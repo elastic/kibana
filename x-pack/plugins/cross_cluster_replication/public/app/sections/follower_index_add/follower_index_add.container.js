@@ -18,12 +18,9 @@ const mapStateToProps = (state) => ({
   apiError: getApiError(`${scope}-save`)(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   saveFollowerIndex: (id, followerIndex) => dispatch(saveFollowerIndex(id, followerIndex)),
   clearApiError: () => dispatch(clearApiError(`${scope}-save`)),
 });
 
-export const FollowerIndexAdd = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FollowerIndexAddView);
+export const FollowerIndexAdd = connect(mapStateToProps, mapDispatchToProps)(FollowerIndexAddView);

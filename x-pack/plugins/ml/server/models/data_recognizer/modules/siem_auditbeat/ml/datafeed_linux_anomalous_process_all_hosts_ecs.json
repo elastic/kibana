@@ -1,0 +1,28 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "max_empty_searches": 10,
+    "query": {
+        "bool": {
+          "filter": [
+            {"terms": {"event.action": ["process_started", "executed"]}},
+            {"term": {"agent.type": "auditbeat"}}
+          ],
+          "must_not": [
+            {
+              "bool": {
+                "should": [
+                  {"term": {"user.name": "jenkins-worker"}},
+                  {"term": {"user.name": "jenkins-user"}},
+                  {"term": {"user.name": "jenkins"}},
+                  {"wildcard": {"process.name": {"wildcard": "jenkins*"}}}
+                ],
+                "minimum_should_match": 1
+              }
+            }
+          ]
+        }
+    }
+}

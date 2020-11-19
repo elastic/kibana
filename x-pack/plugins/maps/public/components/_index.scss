@@ -1,5 +1,4 @@
-@import './gis_map/gis_map';
-@import './layer_addpanel/layer_addpanel';
-@import './layer_panel/index';
-@import './widget_overlay/index';
-@import './toolbar_overlay/index';
+@import 'action_select';
+@import 'metrics_editor/metric_editors';
+@import './geometry_filter';
+@import 'tooltip_selector/tooltip_selector';

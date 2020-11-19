@@ -1,0 +1,12 @@
+// Prefix all styles with "vis" to avoid conflicts.
+// Examples
+//   visChart
+//   visChart__legend
+//   visChart__legend--small
+//   visChart__legend-isLoading
+
+.visAppWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}

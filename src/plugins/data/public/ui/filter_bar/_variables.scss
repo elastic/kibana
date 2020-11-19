@@ -1,0 +1,4 @@
+$kbnGlobalFilterItemBorderColor: tintOrShade($euiColorMediumShade, 35%, 20%);
+$kbnGlobalFilterItemBorderColorExcluded: tintOrShade($euiColorDanger, 70%, 50%);
+$kbnGlobalFilterItemPinnedColorExcluded: tintOrShade($euiColorDanger, 30%, 20%);
+$kbnGlobalFilterItemEditorWidth: 420px; // if changing this make sure to also change `FILTER_EDITOR_WIDTH` in ./filter_item.tsx

@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'graph', 'security', 'error']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -36,24 +34,25 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Graph');
       });
 
-      it('shows save button', async () => {
+      it('landing page shows "Create new graph" button', async () => {
         await PageObjects.common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('graphSaveButton');
+        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
 
-      it('shows delete button', async () => {
+      it('allows creating a new graph', async () => {
         await PageObjects.common.navigateToApp('graph', {
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('graphDeleteButton');
+        await testSubjects.click('graphCreateGraphPromptButton');
+        const breadcrumb = await testSubjects.find('~graphCurrentGraphBreadcrumb');
+        expect(await breadcrumb.getVisibleText()).to.equal('Unsaved graph');
       });
     });
 
@@ -74,9 +73,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Graph');
       });
 

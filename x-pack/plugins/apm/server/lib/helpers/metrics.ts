@@ -6,15 +6,19 @@
 
 import { getBucketSize } from './get_bucket_size';
 
-export function getMetricsDateHistogramParams(start: number, end: number) {
-  const { bucketSize } = getBucketSize(start, end, 'auto');
+export function getMetricsDateHistogramParams(
+  start: number,
+  end: number,
+  metricsInterval: number
+) {
+  const { bucketSize } = getBucketSize(start, end);
   return {
     field: '@timestamp',
 
-    // ensure minimum bucket size of 30s since this is the default resolution for metric data
-    interval: `${Math.max(bucketSize, 30)}s`,
+    // ensure minimum bucket size of configured interval since this is the default resolution for metric data
+    fixed_interval: `${Math.max(bucketSize, metricsInterval)}s`,
 
     min_doc_count: 0,
-    extended_bounds: { min: start, max: end }
+    extended_bounds: { min: start, max: end },
   };
 }

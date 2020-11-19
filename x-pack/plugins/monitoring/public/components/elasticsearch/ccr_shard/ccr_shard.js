@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
+import { Legacy } from '../../../legacy_shims';
 import {
   EuiPage,
   EuiPageBody,
@@ -22,35 +23,27 @@ import {
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
 import { formatDateTimeLocal } from '../../../../common/formatting';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-class CcrShardUI extends PureComponent {
+export class CcrShard extends PureComponent {
   renderCharts() {
     const { metrics } = this.props;
-    const seriesToShow = [
-      metrics.ccr_sync_lag_ops,
-      metrics.ccr_sync_lag_time
-    ];
+    const seriesToShow = [metrics.ccr_sync_lag_ops, metrics.ccr_sync_lag_time];
 
     const charts = seriesToShow.map((data, index) => (
       <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
         <EuiPanel>
-          <MonitoringTimeseriesContainer
-            series={data}
-          />
+          <MonitoringTimeseriesContainer series={data} />
         </EuiPanel>
       </EuiFlexItem>
     ));
 
-    return (
-      <Fragment>
-        {charts}
-      </Fragment>
-    );
+    return <Fragment>{charts}</Fragment>;
   }
 
   renderErrors() {
-    const { stat, intl } = this.props;
+    const { stat } = this.props;
     if (stat.read_exceptions && stat.read_exceptions.length > 0) {
       return (
         <Fragment>
@@ -65,29 +58,33 @@ class CcrShardUI extends PureComponent {
                 </EuiTextColor>
               </h3>
             </EuiTitle>
-            <EuiSpacer size="s"/>
+            <EuiSpacer size="s" />
             <EuiBasicTable
               items={stat.read_exceptions}
               columns={[
                 {
-                  name: intl.formatMessage({
-                    id: 'xpack.monitoring.elasticsearch.ccrShard.errorsTable.typeColumnTitle',
-                    defaultMessage: 'Type'
-                  }),
-                  field: 'exception.type'
+                  name: i18n.translate(
+                    'xpack.monitoring.elasticsearch.ccrShard.errorsTable.typeColumnTitle',
+                    {
+                      defaultMessage: 'Type',
+                    }
+                  ),
+                  field: 'exception.type',
                 },
                 {
-                  name: intl.formatMessage({
-                    id: 'xpack.monitoring.elasticsearch.ccrShard.errorsTable.reasonColumnTitle',
-                    defaultMessage: 'Reason'
-                  }),
+                  name: i18n.translate(
+                    'xpack.monitoring.elasticsearch.ccrShard.errorsTable.reasonColumnTitle',
+                    {
+                      defaultMessage: 'Reason',
+                    }
+                  ),
                   field: 'exception.reason',
-                  width: '75%'
-                }
+                  width: '75%',
+                },
               ]}
             />
           </EuiPanel>
-          <EuiHorizontalRule/>
+          <EuiHorizontalRule />
         </Fragment>
       );
     }
@@ -96,11 +93,13 @@ class CcrShardUI extends PureComponent {
 
   renderLatestStat() {
     const { stat, timestamp } = this.props;
+    const injector = Legacy.shims.getAngularInjector();
+    const timezone = injector.get('config').get('dateFormat:tz');
 
     return (
       <EuiAccordion
         id="ccrLatestStat"
-        buttonContent={(
+        buttonContent={
           <EuiTitle>
             <h2>
               <FormattedMessage
@@ -109,17 +108,15 @@ class CcrShardUI extends PureComponent {
               />
             </h2>
           </EuiTitle>
-        )}
+        }
         paddingSize="l"
       >
         <Fragment>
           <EuiTitle size="s">
-            <h4>{formatDateTimeLocal(timestamp)}</h4>
+            <h2>{formatDateTimeLocal(timestamp, timezone)}</h2>
           </EuiTitle>
-          <EuiHorizontalRule/>
-          <EuiCodeBlock language="json">
-            {JSON.stringify(stat, null, 2)}
-          </EuiCodeBlock>
+          <EuiHorizontalRule />
+          <EuiCodeBlock language="json">{JSON.stringify(stat, null, 2)}</EuiCodeBlock>
         </Fragment>
       </EuiAccordion>
     );
@@ -131,18 +128,14 @@ class CcrShardUI extends PureComponent {
     return (
       <EuiPage style={{ backgroundColor: 'white' }}>
         <EuiPageBody>
-          <Status stat={stat} formattedLeader={formattedLeader} oldestStat={oldestStat}/>
-          <EuiSpacer size="s"/>
+          <Status stat={stat} formattedLeader={formattedLeader} oldestStat={oldestStat} />
+          <EuiSpacer size="s" />
           {this.renderErrors()}
-          <EuiFlexGroup wrap>
-            {this.renderCharts()}
-          </EuiFlexGroup>
-          <EuiHorizontalRule/>
+          <EuiFlexGroup wrap>{this.renderCharts()}</EuiFlexGroup>
+          <EuiHorizontalRule />
           {this.renderLatestStat()}
         </EuiPageBody>
       </EuiPage>
     );
   }
 }
-
-export const CcrShard = injectI18n(CcrShardUI);

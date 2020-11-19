@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraNodeType } from '../graphql/types';
-import { KbnServer } from '../kibana.index';
-
-const KIBANA_REPORTING_TYPE = 'infraops';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { InventoryItemType } from '../../common/inventory_models/types';
 
 interface InfraopsSum {
   infraopsHosts: number;
@@ -16,27 +14,52 @@ interface InfraopsSum {
   logs: number;
 }
 
-export class UsageCollector {
-  public static getUsageCollector(server: KbnServer) {
-    const { collectorSet } = server.usage;
+interface Usage {
+  last_24_hours: {
+    hits: {
+      infraops_hosts: number;
+      infraops_docker: number;
+      infraops_kubernetes: number;
+      logs: number;
+    };
+  };
+}
 
-    return collectorSet.makeUsageCollector({
-      type: KIBANA_REPORTING_TYPE,
+export class UsageCollector {
+  public static registerUsageCollector(usageCollection: UsageCollectionSetup): void {
+    const collector = UsageCollector.getUsageCollector(usageCollection);
+    usageCollection.registerCollector(collector);
+  }
+
+  public static getUsageCollector(usageCollection: UsageCollectionSetup) {
+    return usageCollection.makeUsageCollector<Usage>({
+      type: 'infraops',
+      isReady: () => true,
       fetch: async () => {
         return this.getReport();
+      },
+      schema: {
+        last_24_hours: {
+          hits: {
+            infraops_hosts: { type: 'long' },
+            infraops_docker: { type: 'long' },
+            infraops_kubernetes: { type: 'long' },
+            logs: { type: 'long' },
+          },
+        },
       },
     });
   }
 
-  public static countNode(nodeType: InfraNodeType) {
+  public static countNode(nodeType: InventoryItemType) {
     const bucket = this.getBucket();
     this.maybeInitializeBucket(bucket);
 
     switch (nodeType) {
-      case InfraNodeType.pod:
+      case 'pod':
         this.counters[bucket].infraopsKubernetes += 1;
         break;
-      case InfraNodeType.container:
+      case 'container':
         this.counters[bucket].infraopsDocker += 1;
         break;
       default:
@@ -75,7 +98,7 @@ export class UsageCollector {
 
     // only keep the newest BUCKET_NUMBER buckets
     const cutoff = this.getBucket() - this.BUCKET_SIZE * (this.BUCKET_NUMBER - 1);
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (parseInt(key, 10) < cutoff) {
         delete this.counters[key];
       }

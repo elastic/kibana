@@ -7,50 +7,47 @@
 import { createLocation } from 'history';
 import React from 'react';
 import { matchPath } from 'react-router-dom';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 import { RedirectToLogs } from './redirect_to_logs';
 
 describe('RedirectToLogs component', () => {
   it('renders a redirect with the correct position', () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <RedirectToLogs {...createRouteComponentProps('/logs?time=1550671089404')} />
-    ).dive();
+    );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
-/>
-`);
+      <Redirect
+        to="/stream?sourceId=default&logPosition=(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)&logFilter=(expression:'',kind:kuery)"
+      />
+    `);
   });
 
   it('renders a redirect with the correct user-defined filter', () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <RedirectToLogs
         {...createRouteComponentProps('/logs?time=1550671089404&filter=FILTER_FIELD:FILTER_VALUE')}
       />
-    ).dive();
+    );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
-/>
-`);
+      <Redirect
+        to="/stream?sourceId=default&logPosition=(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)&logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)"
+      />
+    `);
   });
 
   it('renders a redirect with the correct custom source id', () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <RedirectToLogs {...createRouteComponentProps('/SOME-OTHER-SOURCE/logs')} />
-    ).dive();
+    );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'',kind:kuery)&sourceId=SOME-OTHER-SOURCE"
-/>
-`);
+      <Redirect
+        to="/stream?sourceId=SOME-OTHER-SOURCE&logFilter=(expression:'',kind:kuery)"
+      />
+    `);
   });
 });
 

@@ -11,12 +11,13 @@ export default function ({ getService, getPageObjects }) {
 
   const PageObjects = getPageObjects(['grokDebugger']);
 
-  describe('grok debugger app', () => {
+  describe('grok debugger app', function () {
+    this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('empty_kibana');
       // Increase window height to ensure "Simulate" button is shown above the
       // fold. Otherwise it can't be clicked by the browser driver.
-      browser.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
 
       await PageObjects.grokDebugger.gotoGrokDebugger();
     });
@@ -37,7 +38,9 @@ export default function ({ getService, getPageObjects }) {
         await grokDebugger.setPatternInput('%{FIRSTNAME:f} %{MIDDLENAME:m} %{LASTNAME:l}');
 
         await grokDebugger.toggleCustomPatternsInput();
-        await grokDebugger.setCustomPatternsInput('FIRSTNAME %{WORD}\nMIDDLENAME %{WORD}\nLASTNAME %{WORD}');
+        await grokDebugger.setCustomPatternsInput(
+          'FIRSTNAME %{WORD}\nMIDDLENAME %{WORD}\nLASTNAME %{WORD}'
+        );
 
         await grokDebugger.clickSimulate();
 
@@ -51,15 +54,15 @@ export default function ({ getService, getPageObjects }) {
 
         await grokDebugger.setPatternInput(grokPattern);
 
-        const GROK_START =        'grokStart';
+        const GROK_START = 'grokStart';
         const GROK_PATTERN_NAME = 'grokPatternName';
-        const GROK_SEPARATOR =    'grokSeparator';
-        const GROK_FIELD_NAME =   'grokFieldName';
-        const GROK_FIELD_TYPE =   'grokFieldType';
-        const GROK_END =          'grokEnd';
-        const GROK_ESCAPE =       'grokEscape';
-        const GROK_ESCAPED =      'grokEscaped';
-        const GROK_REGEX =        'grokRegex';
+        const GROK_SEPARATOR = 'grokSeparator';
+        const GROK_FIELD_NAME = 'grokFieldName';
+        const GROK_FIELD_TYPE = 'grokFieldType';
+        const GROK_END = 'grokEnd';
+        const GROK_ESCAPE = 'grokEscape';
+        const GROK_ESCAPED = 'grokEscaped';
+        const GROK_REGEX = 'grokRegex';
 
         await grokDebugger.assertPatternInputSyntaxHighlighting([
           { token: GROK_ESCAPE, content: '\\' },
@@ -79,7 +82,6 @@ export default function ({ getService, getPageObjects }) {
           { token: GROK_ESCAPE, content: '\\' },
           { token: GROK_ESCAPED, content: ']' },
         ]);
-
       });
     });
   });

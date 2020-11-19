@@ -8,9 +8,27 @@ import React from 'react';
 import moment from 'moment';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { getPageData } from '../lib/get_page_data';
-import { PageLoading } from 'plugins/monitoring/components';
-import { timefilter } from 'ui/timefilter';
-import { I18nContext } from 'ui/i18n';
+import { PageLoading } from '../components';
+import { Legacy } from '../legacy_shims';
+import { PromiseWithCancel } from '../../common/cancel_promise';
+import { SetupModeFeature } from '../../common/enums';
+import { updateSetupModeData, isSetupModeFeatureEnabled } from '../lib/setup_mode';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+
+/**
+ * Given a timezone, this function will calculate the offset in milliseconds
+ * from UTC time.
+ *
+ * @param {string} timezone
+ */
+const getOffsetInMS = (timezone) => {
+  if (timezone === 'Browser') {
+    return 0;
+  }
+  const offsetInMinutes = moment.tz(timezone).utcOffset();
+  const offsetInMS = offsetInMinutes * 1 * 60 * 1000;
+  return offsetInMS;
+};
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -61,6 +79,7 @@ export class MonitoringViewBaseController {
    */
   constructor({
     title = '',
+    pageTitle = '',
     api = '',
     apiUrlFn,
     getPageData: _getPageData = getPageData,
@@ -68,83 +87,177 @@ export class MonitoringViewBaseController {
     reactNodeId = null, // WIP: https://github.com/elastic/x-pack-kibana/issues/5198
     $scope,
     $injector,
-    options = {}
+    options = {},
+    alerts = { shouldFetch: false, options: {} },
+    fetchDataImmediately = true,
+    telemetryPageViewTitle = '',
   }) {
     const titleService = $injector.get('title');
     const $executor = $injector.get('$executor');
+    const $window = $injector.get('$window');
+    const config = $injector.get('config');
 
     titleService($scope.cluster, title);
 
+    $scope.pageTitle = pageTitle;
+    this.setPageTitle = (title) => ($scope.pageTitle = title);
     $scope.pageData = this.data = { ...defaultData };
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;
+    this.telemetryPageViewTitle = telemetryPageViewTitle || title;
 
-    const {
-      enableTimeFilter = true,
-      enableAutoRefresh = true
-    } = options;
+    let deferTimer;
+    let zoomInLevel = 0;
 
-    if (enableTimeFilter === false) {
-      timefilter.disableTimeRangeSelector();
-    } else {
-      timefilter.enableTimeRangeSelector();
+    const popstateHandler = () => zoomInLevel > 0 && --zoomInLevel;
+    const removePopstateHandler = () => $window.removeEventListener('popstate', popstateHandler);
+    const addPopstateHandler = () => $window.addEventListener('popstate', popstateHandler);
+
+    this.zoomInfo = {
+      zoomOutHandler: () => $window.history.back(),
+      showZoomOutBtn: () => zoomInLevel > 0,
+    };
+
+    const { enableTimeFilter = true, enableAutoRefresh = true } = options;
+
+    async function fetchAlerts() {
+      const globalState = $injector.get('globalState');
+      const bounds = Legacy.shims.timefilter.getBounds();
+      const min = bounds.min?.valueOf();
+      const max = bounds.max?.valueOf();
+      const options = alerts.options || {};
+      try {
+        return await Legacy.shims.http.post(
+          `/api/monitoring/v1/alert/${globalState.cluster_uuid}/status`,
+          {
+            body: JSON.stringify({
+              alertTypeIds: options.alertTypeIds,
+              filters: options.filters,
+              timeRange: {
+                min,
+                max,
+              },
+            }),
+          }
+        );
+      } catch (err) {
+        Legacy.shims.toastNotifications.addDanger({
+          title: 'Error fetching alert status',
+          text: err.message,
+        });
+      }
     }
 
-    if (enableAutoRefresh === false) {
-      timefilter.disableAutoRefreshSelector();
-    } else {
-      timefilter.enableAutoRefreshSelector();
-    }
-
-    this.updateDataPromise = null;
     this.updateData = () => {
       if (this.updateDataPromise) {
         // Do not sent another request if one is inflight
         // See https://github.com/elastic/kibana/issues/24082
-        return this.updateDataPromise;
+        this.updateDataPromise.cancel();
+        this.updateDataPromise = null;
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      return this.updateDataPromise = _getPageData($injector, _api)
-        .then(pageData => {
+      const promises = [_getPageData($injector, _api, this.getPaginationRouteOptions())];
+      if (alerts.shouldFetch) {
+        promises.push(fetchAlerts());
+      }
+      if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
+        promises.push(updateSetupModeData());
+      }
+      this.updateDataPromise = new PromiseWithCancel(Promise.all(promises));
+      return this.updateDataPromise.promise().then(([pageData, alerts]) => {
+        $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
           $scope.pageData = this.data = pageData; // update the view's data with the fetch result
-          this.updateDataPromise = null;
-        })
-        .catch(() => {
-          this.updateDataPromise = null;
+          $scope.alerts = this.alerts = alerts;
         });
+      });
     };
-    this.updateData();
+
+    $scope.$applyAsync(() => {
+      const timefilter = Legacy.shims.timefilter;
+
+      if (enableTimeFilter === false) {
+        timefilter.disableTimeRangeSelector();
+      } else {
+        timefilter.enableTimeRangeSelector();
+      }
+
+      if (enableAutoRefresh === false) {
+        timefilter.disableAutoRefreshSelector();
+      } else {
+        timefilter.enableAutoRefreshSelector();
+      }
+
+      // needed for chart pages
+      this.onBrush = ({ xaxis }) => {
+        removePopstateHandler();
+        const { to, from } = xaxis;
+        const timezone = config.get('dateFormat:tz');
+        const offset = getOffsetInMS(timezone);
+        timefilter.setTime({
+          from: moment(from - offset),
+          to: moment(to - offset),
+          mode: 'absolute',
+        });
+        $executor.cancel();
+        $executor.run();
+        ++zoomInLevel;
+        clearTimeout(deferTimer);
+        /*
+          Needed to defer 'popstate' event, so it does not fire immediately after it's added.
+          10ms is to make sure the event is not added with the same code digest
+        */
+        deferTimer = setTimeout(() => addPopstateHandler(), 10);
+      };
+
+      // Render loading state
+      this.renderReact(null, true);
+      fetchDataImmediately && this.updateData();
+    });
 
     $executor.register({
-      execute: () => this.updateData()
+      execute: () => this.updateData(),
     });
     $executor.start($scope);
     $scope.$on('$destroy', () => {
-      if (this.reactNodeId) { // WIP https://github.com/elastic/x-pack-kibana/issues/5198
-        unmountComponentAtNode(document.getElementById(this.reactNodeId));
+      clearTimeout(deferTimer);
+      removePopstateHandler();
+      const targetElement = document.getElementById(this.reactNodeId);
+      if (targetElement) {
+        // WIP https://github.com/elastic/x-pack-kibana/issues/5198
+        unmountComponentAtNode(targetElement);
       }
       $executor.destroy();
     });
 
-    // needed for chart pages
-    this.onBrush = ({ xaxis }) => {
-      const { to, from } = xaxis;
-      timefilter.setTime({
-        from: moment(from),
-        to: moment(to),
-        mode: 'absolute'
-      });
-    };
-
-    this.setTitle = title => titleService($scope.cluster, title);
+    this.setTitle = (title) => titleService($scope.cluster, title);
   }
 
-  renderReact(component) {
-    if (this._isDataInitialized === false) {
-      render(<I18nContext><PageLoading /></I18nContext>, document.getElementById(this.reactNodeId));
-    } else {
-      render(component, document.getElementById(this.reactNodeId));
+  renderReact(component, trackPageView = false) {
+    const renderElement = document.getElementById(this.reactNodeId);
+    if (!renderElement) {
+      console.warn(`"#${this.reactNodeId}" element has not been added to the DOM yet`);
+      return;
     }
+    const services = {
+      usageCollection: Legacy.shims.usageCollection,
+    };
+    const I18nContext = Legacy.shims.I18nContext;
+    const wrappedComponent = (
+      <KibanaContextProvider services={services}>
+        <I18nContext>
+          {!this._isDataInitialized ? (
+            <PageLoading pageViewTitle={trackPageView ? this.telemetryPageViewTitle : null} />
+          ) : (
+            component
+          )}
+        </I18nContext>
+      </KibanaContextProvider>
+    );
+    render(wrappedComponent, renderElement);
+  }
+
+  getPaginationRouteOptions() {
+    return {};
   }
 }

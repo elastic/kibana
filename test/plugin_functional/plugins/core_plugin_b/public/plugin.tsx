@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { Plugin, PluginSetupContext } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
 
 declare global {
   interface Window {
-    corePluginB?: string;
+    env?: PluginInitializerContext['env'];
   }
 }
 
@@ -32,11 +32,38 @@ export interface CorePluginBDeps {
 
 export class CorePluginBPlugin
   implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps> {
-  public setup(core: PluginSetupContext, deps: CorePluginBDeps) {
-    window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
+  constructor(pluginContext: PluginInitializerContext) {
+    window.env = pluginContext.env;
+  }
+  public setup(core: CoreSetup, deps: CorePluginBDeps) {
+    core.application.register({
+      id: 'bar',
+      title: 'Bar',
+      async mount(context, params) {
+        const { renderApp } = await import('./application');
+        return renderApp(context, params);
+      },
+    });
+
+    return {
+      sayHi() {
+        return `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
+      },
+    };
   }
 
-  public start() {}
+  public async start(core: CoreStart, deps: {}) {
+    return {
+      sendSystemRequest: async (asSystemRequest: boolean) => {
+        const response = await core.http.post<string>('/core_plugin_b/system_request', {
+          asSystemRequest,
+        });
+        return `/core_plugin_b/system_request says: "${response}"`;
+      },
+    };
+  }
+
+  public stop() {}
 }
 
 export type CorePluginBPluginSetup = ReturnType<CorePluginBPlugin['setup']>;

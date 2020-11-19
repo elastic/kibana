@@ -17,7 +17,17 @@
  * under the License.
  */
 
-export { Toast, ToastInput, ToastsApi } from './toasts';
+export {
+  ErrorToastOptions,
+  ToastOptions,
+  Toast,
+  ToastInput,
+  IToasts,
+  ToastsApi,
+  ToastInputFields,
+  ToastsSetup,
+  ToastsStart,
+} from './toasts';
 export {
   NotificationsService,
   NotificationsSetup,

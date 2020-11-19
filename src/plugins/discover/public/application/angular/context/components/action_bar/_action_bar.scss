@@ -1,0 +1,10 @@
+.cxtSizePicker {
+  text-align: center;
+  width: $euiSize * 5;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    appearance: none; // Hide increment and decrement buttons for type="number" input.
+    margin: 0;
+  }
+}

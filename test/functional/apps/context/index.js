@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await browser.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
     });
 
@@ -38,9 +38,11 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       return esArchiver.unload('logstash_functional');
     });
 
+    loadTestFile(require.resolve('./_context_navigation'));
     loadTestFile(require.resolve('./_discover_navigation'));
     loadTestFile(require.resolve('./_filters'));
     loadTestFile(require.resolve('./_size'));
+    loadTestFile(require.resolve('./_date_nanos'));
+    loadTestFile(require.resolve('./_date_nanos_custom_timestamp'));
   });
-
 }

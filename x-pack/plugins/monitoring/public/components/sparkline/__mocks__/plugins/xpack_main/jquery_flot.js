@@ -6,15 +6,12 @@
 
 /* eslint-env jest */
 
-function $() {
+export function $() {
   return {
     on: jest.fn(),
-    off: jest.fn()
+    off: jest.fn(),
+    plot: () => ({
+      shutdown: jest.fn(),
+    }),
   };
 }
-
-$.plot = () => ({
-  shutdown: jest.fn()
-});
-
-module.exports = $;

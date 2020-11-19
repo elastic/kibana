@@ -5,23 +5,23 @@
  */
 
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
-import { timefilter } from 'ui/timefilter';
+import { Legacy } from '../legacy_shims';
 
 export function getPageData($injector, api) {
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');
-  const timeBounds = timefilter.getBounds();
+  const timeBounds = Legacy.shims.timefilter.getBounds();
 
   return $http
     .post(api, {
       ccs: globalState.ccs,
       timeRange: {
         min: timeBounds.min.toISOString(),
-        max: timeBounds.max.toISOString()
-      }
+        max: timeBounds.max.toISOString(),
+      },
     })
-    .then(response => response.data)
-    .catch(err => {
+    .then((response) => response.data)
+    .catch((err) => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);

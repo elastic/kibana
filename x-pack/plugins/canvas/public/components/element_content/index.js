@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registries } from 'plugins/interpreter/registries';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
+import { withServices } from '../../services';
 import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
 import { ElementContent as Component } from './element_content';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   backgroundColor: getPageById(state, getSelectedPage(state)).style.background,
 });
 
 export const ElementContent = compose(
   connect(mapStateToProps),
-  withProps(({ renderable }) => ({
-    renderFunction: registries.renderers.get(get(renderable, 'as')),
+  withServices,
+  withProps(({ renderable, services }) => ({
+    renderFunction: services.expressions.getRenderer(get(renderable, 'as')),
   }))
 )(Component);
 

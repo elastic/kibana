@@ -7,6 +7,9 @@
 import { UserInputError } from 'apollo-server-errors';
 import { failure } from 'io-ts/lib/PathReporter';
 
+import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
 import {
   InfraSourceLogColumn,
   InfraSourceResolvers,
@@ -90,12 +93,17 @@ export const createSourcesResolvers = (
 } => ({
   Query: {
     async source(root, args, { req }) {
-      const requestedSourceConfiguration = await libs.sources.getSourceConfiguration(req, args.id);
+      const requestedSourceConfiguration = await libs.sources.getSourceConfiguration(
+        req.core.savedObjects.client,
+        args.id
+      );
 
       return requestedSourceConfiguration;
     },
     async allSources(root, args, { req }) {
-      const sourceConfigurations = await libs.sources.getAllSourceConfigurations(req);
+      const sourceConfigurations = await libs.sources.getAllSourceConfigurations(
+        req.core.savedObjects.client
+      );
 
       return sourceConfigurations;
     },
@@ -125,7 +133,7 @@ export const createSourcesResolvers = (
   Mutation: {
     async createSource(root, args, { req }) {
       const sourceConfiguration = await libs.sources.createSourceConfiguration(
-        req,
+        req.core.savedObjects.client,
         args.id,
         compactObject({
           ...args.sourceProperties,
@@ -141,7 +149,7 @@ export const createSourcesResolvers = (
       };
     },
     async deleteSource(root, args, { req }) {
-      await libs.sources.deleteSourceConfiguration(req, args.id);
+      await libs.sources.deleteSourceConfiguration(req.core.savedObjects.client, args.id);
 
       return {
         id: args.id,
@@ -149,7 +157,7 @@ export const createSourcesResolvers = (
     },
     async updateSource(root, args, { req }) {
       const updatedSourceConfiguration = await libs.sources.updateSourceConfiguration(
-        req,
+        req.core.savedObjects.client,
         args.id,
         compactObject({
           ...args.sourceProperties,
@@ -183,9 +191,12 @@ const compactObject = <T>(obj: T): CompactObject<T> =>
 
 const decodeLogColumns = (logColumns?: UpdateSourceLogColumnInput[] | null) =>
   logColumns
-    ? logColumns.map(logColumn =>
-        SavedSourceConfigurationColumnRuntimeType.decode(logColumn).getOrElseL(errors => {
-          throw new UserInputError(failure(errors).join('\n'));
-        })
+    ? logColumns.map((logColumn) =>
+        pipe(
+          SavedSourceConfigurationColumnRuntimeType.decode(logColumn),
+          fold((errors) => {
+            throw new UserInputError(failure(errors).join('\n'));
+          }, identity)
+        )
       )
     : undefined;

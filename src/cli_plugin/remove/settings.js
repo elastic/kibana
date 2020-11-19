@@ -19,13 +19,15 @@
 
 import { resolve } from 'path';
 
+import { fromRoot } from '../../core/server/utils';
+
 export function parse(command, options) {
   const settings = {
     quiet: options.quiet || false,
     silent: options.silent || false,
     config: options.config || '',
-    pluginDir: options.pluginDir || '',
-    plugin: command
+    pluginDir: fromRoot('plugins'),
+    plugin: command,
   };
 
   settings.pluginPath = resolve(settings.pluginDir, settings.plugin);

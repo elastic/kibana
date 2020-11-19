@@ -30,5 +30,4 @@ describe('watch_errors', () => {
       expect(instance.actions).toEqual({ foo: 'bar' });
     });
   });
-
 });

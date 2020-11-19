@@ -25,7 +25,7 @@ describe('I18n engine', () => {
   let i18n: typeof i18nModule;
 
   beforeEach(() => {
-    i18n = require.requireActual('./i18n');
+    i18n = jest.requireActual('./i18n');
   });
 
   afterEach(() => {
@@ -887,7 +887,7 @@ describe('I18n engine', () => {
   });
 
   describe('load', () => {
-    let mockFetch: jest.Mock;
+    let mockFetch: jest.SpyInstance;
     beforeEach(() => {
       mockFetch = jest.spyOn(global as any, 'fetch').mockImplementation();
     });

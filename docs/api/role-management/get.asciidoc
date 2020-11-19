@@ -1,100 +1,36 @@
-[[role-management-api-get]]
-=== Get Role
+[[role-management-specific-api-get]]
+=== Get specific role API
+++++
+<titleabbrev>Get specific role</titleabbrev>
+++++
 
-experimental[This API is experimental and may be changed or removed completely in a future release. Although the underlying mechanism of enforcing role-based access control is stable, the APIs for managing the roles are currently experimental.]
+experimental[] Retrieve a specific role.
 
-Retrieves all {kib} roles, or a specific role.
+[[role-management-specific-api-get-prereqs]]
+==== Prerequisite
 
-NOTE: You cannot access this endpoint via the Console in Kibana.
+To use the get specific role API, you must have the `manage_security` cluster privilege.
 
-==== Authorization
-
-To use this API, you must have at least the `manage_security` cluster privilege.
-
-==== Get all {kib} roles
-
+[[role-management-specific-api-retrieve-all-request-body]]
 ===== Request
 
-To retrieve all roles, issue a GET request to the
-/api/security/role endpoint.
+`GET <kibana host>:<port>/api/security/role/my_restricted_kibana_role`
 
-[source,js]
---------------------------------------------------
-GET /api/security/role
---------------------------------------------------
-// KIBANA
+[[role-management-specific-api-retrieve-all-response-codes]]
+==== Response code
 
-===== Response
+`200`::
+  Indicates a successful call.
 
-A successful call returns a response code of `200` and a response body containing a JSON 
-representation of the roles.
+[[role-management-specific-api-retrieve-all-example]]
+===== Example
 
-[source,js]
---------------------------------------------------
-[
-  {
-    "name": "my_kibana_role",
-    "metadata" : {
-      "version" : 1
-    },
-    "transient_metadata": {
-      "enabled": true
-    },
-    "elasticsearch": {
-      "indices": [ ],
-      "cluster": [ ],
-      "run_as": [ ]
-    },
-    "kibana": [ {
-        "privileges": [ "all" ]
-    } ],
-  },
-  {
-    "name": "my_admin_role",
-    "metadata" : {
-      "version" : 1
-    },
-    "transient_metadata": {
-      "enabled": true
-    },
-    "elasticsearch": {
-      "cluster" : [ "all" ],
-      "indices" : [ {
-        "names" : [ "index1", "index2" ],
-        "privileges" : [ "all" ],
-        "field_security" : {
-          "grant" : [ "title", "body" ]
-        },
-        "query" : "{\"match\": {\"title\": \"foo\"}}"
-      } ],
-    },
-    "kibana": [ ]
-  }
-]
---------------------------------------------------
+The API returns the following:
 
-==== Get a specific role
-
-===== Request
-
-To retrieve a specific role, issue a GET request to
-the `/api/security/role/<rolename>` endpoint:
-
-[source,js]
---------------------------------------------------
-GET /api/security/role/my_kibana_role
---------------------------------------------------
-// KIBANA
-
-===== Response
-
-A successful call returns a response code of `200` and a response body containing a JSON 
-representation of the role.
-
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
-  "name": "my_kibana_role",
+  "name": "my_restricted_kibana_role",
   "metadata" : {
     "version" : 1
   },
@@ -106,8 +42,67 @@ representation of the role.
     "indices": [ ],
     "run_as": [ ]
   },
-  "kibana": [ {
-      "privileges": [ "all" ]
-  } ],
+   "kibana": [
+    {
+      "base": [
+        "read"
+      ],
+      "feature": {},
+      "spaces": [
+        "marketing"
+      ]
+    },
+    {
+      "base": [],
+      "feature": {
+        "discover": [
+          "all"
+        ],
+        "visualize": [
+          "all"
+        ],
+        "dashboard": [
+          "all"
+        ],
+        "dev_tools": [
+          "read"
+        ],
+        "advancedSettings": [
+          "read"
+        ],
+        "indexPatterns": [
+          "read"
+        ],
+        "timelion": [
+          "all"
+        ],
+        "graph": [
+          "all"
+        ],
+        "apm": [
+          "read"
+        ],
+        "maps": [
+          "read"
+        ],
+        "canvas": [
+          "read"
+        ],
+        "infrastructure": [
+          "all"
+        ],
+        "logs": [
+          "all"
+        ],
+        "uptime": [
+          "all"
+        ]
+      },
+      "spaces": [
+        "sales",
+        "default"
+      ]
+    }
+  ]
 }
 --------------------------------------------------

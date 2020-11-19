@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const timeFilter: ElementFactory = () => ({
-  name: 'time_filter',
+  name: 'timeFilter',
   displayName: 'Time filter',
-  tags: ['filter'],
+  type: 'filter',
   help: 'Set a time window',
-  image: header,
+  icon: 'calendar',
   height: 50,
   expression: `timefilterControl compact=true column=@timestamp
 | render`,

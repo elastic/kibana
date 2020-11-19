@@ -13,7 +13,12 @@ import {
   getSelectedAutoFollowPatternId,
   getSelectedAutoFollowPattern,
 } from '../../store/selectors';
-import { getAutoFollowPattern, saveAutoFollowPattern, selectEditAutoFollowPattern, clearApiError } from '../../store/actions';
+import {
+  getAutoFollowPattern,
+  saveAutoFollowPattern,
+  selectEditAutoFollowPattern,
+  clearApiError,
+} from '../../store/actions';
 import { AutoFollowPatternEdit as AutoFollowPatternEditView } from './auto_follow_pattern_edit';
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
@@ -31,10 +36,26 @@ const mapStateToProps = (state) => ({
   autoFollowPattern: getSelectedAutoFollowPattern('edit')(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   getAutoFollowPattern: (id) => dispatch(getAutoFollowPattern(id)),
   selectAutoFollowPattern: (id) => dispatch(selectEditAutoFollowPattern(id)),
-  saveAutoFollowPattern: (id, autoFollowPattern) => dispatch(saveAutoFollowPattern(id, autoFollowPattern, true)),
+  saveAutoFollowPattern: (id, autoFollowPattern) => {
+    // Strip out errors.
+    const { active, remoteCluster, leaderIndexPatterns, followIndexPattern } = autoFollowPattern;
+
+    dispatch(
+      saveAutoFollowPattern(
+        id,
+        {
+          active,
+          remoteCluster,
+          leaderIndexPatterns,
+          followIndexPattern,
+        },
+        true
+      )
+    );
+  },
   clearApiError: () => {
     dispatch(clearApiError(`${scope}-get`));
     dispatch(clearApiError(`${scope}-save`));

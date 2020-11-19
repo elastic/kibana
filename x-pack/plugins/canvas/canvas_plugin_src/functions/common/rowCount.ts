@@ -4,21 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunction, Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Datatable } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
-export function rowCount(): ContextFunction<'rowCount', Datatable, {}, number> {
+export function rowCount(): ExpressionFunctionDefinition<'rowCount', Datatable, {}, number> {
   const { help } = getFunctionHelp().rowCount;
 
   return {
     name: 'rowCount',
     aliases: [],
     type: 'number',
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['datatable'],
     help,
     args: {},
-    fn: context => context.rows.length,
+    fn: (input) => input.rows.length,
   };
 }

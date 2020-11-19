@@ -18,12 +18,16 @@
  */
 
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
+  const browser = getService('browser');
+  const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function () {
@@ -31,12 +35,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    after(async function () {
-      // avoids any 'Object with id x not found' errors when switching tests.
-      await PageObjects.header.clickVisualize();
-      await PageObjects.visualize.gotoLandingPage();
-      await PageObjects.header.clickDashboard();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+    after(async () => {
+      await kibanaServer.uiSettings.replace({});
+      await browser.refresh();
     });
 
     it('Visualization updated when time picker changes', async () => {
@@ -44,19 +45,67 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
       await pieChart.expectPieSliceCount(0);
 
-      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.timePicker.setHistoricalDataRange();
       await pieChart.expectPieSliceCount(10);
     });
 
     it('Saved search updated when time picker changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
+      await dashboardVisualizations.createAndAddSavedSearch({
+        name: 'saved search',
+        fields: ['bytes', 'agent'],
+      });
       await dashboardExpect.docTableFieldCount(150);
 
       // Set to time range with no data
-      await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');
+      await PageObjects.timePicker.setAbsoluteRange(
+        'Jan 1, 2000 @ 00:00:00.000',
+        'Jan 1, 2000 @ 01:00:00.000'
+      );
       await dashboardExpect.docTableFieldCount(0);
+    });
+
+    it('Timepicker start, end, interval values are set by url', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      log.debug('Went to landing page');
+      await PageObjects.dashboard.clickNewDashboard();
+      log.debug('Clicked new dashboard');
+      await dashboardVisualizations.createAndAddSavedSearch({
+        name: 'saved search',
+        fields: ['bytes', 'agent'],
+      });
+      log.debug('added saved search');
+      const currentUrl = await browser.getCurrentUrl();
+      const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+      const urlQuery =
+        `/create?` +
+        `_g=(refreshInterval:(pause:!t,value:2000),` +
+        `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
+        `_a=(description:'',filters:!()` +
+        `)`;
+      log.debug('go to url' + `${kibanaBaseUrl}#${urlQuery}`);
+      await browser.get(`${kibanaBaseUrl}#${urlQuery}`, true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const time = await PageObjects.timePicker.getTimeConfig();
+      const refresh = await PageObjects.timePicker.getRefreshConfig();
+      expect(time.start).to.be('Nov 17, 2012 @ 00:00:00.000');
+      expect(time.end).to.be('Nov 17, 2015 @ 18:01:36.621');
+      expect(refresh.interval).to.be('2');
+    });
+
+    it('Timepicker respects dateFormat from UI settings', async () => {
+      await kibanaServer.uiSettings.replace({ dateFormat: 'YYYY-MM-DD HH:mm:ss.SSS' });
+      await browser.refresh();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
+      // Same date range as `timePicker.setHistoricalDataRange()`
+      await PageObjects.timePicker.setAbsoluteRange(
+        '2015-09-19 06:31:44.000',
+        '2015-09-23 18:31:44.000'
+      );
+      await pieChart.expectPieSliceCount(10);
     });
   });
 }

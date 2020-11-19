@@ -85,5 +85,6 @@ exports[`dev/i18n/serializers/json should serialize default messages to JSON 1`]
       \\"comment\\": \\"Message description\\"
     }
   }
-}"
+}
+"
 `;

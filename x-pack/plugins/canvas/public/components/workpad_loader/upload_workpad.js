@@ -6,16 +6,20 @@
 
 import { get } from 'lodash';
 import { getId } from '../../lib/get_id';
-import { notify } from '../../lib/notify';
+import { ErrorStrings } from '../../../i18n';
 
-export const uploadWorkpad = (file, onUpload) => {
+const { WorkpadFileUpload: errors } = ErrorStrings;
+
+export const uploadWorkpad = (file, onUpload, notify) => {
   if (!file) {
     return;
   }
 
   if (get(file, 'type') !== 'application/json') {
-    return notify.warning('Only JSON files are accepted', {
-      title: `Couldn't upload '${file.name || 'file'}'`,
+    return notify.warning(errors.getAcceptJSONOnlyErrorMessage(), {
+      title: file.name
+        ? errors.getFileUploadFailureWithFileNameErrorMessage(file.name)
+        : errors.getFileUploadFailureWithoutFileNameErrorMessage(),
     });
   }
   // TODO: Clean up this file, this loading stuff can, and should be, abstracted
@@ -29,14 +33,16 @@ export const uploadWorkpad = (file, onUpload) => {
 
       // sanity check for workpad object
       if (!Array.isArray(workpad.pages) || workpad.pages.length === 0 || !workpad.assets) {
-        throw new Error(
-          `Some properties required for a Canvas workpad are missing.  Edit your JSON file to provide the correct property values and try again.`
-        );
+        throw new Error(errors.getMissingPropertiesErrorMessage());
       }
 
       onUpload(workpad);
     } catch (e) {
-      notify.error(e, { title: `Couldn't upload '${file.name || 'file'}'` });
+      notify.error(e, {
+        title: file.name
+          ? errors.getFileUploadFailureWithFileNameErrorMessage(file.name)
+          : errors.getFileUploadFailureWithoutFileNameErrorMessage(),
+      });
     }
   };
 

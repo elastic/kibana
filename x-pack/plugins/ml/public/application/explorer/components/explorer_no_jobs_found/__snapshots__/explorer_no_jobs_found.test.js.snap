@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplorerNoInfluencersFound snapshot 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <Link
+      to="/jobs"
+    >
+      <EuiButton
+        color="primary"
+        fill={true}
+      >
+        <FormattedMessage
+          defaultMessage="Create job"
+          id="xpack.ml.explorer.createNewJobLinkText"
+          values={Object {}}
+        />
+      </EuiButton>
+    </Link>
+  }
+  data-test-subj="mlNoJobsFound"
+  iconType="alert"
+  title={
+    <h2>
+      <FormattedMessage
+        defaultMessage="No jobs found"
+        id="xpack.ml.explorer.noJobsFoundLabel"
+        values={Object {}}
+      />
+    </h2>
+  }
+/>
+`;

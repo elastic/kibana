@@ -1,0 +1,73 @@
+[role="xpack"]
+[[action-types]]
+== Action and connector types
+
+Actions are Kibana services or integrations with third-party systems that run as background tasks on the Kibana server when alert conditions are met. {kib} provides the following types of actions:
+
+[cols="2"]
+|===
+
+a| <<email-action-type, Email>>
+
+| Send email from your server.
+
+a| <<resilient-action-type, IBM Resilient>>
+
+| Create an incident in IBM Resilient.
+
+a| <<index-action-type, Index>>
+
+| Index data into Elasticsearch.
+
+a| <<jira-action-type, Jira>>
+
+| Create an incident in Jira.
+
+
+a| <<pagerduty-action-type, PagerDuty>>
+
+| Send an event in PagerDuty.
+
+a| <<server-log-action-type, ServerLog>>
+
+| Add a message to a Kibana log.
+
+a| <<servicenow-action-type, ServiceNow>>
+
+| Create an incident in ServiceNow.
+
+a| <<slack-action-type, Slack>>
+
+| Send a message to a Slack channel or user.
+
+a| <<webhook-action-type, Webhook>>
+
+| Send a request to a web service.
+|===
+
+[NOTE]
+==============================================
+Some action types are paid commercial features, while others are free.
+For a comparison of the Elastic subscription levels,
+see https://www.elastic.co/subscriptions[the subscription page].
+==============================================
+
+[float]
+[[create-connectors]]
+=== Preconfigured actions and connectors
+
+For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure the connector>>
+before {kib} starts.
+
+If you preconfigure a connector, you can also <<preconfigured-action-type-example, preconfigure its action type>>.
+
+include::action-types/email.asciidoc[]
+include::action-types/resilient.asciidoc[]
+include::action-types/index.asciidoc[]
+include::action-types/jira.asciidoc[]
+include::action-types/pagerduty.asciidoc[]
+include::action-types/server-log.asciidoc[]
+include::action-types/servicenow.asciidoc[]
+include::action-types/slack.asciidoc[]
+include::action-types/webhook.asciidoc[]
+include::action-types/pre-configured-connectors.asciidoc[]

@@ -3,109 +3,82 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { BucketAgg, ESFilter } from 'elasticsearch';
-import { idx } from '@kbn/elastic-idx';
+import { Logger } from '@kbn/logging';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
+import { joinByKey } from '../../../../common/utils/join_by_key';
+import { getServicesProjection } from '../../../projections/services';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
-  PROCESSOR_EVENT,
-  SERVICE_AGENT_NAME,
-  SERVICE_NAME,
-  TRANSACTION_DURATION
-} from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
-import { rangeFilter } from '../../helpers/range_filter';
-import { Setup } from '../../helpers/setup_request';
+  getAgentNames,
+  getEnvironments,
+  getHealthStatuses,
+  getTransactionDurationAverages,
+  getTransactionErrorRates,
+  getTransactionRates,
+} from './get_services_items_stats';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
-export async function getServicesItems(setup: Setup) {
-  const { start, end, esFilterQuery, client, config } = setup;
+export type ServicesItemsSetup = Setup & SetupTimeRange;
+export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
-  const filter: ESFilter[] = [
-    { terms: { [PROCESSOR_EVENT]: ['transaction', 'error', 'metric'] } },
-    { range: rangeFilter(start, end) }
-  ];
-
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
-  }
-
+export async function getServicesItems({
+  setup,
+  searchAggregatedTransactions,
+  logger,
+}: {
+  setup: ServicesItemsSetup;
+  searchAggregatedTransactions: boolean;
+  logger: Logger;
+}) {
   const params = {
-    index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
-    ],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter
-        }
-      },
-      aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: 500
-          },
-          aggs: {
-            avg: {
-              avg: { field: TRANSACTION_DURATION }
-            },
-            agents: {
-              terms: { field: SERVICE_AGENT_NAME, size: 1 }
-            },
-            events: {
-              terms: { field: PROCESSOR_EVENT, size: 2 }
-            }
-          }
-        }
-      }
-    }
+    projection: getServicesProjection({
+      setup,
+      searchAggregatedTransactions,
+    }),
+    setup,
+    searchAggregatedTransactions,
   };
 
-  interface ServiceBucket extends BucketAgg {
-    avg: {
-      value: number;
-    };
-    agents: {
-      buckets: BucketAgg[];
-    };
-    events: {
-      buckets: BucketAgg[];
-    };
-  }
+  const [
+    transactionDurationAverages,
+    agentNames,
+    transactionRates,
+    transactionErrorRates,
+    environments,
+    healthStatuses,
+  ] = await Promise.all([
+    getTransactionDurationAverages(params),
+    getAgentNames(params),
+    getTransactionRates(params),
+    getTransactionErrorRates(params),
+    getEnvironments(params),
+    getHealthStatuses(params, setup.uiFilters.environment).catch((err) => {
+      logger.error(err);
+      return [];
+    }),
+  ]);
 
-  interface Aggs extends BucketAgg {
-    services: {
-      buckets: ServiceBucket[];
-    };
-  }
+  const apmServiceMetrics = joinByKey(
+    [
+      ...transactionDurationAverages,
+      ...agentNames,
+      ...transactionRates,
+      ...transactionErrorRates,
+      ...environments,
+    ],
+    'serviceName'
+  );
 
-  const resp = await client<void, Aggs>('search', params);
-  const aggs = resp.aggregations;
-  const serviceBuckets = idx(aggs, _ => _.services.buckets) || [];
+  const apmServices = apmServiceMetrics.map(({ serviceName }) => serviceName);
 
-  const items = serviceBuckets.map(bucket => {
-    const eventTypes = bucket.events.buckets;
-    const transactions = eventTypes.find(e => e.key === 'transaction');
-    const totalTransactions = idx(transactions, _ => _.doc_count) || 0;
+  // make sure to exclude health statuses from services
+  // that are not found in APM data
 
-    const errors = eventTypes.find(e => e.key === 'error');
-    const totalErrors = idx(errors, _ => _.doc_count) || 0;
+  const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
+    apmServices.includes(serviceName)
+  );
 
-    const deltaAsMinutes = (end - start) / 1000 / 60;
-    const transactionsPerMinute = totalTransactions / deltaAsMinutes;
-    const errorsPerMinute = totalErrors / deltaAsMinutes;
+  const allMetrics = [...apmServiceMetrics, ...matchedHealthStatuses];
 
-    return {
-      serviceName: bucket.key,
-      agentName: idx(bucket, _ => _.agents.buckets[0].key),
-      transactionsPerMinute,
-      errorsPerMinute,
-      avgResponseTime: bucket.avg.value
-    };
-  });
-
-  return items;
+  return joinByKey(allMetrics, 'serviceName');
 }

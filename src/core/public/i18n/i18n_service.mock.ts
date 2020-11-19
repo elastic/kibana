@@ -18,35 +18,33 @@
  */
 
 import React from 'react';
-import { I18nService, I18nSetup } from './i18n_service';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import { I18nService, I18nStart } from './i18n_service';
 
 const PassThroughComponent = ({ children }: { children: React.ReactNode }) => children;
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<I18nSetup> = {
+const createStartContractMock = () => {
+  const setupContract: jest.Mocked<I18nStart> = {
     // By default mock the Context component so it simply renders all children
     Context: jest.fn().mockImplementation(PassThroughComponent),
   };
   return setupContract;
 };
 
-// Start contract is identical to setup
-const createStartContractMock = createSetupContractMock;
-
 type I18nServiceContract = PublicMethodsOf<I18nService>;
 const createMock = () => {
   const mocked: jest.Mocked<I18nServiceContract> = {
-    setup: jest.fn(),
+    getContext: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.getContext.mockReturnValue(createStartContractMock());
   mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
 export const i18nServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };

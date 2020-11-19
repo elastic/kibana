@@ -1,110 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`once LegacyService is set up in \`devClusterMaster\` mode creates ClusterManager with base path proxy.: cluster manager with base path proxy 1`] = `
-Array [
-  Array [
-    Object {
-      "basePath": true,
-      "dev": true,
-      "open": false,
-      "optimize": false,
-      "quiet": true,
-      "repl": false,
-      "silent": false,
-      "watch": false,
-    },
-    Object {
-      "server": Object {
-        "autoListen": true,
-      },
-    },
-    BasePathProxyServer {
-      "devConfig": Object {
-        "basePathProxyTargetPort": 100500,
-      },
-      "httpConfig": Object {
-        "basePath": "/abc",
-        "maxPayload": ByteSizeValue {
-          "valueInBytes": 1073741824,
-        },
-      },
-      "httpsAgent": undefined,
-      "log": Object {
-        "context": Array [
-          "server",
-        ],
-        "debug": [MockFunction] {
-          "calls": Array [
-            Array [
-              "starting legacy service",
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
-        "error": [MockFunction],
-        "fatal": [MockFunction],
-        "info": [MockFunction],
-        "log": [MockFunction],
-        "trace": [MockFunction],
-        "warn": [MockFunction],
-      },
-      "server": undefined,
-    },
-  ],
-]
-`;
-
-exports[`once LegacyService is set up in \`devClusterMaster\` mode creates ClusterManager without base path proxy.: cluster manager without base path proxy 1`] = `
-Array [
-  Array [
-    Object {
-      "basePath": false,
-      "dev": true,
-      "open": false,
-      "optimize": false,
-      "quiet": false,
-      "repl": false,
-      "silent": true,
-      "watch": false,
-    },
-    Object {
-      "server": Object {
-        "autoListen": true,
-      },
-    },
-    undefined,
-  ],
-]
-`;
-
-exports[`once LegacyService is set up with connection info creates legacy kbnServer and closes it if \`listen\` fails. 1`] = `"something failed"`;
-
-exports[`once LegacyService is set up with connection info proxy route responds with \`503\` if \`kbnServer\` is not ready yet.: 503 response 1`] = `
-Object {
-  "body": Array [
-    Array [
-      "Kibana server is not ready yet",
-    ],
-  ],
-  "code": Array [
-    Array [
-      503,
-    ],
-  ],
-  "header": Array [
-    Array [
-      "Retry-After",
-      "30",
-    ],
-  ],
-}
-`;
-
 exports[`once LegacyService is set up with connection info reconfigures logging configuration if new config is received.: applyLoggingConfiguration params 1`] = `
 Array [
   Array [
@@ -112,32 +7,11 @@ Array [
       "logging": Object {
         "verbose": true,
       },
+      "path": Object {},
     },
   ],
 ]
 `;
-
-exports[`once LegacyService is set up with connection info register proxy route.: proxy route options 1`] = `
-Array [
-  Array [
-    Object {
-      "handler": [Function],
-      "method": "*",
-      "options": Object {
-        "payload": Object {
-          "maxBytes": 9007199254740991,
-          "output": "stream",
-          "parse": false,
-          "timeout": false,
-        },
-      },
-      "path": "/{p*}",
-    },
-  ],
-]
-`;
-
-exports[`once LegacyService is set up with connection info throws if fails to retrieve initial config. 1`] = `"something failed"`;
 
 exports[`once LegacyService is set up without connection info reconfigures logging configuration if new config is received.: applyLoggingConfiguration params 1`] = `
 Array [
@@ -146,6 +20,7 @@ Array [
       "logging": Object {
         "verbose": true,
       },
+      "path": Object {},
     },
   ],
 ]

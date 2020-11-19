@@ -1,10 +1,14 @@
+[role="xpack"]
 [[services]]
 === Services overview
 
-The *Services* overview gives you quick insights into the health and general performance of each service.
-The <<set-time-filter,global time range filter>> in {kib} defines which services are available.
+The *Services* overview page provides a quick, high-level overview of the health and general
+performance of all instrumented services.
 
-You can add services by setting the `service.name` configuration in each of the {apm-agents-ref}[APM agents] you’re instrumenting.
+To help surface potential issues, services are sorted by their health status:
+**critical** > **warning** > **healthy** > **unknown**.
+Health status is powered by machine learning and requires anomaly detection to be enabled.
+Learn more in <<machine-learning-integration,machine learning>>.
 
 [role="screenshot"]
-image::apm/images/apm-services-overview.png[Example view of services table the APM UI in Kibana]
+image::apm/images/apm-services-overview.png[Example view of services table the APM app in Kibana]

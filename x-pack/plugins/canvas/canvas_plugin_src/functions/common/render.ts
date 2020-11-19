@@ -4,47 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunction, Render, ContainerStyle } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Render, ContainerStyle } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
+import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 
-interface Arguments {
-  as: string | null;
-  css: string | null;
-  containerStyle: ContainerStyle | null;
+interface ContainerStyleArgument extends ContainerStyle {
+  type: 'containerStyle';
 }
 
-export function render(): ContextFunction<'render', Render<any>, Arguments, Render<Arguments>> {
+interface Arguments {
+  as: string;
+  css: string;
+  containerStyle: ContainerStyleArgument;
+}
+export function render(): ExpressionFunctionDefinition<
+  'render',
+  Render<any>,
+  Arguments,
+  Render<Arguments>
+> {
   const { help, args: argHelp } = getFunctionHelp().render;
 
   return {
     name: 'render',
     aliases: [],
     type: 'render',
+    inputTypes: ['render'],
     help,
-    context: {
-      types: ['render'],
-    },
     args: {
       as: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.as,
-        options: ['debug', 'error', 'image', 'pie', 'plot', 'shape', 'table', 'text'],
+        options: [
+          'advanced_filter',
+          'debug',
+          'dropdown_filter',
+          'error',
+          'image',
+          'markdown',
+          'metric',
+          'pie',
+          'plot',
+          'progress',
+          'repeatImage',
+          'revealImage',
+          'shape',
+          'table',
+          'time_filter',
+          'text',
+        ],
       },
       css: {
-        types: ['string', 'null'],
-        default: '"* > * {}"',
+        types: ['string'],
         help: argHelp.css,
+        default: `"${DEFAULT_ELEMENT_CSS}"`,
       },
       containerStyle: {
-        types: ['containerStyle', 'null'],
+        types: ['containerStyle'],
         help: argHelp.containerStyle,
+        default: '{containerStyle}',
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
-        ...context,
-        as: args.as || context.as,
-        css: args.css,
+        ...input,
+        as: args.as || input.as,
+        css: args.css || DEFAULT_ELEMENT_CSS,
         containerStyle: args.containerStyle,
       };
     },

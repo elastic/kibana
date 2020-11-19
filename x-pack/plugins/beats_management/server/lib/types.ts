@@ -17,7 +17,7 @@ export type UserOrToken = FrameworkUser | string;
 
 export interface CMServerLibs {
   framework: BackendFrameworkLib;
-  database?: DatabaseAdapter;
+  database: DatabaseAdapter;
   beats: CMBeatsDomain;
   tags: CMTagsDomain;
   beatEvents: BeatEventsLib;

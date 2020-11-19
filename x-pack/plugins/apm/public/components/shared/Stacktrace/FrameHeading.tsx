@@ -4,49 +4,71 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import React, { Fragment } from 'react';
+import React, { ComponentType } from 'react';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
-import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
+import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
+import {
+  CSharpFrameHeadingRenderer,
+  DefaultFrameHeadingRenderer,
+  FrameHeadingRendererProps,
+  JavaFrameHeadingRenderer,
+  JavaScriptFrameHeadingRenderer,
+  RubyFrameHeadingRenderer,
+} from './frame_heading_renderers';
 
 const FileDetails = styled.div`
-  color: ${theme.euiColorMediumShade};
-  padding: ${px(units.half)};
+  color: ${({ theme }) => theme.eui.euiColorDarkShade};
+  line-height: 1.5; /* matches the line-hight of the accordion container button */
+  padding: ${px(units.eighth)} 0;
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
 `;
+
 const LibraryFrameFileDetail = styled.span`
-  color: ${theme.euiColorDarkShade};
+  color: ${({ theme }) => theme.eui.euiColorDarkShade};
+  word-break: break-word;
 `;
+
 const AppFrameFileDetail = styled.span`
-  font-weight: bold;
-  color: ${theme.euiColorFullShade};
+  color: ${({ theme }) => theme.eui.euiColorFullShade};
+  word-break: break-word;
 `;
 
 interface Props {
-  stackframe: IStackframe;
+  codeLanguage?: string;
+  stackframe: Stackframe;
   isLibraryFrame: boolean;
 }
 
-const FrameHeading: React.SFC<Props> = ({ stackframe, isLibraryFrame }) => {
-  const FileDetail = isLibraryFrame
+function FrameHeading({ codeLanguage, stackframe, isLibraryFrame }: Props) {
+  const FileDetail: ComponentType = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
-  const lineNumber = idx(stackframe, _ => _.line.number) || 0;
+  let Renderer: ComponentType<FrameHeadingRendererProps>;
+  switch (codeLanguage?.toString().toLowerCase()) {
+    case 'c#':
+      Renderer = CSharpFrameHeadingRenderer;
+      break;
+    case 'java':
+      Renderer = JavaFrameHeadingRenderer;
+      break;
+    case 'javascript':
+      Renderer = JavaScriptFrameHeadingRenderer;
+      break;
+    case 'ruby':
+      Renderer = RubyFrameHeadingRenderer;
+      break;
+    default:
+      Renderer = DefaultFrameHeadingRenderer;
+      break;
+  }
+
   return (
-    <FileDetails>
-      <FileDetail>{stackframe.filename}</FileDetail> in{' '}
-      <FileDetail>{stackframe.function}</FileDetail>
-      {lineNumber > 0 && (
-        <Fragment>
-          {' at '}
-          <FileDetail>line {stackframe.line.number}</FileDetail>
-        </Fragment>
-      )}
+    <FileDetails data-test-subj="FrameHeading">
+      <Renderer fileDetailComponent={FileDetail} stackframe={stackframe} />
     </FileDetails>
   );
-};
+}
 
 export { FrameHeading };

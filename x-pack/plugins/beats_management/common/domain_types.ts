@@ -7,14 +7,12 @@ import * as t from 'io-ts';
 import { configBlockSchemas } from './config_schemas';
 import { DateFromString } from './io_ts_types';
 
-export const OutputTypesArray = ['elasticsearch', 'logstash', 'kafka', 'redis'];
-
 // Here we create the runtime check for a generic, unknown beat config type.
 // We can also pass in optional params to create spacific runtime checks that
 // can be used to validate blocs on the API and UI
 export const createConfigurationBlockInterface = (
-  configType: t.LiteralType<string> | t.UnionType<Array<t.LiteralType<string>>> = t.union(
-    configBlockSchemas.map(s => t.literal(s.id))
+  configType: t.LiteralType<string> | t.KeyofC<Record<string, null>> = t.keyof(
+    Object.fromEntries(configBlockSchemas.map((s) => [s.id, null])) as Record<string, null>
   ),
   beatConfigInterface: t.Mixed = t.Dictionary
 ) =>
@@ -43,7 +41,7 @@ export interface CMBeat {
   status?: BeatEvent;
   enrollment_token: string;
   active: boolean;
-  access_token: string;
+  access_token?: string;
   verified_on?: string;
   type: string;
   version?: string;

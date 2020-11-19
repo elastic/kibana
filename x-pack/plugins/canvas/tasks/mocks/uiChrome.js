@@ -7,4 +7,11 @@
 export default {
   getBasePath: () => '/abc',
   trackSubUrlForApp: () => undefined, // noop
+  getUiSettingsClient: () => {
+    return {
+      get: () => {
+        return null;
+      },
+    };
+  },
 };

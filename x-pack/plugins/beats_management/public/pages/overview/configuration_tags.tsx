@@ -60,7 +60,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
           path={`/overview/configuration_tags`}
         />
         <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="tag">
-          {autocompleteProps => (
+          {(autocompleteProps) => (
             <Table
               kueryBarProps={{
                 ...autocompleteProps,

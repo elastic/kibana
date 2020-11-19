@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FrameworkRequest, FrameworkUser } from '../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 
 export interface DatabaseAdapter {
   get<Source>(
@@ -37,15 +37,6 @@ export interface DatabaseAdapter {
     params: DatabaseSearchParams
   ): Promise<DatabaseSearchResponse<T>>;
   putTemplate(name: string, template: any): Promise<any>;
-}
-
-export interface DatabaseKbnESCluster {
-  callWithInternalUser(esMethod: string, options: {}): Promise<any>;
-  callWithRequest(req: FrameworkRequest, esMethod: string, options: {}): Promise<any>;
-}
-
-export interface DatabaseKbnESPlugin {
-  getCluster(clusterName: string): DatabaseKbnESCluster;
 }
 
 export interface DatabaseSearchParams extends DatabaseGenericParams {

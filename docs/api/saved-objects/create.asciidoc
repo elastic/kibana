@@ -1,61 +1,79 @@
 [[saved-objects-api-create]]
-=== Create Object
+=== Create saved objects API
+++++
+<titleabbrev>Create saved objects</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Create {kib} saved objects.
 
-The create saved object API enables you to persist a Kibana saved object.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-create-request]]
 ==== Request
 
-`POST /api/saved_objects/<type>` +
+`POST <kibana host>:<port>/api/saved_objects/<type>` +
 
-`POST /api/saved_objects/<type>/<id>`
+`POST <kibana host>:<port>/api/saved_objects/<type>/<id>`
 
-==== Path Parameters
+`POST <kibana host>:<port>/s/<space_id>/saved_objects/<type>`
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+[[saved-objects-api-create-path-params]]
+==== Path parameters
 
-`id` (optional)::
-  (string) Enables specifying an ID to use, as opposed to one being randomly generated
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+`<type>`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
-==== Query Parameters
+`<id>`::
+  (Optional, string) Specifies an ID instead of using a randomly generated ID.
 
-`overwrite` (optional)::
-  (boolean) If true, will overwrite the document with the same ID.
+[[saved-objects-api-create-query-params]]
+==== Query parameters
 
+`overwrite`::
+  (Optional, boolean) When true, overwrites the document with the same ID.
 
-==== Request Body
+[[saved-objects-api-create-request-body]]
+==== Request body
 
-`attributes` (required)::
-  (object) The data to persist
+`attributes`::
+  (Required, object) The data that you want to create.
++
+WARNING: When you create saved objects, attributes are not validated, which allows you to pass
+arbitrary and ill-formed data into the API that can break {kib}. Make sure
+any data that you send to the API is properly formed.
 
-`references` (optional)::
-  (array) An array of objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. The `name` can be used in the attributes to refer to the other saved object, but never the `id`, which may be updated automatically in the future during migrations or import/export.
+`references`::
+  (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects that this object references. Use `name` in attributes to refer to the other saved object, but never the `id`, which can update automatically during migrations or import/export.
 
-==== Examples
+`initialNamespaces`::
+  (Optional, string array) Identifiers for the <<xpack-spaces,spaces>> in which this object is created. If this is provided, the
+  object is created only in the explicitly defined spaces. If this is not provided, the object is created in the current space
+  (default behavior).
 
-The following example creates an index pattern object with a pattern of
-`my-pattern-*`.
+[[saved-objects-api-create-request-codes]]
+==== Response code
 
-[source,js]
+`200`::
+    Indicates a successful call.
+
+[[saved-objects-api-create-example]]
+==== Example
+
+[source,sh]
 --------------------------------------------------
-POST api/saved_objects/index-pattern/my-pattern
+$ curl -X POST api/saved_objects/index-pattern/my-pattern  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
   "attributes": {
     "title": "my-pattern-*"
   }
-}
+}'
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "my-pattern", <1>
@@ -67,11 +85,4 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-<1> If `my-pattern` was not specified in the path, a unique ID would have been
-generated.
-
-==== Known issues
-
-1. *Attributes are not validated at creation time*. This means you can pass
-arbitrary and ill-formed data into this API that can break Kibana. Make sure
-any data you send to this API is properly formed.
+<1> When `my-pattern` is unspecified in the path, a unique ID is automatically generated.

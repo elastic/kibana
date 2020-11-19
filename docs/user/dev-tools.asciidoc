@@ -1,0 +1,39 @@
+
+[[devtools-kibana]]
+= Dev Tools
+
+[partintro]
+--
+*Dev Tools* contains tools that you can use to interact
+with your data.
+
+[cols="2"]
+|===
+
+a| <<console-kibana, Console>>
+
+| Interact with the REST API of Elasticsearch, including sending requests
+and viewing API documentation.
+
+a| <<xpack-profiler, Search&nbsp;Profiler>>
+
+| Inspect and analyze your search queries.
+
+a| <<xpack-grokdebugger, Grok&nbsp;Debugger&nbsp;&nbsp;&nbsp;>>
+
+| Build and debug grok patterns before you use them in your data processing pipelines.
+
+a| <<painlesslab, Painless&nbsp;Lab>>
+
+| beta:[] Test and debug Painless scripts in real-time.
+|===
+
+--
+
+include::{kib-repo-dir}/dev-tools/console/console.asciidoc[]
+
+include::{kib-repo-dir}/dev-tools/searchprofiler/index.asciidoc[]
+
+include::{kib-repo-dir}/dev-tools/grokdebugger/index.asciidoc[]
+
+include::{kib-repo-dir}/dev-tools/painlesslab/index.asciidoc[]

@@ -1,0 +1,33 @@
+[[logstash-configuration-management-api-delete]]
+=== Delete Logstash pipeline API
+++++
+<titleabbrev>Delete pipeline</titleabbrev>
+++++
+
+experimental[] Delete a centrally-managed Logstash pipeline.
+
+[[logstash-configuration-management-api-delete-request]]
+==== Request
+
+`DELETE <kibana host>:<port>/api/logstash/pipeline/<id>`
+
+[[logstash-configuration-management-api-delete-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The pipeline ID.
+
+[[logstash-configuration-management-api-delete-codes]]
+==== Response code
+
+`204 No Content`::
+    Indicates a successful call.
+
+[[logstash-configuration-management-api-delete-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X DELETE api/logstash/pipeline/hello-world
+--------------------------------------------------
+// KIBANA

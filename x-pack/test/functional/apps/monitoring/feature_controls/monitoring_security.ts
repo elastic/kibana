@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'security']);
 
-  describe('securty', () => {
+  describe('security', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
 
@@ -78,9 +76,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`doesn't show monitoring navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Stack Monitoring');
       });
     });
@@ -101,9 +97,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows monitoring navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Stack Monitoring');
       });
     });

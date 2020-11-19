@@ -1,0 +1,986 @@
+[
+  {
+    "license": {
+      "expiry_date": "2030-08-29T23:59:59.999Z",
+      "expiry_date_in_millis": 1914278399999,
+      "hkey": null,
+      "issue_date": "2014-09-29T00:00:00.000Z",
+      "issue_date_in_millis": 1411948800000,
+      "issued_to": "issuedTo",
+      "issuer": "issuer",
+      "max_nodes": 1,
+      "status": "active",
+      "type": "basic",
+      "uid": "893361dc-9749-4997-93cb-802e3d7fa4a8"
+    },
+    "cluster_name": "clustertwo",
+    "cluster_stats": {
+      "indices": {
+        "completion": {
+          "size_in_bytes": 0
+        },
+        "count": 1,
+        "docs": {
+          "count": 8,
+          "deleted": 0
+        },
+        "fielddata": {
+          "evictions": 0,
+          "memory_size_in_bytes": 0
+        },
+        "query_cache": {
+          "cache_count": 0,
+          "cache_size": 0,
+          "evictions": 0,
+          "hit_count": 0,
+          "memory_size_in_bytes": 0,
+          "miss_count": 0,
+          "total_count": 0
+        },
+        "segments": {
+          "count": 8,
+          "doc_values_memory_in_bytes": 680,
+          "file_sizes": {},
+          "fixed_bit_set_memory_in_bytes": 0,
+          "index_writer_memory_in_bytes": 0,
+          "max_unsafe_auto_id_timestamp": -1,
+          "memory_in_bytes": 13852,
+          "norms_memory_in_bytes": 256,
+          "points_memory_in_bytes": 8,
+          "stored_fields_memory_in_bytes": 2496,
+          "term_vectors_memory_in_bytes": 0,
+          "terms_memory_in_bytes": 10412,
+          "version_map_memory_in_bytes": 0
+        },
+        "shards": {
+          "index": {
+            "primaries": {
+              "avg": 1,
+              "max": 1,
+              "min": 1
+            },
+            "replication": {
+              "avg": 0,
+              "max": 0,
+              "min": 0
+            },
+            "shards": {
+              "avg": 1,
+              "max": 1,
+              "min": 1
+            }
+          },
+          "primaries": 1,
+          "replication": 0,
+          "total": 1
+        },
+        "store": {
+          "size_in_bytes": 34095
+        }
+      },
+      "nodes": {
+        "count": {
+          "coordinating_only": 0,
+          "data": 1,
+          "ingest": 1,
+          "master": 1,
+          "total": 1
+        },
+        "fs": {
+          "available_in_bytes": 200403197952,
+          "free_in_bytes": 200665341952,
+          "total_in_bytes": 499065712640
+        },
+        "jvm": {
+          "max_uptime_in_millis": 701043,
+          "mem": {
+            "heap_max_in_bytes": 628555776,
+            "heap_used_in_bytes": 204299464
+          },
+          "threads": 40,
+          "versions": [
+            {
+              "count": 1,
+              "version": "1.8.0_121",
+              "vm_name": "Java HotSpot(TM) 64-Bit Server VM",
+              "vm_vendor": "Oracle Corporation",
+              "vm_version": "25.121-b13"
+            }
+          ]
+        },
+        "network_types": {
+          "http_types": {
+            "security4": 1
+          },
+          "transport_types": {
+            "security4": 1
+          }
+        },
+        "os": {
+          "allocated_processors": 1,
+          "available_processors": 4,
+          "mem": {
+            "free_in_bytes": 183799808,
+            "free_percent": 1,
+            "total_in_bytes": 17179869184,
+            "used_in_bytes": 16996069376,
+            "used_percent": 99
+          },
+          "names": [
+            {
+              "count": 1,
+              "name": "Mac OS X"
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "classname": "org.elasticsearch.xpack.XPackPlugin",
+            "description": "Elasticsearch Expanded Pack Plugin",
+            "has_native_controller": true,
+            "name": "x-pack",
+            "version": "7.0.0-alpha1"
+          }
+        ],
+        "process": {
+          "cpu": {
+            "percent": 0
+          },
+          "open_file_descriptors": {
+            "avg": 163,
+            "max": 163,
+            "min": 163
+          }
+        },
+        "versions": [
+          "7.0.0-alpha1"
+        ]
+      },
+      "status": "green",
+      "timestamp": 1502835059952
+    },
+    "cluster_uuid": "6d-9tDFTRe-qT5GoBytdlQ",
+    "stack_stats": {
+      "xpack": {
+        "ccr": {
+          "auto_follow_patterns_count": 0,
+          "available": true,
+          "enabled": true,
+          "follower_indices_count": 0
+        },
+        "graph": {
+          "available": false,
+          "enabled": true
+        },
+        "logstash": {
+          "available": false,
+          "enabled": true
+        },
+        "ml": {
+          "available": false,
+          "datafeeds": {
+            "_all": {
+              "count": 0
+            }
+          },
+          "enabled": true,
+          "jobs": {
+            "_all": {
+              "count": 0,
+              "detectors": {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+                "total": 0
+              },
+              "model_size": {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+                "total": 0
+              }
+            }
+          }
+        },
+        "monitoring": {
+          "available": true,
+          "enabled": true,
+          "enabled_exporters": {
+            "http": 1
+          }
+        },
+        "security": {
+          "anonymous": {
+            "enabled": false
+          },
+          "audit": {
+            "enabled": false,
+            "outputs": [
+              "logfile"
+            ]
+          },
+          "available": false,
+          "enabled": true,
+          "ipfilter": {
+            "http": false,
+            "transport": false
+          },
+          "realms": {
+            "active_directory": {
+              "available": false,
+              "enabled": false
+            },
+            "file": {
+              "available": false,
+              "enabled": false
+            },
+            "ldap": {
+              "available": false,
+              "enabled": false
+            },
+            "native": {
+              "available": false,
+              "enabled": false
+            },
+            "pki": {
+              "available": false,
+              "enabled": false
+            }
+          },
+          "role_mapping": {
+            "native": {
+              "enabled": 0,
+              "size": 0
+            }
+          },
+          "roles": {
+            "file": {
+              "dls": false,
+              "fls": false,
+              "size": 0
+            },
+            "native": {
+              "dls": false,
+              "fls": false,
+              "size": 1
+            }
+          },
+          "ssl": {
+            "http": {
+              "enabled": false
+            }
+          }
+        },
+        "watcher": {
+          "available": false,
+          "enabled": true,
+          "execution": {
+            "actions": {
+              "_all": {
+                "total": 0,
+                "total_time_in_ms": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "timestamp": "2017-08-15T22:10:59.952Z",
+    "version": "7.0.0-alpha1",
+    "collectionSource": "monitoring"
+  },
+  {
+    "license": {
+      "expiry_date": "2017-09-14T21:58:28.997Z",
+      "expiry_date_in_millis": 1505426308997,
+      "hkey": null,
+      "issue_date": "2017-08-15T21:58:28.997Z",
+      "issue_date_in_millis": 1502834308997,
+      "issued_to": "monitoring-one",
+      "issuer": "elasticsearch",
+      "max_nodes": 1000,
+      "start_date_in_millis": -1,
+      "status": "active",
+      "type": "trial",
+      "uid": "e5f6e897-0db5-4042-ad7c-6628ddc91691"
+    },
+    "cluster_name": "monitoring-one",
+    "cluster_stats": {
+      "indices": {
+        "completion": {
+          "size_in_bytes": 0
+        },
+        "count": 8,
+        "docs": {
+          "count": 3997,
+          "deleted": 69
+        },
+        "fielddata": {
+          "evictions": 0,
+          "memory_size_in_bytes": 2104
+        },
+        "query_cache": {
+          "cache_count": 0,
+          "cache_size": 0,
+          "evictions": 0,
+          "hit_count": 0,
+          "memory_size_in_bytes": 0,
+          "miss_count": 0,
+          "total_count": 0
+        },
+        "segments": {
+          "count": 36,
+          "doc_values_memory_in_bytes": 91352,
+          "file_sizes": {},
+          "fixed_bit_set_memory_in_bytes": 992,
+          "index_writer_memory_in_bytes": 205347,
+          "max_unsafe_auto_id_timestamp": -1,
+          "memory_in_bytes": 278961,
+          "norms_memory_in_bytes": 6784,
+          "points_memory_in_bytes": 3250,
+          "stored_fields_memory_in_bytes": 11544,
+          "term_vectors_memory_in_bytes": 0,
+          "terms_memory_in_bytes": 166031,
+          "version_map_memory_in_bytes": 26362
+        },
+        "shards": {
+          "index": {
+            "primaries": {
+              "avg": 1,
+              "max": 1,
+              "min": 1
+            },
+            "replication": {
+              "avg": 0,
+              "max": 0,
+              "min": 0
+            },
+            "shards": {
+              "avg": 1,
+              "max": 1,
+              "min": 1
+            }
+          },
+          "primaries": 8,
+          "replication": 0,
+          "total": 8
+        },
+        "store": {
+          "size_in_bytes": 2647163
+        }
+      },
+      "nodes": {
+        "count": {
+          "coordinating_only": 0,
+          "data": 1,
+          "ingest": 1,
+          "master": 1,
+          "total": 1
+        },
+        "fs": {
+          "available_in_bytes": 200403648512,
+          "free_in_bytes": 200665792512,
+          "total_in_bytes": 499065712640
+        },
+        "jvm": {
+          "max_uptime_in_millis": 761002,
+          "mem": {
+            "heap_max_in_bytes": 628555776,
+            "heap_used_in_bytes": 133041176
+          },
+          "threads": 42,
+          "versions": [
+            {
+              "count": 1,
+              "version": "1.8.0_121",
+              "vm_name": "Java HotSpot(TM) 64-Bit Server VM",
+              "vm_vendor": "Oracle Corporation",
+              "vm_version": "25.121-b13"
+            }
+          ]
+        },
+        "network_types": {
+          "http_types": {
+            "security4": 1
+          },
+          "transport_types": {
+            "security4": 1
+          }
+        },
+        "os": {
+          "allocated_processors": 1,
+          "available_processors": 4,
+          "mem": {
+            "free_in_bytes": 86732800,
+            "free_percent": 1,
+            "total_in_bytes": 17179869184,
+            "used_in_bytes": 17093136384,
+            "used_percent": 99
+          },
+          "names": [
+            {
+              "count": 1,
+              "name": "Mac OS X"
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "classname": "org.elasticsearch.xpack.XPackPlugin",
+            "description": "Elasticsearch Expanded Pack Plugin",
+            "has_native_controller": true,
+            "name": "x-pack",
+            "version": "7.0.0-alpha1"
+          }
+        ],
+        "process": {
+          "cpu": {
+            "percent": 2
+          },
+          "open_file_descriptors": {
+            "avg": 178,
+            "max": 178,
+            "min": 178
+          }
+        },
+        "versions": [
+          "7.0.0-alpha1"
+        ]
+      },
+      "status": "yellow",
+      "timestamp": 1502835054610
+    },
+    "cluster_uuid": "lOF8kofiS_2DX58o9mXJ1Q",
+    "stack_stats": {
+      "xpack": {
+        "ccr": {
+          "auto_follow_patterns_count": 0,
+          "available": true,
+          "enabled": true,
+          "follower_indices_count": 0
+        },
+        "graph": {
+          "available": true,
+          "enabled": true
+        },
+        "logstash": {
+          "available": true,
+          "enabled": true
+        },
+        "ml": {
+          "available": true,
+          "datafeeds": {
+            "_all": {
+              "count": 0
+            }
+          },
+          "enabled": true,
+          "jobs": {
+            "_all": {
+              "count": 0,
+              "detectors": {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+                "total": 0
+              },
+              "model_size": {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+                "total": 0
+              }
+            }
+          }
+        },
+        "monitoring": {
+          "available": true,
+          "enabled": true,
+          "enabled_exporters": {
+            "local": 1
+          }
+        },
+        "security": {
+          "anonymous": {
+            "enabled": false
+          },
+          "audit": {
+            "enabled": false,
+            "outputs": [
+              "logfile"
+            ]
+          },
+          "available": true,
+          "enabled": true,
+          "ipfilter": {
+            "http": false,
+            "transport": false
+          },
+          "realms": {
+            "active_directory": {
+              "available": true,
+              "enabled": false
+            },
+            "file": {
+              "available": true,
+              "enabled": true,
+              "name": [
+                "default_file"
+              ],
+              "order": [
+                2147483647
+              ],
+              "size": [
+                0
+              ]
+            },
+            "ldap": {
+              "available": true,
+              "enabled": false
+            },
+            "native": {
+              "available": true,
+              "enabled": true,
+              "name": [
+                "default_native"
+              ],
+              "order": [
+                2147483647
+              ],
+              "size": [
+                2
+              ]
+            },
+            "pki": {
+              "available": true,
+              "enabled": false
+            }
+          },
+          "role_mapping": {
+            "native": {
+              "enabled": 0,
+              "size": 0
+            }
+          },
+          "roles": {
+            "file": {
+              "dls": false,
+              "fls": false,
+              "size": 0
+            },
+            "native": {
+              "dls": false,
+              "fls": false,
+              "size": 1
+            }
+          },
+          "ssl": {
+            "http": {
+              "enabled": false
+            }
+          }
+        },
+        "watcher": {
+          "available": true,
+          "enabled": true,
+          "execution": {
+            "actions": {
+              "_all": {
+                "total": 110,
+                "total_time_in_ms": 2245
+              },
+              "email": {
+                "total": 14,
+                "total_time_in_ms": 3
+              },
+              "index": {
+                "total": 14,
+                "total_time_in_ms": 158
+              }
+            }
+          }
+        }
+      }
+    },
+    "timestamp": "2017-08-15T22:10:54.610Z",
+    "version": "7.0.0-alpha1",
+    "collectionSource": "monitoring"
+  },
+  {
+    "license": {
+      "expiry_date": "2017-09-14T21:58:47.135Z",
+      "expiry_date_in_millis": 1505426327135,
+      "hkey": null,
+      "issue_date": "2017-08-15T21:58:47.135Z",
+      "issue_date_in_millis": 1502834327135,
+      "issued_to": "clusterone",
+      "issuer": "elasticsearch",
+      "max_nodes": 1000,
+      "start_date_in_millis": -1,
+      "status": "active",
+      "type": "trial",
+      "uid": "e5e99511-0928-41a3-97b0-ec77fa5e3b4c"
+    },
+    "cluster_name": "clusterone",
+    "cluster_stats": {
+      "indices": {
+        "completion": {
+          "size_in_bytes": 0
+        },
+        "count": 5,
+        "docs": {
+          "count": 150,
+          "deleted": 0
+        },
+        "fielddata": {
+          "evictions": 0,
+          "memory_size_in_bytes": 0
+        },
+        "query_cache": {
+          "cache_count": 0,
+          "cache_size": 0,
+          "evictions": 0,
+          "hit_count": 0,
+          "memory_size_in_bytes": 0,
+          "miss_count": 0,
+          "total_count": 0
+        },
+        "segments": {
+          "count": 76,
+          "doc_values_memory_in_bytes": 88064,
+          "file_sizes": {},
+          "fixed_bit_set_memory_in_bytes": 0,
+          "index_writer_memory_in_bytes": 7006184,
+          "max_unsafe_auto_id_timestamp": 1502834982386,
+          "memory_in_bytes": 1907922,
+          "norms_memory_in_bytes": 197184,
+          "points_memory_in_bytes": 3818,
+          "stored_fields_memory_in_bytes": 23744,
+          "term_vectors_memory_in_bytes": 0,
+          "terms_memory_in_bytes": 1595112,
+          "version_map_memory_in_bytes": 260
+        },
+        "shards": {
+          "index": {
+            "primaries": {
+              "avg": 2.6,
+              "max": 5,
+              "min": 1
+            },
+            "replication": {
+              "avg": 1,
+              "max": 1,
+              "min": 1
+            },
+            "shards": {
+              "avg": 5.2,
+              "max": 10,
+              "min": 2
+            }
+          },
+          "primaries": 13,
+          "replication": 1,
+          "total": 26
+        },
+        "store": {
+          "size_in_bytes": 4838464
+        }
+      },
+      "nodes": {
+        "count": {
+          "coordinating_only": 0,
+          "data": 2,
+          "ingest": 2,
+          "master": 2,
+          "total": 2
+        },
+        "fs": {
+          "available_in_bytes": 200404209664,
+          "free_in_bytes": 200666353664,
+          "total_in_bytes": 499065712640
+        },
+        "jvm": {
+          "max_uptime_in_millis": 741786,
+          "mem": {
+            "heap_max_in_bytes": 1257111552,
+            "heap_used_in_bytes": 465621856
+          },
+          "threads": 92,
+          "versions": [
+            {
+              "count": 2,
+              "version": "1.8.0_121",
+              "vm_name": "Java HotSpot(TM) 64-Bit Server VM",
+              "vm_vendor": "Oracle Corporation",
+              "vm_version": "25.121-b13"
+            }
+          ]
+        },
+        "network_types": {
+          "http_types": {
+            "security4": 2
+          },
+          "transport_types": {
+            "security4": 2
+          }
+        },
+        "os": {
+          "allocated_processors": 2,
+          "available_processors": 8,
+          "mem": {
+            "free_in_bytes": 332099584,
+            "free_percent": 1,
+            "total_in_bytes": 34359738368,
+            "used_in_bytes": 34027638784,
+            "used_percent": 99
+          },
+          "names": [
+            {
+              "count": 2,
+              "name": "Mac OS X"
+            }
+          ]
+        },
+        "plugins": [
+          {
+            "classname": "org.elasticsearch.xpack.XPackPlugin",
+            "description": "Elasticsearch Expanded Pack Plugin",
+            "has_native_controller": true,
+            "name": "x-pack",
+            "version": "7.0.0-alpha1"
+          }
+        ],
+        "process": {
+          "cpu": {
+            "percent": 2
+          },
+          "open_file_descriptors": {
+            "avg": 227,
+            "max": 237,
+            "min": 218
+          }
+        },
+        "versions": [
+          "7.0.0-alpha1"
+        ]
+      },
+      "status": "green",
+      "timestamp": 1502835052641
+    },
+    "cluster_uuid": "TkHOX_-1TzWwbROwQJU5IA",
+    "stack_stats": {
+      "xpack": {
+        "ccr": {
+          "auto_follow_patterns_count": 0,
+          "available": true,
+          "enabled": true,
+          "follower_indices_count": 0
+        },
+        "graph": {
+          "available": true,
+          "enabled": true,
+          "graph_workspace": {
+            "total": 0
+          }
+        },
+        "logstash": {
+          "available": true,
+          "enabled": true
+        },
+        "ml": {
+          "available": true,
+          "datafeeds": {
+            "_all": {
+              "count": 0
+            }
+          },
+          "enabled": true,
+          "jobs": {
+            "_all": {
+              "count": 3,
+              "detectors": {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+                "total": 3
+              },
+              "model_size": {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+                "total": 0
+              }
+            },
+            "closed": {
+              "count": 2,
+              "detectors": {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+                "total": 2
+              },
+              "model_size": {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+                "total": 0
+              }
+            },
+            "opened": {
+              "count": 1,
+              "detectors": {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+                "total": 1
+              },
+              "model_size": {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+                "total": 0
+              }
+            }
+          }
+        },
+        "monitoring": {
+          "available": true,
+          "enabled": true,
+          "enabled_exporters": {
+            "http": 1
+          }
+        },
+        "security": {
+          "anonymous": {
+            "enabled": false
+          },
+          "audit": {
+            "enabled": false,
+            "outputs": [
+              "logfile"
+            ]
+          },
+          "available": true,
+          "enabled": true,
+          "ipfilter": {
+            "http": false,
+            "transport": false
+          },
+          "realms": {
+            "active_directory": {
+              "available": true,
+              "enabled": false
+            },
+            "file": {
+              "available": true,
+              "enabled": true,
+              "name": [
+                "default_file"
+              ],
+              "order": [
+                2147483647
+              ],
+              "size": [
+                0
+              ]
+            },
+            "ldap": {
+              "available": true,
+              "enabled": false
+            },
+            "native": {
+              "available": true,
+              "enabled": true,
+              "name": [
+                "default_native"
+              ],
+              "order": [
+                2147483647
+              ],
+              "size": [
+                1
+              ]
+            },
+            "pki": {
+              "available": true,
+              "enabled": false
+            }
+          },
+          "role_mapping": {
+            "native": {
+              "enabled": 0,
+              "size": 0
+            }
+          },
+          "roles": {
+            "file": {
+              "dls": false,
+              "fls": false,
+              "size": 0
+            },
+            "native": {
+              "dls": false,
+              "fls": false,
+              "size": 1
+            }
+          },
+          "ssl": {
+            "http": {
+              "enabled": false
+            }
+          }
+        },
+        "watcher": {
+          "available": true,
+          "enabled": true,
+          "execution": {
+            "actions": {
+              "_all": {
+                "total": 0,
+                "total_time_in_ms": 0
+              }
+            }
+          }
+        }
+      },
+      "kibana": {
+        "count": 1,
+        "versions": [
+          {
+            "version": "7.0.0-alpha1",
+            "count": 1
+          }
+        ],
+        "os": {
+          "platforms": [],
+          "platformReleases": [],
+          "distros": [],
+          "distroReleases": []
+        },
+        "dashboard": {
+          "total": 0
+        },
+        "visualization": {
+          "total": 0
+        },
+        "search": {
+          "total": 0
+        },
+        "index_pattern": {
+          "total": 0
+        },
+        "graph_workspace": {
+          "total": 0
+        },
+        "timelion_sheet": {
+          "total": 0
+        },
+        "indices": 1,
+        "plugins": {}
+      }
+    },
+    "timestamp": "2017-08-15T22:10:52.642Z",
+    "version": "7.0.0-alpha1",
+    "collectionSource": "monitoring"
+  }
+]

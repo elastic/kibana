@@ -81,13 +81,17 @@ export class ElementShareContainer extends React.PureComponent {
   };
 
   render() {
+    const shouldTrackComplete = this.props.functionName !== 'embeddable';
+
     // NOTE: the data-shared-item and data-render-complete attributes are used for reporting
+    // Embeddables should be setting data-shared-item and data-render-complete on themselves
+    // so we should not be tracking them here.
     return (
       <div
-        data-shared-item
-        data-render-complete={this.state.renderComplete}
+        data-shared-item={shouldTrackComplete ? this.state.renderComplete : undefined}
+        data-render-complete={shouldTrackComplete ? this.state.renderComplete : undefined}
         className={this.props.className}
-        ref={ref => (this.sharedItemRef = ref)}
+        ref={(ref) => (this.sharedItemRef = ref)}
       >
         {this.props.children}
       </div>

@@ -4,40 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiBasicTable, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
-import moment from 'moment';
-import React, { Component } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { EuiIconTip } from '@elastic/eui';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_groups';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
   fontFamilyCode,
   fontSizes,
   px,
   truncate,
-  unit
+  unit,
 } from '../../../../style/variables';
-import { APMLink } from '../../../shared/Links/APMLink';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { history } from '../../../../utils/history';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { ManagedTable } from '../../../shared/ManagedTable';
+import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
+import { APMQueryParams } from '../../../shared/Links/url_helpers';
 
-function paginateItems({
-  items,
-  pageIndex,
-  pageSize
-}: {
-  items: any[];
-  pageIndex: number;
-  pageSize: number;
-}) {
-  return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-}
-
-const GroupIdLink = styled(APMLink)`
+const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
 `;
 
@@ -45,7 +35,11 @@ const MessageAndCulpritCell = styled.div`
   ${truncate('100%')};
 `;
 
-const MessageLink = styled(APMLink)`
+const ErrorLink = styled(ErrorOverviewLink)`
+  ${truncate('100%')};
+`;
+
+const MessageLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
   font-size: ${fontSizes.large};
   ${truncate('100%')};
@@ -56,77 +50,77 @@ const Culprit = styled.div`
 `;
 
 interface Props {
-  location: Location;
-  urlParams: IUrlParams;
   items: ErrorGroupListAPIResponse;
+  serviceName: string;
 }
 
-interface ITableChange {
-  page: { index?: number; size?: number };
-  sort: {
-    field?: string;
-    direction?: string;
-  };
-}
+function ErrorGroupList({ items, serviceName }: Props) {
+  const { urlParams } = useUrlParams();
 
-interface State {
-  page: { index?: number; size?: number };
-}
-
-export class ErrorGroupList extends Component<Props, State> {
-  public state = {
-    page: {
-      index: 0,
-      size: 25
-    }
-  };
-
-  public onTableChange = ({ page = {}, sort = {} }: ITableChange) => {
-    this.setState({ page });
-
-    const { location } = this.props;
-
-    history.push({
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        sortField: sort.field,
-        sortDirection: sort.direction
-      })
-    });
-  };
-
-  public render() {
-    const { items } = this.props;
-    const { serviceName, sortDirection, sortField } = this.props.urlParams;
-
-    const paginatedItems = paginateItems({
-      items,
-      pageIndex: this.state.page.index,
-      pageSize: this.state.page.size
-    });
-
-    const columns = [
+  const columns = useMemo(
+    () => [
       {
-        name: i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
-          defaultMessage: 'Group ID'
-        }),
+        name: (
+          <>
+            {i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
+              defaultMessage: 'Group ID',
+            })}{' '}
+            <EuiIconTip
+              size="s"
+              type="questionInCircle"
+              color="subdued"
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
+              content={i18n.translate(
+                'xpack.apm.errorsTable.groupIdColumnDescription',
+                {
+                  defaultMessage:
+                    'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
+                }
+              )}
+            />
+          </>
+        ),
         field: 'groupId',
         sortable: false,
         width: px(unit * 6),
         render: (groupId: string) => {
           return (
-            <GroupIdLink path={`/${serviceName}/errors/${groupId}`}>
+            <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
-        }
+        },
+      },
+      {
+        name: i18n.translate('xpack.apm.errorsTable.typeColumnLabel', {
+          defaultMessage: 'Type',
+        }),
+        field: 'type',
+        sortable: false,
+        render: (type: string) => {
+          return (
+            <ErrorLink
+              title={type}
+              serviceName={serviceName}
+              query={
+                {
+                  ...urlParams,
+                  kuery: `error.exception.type:"${type}"`,
+                } as APMQueryParams
+              }
+            >
+              {type}
+            </ErrorLink>
+          );
+        },
       },
       {
         name: i18n.translate(
           'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
           {
-            defaultMessage: 'Error message and culprit'
+            defaultMessage: 'Error message and culprit',
           }
         ),
         field: 'message',
@@ -139,7 +133,10 @@ export class ErrorGroupList extends Component<Props, State> {
                 id="error-message-tooltip"
                 content={message || NOT_AVAILABLE_LABEL}
               >
-                <MessageLink path={`/${serviceName}/errors/${item.groupId}`}>
+                <MessageLink
+                  serviceName={serviceName}
+                  errorGroupId={item.groupId}
+                >
                   {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
@@ -152,7 +149,7 @@ export class ErrorGroupList extends Component<Props, State> {
               </EuiToolTip>
             </MessageAndCulpritCell>
           );
-        }
+        },
       },
       {
         name: '',
@@ -163,20 +160,20 @@ export class ErrorGroupList extends Component<Props, State> {
           isUnhandled === false && (
             <EuiBadge color="warning">
               {i18n.translate('xpack.apm.errorsTable.unhandledLabel', {
-                defaultMessage: 'Unhandled'
+                defaultMessage: 'Unhandled',
               })}
             </EuiBadge>
-          )
+          ),
       },
       {
         name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
-          defaultMessage: 'Occurrences'
+          defaultMessage: 'Occurrences',
         }),
         field: 'occurrenceCount',
         sortable: true,
         dataType: 'number',
         render: (value?: number) =>
-          value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL
+          value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL,
       },
       {
         field: 'latestOccurrenceAt',
@@ -184,35 +181,34 @@ export class ErrorGroupList extends Component<Props, State> {
         name: i18n.translate(
           'xpack.apm.errorsTable.latestOccurrenceColumnLabel',
           {
-            defaultMessage: 'Latest occurrence'
+            defaultMessage: 'Latest occurrence',
           }
         ),
         align: 'right',
         render: (value?: number) =>
-          value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL
-      }
-    ];
+          value ? (
+            <TimestampTooltip time={value} timeUnit="minutes" />
+          ) : (
+            NOT_AVAILABLE_LABEL
+          ),
+      },
+    ],
+    [serviceName, urlParams]
+  );
 
-    return (
-      <EuiBasicTable
-        noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-          defaultMessage: 'No errors were found'
-        })}
-        items={paginatedItems}
-        columns={columns}
-        pagination={{
-          pageIndex: this.state.page.index,
-          pageSize: this.state.page.size,
-          totalItemCount: this.props.items.length
-        }}
-        sorting={{
-          sort: {
-            field: sortField || 'latestOccurrenceAt',
-            direction: sortDirection || 'desc'
-          }
-        }}
-        onChange={this.onTableChange}
-      />
-    );
-  }
+  return (
+    <ManagedTable
+      noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+        defaultMessage: 'No errors were found',
+      })}
+      items={items}
+      columns={columns}
+      initialPageSize={25}
+      initialSortField="occurrenceCount"
+      initialSortDirection="desc"
+      sortItems={false}
+    />
+  );
 }
+
+export { ErrorGroupList };

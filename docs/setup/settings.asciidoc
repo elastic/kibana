@@ -1,316 +1,651 @@
 [[settings]]
-== Configuring Kibana
+== Configure {kib}
 
-The Kibana server reads properties from the `kibana.yml` file on startup. The 
-location of this file differs depending on how you installed {kib}. For example, 
-if you installed {kib} from an archive distribution (`.tar.gz` or `.zip`), by 
-default it is in `$KIBANA_HOME/config`. By default, with package distributions 
-(Debian or RPM), it is in `/etc/kibana`. 
+The {kib} server reads properties from the `kibana.yml` file on startup. The
+location of this file differs depending on how you installed {kib}. For example,
+if you installed {kib} from an archive distribution (`.tar.gz` or `.zip`), by
+default it is in `$KIBANA_HOME/config`. By default, with package distributions
+(Debian or RPM), it is in `/etc/kibana`.
 
-The default settings configure Kibana to run on `localhost:5601`. To change the
-host or port number, or connect to Elasticsearch running on a different machine,
-you'll need to update your `kibana.yml` file. You can also enable SSL and set a
+The default host and port settings configure {kib} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you'll need to update your `kibana.yml` file. You can also enable SSL and set a
 variety of other options. Finally, environment variables can be injected into
 configuration using `${MY_ENV_VAR}` syntax.
 
-.Kibana configuration settings
+[cols="2*<"]
+|===
 
-`console.enabled:`:: *Default: true* Set to false to disable Console.  Toggling
-this will cause the server to regenerate assets on the next startup, which may
-cause a delay before pages start being served.
+| `console.enabled:`
+ | Toggling this causes the server to regenerate assets on the next startup,
+which may cause a delay before pages start being served.
+Set to `false` to disable Console. *Default: `true`*
 
-`cpu.cgroup.path.override:`:: Override for cgroup cpu path when mounted in a
-manner that is inconsistent with `/proc/self/cgroup`
+| `cpu.cgroup.path.override:`
+ | *deprecated* This setting has been renamed to <<ops-cGroupOverrides-cpuPath, `ops.cGroupOverrides.cpuPath`>>
+and the old name will no longer be supported as of 8.0.
 
-`cpuacct.cgroup.path.override:`:: Override for cgroup cpuacct path when mounted
-in a manner that is inconsistent with `/proc/self/cgroup`
+| `cpuacct.cgroup.path.override:`
+ | *deprecated* This setting has been renamed to <<ops-cGroupOverrides-cpuAcctPath, `ops.cGroupOverrides.cpuAcctPath`>>
+and the old name will no longer be supported as of 8.0.
 
-`csp.rules:`:: A template
-https://w3c.github.io/webappsec-csp/[content-security-policy] that disables
-certain unnecessary and potentially insecure capabilities in the browser. All
-instances of `{nonce}` will be replaced with an automatically generated nonce
-at load time. We strongly recommend that you keep the default CSP rules that
-ship with Kibana.
+| `csp.rules:`
+ | A https://w3c.github.io/webappsec-csp/[content-security-policy] template
+that disables certain unnecessary and potentially insecure capabilities in
+the browser. It is strongly recommended that you keep the default CSP rules
+that ship with {kib}.
 
-`csp.strict:`:: *Default: `false`* Blocks access to Kibana to any browser that
-does not enforce even rudimentary CSP rules. In practice, this will disable
+|[[csp-strict]] `csp.strict:`
+ | Blocks {kib} access to any browser that
+does not enforce even rudimentary CSP rules. In practice, this disables
 support for older, less safe browsers like Internet Explorer.
+For more information, refer to <<csp-strict-mode, Content Security Policy>>.
+*Default: `true`*
 
-`csp.warnLegacyBrowsers:`:: *Default: `true`* Shows a warning message after
-loading Kibana to any browser that does not enforce even rudimentary CSP rules,
-though Kibana is still accessible. This configuration is effectively ignored
-when `csp.strict` is enabled.
+| `csp.warnLegacyBrowsers:`
+ | Shows a warning message after loading {kib} to any browser that does not
+enforce even rudimentary CSP rules, though {kib} is still accessible. This
+configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enabled.
+*Default: `true`*
 
-`elasticsearch.customHeaders:`:: *Default: `{}`* Header names and values to send
-to Elasticsearch. Any custom headers cannot be overwritten by client-side
-headers, regardless of the `elasticsearch.requestHeadersWhitelist` configuration.
+| `elasticsearch.customHeaders:`
+ | Header names and values to send to {es}. Any custom headers cannot be
+overwritten by client-side headers, regardless of the
+<<elasticsearch-requestHeadersWhitelist, `elasticsearch.requestHeadersWhitelist`>> configuration. *Default: `{}`*
 
-`elasticsearch.hosts:`:: *Default: "http://localhost:9200"* The URLs of the
-Elasticsearch instances to use for all your queries. All nodes listed here must
-be on the same cluster.
+|[[elasticsearch-hosts]] `elasticsearch.hosts:`
+ | The URLs of the {es} instances to use for all your queries. All nodes
+listed here must be on the same cluster. *Default: `[ "http://localhost:9200" ]`*
 
-`elasticsearch.logQueries:`:: *Default: `false`* Logs queries sent to
-Elasticsearch. Requires `logging.verbose` set to `true`. This is useful for
-seeing the query DSL generated by applications that currently do not have an
-inspector, for example Timelion and Monitoring.
+To enable SSL/TLS for outbound connections to {es}, use the `https` protocol
+in this setting.
 
-`elasticsearch.pingTimeout:`::
-*Default: the value of the `elasticsearch.requestTimeout` setting* Time in
-milliseconds to wait for Elasticsearch to respond to pings.
+| `elasticsearch.logQueries:`
+ | Log queries sent to {es}. Requires <<logging-verbose, `logging.verbose`>> set to `true`.
+This is useful for seeing the query DSL generated by applications that
+currently do not have an inspector, for example Timelion and Monitoring.
+*Default: `false`*
 
-`elasticsearch.preserveHost:`:: *Default: true* When this setting’s value is
-true, Kibana uses the hostname specified in the `server.host` setting. When the
-value of this setting is `false`, Kibana uses the hostname of the host that
-connects to this Kibana instance.
+|[[elasticsearch-pingTimeout]] `elasticsearch.pingTimeout:`
+ | Time in milliseconds to wait for {es} to respond to pings.
+*Default: the value of the <<elasticsearch-requestTimeout, `elasticsearch.requestTimeout`>> setting*
 
-`elasticsearch.requestHeadersWhitelist:`:: *Default: `[ 'authorization' ]`* List
-of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
-headers, set this value to [] (an empty list).
+|[[elasticsearch-requestHeadersWhitelist]] `elasticsearch.requestHeadersWhitelist:`
+ | List of {kib} client-side headers to send to {es}. To send *no* client-side
+headers, set this value to [] (an empty list). Removing the `authorization`
+header from being whitelisted means that you cannot use
+<<basic-authentication, basic authentication>> in {kib}.
+*Default: `[ 'authorization' ]`*
 
-`elasticsearch.requestTimeout:`:: *Default: 30000* Time in milliseconds to wait
-for responses from the back end or Elasticsearch. This value must be a positive
-integer.
+|[[elasticsearch-requestTimeout]] `elasticsearch.requestTimeout:`
+ | Time in milliseconds to wait for responses from the back end or {es}.
+This value must be a positive integer. *Default: `30000`*
 
-`elasticsearch.shardTimeout:`:: *Default: 30000* Time in milliseconds for
-Elasticsearch to wait for responses from shards. Set to 0 to disable.
+| `elasticsearch.shardTimeout:`
+ | Time in milliseconds for {es} to wait for responses from shards.
+Set to 0 to disable. *Default: `30000`*
 
-`elasticsearch.sniffInterval:`:: *Default: false* Time in milliseconds between
-requests to check Elasticsearch for an updated list of nodes.
+| `elasticsearch.sniffInterval:`
+ | Time in milliseconds between requests to check {es} for an updated list of
+nodes. *Default: `false`*
 
-`elasticsearch.sniffOnStart:`:: *Default: false* Attempt to find other
-Elasticsearch nodes on startup.
+| `elasticsearch.sniffOnStart:`
+ | Attempt to find other {es} nodes on startup. *Default: `false`*
 
-`elasticsearch.sniffOnConnectionFault:`:: *Default: false* Update the list of
-Elasticsearch nodes immediately following a connection fault.
+| `elasticsearch.sniffOnConnectionFault:`
+ | Update the list of {es} nodes immediately following a connection fault.
+*Default: `false`*
 
-`elasticsearch.ssl.alwaysPresentCertificate:`:: *Default: false* Controls
-whether to always present the certificate specified by
-`elasticsearch.ssl.certificate` when requested. This applies to all requests to
-Elasticsearch, including requests that are proxied for end-users. Setting this
-to `true` when Elasticsearch is using certificates to authenticate users can
-lead to proxied requests for end-users being executed as the identity tied to
-the configured certificate.
+|[[elasticsearch-ssl-alwaysPresentCertificate]] `elasticsearch.ssl.alwaysPresentCertificate:`
+ | Controls {kib} behavior in regard to presenting a client certificate when
+requested by {es}. This setting applies to all outbound SSL/TLS connections
+to {es}, including requests that are proxied for end users. *Default: `false`*
 
-`elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`:: Optional
-settings that provide the paths to the PEM-format SSL certificate and key files.
-These files are used to verify the identity of Kibana to Elasticsearch and are
-required when `xpack.ssl.verification_mode` in Elasticsearch is set to either
-`certificate` or `full`.
+|===
 
-`elasticsearch.ssl.certificateAuthorities:`:: Optional setting that enables you
-to specify a list of paths to the PEM file for the certificate authority for
-your Elasticsearch instance.
+[WARNING]
+============
+When {es} uses certificates to authenticate end users with a PKI realm
+and <<elasticsearch-ssl-alwaysPresentCertificate, `elasticsearch.ssl.alwaysPresentCertificate`>> is `true`,
+proxied requests may be executed as the identity that is tied to the {kib}
+server.
+============
 
-`elasticsearch.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt
-the private key. This value is optional as the key may not be encrypted.
+[cols="2*<"]
+|===
 
-`elasticsearch.ssl.verificationMode:`:: *Default: full* Controls the
-verification of certificates presented by Elasticsearch. Valid values are `none`,
-`certificate`, and `full`. `full` performs hostname verification, and
-`certificate` does not.
+|[[elasticsearch-ssl-cert-key]] `elasticsearch.ssl.certificate:` and `elasticsearch.ssl.key:`
+ | Paths to a PEM-encoded X.509 client certificate and its corresponding
+private key. These are used by {kib} to authenticate itself when making
+outbound SSL/TLS connections to {es}. For this setting to take effect, the
+`xpack.security.http.ssl.client_authentication` setting in {es} must be also
+be set to `"required"` or `"optional"` to request a client certificate from
+{kib}.
 
-`elasticsearch.startupTimeout:`:: *Default: 5000* Time in milliseconds to wait
-for Elasticsearch at Kibana startup before retrying.
+|===
 
-`elasticsearch.username:` and `elasticsearch.password:`:: If your Elasticsearch
-is protected with basic authentication, these settings provide the username and
-password that the Kibana server uses to perform maintenance on the Kibana index
-at startup. Your Kibana users still need to authenticate with Elasticsearch,
-which is proxied through the Kibana server.
+[NOTE]
+============
+These settings cannot be used in conjunction with
+<<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>>.
+============
 
-`interpreter.enableInVisualize`:: *Default: true* Enables use of interpreter in 
-Visualize.
+[cols="2*<"]
+|===
 
-`kibana.defaultAppId:`:: *Default: "discover"* The default application to load.
+|[[elasticsearch-ssl-certificateAuthorities]] `elasticsearch.ssl.certificateAuthorities:`
+ | Paths to one or more PEM-encoded X.509 certificate authority (CA)
+certificates, which make up a trusted certificate chain for {es}. This chain is
+used by {kib} to establish trust when making outbound SSL/TLS connections to
+{es}.
 
-`kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
-store saved searches, visualizations and dashboards. Kibana creates a new index
-if the index doesn’t already exist. If you configure a custom index, the name must 
-be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
+In addition to this setting, trusted certificates may be specified via
+<<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>> and/or
+<<elasticsearch-ssl-truststore-path, `elasticsearch.ssl.truststore.path`>>.
 
-`logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana
-stores log output.
+| `elasticsearch.ssl.keyPassphrase:`
+ | The password that decrypts the private key that is specified
+via <<elasticsearch-ssl-cert-key, `elasticsearch.ssl.key`>>. This value is optional, as the key may not be
+encrypted.
 
-`logging.json:`:: *Default: false* Logs output as JSON. When set to `true`, the 
-logs will be formatted as JSON strings that include timestamp, log level, context, message 
-text and any other metadata that may be associated with the log message itself. 
-If `logging.dest.stdout` is set and there is no interactive terminal ("TTY"), this setting
-will default to `true`.
+|[[elasticsearch-ssl-keystore-path]] `elasticsearch.ssl.keystore.path:`
+ | Path to a PKCS#12 keystore that contains an X.509 client certificate and it's
+corresponding private key. These are used by {kib} to authenticate itself when
+making outbound SSL/TLS connections to {es}. For this setting, you must also set
+the `xpack.security.http.ssl.client_authentication` setting in {es} to
+`"required"` or `"optional"` to request a client certificate from {kib}.
 
-`logging.quiet:`:: *Default: false* Set the value of this setting to `true` to
-suppress all logging output other than error messages.
+If the keystore contains any additional certificates, they are used as a
+trusted certificate chain for {es}. This chain is used by {kib} to establish
+trust when making outbound SSL/TLS connections to {es}. In addition to this
+setting, trusted certificates may be specified via
+<<elasticsearch-ssl-certificateAuthorities, `elasticsearch.ssl.certificateAuthorities`>> and/or
+<<elasticsearch-ssl-truststore-path, `elasticsearch.ssl.truststore.path`>>.
 
-`logging.silent:`:: *Default: false* Set the value of this setting to `true` to
-suppress all logging output.
+|===
 
-`logging.timezone`:: *Default: UTC* Set to the canonical timezone id
-(for example, `America/Los_Angeles`) to log events using that timezone. A list of timezones can
-be referenced at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
+[NOTE]
+============
+This setting cannot be used in conjunction with
+<<elasticsearch-ssl-cert-key, `elasticsearch.ssl.certificate`>> or <<elasticsearch-ssl-cert-key, `elasticsearch.ssl.key`>>.
+============
 
-[[logging-verbose]]`logging.verbose:`:: *Default: false* Set the value of this
-setting to `true` to log all events, including system usage information and all
-requests. Supported on Elastic Cloud Enterprise.
+[cols="2*<"]
+|===
 
-`map.includeElasticMapsService:`:: *Default: true* Turns on or off whether
-layers from the Elastic Maps Service should be included in the vector and tile
-layer option list. By turning this off, only the layers that are configured here
-will be included.
+| `elasticsearch.ssl.keystore.password:`
+ | The password that decrypts the keystore specified via
+<<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>>. If the keystore has no password, leave this
+as blank. If the keystore has an empty password, set this to
+`""`.
 
-[[regionmap-settings]] `map.regionmap:`:: Specifies additional vector layers for
-use in <<regionmap, Region Map>> visualizations. Supported on {ece}. Each layer
+|[[elasticsearch-ssl-truststore-path]] `elasticsearch.ssl.truststore.path:`
+ | Path to a PKCS#12 trust store that contains one or more X.509 certificate
+authority (CA) certificates, which make up a trusted certificate chain for
+{es}. This chain is used by {kib} to establish trust when making outbound
+SSL/TLS connections to {es}.
+
+In addition to this setting, trusted certificates may be specified via
+<<elasticsearch-ssl-certificateAuthorities, `elasticsearch.ssl.certificateAuthorities`>> and/or
+<<elasticsearch-ssl-keystore-path, `elasticsearch.ssl.keystore.path`>>.
+
+|`elasticsearch.ssl.truststore.password:`
+ | The password that decrypts the trust store specified via
+<<elasticsearch-ssl-truststore-path, `elasticsearch.ssl.truststore.path`>>. If the trust store
+has no password, leave this as blank. If the trust store has an empty password, set this to `""`.
+
+| `elasticsearch.ssl.verificationMode:`
+ | Controls the verification of the server certificate that {kib} receives when
+making an outbound SSL/TLS connection to {es}. Valid values are `"full"`,
+`"certificate"`, and `"none"`. Using `"full"` performs hostname verification,
+using `"certificate"` skips hostname verification, and using `"none"` skips
+verification entirely. *Default: `"full"`*
+
+|[[elasticsearch-user-passwd]] `elasticsearch.username:` and `elasticsearch.password:`
+ | If your {es} is protected with basic authentication, these settings provide
+the username and password that the {kib} server uses to perform maintenance
+on the {kib} index at startup. {kib} users still need to authenticate with
+{es}, which is proxied through the {kib} server.
+
+| `interpreter.enableInVisualize`
+  | Enables use of interpreter in Visualize. *Default: `true`*
+
+| `kibana.defaultAppId:`
+ | *deprecated* This setting is deprecated and will get removed in Kibana 8.0.
+Please use the `defaultRoute` advanced setting instead.
+The default application to load. *Default: `"home"`*
+
+|[[kibana-index]] `kibana.index:`
+ | {kib} uses an index in {es} to store saved searches, visualizations, and
+dashboards. {kib} creates a new index if the index doesn’t already exist.
+If you configure a custom index, the name must be lowercase, and conform to the
+{es} {ref}/indices-create-index.html[index name limitations].
+*Default: `".kibana"`*
+
+| `kibana.autocompleteTimeout:` {ess-icon}
+ | Time in milliseconds to wait for autocomplete suggestions from {es}.
+This value must be a whole number greater than zero. *Default: `"1000"`*
+
+| `kibana.autocompleteTerminateAfter:` {ess-icon}
+ | Maximum number of documents loaded by each shard to generate autocomplete
+suggestions. This value must be a whole number greater than zero.
+*Default: `"100000"`*
+
+|[[logging-dest]] `logging.dest:`
+ | Enables you to specify a file where {kib} stores log output.
+*Default: `stdout`*
+
+| `logging.json:`
+ | Logs output as JSON. When set to `true`, the logs are formatted as JSON
+strings that include timestamp, log level, context, message text, and any other
+metadata that may be associated with the log message.
+When <<logging-dest, `logging.dest.stdout`>> is set, and there is no interactive terminal ("TTY"),
+this setting defaults to `true`. *Default: `false`*
+
+| `logging.quiet:`
+  | Set the value of this setting to `true` to suppress all logging output other
+than error messages. *Default: `false`*
+
+| `logging.rotate:`
+ | experimental[] Specifies the options for the logging rotate feature.
+When not defined, all the sub options defaults would be applied.
+The following example shows a valid logging rotate configuration:
+
+|===
+
+[source,text]
+--
+ logging.rotate:
+   enabled: true
+   everyBytes: 10485760
+   keepFiles: 10
+--
+
+[cols="2*<"]
+|===
+
+| `logging.rotate.enabled:`
+ | experimental[] Set the value of this setting to `true` to
+enable log rotation. If you do not have a <<logging-dest, `logging.dest`>> set that is different from `stdout`
+that feature would not take any effect. *Default: `false`*
+
+| `logging.rotate.everyBytes:`
+ | experimental[] The maximum size of a log file (that is `not an exact` limit). After the
+limit is reached, a new log file is generated. The default size limit is 10485760 (10 MB) and
+this option should be in the range of 1048576 (1 MB) to 1073741824 (1 GB). *Default: `10485760`*
+
+| `logging.rotate.keepFiles:`
+ | experimental[] The number of most recent rotated log files to keep
+on disk. Older files are deleted during log rotation. The default value is 7. The `logging.rotate.keepFiles`
+option has to be in the range of 2 to 1024 files. *Default: `7`*
+
+| `logging.rotate.pollingInterval:`
+ | experimental[] The number of milliseconds for the polling strategy in case
+the <<logging-rotate-usePolling, `logging.rotate.usePolling`>> is enabled. `logging.rotate.usePolling` must be in the 5000 to 3600000 millisecond range. *Default: `10000`*
+
+|[[logging-rotate-usePolling]] `logging.rotate.usePolling:`
+ | experimental[] By default we try to understand the best way to monitoring
+the log file and warning about it. Please be aware there are some systems where watch api is not accurate. In those cases, in order to get the feature working,
+the `polling` method could be used enabling that option. *Default: `false`*
+
+| `logging.silent:`
+ | Set the value of this setting to `true` to
+suppress all logging output. *Default: `false`*
+
+| `logging.timezone`
+ | Set to the canonical time zone ID
+(for example, `America/Los_Angeles`) to log events using that time zone.
+For possible values, refer to
+https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[database time zones]. *Default: `UTC`*
+
+| [[logging-verbose]] `logging.verbose:` {ess-icon}
+ | Set to `true` to log all events, including system usage information and all
+requests. *Default: `false`*
+
+| [[regionmap-ES-map]] `map.includeElasticMapsService:` {ess-icon}
+ | Set to `false` to disable connections to Elastic Maps Service.
+When `includeElasticMapsService` is turned off, only the vector layers configured by <<regionmap-settings, `map.regionmap`>>
+and the tile layer configured by <<tilemap-url, `map.tilemap.url`>> are available in <<maps, Maps>>. *Default: `true`*
+
+| `map.proxyElasticMapsServiceInMaps:`
+ | Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
+requests through the {kib} server. *Default: `false`*
+
+| [[regionmap-settings]] `map.regionmap:` {ess-icon}
+ | Specifies additional vector layers for
+use in <<maps, Maps>> visualizations. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
-https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system]
+https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system (ESPG:4326)]
 and only include polygons. If the file is hosted on a separate domain from
-Kibana, the server needs to be CORS-enabled so Kibana can download the file.
-The following example shows a valid regionmap configuration.
-+
+{kib}, the server needs to be CORS-enabled so {kib} can download the file.
+The following example shows a valid region map configuration.
+
+|===
+
+[source,text]
 --
-    map.regionmap:
-      includeElasticMapsService: false
-      layers:
-         - name: "Departments of France"
-           url: "http://my.cors.enabled.server.org/france_departements.geojson"
-           attribution: "INRAP"
-           fields:
-              - name: "department"
-                description: "Full department name"
-              - name: "INSEE"
-                description: "INSEE numeric identifier"
+map.regionmap:
+  includeElasticMapsService: false
+  layers:
+    - name: "Departments of France"
+      url: "http://my.cors.enabled.server.org/france_departements.geojson"
+      attribution: "INRAP"
+      fields:
+          - name: "department"
+            description: "Full department name"
+          - name: "INSEE"
+            description: "INSEE numeric identifier"
 --
 
-[[regionmap-ES-map]]`map.regionmap.includeElasticMapsService:`:: Turns on or off
-whether layers from the Elastic Maps Service should be included in the vector
-layer option list. Supported on Elastic Cloud Enterprise. By turning this off,
-only the layers that are configured here will be included. The default is `true`.
+[cols="2*<"]
+|===
 
-[[regionmap-attribution]]`map.regionmap.layers[].attribution:`:: Optional.
-References the originating source of the geojson file. Supported on {ece}.
+| [[regionmap-attribution]] `map.regionmap.layers[].attribution:` {ess-icon}
+ | Optional. References the originating source of the geojson file.
 
-[[regionmap-fields]]`map.regionmap.layers[].fields[]:`:: Mandatory. Each layer
+| [[regionmap-fields]] `map.regionmap.layers[].fields[]:` {ess-icon}
+ | Mandatory. Each layer
 can contain multiple fields to indicate what properties from the geojson
-features you wish to expose. The example above shows how to define multiple
-properties. Supported on {ece}.
+features you wish to expose. The following shows how to define multiple
+properties:
 
-[[regionmap-field-description]]`map.regionmap.layers[].fields[].description:`::
-Mandatory. The human readable text that is shown under the Options tab when
-building the Region Map visualization. Supported on {ece}.
+|===
 
-[[regionmap-field-name]]`map.regionmap.layers[].fields[].name:`:: Mandatory.
+[source,text]
+--
+map.regionmap:
+  includeElasticMapsService: false
+  layers:
+    - name: "Departments of France"
+      url: "http://my.cors.enabled.server.org/france_departements.geojson"
+      attribution: "INRAP"
+      fields:
+          - name: "department"
+            description: "Full department name"
+          - name: "INSEE"
+            description: "INSEE numeric identifier"
+--
+
+[cols="2*<"]
+|===
+
+| [[regionmap-field-description]] `map.regionmap.layers[].fields[].description:` {ess-icon}
+ | Mandatory. The human readable text that is shown under the Options tab when
+building the Region Map visualization.
+
+| [[regionmap-field-name]] `map.regionmap.layers[].fields[].name:` {ess-icon}
+ | Mandatory.
 This value is used to do an inner-join between the document stored in
-Elasticsearch and the geojson file. For example, if the field in the geojson is
-called `Location` and has city names, there must be a field in Elasticsearch
-that holds the same values that Kibana can then use to lookup for the geoshape
-data. Supported on {ece}.
+{es} and the geojson file. For example, if the field in the geojson is
+called `Location` and has city names, there must be a field in {es}
+that holds the same values that {kib} can then use to lookup for the geoshape
+data.
 
-[[regionmap-name]]`map.regionmap.layers[].name:`:: Mandatory. A description of
-the map being provided. Supported on {ece}.
+| [[regionmap-name]] `map.regionmap.layers[].name:` {ess-icon}
+ | Mandatory. A description of
+the map being provided.
 
-[[regionmap-url]]`map.regionmap.layers[].url:`:: Mandatory. The location of the
-geojson file as provided by a webserver. Supported on {ece}.
+| [[regionmap-url]] `map.regionmap.layers[].url:` {ess-icon}
+ | Mandatory. The location of the
+geojson file as provided by a webserver.
 
-[[tilemap-settings]] `map.tilemap.options.attribution:`::
+| [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
+ | The map attribution string.
 *Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`*
-The map attribution string. Supported on {ece}.
 
-[[tilemap-max-zoom]]`map.tilemap.options.maxZoom:`:: *Default: 10* The maximum
-zoom level. Supported on {ece}.
+| [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon}
+ | The maximum zoom level. *Default: `10`*
 
-[[tilemap-min-zoom]]`map.tilemap.options.minZoom:`:: *Default: 1* The minimum
-zoom level. Supported on {ece}.
+| [[tilemap-min-zoom]] `map.tilemap.options.minZoom:` {ess-icon}
+ | The minimum zoom level. *Default: `1`*
 
-[[tilemap-subdomains]]`map.tilemap.options.subdomains:`:: An array of subdomains
+| [[tilemap-subdomains]] `map.tilemap.options.subdomains:` {ess-icon}
+ | An array of subdomains
 used by the tile service. Specify the position of the subdomain the URL with
-the token `{s}`. Supported on {ece}.
+the token `{s}`.
 
-[[tilemap-url]]`map.tilemap.url:`:: The URL to the tileservice that Kibana uses
-to display map tiles in tilemap visualizations. Supported on {ece}. By default,
-Kibana reads this url from an external metadata service, but users can still
+| [[tilemap-url]] `map.tilemap.url:` {ess-icon}
+ | The URL to the tileservice that {kib} uses
+to display map tiles in tilemap visualizations. By default,
+{kib} reads this URL from an external metadata service, but users can
 override this parameter to use their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
-`path.data:`:: *Default: `data`* The path where Kibana stores persistent data
-not saved in Elasticsearch.
+| `newsfeed.enabled:`
+ | Controls whether to enable the newsfeed
+system for the {kib} UI notification center. Set to `false` to disable the
+newsfeed system. *Default: `true`*
 
-`pid.file:`:: Specifies the path where Kibana creates the process ID file.
+|[[path-data]] `path.data:`
+ | The path where {kib} stores persistent data
+not saved in {es}. *Default: `data`*
 
-`ops.interval:`:: *Default: 5000* Set the interval in milliseconds to sample
-system and process performance metrics. The minimum value is 100.
+| `pid.file:`
+ | Specifies the path where {kib} creates the process ID file.
 
-`server.basePath:`:: Enables you to specify a path to mount Kibana at if you are
-running behind a proxy. Use the `server.rewriteBasePath` setting to tell Kibana
+| `ops.interval:`
+ | Set the interval in milliseconds to sample
+system and process performance metrics. The minimum value is 100. *Default: `5000`*
+
+|[[ops-cGroupOverrides-cpuPath]] `ops.cGroupOverrides.cpuPath:`
+ | Override for cgroup cpu path when mounted in a
+manner that is inconsistent with `/proc/self/cgroup`.
+
+|[[ops-cGroupOverrides-cpuAcctPath]] `ops.cGroupOverrides.cpuAcctPath:`
+ | Override for cgroup cpuacct path when mounted
+in a manner that is inconsistent with `/proc/self/cgroup`.
+
+|[[server-basePath]] `server.basePath:`
+ | Enables you to specify a path to mount {kib} at if you are
+running behind a proxy. Use the <<server-rewriteBasePath, `server.rewriteBasePath`>> setting to tell {kib}
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
 
-`server.customResponseHeaders:`:: *Default: `{}`* Header names and values to
-  send on all responses to the client from the Kibana server.
+| [[server-compression]] `server.compression.enabled:`
+ | Set to `false` to disable HTTP compression for all responses. *Default: `true`*
 
-[[server-default]]`server.defaultRoute:`:: *Default: "/app/kibana"* This setting
-specifies the default route when opening Kibana. You can use this setting to
-modify the landing page when opening Kibana. Supported on {ece}.
+| `server.compression.referrerWhitelist:`
+ | Specifies an array of trusted hostnames, such as the {kib} host, or a reverse
+proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header.
+This setting may not be used when <<server-compression, `server.compression.enabled`>> is set to `false`. *Default: `none`*
 
-`server.host:`:: *Default: "localhost"* This setting specifies the host of the
-back end server.
+| `server.customResponseHeaders:` {ess-icon}
+ | Header names and values to
+send on all responses to the client from the {kib} server. *Default: `{}`*
 
-`server.maxPayloadBytes:`:: *Default: 1048576* The maximum payload size in bytes
-for incoming server requests.
+|[[server-host]] `server.host:`
+ | This setting specifies the host of the
+back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server. *Default: `"localhost"`*
 
-`server.name:`:: *Default: "your-hostname"* A human-readable display name that
-identifies this Kibana instance.
+| `server.keepaliveTimeout:`
+ | The number of milliseconds to wait for additional data before restarting
+the <<server-socketTimeout, `server.socketTimeout`>> counter. *Default: `"120000"`*
 
-`server.port:`:: *Default: 5601* Kibana is served by a back end server. This
-setting specifies the port to use.
+| `server.maxPayloadBytes:`
+ | The maximum payload size in bytes
+for incoming server requests. *Default: `1048576`*
 
-`server.rewriteBasePath:`:: *Default: false* Specifies whether Kibana should
-rewrite requests that are prefixed with `server.basePath` or require that they
-are rewritten by your reverse proxy. This setting was effectively always `false`
-before Kibana 6.3 and will default to `true` starting in Kibana 7.0.
+| `server.name:`
+ | A human-readable display name that
+identifies this {kib} instance. *Default: `"your-hostname"`*
 
-`server.ssl.certificate:` and `server.ssl.key:`:: Paths to the PEM-format SSL
-certificate and SSL key files, respectively.
+|[[server-port]] `server.port:`
+ | {kib} is served by a back end server. This
+setting specifies the port to use. *Default: `5601`*
 
-`server.ssl.certificateAuthorities:`:: List of paths to PEM encoded certificate
-files that should be trusted.
+|[[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp:`
+ | Sets whether or not the X-Opaque-Id header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
 
-`server.ssl.cipherSuites:`:: *Default: ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA*.
-Details on the format, and the valid options, are available via the
-https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT[OpenSSL cipher list format documentation].
+| `server.requestId.ipAllowlist:`
+ | A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, <<server-requestId-allowFromAnyIp, `server.requestId.allowFromAnyIp`>> must also be set to `false.`
 
-`server.ssl.enabled:`:: *Default: "false"* Enables SSL for outgoing requests
-from the Kibana server to the browser. When set to `true`,
-`server.ssl.certificate` and `server.ssl.key` are required.
+|[[server-rewriteBasePath]] `server.rewriteBasePath:`
+ | Specifies whether {kib} should
+rewrite requests that are prefixed with <<server-basePath, `server.basePath`>> or require that they
+are rewritten by your reverse proxy. In {kib} 6.3 and earlier, the default is
+`false`. In {kib} 7.x, the setting is deprecated. In {kib} 8.0 and later, the
+default is `true`. *Default: `deprecated`*
 
-`server.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt the
-private key. This value is optional as the key may not be encrypted.
+|[[server-socketTimeout]] `server.socketTimeout:`
+ | The number of milliseconds to wait before closing an
+inactive socket. *Default: `"120000"`*
 
-`server.ssl.redirectHttpFromPort:`:: Kibana will bind to this port and redirect
-all http requests to https over the port configured as `server.port`.
+|[[server-ssl-cert-key]] `server.ssl.certificate:` and `server.ssl.key:`
+ | Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
+are used by {kib} to establish trust when receiving inbound SSL/TLS connections from users.
 
-`server.ssl.supportedProtocols:`:: *Default: TLSv1.1, TLSv1.2*  An array of
-supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`
+|===
 
-`status.allowAnonymous:`:: *Default: false* If authentication is enabled,
-setting this to `true` enables unauthenticated users to access the Kibana
-server status API and status page.
+[NOTE]
+============
+These settings cannot be used in conjunction with <<server-ssl-keystore-path, `server.ssl.keystore.path`>>.
+============
 
-`xpack.license_management.enabled`:: *Default: true* Set this value to false to
-disable the License Management user interface.
+[cols="2*<"]
+|===
 
-`xpack.rollup.enabled:`:: *Default: true* Set this value to false to disable the
-Rollup user interface.
+|[[server-ssl-certificateAuthorities]] `server.ssl.certificateAuthorities:`
+ | Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a
+trusted certificate chain for {kib}. This chain is used by {kib} to establish trust when receiving inbound SSL/TLS connections from end
+users. If PKI authentication is enabled, this chain is also used by {kib} to verify client certificates from end users.
 
-`i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`.
+In addition to this setting, trusted certificates may be specified via <<server-ssl-keystore-path, `server.ssl.keystore.path`>> and/or <<server-ssl-truststore-path, `server.ssl.truststore.path`>>.
 
+| `server.ssl.cipherSuites:`
+ | Details on the format, and the valid options, are available via the
+https://www.openssl.org/docs/man1.1.1/man1/ciphers.html#CIPHER-LIST-FORMAT[OpenSSL cipher list format documentation].
+*Default: `TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_AES_128_GCM_SHA256 ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA`*.
 
-include::{docdir}/settings/apm-settings.asciidoc[]
-include::{docdir}/settings/dev-settings.asciidoc[]
-include::{docdir}/settings/graph-settings.asciidoc[]
-include::{docdir}/settings/infrastructure-ui-settings.asciidoc[]
-include::{docdir}/settings/i18n-settings.asciidoc[]
-include::{docdir}/settings/logs-ui-settings.asciidoc[]
-include::{docdir}/settings/ml-settings.asciidoc[]
-include::{docdir}/settings/monitoring-settings.asciidoc[]
-include::{docdir}/settings/reporting-settings.asciidoc[]
+| `server.ssl.clientAuthentication:`
+ | Controls the behavior in {kib} for requesting a certificate from client
+connections. Valid values are `"required"`, `"optional"`, and `"none"`. Using `"required"` will refuse to establish the connection unless a
+client presents a certificate, using `"optional"` will allow a client to present a certificate if it has one, and using `"none"` will
+prevent a client from presenting a certificate. *Default: `"none"`*
+
+|[[server-ssl-enabled]] `server.ssl.enabled:`
+ | Enables SSL/TLS for inbound connections to {kib}. When set to `true`, a certificate and its
+corresponding private key must be provided. These can be specified via <<server-ssl-keystore-path, `server.ssl.keystore.path`>> or the combination of
+<<server-ssl-cert-key, `server.ssl.certificate`>> and <<server-ssl-cert-key, `server.ssl.key`>>. *Default: `false`*
+
+| `server.ssl.keyPassphrase:`
+ | The password that decrypts the private key that is specified via <<server-ssl-cert-key, `server.ssl.key`>>. This value
+is optional, as the key may not be encrypted.
+
+|[[server-ssl-keystore-path]] `server.ssl.keystore.path:`
+ | Path to a PKCS#12 keystore that contains an X.509 server certificate and its corresponding private key. If the
+keystore contains any additional certificates, those will be used as a trusted certificate chain for {kib}. All of these are used by {kib}
+to establish trust when receiving inbound SSL/TLS connections from end users. The certificate chain is also used by {kib} to verify client
+certificates from end users when PKI authentication is enabled.
+
+In addition to this setting, trusted certificates may be specified via <<server-ssl-certificateAuthorities, `server.ssl.certificateAuthorities`>> and/or
+<<server-ssl-truststore-path, `server.ssl.truststore.path`>>.
+
+|===
+
+[NOTE]
+============
+This setting cannot be used in conjunction with <<server-ssl-cert-key, `server.ssl.certificate`>> or <<server-ssl-cert-key, `server.ssl.key`>>
+============
+
+[cols="2*<"]
+|===
+
+| `server.ssl.keystore.password:`
+ | The password that will be used to decrypt the keystore specified via <<server-ssl-keystore-path, `server.ssl.keystore.path`>>. If the
+keystore has no password, leave this unset. If the keystore has an empty password, set this to `""`.
+
+|[[server-ssl-truststore-path]] `server.ssl.truststore.path:`
+ | Path to a PKCS#12 trust store that contains one or more X.509 certificate authority (CA) certificates which
+make up a trusted certificate chain for {kib}. This chain is used by {kib} to establish trust when receiving inbound SSL/TLS connections
+from end users. If PKI authentication is enabled, this chain is also used by {kib} to verify client certificates from end users.
+
+In addition to this setting, trusted certificates may be specified via <<server-ssl-certificateAuthorities, `server.ssl.certificateAuthorities`>> and/or
+<<server-ssl-keystore-path, `server.ssl.keystore.path`>>.
+
+| `server.ssl.truststore.password:`
+ | The password that will be used to decrypt the trust store specified via <<server-ssl-truststore-path, `server.ssl.truststore.path`>>. If
+the trust store has no password, leave this unset. If the trust store has an empty password, set this to `""`.
+
+| `server.ssl.redirectHttpFromPort:`
+ | {kib} binds to this port and redirects
+all http requests to https over the port configured as <<server-port, `server.port`>>.
+
+| `server.ssl.supportedProtocols:`
+ | An array of supported protocols with versions.
+Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.1, TLSv1.2, TLSv1.3*
+
+| [[settings-xsrf-whitelist]] `server.xsrf.whitelist:`
+ | It is not recommended to disable protections for
+arbitrary API endpoints. Instead, supply the `kbn-xsrf` header.
+The <<settings-xsrf-whitelist, `server.xsrf.whitelist`>> setting requires the following format:
+
+|===
+
+[source,text]
+----
+*Default: [ ]* An array of API endpoints which should be exempt from Cross-Site Request Forgery ("XSRF") protections.
+----
+
+[cols="2*<"]
+|===
+
+| [[settings-xsrf-disableProtection]] `server.xsrf.disableProtection:`
+ | Setting this to `true` will completely disable Cross-site request forgery protection in Kibana. This is not recommended. *Default: `false`*
+
+| `status.allowAnonymous:`
+ | If authentication is enabled,
+setting this to `true` enables unauthenticated users to access the {kib}
+server status API and status page. *Default: `false`*
+
+|[[telemetry-allowChangingOptInStatus]] `telemetry.allowChangingOptInStatus`
+ | When `true`, users are able to change the telemetry setting at a later time in
+<<advanced-options, Advanced Settings>>.  When `false`,
+{kib} looks at the value of <<settings-telemetry-optIn, `telemetry.optIn`>> to determine whether to send
+telemetry data or not. <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> and <<settings-telemetry-optIn, `telemetry.optIn`>>
+cannot be `false` at the same time. *Default: `true`*.
+
+|[[settings-telemetry-optIn]] `telemetry.optIn`
+ | When `true`, telemetry data is sent to Elastic.
+When `false`, collection of telemetry data is disabled.
+To enable telemetry and prevent users from disabling it,
+set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>> to `false` and <<settings-telemetry-optIn, `telemetry.optIn`>> to `true`.
+*Default: `true`*
+
+| `telemetry.enabled`
+ | Reporting your cluster statistics helps
+us improve your user experience. Your data is never shared with anyone. Set to
+`false` to disable telemetry capabilities entirely. You can alternatively opt
+out through *Advanced Settings*. *Default: `true`*
+
+| `vis_type_vega.enableExternalUrls:` {ess-icon}
+ | Set this value to true to allow Vega to use any URL to access external data
+sources and images. When false, Vega can only get data from {es}. *Default: `false`*
+
+| `xpack.license_management.enabled`
+ | Set this value to false to
+disable the License Management UI. *Default: `true`*
+
+| `xpack.rollup.enabled:`
+ | Set this value to false to disable the
+Rollup UI. *Default: true*
+
+| `i18n.locale` {ess-icon}
+ | Set this value to change the {kib} interface language.
+Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
+
+|===
+
+include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
+include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
+include::{kib-repo-dir}/settings/dev-settings.asciidoc[]
+include::{kib-repo-dir}/settings/graph-settings.asciidoc[]
+include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
+include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
+include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
+include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
+include::{kib-repo-dir}/settings/ml-settings.asciidoc[]
+include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
+include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]
 include::secure-settings.asciidoc[]
-include::{docdir}/settings/security-settings.asciidoc[]
-include::{docdir}/settings/spaces-settings.asciidoc[]
+include::{kib-repo-dir}/settings/security-settings.asciidoc[]
+include::{kib-repo-dir}/settings/spaces-settings.asciidoc[]
+include::{kib-repo-dir}/settings/telemetry-settings.asciidoc[]

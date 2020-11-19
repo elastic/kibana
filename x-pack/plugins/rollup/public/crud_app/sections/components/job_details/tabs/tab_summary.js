@@ -34,13 +34,7 @@ export class TabSummary extends Component {
       return null;
     }
 
-    const {
-      documentsProcessed,
-      pagesProcessed,
-      rollupsIndexed,
-      triggerCount,
-      status,
-    } = stats;
+    const { documentsProcessed, pagesProcessed, rollupsIndexed, triggerCount, status } = stats;
 
     return (
       <section
@@ -50,10 +44,7 @@ export class TabSummary extends Component {
         <EuiSpacer size="l" />
 
         <EuiTitle size="s">
-          <h3
-            id="rollupJobDetailStatsTitle"
-            data-test-subj="rollupJobDetailStatsTitle"
-          >
+          <h3 id="rollupJobDetailStatsTitle" data-test-subj="rollupJobDetailStatsTitle">
             <FormattedMessage
               id="xpack.rollupJobs.jobDetails.tabSummary.sectionStatsTitle"
               defaultMessage="Stats"
@@ -67,9 +58,9 @@ export class TabSummary extends Component {
 
         <EuiSpacer size="s" />
 
-        <EuiDescriptionList textStyle="reverse">
-          <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="rollupJobDetailSummaryStatsItem">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiDescriptionList textStyle="reverse">
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.rollupJobs.jobDetails.tabSummary.itemDocumentsProcessedLabel"
@@ -81,26 +72,7 @@ export class TabSummary extends Component {
               <EuiDescriptionListDescription data-test-subj="rollupJobDetailStatsDocumentsProcessedDescription">
                 {documentsProcessed}
               </EuiDescriptionListDescription>
-            </EuiFlexItem>
 
-            <EuiFlexItem data-test-subj="rollupJobDetailSummaryStatsItem">
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.rollupJobs.jobDetails.tabSummary.itemPagesProcessedLabel"
-                  data-test-subj="rollupJobDetailStatsPagesProcessedTitle"
-                  defaultMessage="Pages processed"
-                />
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="rollupJobDetailStatsPagesProcessedDescription">
-                {pagesProcessed}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-
-          </EuiFlexGroup>
-
-          <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="rollupJobDetailSummaryStatsItem">
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.rollupJobs.jobDetails.tabSummary.itemRollupsIndexedLabel"
@@ -112,9 +84,22 @@ export class TabSummary extends Component {
               <EuiDescriptionListDescription data-test-subj="rollupJobDetailStatsRollupsIndexedDescription">
                 {rollupsIndexed}
               </EuiDescriptionListDescription>
-            </EuiFlexItem>
+            </EuiDescriptionList>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiDescriptionList textStyle="reverse">
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.rollupJobs.jobDetails.tabSummary.itemPagesProcessedLabel"
+                  data-test-subj="rollupJobDetailStatsPagesProcessedTitle"
+                  defaultMessage="Pages processed"
+                />
+              </EuiDescriptionListTitle>
 
-            <EuiFlexItem data-test-subj="rollupJobDetailSummaryStatsItem">
+              <EuiDescriptionListDescription data-test-subj="rollupJobDetailStatsPagesProcessedDescription">
+                {pagesProcessed}
+              </EuiDescriptionListDescription>
+
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.rollupJobs.jobDetails.tabSummary.itemTriggerCountLabel"
@@ -126,9 +111,9 @@ export class TabSummary extends Component {
               <EuiDescriptionListDescription data-test-subj="rollupJobDetailStatsTriggerCountDescription">
                 {triggerCount}
               </EuiDescriptionListDescription>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiDescriptionList>
+            </EuiDescriptionList>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </section>
     );
   }
@@ -153,10 +138,7 @@ export class TabSummary extends Component {
           data-test-subj="rollupJobDetailSummaryLogisticsSection"
         >
           <EuiTitle size="s">
-            <h3
-              id="rollupJobDetailLogisticsTitle"
-              data-test-subj="rollupJobDetailLogisticsTitle"
-            >
+            <h3 id="rollupJobDetailLogisticsTitle" data-test-subj="rollupJobDetailLogisticsTitle">
               <FormattedMessage
                 id="xpack.rollupJobs.jobDetails.tabSummary.sectionLogisticsLabel"
                 defaultMessage="Logistics"
@@ -166,9 +148,9 @@ export class TabSummary extends Component {
 
           <EuiSpacer size="s" />
 
-          <EuiDescriptionList textStyle="reverse">
-            <EuiFlexGroup>
-              <EuiFlexItem data-test-subj="rollupJobDetailSummaryLogisticItem">
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDescriptionList textStyle="reverse">
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.rollupJobs.jobDetails.tabSummary.itemIndexPatternLabel"
@@ -183,9 +165,30 @@ export class TabSummary extends Component {
                 >
                   {indexPattern}
                 </EuiDescriptionListDescription>
-              </EuiFlexItem>
 
-              <EuiFlexItem data-test-subj="rollupJobDetailSummaryLogisticItem">
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.jobDetails.tabSummary.itemCronLabel"
+                    data-test-subj="rollupJobDetailLogisticsCronTitle"
+                    defaultMessage="Cron"
+                  />{' '}
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.rollupJobs.jobDetails.tabSummary.itemCronTip"
+                        defaultMessage="The frequency with which data is rolled up"
+                      />
+                    }
+                  />
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="rollupJobDetailLogisticsCronDescription">
+                  {rollupCron}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiDescriptionList textStyle="reverse">
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.rollupJobs.jobDetails.tabSummary.itemRollupIndexLabel"
@@ -194,40 +197,13 @@ export class TabSummary extends Component {
                   />
                 </EuiDescriptionListTitle>
 
-
                 <EuiDescriptionListDescription
                   className="eui-textBreakWord"
                   data-test-subj="rollupJobDetailLogisticsRollupIndexDescription"
                 >
                   {rollupIndex}
                 </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            </EuiFlexGroup>
 
-            <EuiFlexGroup>
-              <EuiFlexItem data-test-subj="rollupJobDetailSummaryLogisticItem">
-                <EuiDescriptionListTitle>
-                  <FormattedMessage
-                    id="xpack.rollupJobs.jobDetails.tabSummary.itemCronLabel"
-                    data-test-subj="rollupJobDetailLogisticsCronTitle"
-                    defaultMessage="Cron"
-                  />{' '}
-                  <EuiIconTip
-                    content={(
-                      <FormattedMessage
-                        id="xpack.rollupJobs.jobDetails.tabSummary.itemCronTip"
-                        defaultMessage="The frequency with which data is rolled up"
-                      />
-                    )}
-                  />
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription data-test-subj="rollupJobDetailLogisticsCronDescription">
-                  {rollupCron}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-
-              <EuiFlexItem data-test-subj="rollupJobDetailSummaryLogisticItem">
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.rollupJobs.jobDetails.tabSummary.itemDelayLabel"
@@ -244,9 +220,9 @@ export class TabSummary extends Component {
                     />
                   )}
                 </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiDescriptionList>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiSpacer size="l" />
         </section>
@@ -269,9 +245,9 @@ export class TabSummary extends Component {
 
           <EuiSpacer size="s" />
 
-          <EuiDescriptionList textStyle="reverse">
-            <EuiFlexGroup>
-              <EuiFlexItem data-test-subj="rollupJobDetailSummaryDateHistogramItem">
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiDescriptionList textStyle="reverse">
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.rollupJobs.jobDetails.tabSummary.itemTimeFieldLabel"
@@ -286,9 +262,29 @@ export class TabSummary extends Component {
                 >
                   {dateHistogramField}
                 </EuiDescriptionListDescription>
-              </EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.rollupJobs.jobDetails.tabSummary.itemIntervalLabel"
+                    data-test-subj="rollupJobDetailDateHistogramIntervalTitle"
+                    defaultMessage="Interval"
+                  />{' '}
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.rollupJobs.jobDetails.tabSummary.itemIntervalTip"
+                        defaultMessage="The time bucket interval into which data is rolled up"
+                      />
+                    }
+                  />
+                </EuiDescriptionListTitle>
 
-              <EuiFlexItem data-test-subj="rollupJobDetailSummaryDateHistogramItem">
+                <EuiDescriptionListDescription data-test-subj="rollupJobDetailDateHistogramIntervalDescription">
+                  {dateHistogramInterval}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiDescriptionList textStyle="reverse">
                 <EuiDescriptionListTitle>
                   <FormattedMessage
                     id="xpack.rollupJobs.jobDetails.tabSummary.itemTimezoneLabel"
@@ -300,33 +296,9 @@ export class TabSummary extends Component {
                 <EuiDescriptionListDescription data-test-subj="rollupJobDetailDateHistogramTimezoneDescription">
                   {dateHistogramTimeZone}
                 </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiFlexGroup>
-              <EuiFlexItem data-test-subj="rollupJobDetailSummaryDateHistogramItem">
-                <EuiDescriptionListTitle>
-                  <FormattedMessage
-                    id="xpack.rollupJobs.jobDetails.tabSummary.itemIntervalLabel"
-                    data-test-subj="rollupJobDetailDateHistogramIntervalTitle"
-                    defaultMessage="Interval"
-                  />{' '}
-                  <EuiIconTip
-                    content={(
-                      <FormattedMessage
-                        id="xpack.rollupJobs.jobDetails.tabSummary.itemIntervalTip"
-                        defaultMessage="The time bucket interval into which data is rolled up"
-                      />
-                    )}
-                  />
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription data-test-subj="rollupJobDetailDateHistogramIntervalDescription">
-                  {dateHistogramInterval}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiDescriptionList>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </section>
 
         {this.renderStats()}

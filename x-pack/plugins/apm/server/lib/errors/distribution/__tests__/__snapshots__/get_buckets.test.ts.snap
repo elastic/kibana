@@ -3,8 +3,12 @@
 exports[`timeseriesFetcher should make the correct query 1`] = `
 Array [
   Array [
-    "search",
     Object {
+      "apm": Object {
+        "events": Array [
+          "error",
+        ],
+      },
       "body": Object {
         "aggs": Object {
           "distribution": Object {
@@ -24,11 +28,6 @@ Array [
             "filter": Array [
               Object {
                 "term": Object {
-                  "processor.event": "error",
-                },
-              },
-              Object {
-                "term": Object {
                   "service.name": "myServiceName",
                 },
               },
@@ -41,12 +40,16 @@ Array [
                   },
                 },
               },
+              Object {
+                "term": Object {
+                  "service.environment": "prod",
+                },
+              },
             ],
           },
         },
         "size": 0,
       },
-      "index": "myIndex",
     },
   ],
 ]

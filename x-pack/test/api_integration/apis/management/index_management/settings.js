@@ -11,12 +11,9 @@ import { registerHelpers } from './settings.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
-  const {
-    createIndex,
-    cleanUp: cleanUpEsResources
-  } = initElasticsearchHelpers(es);
+  const { createIndex, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
 
   const { getIndexSettings, updateIndexSettings } = registerHelpers({ supertest });
 
@@ -37,7 +34,6 @@ export default function ({ getService }) {
         'max_terms_count',
         'lifecycle',
         'routing_partition_size',
-        'force_memory_term_dictionary',
         'max_docvalue_fields_search',
         'merge',
         'max_refresh_listeners',
@@ -57,13 +53,11 @@ export default function ({ getService }) {
         'priority',
         'codec',
         'max_rescore_window',
-        'max_adjacency_matrix_filters',
         'analyze',
         'gc_deletes',
         'max_ngram_diff',
         'translog',
         'auto_expand_replicas',
-        'mapper',
         'requests',
         'data_path',
         'highlight',
@@ -85,7 +79,7 @@ export default function ({ getService }) {
         'queries',
         'warmer',
         'max_shingle_diff',
-        'query_string'
+        'query_string',
       ];
 
       // Make sure none of the settings have been removed from ES API
@@ -105,9 +99,9 @@ export default function ({ getService }) {
       expect(body1.settings.index.number_of_replicas).to.be('1');
 
       const settings = {
-        'index': {
-          'number_of_replicas': 2
-        }
+        index: {
+          number_of_replicas: 2,
+        },
       };
       await updateIndexSettings(index, settings);
 

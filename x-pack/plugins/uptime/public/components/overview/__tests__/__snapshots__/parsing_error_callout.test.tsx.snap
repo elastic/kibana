@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OverviewPageParsingErrorCallout renders without errors when a valid error is provided 1`] = `
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
+  title="Parsing error"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="There was an error parsing the filter query. {content}"
+      id="xpack.uptime.overviewPageParsingErrorCallout.content"
+      values={
+        Object {
+          "content": <EuiCodeBlock>
+            Unable to convert to Elasticsearch query, invalid syntax.
+          </EuiCodeBlock>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`OverviewPageParsingErrorCallout renders without errors when an error with no message is provided 1`] = `
+<EuiCallOut
+  color="danger"
+  iconType="alert"
+  style={
+    Object {
+      "width": "100%",
+    }
+  }
+  title="Parsing error"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="There was an error parsing the filter query. {content}"
+      id="xpack.uptime.overviewPageParsingErrorCallout.content"
+      values={
+        Object {
+          "content": <EuiCodeBlock>
+            There was no error message
+          </EuiCodeBlock>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;

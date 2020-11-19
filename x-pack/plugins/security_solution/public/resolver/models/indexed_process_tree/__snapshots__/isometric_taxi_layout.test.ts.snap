@@ -1,0 +1,674 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resolver graph layout when rendering no nodes renders right 1`] = `
+Object {
+  "ariaLevels": Map {},
+  "edgeLineSegments": Array [],
+  "processNodePositions": Map {},
+}
+`;
+
+exports[`resolver graph layout when rendering one node renders right 1`] = `
+Object {
+  "ariaLevels": Map {
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "process_name": "",
+        "unique_pid": 0,
+      },
+    } => 1,
+  },
+  "edgeLineSegments": Array [],
+  "processNodePositions": Map {
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "process_name": "",
+        "unique_pid": 0,
+      },
+    } => Array [
+      0,
+      -0.8164965809277259,
+    ],
+  },
+}
+`;
+
+exports[`resolver graph layout when rendering two forks, and one fork has an extra long tine renders right 1`] = `
+Object {
+  "ariaLevels": Map {
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "process_name": "",
+        "unique_pid": 0,
+      },
+    } => 1,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "already_running",
+        "event_type_full": "process_event",
+        "unique_pid": 1,
+        "unique_ppid": 0,
+      },
+    } => 2,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 2,
+        "unique_ppid": 0,
+      },
+    } => 2,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "termination_event",
+        "event_type_full": "process_event",
+        "unique_pid": 8,
+        "unique_ppid": 0,
+      },
+    } => 2,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 3,
+        "unique_ppid": 1,
+      },
+    } => 3,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 4,
+        "unique_ppid": 1,
+      },
+    } => 3,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 5,
+        "unique_ppid": 2,
+      },
+    } => 3,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 6,
+        "unique_ppid": 2,
+      },
+    } => 3,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 7,
+        "unique_ppid": 6,
+      },
+    } => 4,
+  },
+  "edgeLineSegments": Array [
+    Object {
+      "metadata": Object {
+        "reactKey": "parentToMidedge:0:1",
+      },
+      "points": Array [
+        Array [
+          0,
+          -0.8164965809277259,
+        ],
+        Array [
+          197.9898987322333,
+          -115.12601791080935,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "reactKey": "midwayedge:0:1",
+      },
+      "points": Array [
+        Array [
+          -98.99494936611666,
+          -286.5902999056318,
+        ],
+        Array [
+          593.9696961966999,
+          113.49302474895391,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:0:1",
+      },
+      "points": Array [
+        Array [
+          -98.99494936611666,
+          -286.5902999056318,
+        ],
+        Array [
+          98.99494936611666,
+          -400.8998212355134,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:0:2",
+      },
+      "points": Array [
+        Array [
+          296.98484809834997,
+          -57.97125724586854,
+        ],
+        Array [
+          494.9747468305833,
+          -172.28077857575016,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:0:8",
+      },
+      "points": Array [
+        Array [
+          593.9696961966999,
+          113.49302474895391,
+        ],
+        Array [
+          791.9595949289333,
+          -0.8164965809277259,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "reactKey": "parentToMidedge:1:3",
+      },
+      "points": Array [
+        Array [
+          98.99494936611666,
+          -400.8998212355134,
+        ],
+        Array [
+          296.98484809834997,
+          -515.2093425653951,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "reactKey": "midwayedge:1:3",
+      },
+      "points": Array [
+        Array [
+          197.9898987322333,
+          -572.3641032303359,
+        ],
+        Array [
+          395.9797974644666,
+          -458.05458190045425,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:1:3",
+      },
+      "points": Array [
+        Array [
+          197.9898987322333,
+          -572.3641032303359,
+        ],
+        Array [
+          395.9797974644666,
+          -686.6736245602175,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:1:4",
+      },
+      "points": Array [
+        Array [
+          395.9797974644666,
+          -458.05458190045425,
+        ],
+        Array [
+          593.9696961966999,
+          -572.3641032303359,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "reactKey": "parentToMidedge:2:5",
+      },
+      "points": Array [
+        Array [
+          494.9747468305833,
+          -172.28077857575016,
+        ],
+        Array [
+          692.9646455628166,
+          -286.5902999056318,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "reactKey": "midwayedge:2:5",
+      },
+      "points": Array [
+        Array [
+          593.9696961966999,
+          -343.7450605705726,
+        ],
+        Array [
+          791.9595949289333,
+          -229.43553924069096,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:2:5",
+      },
+      "points": Array [
+        Array [
+          593.9696961966999,
+          -343.7450605705726,
+        ],
+        Array [
+          791.9595949289333,
+          -458.05458190045425,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:2:6",
+      },
+      "points": Array [
+        Array [
+          791.9595949289333,
+          -229.43553924069096,
+        ],
+        Array [
+          989.9494936611666,
+          -343.7450605705726,
+        ],
+      ],
+    },
+    Object {
+      "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:6:7",
+      },
+      "points": Array [
+        Array [
+          989.9494936611666,
+          -343.7450605705726,
+        ],
+        Array [
+          1187.9393923933999,
+          -458.05458190045425,
+        ],
+      ],
+    },
+  ],
+  "processNodePositions": Map {
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "process_name": "",
+        "unique_pid": 0,
+      },
+    } => Array [
+      0,
+      -0.8164965809277259,
+    ],
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "already_running",
+        "event_type_full": "process_event",
+        "unique_pid": 1,
+        "unique_ppid": 0,
+      },
+    } => Array [
+      98.99494936611666,
+      -400.8998212355134,
+    ],
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 2,
+        "unique_ppid": 0,
+      },
+    } => Array [
+      494.9747468305833,
+      -172.28077857575016,
+    ],
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "termination_event",
+        "event_type_full": "process_event",
+        "unique_pid": 8,
+        "unique_ppid": 0,
+      },
+    } => Array [
+      791.9595949289333,
+      -0.8164965809277259,
+    ],
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 3,
+        "unique_ppid": 1,
+      },
+    } => Array [
+      395.9797974644666,
+      -686.6736245602175,
+    ],
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 4,
+        "unique_ppid": 1,
+      },
+    } => Array [
+      593.9696961966999,
+      -572.3641032303359,
+    ],
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 5,
+        "unique_ppid": 2,
+      },
+    } => Array [
+      791.9595949289333,
+      -458.05458190045425,
+    ],
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 6,
+        "unique_ppid": 2,
+      },
+    } => Array [
+      989.9494936611666,
+      -343.7450605705726,
+    ],
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 7,
+        "unique_ppid": 6,
+      },
+    } => Array [
+      1187.9393923933999,
+      -458.05458190045425,
+    ],
+  },
+}
+`;
+
+exports[`resolver graph layout when rendering two nodes, one being the parent of the other renders right 1`] = `
+Object {
+  "ariaLevels": Map {
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "process_name": "",
+        "unique_pid": 0,
+      },
+    } => 1,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "already_running",
+        "event_type_full": "process_event",
+        "unique_pid": 1,
+        "unique_ppid": 0,
+      },
+    } => 2,
+  },
+  "edgeLineSegments": Array [
+    Object {
+      "metadata": Object {
+        "elapsedTime": Object {
+          "duration": "<1",
+          "durationType": "millisecond",
+        },
+        "reactKey": "edge:0:1",
+      },
+      "points": Array [
+        Array [
+          0,
+          -0.8164965809277259,
+        ],
+        Array [
+          197.9898987322333,
+          -115.12601791080935,
+        ],
+      ],
+    },
+  ],
+  "processNodePositions": Map {
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "process_name": "",
+        "unique_pid": 0,
+      },
+    } => Array [
+      0,
+      -0.8164965809277259,
+    ],
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "already_running",
+        "event_type_full": "process_event",
+        "unique_pid": 1,
+        "unique_ppid": 0,
+      },
+    } => Array [
+      197.9898987322333,
+      -115.12601791080935,
+    ],
+  },
+}
+`;

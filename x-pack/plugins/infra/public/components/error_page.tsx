@@ -15,7 +15,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import euiStyled from '../../../../common/eui_styled_components';
+import { euiStyled } from '../../../observability/public';
 import { FlexPage } from './page';
 
 interface Props {
@@ -24,7 +24,7 @@ interface Props {
   shortMessage: React.ReactNode;
 }
 
-export const ErrorPage: React.SFC<Props> = ({ detailedMessage, retry, shortMessage }) => (
+export const ErrorPage: React.FC<Props> = ({ detailedMessage, retry, shortMessage }) => (
   <FlexPage>
     <EuiPageBody>
       <MinimumPageContent

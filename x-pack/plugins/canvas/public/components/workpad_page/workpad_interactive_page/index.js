@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compose, withHandlers, withProps, withState } from 'recompose';
+import { compose, lifecycle, withHandlers, withProps, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
 import { getNodes, getPageById, isWriteable } from '../../../state/selectors/workpad';
 import { flatten } from '../../../lib/aeroelastic/functional';
-import { canUserWrite, getFullscreen } from '../../../state/selectors/app';
-import { elementLayer, insertNodes, removeElements } from '../../../state/actions/elements';
+import { canUserWrite, getFullscreen, getZoomScale } from '../../../state/selectors/app';
+import {
+  elementLayer,
+  insertNodes,
+  removeElements,
+  setMultiplePositions,
+} from '../../../state/actions/elements';
 import { selectToplevelNodes } from '../../../state/actions/transient';
 import { crawlTree, globalStateUpdater, shapesForNodes } from '../integration_utils';
+import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../../common/lib';
 import { InteractiveWorkpadPage as InteractiveComponent } from './interactive_workpad_page';
 import { eventHandlers } from './event_handlers';
 
@@ -24,6 +30,8 @@ const configuration = {
   atopZ: 1000,
   depthSelect: true,
   devColor: 'magenta',
+  dragBoxAnnotationName: 'dragBoxAnnotation',
+  dragBoxZ: 1050, // above alignment guides but below the upcoming hover tooltip
   groupName: 'group',
   groupResize: true,
   guideDistance: 3,
@@ -51,6 +59,52 @@ const configuration = {
   tooltipZ: 1100,
 };
 
+// Polyfill for browsers (IE11) that don't have element.closest
+// From: https://developer.mozilla.org/en-US/docs/Web/API/Element/closest
+function closest(s) {
+  let el = this;
+  const matchFn = el.matches ? 'matches' : 'msMatchesSelector';
+
+  do {
+    if (el[matchFn](s)) {
+      return el;
+    }
+    el = el.parentElement || el.parentNode;
+  } while (el !== null && el.nodeType === 1);
+  return null;
+}
+
+// If you interact with an embeddable panel, only the header should be draggable
+// This function will determine if an element is an embeddable body or not
+const isEmbeddableBody = (element) => {
+  const hasClosest = typeof element.closest === 'function';
+
+  if (hasClosest) {
+    return (
+      element.closest(`.${CANVAS_EMBEDDABLE_CLASSNAME}`) && !element.closest('.embPanel__header')
+    );
+  } else {
+    return (
+      closest.call(element, `.${CANVAS_EMBEDDABLE_CLASSNAME}`) &&
+      !closest.call(element, '.embPanel__header')
+    );
+  }
+};
+
+// Some elements in an embeddable may be portaled out of the embeddable container.
+// We do not want clicks on those to trigger drags, etc, in the workpad. This function
+// will check to make sure the clicked item is actually in the container
+const isInWorkpad = (element) => {
+  const hasClosest = typeof element.closest === 'function';
+  const workpadContainerSelector = '.canvasWorkpadContainer';
+
+  if (hasClosest) {
+    return !!element.closest(workpadContainerSelector);
+  } else {
+    return !!closest.call(element, workpadContainerSelector);
+  }
+};
+
 const componentLayoutState = ({
   aeroStore,
   setAeroStore,
@@ -60,7 +114,7 @@ const componentLayoutState = ({
   width,
 }) => {
   const shapes = shapesForNodes(elements);
-  const selectedShapes = selectedToplevelNodes.filter(e => shapes.find(s => s.id === e));
+  const selectedShapes = selectedToplevelNodes.filter((e) => shapes.find((s) => s.id === e));
   const newState = {
     primaryUpdate: null,
     currentScene: {
@@ -73,7 +127,7 @@ const componentLayoutState = ({
       gestureState: aeroStore
         ? aeroStore.getCurrentState().currentScene.gestureState
         : {
-            cursor: { x: 0, y: 0 },
+            cursor: { x: Infinity, y: Infinity },
             mouseIsDown: false,
             mouseButtonState: { buttonState: 'up', downX: null, downY: null },
           },
@@ -91,13 +145,13 @@ const mapStateToProps = (state, ownProps) => {
   const selectedToplevelNodes = state.transient.selectedToplevelNodes;
   const nodes = getNodes(state, ownProps.pageId);
   const selectedPrimaryShapeObjects = selectedToplevelNodes
-    .map(id => nodes.find(s => s.id === id))
-    .filter(shape => shape);
+    .map((id) => nodes.find((s) => s.id === id))
+    .filter((shape) => shape);
   const selectedPersistentPrimaryNodes = flatten(
-    selectedPrimaryShapeObjects.map(shape =>
-      nodes.find(n => n.id === shape.id) // is it a leaf or a persisted group?
+    selectedPrimaryShapeObjects.map((shape) =>
+      nodes.find((n) => n.id === shape.id) // is it a leaf or a persisted group?
         ? [shape.id]
-        : nodes.filter(s => s.parent === shape.id).map(s => s.id)
+        : nodes.filter((s) => s.parent === shape.id).map((s) => s.id)
     )
   );
   const selectedNodeIds = flatten(selectedPersistentPrimaryNodes.map(crawlTree(nodes)));
@@ -106,21 +160,26 @@ const mapStateToProps = (state, ownProps) => {
     isEditable: !getFullscreen(state) && isWriteable(state) && canUserWrite(state),
     elements: nodes,
     selectedToplevelNodes,
-    selectedNodes: selectedNodeIds.map(id => nodes.find(s => s.id === id)),
+    selectedNodes: selectedNodeIds.map((id) => nodes.find((s) => s.id === id)),
     pageStyle: getPageById(state, ownProps.pageId).style,
+    zoomScale: getZoomScale(state),
   };
 };
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   dispatch,
   insertNodes: (selectedNodes, pageId) => dispatch(insertNodes(selectedNodes, pageId)),
   removeNodes: (nodeIds, pageId) => dispatch(removeElements(nodeIds, pageId)),
-  selectToplevelNodes: nodes =>
-    dispatch(selectToplevelNodes(nodes.filter(e => !e.position.parent).map(e => e.id))),
-  // TODO: Abstract this out, this is similar to layering code in sidebar/index.js:
-  elementLayer: (pageId, elementId, movement) => {
-    dispatch(elementLayer({ pageId, elementId, movement }));
-  },
+  selectToplevelNodes: (nodes) =>
+    dispatch(selectToplevelNodes(nodes.filter((e) => !e.position.parent).map((e) => e.id))),
+  elementLayer: (pageId, elementId, movement) =>
+    dispatch(elementLayer({ pageId, elementId, movement })),
+  setMultiplePositions: (pageId) => (repositionedNodes) =>
+    dispatch(
+      setMultiplePositions(
+        repositionedNodes.map((node) => ({ ...node, pageId, elementId: node.id }))
+      )
+    ),
 });
 
 const mergeProps = (
@@ -131,15 +190,12 @@ const mergeProps = (
   ...ownProps,
   ...restDispatchProps,
   ...restStateProps,
-  updateGlobalState: globalStateUpdater(dispatch, () => state),
+  updateGlobalState: globalStateUpdater(dispatch, state),
+  setMultiplePositions: restDispatchProps.setMultiplePositions(ownProps.pageId),
 });
 
 export const InteractivePage = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('aeroStore', 'setAeroStore'),
   withProps(componentLayoutState),
   withProps(({ aeroStore, updateGlobalState }) => ({
@@ -150,12 +206,30 @@ export const InteractivePage = compose(
       }
     },
   })),
+  lifecycle({
+    componentWillUnmount() {
+      this.props.unregisterLayout(this.props.aeroStore);
+    },
+  }),
   withState('canvasOrigin', 'saveCanvasOrigin'),
   withState('_forceRerender', 'forceRerender'),
-  withProps(({ aeroStore }) => ({ cursor: aeroStore.getCurrentState().currentScene.cursor })),
+  withProps(({ registerLayout, aeroStore, updateGlobalState, forceRerender }) => {
+    registerLayout((type, payload) => {
+      const newLayoutState = aeroStore.commit(type, payload);
+      if (newLayoutState.currentScene.gestureEnd) {
+        // conditionalizing the global update so as to enable persist-free nudge series
+        updateGlobalState(newLayoutState);
+      }
+      forceRerender(newLayoutState);
+      return newLayoutState;
+    });
+    return {
+      cursor: aeroStore.getCurrentState().currentScene.cursor,
+    };
+  }),
   withProps(({ aeroStore, elements }) => {
-    const elementLookup = new Map(elements.map(element => [element.id, element]));
-    const elementsToRender = aeroStore.getCurrentState().currentScene.shapes.map(shape => {
+    const elementLookup = new Map(elements.map((element) => [element.id, element]));
+    const elementsToRender = aeroStore.getCurrentState().currentScene.shapes.map((shape) => {
       const element = elementLookup.get(shape.id);
       return element
         ? { ...shape, width: shape.a * 2, height: shape.b * 2, filter: element.filter }
@@ -165,6 +239,20 @@ export const InteractivePage = compose(
   }),
   withProps(({ commit, forceRerender }) => ({
     commit: (...args) => forceRerender(commit(...args)),
+  })),
+  withProps((...props) => ({
+    ...props,
+    canDragElement: (element) => {
+      return !isEmbeddableBody(element) && isInWorkpad(element);
+
+      const hasClosest = typeof element.closest === 'function';
+
+      if (hasClosest) {
+        return !element.closest('.embeddable') || element.closest('.embPanel__header');
+      } else {
+        return !closest.call(element, '.embeddable') || closest.call(element, '.embPanel__header');
+      }
+    },
   })),
   withHandlers(eventHandlers), // Captures user intent, needs to have reconciled state
   () => InteractiveComponent

@@ -1,17 +1,14 @@
 {
   "name": "@kbn/plugin-generator",
-  "license": "Apache-2.0",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "target/index.js",
+  "scripts": {
+    "kbn:bootstrap": "node scripts/build",
+    "kbn:watch": "node scripts/build --watch"
+  },
   "dependencies": {
-    "chalk": "^2.4.1",
-    "dedent": "^0.7.0",
-    "execa": "^1.0.0",
-    "getopts": "^2.2.4",
-    "lodash.camelcase": "^4.3.0",
-    "lodash.kebabcase": "^4.1.1",
-    "lodash.snakecase": "^4.1.1",
-    "lodash.startcase": "^4.4.0",
-    "sao": "^0.22.12"
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }

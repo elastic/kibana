@@ -18,8 +18,9 @@ const mapStateToProps = (state) => ({
   apiError: getApiError(`${scope}-save`)(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  saveAutoFollowPattern: (id, autoFollowPattern) => dispatch(saveAutoFollowPattern(id, autoFollowPattern)),
+const mapDispatchToProps = (dispatch) => ({
+  saveAutoFollowPattern: (id, autoFollowPattern) =>
+    dispatch(saveAutoFollowPattern(id, autoFollowPattern)),
   clearApiError: () => dispatch(clearApiError(scope)),
 });
 

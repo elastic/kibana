@@ -14,7 +14,7 @@ export function handleResponse({ nodes = {} } = {}) {
     if (nodeSettings !== undefined) {
       const monitoringSettings = get(nodeSettings, 'xpack.monitoring');
       const check = findReason(monitoringSettings, {
-        context: `nodeId: ${nodeId}`
+        context: `nodeId: ${nodeId}`,
       });
 
       if (check.found) {
@@ -31,7 +31,7 @@ export async function checkNodesSettings(req) {
   const response = await callWithRequest(req, 'transport.request', {
     method: 'GET',
     path: '/_nodes/settings',
-    filter_path: [ 'nodes' ] // NOTE: this doesn't seem to do anything when used with elasticsearch-js. In Console, it does work though
+    filter_path: ['nodes'], // NOTE: this doesn't seem to do anything when used with elasticsearch-js. In Console, it does work though
   });
 
   return handleResponse(response);

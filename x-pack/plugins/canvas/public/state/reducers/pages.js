@@ -5,13 +5,16 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { set, del, insert } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import { getId } from '../../lib/get_id';
 import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
 import { getSelectedPageIndex } from '../selectors/workpad';
+import { isGroupId } from '../../components/workpad_page/positioning_utils';
+
+const { set, del, insert } = immutable;
 
 const setPageIndex = (workpadState, index) =>
   index < 0 || !workpadState.pages[index] || getSelectedPageIndex(workpadState) === index
@@ -19,7 +22,7 @@ const setPageIndex = (workpadState, index) =>
     : set(workpadState, 'page', index);
 
 function getPageIndexById(workpadState, id) {
-  return workpadState.pages.findIndex(page => page.id === id);
+  return workpadState.pages.findIndex((page) => page.id === id);
 }
 
 function addPage(workpadState, payload, srcIndex = workpadState.pages.length - 1) {
@@ -36,8 +39,8 @@ function clonePage(page) {
   return {
     ...page,
     id: getId('page'),
-    groups: newNodes.filter(n => n.position.type === 'group'),
-    elements: newNodes.filter(n => n.position.type !== 'group'),
+    groups: newNodes.filter((n) => isGroupId(n.id)),
+    elements: newNodes.filter((n) => !isGroupId(n.id)),
   };
 }
 
@@ -56,7 +59,7 @@ export const pagesReducer = handleActions(
     },
 
     [actions.duplicatePage]: (workpadState, { payload }) => {
-      const srcPage = workpadState.pages.find(page => page.id === payload);
+      const srcPage = workpadState.pages.find((page) => page.id === payload);
 
       // if the page id is invalid, don't change the state
       if (!srcPage) {
@@ -100,7 +103,7 @@ export const pagesReducer = handleActions(
 
       // adjust the selected page index and return the new state
       const selectedId = workpadState.pages[workpadState.page].id;
-      const newSelectedIndex = newState.pages.findIndex(page => page.id === selectedId);
+      const newSelectedIndex = newState.pages.findIndex((page) => page.id === selectedId);
       newState = set(newState, 'page', newSelectedIndex);
 
       // changes to the page require navigation
@@ -141,13 +144,13 @@ export const pagesReducer = handleActions(
     },
 
     [actions.stylePage]: (workpadState, { payload }) => {
-      const pageIndex = workpadState.pages.findIndex(page => page.id === payload.pageId);
-      return set(workpadState, ['pages', pageIndex, 'style'], payload.style);
+      const pageIndex = workpadState.pages.findIndex((page) => page.id === payload.pageId);
+      return set(workpadState, `pages.${pageIndex}.style`, payload.style);
     },
 
     [actions.setPageTransition]: (workpadState, { payload }) => {
-      const pageIndex = workpadState.pages.findIndex(page => page.id === payload.pageId);
-      return set(workpadState, ['pages', pageIndex, 'transition'], payload.transition);
+      const pageIndex = workpadState.pages.findIndex((page) => page.id === payload.pageId);
+      return set(workpadState, `pages.${pageIndex}.transition`, payload.transition);
     },
   },
   {}

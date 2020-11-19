@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import Boom from 'boom';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import moment from 'moment';
 
 import {
@@ -27,7 +26,7 @@ describe('ReindexActions', () => {
 
   beforeEach(() => {
     client = {
-      errors: null,
+      errors: SavedObjectsErrorHelpers,
       create: jest.fn(unimplemented('create')),
       bulkCreate: jest.fn(unimplemented('bulkCreate')),
       delete: jest.fn(unimplemented('delete')),
@@ -51,6 +50,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
         newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -66,6 +66,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: '.internalIndex',
         newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-internalIndex`,
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -83,6 +84,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName,
         newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -98,6 +100,7 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: `reindexed-v${PREV_MAJOR_VERSION}-myIndex`,
         newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
+        reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -148,7 +151,7 @@ describe('ReindexActions', () => {
   describe('runWhileLocked', () => {
     it('locks and unlocks if object is unlocked', async () => {
       const reindexOp = { id: '1', attributes: { locked: null } } as ReindexSavedObject;
-      await actions.runWhileLocked(reindexOp, op => Promise.resolve(op));
+      await actions.runWhileLocked(reindexOp, (op) => Promise.resolve(op));
 
       expect(client.update).toHaveBeenCalledTimes(2);
 
@@ -170,13 +173,10 @@ describe('ReindexActions', () => {
         id: '1',
         attributes: {
           // Set locked timestamp to timeout + 10 seconds ago
-          locked: moment()
-            .subtract(LOCK_WINDOW)
-            .subtract(moment.duration(10, 'seconds'))
-            .format(),
+          locked: moment().subtract(LOCK_WINDOW).subtract(moment.duration(10, 'seconds')).format(),
         },
       } as ReindexSavedObject;
-      await actions.runWhileLocked(reindexOp, op => Promise.resolve(op));
+      await actions.runWhileLocked(reindexOp, (op) => Promise.resolve(op));
 
       expect(client.update).toHaveBeenCalledTimes(2);
 
@@ -197,7 +197,7 @@ describe('ReindexActions', () => {
       const reindexOp = { id: '1', attributes: { locked: null } } as ReindexSavedObject;
 
       await expect(
-        actions.runWhileLocked(reindexOp, op => Promise.reject(new Error('IT FAILED!')))
+        actions.runWhileLocked(reindexOp, (op) => Promise.reject(new Error('IT FAILED!')))
       ).rejects.toThrow('IT FAILED!');
 
       expect(client.update).toHaveBeenCalledTimes(2);
@@ -220,7 +220,9 @@ describe('ReindexActions', () => {
         id: '1',
         attributes: { locked: moment().format() },
       } as ReindexSavedObject;
-      await expect(actions.runWhileLocked(reindexOp, op => Promise.resolve(op))).rejects.toThrow();
+      await expect(
+        actions.runWhileLocked(reindexOp, (op) => Promise.resolve(op))
+      ).rejects.toThrow();
     });
   });
 
@@ -299,13 +301,11 @@ describe('ReindexActions', () => {
   });
 
   describe('runWhileConsumerLocked', () => {
-    Object.keys(IndexGroup).forEach(typeKey => {
-      const consumerType = IndexGroup[typeKey as any] as IndexGroup;
-
+    Object.entries(IndexGroup).forEach(([typeKey, consumerType]) => {
       describe(`IndexConsumerType.${typeKey}`, () => {
         it('creates the lock doc if it does not exist and executes callback', async () => {
           expect.assertions(3);
-          client.get.mockRejectedValueOnce(Boom.notFound()); // mock no ML doc exists yet
+          client.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError()); // mock no ML doc exists yet
           client.create.mockImplementationOnce((type: any, attributes: any, { id }: any) =>
             Promise.resolve({
               type,
@@ -315,7 +315,7 @@ describe('ReindexActions', () => {
           );
 
           let flip = false;
-          await actions.runWhileIndexGroupLocked(consumerType, async mlDoc => {
+          await actions.runWhileIndexGroupLocked(consumerType, async (mlDoc) => {
             expect(mlDoc.id).toEqual(consumerType);
             expect(mlDoc.attributes.runningReindexCount).toEqual(0);
             flip = true;
@@ -325,7 +325,6 @@ describe('ReindexActions', () => {
         });
 
         it('fails after 10 attempts to lock', async () => {
-          jest.setTimeout(20000); // increase the timeout
           client.get.mockResolvedValue({
             type: REINDEX_OP_TYPE,
             id: consumerType,
@@ -335,13 +334,10 @@ describe('ReindexActions', () => {
           client.update.mockRejectedValue(new Error('NO LOCKING!'));
 
           await expect(
-            actions.runWhileIndexGroupLocked(consumerType, async m => m)
+            actions.runWhileIndexGroupLocked(consumerType, async (m) => m)
           ).rejects.toThrow('Could not acquire lock for ML jobs');
           expect(client.update).toHaveBeenCalledTimes(10);
-
-          // Restore default timeout.
-          jest.setTimeout(5000);
-        });
+        }, 20000);
       });
     });
   });

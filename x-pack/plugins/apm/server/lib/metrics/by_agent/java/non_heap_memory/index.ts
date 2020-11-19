@@ -6,41 +6,66 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { Setup } from '../../../../helpers/setup_request';
-import { fetch, NonHeapMemoryMetrics } from './fetcher';
+import {
+  METRIC_JAVA_NON_HEAP_MEMORY_MAX,
+  METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
+  METRIC_JAVA_NON_HEAP_MEMORY_USED,
+  AGENT_NAME,
+} from '../../../../../../common/elasticsearch_fieldnames';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
-import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
+import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 
-const chartBase: ChartBase<NonHeapMemoryMetrics> = {
+const series = {
+  nonHeapMemoryUsed: {
+    title: i18n.translate(
+      'xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed',
+      {
+        defaultMessage: 'Avg. used',
+      }
+    ),
+    color: theme.euiColorVis0,
+  },
+  nonHeapMemoryCommitted: {
+    title: i18n.translate(
+      'xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted',
+      {
+        defaultMessage: 'Avg. committed',
+      }
+    ),
+    color: theme.euiColorVis1,
+  },
+};
+
+const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.nonHeapMemoryChartTitle', {
-    defaultMessage: 'Non-Heap Memory'
+    defaultMessage: 'Non-Heap Memory',
   }),
   key: 'non_heap_memory_area_chart',
   type: 'area',
   yUnit: 'bytes',
-  series: {
-    nonHeapMemoryUsed: {
-      title: i18n.translate(
-        'xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed',
-        {
-          defaultMessage: 'Used'
-        }
-      ),
-      color: theme.euiColorVis0
-    },
-    nonHeapMemoryCommitted: {
-      title: i18n.translate(
-        'xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted',
-        {
-          defaultMessage: 'Committed'
-        }
-      ),
-      color: theme.euiColorVis1
-    }
-  }
+  series,
 };
 
-export async function getNonHeapMemoryChart(setup: Setup, serviceName: string) {
-  const result = await fetch(setup, serviceName);
-  return transformDataToMetricsChart<NonHeapMemoryMetrics>(result, chartBase);
+export async function getNonHeapMemoryChart(
+  setup: Setup & SetupTimeRange,
+  serviceName: string,
+  serviceNodeName?: string
+) {
+  return fetchAndTransformMetrics({
+    setup,
+    serviceName,
+    serviceNodeName,
+    chartBase,
+    aggs: {
+      nonHeapMemoryMax: { avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_MAX } },
+      nonHeapMemoryCommitted: {
+        avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED },
+      },
+      nonHeapMemoryUsed: {
+        avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_USED },
+      },
+    },
+    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
+  });
 }

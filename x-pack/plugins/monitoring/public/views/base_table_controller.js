@@ -5,7 +5,7 @@
  */
 
 import { MonitoringViewBaseController } from './';
-import { tableStorageGetter, tableStorageSetter } from 'plugins/monitoring/components/table';
+import { tableStorageGetter, tableStorageSetter } from '../components/table';
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -18,7 +18,6 @@ import { tableStorageGetter, tableStorageSetter } from 'plugins/monitoring/compo
  * This is expected to be extended, and behavior enabled using super();
  */
 export class MonitoringViewBaseTableController extends MonitoringViewBaseController {
-
   /**
    * Create a table view controller
    * - used by parent class:
@@ -46,7 +45,7 @@ export class MonitoringViewBaseTableController extends MonitoringViewBaseControl
     this.sortKey = sortKey;
     this.sortOrder = sortOrder;
 
-    this.onNewState = newState => {
+    this.onNewState = (newState) => {
       setLocalStorageData(storage, newState);
     };
   }

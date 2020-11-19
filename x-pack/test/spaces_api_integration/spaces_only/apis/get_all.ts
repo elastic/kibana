@@ -26,11 +26,23 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
       {
         spaceId: SPACES.SPACE_1.spaceId,
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       getAllTest(`can access all spaces from ${scenario.spaceId}`, {
         spaceId: scenario.spaceId,
         tests: {
           exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+          copySavedObjectsPurpose: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+          shareSavedObjectsPurpose: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+          includeAuthorizedPurposes: {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },

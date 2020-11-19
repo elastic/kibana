@@ -5,24 +5,25 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
+// @ts-expect-error
 import { calculateAuto } from './calculate_auto';
-// @ts-ignore
-import { unitToSeconds } from './unit_to_seconds';
 
-export function getBucketSize(start: number, end: number, interval: string) {
+export function getBucketSize(
+  start: number,
+  end: number,
+  numBuckets: number = 100
+) {
   const duration = moment.duration(end - start, 'ms');
-  const bucketSize = Math.max(calculateAuto.near(100, duration).asSeconds(), 1);
+  const bucketSize = Math.max(
+    calculateAuto.near(numBuckets, duration).asSeconds(),
+    1
+  );
   const intervalString = `${bucketSize}s`;
-  const matches = interval && interval.match(/^([\d]+)([shmdwMy]|ms)$/);
-  const minBucketSize = matches
-    ? Number(matches[1]) * unitToSeconds(matches[2])
-    : 0;
 
-  if (bucketSize < minBucketSize) {
+  if (bucketSize < 0) {
     return {
-      bucketSize: minBucketSize,
-      intervalString: interval
+      bucketSize: 0,
+      intervalString: 'auto',
     };
   }
 

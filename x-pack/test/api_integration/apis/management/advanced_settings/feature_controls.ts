@@ -6,14 +6,13 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { SecurityService, SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { CSV_QUOTE_VALUES_SETTING } from '../../../../../../src/plugins/share/common/constants';
 
-// eslint-disable-next-line import/no-default-export
-export default function featureControlsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest: SuperTest<any> = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
 
   const expect403 = (result: any) => {
     expect(result.error).to.be(undefined);
@@ -22,9 +21,16 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
   };
 
   const expectResponse = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 200);
+    if (result.response && result.response.statusCode === 400) {
+      // expect a change of telemetry settings to fail in cloud environment
+      expect(result.response.body.message).to.be(
+        '{"error":"Not allowed to change Opt-in Status."}'
+      );
+    } else {
+      expect(result.error).to.be(undefined);
+      expect(result.response).not.to.be(undefined);
+      expect(result.response).to.have.property('statusCode', 200);
+    }
   };
 
   async function saveAdvancedSetting(username: string, password: string, spaceId?: string) {
@@ -34,7 +40,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       .post(`${basePath}/api/kibana/settings`)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
-      .send({ changes: { 'csv:quoteValues': null } })
+      .send({ changes: { [CSV_QUOTE_VALUES_SETTING]: null } })
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   }
@@ -43,7 +49,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
     return await supertest
-      .post(`${basePath}/api/telemetry/v1/optIn`)
+      .post(`${basePath}/api/telemetry/v2/optIn`)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
       .send({ enabled: true })

@@ -13,15 +13,13 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiPanel,
-  EuiPageContent
+  EuiPageContent,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { Status } from '../instances/status';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export function ApmOverview({
-  stats,
-  metrics,
-  ...props
-}) {
+export function ApmOverview({ stats, metrics, alerts, ...props }) {
   const seriesToShow = [
     metrics.apm_responses_valid,
     metrics.apm_responses_errors,
@@ -32,7 +30,6 @@ export function ApmOverview({
     metrics.apm_requests,
     metrics.apm_transformations,
 
-
     metrics.apm_cpu,
     metrics.apm_memory,
 
@@ -41,24 +38,27 @@ export function ApmOverview({
 
   const charts = seriesToShow.map((data, index) => (
     <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
-      <EuiPanel>
-        <MonitoringTimeseriesContainer
-          series={data}
-          {...props}
-        />
-      </EuiPanel>
+      <MonitoringTimeseriesContainer series={data} {...props} />
     </EuiFlexItem>
   ));
 
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.apm.overview.heading"
+              defaultMessage="APM server overview"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
+        <EuiPanel>
+          <Status stats={stats} alerts={alerts} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
         <EuiPageContent>
-          <Status stats={stats}/>
-          <EuiSpacer size="s"/>
-          <EuiFlexGroup wrap>
-            {charts}
-          </EuiFlexGroup>
+          <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

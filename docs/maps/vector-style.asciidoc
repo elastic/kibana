@@ -3,24 +3,7 @@
 === Vector styling
 
 When styling a vector layer, you can customize your data by property, such as size and color.
-For each property, you can specify whether to use a constant or dynamic value for the style.
-
-[float]
-[[maps-vector-style-properties]]
-==== Style properties
-
-You can configure the following properties.
-
-*Fill color*:: The fill color of the vector features.
-+
-NOTE: *LineString* and *MultiLineString* geometries do not have fill and do not use the fill color property.
-Set border color to style line geometries.
-
-*Border color*:: The border color of the vector features.
-
-*Border width*:: The border width of the vector features.
-
-*Symbol size*:: The symbol size of point features.
+For each property, you can specify whether to use a constant or data driven value for the style.
 
 
 [float]
@@ -29,22 +12,21 @@ Set border color to style line geometries.
 
 Use static styling to specificy a constant value for a style property.
 
-The image below shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses static styling for all properties.
 
 [role="screenshot"]
 image::maps/images/vector_style_static.png[]
 
+
 [float]
 [[maps-vector-style-data-driven]]
 ==== Data driven styling
 
-Use data driven styling to symbolize features from a range of numeric property values.
-To enable data driven styling, click image:maps/images/gs_link_icon.png[] next to the property.
+Use data driven styling to symbolize features by property values.
+To enable data driven styling for a style property, change the selected value from *Fixed* or *Solid* to *By value*.
 
-NOTE: The image:maps/images/gs_link_icon.png[] button is only available for vector features that contain numeric properties.
-
-The image below shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses data driven styling for fill color and symbol size style properties.
 
 * The `hour_of_day` property determines the fill color for each feature based on where the value fits on a linear scale.
@@ -58,13 +40,73 @@ image::maps/images/vector_style_dynamic.png[]
 
 
 [float]
+[[maps-vector-style-quantitative-data-driven]]
+==== Quantitative data driven styling
+
+Quantitative data driven styling symbolizes features from a range of numeric property values.
+
+Property values are fit from the domain range to the style range on a linear scale.
+For example, let's symbolize <<add-sample-data, Kibana sample web log>> documents by size.
+The sample web logs `bytes` field ranges from 0 to 18,000. This is the domain range.
+The smallest feature has a symbol radius of 1, and the largest feature has a symbol radius of 24. This is the style range.
+The `bytes` property value for each feature will fit on a linear scale from the range of 0 to 18,000 to the style range of 1 to 24.
+
+To ensure symbols are consistent as you pan, zoom, and filter the map, quantitative data driven styling uses {ref}/search-aggregations-metrics-extendedstats-aggregation.html[extended_stats aggregation] to retrieve statistical metadata. Extended_stats is not available for numeric property values from the <<maps-aggregations, metric aggregations>> count, sum, and unique count.
+
+To configure extended_stats, click the gear icon image:maps/images/gear_icon.png[]. Set *Sigma* to a smaller value to minimize outliers by moving the range minimum and maximum closer to the average. Clear the *Calculate range from indices* checkbox to turn off the extended_stats aggregation request. The gear icon is not available for numeric property values from the <<maps-aggregations, metric aggregations>> count, sum, and unique count.
+
+NOTE: When extended_stats is not used, symbols might be inconsistent as users pan, zoom, and filter the map. Without extended_stats, the range is calculated with data from the local layer. The range is re-calculated when layer data changes.
+
+[role="screenshot"]
+image::maps/images/extended_stats_config.png[]
+
+When the property value is undefined for a feature:
+
+* *Fill color* and *Border color* are set to transparent and are not visible.
+* *Border width* and *Symbol size* are set to the minimum size.
+* *Symbol orientation* is set to 0.
+
+When the symbol range minimum and maximum are the same and there is no range:
+
+* *Fill color* and *Border color* are set to last color in the color ramp.
+* *Border width* and *Symbol size* are set to the maximum size.
+
+
+[float]
+[[maps-vector-style-qualitative-data-driven]]
+==== Qualitative data driven styling
+
+Qualitative data driven styling symbolizes properties, such as strings and IP addresses, by category.
+
+Qualitative data driven styling is available for the following styling properties:
+
+* *Icon*
+* *Fill color*
+* *Border color*
+* *Label color*
+* *Label border color*
+
+To ensure symbols are consistent as you pan, zoom, and filter the map, qualitative data driven styling uses a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation]. The term aggregation retrieves the top categories for the property. Feature values within the top categories are assigned a unique style. Feature values outside of the top categories are grouped into the *Other* category. A feature is assigned the *Other* category when the property value is undefined.
+
+To configure the terms aggregation, click the gear icon image:maps/images/gear_icon.png[]. Clear the *Get categories from indice* checkbox to turn off the terms aggregation request.
+
+NOTE: When the terms aggregation is not used, symbols might be inconsistent as users pan, zoom, and filter the map. Without terms aggregation, the top categories are calculated with data from the local layer. The top categories are re-calculated when layer data changes.
+
+This image shows an example of quantitative data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
+The `machine.os.keyword` property determines the color of each symbol based on category.
+
+[role="screenshot"]
+image::maps/images/quantitative_data_driven_styling.png[]
+
+
+[float]
 [[maps-vector-style-class]]
 ==== Class styling
 
 Class styling symbolizes features by class and requires multiple layers.
 Use <<maps-layer-based-filtering, layer filtering>> to define the class for each layer, and <<maps-vector-style-static, static styling>> to symbolize each class.
 
-The image below shows an example of class styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of class styling using the <<add-sample-data, Kibana sample web logs>> data set.
 
 * The *Mac OS requests* layer applies the filter `machine.os : osx` so the layer only contains Mac OS requests.
 The fill color is a static value of green.

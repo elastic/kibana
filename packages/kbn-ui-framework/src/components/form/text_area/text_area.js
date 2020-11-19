@@ -38,27 +38,24 @@ export const KuiTextArea = ({
   size,
   ...rest
 }) => {
-  const classes = classNames('kuiTextArea', className, {
-    'kuiTextArea-isInvalid': isInvalid,
-    'kuiTextArea--nonResizable': isNonResizable
-  }, sizeToClassNameMap[size]
+  const classes = classNames(
+    'kuiTextArea',
+    className,
+    {
+      'kuiTextArea-isInvalid': isInvalid,
+      'kuiTextArea--nonResizable': isNonResizable,
+    },
+    sizeToClassNameMap[size]
   );
 
-  return (
-    <textarea
-      className={classes}
-      onChange={onChange}
-      disabled={isDisabled}
-      {...rest}
-    />
-  );
+  return <textarea className={classes} onChange={onChange} disabled={isDisabled} {...rest} />;
 };
 
 KuiTextArea.defaultProps = {
   isInvalid: false,
   isNonResizable: false,
   isDisabled: false,
-  size: 'medium'
+  size: 'medium',
 };
 
 KuiTextArea.propTypes = {
@@ -67,5 +64,5 @@ KuiTextArea.propTypes = {
   isInvalid: PropTypes.bool,
   isNonResizable: PropTypes.bool,
   isDisabled: PropTypes.bool,
-  size: PropTypes.oneOf(TEXTAREA_SIZE)
+  size: PropTypes.oneOf(TEXTAREA_SIZE),
 };

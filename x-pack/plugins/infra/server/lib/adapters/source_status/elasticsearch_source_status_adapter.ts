@@ -4,26 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceStatusAdapter } from '../../source_status';
-import {
-  InfraBackendFrameworkAdapter,
-  InfraDatabaseGetIndicesResponse,
-  InfraFrameworkRequest,
-} from '../framework';
+import { RequestHandlerContext } from 'src/core/server';
+import { InfraSourceStatusAdapter, SourceIndexStatus } from '../../source_status';
+import { InfraDatabaseGetIndicesResponse } from '../framework';
+import { KibanaFramework } from '../framework/kibana_framework_adapter';
 
 export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusAdapter {
-  constructor(private readonly framework: InfraBackendFrameworkAdapter) {}
+  constructor(private readonly framework: KibanaFramework) {}
 
-  public async getIndexNames(request: InfraFrameworkRequest, aliasName: string) {
+  public async getIndexNames(requestContext: RequestHandlerContext, aliasName: string) {
     const indexMaps = await Promise.all([
       this.framework
-        .callWithRequest(request, 'indices.getAlias', {
+        .callWithRequest(requestContext, 'indices.getAlias', {
           name: aliasName,
           filterPath: '*.settings.index.uuid', // to keep the response size as small as possible
         })
         .catch(withDefaultIfNotFound<InfraDatabaseGetIndicesResponse>({})),
       this.framework
-        .callWithRequest(request, 'indices.get', {
+        .callWithRequest(requestContext, 'indices.get', {
           index: aliasName,
           filterPath: '*.settings.index.uuid', // to keep the response size as small as possible
         })
@@ -36,26 +34,40 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
     );
   }
 
-  public async hasAlias(request: InfraFrameworkRequest, aliasName: string) {
-    return await this.framework.callWithRequest(request, 'indices.existsAlias', {
+  public async hasAlias(requestContext: RequestHandlerContext, aliasName: string) {
+    return await this.framework.callWithRequest(requestContext, 'indices.existsAlias', {
       name: aliasName,
     });
   }
 
-  public async hasIndices(request: InfraFrameworkRequest, indexNames: string) {
+  public async getIndexStatus(
+    requestContext: RequestHandlerContext,
+    indexNames: string
+  ): Promise<SourceIndexStatus> {
     return await this.framework
-      .callWithRequest(request, 'search', {
+      .callWithRequest(requestContext, 'search', {
         ignore_unavailable: true,
         allow_no_indices: true,
         index: indexNames,
         size: 0,
         terminate_after: 1,
+        track_total_hits: 1,
       })
       .then(
-        response => response._shards.total > 0,
-        err => {
+        (response) => {
+          if (response._shards.total <= 0) {
+            return 'missing';
+          }
+
+          if (response.hits.total.value > 0) {
+            return 'available';
+          }
+
+          return 'empty';
+        },
+        (err) => {
           if (err.status === 404) {
-            return false;
+            return 'missing';
           }
           throw err;
         }

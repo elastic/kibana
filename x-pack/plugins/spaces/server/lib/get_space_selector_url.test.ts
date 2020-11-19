@@ -6,25 +6,14 @@
 
 import { getSpaceSelectorUrl } from './get_space_selector_url';
 
-const buildServerConfig = (serverBasePath?: string) => {
-  return {
-    get: (key: string) => {
-      if (key === 'server.basePath') {
-        return serverBasePath;
-      }
-      throw new Error(`unexpected config request: ${key}`);
-    },
-  };
-};
-
 describe('getSpaceSelectorUrl', () => {
   it('returns / when no server base path is defined', () => {
-    const serverConfig = buildServerConfig();
-    expect(getSpaceSelectorUrl(serverConfig)).toEqual('/');
+    expect(getSpaceSelectorUrl('')).toEqual('/spaces/space_selector');
   });
 
   it('returns the server base path when defined', () => {
-    const serverConfig = buildServerConfig('/my/server/base/path');
-    expect(getSpaceSelectorUrl(serverConfig)).toEqual('/my/server/base/path');
+    expect(getSpaceSelectorUrl('/my/server/base/path')).toEqual(
+      '/my/server/base/path/spaces/space_selector'
+    );
   });
 });

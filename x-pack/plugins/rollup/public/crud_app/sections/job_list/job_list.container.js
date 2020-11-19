@@ -6,17 +6,14 @@
 
 import { connect } from 'react-redux';
 
-import {
-  isLoading,
-  jobLoadError,
-  getJobsList,
-} from '../../store/selectors';
+import { isLoading, jobLoadError, getJobsList } from '../../store/selectors';
 
 import {
   loadJobs,
   refreshJobs,
   openDetailPanel,
   closeDetailPanel,
+  cloneJob,
 } from '../../store/actions';
 
 import { JobList as JobListView } from './job_list';
@@ -42,6 +39,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
+    },
+    cloneJob: (jobConfig) => {
+      dispatch(cloneJob(jobConfig));
     },
   };
 };

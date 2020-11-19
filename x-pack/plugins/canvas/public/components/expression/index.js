@@ -15,28 +15,19 @@ import {
   renderComponent,
 } from 'recompose';
 import { fromExpression } from '@kbn/interpreter/common';
-import { Storage } from 'ui/storage';
+import { withServices } from '../../services';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
-import { getFunctionDefinitions } from '../../lib/function_definitions';
-import { getWindow } from '../../lib/get_window';
-import {
-  LOCALSTORAGE_AUTOCOMPLETE_ENABLED,
-  LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE,
-} from '../../../common/lib/constants';
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
 
-const storage = new Storage(getWindow().localStorage);
-
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   pageId: getSelectedPage(state),
   element: getSelectedElement(state),
-  functionDefinitionsPromise: getFunctionDefinitions(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  setExpression: (elementId, pageId) => expression => {
+const mapDispatchToProps = (dispatch) => ({
+  setExpression: (elementId, pageId) => (expression) => {
     // destroy the context cache
     dispatch(flushContext(elementId));
 
@@ -55,77 +46,59 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   const { expression } = element;
 
+  const functions = Object.values(allProps.services.expressions.getFunctions());
+
   return {
     ...allProps,
     expression,
+    functionDefinitions: functions,
     setExpression: dispatchProps.setExpression(element.id, pageId),
   };
 };
 
 const expressionLifecycle = lifecycle({
-  componentWillReceiveProps({ formState, setFormState, expression }) {
-    if (this.props.expression !== expression && expression !== formState.expression) {
-      setFormState({
-        expression,
+  componentDidUpdate({ expression }) {
+    if (
+      this.props.expression !== expression &&
+      this.props.expression !== this.props.formState.expression
+    ) {
+      this.props.setFormState({
+        expression: this.props.expression,
         dirty: false,
       });
     }
   },
-  componentDidMount() {
-    const { functionDefinitionsPromise, setFunctionDefinitions } = this.props;
-    functionDefinitionsPromise.then(defs => setFunctionDefinitions(defs));
-  },
 });
 
 export const Expression = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
-  withState('functionDefinitions', 'setFunctionDefinitions', []),
+  withServices,
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('formState', 'setFormState', ({ expression }) => ({
     expression,
     dirty: false,
   })),
-  withState('isAutocompleteEnabled', 'setIsAutocompleteEnabled', () => {
-    const setting = storage.get(LOCALSTORAGE_AUTOCOMPLETE_ENABLED);
-    return setting === null ? true : setting;
-  }),
-  withState('fontSize', 'setFontSize', () => {
-    const fontSize = storage.get(LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE);
-    return fontSize === null ? 16 : fontSize;
-  }),
   withState('isCompact', 'setCompact', true),
   withHandlers({
-    toggleAutocompleteEnabled: ({ isAutocompleteEnabled, setIsAutocompleteEnabled }) => () => {
-      storage.set(LOCALSTORAGE_AUTOCOMPLETE_ENABLED, !isAutocompleteEnabled);
-      setIsAutocompleteEnabled(!isAutocompleteEnabled);
-    },
     toggleCompactView: ({ isCompact, setCompact }) => () => {
       setCompact(!isCompact);
     },
-    updateValue: ({ setFormState }) => expression => {
+    updateValue: ({ setFormState }) => (expression) => {
       setFormState({
         expression,
         dirty: true,
       });
     },
-    setExpression: ({ setExpression, setFormState }) => exp => {
-      setFormState(prev => ({
+    setExpression: ({ setExpression, setFormState }) => (exp) => {
+      setFormState((prev) => ({
         ...prev,
         dirty: false,
       }));
       setExpression(exp);
     },
-    setFontSize: ({ setFontSize }) => size => {
-      storage.set(LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE, size);
-      setFontSize(size);
-    },
   }),
   expressionLifecycle,
   withPropsOnChange(['formState'], ({ formState }) => ({
-    error: (function() {
+    error: (function () {
       try {
         // TODO: We should merge the advanced UI input and this into a single validated expression input.
         fromExpression(formState.expression);
@@ -135,5 +108,5 @@ export const Expression = compose(
       }
     })(),
   })),
-  branch(props => !props.element, renderComponent(ElementNotSelected))
+  branch((props) => !props.element, renderComponent(ElementNotSelected))
 )(Component);

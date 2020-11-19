@@ -1,41 +1,51 @@
 [[saved-objects-api-get]]
-=== Get Object
+=== Get object API
+++++
+<titleabbrev>Get object</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieve a single {kib} saved object by ID.
 
-The get saved object API enables you to retrieve a single Kibana saved object
-by id.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-get-request]]
 ==== Request
 
-`GET /api/saved_objects/<type>/<id>`
+`GET <kibana host>:<port>/api/saved_objects/<type>/<id>`
 
-==== Path Parameters
+`GET <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+[[saved-objects-api-get-params]]
+==== Path parameters
 
-`id` (required)::
-  (string) ID of object to retrieve
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 
-==== Examples
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
-The following example retrieves the index pattern object with an id of
-`my-pattern`.
+`id`::
+  (Required, string) The ID of the object to retrieve.
 
-[source,js]
+[[saved-objects-api-get-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[saved-objects-api-get-example]]
+==== Example
+
+Retrieve the index pattern object with the `my-pattern` ID:
+
+[source,sh]
 --------------------------------------------------
-GET api/saved_objects/index-pattern/my-pattern
+$ curl -X GET api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "my-pattern",
@@ -43,6 +53,62 @@ containing a JSON structure similar to the following example:
   "version": 1,
   "attributes": {
     "title": "my-pattern-*"
+  }
+}
+--------------------------------------------------
+
+Retrieve a dashboard object in the `testspace` by ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET s/testspace/api/saved_objects/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "type": "dashboard",
+  "updated_at": "2019-07-23T00:11:07.059Z",
+  "version": "WzQ0LDFd",
+  "attributes": {
+    "title": "[Flights] Global Flight Dashboard",
+    "hits": 0,
+    "description": "Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats",
+    "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":32,\"h\":7,\"i\":\"1\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRefName\":\"panel_0\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":17,\"y\":7,\"w\":23,\"h\":12,\"i\":\"3\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Average Ticket Price\":\"#0A50A1\",\"Flight Count\":\"#82B5D8\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRefName\":\"panel_1\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":85,\"w\":48,\"h\":15,\"i\":\"4\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRefName\":\"panel_2\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":0,\"y\":7,\"w\":17,\"h\":12,\"i\":\"5\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"ES-Air\":\"#447EBC\",\"JetBeats\":\"#65C5DB\",\"Kibana Airlines\":\"#BA43A9\",\"Logstash Airways\":\"#E5AC0E\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRefName\":\"panel_3\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":24,\"y\":33,\"w\":24,\"h\":14,\"i\":\"6\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Carrier Delay\":\"#5195CE\",\"Late Aircraft Delay\":\"#1F78C1\",\"NAS Delay\":\"#70DBED\",\"No Delay\":\"#BADFF4\",\"Security Delay\":\"#052B51\",\"Weather Delay\":\"#6ED0E0\"}}},\"version\":\"6.3.0\",\"panelRefName\":\"panel_4\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":24,\"y\":19,\"w\":24,\"h\":14,\"i\":\"7\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRefName\":\"panel_5\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":0,\"y\":35,\"w\":24,\"h\":12,\"i\":\"10\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRefName\":\"panel_6\"},{\"panelIndex\":\"13\",\"gridData\":{\"x\":10,\"y\":19,\"w\":14,\"h\":8,\"i\":\"13\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRefName\":\"panel_7\"},{\"panelIndex\":\"14\",\"gridData\":{\"x\":10,\"y\":27,\"w\":14,\"h\":8,\"i\":\"14\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRefName\":\"panel_8\"},{\"panelIndex\":\"18\",\"gridData\":{\"x\":24,\"y\":70,\"w\":24,\"h\":15,\"i\":\"18\"},\"embeddableConfig\":{\"mapCenter\":[27.421687059550266,15.371002131141724],\"mapZoom\":1},\"version\":\"6.3.0\",\"panelRefName\":\"panel_9\"},{\"panelIndex\":\"21\",\"gridData\":{\"x\":0,\"y\":62,\"w\":48,\"h\":8,\"i\":\"21\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRefName\":\"panel_10\"},{\"panelIndex\":\"22\",\"gridData\":{\"x\":32,\"y\":0,\"w\":16,\"h\":7,\"i\":\"22\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRefName\":\"panel_11\"},{\"panelIndex\":\"23\",\"gridData\":{\"x\":0,\"y\":70,\"w\":24,\"h\":15,\"i\":\"23\"},\"embeddableConfig\":{\"mapCenter\":[42.19556096274418,9.536742995308601e-7],\"mapZoom\":1},\"version\":\"6.3.0\",\"panelRefName\":\"panel_12\"},{\"panelIndex\":\"25\",\"gridData\":{\"x\":0,\"y\":19,\"w\":10,\"h\":8,\"i\":\"25\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRefName\":\"panel_13\"},{\"panelIndex\":\"27\",\"gridData\":{\"x\":0,\"y\":27,\"w\":10,\"h\":8,\"i\":\"27\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRefName\":\"panel_14\"},{\"panelIndex\":\"28\",\"gridData\":{\"x\":0,\"y\":47,\"w\":24,\"h\":15,\"i\":\"28\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 -* Connection #0 to host 69c72adb58fa46c69a01afdf4a6cbfd3.us-west1.gcp.cloud.es.io left intact\n 11\":\"rgb(247,251,255)\",\"11 - 22\":\"rgb(208,225,242)\",\"22 - 33\":\"rgb(148,196,223)\",\"33 - 44\":\"rgb(74,152,201)\",\"44 - 55\":\"rgb(23,100,171)\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRefName\":\"panel_15\"},{\"panelIndex\":\"29\",\"gridData\":{\"x\":40,\"y\":7,\"w\":8,\"h\":6,\"i\":\"29\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRefName\":\"panel_16\"},{\"panelIndex\":\"30\",\"gridData\":{\"x\":40,\"y\":13,\"w\":8,\"h\":6,\"i\":\"30\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRefName\":\"panel_17\"},{\"panelIndex\":\"31\",\"gridData\":{\"x\":24,\"y\":47,\"w\":24,\"h\":15,\"i\":\"31\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRefName\":\"panel_18\"}]",
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "version": 1,
+    "timeRestore": true,
+    "timeTo": "now",
+    "timeFrom": "now-24h",
+    "refreshInterval": {
+      "display": "15 minutes",
+      "pause": false,
+      "section": 2,
+      "value": 900000
+    },
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+    }
+  },
+  "references": [
+    {
+      "name": "panel_0",
+      "type": "visualization",
+      "id": "aeb212e0-4c84-11e8-b3d7-01146121b73d"
+    },
+    . . .
+    {
+      "name": "panel_18",
+      "type": "visualization",
+      "id": "ed78a660-53a0-11e8-acbd-0be0ad9d822b"
+    }
+  ],
+  "migrationVersion": {
+    "dashboard": "7.0.0"
   }
 }
 --------------------------------------------------

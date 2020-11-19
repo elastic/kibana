@@ -22,7 +22,7 @@ const KIBANA_ROOT = path.resolve(__dirname, '../../..');
 
 function checkModuleNameNode(context, mappings, node) {
   const mapping = mappings.find(
-    mapping => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
+    (mapping) => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
   );
 
   if (!mapping) {
@@ -30,6 +30,14 @@ function checkModuleNameNode(context, mappings, node) {
   }
 
   let newSource;
+
+  if (mapping.to === false) {
+    context.report({
+      message: mapping.disallowedMessage || `Importing "${mapping.from}" is not allowed`,
+      loc: node.loc,
+    });
+    return;
+  }
 
   // support for toRelative added to migrate away from X-Pack being bundled
   // within node modules. after that migration, this can be removed.
@@ -66,9 +74,19 @@ module.exports = {
               type: 'string',
             },
             to: {
-              type: 'string',
+              anyOf: [
+                {
+                  type: 'string',
+                },
+                {
+                  const: false,
+                },
+              ],
             },
             toRelative: {
+              type: 'string',
+            },
+            disallowedMessage: {
               type: 'string',
             },
           },
@@ -87,7 +105,7 @@ module.exports = {
       },
     ],
   },
-  create: context => {
+  create: (context) => {
     const mappings = context.options[0];
 
     return {

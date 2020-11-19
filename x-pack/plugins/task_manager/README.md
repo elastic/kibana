@@ -1,7 +1,8 @@
 # Kibana task manager
 
-The task manager is a generic system for running background tasks. It supports:
+The task manager is a generic system for running background tasks.
 
+It supports:
 - Single-run and recurring tasks
 - Scheduling tasks to run after a specified datetime
 - Basic retry logic
@@ -19,7 +20,8 @@ At a high-level, the task manager works like this:
   - `attempts` is less than the configured threshold
 - Attempt to claim the task by using optimistic concurrency to set:
   - status to `running`
-  - `runAt` to now + the timeout specified by the task
+  - `startedAt` to now
+  - `retryAt` to next time task should retry if it times out and is still in `running` status
 - Execute the task, if the previous claim succeeded
 - If the task fails, increment the `attempts` count and reschedule it
 - If the task succeeds:
@@ -38,72 +40,88 @@ If a task specifies a higher `numWorkers` than the system supports, the system's
 
 The task_manager can be configured via `taskManager` config options (e.g. `taskManager.maxAttempts`):
 
-- `max_attempts` - How many times a failing task instance will be retried before it is never run again
+- `max_attempts` - The maximum number of times a task will be attempted before being abandoned as failed
 - `poll_interval` - How often the background worker should check the task_manager index for more work
+- `max_poll_inactivity_cycles` - How many poll intervals is work allowed to block polling for before it's timed out. This does not include task execution, as task execution does not block the polling, but rather includes work needed to manage Task Manager's state.
 - `index` - The name of the index that the task_manager
 - `max_workers` - The maximum number of tasks a Kibana will run concurrently (defaults to 10)
 - `credentials` - Encrypted user credentials. All tasks will run in the security context of this user. See [this issue](https://github.com/elastic/dev/issues/1045) for a discussion on task scheduler security.
 - `override_num_workers`: An object of `taskType: number` that overrides the `num_workers` for tasks
   - For example: `task_manager.override_num_workers.reporting: 2` would override the number of workers occupied by tasks of type `reporting`
   - This allows sysadmins to tweak the operational performance of Kibana, allowing more or fewer tasks of a specific type to run simultaneously
+- `monitored_aggregated_stats_refresh_rate` - Dictates how often we refresh the "Cold" metrics. Learn More: [./MONITORING](./MONITORING.MD)
+- `monitored_stats_running_average_window`- Dictates the size of the window used to calculate the running average of various "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)
+- `monitored_stats_required_freshness` - Dictates the _required freshness_ of critical "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)
+- `monitored_task_execution_thresholds`- Dictates the threshold of failed task executions. Learn More: [./MONITORING](./MONITORING.MD)
 
 ## Task definitions
 
-Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.taskManager` object.
+Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.plugins.task_manager` object.
 
 A sample task can be found in the [x-pack/test/plugin_api_integration/plugins/task_manager](../../test/plugin_api_integration/plugins/task_manager/index.js) folder.
 
 ```js
-const { taskManager } = server;
-taskManager.registerTaskDefinitions({
-  // clusterMonitoring is the task type, and must be unique across the entire system
-  clusterMonitoring: {
-    // Human friendly name, used to represent this task in logs, UI, etc
-    title: 'Human friendly name',
+export class Plugin {
+  constructor() {
+  }
 
-    // Optional, human-friendly, more detailed description
-    description: 'Amazing!!',
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+    taskManager.registerTaskDefinitions({
+      // clusterMonitoring is the task type, and must be unique across the entire system
+      clusterMonitoring: {
+        // Human friendly name, used to represent this task in logs, UI, etc
+        title: 'Human friendly name',
 
-    // Optional, how long, in minutes, the system should wait before
-    // a running instance of this task is considered to be timed out.
-    // This defaults to 5 minutes.
-    timeout: '5m',
+        // Optional, human-friendly, more detailed description
+        description: 'Amazing!!',
 
-    // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
-    // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
-    // overridden by the `override_num_workers` config value, if specified.
-    numWorkers: 2,
+        // Optional, how long, in minutes or seconds, the system should wait before
+        // a running instance of this task is considered to be timed out.
+        // This defaults to 5 minutes.
+        timeout: '5m',
 
-    // The createTaskRunner function / method returns an object that is responsible for
-    // performing the work of the task. context: { taskInstance, kbnServer }, is documented below.
-    createTaskRunner(context) {
-      return {
-        // Perform the work of the task. The return value should fit the TaskResult interface, documented
-        // below. Invalid return values will result in a logged warning.
-        async run() {
-          // Do some work
-          // Conditionally send some alerts
-          // Return some result or other...
+        // Optional, how many attempts before marking task as failed.
+        // This defaults to what is configured at the task manager level.
+        maxAttempts: 5,
+
+        // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
+        // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is
+        // overridden by the `override_num_workers` config value, if specified.
+        numWorkers: 2,
+
+        // The createTaskRunner function / method returns an object that is responsible for
+        // performing the work of the task. context: { taskInstance }, is documented below.
+        createTaskRunner(context) {
+          return {
+            // Perform the work of the task. The return value should fit the TaskResult interface, documented
+            // below. Invalid return values will result in a logged warning.
+            async run() {
+              // Do some work
+              // Conditionally send some alerts
+              // Return some result or other...
+            },
+
+            // Optional, will be called if a running instance of this task times out, allowing the task
+            // to attempt to clean itself up.
+            async cancel() {
+              // Do whatever is required to cancel this task, such as killing any spawned processes
+            },
+          };
         },
+      },
+    });
+  }
 
-        // Optional, will be called if a running instance of this task times out, allowing the task
-        // to attempt to clean itself up.
-        async cancel() {
-          // Do whatever is required to cancel this task, such as killing any spawned processes
-        },
-      };
-    },
-  },
-});
+  public start(core: CoreStart, plugins: { taskManager }) {
+    
+  }
+}
 ```
 
 When Kibana attempts to claim and run a task instance, it looks its definition up, and executes its createTaskRunner's method, passing it a run context which looks like this:
 
 ```js
 {
-  // An instance of the Kibana server object.
-  kbnServer,
-
   // The data associated with this instance of the task, with two properties being most notable:
   //
   // params:
@@ -124,18 +142,34 @@ When Kibana attempts to claim and run a task instance, it looks its definition u
 ## Task result
 
 The task runner's `run` method is expected to return a promise that resolves to undefined or to an object that looks like the following:
+
+|Property|Description|Type|
+|---|---|---|
+|runAt| Optional. If specified, this is used as the tasks' next `runAt`, overriding the default system scheduler. | Date ISO String | 
+|schedule| Optional. If specified, this is used as the tasks' new recurring schedule, overriding the default system scheduler and any existing schedule.  | { interval: string } | 
+|error| Optional, an error object, logged out as a warning. The pressence of this property indicates that the task did not succeed.| Error |
+|state| Optional, this will be passed into the next run of the task, if this is a recurring task. |Record<string, unknown>|
+
+### Examples
+
 ```js
 {
   // Optional, if specified, this is used as the tasks' nextRun, overriding
   // the default system scheduler.
   runAt: "2020-07-24T17:34:35.272Z",
 
-  // Optional, an error object, logged out as a warning. The pressence of this
-  // property indicates that the task did not succeed.
   error: { message: 'Hrumph!' },
 
-  // Optional, this will be passed into the next run of the task, if
-  // this is a recurring task.
+  state: {
+    anything: 'goes here',
+  },
+}
+```
+
+```js
+{
+  schedule: { interval: '30s' },
+  
   state: {
     anything: 'goes here',
   },
@@ -143,6 +177,39 @@ The task runner's `run` method is expected to return a promise that resolves to 
 ```
 
 Other return values will result in a warning, but the system should continue to work.
+
+### Task retries when the Task Runner fails
+If a task runner throws an error, task manager will try to rerun the task shortly after (up to the task definition's `maxAttempts`).
+Normal tasks will wait a default amount of 5m before trying again and every subsequent attempt will add an additonal 5m cool off period to avoid a stampeding herd of failed tasks from storming Elasticsearch.
+
+Recurring tasks will also get retried, but instead of using the 5m interval for the retry, they will be retried on their next scheduled run.
+
+### Force failing a task
+If you wish to purposfully fail a task, you can throw an error of any kind and the retry logic will apply.
+If, on the other hand, you wish not only to fail the task, but you'd also like to indicate the Task Manager that it shouldn't retry the task, you can throw an Unrecoverable Error, using the `throwUnrecoverableError` helper function.
+
+For example:
+```js
+  taskManager.registerTaskDefinitions({
+    myTask: {
+      /// ...
+      createTaskRunner(context) {
+        return {
+          async run() {
+            const result = ... // Do some work
+
+            if(!result) {
+              // No point retrying?
+              throwUnrecoverableError(new Error("No point retrying, this is unrecoverable"));
+            }
+
+            return result;
+          }
+        };
+      },
+    },
+  });
+```
 
 ## Task instances
 
@@ -160,18 +227,23 @@ The data stored for a task instance looks something like this:
   // this.
   runAt: "2020-07-24T17:34:35.272Z",
 
-  // Indicates that this is a recurring task. We currently only support
-  // 1 minute granularity.
-  interval: '5m',
+  // Indicates that this is a recurring task. We support interval syntax
+  // with days such as '1d', hours '3h', minutes such as `5m`, seconds `10s`.
+  schedule: { interval: '5m' },
 
   // How many times this task has been unsuccesfully attempted,
   // this will be reset to 0 if the task ever succesfully completes.
   // This is incremented if a task fails or times out.
   attempts: 0,
 
-  // Currently, this is either idle | running. It is used to
+  // Currently, this is either idle | claiming | running | failed. It is used to
   // coordinate which Kibana instance owns / is running a specific
   // task instance.
+  // idle: Task Instance isn't being worked on
+  // claiming: A Kibana instance has claimed ownership but hasn't started running
+  //           the Task Instance yet
+  // running: A Kibana instance has began working on the Task Instance
+  // failed: The last run of the Task Instance failed, waiting to retry
   status: 'idle',
 
   // The params specific to this task instance, which will be
@@ -205,6 +277,9 @@ The data stored for a task instance looks something like this:
   // An application-specific designation, allowing different Kibana
   // plugins / apps to query for only those tasks they care about.
   scope: ['alerting'],
+
+  // The Kibana UUID of the Kibana instance who last claimed ownership for running this task.
+  ownerId: '123e4567-e89b-12d3-a456-426655440000'
 }
 ```
 
@@ -212,39 +287,132 @@ The data stored for a task instance looks something like this:
 
 The task manager mixin exposes a taskManager object on the Kibana server which plugins can use to manage scheduled tasks. Each method takes an optional `scope` argument and ensures that only tasks with the specified scope(s) will be affected.
 
+### Overview
+Interaction with the TaskManager Plugin is done via the Kibana Platform Plugin system.
+When developing your Plugin, you're asked to define a `setup` method and a `start` method.
+These methods are handed Kibana's Plugin APIs for these two stages, which means you'll have access to the following apis in these two stages:
+
+#### Setup
+The _Setup_ Plugin api includes methods which configure Task Manager to support your Plugin's requirements, such as defining custom Middleware and Task Definitions.
 ```js
-const { taskManager } = server;
-// Schedules a task. All properties are as documented in the previous
-// storage section, except that here, params is an object, not a JSON
-// string.
-const task = await taskManager.schedule({
-  taskType,
-  runAt,
-  interval,
-  params,
-  scope: ['my-fanci-app'],
-});
-
-// Removes the specified task
-await manager.remove(task.id);
-
-// Fetches tasks, supports pagination, via the search-after API:
-// https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-search-after.html
-// If scope is not specified, all tasks are returned, otherwise only tasks
-// with the given scope are returned.
-const results = await manager.find({ scope: 'my-fanci-app', searchAfter: ['ids'] });
-
-// results look something like this:
 {
-  searchAfter: ['233322'],
-  // Tasks is an array of task instances
-  tasks: [{
-    id: '3242342',
-    taskType: 'reporting',
-    // etc
-  }]
+  addMiddleware: (middleware: Middleware) => {
+    // ...
+  },
+  registerTaskDefinitions: (taskDefinitions: TaskDictionary<TaskDefinition>) => {
+    // ...
+  },
 }
 ```
+
+#### Start
+The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's behaviour, such as scheduling tasks.
+
+```js
+{
+  fetch: (opts: FetchOpts) =>  {
+    // ...
+  },
+  remove: (id: string) =>  {
+    // ...
+  },
+  get: (id: string) =>  {
+    // ...
+  },
+  schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: any) => {
+    // ...
+  },
+  runNow: (taskId: string) =>  {
+    // ...
+  },
+  ensureScheduled: (taskInstance: TaskInstanceWithId, options?: any) => {
+    // ...
+  },
+}
+```
+
+### Detailed APIs
+
+#### schedule
+Using `schedule` you can instruct TaskManger to schedule an instance of a TaskType at some point in the future.
+
+
+```js
+export class Plugin {
+  constructor() {
+  }
+
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+  }
+
+  public start(core: CoreStart, plugins: { taskManager }) {
+    // Schedules a task. All properties are as documented in the previous
+    // storage section, except that here, params is an object, not a JSON
+    // string.
+    const task = await taskManager.schedule({
+      taskType,
+      runAt,
+      schedule,
+      params,
+      scope: ['my-fanci-app'],
+    });
+
+    // Removes the specified task
+    await taskManager.remove(task.id);
+
+    // Fetches tasks, supports pagination, via the search-after API:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-search-after.html
+    // If scope is not specified, all tasks are returned, otherwise only tasks
+    // with the given scope are returned.
+    const results = await taskManager.find({ scope: 'my-fanci-app', searchAfter: ['ids'] });
+  }
+}
+```
+*results* then look something like this:
+
+```json
+    {
+      "searchAfter": ["233322"],
+      // Tasks is an array of task instances
+      "tasks": [{
+        "id": "3242342",
+        "taskType": "reporting",
+        // etc
+      }]
+    }
+```
+
+#### ensureScheduling
+When using the `schedule` api to schedule a Task you can provide a hard coded `id` on the Task. This tells TaskManager to use this `id` to identify the Task Instance rather than generate an `id` on its own.
+The danger is that in such a situation, a Task with that same `id` might already have been scheduled at some earlier point, and this would result in an error. In some cases, this is the expected behavior, but often you only care about ensuring the task has been _scheduled_ and don't need it to be scheduled a fresh.
+
+To achieve this you should use the `ensureScheduling` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
+
+#### runNow
+Using `runNow` you can instruct TaskManger to run an existing task on-demand, without waiting for its scheduled time to be reached.
+
+```js
+export class Plugin {
+  constructor() {
+  }
+
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+  }
+
+  public start(core: CoreStart, plugins: { taskManager }) {
+    try {
+      const taskRunResult = await taskManager.runNow('91760f10-ba42-de9799');
+      // If no error is thrown, the task has completed successfully.
+    } catch(err: Error) {
+      // If running the task has failed, we throw an error with an appropriate message.
+      // For example, if the requested task doesnt exist: `Error: failed to run task "91760f10-ba42-de9799" as it does not exist`
+      // Or if, for example, the task is already running: `Error: failed to run task "91760f10-ba42-de9799" as it is currently running`
+    }    
+  }
+}
+```
+
+#### more options
 
 More custom access to the tasks can be done directly via Elasticsearch, though that won't be officially supported, as we can change the document structure at any time.
 
@@ -253,35 +421,75 @@ More custom access to the tasks can be done directly via Elasticsearch, though t
 The task manager exposes a middleware layer that allows modifying tasks before they are scheduled / persisted to the task manager index, and modifying tasks / the run context before a task is run.
 
 For example:
-
 ```js
-// In your plugin's init
-server.taskManager.addMiddleware({
-  async beforeSave({ taskInstance, ...opts }) {
-    console.log(`About to save a task of type ${taskInstance.taskType}`);
+export class Plugin {
+  constructor() {
+  }
 
-    return {
-      ...opts,
-      taskInstance: {
-        ...taskInstance,
-        params: {
-          ...taskInstance.params,
-          example: 'Added to params!',
-        },
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+    taskManager.addMiddleware({
+      async beforeSave({ taskInstance, ...opts }) {
+        console.log(`About to save a task of type ${taskInstance.taskType}`);
+
+        return {
+          ...opts,
+          taskInstance: {
+            ...taskInstance,
+            params: {
+              ...taskInstance.params,
+              example: 'Added to params!',
+            },
+          },
+        };
       },
-    };
-  },
 
-  async beforeRun({ taskInstance, ...opts }) {
-    console.log(`About to run ${taskInstance.taskType} ${taskInstance.id}`);
-    const { example, ...taskWithoutExampleProp } = taskInstance;
+      async beforeRun({ taskInstance, ...opts }) {
+        console.log(`About to run ${taskInstance.taskType} ${taskInstance.id}`);
+        const { example, ...taskWithoutExampleProp } = taskInstance;
 
-    return {
-      ...opts,
-      taskInstance: taskWithoutExampleProp,
-    };
-  },
-});
+        return {
+          ...opts,
+          taskInstance: taskWithoutExampleProp,
+        };
+      },
+    });
+  }
+
+  public start(core: CoreStart, plugins: { taskManager }) {
+    
+  }
+}
+```
+
+## Task Poller: polling for work
+TaskManager used to work in a `pull` model, but it now needs to support both `push` and `pull`, so it has been remodeled internally to support a single `push` model.
+
+Task Manager's _push_ mechanism is driven by the following operations:
+
+1. A polling interval has been reached.
+2. A new Task is scheduled.
+3. A Task is run using `runNow`.
+
+The polling interval is straight forward: TaskPoller is configured to emit an event at a fixed interval.
+That said, if there are no workers available, we want to ignore these events, so we'll throttle the interval on worker availability.
+
+Whenever a user uses the `schedule` api to schedule a new Task, we want to trigger an early polling in order to respond to the newly scheduled task as soon as possible, but this too we only wish to do if there are available workers, so we can throttle this too.
+
+When a `runNow` call is made we need to force a poll as the user will now be waiting on the result of the `runNow` call, but
+there is a complexity here- we don't want to force polling (as there might not be any worker capacity and it's possible that a polling cycle is already running), but we also can't throttle, as we can't afford to "drop" these requests, so we'll have to buffer these.
+
+We now want to respond to all three of these push events, but we still need to balance against our worker capacity, so if there are too many requests buffered, we only want to `take` as many requests as we have capacity to handle.
+Luckily, `Polling Interval` and `Task Scheduled` simply denote a request to "poll for work as soon as possible", unlike `Run Task Now` which also means "poll for these specific tasks", so our worker capacity only needs to be applied to `Run Task Now`.
+
+We achieve this model by buffering requests into a queue using a Set (which removes duplicated). As we don't want an unbounded queue in our system, we have limited the size of this queue (configurable by the `xpack.task_manager.request_capacity` config, defaulting to 1,000 requests) which forces us to throw an error once this cap is reachedand to all subsequent calls to `runNow` until the queue drain bellow the cap.
+
+Our current model, then, is this:
+```
+  Polling Interval  --> filter(availableWorkers > 0) - mapTo([]) -------\\ 
+  Task Scheduled    --> filter(availableWorkers > 0) - mapTo([]) --------||==>Set([]+[]+[`1`,`2`]) ==> work([`1`,`2`])
+  Run Task `1` Now --\                                                  //
+                      ----> buffer(availableWorkers > 0) -- [`1`,`2`] -// 
+  Run Task `2` Now --/
 ```
 
 ## Limitations in v1.0
@@ -303,6 +511,12 @@ The task manager's public API is create / delete / list. Updates aren't directly
    ```
 - Integration tests:
    ```
-   node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.js
-   node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.js
+   node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.ts
+   node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts
    ```
+
+## Monitoring
+
+Task Manager exposes runtime statistics which enable basic observability into its inner workings and makes it possible to monitor the system from external services.
+
+Learn More: [./MONITORING](./MONITORING.MD)

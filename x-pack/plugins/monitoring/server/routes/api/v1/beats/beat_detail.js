@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getBeatSummary } from '../../../../lib/beats';
 import { getMetrics } from '../../../../lib/details/get_metrics';
@@ -18,21 +18,20 @@ export function beatsDetailRoute(server) {
     path: '/api/monitoring/v1/clusters/{clusterUuid}/beats/beat/{beatUuid}',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required(),
-          beatUuid: Joi.string().required(),
+        params: schema.object({
+          clusterUuid: schema.string(),
+          beatUuid: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+        }),
+      },
     },
     async handler(req) {
-
       const clusterUuid = req.params.clusterUuid;
       const beatUuid = req.params.beatUuid;
       const config = server.config();
@@ -47,9 +46,11 @@ export function beatsDetailRoute(server) {
       };
 
       try {
-        const [ summary, metrics ] = await Promise.all([
+        const [summary, metrics] = await Promise.all([
           getBeatSummary(req, beatsIndexPattern, summaryOptions),
-          getMetrics(req, beatsIndexPattern, metricSet, [{ term: { 'beats_stats.beat.uuid': beatUuid } }]),
+          getMetrics(req, beatsIndexPattern, metricSet, [
+            { term: { 'beats_stats.beat.uuid': beatUuid } },
+          ]),
         ]);
 
         return {
@@ -59,7 +60,6 @@ export function beatsDetailRoute(server) {
       } catch (err) {
         throw handleError(err, req);
       }
-
-    }
+    },
   });
 }

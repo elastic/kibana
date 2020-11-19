@@ -1,4 +1,4 @@
-<monitoring-main product="elasticsearch" name="ml">
+<monitoring-main product="elasticsearch" name="ml" is-ccr-enabled="{{ mlJobs.isCcrEnabled }}">
   <monitoring-ml-listing
     paginationSettings="mlJobs.pagination"
     sorting="mlJobs.sorting"

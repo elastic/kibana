@@ -7,13 +7,14 @@
 import { get } from 'lodash';
 import { findReason } from './find_reason';
 
-export function handleResponse(response) {
+export function handleResponse(response, isCloudEnabled) {
   const sources = ['persistent', 'transient', 'defaults'];
   for (const source of sources) {
     const monitoringSettings = get(response[source], 'xpack.monitoring');
     if (monitoringSettings !== undefined) {
       const check = findReason(monitoringSettings, {
-        context: `cluster ${source}`
+        context: `cluster ${source}`,
+        isCloudEnabled,
       });
 
       if (check.found) {
@@ -27,15 +28,17 @@ export function handleResponse(response) {
 
 export async function checkClusterSettings(req) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
+  const { cloud } = req.server.newPlatform.setup.plugins;
+  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
   const response = await callWithRequest(req, 'transport.request', {
     method: 'GET',
     path: '/_cluster/settings?include_defaults',
     filter_path: [
       'persistent.xpack.monitoring',
       'transient.xpack.monitoring',
-      'defaults.xpack.monitoring'
-    ]
+      'defaults.xpack.monitoring',
+    ],
   });
 
-  return handleResponse(response);
+  return handleResponse(response, isCloudEnabled);
 }

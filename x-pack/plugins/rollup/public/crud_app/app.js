@@ -6,22 +6,20 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Switch, Route, Redirect, withRouter } from 'react-router-dom';
 
 import { UIM_APP_LOAD } from '../../common';
-import { CRUD_APP_BASE_PATH } from './constants';
-import { registerRouter, setUserHasLeftApp, trackUiMetric } from './services';
+import { registerRouter, setUserHasLeftApp, METRIC_TYPE } from './services';
+import { trackUiMetric } from '../kibana_services';
 import { JobList, JobCreate } from './sections';
 
-class ShareRouter extends Component {
-  static contextTypes = {
-    router: PropTypes.shape({
-      history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-        createHref: PropTypes.func.isRequired
-      }).isRequired
-    }).isRequired
-  }
+class ShareRouterComponent extends Component {
+  static propTypes = {
+    history: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+      createHref: PropTypes.func.isRequired,
+    }).isRequired,
+  };
 
   constructor(...args) {
     super(...args);
@@ -30,8 +28,8 @@ class ShareRouter extends Component {
 
   registerRouter() {
     // Share the router with the app without requiring React or context.
-    const { router } = this.context;
-    registerRouter(router);
+    const { history } = this.props;
+    registerRouter({ history });
   }
 
   render() {
@@ -39,9 +37,12 @@ class ShareRouter extends Component {
   }
 }
 
-export class App extends Component { // eslint-disable-line react/no-multi-comp
+const ShareRouter = withRouter(ShareRouterComponent);
+
+// eslint-disable-next-line react/no-multi-comp
+export class App extends Component {
   componentDidMount() {
-    trackUiMetric(UIM_APP_LOAD);
+    trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
   }
 
   componentWillUnmount() {
@@ -51,15 +52,15 @@ export class App extends Component { // eslint-disable-line react/no-multi-comp
 
   render() {
     return (
-      <HashRouter>
+      <Router history={this.props.history}>
         <ShareRouter>
           <Switch>
-            <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/job_list`} />
-            <Route exact path={`${CRUD_APP_BASE_PATH}/job_list`} component={JobList} />
-            <Route exact path={`${CRUD_APP_BASE_PATH}/create`} component={JobCreate} />
+            <Redirect exact from="/" to="/job_list" />
+            <Route exact path="/job_list" component={JobList} />
+            <Route exact path="/create" component={JobCreate} />
           </Switch>
         </ShareRouter>
-      </HashRouter>
+      </Router>
     );
   }
 }

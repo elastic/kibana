@@ -5,22 +5,18 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const progressSemicircle: ElementFactory = () => ({
   name: 'progressSemicircle',
-  displayName: 'Progress semicircle',
-  tags: ['chart', 'proportion'],
+  displayName: 'Semicircle',
+  type: 'progress',
   help: 'Displays progress as a portion of a semicircle',
   width: 200,
   height: 100,
-  image: header,
   expression: `filters
 | demodata
 | math "mean(percent_uptime)"
-| progress shape="semicircle" label={formatnumber 0%} font={font size=24 family="${
-    openSans.value
-  }" color="#000000" align=center}
+| progress shape="semicircle" label={formatnumber 0%} font={font size=24 family="${openSans.value}" color="#000000" align=center}
 | render`,
 });

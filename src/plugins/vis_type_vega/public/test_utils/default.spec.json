@@ -1,0 +1,41 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "title": "Event counts from all indexes",
+  "data": {
+    "url": {
+      "%context%": true,
+      "%timefield%": "@timestamp",
+      "index": "_all",
+      "body": {
+        "aggs": {
+          "time_buckets": {
+            "date_histogram": {
+              "field": "@timestamp",
+              "interval": { "%autointerval%": true },
+              "extended_bounds": {
+                "min": { "%timefilter%": "min" },
+                "max": { "%timefilter%": "max" }
+              },
+              "min_doc_count": 0
+            }
+          }
+        },
+        "size": 0
+      }
+    },
+    "format": { "property": "aggregations.time_buckets.buckets" }
+  },
+  "mark": "line",
+  "encoding": {
+    "x": {
+      "field": "key",
+      "type": "temporal",
+      "axis": { "title": false }
+    },
+    "y": {
+      "field": "doc_count",
+      "type": "quantitative",
+      "axis": { "title": "Document count" }
+    }
+  }
+}

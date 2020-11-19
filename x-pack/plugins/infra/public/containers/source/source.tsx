@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate-latest';
+import createContainer from 'constate';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -13,13 +13,26 @@ import {
   UpdateSourceInput,
   UpdateSourceMutation,
 } from '../../graphql/types';
-import { useApolloClient } from '../../utils/apollo_context';
+import { DependencyError, useApolloClient } from '../../utils/apollo_context';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { createSourceMutation } from './create_source.gql_query';
 import { sourceQuery } from './query_source.gql_query';
 import { updateSourceMutation } from './update_source.gql_query';
 
 type Source = SourceQuery.Query['source'];
+
+export const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'metrics' | 'both') => {
+  if (!source) {
+    return 'unknown-index';
+  }
+  if (type === 'logs') {
+    return source.configuration.logAlias;
+  }
+  if (type === 'metrics') {
+    return source.configuration.metricAlias;
+  }
+  return `${source.configuration.logAlias},${source.configuration.metricAlias}`;
+};
 
 export const useSource = ({ sourceId }: { sourceId: string }) => {
   const apolloClient = useApolloClient();
@@ -41,7 +54,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           },
         });
       },
-      onResolve: response => {
+      onResolve: (response) => {
         setSource(response.data.source);
       },
     },
@@ -69,7 +82,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           },
         });
       },
-      onResolve: response => {
+      onResolve: (response) => {
         if (response.data) {
           setSource(response.data.createSource.source);
         }
@@ -99,7 +112,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           },
         });
       },
-      onResolve: response => {
+      onResolve: (response) => {
         if (response.data) {
           setSource(response.data.updateSource.source);
         }
@@ -108,13 +121,12 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [apolloClient, sourceId]
   );
 
-  const derivedIndexPattern = useMemo(
-    () => ({
+  const createDerivedIndexPattern = (type: 'logs' | 'metrics' | 'both') => {
+    return {
       fields: source ? source.status.indexFields : [],
-      title: source ? `${source.configuration.logAlias}` : 'unknown-index',
-    }),
-    [source]
-  );
+      title: pickIndexPattern(source, type),
+    };
+  };
 
   const isLoading = useMemo(
     () =>
@@ -122,13 +134,17 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
         loadSourceRequest.state,
         createSourceConfigurationRequest.state,
         updateSourceConfigurationRequest.state,
-      ].some(state => state === 'pending'),
+      ].some((state) => state === 'pending'),
     [
       loadSourceRequest.state,
       createSourceConfigurationRequest.state,
       updateSourceConfigurationRequest.state,
     ]
   );
+
+  const isUninitialized = useMemo(() => loadSourceRequest.state === 'uninitialized', [
+    loadSourceRequest.state,
+  ]);
 
   const sourceExists = useMemo(() => (source ? !!source.version : undefined), [source]);
 
@@ -140,19 +156,17 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [source]
   );
 
-  useEffect(
-    () => {
-      loadSource();
-    },
-    [loadSource, sourceId]
-  );
+  useEffect(() => {
+    loadSource();
+  }, [loadSource, sourceId]);
 
   return {
     createSourceConfiguration,
-    derivedIndexPattern,
+    createDerivedIndexPattern,
     logIndicesExist,
     isLoading,
     isLoadingSource: loadSourceRequest.state === 'pending',
+    isUninitialized,
     hasFailedLoadingSource: loadSourceRequest.state === 'rejected',
     loadSource,
     loadSourceFailureMessage:
@@ -167,10 +181,4 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 };
 
 export const Source = createContainer(useSource);
-
-class DependencyError extends Error {
-  constructor(message?: string) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}
+export const [SourceProvider, useSourceContext] = Source;

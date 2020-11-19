@@ -6,29 +6,53 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { Setup } from '../../../../helpers/setup_request';
-import { fetch, ThreadCountMetrics } from './fetcher';
+import {
+  METRIC_JAVA_THREAD_COUNT,
+  AGENT_NAME,
+} from '../../../../../../common/elasticsearch_fieldnames';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
-import { transformDataToMetricsChart } from '../../../transform_metrics_chart';
+import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 
-const chartBase: ChartBase<ThreadCountMetrics> = {
+const series = {
+  threadCount: {
+    title: i18n.translate('xpack.apm.agentMetrics.java.threadCount', {
+      defaultMessage: 'Avg. count',
+    }),
+    color: theme.euiColorVis0,
+  },
+  threadCountMax: {
+    title: i18n.translate('xpack.apm.agentMetrics.java.threadCountMax', {
+      defaultMessage: 'Max count',
+    }),
+    color: theme.euiColorVis1,
+  },
+};
+
+const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.threadCountChartTitle', {
-    defaultMessage: 'Thread Count'
+    defaultMessage: 'Thread Count',
   }),
   key: 'thread_count_line_chart',
   type: 'linemark',
   yUnit: 'number',
-  series: {
-    threadCount: {
-      title: i18n.translate('xpack.apm.agentMetrics.java.threadCount', {
-        defaultMessage: 'Count'
-      }),
-      color: theme.euiColorVis0
-    }
-  }
+  series,
 };
 
-export async function getThreadCountChart(setup: Setup, serviceName: string) {
-  const result = await fetch(setup, serviceName);
-  return transformDataToMetricsChart<ThreadCountMetrics>(result, chartBase);
+export async function getThreadCountChart(
+  setup: Setup & SetupTimeRange,
+  serviceName: string,
+  serviceNodeName?: string
+) {
+  return fetchAndTransformMetrics({
+    setup,
+    serviceName,
+    serviceNodeName,
+    chartBase,
+    aggs: {
+      threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
+      threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } },
+    },
+    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
+  });
 }

@@ -1,55 +1,61 @@
 [[spaces-api-put]]
-=== Update Space
+=== Update space API
+++++
+<titleabbrev>Update space</titleabbrev>
+++++
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+experimental[] Update an existing {kib} space.
 
-Updates an existing {kib} space. To create a new space, use the POST command.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[spaces-api-put-api-request]]
 ==== Request
 
-To update a space, issue a PUT request to the 
-`/api/spaces/space/<space_id>` endpoint.
+`PUT <kibana host>:<port>/api/spaces/space/<space_id>`
 
-[source,js]
+[[spaces-api-put-request-body]]
+==== Request body
+
+`id`::
+  (Required, string) The space ID that is part of the {kib} URL when inside the space. You are unable to change the ID with the update operation.
+
+`name`::
+  (Required, string) The display name for the space.
+
+`description`::
+  (Optional, string) The description for the space.
+
+`disabledFeatures`::
+  (Optional, string array) The list of disabled features for the space. To get a list of available feature IDs, use the <<features-api-get, Features API>>.
+
+`initials`::
+  (Optional, string) Specifies the initials shown in the space avatar. By default, the initials are automatically generated from the space name. Initials must be 1 or 2 characters.
+
+`color`::
+  (Optional, string) Specifies the hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
+
+`imageUrl`::
+  (Optional, string) Specifies the data-url encoded image to display in the space avatar. If specified, `initials` will not be displayed, and the `color` will be visible as the background color for transparent images.
+  For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.
+
+[[spaces-api-put-response-codes]]
+==== Response codes
+
+`200`::
+  Indicates a successful call.
+
+[[sample-api-example]]
+==== Example
+
+[source,sh]
 --------------------------------------------------
-PUT /api/spaces/space/<space_id>
---------------------------------------------------
-
-==== Request Body
-
-The following parameters can be specified in the body of a PUT request to update a space:
-
-`id`:: (string) Required identifier for the space. This identifier becomes part of Kibana's URL when inside the space. This cannot be changed by the update operation.
-
-`name`:: (string) Required display name for the space.
-
-`description`:: (string) Optional description for the space.
-
-`disabledFeatures`:: (string array) Optional list of features that are disabled for the space. Use the <<features-api-get, Features API>> to get a list of available features IDs.
-
-`initials`:: (string) Optionally specify the initials shown in the Space Avatar for this space. By default, the initials will be automatically generated from the space name.
-If specified, initials should be either 1 or 2 characters.
-
-`color`:: (string) Optioanlly specify the hex color code used in the Space Avatar for this space. By default, the color will be automatically generated from the space name.
-
-===== Example
-
-[source,js]
---------------------------------------------------
-PUT /api/spaces/space/marketing
+$ curl -X PUT api/spaces/space/marketing
 {
   "id": "marketing",
   "name": "Marketing",
   "description" : "This is the Marketing Space",
   "color": "#aabbcc",
   "initials": "MK",
-  "disabledFeatures": []
+  "disabledFeatures": [],
+  "imageUrl": ""
 }
 --------------------------------------------------
 // KIBANA
-
-==== Response
-
-A successful call returns a response code of `200` with the updated Space.

@@ -4,24 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
+import { RequestHandlerContext } from 'src/core/server';
+import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';
 
 export class FrameworkFieldsAdapter implements FieldsAdapter {
-  private framework: InfraBackendFrameworkAdapter;
+  private framework: KibanaFramework;
 
-  constructor(framework: InfraBackendFrameworkAdapter) {
+  constructor(framework: KibanaFramework) {
     this.framework = framework;
   }
 
   public async getIndexFields(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     indices: string
   ): Promise<IndexFieldDescriptor[]> {
-    const indexPatternsService = this.framework.getIndexPatternsService(request);
+    const indexPatternsService = this.framework.getIndexPatternsService(requestContext);
     const response = await indexPatternsService.getFieldsForWildcard({
       pattern: indices,
     });
-    return response;
+    return response.map((field) => ({
+      ...field,
+      displayable: true,
+    }));
   }
 }

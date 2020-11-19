@@ -3,37 +3,38 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ViewStrings } from '../../../i18n';
+
+const { RepeatImage: strings } = ViewStrings;
 
 export const repeatImage = () => ({
   name: 'repeatImage',
-  displayName: 'Repeating image',
-  help: '',
+  displayName: strings.getDisplayName(),
   modelArgs: [['_', { label: 'Value' }]],
   args: [
     {
       name: 'image',
-      displayName: 'Image',
-      help: 'An image to repeat',
+      displayName: strings.getImageDisplayName(),
+      help: strings.getImageHelp(),
       argType: 'imageUpload',
     },
     {
       name: 'emptyImage',
-      displayName: 'Empty image',
-      help: 'An image to fill up the difference between the value and the max count',
+      displayName: strings.getEmptyImageDisplayName(),
+      help: strings.getEmptyImageHelp(),
       argType: 'imageUpload',
     },
     {
       name: 'size',
-      displayName: 'Image size',
-      help:
-        'The size of the largest dimension of the image. Eg, if the image is tall but not wide, this is the height',
+      displayName: strings.getSizeDisplayName(),
+      help: strings.getSizeHelp(),
       argType: 'number',
       default: '100',
     },
     {
       name: 'max',
-      displayName: 'Max count',
-      help: 'The maximum number of repeated images',
+      displayName: strings.getMaxDisplayName(),
+      help: strings.getMaxHelp(),
       argType: 'number',
       default: '1000',
     },

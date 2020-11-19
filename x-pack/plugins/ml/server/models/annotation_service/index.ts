@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { annotationProvider, callWithRequestType } from './annotation';
+import { IScopedClusterClient } from 'kibana/server';
+import { annotationProvider } from './annotation';
 
-export function annotationServiceProvider(callWithRequest: callWithRequestType) {
+export function annotationServiceProvider(client: IScopedClusterClient) {
   return {
-    ...annotationProvider(callWithRequest),
+    ...annotationProvider(client),
   };
 }

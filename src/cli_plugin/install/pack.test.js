@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import glob from 'glob-all';
-import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
-import Logger from '../lib/logger';
-import { extract, getPackData } from './pack';
-import { _downloadSingle }  from './download';
+import Fs from 'fs';
 import { join } from 'path';
 
+import sinon from 'sinon';
+import glob from 'glob-all';
+import del from 'del';
+
+import { Logger } from '../lib/logger';
+import { extract, getPackData } from './pack';
+import { _downloadSingle } from './download';
+
 describe('kibana cli', function () {
-
   describe('pack', function () {
-
     let testNum = 0;
     const workingPathRoot = join(__dirname, '.test.data.pack');
     let testWorkingPath;
@@ -40,7 +40,7 @@ describe('kibana cli', function () {
 
     beforeEach(function () {
       //These tests are dependent on the file system, and I had some inconsistent
-      //behavior with rimraf.sync show up. Until these tests are re-written to not
+      //behavior with del.sync show up. Until these tests are re-written to not
       //depend on the file system, I make sure that each test uses a different
       //working directory.
       testNum += 1;
@@ -52,19 +52,19 @@ describe('kibana cli', function () {
         workingPath: testWorkingPath,
         tempArchiveFile: tempArchiveFilePath,
         pluginDir: testPluginPath,
-        plugin: 'test-plugin'
+        plugin: 'test-plugin',
       };
 
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      mkdirp.sync(testWorkingPath);
+      Fs.mkdirSync(testWorkingPath, { recursive: true });
     });
 
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(workingPathRoot);
+      del.sync(workingPathRoot);
     });
 
     function copyReplyFile(filename) {
@@ -74,140 +74,105 @@ describe('kibana cli', function () {
       return _downloadSingle(settings, logger, sourceUrl);
     }
 
-    function shouldReject() {
-      throw new Error('expected the promise to reject');
-    }
-
     describe('extract', function () {
+      // Also only extracts the content from the kibana folder.
+      // Ignores the others.
+      it('successfully extract a valid zip', async () => {
+        await copyReplyFile('test_plugin.zip');
+        await getPackData(settings, logger);
+        await extract(settings, logger);
 
-      //Also only extracts the content from the kibana folder.
-      //Ignores the others.
-      it('successfully extract a valid zip', function () {
-        return copyReplyFile('test_plugin.zip')
-          .then(() => {
-            return getPackData(settings, logger);
-          })
-          .then(() => {
-            return extract(settings, logger);
-          })
-          .then(() => {
-            const files = glob.sync('**/*', { cwd: testWorkingPath });
-            const expected = [
-              'archive.part',
-              'README.md',
-              'index.js',
-              'package.json',
-              'public',
-              'public/app.js',
-              'extra file only in zip.txt'
-            ];
-            expect(files.sort()).toEqual(expected.sort());
-          });
+        expect(glob.sync('**/*', { cwd: testWorkingPath })).toMatchInlineSnapshot(`
+          Array [
+            "archive.part",
+            "bin",
+            "bin/executable",
+            "bin/not-executable",
+            "kibana.json",
+            "node_modules",
+            "node_modules/some-package",
+            "node_modules/some-package/index.js",
+            "node_modules/some-package/package.json",
+            "public",
+            "public/index.js",
+          ]
+        `);
       });
-
     });
 
-    describe('getPackData', function () {
-
-      it('populate settings.plugins', function () {
-        return copyReplyFile('test_plugin.zip')
-          .then(() => {
-            return getPackData(settings, logger);
-          })
-          .then(() => {
-            expect(settings.plugins[0].name).toBe('test-plugin');
-            expect(settings.plugins[0].archivePath).toBe('kibana/test-plugin');
-            expect(settings.plugins[0].version).toBe('1.0.0');
-            expect(settings.plugins[0].kibanaVersion).toBe('1.0.0');
-          });
+    describe('getPackData', () => {
+      it('populate settings.plugins', async () => {
+        await copyReplyFile('test_plugin.zip');
+        await getPackData(settings, logger);
+        expect(settings.plugins).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "id": "testPlugin",
+              "kibanaVersion": "1.0.0",
+              "stripPrefix": "kibana/test-plugin",
+            },
+          ]
+        `);
       });
 
-      it('populate settings.plugin.kibanaVersion', function () {
-        //kibana.version is defined in this package.json and is different than plugin version
-        return copyReplyFile('test_plugin_different_version.zip')
-          .then(() => {
-            return getPackData(settings, logger);
-          })
-          .then(() => {
-            expect(settings.plugins[0].kibanaVersion).toBe('5.0.1');
-          });
+      it('populate settings.plugin.kibanaVersion', async () => {
+        await copyReplyFile('test_plugin_different_version.zip');
+        await getPackData(settings, logger);
+        expect(settings.plugins).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "id": "testPlugin",
+              "kibanaVersion": "5.0.1",
+              "stripPrefix": "kibana/test-plugin",
+            },
+          ]
+        `);
       });
 
-      it('populate settings.plugin.kibanaVersion (default to plugin version)', function () {
-        //kibana.version is not defined in this package.json, defaults to plugin version
-        return copyReplyFile('test_plugin.zip')
-          .then(() => {
-            return getPackData(settings, logger);
-          })
-          .then(() => {
-            expect(settings.plugins[0].kibanaVersion).toBe('1.0.0');
-          });
+      it('populate settings.plugins with multiple plugins', async () => {
+        await copyReplyFile('test_plugin_many.zip');
+        await getPackData(settings, logger);
+        expect(settings.plugins).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "id": "fungerPlugin",
+              "kibanaVersion": "1.0.0",
+              "stripPrefix": "kibana/funger-plugin",
+            },
+            Object {
+              "id": "pdf",
+              "kibanaVersion": "1.0.0",
+              "stripPrefix": "kibana/pdf",
+            },
+            Object {
+              "id": "testPlugin",
+              "kibanaVersion": "1.0.0",
+              "stripPrefix": "kibana/test-plugin",
+            },
+          ]
+        `);
       });
 
-      it('populate settings.plugins with multiple plugins', function () {
-        return copyReplyFile('test_plugin_many.zip')
-          .then(() => {
-            return getPackData(settings, logger);
-          })
-          .then(() => {
-            expect(settings.plugins[0].name).toBe('funger-plugin');
-            expect(settings.plugins[0].archivePath).toBe('kibana/funger-plugin');
-            expect(settings.plugins[0].version).toBe('1.0.0');
-
-            expect(settings.plugins[1].name).toBe('pdf');
-            expect(settings.plugins[1].archivePath).toBe('kibana/pdf-linux');
-            expect(settings.plugins[1].version).toBe('1.0.0');
-
-            expect(settings.plugins[2].name).toBe('pdf');
-            expect(settings.plugins[2].archivePath).toBe('kibana/pdf-win32');
-            expect(settings.plugins[2].version).toBe('1.0.0');
-
-            expect(settings.plugins[3].name).toBe('pdf');
-            expect(settings.plugins[3].archivePath).toBe('kibana/pdf-win64');
-            expect(settings.plugins[3].version).toBe('1.0.0');
-
-            expect(settings.plugins[4].name).toBe('pdf');
-            expect(settings.plugins[4].archivePath).toBe('kibana/pdf');
-            expect(settings.plugins[4].version).toBe('1.0.0');
-
-            expect(settings.plugins[5].name).toBe('test-plugin');
-            expect(settings.plugins[5].archivePath).toBe('kibana/test-plugin');
-            expect(settings.plugins[5].version).toBe('1.0.0');
-          });
+      it('throw an error if there is no kibana plugin', async () => {
+        await copyReplyFile('test_plugin_no_kibana.zip');
+        await expect(getPackData(settings, logger)).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"No kibana plugins found in archive"`
+        );
       });
 
-      it('throw an error if there is no kibana plugin', function () {
-        return copyReplyFile('test_plugin_no_kibana.zip')
-          .then(() => {
-            return getPackData(settings, logger);
-          })
-          .then(shouldReject, (err) => {
-            expect(err.message).toMatch(/No kibana plugins found in archive/i);
-          });
+      it('throw an error with a corrupt zip', async () => {
+        await copyReplyFile('corrupt.zip');
+        await expect(getPackData(settings, logger)).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Error retrieving metadata from plugin archive"`
+        );
       });
 
-      it('throw an error with a corrupt zip', function () {
-        return copyReplyFile('corrupt.zip')
-          .then(() => {
-            return getPackData(settings, logger);
-          })
-          .then(shouldReject, (err) => {
-            expect(err.message).toMatch(/error retrieving/i);
-          });
+      it('throw an error if there an invalid plugin name', async () => {
+        await copyReplyFile('invalid_name.zip');
+        await expect(getPackData(settings, logger)).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Invalid plugin name [invalid name] in kibana.json, expected it to be valid camelCase"`
+        );
       });
-
-      it('throw an error if there an invalid plugin name', function () {
-        return copyReplyFile('invalid_name.zip')
-          .then(() => {
-            return getPackData(settings, logger);
-          })
-          .then(shouldReject, (err) => {
-            expect(err.message).toMatch(/invalid plugin name/i);
-          });
-      });
-
     });
-
   });
-
 });

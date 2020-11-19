@@ -17,34 +17,31 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
-export function KibanaSupertestProvider({ getService }, options) {
-  const config = getService('config');
-  const kibanaServerUrl = options ? formatUrl(options) : formatUrl(config.get('servers.kibana'));
+export function createKibanaSupertestProvider({ certificateAuthorities, kibanaUrl } = {}) {
+  return function ({ getService }) {
+    const config = getService('config');
+    kibanaUrl = kibanaUrl ?? formatUrl(config.get('servers.kibana'));
 
-  const kibanaServerCert = config.get('kbnTestServer.serverArgs')
-    .filter(arg => arg.startsWith('--server.ssl.certificate'))
-    .map(arg => arg.split('=').pop())
-    .map(path => readFileSync(path))
-    .shift();
-
-  return kibanaServerCert
-    ? supertestAsPromised.agent(kibanaServerUrl, { ca: kibanaServerCert })
-    : supertestAsPromised(kibanaServerUrl);
+    return certificateAuthorities
+      ? supertestAsPromised.agent(kibanaUrl, { ca: certificateAuthorities })
+      : supertestAsPromised(kibanaUrl);
+  };
 }
 
 export function KibanaSupertestWithoutAuthProvider({ getService }) {
   const config = getService('config');
   const kibanaServerConfig = config.get('servers.kibana');
 
-  return supertestAsPromised(formatUrl({
-    ...kibanaServerConfig,
-    auth: false
-  }));
+  return supertestAsPromised(
+    formatUrl({
+      ...kibanaServerConfig,
+      auth: false,
+    })
+  );
 }
 
 export function ElasticsearchSupertestProvider({ getService }) {

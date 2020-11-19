@@ -10,18 +10,21 @@ export function createSpaces() {
       id: 'a-space',
       attributes: {
         name: 'a space',
+        disabledFeatures: [],
       },
     },
     {
       id: 'b-space',
       attributes: {
         name: 'b space',
+        disabledFeatures: [],
       },
     },
     {
       id: 'default',
       attributes: {
         name: 'Default Space',
+        disabledFeatures: [],
         _reserved: true,
       },
     },

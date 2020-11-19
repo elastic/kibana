@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
 import { getMetrics } from '../../../../lib/details/get_metrics';
@@ -13,31 +13,30 @@ import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSet } from './metric_set_index_detail';
-import { INDEX_PATTERN_ELASTICSEARCH, INDEX_PATTERN_FILEBEAT } from '../../../../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs/get_logs';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSet;
 
 export function esIndexRoute(server) {
-
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/indices/{id}',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required(),
-          id: Joi.string().required()
+        params: schema.object({
+          clusterUuid: schema.string(),
+          id: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required(),
-          is_advanced: Joi.boolean().required()
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+          is_advanced: schema.boolean(),
+        }),
+      },
     },
     handler: async (req) => {
       try {
@@ -48,16 +47,31 @@ export function esIndexRoute(server) {
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
         const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-        const filebeatIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_FILEBEAT, ccs);
+        const filebeatIndexPattern = prefixIndexPattern(
+          config,
+          config.get('monitoring.ui.logs.index'),
+          '*'
+        );
         const isAdvanced = req.payload.is_advanced;
         const metricSet = isAdvanced ? metricSetAdvanced : metricSetOverview;
 
         const cluster = await getClusterStats(req, esIndexPattern, clusterUuid);
         const showSystemIndices = true; // hardcode to true, because this could be a system index
 
-        const shardStats = await getShardStats(req, esIndexPattern, cluster, { includeNodes: true, includeIndices: true });
-        const indexSummary = await getIndexSummary(req, esIndexPattern, shardStats, { clusterUuid, indexUuid, start, end });
-        const metrics = await getMetrics(req, esIndexPattern, metricSet, [{ term: { 'index_stats.index': indexUuid } }]);
+        const shardStats = await getShardStats(req, esIndexPattern, cluster, {
+          includeNodes: true,
+          includeIndices: true,
+          indexName: indexUuid,
+        });
+        const indexSummary = await getIndexSummary(req, esIndexPattern, shardStats, {
+          clusterUuid,
+          indexUuid,
+          start,
+          end,
+        });
+        const metrics = await getMetrics(req, esIndexPattern, metricSet, [
+          { term: { 'index_stats.index': indexUuid } },
+        ]);
 
         let logs;
         let shardAllocation;
@@ -72,7 +86,12 @@ export function esIndexRoute(server) {
           };
           const shards = await getShardAllocation(req, esIndexPattern, allocationOptions);
 
-          logs = await getLogs(config, req, filebeatIndexPattern, { clusterUuid, indexUuid, start, end });
+          logs = await getLogs(config, req, filebeatIndexPattern, {
+            clusterUuid,
+            indexUuid,
+            start,
+            end,
+          });
 
           shardAllocation = {
             shards,
@@ -88,11 +107,9 @@ export function esIndexRoute(server) {
           logs,
           ...shardAllocation,
         };
-
       } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
-
 }

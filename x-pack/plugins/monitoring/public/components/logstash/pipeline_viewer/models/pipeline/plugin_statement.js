@@ -11,22 +11,17 @@ export class PluginStatement extends Statement {
   constructor(vertex) {
     super(vertex);
 
-    const {
-      pluginType,
-      name
-    } = vertex;
+    const { pluginType, name } = vertex;
 
     this.pluginType = pluginType; // input, filter, or output
     this.name = name; // twitter, grok, elasticsearch, etc.
   }
 
   toList(depth, parentId) {
-    return [ new PluginElement(this, depth, parentId) ];
+    return [new PluginElement(this, depth, parentId)];
   }
 
   static fromPipelineGraphVertex(pluginVertex) {
-    return new PluginStatement(
-      pluginVertex
-    );
+    return new PluginStatement(pluginVertex);
   }
 }

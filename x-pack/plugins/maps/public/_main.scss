@@ -1,14 +1,16 @@
-@import '@elastic/eui/src/components/header/variables';
+@import '../../../../src/core/public/variables';
 
+// sass-lint:disable no-ids
 #maps-plugin {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - #{$euiHeaderChildSize});
+  height: calc(100vh - #{$kbnHeaderOffset});
   width: 100%;
   overflow: hidden;
 }
 
 .mapFullScreen {
+  // sass-lint:disable no-important
   height: 100vh !important;
 }
 
@@ -18,44 +20,6 @@
   flex-direction: column;
 }
 
-
-// MapBox
-
-.mapContainer {
-  flex-grow: 1;
-
-  .mapboxgl-popup {
-    z-index: 100;
-    border-color: $euiColorEmptyShade;
-  }
-
-  .mapboxgl-popup-content {
-    background-color: $euiColorEmptyShade;
-  }
-
-  .mapboxgl-popup-tip {
-    border-top-color: $euiColorEmptyShade !important;
-  }
-
-  .mapboxgl-ctrl-top-left .mapboxgl-ctrl {
-    margin-left: $euiSizeM;
-    margin-top: $euiSizeM;
-  }
-
-  .mapboxgl-ctrl-group:not(:empty) {
-    @include euiBottomShadowLarge;
-    background-color: $euiColorEmptyShade;
-    border-radius: $euiBorderRadius;
-
-    > button {
-      @include size($euiSizeXL);
-
-      + button {
-        border: none;
-      }
-    }
-  }
-}
 .euiColorPicker__emptySwatch {
   position: relative;
 }

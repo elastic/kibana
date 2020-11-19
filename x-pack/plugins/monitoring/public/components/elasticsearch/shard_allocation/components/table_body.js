@@ -4,51 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React from 'react';
 import { Unassigned } from './unassigned';
 import { Assigned } from './assigned';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-const ShardRow = props => {
+const ShardRow = (props) => {
   let unassigned;
   if (props.data.unassigned && props.data.unassigned.length) {
-    unassigned = (
-      <Unassigned shards={props.data.unassigned}/>
-    );
+    unassigned = <Unassigned shards={props.data.unassigned} />;
   } else {
     if (props.cols === 3) {
-      unassigned = (<td />);
+      unassigned = <td />;
     }
   }
   return (
     <tr>
-      { unassigned }
-      <Assigned
-        shardStats={props.shardStats}
-        data={props.data.children}
-        changeUrl={props.changeUrl}
-      />
+      {unassigned}
+      <Assigned shardStats={props.shardStats} data={props.data.children} />
     </tr>
   );
 };
 
 export class TableBody extends React.Component {
-  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.tableBodyDisplayName', {
-    defaultMessage: 'TableBody',
-  });
+  static displayName = i18n.translate(
+    'xpack.monitoring.elasticsearch.shardAllocation.tableBodyDisplayName',
+    {
+      defaultMessage: 'TableBody',
+    }
+  );
 
   createRow = (data, index) => {
-    return (
-      <ShardRow
-        key={`shardRow-${index}`}
-        data={data}
-        {...this.props}
-        changeUrl={this.props.changeUrl}
-      />
-    );
+    return <ShardRow key={`shardRow-${index}`} data={data} {...this.props} />;
   };
 
   render() {
@@ -73,11 +61,7 @@ export class TableBody extends React.Component {
 
     if (this.props.shardStats) {
       if (this.props.rows.length) {
-        return (
-          <tbody>
-            { this.props.rows.map(this.createRow) }
-          </tbody>
-        );
+        return <tbody>{this.props.rows.map(this.createRow)}</tbody>;
       }
     }
 
@@ -88,6 +72,5 @@ export class TableBody extends React.Component {
         </tr>
       </tbody>
     );
-
   }
 }

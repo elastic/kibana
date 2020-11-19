@@ -16,17 +16,18 @@ export default class ClickOutside extends Component {
     document.removeEventListener('mousedown', this.onClick);
   }
 
-  setNodeRef = node => {
+  setNodeRef = (node) => {
     this.nodeRef = node;
   };
 
-  onClick = event => {
+  onClick = (event) => {
     if (this.nodeRef && !this.nodeRef.contains(event.target)) {
       this.props.onClickOutside();
     }
   };
 
   render() {
+    // eslint-disable-next-line no-unused-vars
     const { onClickOutside, ...restProps } = this.props;
     return (
       <div ref={this.setNodeRef} {...restProps}>
@@ -37,5 +38,5 @@ export default class ClickOutside extends Component {
 }
 
 ClickOutside.propTypes = {
-  onClickOutside: PropTypes.func.isRequired
+  onClickOutside: PropTypes.func.isRequired,
 };

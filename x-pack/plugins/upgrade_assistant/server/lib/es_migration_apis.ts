@@ -4,33 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { ILegacyScopedClusterClient } from 'src/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationAPIResponse } from '../../../../../src/core/server/elasticsearch/legacy/api_types';
+import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
 
-import { Request } from 'hapi';
-import {
-  CallClusterWithRequest,
-  DeprecationAPIResponse,
-  DeprecationInfo,
-} from 'src/legacy/core_plugins/elasticsearch';
-
-export interface EnrichedDeprecationInfo extends DeprecationInfo {
-  index?: string;
-  node?: string;
-  reindex?: boolean;
-}
-
-export interface UpgradeAssistantStatus {
-  readyForUpgrade: boolean;
-  cluster: EnrichedDeprecationInfo[];
-  indices: EnrichedDeprecationInfo[];
-}
+import { esIndicesStateCheck } from './es_indices_state_check';
 
 export async function getUpgradeAssistantStatus(
-  callWithRequest: CallClusterWithRequest,
-  req: Request,
+  dataClient: ILegacyScopedClusterClient,
   isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
-  const deprecations = await callWithRequest(req, 'transport.request', {
+  const deprecations = await dataClient.callAsCurrentUser('transport.request', {
     path: '/_migration/deprecations',
     method: 'GET',
   });
@@ -38,7 +23,23 @@ export async function getUpgradeAssistantStatus(
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
   const indices = getCombinedIndexInfos(deprecations);
 
-  const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
+  const indexNames = indices.map(({ index }) => index!);
+
+  // If we have found deprecation information for index/indices check whether the index is
+  // open or closed.
+  if (indexNames.length) {
+    const indexStates = await esIndicesStateCheck(
+      dataClient.callAsCurrentUser.bind(dataClient),
+      indexNames
+    );
+
+    indices.forEach((indexData) => {
+      indexData.blockerForReindexing =
+        indexStates[indexData.index!] === 'closed' ? 'index-closed' : undefined;
+    });
+  }
+
+  const criticalWarnings = cluster.concat(indices).filter((d) => d.level === 'critical');
 
   return {
     readyForUpgrade: criticalWarnings.length === 0,
@@ -49,21 +50,18 @@ export async function getUpgradeAssistantStatus(
 
 // Reformats the index deprecations to an array of deprecation warnings extended with an index field.
 const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
-  Object.keys(deprecations.index_settings).reduce(
-    (indexDeprecations, indexName) => {
-      return indexDeprecations.concat(
-        deprecations.index_settings[indexName].map(
-          d =>
-            ({
-              ...d,
-              index: indexName,
-              reindex: /Index created before/.test(d.message),
-            } as EnrichedDeprecationInfo)
-        )
-      );
-    },
-    [] as EnrichedDeprecationInfo[]
-  );
+  Object.keys(deprecations.index_settings).reduce((indexDeprecations, indexName) => {
+    return indexDeprecations.concat(
+      deprecations.index_settings[indexName].map(
+        (d) =>
+          ({
+            ...d,
+            index: indexName,
+            reindex: /Index created before/.test(d.message),
+          } as EnrichedDeprecationInfo)
+      )
+    );
+  }, [] as EnrichedDeprecationInfo[]);
 
 const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
   const combined = deprecations.cluster_settings
@@ -72,7 +70,7 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
 
   if (isCloudEnabled) {
     // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
-    return combined.filter(d => d.message !== 'Security realm settings structure changed');
+    return combined.filter((d) => d.message !== 'Security realm settings structure changed');
   } else {
     return combined;
   }

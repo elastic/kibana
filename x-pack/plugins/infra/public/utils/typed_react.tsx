@@ -4,28 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import omit from 'lodash/fp/omit';
+import { omit } from 'lodash';
 import React from 'react';
-import { InferableComponentEnhancerWithProps } from 'react-redux';
+import { InferableComponentEnhancerWithProps, ConnectedComponent } from 'react-redux';
 
 export type RendererResult = React.ReactElement<any> | null;
 export type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
 
-export type ChildFunctionRendererProps<RenderArgs> = {
+export type ChildFunctionRendererProps<RenderArgs extends {}> = {
   children: RendererFunction<RenderArgs>;
   initializeOnMount?: boolean;
   resetOnUnmount?: boolean;
 } & RenderArgs;
 
-interface ChildFunctionRendererOptions<RenderArgs> {
+interface ChildFunctionRendererOptions<RenderArgs extends {}> {
   onInitialize?: (props: RenderArgs) => void;
   onCleanup?: (props: RenderArgs) => void;
 }
 
-export const asChildFunctionRenderer = <InjectedProps, OwnProps>(
+export const asChildFunctionRenderer = <InjectedProps extends {}, OwnProps>(
   hoc: InferableComponentEnhancerWithProps<InjectedProps, OwnProps>,
   { onInitialize, onCleanup }: ChildFunctionRendererOptions<InjectedProps> = {}
-) =>
+): ConnectedComponent<
+  React.ComponentClass<{}>,
+  {
+    children: RendererFunction<InjectedProps>;
+    initializeOnMount?: boolean;
+    resetOnUnmount?: boolean;
+  } & OwnProps
+> =>
   hoc(
     class ChildFunctionRenderer extends React.Component<ChildFunctionRendererProps<InjectedProps>> {
       public displayName = 'ChildFunctionRenderer';
@@ -43,21 +50,30 @@ export const asChildFunctionRenderer = <InjectedProps, OwnProps>(
       }
 
       public render() {
-        return this.props.children(this.getRendererArgs());
+        return (this.props.children as ChildFunctionRendererProps<InjectedProps>['children'])(
+          this.getRendererArgs()
+        );
       }
 
       private getRendererArgs = () =>
-        omit(['children', 'initializeOnMount', 'resetOnUnmount'], this.props) as Pick<
+        omit(this.props, ['children', 'initializeOnMount', 'resetOnUnmount']) as Pick<
           ChildFunctionRendererProps<InjectedProps>,
           keyof InjectedProps
         >;
-    }
+    } as any
   );
 
 export type StateUpdater<State, Props = {}> = (
   prevState: Readonly<State>,
   prevProps: Readonly<Props>
 ) => State | null;
+
+export type PropsOfContainer<Container> = Container extends InferableComponentEnhancerWithProps<
+  infer InjectedProps,
+  any
+>
+  ? InjectedProps
+  : never;
 
 export function composeStateUpdaters<State, Props>(...updaters: Array<StateUpdater<State, Props>>) {
   return (state: State, props: Props) =>

@@ -12,6 +12,8 @@ export const sourceConfigurationFieldsFragment = gql`
     description
     logAlias
     metricAlias
+    inventoryDefaultView
+    metricsExplorerDefaultView
     fields {
       container
       host
@@ -48,6 +50,7 @@ export const sourceStatusFieldsFragment = gql`
       type
       searchable
       aggregatable
+      displayable
     }
     logIndicesExist
     metricIndicesExist

@@ -24,14 +24,18 @@ import { join, relative, resolve } from 'path';
 import { getProjectPaths } from '../config';
 import { isDirectory, isFile } from '../utils/fs';
 import { log } from '../utils/log';
-import { readPackageJson, writePackageJson } from '../utils/package_json';
-import { Project } from '../utils/project';
+import {
+  createProductionPackageJson,
+  readPackageJson,
+  writePackageJson,
+} from '../utils/package_json';
 import {
   buildProjectGraph,
   getProjects,
   includeTransitiveProjects,
   topologicallyBatchProjects,
 } from '../utils/projects';
+import { Project } from '..';
 
 export async function buildProductionProjects({
   kibanaRoot,
@@ -46,8 +50,8 @@ export async function buildProductionProjects({
   const projectGraph = buildProjectGraph(projects);
   const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
-  const projectNames = [...projects.values()].map(project => project.name);
-  log.write(`Preparing production build for [${projectNames.join(', ')}]`);
+  const projectNames = [...projects.values()].map((project) => project.name);
+  log.info(`Preparing production build for [${projectNames.join(', ')}]`);
 
   for (const batch of batchedProjects) {
     for (const project of batch) {
@@ -66,7 +70,7 @@ export async function buildProductionProjects({
  * is supplied, we omit projects with build.oss in their package.json set to false.
  */
 async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
-  const projectPaths = getProjectPaths(rootPath, {});
+  const projectPaths = getProjectPaths({ rootPath });
   const projects = await getProjects(rootPath, projectPaths);
   const projectsSubset = [projects.get('kibana')!];
 
@@ -82,7 +86,7 @@ async function getProductionProjects(rootPath: string, onlyOSS?: boolean) {
   productionProjects.delete('kibana');
 
   if (onlyOSS) {
-    productionProjects.forEach(project => {
+    productionProjects.forEach((project) => {
       if (project.getBuildConfig().oss === false) {
         productionProjects.delete(project.json.name);
       }
@@ -125,9 +129,9 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
   await copy(['**/*', '!node_modules/**'], buildProjectPath, {
     cwd: project.getIntermediateBuildDirectory(),
     dot: true,
-    nodir: true,
+    onlyFiles: true,
     parents: true,
-  });
+  } as copy.Options);
 
   // If a project is using an intermediate build directory, we special-case our
   // handling of `package.json`, as the project build process might have copied
@@ -140,5 +144,6 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
     ? await readPackageJson(buildProjectPath)
     : project.json;
 
-  await writePackageJson(buildProjectPath, packageJson);
+  const preparedPackageJson = createProductionPackageJson(packageJson);
+  await writePackageJson(buildProjectPath, preparedPackageJson);
 }

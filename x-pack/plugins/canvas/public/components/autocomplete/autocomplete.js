@@ -15,7 +15,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, keyCodes } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, keys } from '@elastic/eui';
 
 /**
  * An autocomplete component. Currently this is only used for the expression editor but in theory
@@ -133,28 +133,28 @@ export class Autocomplete extends React.Component {
    * Handle key down events for the menu, including selecting the previous and next items, making
    * the item selection, closing the menu, etc.
    */
-  onKeyDown = e => {
-    const { ESCAPE, TAB, ENTER, UP, DOWN, LEFT, RIGHT } = keyCodes;
-    const { keyCode } = e;
+  onKeyDown = (e) => {
+    const { BACKSPACE, ESCAPE, TAB, ENTER, ARROW_UP, ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT } = keys;
+    const { key } = e;
     const { items } = this.props;
     const { isOpen, selectedIndex } = this.state;
 
-    if ([ESCAPE, LEFT, RIGHT].includes(keyCode)) {
+    if ([ESCAPE, ARROW_LEFT, ARROW_RIGHT].includes(key)) {
       this.setState({ isOpen: false });
     }
 
-    if ([TAB, ENTER].includes(keyCode) && isOpen && selectedIndex >= 0) {
+    if ([TAB, ENTER].includes(key) && isOpen && selectedIndex >= 0) {
       e.preventDefault();
       this.onSubmit();
-    } else if (keyCode === UP && items.length > 0 && isOpen) {
+    } else if (key === ARROW_UP && items.length > 0 && isOpen) {
       e.preventDefault();
       this.selectPrevious();
-    } else if (keyCode === DOWN && items.length > 0 && isOpen) {
+    } else if (key === ARROW_DOWN && items.length > 0 && isOpen) {
       e.preventDefault();
       this.selectNext();
-    } else if (e.key === 'Backspace') {
+    } else if (key === BACKSPACE) {
       this.setState({ isOpen: true });
-    } else if (!['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) {
+    } else if (!['Shift', 'Control', 'Alt', 'Meta'].includes(key)) {
       this.setState({ selectedIndex: -1 });
     }
   };
@@ -222,14 +222,14 @@ export class Autocomplete extends React.Component {
                 <EuiFlexItem style={{ maxWidth: 400 }}>
                   <div
                     className="autocompleteItems"
-                    ref={ref => (this.containerRef = ref)}
+                    ref={(ref) => (this.containerRef = ref)}
                     role="listbox"
                   >
                     {header}
                     {items.map((item, i) => (
                       <div
                         key={i}
-                        ref={ref => (this.itemRefs[i] = ref)}
+                        ref={(ref) => (this.itemRefs[i] = ref)}
                         className={
                           'autocompleteItem' +
                           (this.state.selectedIndex === i ? ' autocompleteItem--isActive' : '')
@@ -254,7 +254,7 @@ export class Autocomplete extends React.Component {
         ) : (
           ''
         )}
-        <div className="canvasAutocomplete--inner" onMouseDown={this.onMouseDown}>
+        <div className="canvasAutocomplete__inner" onMouseDown={this.onMouseDown}>
           {this.props.children}
         </div>
       </div>

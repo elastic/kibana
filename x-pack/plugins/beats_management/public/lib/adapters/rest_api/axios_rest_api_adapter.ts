@@ -13,22 +13,22 @@ export class AxiosRestAPIAdapter implements RestAPIAdapter {
   constructor(private readonly xsrfToken: string, private readonly basePath: string) {}
 
   public async get<ResponseData>(url: string, query?: FlatObject<object>): Promise<ResponseData> {
-    return await this.REST.get(url, query ? { params: query } : {}).then(resp => resp.data);
+    return await this.REST.get(url, query ? { params: query } : {}).then((resp) => resp.data);
   }
 
   public async post<ResponseData>(
     url: string,
     body?: { [key: string]: any }
   ): Promise<ResponseData> {
-    return await this.REST.post(url, body).then(resp => resp.data);
+    return await this.REST.post(url, body).then((resp) => resp.data);
   }
 
   public async delete<T>(url: string): Promise<T> {
-    return await this.REST.delete(url).then(resp => resp.data);
+    return await this.REST.delete(url).then((resp) => resp.data);
   }
 
   public async put<ResponseData>(url: string, body?: any): Promise<ResponseData> {
-    return await this.REST.put(url, body).then(resp => resp.data);
+    return await this.REST.put(url, body).then((resp) => resp.data);
   }
 
   private get REST() {
@@ -51,11 +51,11 @@ export class AxiosRestAPIAdapter implements RestAPIAdapter {
     });
     // Add a request interceptor
     globalAPI.interceptors.request.use(
-      config => {
+      (config) => {
         // Do something before request is sent
         return config;
       },
-      error => {
+      (error) => {
         // Do something with request error
         return Promise.reject(error);
       }
@@ -63,11 +63,11 @@ export class AxiosRestAPIAdapter implements RestAPIAdapter {
 
     // Add a response interceptor
     globalAPI.interceptors.response.use(
-      response => {
+      (response) => {
         // Do something with response data
         return response;
       },
-      error => {
+      (error) => {
         // Do something with response error
         return Promise.reject(error);
       }

@@ -1,0 +1,29 @@
+get:
+  summary: Fleet - Agent - List
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              list:
+                type: array
+                items:
+                  type: object
+              total:
+                type: number
+              page:
+                type: number
+              perPage:
+                type: number
+            required:
+              - list
+              - total
+              - page
+              - perPage
+  operationId: get-fleet-agents
+  security:
+    - basicAuth: []

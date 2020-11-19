@@ -6,8 +6,9 @@
 
 export default function ({ loadTestFile }) {
   describe('logstash', function () {
-    this.tags('ciGroup2');
+    this.tags(['ciGroup2']);
 
+    loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./pipeline_list'));
     loadTestFile(require.resolve('./pipeline_create'));
   });

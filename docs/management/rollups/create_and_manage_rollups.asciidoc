@@ -1,90 +1,168 @@
 [role="xpack"]
 [[data-rollups]]
-== Working with rollup indices
-
-The {ref}/xpack-rollup.html[rollup feature in {es}]
-enables you to summarize historical data and store it compactly for future analysis, 
-so you can query, aggregate, and visualize the data using a fraction of the storage. 
-This is a good way to keep costs down when you need to store months or years of 
-historical data for use in visualizations and reports.  
-
-{kib} supports rolled up data in two ways:
-
-* You can create and manage a rollup job in Management
-* You can create a visualization using rolled up data in 
-Visualize and view it in a dashboard
+== Rollup Jobs
 
 
-[role="xpack"]
-[[create-and-manage-rollup-job]]
-=== Create and manage rollup jobs
+A rollup job is a periodic task that aggregates data from indices specified
+by an index pattern, and then rolls it into a new index. Rollup indices are a good way to
+compactly store months or years of historical
+data for use in visualizations and reports.
 
-In Management, you'll find a UI for viewing, creating, starting, stopping, and 
-deleting rollup jobs. A rollup job is a periodic task that summarizes data from 
-indices specified by an index pattern and rolls it into a new index. To navigate 
-to the UI, go to *Management*, and under *Elasticsearch*, click *Rollup Jobs*. 
+To get started, open the main menu, then click *Stack Management > Rollup Jobs*.
 
 [role="screenshot"]
 image::images/management_rollup_list.png[][List of currently active rollup jobs]
 
+Before using this feature, you should be familiar with how rollups work.
+{ref}/xpack-rollup.html[Rolling up historical data] is a good source for more detailed information.
+
 [float]
-[[create-rollup-job]]
-==== Creating a rollup job
+=== Required permissions
 
-{kib} makes it easy for you to create a rollup job by walking you through the 
-process step by step. The first step is to define the job logistics. These include 
-the name of the rollup job, the index or indices to summarize, and the output rollup index.  
+The `manage_rollup` cluster privilege is required to access *Rollup jobs*.
 
-The index pattern cannot match the name of the output rollup index. For example,
-if your index pattern is `metricbeat-*`, you cannot name your rollup index
-`metricbeat-rollup`.  Otherwise, the job will attempt to capture the data in the 
-rollup index.
+To add the privilege, open the main menu, then click *Stack Management > Roles*.
+
+[float]
+[[create-and-manage-rollup-job]]
+=== Create a rollup job
+
+{kib} makes it easy for you to create a rollup job by walking you through
+the process. You fill in the name, data flow, and how often you want to roll
+up the data.  Then you define a date histogram aggregation for the rollup job
+and optionally define terms, histogram, and metrics aggregations.
+
+When defining the index pattern, you must enter a name that is different than
+the output rollup index. Otherwise, the job
+will attempt to capture the data in the rollup index. For example, if your index pattern is `metricbeat-*`,
+you can name your rollup index `rollup-metricbeat`, but not `metricbeat-rollup`.
 
 [role="screenshot"]
 image::images/management_create_rollup_job.png[][Wizard that walks you through creation of a rollup job]
 
-You must set a schedule for the rollup job: how often to collect the data, 
-the number of documents to roll up at a time, and the duration of its latency. 
-The latency buffer field is provided to protect against the late arrival of data 
-from Beats or other sources. By delaying the rollup for the specified amount of 
-time from when the job starts, you allow for the inclusion of late-arriving data 
-in the rollup.
-
-In the subsequent phases, you define the Date Histogram aggregation for the job 
-and optionally the Terms and Histogram aggregations.
-
-* The Date Histogram aggregation defines the time intervals for summarizing the data. 
-This value is important because you cannot search the data with a smaller value 
-than this interval. However, you can aggregate buckets in a larger time interval. 
-
-* The Terms histogram enables you to split the time buckets into sub buckets for 
-term field values. 
-
-* The Histogram aggregation enables you to split the time buckets into sub buckets 
-for numeric field values. 
-
-The final step is to specify the fields for calculating metrics. For each selected 
-field, you can collect any or all of the following: value count, average, sum, min, and max.
-
-Before you save the rollup job, {kib} displays a summary of the rollup job for 
-validation.
-
 [float]
 [[manage-rollup-job]]
-==== Managing rollup jobs
+=== Start, stop, and delete rollup jobs
 
-Selecting a job on the *Rollup jobs* page shows its details. The Manage menu in 
-the lower right enables you to start, stop, and delete the rollup job.
+Once you’ve saved a rollup job, you’ll see it the *Rollup Jobs* overview page,
+where you can drill down for further investigation. The *Manage* menu enables
+you to start, stop, and delete the rollup job.
 You must first stop a rollup job before deleting it.
 
 [role="screenshot"]
 image::images/management_rollup_job_details.png[][Rollup job details]
 
-You can start, stop, and delete an existing rollup job, but edits are not supported. 
-If you want to make any changes, delete the existing job and create a new one with 
-the updated specifications. Be sure to use a different name for the new rollup job; 
-reusing the same name could lead to problems with mismatched job configurations. 
-More about logistical details for the {ref}/rollup-job-config.html[rollup job configuration] 
-can be found in the {es} documentation.
+You can’t change a rollup job after you’ve created it. To select additional fields
+or redefine terms, you must delete the existing job, and then create a new one
+with the updated specifications. Be sure to use a different name for the new rollup
+job&mdash;reusing the same name can lead to problems with mismatched job configurations.
+You can read more at {ref}/rollup-job-config.html[rollup job configuration].
+
+[float]
+[[rollup-data-tutorial]]
+=== Try it: Create and visualize rolled up data
+
+This example creates a rollup job to capture log data from sample web logs.
+To follow along, add the sample web logs data set.
+
+In this example, you want data that is older than 7 days in the target index pattern `kibana_sample_data_logs`
+to roll up once a day into the index `rollup_logstash`. You’ll bucket the
+rolled up data on an hourly basis, using 60m for the time bucket configuration.
+This allows for more granular queries, such as 2h and 12h.
+
+[float]
+==== Create the rollup job
+
+As you walk through the *Create rollup job* UI, enter the data:
+
+|===
+|*Field* |*Value*
+
+|Name
+|logs_job
+
+|Index pattern
+|`kibana_sample_data_logs`
+
+|Rollup index name
+|`rollup_logstash`
+
+|Frequency
+|Every day at midnight
+
+|Page size
+|1000
+
+|Delay (latency buffer)|7d
+
+|Date field
+|@timestamp
+
+|Time bucket size
+|60m
+
+|Time zone
+|UTC
+
+|Terms
+|geo.src, machine.os.keyword
+
+|Histogram
+|bytes, memory
+
+|Histogram interval
+|1000
+
+|Metrics
+|bytes (average)
+|===
+
+The terms, histogram, and metrics fields reflect
+the key information to retain in the rolled up data: where visitors are from (geo.src),
+what operating system they are using (machine.os.keyword),
+and how much data is being sent (bytes).
+
+You can now use the rolled up data for analysis at a fraction of the storage cost
+of the original index. The original data can live side by side with the new
+rollup index, or you can remove or archive it using <<creating-index-lifecycle-policies,Index Lifecycle Management>>.
+
+[float]
+==== Visualize the rolled up data
+
+Your next step is to visualize your rolled up data in a vertical bar chart.
+Most visualizations support rolled up data, with the exception of Timelion and Vega visualizations.
 
 
+. Open the main menu, then click *Stack Management > Index Patterns*.
+
+. Click *Create index pattern*, and select *Rollup index pattern* from the dropdown.
++
+[role="screenshot"]
+image::images/management-rollup-index-pattern.png[][Create rollup index pattern]
+
+. Enter *rollup_logstash,kibana_sample_logs* as your *Index Pattern* and `@timestamp`
+as the *Time Filter field name*.
++
+The notation for a combination index pattern with both raw and rolled up data
+is `rollup_logstash,kibana_sample_data_logs`. In this index pattern, `rollup_logstash`
+matches the rolled up index pattern and `kibana_sample_data_logs` matches the index
+pattern for raw data.
+
+. Open the main menu, click *Dashboard*, then create and add a vertical bar chart.
+ 
+. Choose `rollup_logstash,kibana_sample_data_logs`
+as your source to see both the raw and rolled up data.
++
+[role="screenshot"]
+image::images/management-create-rollup-bar-chart.png[][Create visualization of rolled up data]
+
+. Look at the data in your visualization.
++
+[role="screenshot"]
+image::images/management_rollup_job_vis.png[][Visualization of rolled up data]
+
+. Optionally, create a dashboard that contains visualizations of the rolled up
+data, raw data, or both.
++
+[role="screenshot"]
+image::images/management_rollup_job_dashboard.png[][Dashboard with rolled up data]

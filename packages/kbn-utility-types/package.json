@@ -1,0 +1,18 @@
+{
+  "name": "@kbn/utility-types",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "target",
+  "types": "target/index.d.ts",
+  "kibana": {
+    "devOnly": true
+  },
+  "scripts": {
+    "build": "../../node_modules/.bin/tsc",
+    "kbn:bootstrap": "../../node_modules/.bin/tsc",
+    "kbn:watch": "../../node_modules/.bin/tsc --watch",
+    "test": "../../node_modules/.bin/tsd",
+    "clean": "../../node_modules/.bin/del target"
+  }
+}

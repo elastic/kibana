@@ -18,11 +18,12 @@
  */
 
 import { statSync } from 'fs';
+
+import del from 'del';
+
 import { errorIfXPackRemove } from '../lib/error_if_x_pack';
 
-import rimraf from 'rimraf';
-
-export default function remove(settings, logger) {
+export function remove(settings, logger) {
   try {
     let stat;
     try {
@@ -37,7 +38,7 @@ export default function remove(settings, logger) {
     }
 
     logger.log(`Removing ${settings.plugin}...`);
-    rimraf.sync(settings.pluginPath);
+    del.sync(settings.pluginPath, { force: true });
     logger.log('Plugin removal complete');
   } catch (err) {
     logger.error(`Unable to remove plugin because of error: "${err.message}"`);

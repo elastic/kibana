@@ -1,0 +1,32 @@
+#!/bin/groovy
+
+library 'kibana-pipeline-library'
+kibanaLibrary.load()
+
+kibanaPipeline(timeoutMinutes: 120) {
+  githubCommitStatus.trackBuild(params.commit, 'kibana-ci-baseline') {
+    ciStats.trackBuild {
+      catchError {
+        withEnv([
+          'CI_PARALLEL_PROCESS_NUMBER=1'
+        ]) {
+          parallel([
+            'oss-baseline': {
+              workers.ci(name: 'oss-baseline', size: 'l', ramDisk: true, runErrorReporter: false) {
+                kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh')()
+              }
+            },
+            'xpack-baseline': {
+              workers.ci(name: 'xpack-baseline', size: 'l', ramDisk: true, runErrorReporter: false) {
+                kibanaPipeline.functionalTestProcess('xpack-baseline', './test/scripts/jenkins_xpack_baseline.sh')()
+              }
+            },
+          ])
+        }
+      }
+
+      kibanaPipeline.sendMail()
+      slackNotifications.onFailure()
+    }
+  }
+}

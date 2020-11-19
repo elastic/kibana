@@ -19,14 +19,10 @@
 
 import path from 'path';
 
-import {
-  extractHtmlMessages,
-  extractCodeMessages,
-  extractPugMessages,
-} from './extractors';
+import { extractHtmlMessages, extractCodeMessages } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
-import { createFailError, isFailError } from '../run';
+import { createFailError, isFailError } from '@kbn/dev-utils';
 
 function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);
@@ -42,16 +38,16 @@ function addMessageToMap(targetMap, key, value, reporter) {
 }
 
 function filterEntries(entries, exclude) {
-  return entries.filter(entry =>
-    exclude.every(excludedPath => !normalizePath(entry).startsWith(excludedPath))
+  return entries.filter((entry) =>
+    exclude.every((excludedPath) => !normalizePath(entry).startsWith(excludedPath))
   );
 }
 
 export function validateMessageNamespace(id, filePath, allowedPaths, reporter) {
   const normalizedPath = normalizePath(filePath);
 
-  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPath]) =>
-    normalizedPath.startsWith(`${pluginPath}/`)
+  const [expectedNamespace] = Object.entries(allowedPaths).find(([, pluginPaths]) =>
+    pluginPaths.some((pluginPath) => normalizedPath.startsWith(`${pluginPath}/`))
   );
 
   if (!id.startsWith(`${expectedNamespace}.`)) {
@@ -62,38 +58,53 @@ See .i18nrc.json for the list of supported namespaces.`)
   }
 }
 
-export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
-  const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html}', {
+export async function matchEntriesWithExctractors(inputPath, options = {}) {
+  const { additionalIgnore = [], mark = false, absolute = false } = options;
+  const ignore = [
+    '**/node_modules/**',
+    '**/__tests__/**',
+    '**/dist/**',
+    '**/target/**',
+    '**/vendor/**',
+    '**/*.test.{js,jsx,ts,tsx}',
+    '**/*.d.ts',
+  ].concat(additionalIgnore);
+
+  const entries = await globAsync('*.{js,jsx,ts,tsx,html}', {
     cwd: inputPath,
     matchBase: true,
-    ignore: ['**/node_modules/**', '**/__tests__/**', '**/*.test.{js,jsx,ts,tsx}', '**/*.d.ts'],
+    ignore,
+    mark,
+    absolute,
   });
 
-  const { htmlEntries, codeEntries, pugEntries } = entries.reduce(
+  const { htmlEntries, codeEntries } = entries.reduce(
     (paths, entry) => {
       const resolvedPath = path.resolve(inputPath, entry);
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
-      } else if (resolvedPath.endsWith('.pug')) {
-        paths.pugEntries.push(resolvedPath);
       } else {
         paths.codeEntries.push(resolvedPath);
       }
 
       return paths;
     },
-    { htmlEntries: [], codeEntries: [], pugEntries: [] }
+    { htmlEntries: [], codeEntries: [] }
   );
 
-  await Promise.all(
-    [
-      [htmlEntries, extractHtmlMessages],
-      [codeEntries, extractCodeMessages],
-      [pugEntries, extractPugMessages],
-    ].map(async ([entries, extractFunction]) => {
+  return [
+    [htmlEntries, extractHtmlMessages],
+    [codeEntries, extractCodeMessages],
+  ];
+}
+
+export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
+  const categorizedEntries = await matchEntriesWithExctractors(inputPath);
+  return Promise.all(
+    categorizedEntries.map(async ([entries, extractFunction]) => {
       const files = await Promise.all(
-        filterEntries(entries, config.exclude).map(async entry => {
+        filterEntries(entries, config.exclude).map(async (entry) => {
           return {
             name: entry,
             content: await readFileAsync(entry),

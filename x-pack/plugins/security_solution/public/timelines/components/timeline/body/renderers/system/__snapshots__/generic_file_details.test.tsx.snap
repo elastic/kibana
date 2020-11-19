@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SystemGenericFileDetails rendering it renders the default SystemGenericDetails 1`] = `
+<Details>
+  <SystemGenericFileLine
+    contextId="[contextid-123]"
+    eventAction="process_started"
+    hostName="zeek-london"
+    id="30"
+    message={null}
+    outcome="failure"
+    processPid={6278}
+    showMessage={true}
+    text="[generic-text-123]"
+    userName="Evan"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <NetflowRenderer
+    data={
+      Object {
+        "_id": "30",
+        "event": Object {
+          "action": Array [
+            "process_started",
+          ],
+          "dataset": Array [
+            "login",
+          ],
+          "kind": Array [
+            "event",
+          ],
+          "module": Array [
+            "system",
+          ],
+          "outcome": Array [
+            "failure",
+          ],
+        },
+        "host": Object {
+          "id": Array [
+            "7c21f5ed03b04d0299569d221fe18bbc",
+          ],
+          "ip": Array [
+            "46.101.3.136",
+            "10.16.0.5",
+            "fe80::4066:42ff:fe19:b3b9",
+          ],
+          "name": Array [
+            "zeek-london",
+          ],
+        },
+        "process": Object {
+          "pid": Array [
+            6278,
+          ],
+        },
+        "source": Object {
+          "ip": Array [
+            "128.199.212.120",
+          ],
+        },
+        "user": Object {
+          "name": Array [
+            "Evan",
+          ],
+        },
+      }
+    }
+    timelineId="test"
+  />
+</Details>
+`;

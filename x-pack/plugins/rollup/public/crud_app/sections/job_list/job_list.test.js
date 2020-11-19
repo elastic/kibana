@@ -4,26 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../../test_utils';
+import React from 'react';
+import { registerTestBed } from '@kbn/test/jest';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => {},
-  breadcrumbs: { set: () => {} },
-  getInjected: (key) => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {},
-        catalogue: {}
-      };
-    }
-  }
-}));
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+const startMock = coreMock.createStart();
 
 jest.mock('../../services', () => {
-  const services = require.requireActual('../../services');
+  const services = jest.requireActual('../../services');
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),
@@ -36,10 +27,19 @@ const defaultProps = {
   refreshJobs: () => {},
   openDetailPanel: () => {},
   hasJobs: false,
-  isLoading: false
+  isLoading: false,
 };
 
-const initTestBed = registerTestBed(JobList, { defaultProps, store: rollupJobsStore });
+const services = {
+  setBreadcrumbs: startMock.chrome.setBreadcrumbs,
+};
+const Component = (props) => (
+  <KibanaContextProvider services={services}>
+    <JobList {...props} />
+  </KibanaContextProvider>
+);
+
+const initTestBed = registerTestBed(Component, { defaultProps, store: rollupJobsStore });
 
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {
@@ -52,22 +52,22 @@ describe('<JobList />', () => {
     const { component, exists } = initTestBed({ isLoading: true });
 
     expect(exists('jobListLoading')).toBeTruthy();
-    expect(component.find('JobTableUi').length).toBeFalsy();
+    expect(component.find('JobTable').length).toBeFalsy();
   });
 
   it('should display the <JobTable /> when there are jobs', () => {
     const { component, exists } = initTestBed({ hasJobs: true });
 
     expect(exists('jobListLoading')).toBeFalsy();
-    expect(component.find('JobTableUi').length).toBeTruthy();
+    expect(component.find('JobTable').length).toBeTruthy();
   });
 
   describe('when there is an API error', () => {
     const { exists, find } = initTestBed({
       jobLoadError: {
         status: 400,
-        data: { statusCode: 400, error: 'Houston we got a problem.' }
-      }
+        body: { statusCode: 400, error: 'Houston we got a problem.' },
+      },
     });
 
     it('should display a callout with the status and the message', () => {
@@ -76,7 +76,7 @@ describe('<JobList />', () => {
     });
   });
 
-  describe('when the user does not have the permission to access it', () =>  {
+  describe('when the user does not have the permission to access it', () => {
     const { exists } = initTestBed({ jobLoadError: { status: 403 } });
 
     it('should render a callout message', () => {

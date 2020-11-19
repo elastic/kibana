@@ -17,19 +17,28 @@
  * under the License.
  */
 
+import { readFileSync } from 'fs';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { createKibanaSupertestProvider } from '../../services';
+
 export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
+  const certificateAuthorities = [readFileSync(CA_CERT_PATH)];
 
   return {
-    testFiles: [
-      require.resolve('./'),
-    ],
-    services: httpConfig.get('services'),
+    testFiles: [require.resolve('./')],
+    services: {
+      ...httpConfig.get('services'),
+      supertest: createKibanaSupertestProvider({
+        certificateAuthorities,
+      }),
+    },
     servers: {
       ...httpConfig.get('servers'),
       kibana: {
         ...httpConfig.get('servers.kibana'),
         protocol: 'https',
+        certificateAuthorities,
       },
     },
     junit: {
@@ -41,8 +50,8 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...httpConfig.get('kbnTestServer.serverArgs'),
         '--server.ssl.enabled=true',
-        `--server.ssl.key=${require.resolve('../../../dev_certs/server.key')}`,
-        `--server.ssl.certificate=${require.resolve('../../../dev_certs/server.crt')}`,
+        `--server.ssl.key=${KBN_KEY_PATH}`,
+        `--server.ssl.certificate=${KBN_CERT_PATH}`,
       ],
     },
   };

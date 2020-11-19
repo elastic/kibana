@@ -29,6 +29,7 @@ import {
 } from 'joi';
 import { isPlainObject } from 'lodash';
 import { isDuration } from 'moment';
+import { Stream } from 'stream';
 import { ByteSizeValue, ensureByteSizeValue } from '../byte_size_value';
 import { ensureDuration } from '../duration';
 
@@ -41,9 +42,7 @@ function isMap<K, V>(o: any): o is Map<K, V> {
 const anyCustomRule: Rules = {
   name: 'custom',
   params: {
-    validator: Joi.func()
-      .maxArity(1)
-      .required(),
+    validator: Joi.func().maxArity(1).required(),
   },
   validate(params, value, state, options) {
     let validationResultMessage;
@@ -81,11 +80,54 @@ export const internals = Joi.extend([
     base: Joi.boolean(),
     coerce(value: any, state: State, options: ValidationOptions) {
       // If value isn't defined, let Joi handle default value if it's defined.
-      if (value !== undefined && typeof value !== 'boolean') {
+      if (value === undefined) {
+        return value;
+      }
+
+      // Allow strings 'true' and 'false' to be coerced to booleans (case-insensitive).
+
+      // From Joi docs on `Joi.boolean`:
+      // > Generates a schema object that matches a boolean data type. Can also
+      // >  be called via bool(). If the validation convert option is on
+      // > (enabled by default), a string (either "true" or "false") will be
+      // converted to a boolean if specified.
+      if (typeof value === 'string') {
+        const normalized = value.toLowerCase();
+        value = normalized === 'true' ? true : normalized === 'false' ? false : value;
+      }
+
+      if (typeof value !== 'boolean') {
         return this.createError('boolean.base', { value }, state, options);
       }
 
       return value;
+    },
+    rules: [anyCustomRule],
+  },
+  {
+    name: 'binary',
+
+    base: Joi.binary(),
+    coerce(value: any, state: State, options: ValidationOptions) {
+      // If value isn't defined, let Joi handle default value if it's defined.
+      if (value !== undefined && !(typeof value === 'object' && Buffer.isBuffer(value))) {
+        return this.createError('binary.base', { value }, state, options);
+      }
+
+      return value;
+    },
+    rules: [anyCustomRule],
+  },
+  {
+    name: 'stream',
+
+    pre(value: any, state: State, options: ValidationOptions) {
+      // If value isn't defined, let Joi handle default value if it's defined.
+      if (value instanceof Stream) {
+        return value as any;
+      }
+
+      return this.createError('stream.base', { value }, state, options);
     },
     rules: [anyCustomRule],
   },
@@ -206,12 +248,23 @@ export const internals = Joi.extend([
 
     base: Joi.object(),
     coerce(value: any, state: State, options: ValidationOptions) {
-      // If value isn't defined, let Joi handle default value if it's defined.
-      if (value !== undefined && !isPlainObject(value)) {
-        return this.createError('object.base', { value }, state, options);
+      if (value === undefined || isPlainObject(value)) {
+        return value;
       }
 
-      return value;
+      if (options.convert && typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          if (isPlainObject(parsed)) {
+            return parsed;
+          }
+          return this.createError('object.base', { value: parsed }, state, options);
+        } catch (e) {
+          return this.createError('object.parse', { value }, state, options);
+        }
+      }
+
+      return this.createError('object.base', { value }, state, options);
     },
     rules: [anyCustomRule],
   },
@@ -219,8 +272,22 @@ export const internals = Joi.extend([
     name: 'map',
 
     coerce(value: any, state: State, options: ValidationOptions) {
+      if (value === undefined) {
+        return value;
+      }
       if (isPlainObject(value)) {
         return new Map(Object.entries(value));
+      }
+      if (options.convert && typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          if (isPlainObject(parsed)) {
+            return new Map(Object.entries(parsed));
+          }
+          return this.createError('map.base', { value: parsed }, state, options);
+        } catch (e) {
+          return this.createError('map.parse', { value }, state, options);
+        }
       }
 
       return value;
@@ -245,7 +312,8 @@ export const internals = Joi.extend([
           for (const [entryKey, entryValue] of value) {
             const { value: validatedEntryKey, error: keyError } = Joi.validate(
               entryKey,
-              params.key
+              params.key,
+              { presence: 'required' }
             );
 
             if (keyError) {
@@ -254,7 +322,8 @@ export const internals = Joi.extend([
 
             const { value: validatedEntryValue, error: valueError } = Joi.validate(
               entryValue,
-              params.value
+              params.value,
+              { presence: 'required' }
             );
 
             if (valueError) {
@@ -277,11 +346,23 @@ export const internals = Joi.extend([
   {
     name: 'record',
     pre(value: any, state: State, options: ValidationOptions) {
-      if (!isPlainObject(value)) {
-        return this.createError('record.base', { value }, state, options);
+      if (value === undefined || isPlainObject(value)) {
+        return value;
       }
 
-      return value as any;
+      if (options.convert && typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          if (isPlainObject(parsed)) {
+            return parsed;
+          }
+          return this.createError('record.base', { value: parsed }, state, options);
+        } catch (e) {
+          return this.createError('record.parse', { value }, state, options);
+        }
+      }
+
+      return this.createError('record.base', { value }, state, options);
     },
     rules: [
       anyCustomRule,
@@ -293,7 +374,8 @@ export const internals = Joi.extend([
           for (const [entryKey, entryValue] of Object.entries(value)) {
             const { value: validatedEntryKey, error: keyError } = Joi.validate(
               entryKey,
-              params.key
+              params.key,
+              { presence: 'required' }
             );
 
             if (keyError) {
@@ -302,7 +384,8 @@ export const internals = Joi.extend([
 
             const { value: validatedEntryValue, error: valueError } = Joi.validate(
               entryValue,
-              params.value
+              params.value,
+              { presence: 'required' }
             );
 
             if (valueError) {
@@ -327,12 +410,23 @@ export const internals = Joi.extend([
 
     base: Joi.array(),
     coerce(value: any, state: State, options: ValidationOptions) {
-      // If value isn't defined, let Joi handle default value if it's defined.
-      if (value !== undefined && !Array.isArray(value)) {
-        return this.createError('array.base', { value }, state, options);
+      if (value === undefined || Array.isArray(value)) {
+        return value;
       }
 
-      return value;
+      if (options.convert && typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          if (Array.isArray(parsed)) {
+            return parsed;
+          }
+          return this.createError('array.base', { value: parsed }, state, options);
+        } catch (e) {
+          return this.createError('array.parse', { value }, state, options);
+        }
+      }
+
+      return this.createError('array.base', { value }, state, options);
     },
     rules: [anyCustomRule],
   },

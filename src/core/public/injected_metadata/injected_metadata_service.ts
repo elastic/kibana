@@ -18,18 +18,22 @@
  */
 
 import { get } from 'lodash';
+import { deepFreeze } from '@kbn/std';
 import { DiscoveredPlugin, PluginName } from '../../server';
-import { UiSettingsState } from '../ui_settings';
-import { deepFreeze } from '../utils/deep_freeze';
+import {
+  EnvironmentMode,
+  PackageInfo,
+  UiSettingsParams,
+  UserProvidedValues,
+} from '../../server/types';
+import { AppCategory } from '../';
 
-/** @public */
-export interface LegacyNavLink {
-  id: string;
-  title: string;
-  order: number;
-  url: string;
-  icon?: string;
-  euiIconType?: string;
+export interface InjectedPluginMetadata {
+  id: PluginName;
+  plugin: DiscoveredPlugin;
+  config?: {
+    [key: string]: unknown;
+  };
 }
 
 /** @internal */
@@ -37,32 +41,26 @@ export interface InjectedMetadataParams {
   injectedMetadata: {
     version: string;
     buildNumber: number;
+    branch: string;
     basePath: string;
+    serverBasePath: string;
+    category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
     };
     vars: {
       [key: string]: unknown;
     };
-    uiPlugins: Array<{
-      id: PluginName;
-      plugin: DiscoveredPlugin;
-    }>;
+    env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
+    };
+    uiPlugins: InjectedPluginMetadata[];
+    anonymousStatusPage: boolean;
     legacyMetadata: {
-      app: unknown;
-      translations: unknown;
-      bundleId: string;
-      nav: LegacyNavLink[];
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      basePath: string;
-      serverName: string;
-      devMode: boolean;
       uiSettings: {
-        defaults: UiSettingsState;
-        user?: UiSettingsState;
+        defaults: Record<string, UiSettingsParams>;
+        user?: Record<string, UserProvidedValues>;
       };
     };
   };
@@ -93,6 +91,14 @@ export class InjectedMetadataService {
         return this.state.basePath;
       },
 
+      getServerBasePath: () => {
+        return this.state.serverBasePath;
+      },
+
+      getAnonymousStatusPage: () => {
+        return this.state.anonymousStatusPage;
+      },
+
       getKibanaVersion: () => {
         return this.state.version;
       },
@@ -120,6 +126,10 @@ export class InjectedMetadataService {
       getKibanaBuildNumber: () => {
         return this.state.buildNumber;
       },
+
+      getKibanaBranch: () => {
+        return this.state.branch;
+      },
     };
   }
 }
@@ -127,11 +137,13 @@ export class InjectedMetadataService {
 /**
  * Provides access to the metadata injected by the server into the page
  *
- * @public
+ * @internal
  */
 export interface InjectedMetadataSetup {
   getBasePath: () => string;
+  getServerBasePath: () => string;
   getKibanaBuildNumber: () => number;
+  getKibanaBranch: () => string;
   getKibanaVersion: () => string;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
@@ -139,25 +151,12 @@ export interface InjectedMetadataSetup {
   /**
    * An array of frontend plugins in topological order.
    */
-  getPlugins: () => Array<{
-    id: string;
-    plugin: DiscoveredPlugin;
-  }>;
+  getPlugins: () => InjectedPluginMetadata[];
+  getAnonymousStatusPage: () => boolean;
   getLegacyMetadata: () => {
-    app: unknown;
-    translations: unknown;
-    bundleId: string;
-    nav: LegacyNavLink[];
-    version: string;
-    branch: string;
-    buildNum: number;
-    buildSha: string;
-    basePath: string;
-    serverName: string;
-    devMode: boolean;
     uiSettings: {
-      defaults: UiSettingsState;
-      user?: UiSettingsState | undefined;
+      defaults: Record<string, UiSettingsParams>;
+      user?: Record<string, UserProvidedValues> | undefined;
     };
   };
   getInjectedVar: (name: string, defaultValue?: any) => unknown;
@@ -166,5 +165,5 @@ export interface InjectedMetadataSetup {
   };
 }
 
-/** @public */
+/** @internal */
 export type InjectedMetadataStart = InjectedMetadataSetup;

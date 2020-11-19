@@ -6,18 +6,18 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import euiStyled from '../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 
-export const LogStatusbar = euiStyled(EuiFlexGroup).attrs({
+export const LogStatusbar = euiStyled(EuiFlexGroup).attrs(() => ({
   alignItems: 'center',
   gutterSize: 'none',
   justifyContent: 'flexEnd',
-})`
-  padding: ${props => props.theme.eui.euiSizeS};
-  border-top: ${props => props.theme.eui.euiBorderThin};
+}))`
+  padding: ${(props) => props.theme.eui.euiSizeS};
+  border-top: ${(props) => props.theme.eui.euiBorderThin};
   max-height: 48px;
   min-height: 48px;
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   flex-direction: row;
 `;
 

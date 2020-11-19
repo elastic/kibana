@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'timelion', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
 
@@ -40,9 +38,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Timelion');
       });
 
@@ -73,9 +69,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Timelion');
       });
 
@@ -86,7 +80,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -103,7 +97,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -120,7 +114,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

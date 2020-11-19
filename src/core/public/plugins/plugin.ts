@@ -17,9 +17,12 @@
  * under the License.
  */
 
-import { DiscoveredPlugin, PluginName } from '../../server';
-import { PluginInitializerContext, PluginSetupContext, PluginStartContext } from './plugin_context';
-import { loadPluginBundle } from './plugin_loader';
+import { Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
+import { PluginInitializerContext } from './plugin_context';
+import { read } from './plugin_reader';
+import { CoreStart, CoreSetup } from '..';
 
 /**
  * The interface that should be returned by a `PluginInitializer`.
@@ -27,14 +30,14 @@ import { loadPluginBundle } from './plugin_loader';
  * @public
  */
 export interface Plugin<
-  TSetup,
-  TStart,
-  TPluginsSetup extends Record<string, unknown> = {},
-  TPluginsStart extends Record<string, unknown> = {}
+  TSetup = void,
+  TStart = void,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > {
-  setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
-  start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
-  stop?: () => void;
+  setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+  start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+  stop?(): void;
 }
 
 /**
@@ -46,8 +49,8 @@ export interface Plugin<
 export type PluginInitializer<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<string, unknown> = {},
-  TPluginsStart extends Record<string, unknown> = {}
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
@@ -59,18 +62,21 @@ export type PluginInitializer<
 export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
-  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
 > {
   public readonly name: DiscoveredPlugin['id'];
   public readonly configPath: DiscoveredPlugin['configPath'];
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
-  private initializer?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
+  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
+  public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
+
   constructor(
-    readonly discoveredPlugin: DiscoveredPlugin,
+    public readonly discoveredPlugin: DiscoveredPlugin,
+    public readonly opaqueId: PluginOpaqueId,
     private readonly initializerContext: PluginInitializerContext
   ) {
     this.name = discoveredPlugin.id;
@@ -80,25 +86,13 @@ export class PluginWrapper<
   }
 
   /**
-   * Loads the plugin's bundle into the browser. Should be called in parallel with all plugins
-   * using `Promise.all`. Must be called before `setup`.
-   * @param addBasePath Function that adds the base path to a string for plugin bundle path.
-   */
-  public async load(addBasePath: (path: string) => string) {
-    this.initializer = await loadPluginBundle<TSetup, TStart, TPluginsSetup, TPluginsStart>(
-      addBasePath,
-      this.name
-    );
-  }
-
-  /**
    * Instantiates plugin and calls `setup` function exposed by the plugin initializer.
    * @param setupContext Context that consists of various core services tailored specifically
    * for the `setup` lifecycle event.
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: PluginSetupContext, plugins: TPluginsSetup) {
+  public async setup(setupContext: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup) {
     this.instance = await this.createPluginInstance();
 
     return await this.instance.setup(setupContext, plugins);
@@ -111,12 +105,16 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public async start(startContext: PluginStartContext, plugins: TPluginsStart) {
+  public async start(startContext: CoreStart, plugins: TPluginsStart) {
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    return await this.instance.start(startContext, plugins);
+    const startContract = await this.instance.start(startContext, plugins);
+
+    this.startDependencies$.next([startContext, plugins, startContract]);
+
+    return startContract;
   }
 
   /**
@@ -135,11 +133,14 @@ export class PluginWrapper<
   }
 
   private async createPluginInstance() {
-    if (this.initializer === undefined) {
-      throw new Error(`Plugin "${this.name}" can't be setup since its bundle isn't loaded.`);
-    }
+    const initializer = read(this.name) as PluginInitializer<
+      TSetup,
+      TStart,
+      TPluginsSetup,
+      TPluginsStart
+    >;
 
-    const instance = this.initializer(this.initializerContext);
+    const instance = initializer(this.initializerContext);
 
     if (typeof instance.setup !== 'function') {
       throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);

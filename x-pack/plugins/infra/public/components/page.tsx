@@ -6,22 +6,23 @@
 
 import { EuiPage } from '@elastic/eui';
 
-import euiStyled from '../../../../common/eui_styled_components';
+import { euiStyled } from '../../../observability/public';
 
 export const ColumnarPage = euiStyled.div`
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  flex: 1 0 0%;
+  flex: 1 0 auto;
+  width: 100%
 `;
 
 export const PageContent = euiStyled.div`
   flex: 1 0 0%;
   display: flex;
   flex-direction: row;
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
 `;
 
 export const FlexPage = euiStyled(EuiPage)`
+  align-self: stretch;
   flex: 1 0 0%;
 `;

@@ -1,7 +1,7 @@
 # Beats CM
 
 Notes:
-Falure to have auth enabled in Kibana will make for a broken UI. UI based errors not yet in place
+Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
 
 ## Testing
 
@@ -15,7 +15,7 @@ In one shell, from **~/kibana/x-pack**:
 `node scripts/functional_tests-server.js`
 
 In another shell, from **~kibana/x-pack**:
-`node ../scripts/functional_test_runner.js --config test/api_integration/config.js`.
+`node ../scripts/functional_test_runner.js --config test/api_integration/config.ts`.
 
 ### Manual e2e testing
 

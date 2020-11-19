@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  UPDATE_JOB_START,
-  UPDATE_JOB_SUCCESS,
-  UPDATE_JOB_FAILURE,
-} from '../action_types';
+import { UPDATE_JOB_START, UPDATE_JOB_SUCCESS, UPDATE_JOB_FAILURE } from '../action_types';
 
 const initialState = {
   isUpdating: false,

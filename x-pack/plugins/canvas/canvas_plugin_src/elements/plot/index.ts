@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const plot: ElementFactory = () => ({
   name: 'plot',
   displayName: 'Coordinate plot',
-  tags: ['chart'],
+  type: 'chart',
   help: 'Mixed line, bar or dot charts',
-  image: header,
   expression: `filters
 | demodata
 | pointseries x="time" y="sum(price)" color="state"

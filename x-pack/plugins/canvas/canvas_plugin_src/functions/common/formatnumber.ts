@@ -5,35 +5,39 @@
  */
 
 import numeral from '@elastic/numeral';
-import { ContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
-interface Arguments {
+export interface Arguments {
   format: string;
 }
 
-export function formatnumber(): ContextFunction<'formatnumber', number, Arguments, string> {
+export function formatnumber(): ExpressionFunctionDefinition<
+  'formatnumber',
+  number,
+  Arguments,
+  string
+> {
   const { help, args: argHelp } = getFunctionHelp().formatnumber;
 
   return {
     name: 'formatnumber',
     type: 'string',
     help,
-    context: {
-      types: ['number'],
-    },
+    inputTypes: ['number'],
     args: {
       format: {
         aliases: ['_'],
         types: ['string'],
         help: argHelp.format,
+        required: true,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.format) {
-        return String(context);
+        return String(input);
       }
-      return numeral(context).format(args.format);
+      return numeral(input).format(args.format);
     },
   };
 }

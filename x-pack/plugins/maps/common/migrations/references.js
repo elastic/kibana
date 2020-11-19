@@ -7,11 +7,15 @@
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
 
 import _ from 'lodash';
-import { ES_GEO_GRID, ES_SEARCH } from '../constants';
+import { SOURCE_TYPES } from '../constants';
 
 function doesSourceUseIndexPattern(layerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
-  return sourceType === ES_GEO_GRID || sourceType === ES_SEARCH;
+  return (
+    sourceType === SOURCE_TYPES.ES_GEO_GRID ||
+    sourceType === SOURCE_TYPES.ES_SEARCH ||
+    sourceType === SOURCE_TYPES.ES_PEW_PEW
+  );
 }
 
 export function extractReferences({ attributes, references = [] }) {
@@ -23,7 +27,6 @@ export function extractReferences({ attributes, references = [] }) {
 
   const layerList = JSON.parse(attributes.layerListJSON);
   layerList.forEach((layer, layerIndex) => {
-
     // Extract index-pattern references from source descriptor
     if (doesSourceUseIndexPattern(layer) && _.has(layer, 'sourceDescriptor.indexPatternId')) {
       const refName = `layer_${layerIndex}_source_index_pattern`;
@@ -62,7 +65,7 @@ export function extractReferences({ attributes, references = [] }) {
 }
 
 function findReference(targetName, references) {
-  const reference = references.find(reference => reference.name === targetName);
+  const reference = references.find((reference) => reference.name === targetName);
   if (!reference) {
     throw new Error(`Could not find reference "${targetName}"`);
   }
@@ -76,7 +79,6 @@ export function injectReferences({ attributes, references }) {
 
   const layerList = JSON.parse(attributes.layerListJSON);
   layerList.forEach((layer) => {
-
     // Inject index-pattern references into source descriptor
     if (doesSourceUseIndexPattern(layer) && _.has(layer, 'sourceDescriptor.indexPatternRefName')) {
       const reference = findReference(layer.sourceDescriptor.indexPatternRefName, references);

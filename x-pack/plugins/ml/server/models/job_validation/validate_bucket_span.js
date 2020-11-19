@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { estimateBucketSpanFactory } from '../../models/bucket_span_estimator';
-import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
+import { mlFunctionToESAggregation, parseTimeIntervalForJob } from '../../../common/util/job_utils';
 import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
-import { parseInterval } from '../../../common/util/parse_interval.js';
 
 import { validateJobObject } from './validate_job_object';
 
@@ -18,8 +15,8 @@ const BUCKET_SPAN_HIGH_THRESHOLD = 1;
 const wrapQuery = (query) => ({
   bool: {
     must: [query],
-    must_not: []
-  }
+    must_not: [],
+  },
 });
 
 // Choosing a bucket from the set of recommendations which minimises
@@ -41,24 +38,31 @@ const pickBucketSpan = (bucketSpans) => {
     }, 0);
   };
 
-  const spansMs = bucketSpans.map(span => span.ms);
-  const sumDistances = spansMs.map(ms => getSumDistance(spansMs, ms));
+  const spansMs = bucketSpans.map((span) => span.ms);
+  const sumDistances = spansMs.map((ms) => getSumDistance(spansMs, ms));
   const minSumDistance = Math.min(...sumDistances);
-  const i = sumDistances.findIndex(d => d === minSumDistance);
+  const i = sumDistances.findIndex((d) => d === minSumDistance);
   return bucketSpans[i];
 };
 
-export async function validateBucketSpan(callWithRequest, job, duration, server) {
+export async function validateBucketSpan(client, job, duration) {
   validateJobObject(job);
 
   // if there is no duration, do not run the estimate test
-  if (typeof duration === 'undefined' || typeof duration.start === 'undefined' || typeof duration.end === 'undefined') {
+  if (
+    typeof duration === 'undefined' ||
+    typeof duration.start === 'undefined' ||
+    typeof duration.end === 'undefined'
+  ) {
     return Promise.resolve([]);
   }
 
   const messages = [];
-  const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span, false);
-  if (parsedBucketSpan === null || parsedBucketSpan.asMilliseconds() === 0) {
+
+  // Bucket span must be a valid interval, greater than 0,
+  // and if specified in ms must be a multiple of 1000ms
+  const parsedBucketSpan = parseTimeIntervalForJob(job.analysis_config.bucket_span);
+  if (parsedBucketSpan === null) {
     messages.push({ id: 'bucket_span_invalid' });
     return messages;
   }
@@ -74,7 +78,7 @@ export async function validateBucketSpan(callWithRequest, job, duration, server)
     if (messages.length === 0) {
       messages.push({
         id: 'success_bucket_span',
-        bucketSpan: job.analysis_config.bucket_span
+        bucketSpan: job.analysis_config.bucket_span,
       });
     }
     return messages;
@@ -91,9 +95,8 @@ export async function validateBucketSpan(callWithRequest, job, duration, server)
       index: job.datafeed_config.indices.join(','),
       query: wrapQuery(job.datafeed_config.query),
       splitField: undefined,
-      timeField: job.data_description.time_field
+      timeField: job.data_description.time_field,
     };
-
   };
 
   const estimatorConfigs = [];
@@ -101,7 +104,7 @@ export async function validateBucketSpan(callWithRequest, job, duration, server)
   job.analysis_config.detectors.forEach((detector) => {
     const data = getRequestData();
     const aggType = mlFunctionToESAggregation(detector.function);
-    const fieldName = (typeof detector.field_name === 'undefined') ? null : detector.field_name;
+    const fieldName = typeof detector.field_name === 'undefined' ? null : detector.field_name;
     data.aggTypes.push(aggType);
     data.fields.push(fieldName);
     if (typeof detector.partition_field_name !== 'undefined') {
@@ -114,7 +117,7 @@ export async function validateBucketSpan(callWithRequest, job, duration, server)
   try {
     const estimations = estimatorConfigs.map((data) => {
       return new Promise((resolve) => {
-        estimateBucketSpanFactory(callWithRequest, server)(data)
+        estimateBucketSpanFactory(client)(data)
           .then(resolve)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
@@ -123,7 +126,7 @@ export async function validateBucketSpan(callWithRequest, job, duration, server)
           .catch((resp) => {
             resolve({
               error: true,
-              message: resp
+              message: resp,
             });
           });
       });
@@ -131,7 +134,7 @@ export async function validateBucketSpan(callWithRequest, job, duration, server)
 
     // run the estimations, filter valid results, then pick a bucket span.
     const results = await Promise.all(estimations);
-    const bucketSpans = results.filter(result => result.name && result.ms);
+    const bucketSpans = results.filter((result) => result.name && result.ms);
 
     if (bucketSpans.length > 0) {
       const bucketSpan = pickBucketSpan(bucketSpans);
@@ -142,12 +145,12 @@ export async function validateBucketSpan(callWithRequest, job, duration, server)
         messages.push({
           id: 'bucket_span_estimation_mismatch',
           currentBucketSpan: job.analysis_config.bucket_span,
-          estimateBucketSpan: bucketSpan.name
+          estimateBucketSpan: bucketSpan.name,
         });
       }
     }
-  // this catch gets triggered when an actual error gets thrown when running
-  // the estimation code, for example when the request payload is malformed
+    // this catch gets triggered when an actual error gets thrown when running
+    // the estimation code, for example when the request payload is malformed
   } catch (error) {
     throw new Error(error);
   }
@@ -155,7 +158,7 @@ export async function validateBucketSpan(callWithRequest, job, duration, server)
   if (messages.length === 0) {
     messages.push({
       id: 'success_bucket_span',
-      bucketSpan: job.analysis_config.bucket_span
+      bucketSpan: job.analysis_config.bucket_span,
     });
   }
 

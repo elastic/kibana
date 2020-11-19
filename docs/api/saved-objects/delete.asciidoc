@@ -1,34 +1,52 @@
 [[saved-objects-api-delete]]
-=== Delete Object
+=== Delete object API
+++++
+<titleabbrev>Delete object</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Remove {kib} saved objects.
 
-The delete saved object API permanently removes a Kibana saved object. Once a
-saved object has been deleted, _it cannot be recovered_.
+WARNING: Once you delete a saved object, _it cannot be recovered_.
 
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-delete-request]]
 ==== Request
 
-`DELETE /api/saved_objects/<type>/<id>`
+`DELETE <kibana host>:<port>/api/saved_objects/<type>/<id>`
 
-==== Path Parameters
+`DELETE <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+[[saved-objects-api-delete-path-params]]
+==== Path parameters
 
-`id` (required)::
-  (string) Object ID being removed
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
-==== Examples
+`id`::
+  (Required, string) The object ID that you want to remove.
 
-The following example deletes an index pattern object with an ID of `my-pattern`
+[[saved-objects-api-delete-query-params]]
+==== Query parameters
 
-[source,js]
+`force`::
+  (Optional, boolean) When true, forces an object to be deleted if it exists in multiple namespaces.
++
+TIP: Use this if you attempted to delete an object and received an HTTP 400 error with the following message: _"Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway"_
+
+[[saved-objects-api-delete-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Example
+
+Delete an index pattern object with the `my-pattern` ID:
+
+[source,sh]
 --------------------------------------------------
-DELETE api/saved_objects/index-pattern/my-pattern
+$ curl -X DELETE api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
-
-A successful call returns a response code of `200`.

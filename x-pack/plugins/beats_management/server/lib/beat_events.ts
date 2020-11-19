@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isLeft } from 'fp-ts/lib/Either';
 import { BeatEvent, RuntimeBeatEvent } from '../../common/domain_types';
-import { BeatEventsAdapter } from './adapters/events/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { CMBeatsDomain } from './beats';
 
 export class BeatEventsLib {
-  // @ts-ignore
-  constructor(private readonly adapter: BeatEventsAdapter, private readonly beats: CMBeatsDomain) {}
+  constructor(private readonly beats: CMBeatsDomain) {}
 
   public log = async (
     user: FrameworkUser,
@@ -20,7 +19,7 @@ export class BeatEventsLib {
   ): Promise<Array<{ success: boolean; reason?: string }>> => {
     return events.map((event, i) => {
       const assertData = RuntimeBeatEvent.decode(event);
-      if (assertData.isLeft()) {
+      if (isLeft(assertData)) {
         if (events.length - 1 === i) {
           this.beats
             .update(user, beatId, {
@@ -29,7 +28,7 @@ export class BeatEventsLib {
                 timestamp: new Date(events[events.length - 2].timestamp),
               },
             })
-            .catch(e => {
+            .catch((e) => {
               // eslint-disable-next-line
               console.error('Error inserting event into beats log.', e);
             });
@@ -47,7 +46,7 @@ export class BeatEventsLib {
               timestamp: new Date(events[events.length - 1].timestamp),
             },
           })
-          .catch(e => {
+          .catch((e) => {
             // eslint-disable-next-line
             console.error('Error inserting event into beats log.', e);
           });

@@ -9,4 +9,4 @@ export { INDEX_NAMES } from './index_names';
 export { PLUGIN } from './plugin';
 export { LICENSES, REQUIRED_LICENSES, REQUIRED_ROLES } from './security';
 export { TABLE_CONFIG } from './table';
-export const BASE_PATH = '/management/beats_management';
+export const BASE_PATH = '/management/ingest/beats_management';

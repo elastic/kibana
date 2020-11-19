@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ace from 'ace';
+import ace from 'brace';
 
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 
@@ -14,14 +14,8 @@ export class GrokHighlightRules extends TextHighlightRules {
     this.$rules = {
       start: [
         {
-          token: [
-            'grokStart',
-            'grokPatternName',
-            'grokSeparator',
-            'grokFieldName',
-            'grokEnd'
-          ],
-          regex: '(%{)([^:]+)(:)([^:]+)(})'
+          token: ['grokStart', 'grokPatternName', 'grokSeparator', 'grokFieldName', 'grokEnd'],
+          regex: '(%{)([^:]+)(:)([^:]+)(})',
         },
         {
           token: [
@@ -31,20 +25,20 @@ export class GrokHighlightRules extends TextHighlightRules {
             'grokFieldName',
             'grokSeparator',
             'grokFieldType',
-            'grokEnd'
+            'grokEnd',
           ],
-          regex: '(%{)([^:]+)(:)([^:]+)(:)([^:]+)(})'
+          regex: '(%{)([^:]+)(:)([^:]+)(:)([^:]+)(})',
         },
         {
-          token: (escapeToken, /* regexToken */) => {
+          token: (escapeToken /* regexToken */) => {
             if (escapeToken) {
-              return [ 'grokEscape', 'grokEscaped' ];
+              return ['grokEscape', 'grokEscaped'];
             }
             return 'grokRegex';
           },
-          regex: '(\\\\)?([\\[\\]\\(\\)\\?\\:\\|])'
+          regex: '(\\\\)?([\\[\\]\\(\\)\\?\\:\\|])',
         },
-      ]
+      ],
     };
   }
 }

@@ -17,38 +17,230 @@
  * under the License.
  */
 
-import { ObjectType, Schema } from '@kbn/config-schema';
-export type RouteMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+import { RouteValidatorFullConfig } from './validator';
 
-export interface RouteConfig<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
+export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
+  return method === 'get' || method === 'options';
+}
+
+/**
+ * Set of HTTP methods changing the state of the server.
+ * @public
+ */
+export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
+
+/**
+ * Set of HTTP methods not changing the state of the server.
+ * @public
+ */
+export type SafeRouteMethod = 'get' | 'options';
+
+/**
+ * The set of common HTTP methods supported by Kibana routing.
+ * @public
+ */
+export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
+
+/**
+ * The set of valid body.output
+ * @public
+ */
+export const validBodyOutput = ['data', 'stream'] as const;
+
+/**
+ * The set of supported parseable Content-Types
+ * @public
+ */
+export type RouteContentType =
+  | 'application/json'
+  | 'application/*+json'
+  | 'application/octet-stream'
+  | 'application/x-www-form-urlencoded'
+  | 'multipart/form-data'
+  | 'text/*';
+
+/**
+ * Additional body options for a route
+ * @public
+ */
+export interface RouteConfigOptionsBody {
   /**
-   * The endpoint _within_ the router path to register the route. E.g. if the
-   * router is registered at `/elasticsearch` and the route path is `/search`,
-   * the full path for the route is `/elasticsearch/search`.
+   * A string or an array of strings with the allowed mime types for the endpoint. Use this settings to limit the set of allowed mime types. Note that allowing additional mime types not listed
+   * above will not enable them to be parsed, and if parse is true, the request will result in an error response.
+   *
+   * Default value: allows parsing of the following mime types:
+   * * application/json
+   * * application/*+json
+   * * application/octet-stream
+   * * application/x-www-form-urlencoded
+   * * multipart/form-data
+   * * text/*
+   */
+  accepts?: RouteContentType | RouteContentType[] | string | string[];
+
+  /**
+   * Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
+   *
+   * Default value: The one set in the kibana.yml config file under the parameter `server.maxPayloadBytes`.
+   */
+  maxBytes?: number;
+
+  /**
+   * The processed payload format. The value must be one of:
+   * * 'data' - the incoming payload is read fully into memory. If parse is true, the payload is parsed (JSON, form-decoded, multipart) based on the 'Content-Type' header. If parse is false, a raw
+   * Buffer is returned.
+   * * 'stream' - the incoming payload is made available via a Stream.Readable interface. If the payload is 'multipart/form-data' and parse is true, field values are presented as text while files
+   * are provided as streams. File streams from a 'multipart/form-data' upload will also have a hapi property containing the filename and headers properties. Note that payload streams for multipart
+   * payloads are a synthetic interface created on top of the entire multipart content loaded into memory. To avoid loading large multipart payloads into memory, set parse to false and handle the
+   * multipart payload in the handler using a streaming parser (e.g. pez).
+   *
+   * Default value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure.
+   */
+  output?: typeof validBodyOutput[number];
+
+  /**
+   * Determines if the incoming payload is processed or presented raw. Available values:
+   * * true - if the request 'Content-Type' matches the allowed mime types set by allow (for the whole payload as well as parts), the payload is converted into an object when possible. If the
+   * format is unknown, a Bad Request (400) error response is sent. Any known content encoding is decoded.
+   * * false - the raw payload is returned unmodified.
+   * * 'gunzip' - the raw payload is returned unmodified after any known content encoding is decoded.
+   *
+   * Default value: true, unless no validation.body is provided in the route definition. In that case the default is false to alleviate memory pressure.
+   */
+  parse?: boolean | 'gunzip';
+}
+
+/**
+ * Additional route options.
+ * @public
+ */
+export interface RouteConfigOptions<Method extends RouteMethod> {
+  /**
+   * Defines authentication mode for a route:
+   * - true. A user has to have valid credentials to access a resource
+   * - false. A user can access a resource without any credentials.
+   * - 'optional'. A user can access a resource if has valid credentials or no credentials at all.
+   * Can be useful when we grant access to a resource but want to identify a user if possible.
+   *
+   * Defaults to `true` if an auth mechanism is registered.
+   */
+  authRequired?: boolean | 'optional';
+
+  /**
+   * Defines xsrf protection requirements for a route:
+   * - true. Requires an incoming POST/PUT/DELETE request to contain `kbn-xsrf` header.
+   * - false. Disables xsrf protection.
+   *
+   * Set to true by default
+   */
+  xsrfRequired?: Method extends 'get' ? never : boolean;
+
+  /**
+   * Additional metadata tag strings to attach to the route.
+   */
+  tags?: readonly string[];
+
+  /**
+   * Additional body options {@link RouteConfigOptionsBody}.
+   */
+  body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
+
+  /**
+   * Defines per-route timeouts.
+   */
+  timeout?: {
+    /**
+     * Milliseconds to receive the payload
+     */
+    payload?: Method extends 'get' | 'options' ? undefined : number;
+
+    /**
+     * Milliseconds the socket can be idle before it's closed
+     */
+    idleSocket?: number;
+  };
+}
+
+/**
+ * Route specific configuration.
+ * @public
+ */
+export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
+  /**
+   * The endpoint _within_ the router path to register the route.
+   *
+   * @remarks
+   * E.g. if the router is registered at `/elasticsearch` and the route path is
+   * `/search`, the full path for the route is `/elasticsearch/search`.
+   * Supports:
+   *   - named path segments `path/{name}`.
+   *   - optional path segments `path/{position?}`.
+   *   - multi-segments `path/{coordinates*2}`.
+   * Segments are accessible within a handler function as `params` property of {@link KibanaRequest} object.
+   * To have read access to `params` you *must* specify validation schema with {@link RouteConfig.validate}.
    */
   path: string;
 
   /**
-   * A function that will be called when setting up the route and that returns
-   * a schema that every request will be validated against.
+   * A schema created with `@kbn/config-schema` that every request will be validated against.
    *
-   * To opt out of validating the request, specify `false`.
+   * @remarks
+   * You *must* specify a validation schema to be able to read:
+   *   - url path segments
+   *   - request query
+   *   - request body
+   * To opt out of validating the request, specify `validate: false`. In this case
+   * request params, query, and body will be **empty** objects and have no
+   * access to raw values.
+   * In some cases you may want to use another validation library. To do this, you need to
+   * instruct the `@kbn/config-schema` library to output **non-validated values** with
+   * setting schema as `schema.object({}, { unknowns: 'allow' })`;
+   *
+   * @example
+   * ```ts
+   *  import { schema } from '@kbn/config-schema';
+   *  router.get({
+   *   path: 'path/{id}',
+   *   validate: {
+   *     params: schema.object({
+   *       id: schema.string(),
+   *     }),
+   *     query: schema.object({...}),
+   *     body: schema.object({...}),
+   *   },
+   * },
+   * (context, req, res,) {
+   *   req.params; // type Readonly<{id: string}>
+   *   console.log(req.params.id); // value
+   * });
+   *
+   * router.get({
+   *   path: 'path/{id}',
+   *   validate: false, // handler has no access to params, query, body values.
+   * },
+   * (context, req, res,) {
+   *   req.params; // type Readonly<{}>;
+   *   console.log(req.params.id); // undefined
+   * });
+   *
+   * router.get({
+   *   path: 'path/{id}',
+   *   validate: {
+   *     // handler has access to raw non-validated params in runtime
+   *     params: schema.object({}, { unknowns: 'allow' })
+   *   },
+   * },
+   * (context, req, res,) {
+   *   req.params; // type Readonly<{}>;
+   *   console.log(req.params.id); // value
+   *   myValidationLibrary.validate({ params: req.params });
+   * });
+   * ```
    */
-  validate: RouteValidateFactory<P, Q, B> | false;
-}
+  validate: RouteValidatorFullConfig<P, Q, B> | false;
 
-export type RouteValidateFactory<
-  P extends ObjectType,
-  Q extends ObjectType,
-  B extends ObjectType
-> = (schema: Schema) => RouteSchemas<P, Q, B>;
-
-/**
- * RouteSchemas contains the schemas for validating the different parts of a
- * request.
- */
-export interface RouteSchemas<P extends ObjectType, Q extends ObjectType, B extends ObjectType> {
-  params?: P;
-  query?: Q;
-  body?: B;
+  /**
+   * Additional route options {@link RouteConfigOptions}.
+   */
+  options?: RouteConfigOptions<Method>;
 }

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-const assertStatsAndMetrics = body => {
+const assertStatsAndMetrics = (body) => {
   expect(body.kibana.name).to.be.a('string');
   expect(body.kibana.uuid).to.be.a('string');
   expect(body.kibana.host).to.be.a('string');
@@ -55,7 +55,12 @@ const assertStatsAndMetrics = body => {
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
+
   describe('kibana stats api', () => {
+    before('make sure there are some saved objects', () => esArchiver.load('saved_objects/basic'));
+    after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/basic'));
+
     describe('basic', () => {
       it('should return the stats without cluster_uuid with no query string params', () => {
         return supertest
@@ -120,17 +125,28 @@ export default function ({ getService }) {
       });
 
       describe('exclude usage', () => {
-        it('should exclude usage from the API response', () => {
+        it('should include an empty usage object from the API response', () => {
           return supertest
             .get('/api/stats?extended&exclude_usage')
             .expect('Content-Type', /json/)
             .expect(200)
             .then(({ body }) => {
-              expect(body).to.not.have.property('usage');
+              expect(body).to.have.property('usage');
+              expect(body.usage).to.eql({});
+            });
+        });
+
+        it('should include an empty usage object from the API response if `legacy` is provided', () => {
+          return supertest
+            .get('/api/stats?extended&exclude_usage&legacy')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .then(({ body }) => {
+              expect(body).to.have.property('usage');
+              expect(body.usage).to.eql({});
             });
         });
       });
     });
   });
 }
-

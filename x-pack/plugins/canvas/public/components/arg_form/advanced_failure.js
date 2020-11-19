@@ -7,11 +7,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps, withPropsOnChange } from 'recompose';
-import { EuiForm, EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 
-export const AdvancedFailureComponent = props => {
+import { ComponentStrings } from '../../../i18n';
+
+const { ArgFormAdvancedFailure: strings } = ComponentStrings;
+
+export const AdvancedFailureComponent = (props) => {
   const {
     onValueChange,
     defaultValue,
@@ -22,7 +26,7 @@ export const AdvancedFailureComponent = props => {
     argId,
   } = props;
 
-  const valueChange = ev => {
+  const valueChange = (ev) => {
     ev.preventDefault();
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
@@ -32,34 +36,42 @@ export const AdvancedFailureComponent = props => {
     }
   };
 
-  const confirmReset = ev => {
+  const confirmReset = (ev) => {
     ev.preventDefault();
     resetErrorState(); // when setting a new value, attempt to reset the error state
     onValueChange(fromExpression(defaultValue, 'argument'));
   };
 
   return (
-    <EuiForm>
-      <EuiFormRow id={argId} isInvalid={!valid} error="Invalid Expression">
+    <div>
+      <EuiFormRow
+        display="rowCompressed"
+        id={argId}
+        isInvalid={!valid}
+        error={strings.getRowErrorMessage()}
+      >
         <EuiTextArea
           id={argId}
           isInvalid={!valid}
           value={argExpression}
+          compressed
           onChange={updateArgExpression}
           rows={3}
         />
       </EuiFormRow>
+      <EuiSpacer size="s" />
       <div>
-        <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
-          Apply
+        <EuiButton disabled={!valid} onClick={(e) => valueChange(e)} size="s" type="submit">
+          {strings.getApplyButtonLabel()}
         </EuiButton>
         {defaultValue && defaultValue.length && (
           <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
-            Reset
+            {strings.getResetButtonLabel()}
           </EuiButtonEmpty>
         )}
       </div>
-    </EuiForm>
+      <EuiSpacer size="s" />
+    </div>
   );
 };
 
@@ -79,7 +91,7 @@ export const AdvancedFailure = compose(
   })),
   createStatefulPropHoc('argExpression', 'updateArgExpression'),
   withPropsOnChange(['argExpression'], ({ argExpression }) => ({
-    valid: (function() {
+    valid: (function () {
       try {
         fromExpression(argExpression, 'argument');
         return true;

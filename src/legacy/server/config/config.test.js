@@ -38,9 +38,9 @@ const data = {
     client: {
       type: 'datastore',
       host: 'store-01',
-      port: 5050
-    }
-  }
+      port: 5050,
+    },
+  },
 };
 
 const schema = Joi.object({
@@ -50,17 +50,15 @@ const schema = Joi.object({
     client: Joi.object({
       type: Joi.string().default('datastore'),
       host: Joi.string(),
-      port: Joi.number()
+      port: Joi.number(),
     }).default(),
-    undefValue: Joi.string()
-  }).default()
+    undefValue: Joi.string(),
+  }).default(),
 }).default();
 
 describe('lib/config/config', function () {
   describe('class Config()', function () {
-
     describe('constructor', function () {
-
       it('should not allow any config if the schema is not passed', function () {
         const config = new Config();
         const run = function () {
@@ -98,11 +96,9 @@ describe('lib/config/config', function () {
         expect(config.get('test.enable')).toBe(true);
         expect(config.get('test.client.type')).toBe('datastore');
       });
-
     });
 
     describe('#resetTo(object)', function () {
-
       let config;
       beforeEach(function () {
         config = new Config(schema);
@@ -115,11 +111,9 @@ describe('lib/config/config', function () {
         config.resetTo(newData);
         expect(config.get()).toEqual(newData);
       });
-
     });
 
     describe('#has(key)', function () {
-
       let config;
       beforeEach(function () {
         config = new Config(schema);
@@ -136,7 +130,6 @@ describe('lib/config/config', function () {
       it('should return false for fields that do not exist in the schema', function () {
         expect(config.has('test.client.pool')).toBe(false);
       });
-
     });
 
     describe('#set(key, value)', function () {
@@ -184,8 +177,9 @@ describe('lib/config/config', function () {
           run();
         } catch (err) {
           expect(err).toHaveProperty('name', 'ValidationError');
-          expect(err).toHaveProperty('message',
-            'child \"test\" fails because [child \"enable\" fails because [\"enable\" must be a boolean]]'
+          expect(err).toHaveProperty(
+            'message',
+            'child "test" fails because [child "enable" fails because ["enable" must be a boolean]]'
           );
           expect(err).not.toHaveProperty('details');
           expect(err).not.toHaveProperty('_object');
@@ -193,11 +187,9 @@ describe('lib/config/config', function () {
 
         done();
       });
-
     });
 
     describe('#get(key)', function () {
-
       let config;
 
       beforeEach(function () {
@@ -233,7 +225,6 @@ describe('lib/config/config', function () {
         };
         expect(run).not.toThrow();
       });
-
     });
 
     describe('#getDefault(key)', function () {
@@ -281,13 +272,15 @@ describe('lib/config/config', function () {
       });
 
       it('object schema with no default should return default value for property', function () {
-        const noDefaultSchema = Joi.object().keys({
-          foo: Joi.array().items(Joi.string().min(1)).default(['bar'])
-        }).required();
+        const noDefaultSchema = Joi.object()
+          .keys({
+            foo: Joi.array().items(Joi.string().min(1)).default(['bar']),
+          })
+          .required();
 
         const config = new Config(noDefaultSchema);
         config.set({
-          foo: ['baz']
+          foo: ['baz'],
         });
 
         const fooDefault = config.getDefault('foo');
@@ -295,13 +288,15 @@ describe('lib/config/config', function () {
       });
 
       it('should return clone of the default', function () {
-        const schemaWithArrayDefault = Joi.object().keys({
-          foo: Joi.array().items(Joi.string().min(1)).default(['bar'])
-        }).default();
+        const schemaWithArrayDefault = Joi.object()
+          .keys({
+            foo: Joi.array().items(Joi.string().min(1)).default(['bar']),
+          })
+          .default();
 
         const config = new Config(schemaWithArrayDefault);
         config.set({
-          foo: ['baz']
+          foo: ['baz'],
         });
 
         expect(config.getDefault('foo')).not.toBe(config.getDefault('foo'));
@@ -336,14 +331,15 @@ describe('lib/config/config', function () {
         };
         expect(run).toThrow();
       });
-
     });
 
     describe('#removeSchema(key)', function () {
       it('should completely remove the key', function () {
-        const config = new Config(Joi.object().keys({
-          a: Joi.number().default(1)
-        }));
+        const config = new Config(
+          Joi.object().keys({
+            a: Joi.number().default(1),
+          })
+        );
 
         expect(config.get('a')).toBe(1);
         config.removeSchema('a');
@@ -356,6 +352,5 @@ describe('lib/config/config', function () {
         expect(() => config.removeSchema('b')).toThrowError('Unknown schema');
       });
     });
-
   });
 });

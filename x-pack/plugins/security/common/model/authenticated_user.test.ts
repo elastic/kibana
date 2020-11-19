@@ -7,11 +7,12 @@
 import { AuthenticatedUser, canUserChangePassword } from './authenticated_user';
 
 describe('#canUserChangePassword', () => {
-  ['reserved', 'native'].forEach(realm => {
+  ['reserved', 'native'].forEach((realm) => {
     it(`returns true for users in the ${realm} realm`, () => {
       expect(
         canUserChangePassword({
           username: 'foo',
+          authentication_provider: { type: 'basic', name: 'basic1' },
           authentication_realm: {
             name: 'the realm name',
             type: realm,
@@ -25,6 +26,7 @@ describe('#canUserChangePassword', () => {
     expect(
       canUserChangePassword({
         username: 'foo',
+        authentication_provider: { type: 'the provider type', name: 'does not matter' },
         authentication_realm: {
           name: 'the realm name',
           type: 'does not matter',

@@ -11,73 +11,85 @@
  */
 
 import React from 'react';
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { find, get } from 'lodash';
-import uiRoutes from'ui/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
-import { timefilter } from 'ui/timefilter';
-import { I18nContext } from 'ui/i18n';
+import {
+  CODE_PATH_APM,
+  ALERT_MISSING_MONITORING_DATA,
+  APM_SYSTEM_ID,
+} from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_APM] });
     },
   },
 
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const title = $injector.get('title');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, {
-        cluster_uuid: globalState.cluster_uuid
+        cluster_uuid: globalState.cluster_uuid,
       });
-
       super({
-        title: i18n('xpack.monitoring.apm.instance.routeTitle', {
+        title: i18n.translate('xpack.monitoring.apm.instance.routeTitle', {
           defaultMessage: '{apm} - Instance',
           values: {
-            apm: 'APM'
-          }
+            apm: 'APM server',
+          },
         }),
+        telemetryPageViewTitle: 'apm_server_instance',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/${$route.current.params.uuid}`,
         defaultData: {},
         reactNodeId: 'apmInstanceReact',
         $scope,
-        $injector
+        $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
+            filters: [
+              {
+                stackProduct: APM_SYSTEM_ID,
+              },
+            ],
+          },
+        },
       });
 
-      function onBrush({ xaxis }) {
-        timefilter.setTime({
-          from: moment(xaxis.from),
-          to: moment(xaxis.to),
-          mode: 'absolute',
-        });
-      }
-
-      $scope.$watch(() => this.data, data => {
-        title($scope.cluster, `APM - ${get(data, 'apmSummary.name')}`);
-        this.renderReact(data, onBrush);
-      });
-    }
-
-    renderReact(data, onBrush) {
-      const component = (
-        <I18nContext>
-          <ApmServerInstance
-            summary={data.apmSummary || {}}
-            metrics={data.metrics || {}}
-            onBrush={onBrush}
-          />
-        </I18nContext>
+      $scope.$watch(
+        () => this.data,
+        (data) => {
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.apm.instance.pageTitle', {
+              defaultMessage: 'APM server instance: {instanceName}',
+              values: {
+                instanceName: get(data, 'apmSummary.name'),
+              },
+            })
+          );
+          title($scope.cluster, `APM server - ${get(data, 'apmSummary.name')}`);
+          this.renderReact(
+            <ApmServerInstance
+              summary={data.apmSummary || {}}
+              metrics={data.metrics || {}}
+              onBrush={this.onBrush}
+              alerts={this.alerts}
+              zoomInfo={this.zoomInfo}
+            />
+          );
+        }
       );
-      super.renderReact(component);
     }
-  }
+  },
 });

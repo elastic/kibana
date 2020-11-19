@@ -4,54 +4,95 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loadTransactionDistribution } from '../services/rest/apm/transaction_groups';
+import { flatten, omit, isEmpty } from 'lodash';
+import { useHistory, useParams } from 'react-router-dom';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
+import { useUiFilters } from '../context/UrlParamsContext';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
+import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
+import { maybe } from '../../common/utils/maybe';
 
 const INITIAL_DATA = {
-  buckets: [],
-  totalHits: 0,
+  buckets: [] as TransactionDistributionAPIResponse['buckets'],
+  noHits: true,
   bucketSize: 0,
-  defaultSample: undefined
 };
 
 export function useTransactionDistribution(urlParams: IUrlParams) {
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
-    serviceName,
     start,
     end,
     transactionType,
     transactionId,
     traceId,
     transactionName,
-    kuery
   } = urlParams;
+  const uiFilters = useUiFilters(urlParams);
+
+  const history = useHistory();
 
   const { data = INITIAL_DATA, status, error } = useFetcher(
-    () => {
+    async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
-        return loadTransactionDistribution({
-          serviceName,
-          start,
-          end,
-          transactionType,
-          transactionName,
-          transactionId,
-          traceId,
-          kuery
+        const response = await callApmApi({
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transaction_groups/distribution',
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              start,
+              end,
+              transactionType,
+              transactionName,
+              transactionId,
+              traceId,
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
+
+        const selectedSample =
+          transactionId && traceId
+            ? flatten(response.buckets.map((bucket) => bucket.samples)).find(
+                (sample) =>
+                  sample.transactionId === transactionId &&
+                  sample.traceId === traceId
+              )
+            : undefined;
+
+        if (!selectedSample) {
+          // selected sample was not found. select a new one:
+          // sorted by total number of requests, but only pick
+          // from buckets that have samples
+          const bucketsSortedByCount = response.buckets
+            .filter((bucket) => !isEmpty(bucket.samples))
+            .sort((bucket) => bucket.count);
+
+          const preferredSample = maybe(bucketsSortedByCount[0]?.samples[0]);
+
+          history.replace({
+            ...history.location,
+            search: fromQuery({
+              ...omit(toQuery(history.location.search), [
+                'traceId',
+                'transactionId',
+              ]),
+              ...preferredSample,
+            }),
+          });
+        }
+
+        return response;
       }
     },
-    [
-      serviceName,
-      start,
-      end,
-      transactionType,
-      transactionName,
-      transactionId,
-      traceId,
-      kuery
-    ]
+    // the histogram should not be refetched if the transactionId or traceId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [serviceName, start, end, transactionType, transactionName, uiFilters]
   );
 
   return { data, status, error };

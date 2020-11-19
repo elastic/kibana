@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEqual from 'lodash/fp/isEqual';
+import { isEqual } from 'lodash';
 
 export function callWithoutRepeats<T>(
   func: (...args: any[]) => T,

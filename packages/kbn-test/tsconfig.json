@@ -1,6 +1,22 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "include": [
-    "types/**/*"
-  ]
+    "types/**/*",
+    "src/**/*",
+    "index.d.ts"
+  ],
+  "exclude": [
+    "types/ftr_globals/**/*"
+  ],
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./target/types",
+    "types": [
+      "jest",
+      "node"
+    ],
+    "stripInternal": true,
+    "declarationMap": true
+  }
 }

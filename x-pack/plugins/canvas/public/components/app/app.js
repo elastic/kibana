@@ -11,16 +11,20 @@ import { shortcutManager } from '../../lib/shortcut_manager';
 import { getWindow } from '../../lib/get_window';
 import { Router } from '../router';
 
-export class App extends React.PureComponent {
-  static childContextTypes = {
-    shortcuts: PropTypes.object.isRequired,
-  };
+import { ComponentStrings } from '../../../i18n';
 
+const { App: strings } = ComponentStrings;
+
+export class App extends React.PureComponent {
   static propTypes = {
     appState: PropTypes.object.isRequired,
     setAppReady: PropTypes.func.isRequired,
     setAppError: PropTypes.func.isRequired,
     onRouteChange: PropTypes.func.isRequired,
+  };
+
+  static childContextTypes = {
+    shortcuts: PropTypes.object.isRequired,
   };
 
   getChildContext() {
@@ -42,8 +46,8 @@ export class App extends React.PureComponent {
 
     return (
       <div>
-        <div>Canvas failed to load :(</div>
-        <div>Message: {this.props.appState.message}</div>
+        <div>{strings.getLoadErrorTitle()}</div>
+        <div>{strings.getLoadErrorMessage(this.props.appState.messgae)}</div>
       </div>
     );
   };
@@ -58,10 +62,10 @@ export class App extends React.PureComponent {
         <Router
           routes={routes}
           showLoading={this.props.appState.ready === false}
-          loadingMessage="Canvas is loading"
+          loadingMessage={strings.getLoadingMessage()}
           onRouteChange={this.props.onRouteChange}
           onLoad={() => this.props.setAppReady(true)}
-          onError={err => this.props.setAppError(err)}
+          onError={(err) => this.props.setAppError(err)}
         />
       </div>
     );

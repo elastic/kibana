@@ -4,35 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { Legacy } from 'kibana';
-import _ from 'lodash';
-
 import { getUpgradeAssistantStatus } from '../lib/es_migration_apis';
-import { EsVersionPrecheck } from '../lib/es_version_precheck';
+import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
+import { RouteDependencies } from '../types';
+import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
+import { reindexServiceFactory } from '../lib/reindexing';
 
-export function registerClusterCheckupRoutes(server: Legacy.Server) {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-  const isCloudEnabled = _.get(server.plugins, 'cloud.config.isCloudEnabled', false);
+export function registerClusterCheckupRoutes({ cloud, router, licensing, log }: RouteDependencies) {
+  const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
-  server.route({
-    path: '/api/upgrade_assistant/status',
-    method: 'GET',
-    options: {
-      pre: [EsVersionPrecheck],
+  router.get(
+    {
+      path: '/api/upgrade_assistant/status',
+      validate: false,
     },
-    async handler(request) {
-      try {
-        return await getUpgradeAssistantStatus(callWithRequest, request, isCloudEnabled);
-      } catch (e) {
-        if (e.status === 403) {
-          return Boom.forbidden(e.message);
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            savedObjects: { client: savedObjectsClient },
+            elasticsearch: {
+              legacy: { client },
+            },
+          },
+        },
+        request,
+        response
+      ) => {
+        try {
+          const status = await getUpgradeAssistantStatus(client, isCloudEnabled);
+
+          const callAsCurrentUser = client.callAsCurrentUser.bind(client);
+          const reindexActions = reindexActionsFactory(savedObjectsClient, callAsCurrentUser);
+          const reindexService = reindexServiceFactory(
+            callAsCurrentUser,
+            reindexActions,
+            log,
+            licensing
+          );
+          const indexNames = status.indices
+            .filter(({ index }) => typeof index !== 'undefined')
+            .map(({ index }) => index as string);
+
+          await reindexService.cleanupReindexOperations(indexNames);
+
+          return response.ok({
+            body: status,
+          });
+        } catch (e) {
+          if (e.status === 403) {
+            return response.forbidden(e.message);
+          }
+
+          return response.internalError({ body: e });
         }
-
-        return Boom.boomify(e, {
-          statusCode: 500,
-        });
       }
-    },
-  });
+    )
+  );
 }

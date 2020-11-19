@@ -1,10 +1,11 @@
 [[managing-beats]]
 [role="xpack"]
-== Managing {beats}
+== {beats} Central Management
 
-beta[]
+include::{asciidoc-dir}/../../shared/discontinued.asciidoc[tag=cm-discontinued]
 
-Use the Central Management UI under *Management > {beats}* to define and
+To use {beats} Central Management, open the main menu, click *Stack Management >
+{beats} Central Management*, then define and
 manage configurations in a central location in {kib} and quickly deploy
 configuration changes to all {beats} running across your enterprise. For more
 about central management, see the related {beats} documentation:
@@ -17,16 +18,23 @@ about central management, see the related {beats} documentation:
 This feature requires an Elastic license that includes {beats} central
 management.
 
-Don't have a license? You can start a 30-day trial. In {kib}, go to
-*Management > License Management*. At the end of the trial
+Don't have a license? You can start a 30-day trial. Open the main menu, then
+click *Stack Management > License Management*. At the end of the trial
 period, you can purchase a subscription to keep using central management. For
 more information, see https://www.elastic.co/subscriptions and
-{stack-ov}/license-management.html[License Management].
+<<managing-licenses>>.
 ====
 
 {kib} makes it easy for you to use central management by walking you through the
 enrollment and configuration process step by step the first time you use the
 Central Management UI.
+
+[float]
+=== Required permissions
+
+You must have the `beats_admin` role assigned to use **{beats} Central Management**
+
+To assign the role, open the menu, then click *Stack Management > Users*.
 
 
 [float]
@@ -34,14 +42,14 @@ Central Management UI.
 
 You need to enroll {beats} to register them in central management and establish
 trust. Enrolled {beats} will have the credentials needed to retrieve
-configurations from {kib}. 
+configurations from {kib}.
 
 [float]
 === Create configuration tags
 
 A _configuration tag_ is a group of configuration blocks that you can apply to
 one or more {beats}. For example, you can create a tag called `development` to
-group configurations for {beats} running in your development environment. 
+group configurations for {beats} running in your development environment.
 
 The first time you walk through the enrollment process, you'll create a
 configuration tag that's applied to the {beats} instance you're enrolling.
@@ -62,7 +70,7 @@ Central management supports configuration settings for:
 * {filebeat} modules
 * {metricbeat} modules
 * {filebeat} inputs
-* {filebeat} and {metricbeat} outputs 
+* {filebeat} and {metricbeat} outputs
 
 NOTE: Central management supports the following outputs only: {es}, {ls}, Kafka,
 and Redis. Other output types are not supported for {beats} that are enrolled in
@@ -72,7 +80,7 @@ Use the Central Management UI to define and manage settings for supported
 configuration blocks. You cannot define those settings in local {beats}
 configuration files. For configuration blocks that are not supported by central
 management, configure the settings in the local configuration file after
-enrolling the Beat in central management. 
+enrolling the Beat in central management.
 
 [float]
 === Manage enrolled {beats}

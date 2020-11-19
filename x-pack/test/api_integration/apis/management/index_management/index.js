@@ -10,5 +10,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./mapping'));
     loadTestFile(require.resolve('./settings'));
     loadTestFile(require.resolve('./stats'));
+    loadTestFile(require.resolve('./data_streams'));
+    loadTestFile(require.resolve('./templates'));
+    loadTestFile(require.resolve('./component_templates'));
   });
 }

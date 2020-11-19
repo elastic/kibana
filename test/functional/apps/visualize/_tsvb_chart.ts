@@ -20,48 +20,33 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
-  const retry = getService('retry');
   const inspector = getService('inspector');
-  const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker']);
+  const retry = getService('retry');
+  const security = getService('security');
+  const PageObjects = getPageObjects([
+    'visualize',
+    'visualBuilder',
+    'timePicker',
+    'visChart',
+    'common',
+  ]);
 
-  describe('visual builder', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/75127
+  describe.skip('visual builder', function describeIndexTests() {
+    this.tags('includeFirefox');
     beforeEach(async () => {
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_logstash_reader',
+        'kibana_sample_admin',
+      ]);
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
-    });
-
-    describe('Time Series', () => {
-      beforeEach(async () => {
-        await PageObjects.visualBuilder.resetPage();
-      });
-
-      it('should show the correct count in the legend', async () => {
-        await retry.try(async () => {
-          const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-          expect(actualCount).to.be('156');
-        });
-      });
-
-      it('should show the correct count in the legend with 2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('2h');
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('293');
-      });
-
-      it('should show the correct count in the legend with -2h offset', async () => {
-        await PageObjects.visualBuilder.clickSeriesOption();
-        await PageObjects.visualBuilder.enterOffsetSeries('-2h');
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('53');
-      });
     });
 
     describe('metric', () => {
@@ -88,6 +73,16 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         const value = await PageObjects.visualBuilder.getMetricValue();
         expect(value).to.eql('157');
       });
+
+      it('should populate fields for basic functions', async () => {
+        const { visualBuilder } = PageObjects;
+
+        await visualBuilder.selectAggType('Average');
+        await visualBuilder.setFieldForAggregation('machine.ram');
+        const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
+
+        expect(isFieldForAggregationValid).to.be(true);
+      });
     });
 
     describe('gauge', () => {
@@ -98,7 +93,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should verify gauge label and count display', async () => {
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
@@ -114,7 +109,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should verify topN label and count display', async () => {
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
@@ -122,64 +117,108 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('table', () => {
+    describe('switch index patterns', () => {
       beforeEach(async () => {
-        await PageObjects.visualBuilder.resetPage(
-          '2015-09-22 06:00:00.000',
-          '2015-09-22 11:00:00.000'
-        );
-        await PageObjects.visualBuilder.clickTable();
-      });
-
-      it('should display correct values on changing group by field and column name', async () => {
-        await PageObjects.visualBuilder.selectGroupByField('machine.os.raw');
-        await PageObjects.visualBuilder.setLabelValue('OS');
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-        const tableData = await PageObjects.visualBuilder.getViewTable();
-        const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
-        expect(tableData).to.be(expectedData);
-      });
-    });
-
-    describe.skip('switch index patterns', () => {
-      before(async () => {
         log.debug('Load kibana_sample_data_flights data');
         await esArchiver.loadIfNeeded('kibana_sample_data_flights');
-        await PageObjects.visualBuilder.resetPage(
-          '2015-09-19 06:31:44.000',
-          '2018-10-31 00:0:00.000'
-        );
+        await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
       });
       after(async () => {
+        await security.testUser.restoreDefaults();
         await esArchiver.unload('kibana_sample_data_flights');
       });
+
       it('should be able to switch between index patterns', async () => {
-        const expectedMetricValue = '156';
         const value = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${value}`);
-        expect(value).to.eql(expectedMetricValue);
-        await PageObjects.visualBuilder.clickMetricPanelOptions();
-        const fromTime = '2018-10-22 00:00:00.000';
-        const toTime = '2018-10-28 23:59:59.999';
+        expect(value).to.eql('156');
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
+        const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
+        const toTime = 'Oct 28, 2018 @ 23:59:59.999';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
-        await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+        // Sometimes popovers take some time to appear in Firefox (#71979)
+        await retry.tryForTime(20000, async () => {
+          await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
+          await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
+          await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+        });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        log.debug(`metric value: ${newValue}`);
         expect(newValue).to.eql('10');
       });
     });
 
-    describe.skip('dark mode', () => {
-      it('uses dark mode flag', async () => {
-        await kibanaServer.uiSettings.update({
-          'theme:darkMode': true,
-        });
-
+    describe('browser history changes', () => {
+      it('should activate previous/next chart tab and panel config', async () => {
         await PageObjects.visualBuilder.resetPage();
-        const classNames = await testSubjects.getAttribute('timeseriesChart', 'class');
-        expect(classNames.includes('reversed')).to.be(true);
+
+        log.debug('Click metric chart');
+        await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.checkTabIsSelected('metric');
+
+        log.debug('Click Top N chart');
+        await PageObjects.visualBuilder.clickTopN();
+        await PageObjects.visualBuilder.checkTopNTabIsPresent();
+        await PageObjects.visualBuilder.checkTabIsSelected('top_n');
+
+        log.debug('Go back in browser history');
+        await browser.goBack();
+
+        log.debug('Check metric chart and panel config is rendered');
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.checkTabIsSelected('metric');
+        await PageObjects.visualBuilder.checkPanelConfigIsPresent('metric');
+
+        log.debug('Go back in browser history');
+        await browser.goBack();
+
+        log.debug('Check timeseries chart and panel config is rendered');
+        await PageObjects.visualBuilder.checkTimeSeriesChartIsPresent();
+        await PageObjects.visualBuilder.checkTabIsSelected('timeseries');
+        await PageObjects.visualBuilder.checkPanelConfigIsPresent('timeseries');
+
+        log.debug('Go forward in browser history');
+        await browser.goForward();
+
+        log.debug('Check metric chart and panel config is rendered');
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.checkTabIsSelected('metric');
+        await PageObjects.visualBuilder.checkPanelConfigIsPresent('metric');
+      });
+
+      it('should update panel config', async () => {
+        await PageObjects.visualBuilder.resetPage();
+
+        const initialLegendItems = ['Count: 156'];
+        const finalLegendItems = ['jpg: 106', 'css: 22', 'png: 14', 'gif: 8', 'php: 6'];
+
+        log.debug('Group metrics by terms: extension.raw');
+        await PageObjects.visualBuilder.setMetricsGroupByTerms('extension.raw');
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        const legendItems1 = await PageObjects.visualBuilder.getLegendItemsContent();
+        expect(legendItems1).to.eql(finalLegendItems);
+
+        log.debug('Go back in browser history');
+        await browser.goBack();
+        const isTermsSelected = await PageObjects.visualBuilder.checkSelectedMetricsGroupByValue(
+          'Terms'
+        );
+        expect(isTermsSelected).to.be(true);
+
+        log.debug('Go back in browser history');
+        await browser.goBack();
+        await PageObjects.visualBuilder.checkSelectedMetricsGroupByValue('Everything');
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        const legendItems2 = await PageObjects.visualBuilder.getLegendItemsContent();
+        expect(legendItems2).to.eql(initialLegendItems);
+
+        log.debug('Go forward twice in browser history');
+        await browser.goForward();
+        await browser.goForward();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        const legendItems3 = await PageObjects.visualBuilder.getLegendItemsContent();
+        expect(legendItems3).to.eql(finalLegendItems);
       });
     });
   });

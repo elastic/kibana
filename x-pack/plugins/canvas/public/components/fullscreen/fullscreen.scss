@@ -1,21 +1,29 @@
-body.canvas-isFullscreen {
+body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
+  // following two rules are for overriding the header bar padding
+  &.euiBody--headerIsFixed {
+    padding-top: 0;
+  }
+
+  .headerWrapper ~ .app-wrapper {
+    min-height: 100vh;
+  }
+
+  // following rule is for docked navigation
+  &.euiBody--collapsibleNavIsDocked {
+    padding-left: 0 !important; // sass-lint:disable-line no-important
+  }
+
   // hide global loading indicator
   .kbnLoadingIndicator {
     display: none;
   }
-  // remove space for global nav elements
-  .header-global-wrapper + .app-wrapper {
-    left: 0;
-    top: 0;
-  }
 
   // set the background color
   .canvasLayout {
-    background: #000; // This hex is OK, we always want it black
+    background: $euiColorInk;
   }
 
   // hide all the interface parts
-  .header-global-wrapper, // K7 global top nav
   .canvasLayout__stageHeader,
   .canvasLayout__sidebar,
   .canvasLayout__footer,
@@ -36,6 +44,11 @@ body.canvas-isFullscreen {
       padding: 0;
       margin: 0;
     }
+  }
+
+  .canvasLayout__rows {
+    // this is critical for the row to expand outside of the viewport for proper fullscreen sizing
+    max-width: none;
   }
 
   .canvasLayout__rows,

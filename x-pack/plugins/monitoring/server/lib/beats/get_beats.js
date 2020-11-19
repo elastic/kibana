@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { capitalize, get } from 'lodash';
+import { upperFirst, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
 import { calculateRate } from '../calculate_rate';
@@ -32,19 +32,19 @@ export function handleResponse(response, start, end) {
       hitTimestamp: get(stats, 'timestamp'),
       earliestHitTimestamp: get(earliestStats, 'timestamp'),
       timeWindowMin: start,
-      timeWindowMax: end
+      timeWindowMax: end,
     };
 
     const { rate: bytesSentRate } = calculateRate({
       latestTotal: get(stats, 'metrics.libbeat.output.write.bytes'),
       earliestTotal: get(earliestStats, 'metrics.libbeat.output.write.bytes'),
-      ...rateOptions
+      ...rateOptions,
     });
 
     const { rate: totalEventsRate } = calculateRate({
       latestTotal: get(stats, 'metrics.libbeat.pipeline.events.total'),
       earliestTotal: get(earliestStats, 'metrics.libbeat.pipeline.events.total'),
-      ...rateOptions
+      ...rateOptions,
     });
 
     const errorsWrittenLatest = get(stats, 'metrics.libbeat.output.write.errors');
@@ -59,13 +59,13 @@ export function handleResponse(response, start, end) {
     accum.beats.push({
       uuid: get(stats, 'beat.uuid'),
       name: get(stats, 'beat.name'),
-      type: capitalize(get(stats, 'beat.type')),
-      output: capitalize(get(stats, 'metrics.libbeat.output.type')),
+      type: upperFirst(get(stats, 'beat.type')),
+      output: upperFirst(get(stats, 'metrics.libbeat.output.type')),
       total_events_rate: totalEventsRate,
       bytes_sent_rate: bytesSentRate,
       errors,
       memory: get(stats, 'metrics.beat.memstats.memory_alloc'),
-      version: get(stats, 'beat.version')
+      version: get(stats, 'beat.version'),
     });
 
     return accum;
@@ -83,9 +83,10 @@ export async function getBeats(req, beatsIndexPattern, clusterUuid) {
 
   const params = {
     index: beatsIndexPattern,
-    size: config.get('xpack.monitoring.max_bucket_size'), // FIXME
+    size: config.get('monitoring.ui.max_bucket_size'), // FIXME
     ignoreUnavailable: true,
-    filterPath: [ // only filter path can filter for inner_hits
+    filterPath: [
+      // only filter path can filter for inner_hits
       'hits.hits._source.beats_stats.beat.uuid',
       'hits.hits._source.beats_stats.beat.name',
       'hits.hits._source.beats_stats.beat.host',
@@ -108,27 +109,27 @@ export async function getBeats(req, beatsIndexPattern, clusterUuid) {
 
       // earliest hits for calculating diffs
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.read.errors',
-      'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.errors'
+      'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
     ],
     body: {
       query: createBeatsQuery({
         start,
         end,
-        clusterUuid
+        clusterUuid,
       }),
       collapse: {
         field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restarts
         inner_hits: {
           name: 'earliest',
           size: 1,
-          sort: [{ 'beats_stats.timestamp': 'asc' }]
-        }
+          sort: [{ 'beats_stats.timestamp': 'asc' }],
+        },
       },
       sort: [
-        { 'beats_stats.beat.uuid': { order: 'asc' } }, // need to keep duplicate uuids grouped
-        { timestamp: { order: 'desc' } } // need oldest timestamp to come first for rate calcs to work
-      ]
-    }
+        { 'beats_stats.beat.uuid': { order: 'asc', unmapped_type: 'long' } }, // need to keep duplicate uuids grouped
+        { timestamp: { order: 'desc', unmapped_type: 'long' } }, // need oldest timestamp to come first for rate calcs to work
+      ],
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StringMap } from '../../../typings/common';
-import { Setup } from '../helpers/setup_request';
-import { transactionGroupsFetcher } from './fetcher';
-import { transactionGroupsTransformer } from './transform';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { transactionGroupsFetcher, Options } from './fetcher';
 
-export async function getTransactionGroups(setup: Setup, bodyQuery: StringMap) {
-  const { start, end } = setup;
-  const response = await transactionGroupsFetcher(setup, bodyQuery);
-  return transactionGroupsTransformer({
-    response,
-    start,
-    end
-  });
+export async function getTransactionGroupList(
+  options: Options,
+  setup: Setup & SetupTimeRange
+) {
+  const bucketSize = setup.config['xpack.apm.ui.transactionGroupBucketSize'];
+  return await transactionGroupsFetcher(options, setup, bucketSize);
 }

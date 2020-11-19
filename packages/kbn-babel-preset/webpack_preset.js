@@ -23,18 +23,35 @@ module.exports = () => {
       [
         require.resolve('@babel/preset-env'),
         {
-          targets: {
-            browsers: [
-              'last 2 versions',
-              '> 5%',
-              'Safari 7', // for PhantomJS support: https://github.com/elastic/kibana/issues/27136
-            ],
-          },
           useBuiltIns: 'entry',
-          modules: 'cjs'
+          modules: false,
+          // Please read the explanation for this
+          // in node_preset.js
+          corejs: '3.2.1',
         },
       ],
       require('./common_preset'),
-    ]
+    ],
+    plugins: [
+      [
+        require.resolve('babel-plugin-styled-components'),
+        {
+          fileName: false,
+        },
+      ],
+    ],
+    env: {
+      production: {
+        plugins: [
+          [
+            require.resolve('babel-plugin-transform-react-remove-prop-types'),
+            {
+              mode: 'remove',
+              removeImport: true,
+            },
+          ],
+        ],
+      },
+    },
   };
 };

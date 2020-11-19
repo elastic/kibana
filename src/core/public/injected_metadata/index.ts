@@ -22,5 +22,5 @@ export {
   InjectedMetadataParams,
   InjectedMetadataSetup,
   InjectedMetadataStart,
-  LegacyNavLink,
+  InjectedPluginMetadata,
 } from './injected_metadata_service';

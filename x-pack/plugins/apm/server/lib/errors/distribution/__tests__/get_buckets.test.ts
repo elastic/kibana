@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { getBuckets } from '../get_buckets';
+import { APMConfig } from '../../../..';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
 describe('timeseriesFetcher', () => {
   let clientSpy: jest.Mock;
@@ -13,13 +14,13 @@ describe('timeseriesFetcher', () => {
   beforeEach(async () => {
     clientSpy = jest.fn().mockResolvedValueOnce({
       hits: {
-        total: 100
+        total: 100,
       },
       aggregations: {
         distribution: {
-          buckets: []
-        }
-      }
+          buckets: [],
+        },
+      },
     });
 
     await getBuckets({
@@ -28,12 +29,39 @@ describe('timeseriesFetcher', () => {
       setup: {
         start: 1528113600000,
         end: 1528977600000,
-        client: clientSpy,
-        config: {
-          get: () => 'myIndex' as any,
-          has: () => true
-        }
-      }
+        apmEventClient: {
+          search: clientSpy,
+        } as any,
+        internalClient: {
+          search: clientSpy,
+        } as any,
+        config: new Proxy(
+          {},
+          {
+            get: () => 'myIndex',
+          }
+        ) as APMConfig,
+        uiFilters: {
+          environment: 'prod',
+        },
+        esFilter: [
+          {
+            term: { 'service.environment': 'prod' },
+          },
+        ],
+        indices: {
+          /* eslint-disable @typescript-eslint/naming-convention */
+          'apm_oss.sourcemapIndices': 'apm-*',
+          'apm_oss.errorIndices': 'apm-*',
+          'apm_oss.onboardingIndices': 'apm-*',
+          'apm_oss.spanIndices': 'apm-*',
+          'apm_oss.transactionIndices': 'apm-*',
+          'apm_oss.metricsIndices': 'apm-*',
+          /* eslint-enable @typescript-eslint/naming-convention */
+          apmAgentConfigurationIndex: '.apm-agent-configuration',
+          apmCustomLinkIndex: '.apm-custom-link',
+        },
+      },
     });
   });
 
@@ -42,15 +70,7 @@ describe('timeseriesFetcher', () => {
   });
 
   it('should limit query results to error documents', () => {
-    const query = clientSpy.mock.calls[0][1];
-    expect(query.body.query.bool.filter).toEqual(
-      expect.arrayContaining([
-        {
-          term: {
-            [PROCESSOR_EVENT]: 'error'
-          }
-        } as any
-      ])
-    );
+    const query = clientSpy.mock.calls[0][0];
+    expect(query.apm.events).toEqual([ProcessorEvent.error]);
   });
 });

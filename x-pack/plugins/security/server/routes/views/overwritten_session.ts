@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
-import { Legacy } from 'kibana';
+import { RouteDefinitionParams } from '..';
 
-export function initOverwrittenSessionView(server: Legacy.Server) {
-  server.route({
-    method: 'GET',
-    path: '/overwritten_session',
-    handler(request: Request, h: ResponseToolkit) {
-      return h.renderAppWithDefaultConfig(server.getHiddenUiAppById('overwritten_session'));
-    },
-  });
+/**
+ * Defines routes required for the Overwritten Session view.
+ */
+export function defineOverwrittenSessionRoutes({ httpResources }: RouteDefinitionParams) {
+  httpResources.register(
+    { path: '/security/overwritten_session', validate: false },
+    (context, req, res) => res.renderCoreApp()
+  );
 }

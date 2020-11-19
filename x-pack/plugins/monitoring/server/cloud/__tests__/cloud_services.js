@@ -11,7 +11,7 @@ import { AZURE } from '../azure';
 import { GCP } from '../gcp';
 
 describe('cloudServices', () => {
-  const expectedOrder = [ AWS, GCP, AZURE ];
+  const expectedOrder = [AWS, GCP, AZURE];
 
   it('iterates in expected order', () => {
     let i = 0;

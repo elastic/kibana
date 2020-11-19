@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   ERROR_GROUP_ID,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverLink } from './DiscoverLink';
 
 function getDiscoverQuery(error: APMError, kuery?: string) {
@@ -24,21 +24,26 @@ function getDiscoverQuery(error: APMError, kuery?: string) {
     _a: {
       interval: 'auto',
       query: {
-        language: 'lucene',
-        query
+        language: 'kuery',
+        query,
       },
-      sort: { '@timestamp': 'desc' }
-    }
+      sort: { '@timestamp': 'desc' },
+    },
   };
 }
 
-const DiscoverErrorLink: React.SFC<{
+function DiscoverErrorLink({
+  error,
+  kuery,
+  children,
+}: {
+  children?: ReactNode;
   readonly error: APMError;
   readonly kuery?: string;
-}> = ({ error, kuery, children }) => {
+}) {
   return (
     <DiscoverLink query={getDiscoverQuery(error, kuery)} children={children} />
   );
-};
+}
 
 export { DiscoverErrorLink };

@@ -4,226 +4,175 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPopover,
-  EuiLink
-} from '@elastic/eui';
-import chrome from 'ui/chrome';
-import url from 'url';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, FunctionComponent } from 'react';
-import { idx } from '@kbn/elastic-idx';
-import { pick } from 'lodash';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { DiscoverTransactionLink } from '../Links/DiscoverLinks/DiscoverTransactionLink';
-import { InfraLink } from '../Links/InfraLink';
+import React, { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import {
+  ActionMenu,
+  ActionMenuDivider,
+  Section,
+  SectionLink,
+  SectionLinks,
+  SectionSubtitle,
+  SectionTitle,
+} from '../../../../../observability/public';
+import { Filter } from '../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useFetcher } from '../../../hooks/useFetcher';
+import { useLicense } from '../../../hooks/useLicense';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { fromQuery } from '../Links/url_helpers';
+import { CustomLinkFlyout } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout';
+import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
+import { CustomLink } from './CustomLink';
+import { CustomLinkPopover } from './CustomLink/CustomLinkPopover';
+import { getSections } from './sections';
 
-function getInfraMetricsQuery(transaction: Transaction) {
-  const plus5 = new Date(transaction['@timestamp']);
-  const minus5 = new Date(plus5.getTime());
-
-  plus5.setMinutes(plus5.getMinutes() + 5);
-  minus5.setMinutes(minus5.getMinutes() - 5);
-
-  return {
-    from: minus5.getTime(),
-    to: plus5.getTime()
-  };
+interface Props {
+  readonly transaction: Transaction;
 }
 
 function ActionMenuButton({ onClick }: { onClick: () => void }) {
   return (
     <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onClick}>
       {i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
-        defaultMessage: 'Actions'
+        defaultMessage: 'Actions',
       })}
     </EuiButtonEmpty>
   );
 }
 
-interface Props {
-  readonly transaction: Transaction;
-}
+export function TransactionActionMenu({ transaction }: Props) {
+  const license = useLicense();
+  const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
 
-export const TransactionActionMenu: FunctionComponent<Props> = (
-  props: Props
-) => {
-  const { transaction } = props;
-
-  const [isOpen, setIsOpen] = useState(false);
-
+  const { core } = useApmPluginContext();
+  const location = useLocation();
   const { urlParams } = useUrlParams();
 
-  const hostName = idx(transaction, _ => _.host.hostname);
-  const podId = idx(transaction, _ => _.kubernetes.pod.uid);
-  const containerId = idx(transaction, _ => _.container.id);
-  const traceId = idx(transaction, _ => _.trace.id);
+  const [isActionPopoverOpen, setIsActionPopoverOpen] = useState(false);
+  const [isCustomLinksPopoverOpen, setIsCustomLinksPopoverOpen] = useState(
+    false
+  );
+  const [isCustomLinkFlyoutOpen, setIsCustomLinkFlyoutOpen] = useState(false);
 
-  const time = Math.round(transaction.timestamp.us / 1000);
-  const infraMetricsQuery = getInfraMetricsQuery(transaction);
+  const filters = useMemo(
+    () =>
+      [
+        { key: 'service.name', value: transaction?.service.name },
+        { key: 'service.environment', value: transaction?.service.environment },
+        { key: 'transaction.name', value: transaction?.transaction.name },
+        { key: 'transaction.type', value: transaction?.transaction.type },
+      ].filter((filter): filter is Filter => typeof filter.value === 'string'),
+    [transaction]
+  );
 
-  const infraItems = [
-    {
-      icon: 'loggingApp',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
-        { defaultMessage: 'Show pod logs' }
-      ),
-      condition: podId,
-      path: `/link-to/pod-logs/${podId}`,
-      query: { time }
-    },
-    {
-      icon: 'loggingApp',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
-        { defaultMessage: 'Show container logs' }
-      ),
-      condition: containerId,
-      path: `/link-to/container-logs/${containerId}`,
-      query: { time }
-    },
-    {
-      icon: 'loggingApp',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
-        { defaultMessage: 'Show host logs' }
-      ),
-      condition: hostName,
-      path: `/link-to/host-logs/${hostName}`,
-      query: { time }
-    },
-    {
-      icon: 'loggingApp',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
-        { defaultMessage: 'Show trace logs' }
-      ),
-      target: traceId,
-      hash: `/link-to/logs`,
-      query: { time, filter: `trace.id:${traceId}` }
-    },
-    {
-      icon: 'infraApp',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
-        { defaultMessage: 'Show pod metrics' }
-      ),
-      condition: podId,
-      path: `/link-to/pod-detail/${podId}`,
-      query: infraMetricsQuery
-    },
-    {
-      icon: 'infraApp',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
-        { defaultMessage: 'Show container metrics' }
-      ),
-      condition: containerId,
-      path: `/link-to/container-detail/${containerId}`,
-      query: infraMetricsQuery
-    },
-    {
-      icon: 'infraApp',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
-        { defaultMessage: 'Show host metrics' }
-      ),
-      condition: hostName,
-      path: `/link-to/host-detail/${hostName}`,
-      query: infraMetricsQuery
-    }
-  ].map(({ icon, label, condition, path, query }, index) => ({
-    icon,
-    key: `infra-link-${index}`,
-    child: (
-      <InfraLink path={path} query={query}>
-        {label}
-      </InfraLink>
-    ),
-    condition
-  }));
+  const { data: customLinks = [], status, refetch } = useFetcher(
+    (callApmApi) =>
+      callApmApi({
+        endpoint: 'GET /api/apm/settings/custom_links',
+        params: { query: convertFiltersToQuery(filters) },
+      }),
+    [filters]
+  );
 
-  const uptimeLink = url.format({
-    pathname: chrome.addBasePath('/app/uptime'),
-    hash: `/?${fromQuery(
-      pick(
-        {
-          dateRangeStart: urlParams.rangeFrom,
-          dateRangeEnd: urlParams.rangeTo,
-          search: `url.domain:${idx(transaction, t => t.url.domain)}`
-        },
-        (val: string) => !!val
-      )
-    )}`
+  const sections = getSections({
+    transaction,
+    basePath: core.http.basePath,
+    location,
+    urlParams,
   });
 
-  const menuItems = [
-    ...infraItems,
-    {
-      icon: 'discoverApp',
-      key: 'discover-transaction',
-      child: (
-        <DiscoverTransactionLink transaction={transaction}>
-          {i18n.translate(
-            'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
-            {
-              defaultMessage: 'View sample document'
-            }
-          )}
-        </DiscoverTransactionLink>
-      )
-    },
-    {
-      icon: 'uptimeApp',
-      key: 'uptime',
-      child: (
-        <EuiLink href={uptimeLink}>
-          {i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
-            defaultMessage: 'View monitor status'
-          })}
-        </EuiLink>
-      ),
-      condition: transaction && transaction.url
-    }
-  ]
-    .filter(({ condition }) => condition)
-    .map(({ icon, key, child, condition }) =>
-      condition ? (
-        <EuiContextMenuItem icon={icon} key={key}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>{child}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="popout" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiContextMenuItem>
-      ) : null
-    );
+  const closePopover = () => {
+    setIsActionPopoverOpen(false);
+    setIsCustomLinksPopoverOpen(false);
+  };
+
+  const toggleCustomLinkFlyout = () => {
+    closePopover();
+    setIsCustomLinkFlyoutOpen((isOpen) => !isOpen);
+  };
+
+  const toggleCustomLinkPopover = () => {
+    setIsCustomLinksPopoverOpen((isOpen) => !isOpen);
+  };
 
   return (
-    <EuiPopover
-      id="transactionActionMenu"
-      button={<ActionMenuButton onClick={() => setIsOpen(!isOpen)} />}
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      anchorPosition="downRight"
-      panelPaddingSize="none"
-    >
-      <EuiContextMenuPanel
-        items={menuItems}
-        title={i18n.translate('xpack.apm.transactionActionMenu.actionsLabel', {
-          defaultMessage: 'Actions'
-        })}
-      />
-    </EuiPopover>
+    <>
+      {isCustomLinkFlyoutOpen && (
+        <CustomLinkFlyout
+          defaults={{ filters }}
+          onClose={toggleCustomLinkFlyout}
+          onSave={() => {
+            toggleCustomLinkFlyout();
+            refetch();
+          }}
+          onDelete={() => {
+            toggleCustomLinkFlyout();
+            refetch();
+          }}
+        />
+      )}
+      <ActionMenu
+        id="transactionActionMenu"
+        closePopover={closePopover}
+        isOpen={isActionPopoverOpen}
+        anchorPosition="downRight"
+        button={
+          <ActionMenuButton onClick={() => setIsActionPopoverOpen(true)} />
+        }
+      >
+        <div>
+          {isCustomLinksPopoverOpen ? (
+            <CustomLinkPopover
+              customLinks={customLinks.slice(3, customLinks.length)}
+              onCreateCustomLinkClick={toggleCustomLinkFlyout}
+              onClose={toggleCustomLinkPopover}
+              transaction={transaction}
+            />
+          ) : (
+            <>
+              {sections.map((section, idx) => {
+                const isLastSection = idx !== sections.length - 1;
+                return (
+                  <div key={idx}>
+                    {section.map((item) => (
+                      <Section key={item.key}>
+                        {item.title && (
+                          <SectionTitle>{item.title}</SectionTitle>
+                        )}
+                        {item.subtitle && (
+                          <SectionSubtitle>{item.subtitle}</SectionSubtitle>
+                        )}
+                        <SectionLinks>
+                          {item.actions.map((action) => (
+                            <SectionLink
+                              key={action.key}
+                              label={action.label}
+                              href={action.href}
+                            />
+                          ))}
+                        </SectionLinks>
+                      </Section>
+                    ))}
+                    {isLastSection && <ActionMenuDivider />}
+                  </div>
+                );
+              })}
+              {hasValidLicense && (
+                <CustomLink
+                  customLinks={customLinks}
+                  status={status}
+                  onCreateCustomLinkClick={toggleCustomLinkFlyout}
+                  onSeeMoreClick={toggleCustomLinkPopover}
+                  transaction={transaction}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </ActionMenu>
+    </>
   );
-};
+}

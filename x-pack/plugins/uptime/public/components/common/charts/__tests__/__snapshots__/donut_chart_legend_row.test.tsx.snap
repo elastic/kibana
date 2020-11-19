@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DonutChartLegendRow passes appropriate props 1`] = `
+<EuiFlexGroup
+  gutterSize="l"
+  responsive={false}
+>
+  <Styled(EuiFlexItem)
+    component="span"
+    grow={false}
+  >
+    <EuiHealth
+      color="green"
+    />
+  </Styled(EuiFlexItem)>
+  <Styled(EuiFlexItem)
+    component="span"
+    grow={false}
+  >
+    Foo
+  </Styled(EuiFlexItem)>
+  <Styled(EuiFlexItem)
+    component="span"
+    data-test-subj="foo"
+  >
+    23
+  </Styled(EuiFlexItem)>
+</EuiFlexGroup>
+`;

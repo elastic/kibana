@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
 import { handleError } from '../../../../lib/errors';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
-import {
-  INDEX_PATTERN_FILEBEAT
-} from '../../../../../common/constants';
 
 export function clusterRoute(server) {
   /*
@@ -21,28 +18,39 @@ export function clusterRoute(server) {
     path: '/api/monitoring/v1/clusters/{clusterUuid}',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required()
+        params: schema.object({
+          clusterUuid: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+          codePaths: schema.arrayOf(schema.string()),
+        }),
+      },
     },
-    handler: (req) => {
-      const indexPatterns = getIndexPatterns(server, { filebeatIndexPattern: INDEX_PATTERN_FILEBEAT });
+    handler: async (req) => {
+      const config = server.config();
+
+      const indexPatterns = getIndexPatterns(server, {
+        filebeatIndexPattern: config.get('monitoring.ui.logs.index'),
+      });
       const options = {
         clusterUuid: req.params.clusterUuid,
         start: req.payload.timeRange.min,
         end: req.payload.timeRange.max,
+        codePaths: req.payload.codePaths,
       };
 
-      return getClustersFromRequest(req, indexPatterns, options)
-        .catch(err => handleError(err, req));
-    }
+      let clusters = [];
+      try {
+        clusters = await getClustersFromRequest(req, indexPatterns, options);
+      } catch (err) {
+        throw handleError(err, req);
+      }
+      return clusters;
+    },
   });
 }

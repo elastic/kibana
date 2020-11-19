@@ -3,19 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { get } from 'lodash';
-import { getState, getValue } from '../../../public/lib/resolved_arg';
+import { ViewStrings } from '../../../i18n';
+const { DropdownControl: strings } = ViewStrings;
 
 export const dropdownControl = () => ({
   name: 'dropdownControl',
-  displayName: 'Dropdown filter',
+  displayName: strings.getDisplayName(),
   modelArgs: [],
   args: [
     {
       name: 'valueColumn',
-      displayName: 'Values column',
-      help: 'Column from which to extract values to make available in the dropdown',
+      displayName: strings.getValueDisplayName(),
+      help: strings.getValueHelp(),
       argType: 'string',
       options: {
         confirm: 'Set',
@@ -23,18 +22,18 @@ export const dropdownControl = () => ({
     },
     {
       name: 'filterColumn',
-      displayName: 'Filter column ',
-      help: 'Column to which the value selected from the dropdown is applied',
+      displayName: strings.getFilterDisplayName(),
+      help: strings.getFilterHelp(),
       argType: 'string',
       options: {
         confirm: 'Set',
       },
     },
+    {
+      name: 'filterGroup',
+      displayName: strings.getFilterGroupDisplayName(),
+      help: strings.getFilterGroupHelp(),
+      argType: 'filterGroup',
+    },
   ],
-  resolve({ context }) {
-    if (getState(context) !== 'ready') {
-      return { columns: [] };
-    }
-    return { columns: get(getValue(context), 'columns', []) };
-  },
 });

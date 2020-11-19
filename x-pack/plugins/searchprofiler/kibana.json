@@ -1,0 +1,10 @@
+{
+  "id": "searchprofiler",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": ["devTools", "home", "licensing"],
+  "configPath": ["xpack", "searchprofiler"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["esUiShared"]
+}

@@ -30,7 +30,7 @@ export class CMTagsDomain {
 
   public async delete(user: FrameworkUser, tagIds: string[]) {
     const beats = await this.beatsAdabter.getAllWithTags(user, tagIds);
-    if (beats.filter(b => b.active).length > 0) {
+    if (beats.filter((b) => b.active).length > 0) {
       return false;
     }
     await this.configurationBlocksAdapter.deleteForTags(user, tagIds);
@@ -40,16 +40,13 @@ export class CMTagsDomain {
   public async getNonConflictingTags(user: FrameworkUser, existingTagIds: string[]) {
     const tags = await this.adapter.getTagsWithIds(user, existingTagIds);
     const existingUniqueBlockTypes = uniq(
-      tags.reduce(
-        (existingUniqueTypes, tag) => {
-          if (tag.hasConfigurationBlocksTypes) {
-            existingUniqueTypes = existingUniqueTypes.concat(tag.hasConfigurationBlocksTypes);
-          }
-          return existingUniqueTypes;
-        },
-        [] as string[]
-      )
-    ).filter(type => UNIQUENESS_ENFORCING_TYPES.includes(type));
+      tags.reduce((existingUniqueTypes, tag) => {
+        if (tag.hasConfigurationBlocksTypes) {
+          existingUniqueTypes = existingUniqueTypes.concat(tag.hasConfigurationBlocksTypes);
+        }
+        return existingUniqueTypes;
+      }, [] as string[])
+    ).filter((type) => UNIQUENESS_ENFORCING_TYPES.includes(type));
 
     const safeTags = await this.adapter.getWithoutConfigTypes(user, existingUniqueBlockTypes);
     return safeTags;

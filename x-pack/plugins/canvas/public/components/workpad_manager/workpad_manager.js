@@ -17,12 +17,15 @@ import {
 } from '@elastic/eui';
 import { WorkpadLoader } from '../workpad_loader';
 import { WorkpadTemplates } from '../workpad_templates';
+import { ComponentStrings } from '../../../i18n';
+
+const { WorkpadManager: strings } = ComponentStrings;
 
 export const WorkpadManager = ({ onClose }) => {
   const tabs = [
     {
       id: 'workpadLoader',
-      name: 'My workpads',
+      name: strings.getMyWorkpadsTabLabel(),
       content: (
         <Fragment>
           <EuiSpacer />
@@ -32,7 +35,7 @@ export const WorkpadManager = ({ onClose }) => {
     },
     {
       id: 'workpadTemplates',
-      name: 'Templates',
+      name: strings.getWorkpadTemplatesTabLabel(),
       content: (
         <Fragment>
           <EuiSpacer />
@@ -46,11 +49,11 @@ export const WorkpadManager = ({ onClose }) => {
       <EuiModalHeader className="canvasHomeApp__modalHeader">
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiModalHeaderTitle>Canvas workpads</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>{strings.getModalTitle()}</EuiModalHeaderTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>
-      <EuiModalBody>
+      <EuiModalBody className="canvasHomeApp__modalBody">
         <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
       </EuiModalBody>
     </Fragment>

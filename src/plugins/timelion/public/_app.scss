@@ -1,0 +1,83 @@
+.timApp {
+  position: relative;
+  background: $euiColorEmptyShade;
+
+  [ng-click] {
+    cursor: pointer;
+  }
+}
+
+.timApp__container {
+  margin: $euiSizeM;
+}
+
+.timApp__menus {
+  margin: $euiSizeM;
+}
+
+.timApp__title {
+  display: flex;
+  align-items: center;
+  padding: $euiSizeM $euiSizeS;
+  font-size: $euiSize;
+  font-weight: $euiFontWeightBold;
+  border-bottom: 1px solid $euiColorLightShade;
+  flex-grow: 1;
+  background-color: $euiColorEmptyShade;
+}
+
+.timApp__stats {
+  font-weight: $euiFontWeightRegular;
+  color: $euiColorMediumShade;
+}
+
+.timApp__form {
+  display: flex;
+  align-items: flex-start;
+  margin-top: $euiSize;
+  margin-bottom: $euiSize;
+}
+
+.timApp__expression {
+  display: flex;
+  flex: 1;
+  margin-right: $euiSizeS;
+}
+
+.timApp__button {
+  margin-top: $euiSizeS;
+  padding: $euiSizeXS $euiSizeM;
+  font-size: $euiSize;
+  border: none;
+  border-radius: $euiSizeXS;
+  color: $euiColorEmptyShade;
+  background-color: $euiColorPrimary;
+}
+
+.timApp__button--secondary {
+  margin-top: $euiSizeS;
+  padding: $euiSizeXS $euiSizeM;
+  font-size: $euiSize;
+  border: 1px solid $euiColorPrimary;
+  border-radius: $euiSizeXS;
+  color: $euiColorPrimary;
+  width: 100%;
+}
+
+.timApp__sectionTitle {
+  margin-bottom: $euiSizeM;
+  font-size: 18px;
+  color: $euiColorDarkestShade;
+}
+
+.timApp__helpText {
+  margin-bottom: $euiSize;
+  font-size: 14px;
+  color: $euiColorDarkShade;
+}
+
+.timApp__label {
+  font-size: $euiSize;
+  line-height: 1.5;
+  font-weight: $euiFontWeightBold;
+}

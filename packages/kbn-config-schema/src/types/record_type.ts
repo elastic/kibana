@@ -40,14 +40,19 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
       case 'any.required':
       case 'record.base':
         return `expected value of type [object] but got [${typeDetect(value)}]`;
+      case 'record.parse':
+        return `could not parse record value from json input`;
       case 'record.key':
       case 'record.value':
-        const childPathWithIndex = reason.path.slice();
+        const childPathWithIndex = path.slice();
         childPathWithIndex.splice(
           path.length,
           0,
           // If `key` validation failed, let's stress that to make error more obvious.
-          type === 'record.key' ? `key("${entryKey}")` : entryKey.toString()
+          type === 'record.key' ? `key("${entryKey}")` : entryKey.toString(),
+          // Error could have happened deep inside value/key schema and error message should
+          // include full path.
+          ...(reason instanceof SchemaTypeError ? reason.path : [])
         );
 
         return reason instanceof SchemaTypesError

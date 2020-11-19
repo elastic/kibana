@@ -5,14 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { NavLinksBuilder } from '../../common/nav_links_builder';
 import { FeaturesService } from '../../common/services';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function navLinksTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
   const featuresService: FeaturesService = getService('features');
 
@@ -23,29 +22,42 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
       navLinksBuilder = new NavLinksBuilder(features);
     });
 
-    UserAtSpaceScenarios.forEach(scenario => {
+    UserAtSpaceScenarios.forEach((scenario) => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 
         const uiCapabilities = await uiCapabilitiesService.get({
           credentials: { username: user.username, password: user.password },
-          navLinks: navLinksBuilder.all(),
           spaceId: space.id,
         });
-        expect(uiCapabilities.success).to.be(true);
-        expect(uiCapabilities.value).to.have.property('navLinks');
         switch (scenario.id) {
           case 'superuser at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
           case 'global_all at everything_space':
           case 'dual_privileges_all at everything_space':
-          case 'dual_privileges_read at everything_space':
-          case 'global_read at everything_space':
-          case 'everything_space_all at everything_space':
-          case 'everything_space_read at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.except('ml', 'monitoring')
+            );
+            break;
+          case 'everything_space_all at everything_space':
+          case 'global_read at everything_space':
+          case 'dual_privileges_read at everything_space':
+          case 'everything_space_read at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except(
+                'ml',
+                'monitoring',
+                'enterpriseSearch',
+                'appSearch',
+                'workplaceSearch'
+              )
             );
             break;
           case 'superuser at nothing_space':
@@ -55,10 +67,6 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'global_read at nothing_space':
           case 'nothing_space_all at nothing_space':
           case 'nothing_space_read at nothing_space':
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
-            break;
-          // these users have no access to any navLinks except management
-          // which is not a navLink that ever gets disabled.
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':
@@ -67,6 +75,8 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':
           case 'nothing_space_read at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
             break;
           default:

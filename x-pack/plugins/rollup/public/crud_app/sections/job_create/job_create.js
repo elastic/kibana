@@ -6,13 +6,12 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import mapValues from 'lodash/object/mapValues';
-import cloneDeep from 'lodash/lang/cloneDeep';
-import debounce from 'lodash/function/debounce';
+import { cloneDeep, debounce, first, mapValues } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 import {
   EuiCallOut,
@@ -25,13 +24,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { fatalError } from 'ui/notify';
-
 import {
   validateIndexPattern,
   formatFields,
   listBreadcrumb,
   createBreadcrumb,
+  retypeMetrics,
 } from '../../services';
 
 import { Navigation } from './navigation';
@@ -55,6 +53,8 @@ import {
   getAffectedStepsFields,
   hasErrors,
 } from './steps_config';
+
+import { getFatalErrors } from '../../../kibana_services';
 
 const stepIdToTitleMap = {
   [STEP_LOGISTICS]: i18n.translate('xpack.rollupJobs.create.steps.stepLogisticsTitle', {
@@ -80,24 +80,30 @@ const stepIdToTitleMap = {
 export class JobCreateUi extends Component {
   static propTypes = {
     createJob: PropTypes.func,
+    clearCloneJob: PropTypes.func,
     isSaving: PropTypes.bool,
     createJobError: PropTypes.node,
-  }
+    jobToClone: PropTypes.object,
+  };
 
   constructor(props) {
     super(props);
 
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb ]);
-
-    const stepsFields = mapValues(stepIdToStepConfigMap, step => cloneDeep(step.defaultFields || {}));
+    props.kibana.services.setBreadcrumbs([listBreadcrumb, createBreadcrumb]);
+    const { jobToClone: stepDefaultOverrides } = props;
+    const stepsFields = mapValues(stepIdToStepConfigMap, (step) =>
+      cloneDeep(step.getDefaultFields(stepDefaultOverrides))
+    );
 
     this.state = {
+      jobToClone: stepDefaultOverrides || null,
       checkpointStepId: stepIds[0],
       currentStepId: stepIds[0],
       nextStepId: stepIds[1],
       previousStepId: undefined,
       stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
-      areStepErrorsVisible: false,
+      // Show step errors immediately if we are cloning a job.
+      areStepErrorsVisible: !!stepDefaultOverrides,
       stepsFields,
       isValidatingIndexPattern: false,
       indexPatternAsyncErrors: undefined,
@@ -105,6 +111,7 @@ export class JobCreateUi extends Component {
       indexPatternTermsFields: [],
       indexPatternHistogramFields: [],
       indexPatternMetricsFields: [],
+      startJobAfterCreation: false,
     };
 
     this.lastIndexPatternValidationTime = 0;
@@ -112,6 +119,11 @@ export class JobCreateUi extends Component {
 
   componentDidMount() {
     this._isMounted = true;
+    const { clearCloneJob, jobToClone } = this.props;
+    if (jobToClone) {
+      clearCloneJob();
+      this.requestIndexPatternValidation(false);
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -144,148 +156,178 @@ export class JobCreateUi extends Component {
     this.props.clearCreateJobErrors();
   }
 
-  requestIndexPatternValidation = debounce(() => {
+  requestIndexPatternValidation = debounce((resetDefaults = true) => {
     const indexPattern = this.getIndexPattern();
 
-    const lastIndexPatternValidationTime = this.lastIndexPatternValidationTime = Date.now();
-    validateIndexPattern(indexPattern).then(response => {
-      // We don't need to do anything if this component has been unmounted.
-      if (!this._isMounted) {
-        return;
-      }
-
-      // Ignore all responses except that to the most recent request.
-      if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
-        return;
-      }
-
-      const {
-        doesMatchIndices: doesIndexPatternMatchIndices,
-        doesMatchRollupIndices: doesIndexPatternMatchRollupIndices,
-        dateFields: indexPatternDateFields,
-        numericFields,
-        keywordFields,
-      } = response.data;
-
-      let indexPatternAsyncErrors;
-
-      if (doesIndexPatternMatchRollupIndices) {
-        indexPatternAsyncErrors = [(
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternMatchesRollupIndices"
-            defaultMessage="Index pattern must not match rollup indices."
-          />
-        )];
-      } else if (!doesIndexPatternMatchIndices) {
-        indexPatternAsyncErrors = [(
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternNoMatchingIndices"
-            defaultMessage="Index pattern doesn't match any indices."
-          />
-        )];
-      } else if (!indexPatternDateFields.length) {
-        indexPatternAsyncErrors = [(
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
-            defaultMessage="Index pattern must match indices that contain time fields."
-          />
-        )];
-      }
-
-      const formattedNumericFields = formatFields(
-        numericFields,
-        i18n.translate('xpack.rollupJobs.create.numericTypeField', { defaultMessage: 'numeric' })
-      );
-      const formattedKeywordFields = formatFields(
-        keywordFields,
-        i18n.translate('xpack.rollupJobs.create.keywordTypeField', { defaultMessage: 'keyword' })
-      );
-      const formattedDateFields = formatFields(
-        indexPatternDateFields,
-        i18n.translate('xpack.rollupJobs.create.dateTypeField', { defaultMessage: 'date' })
-      );
-
-      function sortFields(a, b) {
-        const nameA = a.name.toUpperCase();
-        const nameB = b.name.toUpperCase();
-
-        if (nameA < nameB) {
-          return -1;
+    const lastIndexPatternValidationTime = (this.lastIndexPatternValidationTime = Date.now());
+    validateIndexPattern(indexPattern)
+      .then((response) => {
+        // We don't need to do anything if this component has been unmounted.
+        if (!this._isMounted) {
+          return;
         }
 
-        if (nameA > nameB) {
-          return 1;
+        // Only re-request if the index pattern changed.
+        if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
+          return;
         }
 
-        return 0;
-      }
+        const {
+          doesMatchIndices: doesIndexPatternMatchIndices,
+          doesMatchRollupIndices: doesIndexPatternMatchRollupIndices,
+          dateFields: indexPatternDateFields,
+          numericFields,
+          keywordFields,
+        } = response;
 
-      const indexPatternTermsFields = [
-        ...formattedNumericFields,
-        ...formattedKeywordFields,
-      ].sort(sortFields);
+        let indexPatternAsyncErrors;
 
-      const indexPatternHistogramFields = [ ...formattedNumericFields ].sort(sortFields);
+        if (doesIndexPatternMatchRollupIndices) {
+          indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternMatchesRollupIndices"
+              defaultMessage="Index pattern must not match rollup indices."
+            />,
+          ];
+        } else if (!doesIndexPatternMatchIndices) {
+          indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternNoMatchingIndices"
+              defaultMessage="Index pattern doesn't match any indices."
+            />,
+          ];
+        } else if (!indexPatternDateFields.length) {
+          indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternNoTimeFields"
+              defaultMessage="Index pattern must match indices that contain time fields."
+            />,
+          ];
+        }
 
-      const indexPatternMetricsFields = [
-        ...formattedNumericFields,
-        ...formattedDateFields,
-      ].sort(sortFields);
+        const numericType = i18n.translate('xpack.rollupJobs.create.numericTypeField', {
+          defaultMessage: 'numeric',
+        });
+        const keywordType = i18n.translate('xpack.rollupJobs.create.keywordTypeField', {
+          defaultMessage: 'keyword',
+        });
+        const dateType = i18n.translate('xpack.rollupJobs.create.dateTypeField', {
+          defaultMessage: 'date',
+        });
 
-      this.setState({
-        indexPatternAsyncErrors,
-        indexPatternDateFields,
-        indexPatternTermsFields,
-        indexPatternHistogramFields,
-        indexPatternMetricsFields,
-        isValidatingIndexPattern: false,
-      });
+        const formattedNumericFields = formatFields(numericFields, numericType);
+        const formattedKeywordFields = formatFields(keywordFields, keywordType);
+        const formattedDateFields = formatFields(indexPatternDateFields, dateType);
 
-      // Select first time field by default.
-      this.onFieldsChange({
-        dateHistogramField: indexPatternDateFields.length ? indexPatternDateFields[0] : null,
-      }, STEP_DATE_HISTOGRAM);
-    }).catch((error) => {
-      // We don't need to do anything if this component has been unmounted.
-      if (!this._isMounted) {
-        return;
-      }
+        const { jobToClone, stepsFields } = this.state;
+        const {
+          [STEP_METRICS]: { metrics },
+        } = stepsFields;
 
-      // Ignore all responses except that to the most recent request.
-      if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
-        return;
-      }
+        // Only re-type metrics if they haven't been typed already
+        if (jobToClone && metrics && metrics.length && !first(metrics).type) {
+          // Re-type any pre-existing metrics entries for the job we are cloning.
+          const typeMaps = [
+            { fields: formattedNumericFields, type: numericType },
+            { fields: formattedKeywordFields, type: keywordType },
+            { fields: formattedDateFields, type: dateType },
+          ];
+          const retypedMetrics = retypeMetrics({ metrics, typeMaps });
+          this.onFieldsChange({ metrics: retypedMetrics }, STEP_METRICS);
+        }
 
-      // Expect an error in the shape provided by Angular's $http service.
-      if (error && error.data) {
-        const { error: errorString, statusCode } = error.data;
+        function sortFields(a, b) {
+          const nameA = a.name.toUpperCase();
+          const nameB = b.name.toUpperCase();
 
-        const indexPatternAsyncErrors = [(
-          <FormattedMessage
-            id="xpack.rollupJobs.create.errors.indexPatternValidationError"
-            defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
-            values={{ error: errorString, statusCode }}
-          />
-        )];
+          if (nameA < nameB) {
+            return -1;
+          }
+
+          if (nameA > nameB) {
+            return 1;
+          }
+
+          return 0;
+        }
+
+        const indexPatternTermsFields = [...formattedNumericFields, ...formattedKeywordFields].sort(
+          sortFields
+        );
+
+        const indexPatternHistogramFields = [...formattedNumericFields].sort(sortFields);
+
+        const indexPatternMetricsFields = [...formattedNumericFields, ...formattedDateFields].sort(
+          sortFields
+        );
+
+        indexPatternDateFields.sort();
+
+        if (resetDefaults) {
+          // Whenever the index pattern changes we default to the first date field if there is one.
+          this.onFieldsChange(
+            {
+              dateHistogramField: indexPatternDateFields.length
+                ? indexPatternDateFields[0]
+                : undefined,
+            },
+            STEP_DATE_HISTOGRAM
+          );
+        }
 
         this.setState({
           indexPatternAsyncErrors,
-          indexPatternDateFields: [],
-          indexPatternTermsFields: [],
-          indexPatternHistogramFields: [],
-          indexPatternMetricsFields: [],
+          indexPatternDateFields,
+          indexPatternTermsFields,
+          indexPatternHistogramFields,
+          indexPatternMetricsFields,
           isValidatingIndexPattern: false,
         });
+      })
+      .catch((error) => {
+        // We don't need to do anything if this component has been unmounted.
+        if (!this._isMounted) {
+          return;
+        }
 
-        return;
-      }
+        // Ignore all responses except that to the most recent request.
+        if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
+          return;
+        }
 
-      // This error isn't an HTTP error, so let the fatal error screen tell the user something
-      // unexpected happened.
-      fatalError(error, i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
-        defaultMessage: 'Rollup Job Wizard index pattern validation',
-      }));
-    });
+        // Expect an error in the shape provided by http service.
+        if (error && error.body) {
+          const { error: errorString, statusCode } = error.body;
+
+          const indexPatternAsyncErrors = [
+            <FormattedMessage
+              id="xpack.rollupJobs.create.errors.indexPatternValidationError"
+              defaultMessage="There was a problem validating this index pattern: {statusCode} {error}"
+              values={{ error: errorString, statusCode }}
+            />,
+          ];
+
+          this.setState({
+            indexPatternAsyncErrors,
+            indexPatternDateFields: [],
+            indexPatternTermsFields: [],
+            indexPatternHistogramFields: [],
+            indexPatternMetricsFields: [],
+            isValidatingIndexPattern: false,
+          });
+
+          return;
+        }
+
+        // This error isn't an HTTP error, so let the fatal error screen tell the user something
+        // unexpected happened.
+        getFatalErrors().add(
+          error,
+          i18n.translate('xpack.rollupJobs.create.errors.indexPatternValidationFatalErrorTitle', {
+            defaultMessage: 'Rollup Job Wizard index pattern validation',
+          })
+        );
+      });
   }, 300);
 
   getSteps() {
@@ -297,11 +339,12 @@ export class JobCreateUi extends Component {
       isComplete: index < indexOfCurrentStep,
       isSelected: index === indexOfCurrentStep,
       onClick: () => this.goToStep(stepId),
-      disabled: (
-        !this.canGoToStep(stepId)
-        || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId)
-      ),
-      'data-test-subj': index === indexOfCurrentStep ? `createRollupStep${index + 1}--active` : `createRollupStep${index + 1}`,
+      disabled:
+        !this.canGoToStep(stepId) || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId),
+      'data-test-subj':
+        index === indexOfCurrentStep
+          ? `createRollupStep${index + 1}--active`
+          : `createRollupStep${index + 1}`,
     }));
   }
 
@@ -346,14 +389,11 @@ export class JobCreateUi extends Component {
     // Check every step before this one and see if it's been completed.
     const prerequisiteSteps = stepIds.slice(0, indexOfStep);
 
-    return prerequisiteSteps.every(prerequisiteStepId => !this.hasStepErrors(prerequisiteStepId));
+    return prerequisiteSteps.every((prerequisiteStepId) => !this.hasStepErrors(prerequisiteStepId));
   }
 
   hasStepErrors(stepId) {
-    const {
-      indexPatternAsyncErrors,
-      stepsFieldErrors,
-    } = this.state;
+    const { indexPatternAsyncErrors, stepsFieldErrors } = this.state;
 
     if (stepId === STEP_LOGISTICS) {
       if (Boolean(indexPatternAsyncErrors)) {
@@ -362,14 +402,15 @@ export class JobCreateUi extends Component {
     }
 
     const stepFieldErrors = stepsFieldErrors[stepId];
-    return Object.values(stepFieldErrors).some(error => error != null);
+    return Object.values(stepFieldErrors).some((error) => error != null);
   }
 
   getStepsFieldsErrors(newStepsFields) {
     return Object.keys(newStepsFields).reduce((stepsFieldErrors, stepId) => {
       const stepFields = newStepsFields[stepId];
       const fieldsValidator = stepIdToStepConfigMap[stepId].fieldsValidator;
-      stepsFieldErrors[stepId] = typeof fieldsValidator === `function` ? fieldsValidator(stepFields) : {};
+      stepsFieldErrors[stepId] =
+        typeof fieldsValidator === `function` ? fieldsValidator(stepFields) : {};
       return stepsFieldErrors;
     }, {});
   }
@@ -407,22 +448,13 @@ export class JobCreateUi extends Component {
           rollupDelay,
           rollupPageSize,
         },
-        [STEP_DATE_HISTOGRAM]: {
-          dateHistogramInterval,
-          dateHistogramTimeZone,
-          dateHistogramField,
-        },
-        [STEP_TERMS]: {
-          terms,
-        },
-        [STEP_HISTOGRAM]: {
-          histogram,
-          histogramInterval,
-        },
-        [STEP_METRICS]: {
-          metrics,
-        },
+        [STEP_DATE_HISTOGRAM]: { dateHistogramInterval, dateHistogramTimeZone, dateHistogramField },
+        [STEP_TERMS]: { terms },
+        [STEP_HISTOGRAM]: { histogram, histogramInterval },
+        [STEP_METRICS]: { metrics },
+        [STEP_REVIEW]: {},
       },
+      startJobAfterCreation,
     } = this.state;
 
     return {
@@ -439,6 +471,7 @@ export class JobCreateUi extends Component {
       histogram,
       histogramInterval,
       metrics,
+      startJobAfterCreation,
     };
   }
 
@@ -475,13 +508,13 @@ export class JobCreateUi extends Component {
 
       if (cause) {
         if (cause.length === 1) {
-          errorBody = (
-            <p>{cause[0]}</p>
-          );
+          errorBody = <p>{cause[0]}</p>;
         } else {
           errorBody = (
             <ul>
-              {cause.map(causeValue => <li key={causeValue}>{causeValue}</li>)}
+              {cause.map((causeValue) => (
+                <li key={causeValue}>{causeValue}</li>
+              ))}
             </ul>
           );
         }
@@ -489,11 +522,7 @@ export class JobCreateUi extends Component {
 
       saveErrorFeedback = (
         <Fragment>
-          <EuiCallOut
-            title={message}
-            icon="cross"
-            color="danger"
-          >
+          <EuiCallOut title={message} icon="cross" color="danger">
             {errorBody}
           </EuiCallOut>
 
@@ -506,7 +535,7 @@ export class JobCreateUi extends Component {
       <Fragment>
         <EuiPageContent>
           <EuiPageContentHeader>
-            <EuiTitle size="m">
+            <EuiTitle size="l">
               <h1>
                 <FormattedMessage
                   id="xpack.rollupJobs.createTitle"
@@ -527,7 +556,6 @@ export class JobCreateUi extends Component {
           <EuiSpacer size="l" />
 
           {this.renderNavigation()}
-
         </EuiPageContent>
         {savingFeedback}
       </Fragment>
@@ -612,16 +640,16 @@ export class JobCreateUi extends Component {
         );
 
       case STEP_REVIEW:
-        return (
-          <StepReview
-            job={this.getAllFields()}
-          />
-        );
+        return <StepReview job={this.getAllFields()} />;
 
       default:
         return null;
     }
   }
+
+  onToggleStartAfterCreate = (eve) => {
+    this.setState({ startJobAfterCreation: eve.target.checked });
+  };
 
   renderNavigation() {
     const {
@@ -629,6 +657,7 @@ export class JobCreateUi extends Component {
       nextStepId,
       previousStepId,
       areStepErrorsVisible,
+      startJobAfterCreation,
     } = this.state;
 
     const { isSaving } = this.props;
@@ -637,9 +666,9 @@ export class JobCreateUi extends Component {
     // Users can click the next step button as long as validation hasn't executed, and as long
     // as we're not waiting on async validation to complete.
     const canGoToNextStep =
-      !isValidatingIndexPattern
-      && hasNextStep
-      && (!areStepErrorsVisible || this.canGoToStep(nextStepId));
+      !isValidatingIndexPattern &&
+      hasNextStep &&
+      (!areStepErrorsVisible || this.canGoToStep(nextStepId));
 
     return (
       <Navigation
@@ -650,9 +679,11 @@ export class JobCreateUi extends Component {
         goToPreviousStep={this.goToPreviousStep}
         canGoToNextStep={canGoToNextStep}
         save={this.save}
+        onClickToggleStart={this.onToggleStartAfterCreate}
+        startJobAfterCreation={startJobAfterCreation}
       />
     );
   }
 }
 
-export const JobCreate = injectI18n(JobCreateUi);
+export const JobCreate = withKibana(JobCreateUi);

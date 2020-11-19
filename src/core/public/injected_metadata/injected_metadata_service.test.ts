@@ -58,7 +58,6 @@ describe('setup.getCspConfig()', () => {
 
     const csp = injectedMetadata.setup().getCspConfig();
     expect(() => {
-      // @ts-ignore TS knows this shouldn't be possible
       csp.warnLegacyBrowsers = false;
     }).toThrowError();
   });
@@ -68,18 +67,27 @@ describe('setup.getPlugins()', () => {
   it('returns injectedMetadata.uiPlugins', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
+        uiPlugins: [
+          { id: 'plugin-1', plugin: {}, config: { clientProp: 'clientValue' } },
+          { id: 'plugin-2', plugin: {} },
+        ],
       },
     } as any);
 
     const plugins = injectedMetadata.setup().getPlugins();
-    expect(plugins).toEqual([{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }]);
+    expect(plugins).toEqual([
+      { id: 'plugin-1', plugin: {}, config: { clientProp: 'clientValue' } },
+      { id: 'plugin-2', plugin: {} },
+    ]);
   });
 
   it('returns frozen version of uiPlugins', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
+        uiPlugins: [
+          { id: 'plugin-1', plugin: {} },
+          { id: 'plugin-2', plugin: {} },
+        ],
       },
     } as any);
 
@@ -91,11 +99,11 @@ describe('setup.getPlugins()', () => {
       plugins.push({ id: 'new-plugin', plugin: {} as DiscoveredPlugin });
     }).toThrowError();
     expect(() => {
-      // @ts-ignore TS knows this shouldn't be possible
+      // @ts-expect-error TS knows this shouldn't be possible
       plugins[0].name = 'changed';
     }).toThrowError();
     expect(() => {
-      // @ts-ignore TS knows this shouldn't be possible
+      // @ts-expect-error TS knows this shouldn't be possible
       plugins[0].newProp = 'changed';
     }).toThrowError();
   });
@@ -127,7 +135,7 @@ describe('setup.getLegacyMetadata()', () => {
       foo: true,
     });
     expect(() => {
-      // @ts-ignore TS knows this shouldn't be possible
+      // @ts-expect-error TS knows this shouldn't be possible
       legacyMetadata.foo = false;
     }).toThrowError();
   });

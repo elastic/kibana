@@ -5,12 +5,19 @@
  */
 
 import { mount } from 'enzyme';
-import { Location } from 'history';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockUrlParamsContextProvider } from '../../../../../context/UrlParamsContext/MockUrlParamsContextProvider';
 import { mockMoment, toJson } from '../../../../../utils/testHelpers';
 import { ErrorGroupList } from '../index';
 import props from './props.json';
+import { MemoryRouter } from 'react-router-dom';
+
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
 
 describe('ErrorGroupOverview -> List', () => {
   beforeAll(() => {
@@ -21,11 +28,9 @@ describe('ErrorGroupOverview -> List', () => {
     const storeState = {};
     const wrapper = mount(
       <MemoryRouter>
-        <ErrorGroupList
-          items={[]}
-          urlParams={props.urlParams}
-          location={{} as Location}
-        />
+        <MockUrlParamsContextProvider>
+          <ErrorGroupList items={[]} serviceName="opbeans-python" />
+        </MockUrlParamsContextProvider>
       </MemoryRouter>,
       storeState
     );
@@ -34,7 +39,15 @@ describe('ErrorGroupOverview -> List', () => {
   });
 
   it('should render with data', () => {
-    const wrapper = mount(<ErrorGroupList {...props} />);
+    const wrapper = mount(
+      <MemoryRouter>
+        <MockApmPluginContextWrapper>
+          <MockUrlParamsContextProvider>
+            <ErrorGroupList items={props.items} serviceName="opbeans-python" />
+          </MockUrlParamsContextProvider>
+        </MockApmPluginContextWrapper>
+      </MemoryRouter>
+    );
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });

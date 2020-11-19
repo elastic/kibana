@@ -1,14 +1,17 @@
 [[targz]]
-=== Install Kibana with `.tar.gz`
+=== Install {kib} from archive on Linux or macOS
+++++
+<titleabbrev>Install from archive on Linux or macOS</titleabbrev>
+++++
 
 Kibana is provided for Linux and Darwin as a `.tar.gz` package. These packages
 are the easiest formats to use when trying out Kibana.
 
-These packages are free to use under the Elastic license. They contain open 
-source and free commercial features and access to paid commercial features. 
-{xpack-ref}/license-management.html[Start a 30-day trial] to try out all of the 
-paid commercial features. See the 
-https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+These packages are free to use under the Elastic license. They contain open
+source and free commercial features and access to paid commercial features.
+<<managing-licenses,Start a 30-day trial>> to try out all of the
+paid commercial features. See the
+https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
 
 The latest stable version of Kibana can be found on the
@@ -32,13 +35,13 @@ The Linux archive for Kibana v{version} can be downloaded and installed as follo
 
 ["source","sh",subs="attributes"]
 --------------------------------------------
-wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz
-shasum -a 512 kibana-{version}-linux-x86_64.tar.gz <1>
+curl -O https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz
+curl https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha512 | shasum -a 512 -c - <1>
 tar -xzf kibana-{version}-linux-x86_64.tar.gz
 cd kibana-{version}-linux-x86_64/ <2>
 --------------------------------------------
-<1> Compare the SHA produced by `shasum` with the
-    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha512[published SHA].
+<1> Compares the SHA of the downloaded `.tar.gz` archive and the published checksum, which should output
+    `kibana-{version}-linux-x86_64.tar.gz: OK`.
 <2> This directory is known as `$KIBANA_HOME`.
 
 endif::[]
@@ -46,6 +49,27 @@ endif::[]
 
 [[install-darwin64]]
 ==== Download and install the Darwin package
+
+[IMPORTANT]
+.macOS Gatekeeper warnings
+====
+Apple's rollout of stricter notarization requirements affected the notarization
+of the {version} {kib} artifacts. If macOS Catalina displays a dialog when you
+first run {kib} that interrupts it, you will need to take an action to allow it
+to run.
+
+To prevent Gatekeeper checks on the {kib} files, run the following command on the
+downloaded `.tar.gz` archive or the directory to which was extracted:
+[source,sh]
+----
+xattr -d -r com.apple.quarantine <archive-or-directory>
+----
+
+Alternatively, you can add a security override if a Gatekeeper popup appears by
+following the instructions in the _How to open an app that hasn’t been notarized
+or is from an unidentified developer_ section of
+https://support.apple.com/en-us/HT202491[Safely open apps on your Mac].
+====
 
 ifeval::["{release-state}"=="unreleased"]
 
@@ -60,17 +84,17 @@ The Darwin archive for Kibana v{version} can be downloaded and installed as foll
 ["source","sh",subs="attributes"]
 --------------------------------------------
 curl -O https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz
-shasum -a 512 kibana-{version}-darwin-x86_64.tar.gz <1>
+curl https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha512 | shasum -a 512 -c - <1>
 tar -xzf kibana-{version}-darwin-x86_64.tar.gz
 cd kibana-{version}-darwin-x86_64/ <2>
 --------------------------------------------
-<1> Compare the SHA produced by `shasum` with the
-    https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha512[published SHA].
+<1> Compares the SHA of the downloaded `.tar.gz` archive and the published checksum, which should output
+    `kibana-{version}-darwin-x86_64.tar.gz: OK`.
 <2> This directory is known as `$KIBANA_HOME`.
 
-Alternatively, you can download the following package, which contains only 
+Alternatively, you can download the following package, which contains only
 features that are available under the Apache 2.0 license:
-https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-darwin-x86_64.tar.gz  
+https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-darwin-x86_64.tar.gz
 
 endif::[]
 
@@ -80,7 +104,7 @@ include::targz-running.asciidoc[]
 
 
 [[targz-configuring]]
-==== Configuring Kibana via config file
+==== Configure {kib} via the config file
 
 Kibana loads its configuration from the `$KIBANA_HOME/config/kibana.yml`
 file by default.  The format of this config file is explained in
@@ -123,12 +147,6 @@ important data later on.
 | data
   | The location of the data files written to disk by Kibana and its plugins
   | $KIBANA_HOME\data
- d|
-
-| optimize
-  | Transpiled source code. Certain administrative actions (e.g. plugin install)
-    result in the source code being retranspiled on the fly.
-  | $KIBANA_HOME\optimize
  d|
 
 | plugins

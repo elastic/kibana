@@ -94,7 +94,7 @@ function init(plot) {
         const size = point[2].size;
 
         const delta = maxPoint - minPoint;
-        const radius = (function() {
+        const radius = (function () {
           if (size == null) {
             return 0;
           } // If there is no size, draw nothing
@@ -115,7 +115,7 @@ function init(plot) {
         seriesBubbleDrawFn(ctx, series, x, y, radius, color);
       }
 
-      series.data.forEach(point => drawPoint(point));
+      series.data.forEach((point) => drawPoint(point));
     }
   }
 }

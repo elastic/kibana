@@ -4,36 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  startJobs,
-  stopJobs,
-} from './change_job_status';
+export { startJobs, stopJobs } from './change_job_status';
 
-export {
-  createJob,
-  clearCreateJobErrors,
-} from './create_job';
+export { cloneJob, clearCloneJob } from './clone_job';
 
-export {
-  deleteJobs,
-} from './delete_jobs';
+export { createJob, clearCreateJobErrors } from './create_job';
 
-export {
-  openDetailPanel,
-  closeDetailPanel,
-} from './detail_panel';
+export { deleteJobs } from './delete_jobs';
 
-export {
-  loadJobs,
-} from './load_jobs';
+export { openDetailPanel, closeDetailPanel } from './detail_panel';
 
-export {
-  refreshJobs,
-} from './refresh_jobs';
+export { loadJobs } from './load_jobs';
 
-export {
-  filterChanged,
-  pageChanged,
-  pageSizeChanged,
-  sortChanged,
-} from './table_state';
+export { refreshJobs } from './refresh_jobs';
+
+export { filterChanged, pageChanged, pageSizeChanged, sortChanged } from './table_state';

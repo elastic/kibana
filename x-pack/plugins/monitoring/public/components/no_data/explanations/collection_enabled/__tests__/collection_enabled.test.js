@@ -6,7 +6,7 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mountWithIntl } from '../../../../../../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ExplainCollectionEnabled } from '../collection_enabled';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -16,14 +16,12 @@ let component;
 describe('ExplainCollectionEnabled', () => {
   beforeEach(() => {
     enabler.enableCollectionEnabled = sinon.spy();
-    component = (
-      <ExplainCollectionEnabled
-        context="cluster"
-        property="xpack.monitoring.collection.enabled"
-        data="-1"
-        enabler={enabler}
-      />
-    );
+    const reason = {
+      property: 'xpack.monitoring.collection.enabled',
+      data: '-1',
+      context: 'cluster',
+    };
+    component = <ExplainCollectionEnabled {...{ reason, enabler }} />;
   });
 
   test('should explain about xpack.monitoring.collection.enabled setting', () => {

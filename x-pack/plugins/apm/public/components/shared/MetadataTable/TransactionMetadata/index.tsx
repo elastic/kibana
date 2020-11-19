@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { MetadataTable } from '..';
+import React, { useMemo } from 'react';
 import { TRANSACTION_METADATA_SECTIONS } from './sections';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { getSectionsWithRows } from '../helper';
+import { MetadataTable } from '..';
 
 interface Props {
   transaction: Transaction;
 }
 
 export function TransactionMetadata({ transaction }: Props) {
-  return (
-    <MetadataTable
-      item={transaction}
-      sections={TRANSACTION_METADATA_SECTIONS}
-    />
+  const sectionsWithRows = useMemo(
+    () => getSectionsWithRows(TRANSACTION_METADATA_SECTIONS, transaction),
+    [transaction]
   );
+  return <MetadataTable sections={sectionsWithRows} />;
 }

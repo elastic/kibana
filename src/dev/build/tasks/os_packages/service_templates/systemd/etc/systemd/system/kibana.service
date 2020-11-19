@@ -1,20 +1,32 @@
 [Unit]
 Description=Kibana
-StartLimitIntervalSec=30
-StartLimitBurst=3
+Documentation=https://www.elastic.co
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 Type=simple
 User=kibana
 Group=kibana
-# Load env vars from /etc/default/ and /etc/sysconfig/ if they exist.
-# Prefixing the path with '-' makes it try to load, but if the file doesn't
-# exist, it continues onward.
+
+Environment=KBN_HOME=/usr/share/kibana
+Environment=KBN_PATH_CONF=/etc/kibana
+
 EnvironmentFile=-/etc/default/kibana
 EnvironmentFile=-/etc/sysconfig/kibana
-ExecStart=/usr/share/kibana/bin/kibana "-c /etc/kibana/kibana.yml"
-Restart=always
-WorkingDirectory=/
+
+ExecStart=/usr/share/kibana/bin/kibana --logging.dest="/var/log/kibana/kibana.log" --pid.file="/run/kibana/kibana.pid"
+
+Restart=on-failure
+RestartSec=3
+
+StartLimitBurst=3
+StartLimitInterval=60
+
+WorkingDirectory=/usr/share/kibana
+
+StandardOutput=journal
+StandardError=inherit
 
 [Install]
 WantedBy=multi-user.target

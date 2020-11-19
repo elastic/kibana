@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import { readFile } from 'fs';
+import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 
 import { unique } from './core/helper';
 import { Translation } from './translation';
-
-const asyncReadFile = promisify(readFile);
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 
@@ -69,7 +67,8 @@ function getLocaleFromFileName(fullFileName: string) {
  * @returns
  */
 async function loadFile(pathToFile: string): Promise<Translation> {
-  return JSON.parse(await asyncReadFile(pathToFile, 'utf8'));
+  // doing this at the moment because fs is mocked in a lot of places where this would otherwise fail
+  return JSON.parse(await promisify(fs.readFile)(pathToFile, 'utf8'));
 }
 
 /**
@@ -128,7 +127,7 @@ export function getRegisteredLocales() {
  */
 export async function getTranslationsByLocale(locale: string): Promise<Translation> {
   const files = translationsRegistry[locale] || [];
-  const notLoadedFiles = files.filter(file => !loadedFiles[file]);
+  const notLoadedFiles = files.filter((file) => !loadedFiles[file]);
 
   if (notLoadedFiles.length) {
     await loadAndCacheFiles(notLoadedFiles);

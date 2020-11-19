@@ -3,5 +3,6 @@
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["core_plugin_a"],
+  "server": true,
   "ui": true
 }

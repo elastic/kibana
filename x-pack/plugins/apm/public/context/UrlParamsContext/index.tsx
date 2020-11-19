@@ -4,81 +4,104 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useReducer, useEffect } from 'react';
-import { Location } from 'history';
-import { useLocation } from '../../hooks/useLocation';
+import React, {
+  createContext,
+  useMemo,
+  useCallback,
+  useRef,
+  useState,
+} from 'react';
+import { withRouter } from 'react-router-dom';
+import { uniqueId, mapValues } from 'lodash';
 import { IUrlParams } from './types';
-import { LOCATION_UPDATE, TIME_RANGE_REFRESH } from './constants';
 import { getParsedDate } from './helpers';
 import { resolveUrlParams } from './resolveUrlParams';
+import { UIFilters } from '../../../typings/ui_filters';
+import {
+  localUIFilterNames,
+
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { pickKeys } from '../../../common/utils/pick_keys';
+import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
+import { LocalUIFilterName } from '../../../common/ui_filter';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 interface TimeRange {
   rangeFrom: string;
   rangeTo: string;
 }
 
-interface LocationAction {
-  type: typeof LOCATION_UPDATE;
-  location: Location;
+function useUiFilters(params: IUrlParams): UIFilters {
+  const { kuery, environment, ...urlParams } = params;
+  const localUiFilters = mapValues(
+    pickKeys(urlParams, ...localUIFilterNames),
+    (val) => (val ? val.split(',') : [])
+  ) as Partial<Record<LocalUIFilterName, string[]>>;
+
+  return useDeepObjectIdentity({
+    kuery,
+    environment: environment || ENVIRONMENT_ALL.value,
+    ...localUiFilters,
+  });
 }
 
-interface TimeRangeRefreshAction {
-  type: typeof TIME_RANGE_REFRESH;
-  time: TimeRange;
-}
-
-const defaultRefresh = (time: TimeRange) => {};
-
-export function urlParamsReducer(
-  state: IUrlParams = {},
-  action: LocationAction | TimeRangeRefreshAction
-): IUrlParams {
-  switch (action.type) {
-    case LOCATION_UPDATE: {
-      return resolveUrlParams(action.location, state);
-    }
-
-    case TIME_RANGE_REFRESH:
-      return {
-        ...state,
-        start: getParsedDate(action.time.rangeFrom),
-        end: getParsedDate(action.time.rangeTo)
-      };
-
-    default:
-      return state;
-  }
-}
+const defaultRefresh = (_time: TimeRange) => {};
 
 const UrlParamsContext = createContext({
   urlParams: {} as IUrlParams,
-  refreshTimeRange: defaultRefresh
+  refreshTimeRange: defaultRefresh,
+  uiFilters: {} as UIFilters,
 });
 
-const UrlParamsProvider: React.FC<{}> = ({ children }) => {
-  const location = useLocation();
-  const [urlParams, dispatch] = useReducer(
-    urlParamsReducer,
-    resolveUrlParams(location, {})
-  );
+const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
+  ({ location, children }) => {
+    const refUrlParams = useRef(resolveUrlParams(location, {}));
 
-  function refreshTimeRange(time: TimeRange) {
-    dispatch({ type: TIME_RANGE_REFRESH, time });
+    const { start, end, rangeFrom, rangeTo } = refUrlParams.current;
+
+    const [, forceUpdate] = useState('');
+
+    const urlParams = useMemo(
+      () =>
+        resolveUrlParams(location, {
+          start,
+          end,
+          rangeFrom,
+          rangeTo,
+        }),
+      [location, start, end, rangeFrom, rangeTo]
+    );
+
+    refUrlParams.current = urlParams;
+
+    const refreshTimeRange = useCallback(
+      (timeRange: TimeRange) => {
+        refUrlParams.current = {
+          ...refUrlParams.current,
+          start: getParsedDate(timeRange.rangeFrom),
+          end: getParsedDate(timeRange.rangeTo, { roundUp: true }),
+        };
+
+        forceUpdate(uniqueId());
+      },
+      [forceUpdate]
+    );
+
+    const uiFilters = useUiFilters(urlParams);
+
+    const contextValue = useMemo(() => {
+      return {
+        urlParams,
+        refreshTimeRange,
+        uiFilters,
+      };
+    }, [urlParams, refreshTimeRange, uiFilters]);
+
+    return (
+      <UrlParamsContext.Provider children={children} value={contextValue} />
+    );
   }
+);
 
-  useEffect(
-    () => {
-      dispatch({ type: LOCATION_UPDATE, location });
-    },
-    [location]
-  );
-
-  return (
-    <UrlParamsContext.Provider
-      children={children}
-      value={{ urlParams, refreshTimeRange }}
-    />
-  );
-};
-
-export { UrlParamsContext, UrlParamsProvider };
+export { UrlParamsContext, UrlParamsProvider, useUiFilters };

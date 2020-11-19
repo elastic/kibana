@@ -1,0 +1,460 @@
+{
+  "cloud_roll_index": {
+    "aggs": [
+      {
+        "dslName": "count",
+        "id": "count",
+        "kibanaName": "count",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Count",
+        "type": "metrics"
+      },
+      {
+        "dslName": "count",
+        "id": "high_count",
+        "kibanaName": "count",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "High count",
+        "type": "metrics"
+      },
+      {
+        "dslName": "count",
+        "id": "low_count",
+        "kibanaName": "count",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Low count",
+        "type": "metrics"
+      },
+      {
+        "id": "mean",
+        "title": "Mean",
+        "kibanaName": "avg",
+        "dslName": "avg",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "avg",
+          "min": "avg"
+        },
+        "fieldIds": ["CPUUtilization", "DiskReadBytes", "NetworkIn", "NetworkOut"]
+      },
+      {
+        "id": "high_mean",
+        "title": "High mean",
+        "kibanaName": "avg",
+        "dslName": "avg",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "avg",
+          "min": "avg"
+        },
+        "fieldIds": ["CPUUtilization", "DiskReadBytes", "NetworkIn", "NetworkOut"]
+      },
+      {
+        "id": "low_mean",
+        "title": "Low mean",
+        "kibanaName": "avg",
+        "dslName": "avg",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "avg",
+          "min": "avg"
+        },
+        "fieldIds": ["CPUUtilization", "DiskReadBytes", "NetworkIn", "NetworkOut"]
+      },
+      {
+        "id": "sum",
+        "title": "Sum",
+        "kibanaName": "sum",
+        "dslName": "sum",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "sum",
+          "min": "sum"
+        },
+        "fieldIds": ["DiskReadBytes", "DiskWriteOps"]
+      },
+      {
+        "id": "high_sum",
+        "title": "High sum",
+        "kibanaName": "sum",
+        "dslName": "sum",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "sum",
+          "min": "sum"
+        },
+        "fieldIds": ["DiskReadBytes", "DiskWriteOps"]
+      },
+      {
+        "id": "low_sum",
+        "title": "Low sum",
+        "kibanaName": "sum",
+        "dslName": "sum",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "sum",
+          "min": "sum"
+        },
+        "fieldIds": ["DiskReadBytes", "DiskWriteOps"]
+      },
+      {
+        "dslName": "percentiles",
+        "fieldIds": [],
+        "id": "median",
+        "kibanaName": "median",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Median",
+        "type": "metrics"
+      },
+      {
+        "dslName": "percentiles",
+        "fieldIds": [],
+        "id": "high_median",
+        "kibanaName": "median",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "High median",
+        "type": "metrics"
+      },
+      {
+        "dslName": "percentiles",
+        "fieldIds": [],
+        "id": "low_median",
+        "kibanaName": "median",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Low median",
+        "type": "metrics"
+      },
+      {
+        "id": "min",
+        "title": "Min",
+        "kibanaName": "min",
+        "dslName": "min",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "min",
+          "min": "min"
+        },
+        "fieldIds": ["NetworkIn", "NetworkOut"]
+      },
+      {
+        "id": "max",
+        "title": "Max",
+        "kibanaName": "max",
+        "dslName": "max",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "max"
+        },
+        "fieldIds": ["CPUUtilization", "DiskReadBytes"]
+      },
+      {
+        "dslName": "cardinality",
+        "fieldIds": [],
+        "id": "distinct_count",
+        "kibanaName": "cardinality",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Distinct count",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "id": "non_zero_count",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Non zero count",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "id": "high_non_zero_count",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "High non zero count",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "id": "low_non_zero_count",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Low non zero count",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "high_distinct_count",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "High distinct count",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "low_distinct_count",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Low distinct count",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "metric",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Metric",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "varp",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "varp",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "high_varp",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "High varp",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "low_varp",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Low varp",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "non_null_sum",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Non null sum",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "high_non_null_sum",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "High non null sum",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "low_non_null_sum",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Low non null sum",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "id": "rare",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Rare",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "id": "freq_rare",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Freq rare",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "info_content",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Info content",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "high_info_content",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "High info content",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "low_info_content",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Low info content",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "id": "time_of_day",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Time of day",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "id": "time_of_week",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Time of week",
+        "type": "metrics"
+      },
+      {
+        "dslName": null,
+        "fieldIds": [],
+        "id": "lat_long",
+        "kibanaName": null,
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "title": "Lat long",
+        "type": "metrics"
+      }
+    ],
+    "fields": [
+      {
+        "id": "@timestamp",
+        "name": "@timestamp",
+        "type": "date",
+        "aggregatable": true,
+        "aggIds": []
+      },
+      {
+        "id": "CPUUtilization",
+        "name": "CPUUtilization",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": ["mean", "high_mean", "low_mean", "max"]
+      },
+      {
+        "id": "DiskReadBytes",
+        "name": "DiskReadBytes",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": ["mean", "high_mean", "low_mean", "sum", "high_sum", "low_sum", "max"]
+      },
+      {
+        "id": "DiskWriteOps",
+        "name": "DiskWriteOps",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": ["sum", "high_sum", "low_sum"]
+      },
+      {
+        "id": "NetworkIn",
+        "name": "NetworkIn",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": ["mean", "high_mean", "low_mean", "min"]
+      },
+      {
+        "id": "NetworkOut",
+        "name": "NetworkOut",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": ["mean", "high_mean", "low_mean", "min"]
+      }
+    ]
+  }
+}

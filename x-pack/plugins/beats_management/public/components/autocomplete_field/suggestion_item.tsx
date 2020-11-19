@@ -8,49 +8,43 @@ import { EuiIcon } from '@elastic/eui';
 import { tint } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-// @ts-ignore
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+
+import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
 
 interface SuggestionItemProps {
   isSelected?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
-  suggestion: AutocompleteSuggestion;
+  suggestion: QuerySuggestion;
 }
 
-export class SuggestionItem extends React.Component<SuggestionItemProps> {
-  public static defaultProps: Partial<SuggestionItemProps> = {
-    isSelected: false,
-  };
+export const SuggestionItem: React.FC<SuggestionItemProps> = (props) => {
+  const { isSelected, onClick, onMouseEnter, suggestion } = props;
 
-  public render() {
-    const { isSelected, onClick, onMouseEnter, suggestion } = this.props;
+  return (
+    <SuggestionItemContainer isSelected={isSelected} onClick={onClick} onMouseEnter={onMouseEnter}>
+      <SuggestionItemIconField suggestionType={suggestion.type}>
+        <EuiIcon type={getEuiIconType(suggestion.type)} />
+      </SuggestionItemIconField>
+      <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
+      <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
+    </SuggestionItemContainer>
+  );
+};
 
-    return (
-      <SuggestionItemContainer
-        isSelected={isSelected}
-        onClick={onClick}
-        onMouseEnter={onMouseEnter}
-      >
-        <SuggestionItemIconField suggestionType={suggestion.type}>
-          <EuiIcon type={getEuiIconType(suggestion.type)} />
-        </SuggestionItemIconField>
-        <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
-        <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
-      </SuggestionItemContainer>
-    );
-  }
-}
+SuggestionItem.defaultProps = {
+  isSelected: false,
+};
 
 const SuggestionItemContainer = styled.div<{
   isSelected?: boolean;
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${props => props.theme.eui.default.euiFontSizeS};
-  height: ${props => props.theme.eui.default.euiSizeXl};
+  font-size: ${(props) => props.theme.eui.default.euiFontSizeS};
+  height: ${(props) => props.theme.eui.default.euiSizeXl};
   white-space: nowrap;
-  background-color: ${props =>
+  background-color: ${(props) =>
     props.isSelected ? props.theme.eui.default.euiColorLightestShade : 'transparent'};
 `;
 
@@ -59,33 +53,33 @@ const SuggestionItemField = styled.div`
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${props => props.theme.eui.default.euiSizeXl};
-  padding: ${props => props.theme.eui.default.euiSizeXs};
+  height: ${(props) => props.theme.eui.default.euiSizeXl};
+  padding: ${(props) => props.theme.eui.default.euiSizeXs};
 `;
 
-const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: string }>`
-  background-color: ${props => {
+const SuggestionItemIconField = styled(SuggestionItemField)<{ suggestionType: string }>`
+  background-color: ${(props) => {
     return tint(0.1, getEuiIconColor(props.theme, props.suggestionType));
   }};
-  color: ${props => {
+  color: ${(props) => {
     return getEuiIconColor(props.theme, props.suggestionType);
   }};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${props => props.theme.eui.default.euiSizeXl};
+  width: ${(props) => props.theme.eui.default.euiSizeXl};
 `;
 
-const SuggestionItemTextField = SuggestionItemField.extend`
+const SuggestionItemTextField = styled(SuggestionItemField)`
   flex: 2 0 0;
-  font-family: ${props => props.theme.eui.default.euiCodeFontFamily};
+  font-family: ${(props) => props.theme.eui.default.euiCodeFontFamily};
 `;
 
-const SuggestionItemDescriptionField = SuggestionItemField.extend`
+const SuggestionItemDescriptionField = styled(SuggestionItemField)`
   flex: 3 0 0;
   p {
     display: inline;
     span {
-      font-family: ${props => props.theme.eui.default.euiCodeFontFamily};
+      font-family: ${(props) => props.theme.eui.default.euiCodeFontFamily};
     }
   }
 `;

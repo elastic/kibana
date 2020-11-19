@@ -1,0 +1,14 @@
+{
+  "rollup.stop_job": {
+    "url_params": {
+      "wait_for_completion": "__flag__",
+      "timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_rollup/job/{id}/_stop"
+    ]
+  }
+}

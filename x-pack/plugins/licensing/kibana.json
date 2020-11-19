@@ -1,0 +1,9 @@
+{
+  "id": "licensing",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "licensing"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": ["kibanaReact"]
+}

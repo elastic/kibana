@@ -1,22 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TransactionActionMenu component should render with data 1`] = `
-<EuiOutsideClickDetector
-  isDisabled={true}
-  onOutsideClick={[Function]}
->
+exports[`TransactionActionMenu component matches the snapshot 1`] = `
+<div>
   <div
-    className="euiPopover euiPopover--anchorDownRight"
+    class="euiPopover euiPopover--anchorDownRight"
     id="transactionActionMenu"
-    onKeyDown={[Function]}
   >
     <div
-      className="euiPopover__anchor"
+      class="euiPopover__anchor"
     >
-      <ActionMenuButton
-        onClick={[Function]}
-      />
+      <button
+        class="euiButtonEmpty euiButtonEmpty--primary"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonContent__icon"
+            data-euiicon-type="arrowDown"
+          />
+          <span
+            class="euiButtonEmpty__text"
+          >
+            Actions
+          </span>
+        </span>
+      </button>
     </div>
   </div>
-</EuiOutsideClickDetector>
+</div>
 `;

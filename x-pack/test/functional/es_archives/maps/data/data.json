@@ -27,7 +27,8 @@
         ],
         "type": "polygon"
       },
-      "name": "alpha"
+      "name": "alpha",
+      "prop1": 1
     }
   }
 }
@@ -61,7 +62,8 @@
         ],
         "type": "polygon"
       },
-      "name": "bravo"
+      "name": "bravo",
+      "prop1": 2
     }
   }
 }
@@ -95,7 +97,8 @@
         ],
         "type": "polygon"
       },
-      "name": "charlie"
+      "name": "charlie",
+      "prop1": 3
     }
   }
 }
@@ -127,7 +130,8 @@
           ],
         "type": "linestring"
       },
-      "name": "tango"
+      "name": "tango",
+      "prop1": 4
     }
   }
 }
@@ -342,6 +346,93 @@
         ],
         "type": "polygon"
       }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "flights",
+    "source": {
+      "location" : [-5, 5],
+      "heading" : 45,
+      "altitude" : 1000
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "flights",
+    "source": {
+      "location" : [5, 5],
+      "heading" : 180,
+      "altitude" : 5000
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "flights",
+    "source": {
+      "location" : [0,-5],
+      "heading" : 270,
+      "altitude" : 3000
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "connections",
+    "source": {
+      "source" : [-65, 40],
+      "destination" : "drm3btev3e86"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "connections",
+    "source": {
+      "source" : [-75.00001, 41],
+      "destination" : { "lon": -71, "lat": 40 }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "connections",
+    "source": {
+      "source" : [-75, 41.00003],
+      "destination" : [ -71.000000000000000, 40 ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "connections",
+    "source": {
+      "source" : [-75, 41.00004],
+      "destination" : "40.000,-71"
     }
   }
 }

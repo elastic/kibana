@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const repeatImage: ElementFactory = () => ({
   name: 'repeatImage',
   displayName: 'Image repeat',
-  tags: ['graphic', 'proportion'],
+  type: 'image',
   help: 'Repeats an image N times',
-  image: header,
   expression: `filters
 | demodata
 | math "mean(cost)"

@@ -12,7 +12,7 @@ import { deleteTestSuiteFactory } from '../../common/suites/delete';
 export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     deleteTest,
@@ -29,7 +29,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
       {
         spaceId: SPACES.SPACE_1.spaceId,
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       deleteTest(`from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         tests: {

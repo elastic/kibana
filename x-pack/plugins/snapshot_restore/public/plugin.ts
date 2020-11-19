@@ -3,92 +3,82 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { unmountComponentAtNode } from 'react-dom';
+import { i18n } from '@kbn/i18n';
+import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../src/plugins/home/public';
 import { PLUGIN } from '../common/constants';
-import { CLIENT_BASE_PATH, renderReact } from './app';
-import { AppCore, AppPlugins } from './app/types';
-import template from './index.html';
-import { Core, Plugins } from './shim';
 
-import { breadcrumbService } from './app/services/navigation';
-import { documentationLinksService } from './app/services/documentation';
-import { httpService } from './app/services/http';
-import { textService } from './app/services/text';
+import { ClientConfigType } from './types';
 
-const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
+import { httpService, setUiMetricService } from './application/services/http';
+import { textService } from './application/services/text';
+import { UiMetricService } from './application/services';
+import { UIM_APP_NAME } from './application/constants';
 
-export class Plugin {
-  public start(core: Core, plugins: Plugins): void {
-    const { i18n, routing, http, chrome, notification, documentation } = core;
-    const { management } = plugins;
+interface PluginsDependencies {
+  usageCollection: UsageCollectionSetup;
+  management: ManagementSetup;
+  home?: HomePublicPluginSetup;
+}
 
-    // Register management section
-    const esSection = management.sections.getSection('elasticsearch');
-    esSection.register(PLUGIN.ID, {
-      visible: true,
-      display: i18n.translate('xpack.snapshotRestore.appName', {
-        defaultMessage: 'Snapshot Repositories',
-      }),
-      order: 7,
-      url: `#${CLIENT_BASE_PATH}`,
-    });
+export class SnapshotRestoreUIPlugin {
+  private uiMetricService = new UiMetricService(UIM_APP_NAME);
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    // Temporary hack to provide the service instances in module files in order to avoid a big refactor
+    setUiMetricService(this.uiMetricService);
+  }
+
+  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): void {
+    const config = this.initializerContext.config.get<ClientConfigType>();
+    const { http } = coreSetup;
+    const { home, management, usageCollection } = plugins;
 
     // Initialize services
-    textService.init(i18n);
-    breadcrumbService.init(chrome, management.constants.BREADCRUMB);
-    documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
+    this.uiMetricService.setup(usageCollection);
+    textService.setup(i18n);
+    httpService.setup(http);
 
-    const unmountReactApp = (): void => {
-      const elem = document.getElementById(REACT_ROOT_ID);
-      if (elem) {
-        unmountComponentAtNode(elem);
-      }
-    };
-
-    // Register react root
-    routing.registerAngularRoute(`${CLIENT_BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
-      template,
-      controllerAs: 'snapshotRestoreController',
-      controller: ($scope: any, $route: any, $http: ng.IHttpService, $q: any) => {
-        // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
-        // e.g. to check license status per request.
-        http.setClient($http);
-        httpService.init(http.getClient(), chrome);
-
-        // Angular Lifecycle
-        const appRoute = $route.current;
-        const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
-          const currentRoute = $route.current;
-          const isNavigationInApp = currentRoute.$$route.template === appRoute.$$route.template;
-
-          // When we navigate within SR, prevent Angular from re-matching the route and rebuild the app
-          if (isNavigationInApp) {
-            $route.current = appRoute;
-          } else {
-            // Any clean up when user leaves SR
-          }
-
-          $scope.$on('$destroy', () => {
-            if (stopListeningForLocationChange) {
-              stopListeningForLocationChange();
-            }
-            unmountReactApp();
-          });
-        });
-
-        $scope.$$postDigest(() => {
-          unmountReactApp();
-          const elem = document.getElementById(REACT_ROOT_ID);
-          if (elem) {
-            renderReact(
-              elem,
-              { i18n, notification } as AppCore,
-              { management: { sections: management.sections } } as AppPlugins
-            );
-          }
-        });
+    management.sections.section.data.registerApp({
+      id: PLUGIN.id,
+      title: i18n.translate('xpack.snapshotRestore.appTitle', {
+        defaultMessage: 'Snapshot and Restore',
+      }),
+      order: 3,
+      mount: async (params) => {
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        const services = {
+          uiMetricService: this.uiMetricService,
+        };
+        return await mountManagementSection(coreSetup, services, config, params);
       },
     });
+
+    if (home) {
+      home.featureCatalogue.register({
+        id: PLUGIN.id,
+        title: i18n.translate('xpack.snapshotRestore.featureCatalogueTitle', {
+          defaultMessage: 'Back up and restore',
+        }),
+        description: i18n.translate('xpack.snapshotRestore.featureCatalogueDescription', {
+          defaultMessage:
+            'Save snapshots to a backup repository, and restore to recover index and cluster state.',
+        }),
+        icon: 'storage',
+        path: '/app/management/data/snapshot_restore',
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.ADMIN,
+        order: 630,
+      });
+    }
   }
+
+  public start() {}
+  public stop() {}
 }

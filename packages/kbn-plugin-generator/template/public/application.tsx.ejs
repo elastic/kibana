@@ -1,0 +1,24 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { AppMountParameters, CoreStart } from '<%= importFromRoot('src/core/public') %>';
+import { AppPluginStartDependencies } from './types';
+import { <%= upperCamelCase(name) %>App } from './components/app';
+
+
+export const renderApp = (
+  { notifications, http }: CoreStart,
+  { navigation }: AppPluginStartDependencies,
+  { appBasePath, element }: AppMountParameters
+) => {
+  ReactDOM.render(
+    <<%= upperCamelCase(name) %>App
+      basename={appBasePath}
+      notifications={notifications}
+      http={http}
+      navigation={navigation}
+    />,
+    element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+};

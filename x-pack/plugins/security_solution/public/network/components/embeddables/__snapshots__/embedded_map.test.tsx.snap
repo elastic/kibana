@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmbeddedMapComponent renders correctly against snapshot 1`] = `
+<EmbeddedMapComponent
+  endDate="2019-08-28T05:50:57.877Z"
+  filters={Array []}
+  query={
+    Object {
+      "language": "kuery",
+      "query": "",
+    }
+  }
+  setQuery={[MockFunction]}
+  startDate="2019-08-28T05:50:47.877Z"
+/>
+`;

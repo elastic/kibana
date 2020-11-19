@@ -28,7 +28,7 @@ export function filterPartialBuckets(min, max, bucketSize, options = {}) {
     /* Table listing metrics don't need to filter the beginning of data for
      * partial buckets. They just boil down the data into max/min/last/slope
      * numbers instead of graphing it. So table listing data buckets pass
-    * ignoreEarly */
+     * ignoreEarly */
     if (options.ignoreEarly !== true) {
       // timestamp is too early to be complete
       if (getDelta(bucketTime.subtract(bucketSize, 'seconds'), min) < 0) {

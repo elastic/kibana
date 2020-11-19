@@ -17,27 +17,28 @@
  * under the License.
  */
 
-import { download } from './download';
-import Promise from 'bluebird';
+import Fs from 'fs';
+import { promisify } from 'util';
 import path from 'path';
+
+import del from 'del';
+
+import { download } from './download';
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
-import { sync as rimrafSync } from 'rimraf';
 import { errorIfXPackInstall } from '../lib/error_if_x_pack';
 import { existingInstall, assertVersion } from './kibana';
-import { prepareExternalProjectDependencies } from '@kbn/pm';
-import mkdirp from 'mkdirp';
 
-const mkdir = Promise.promisify(mkdirp);
+const mkdir = promisify(Fs.mkdir);
 
-export default async function install(settings, logger) {
+export async function install(settings, logger) {
   try {
     errorIfXPackInstall(settings, logger);
 
     await cleanPrevious(settings, logger);
 
-    await mkdir(settings.workingPath);
+    await mkdir(settings.workingPath, { recursive: true });
 
     await download(settings, logger);
 
@@ -45,15 +46,14 @@ export default async function install(settings, logger) {
 
     await extract(settings, logger);
 
-    rimrafSync(settings.tempArchiveFile);
+    del.sync(settings.tempArchiveFile, { force: true });
 
     existingInstall(settings, logger);
 
     assertVersion(settings);
 
-    await prepareExternalProjectDependencies(settings.workingPath);
-
-    await renamePlugin(settings.workingPath, path.join(settings.pluginDir, settings.plugins[0].name));
+    const targetDir = path.join(settings.pluginDir, settings.plugins[0].id);
+    await renamePlugin(settings.workingPath, targetDir);
 
     logger.log('Plugin installation complete');
   } catch (err) {

@@ -1,53 +1,127 @@
 [[upgrade-migrations]]
-=== Troubleshooting saved object migrations
+=== Upgrade migrations
 
-Every time {kib} is upgraded it checks to see if all saved objects, such as dashboards, visualizations, and index patterns, are compatible with the new version. If any objects need to be updated, then the automatic saved object migration process is kicked off.
+Every time {kib} is upgraded it checks to see if all saved objects, such as dashboards, visualizations, and index patterns, are compatible with the new version. If any saved objects need to be updated, then the automatic saved object migration process is kicked off.
 
-NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
-to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
+NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant]
+to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
+
+WARNING: The following instructions assumes {kib} is using the default index names. If the `kibana.index` or `xpack.tasks.index` configuration settings were changed these instructions will have to be adapted accordingly.
 
 [float]
 [[upgrade-migrations-process]]
-==== How the process works
+==== Background
 
-Saved objects are stored in an index named `.kibana_N`, where `N` is a number that increments over time as {kib} is upgraded. The index alias `.kibana` points to the latest up-to-date index for a given install.
+Saved objects are stored in two indices: 
 
-NOTE: Prior to 6.5.0, saved objects were stored directly in an index named `.kibana`, so the first time you upgrade to {kib} version 6.5+, {kib} will migrate into `.kibana_1` and set `.kibana` up as an index alias.
+* `.kibana_N`, or if set, the `kibana.index` configuration setting
+* `.kibana_task_manager_N`, or if set, the `xpack.tasks.index` configuration setting
+ 
+For each of these indices, `N` is a number that increments every time {kib} runs an upgrade migration on that index. The index aliases `.kibana` and `.kibana_task_manager` point to the most up-to-date index.
 
 While {kib} is starting up and before serving any HTTP traffic, it checks to see if any internal mapping changes or data transformations for existing saved objects are required.
 
-When changes are necessary, a new incremental `.kibana_N` index is created with updated mappings, then the saved objects are loaded in batches from the existing index, transformed to whatever extent necessary, and added to this new index.
+When changes are necessary, a new migration is started. To ensure that only one {kib} instance performs the migration, each instance will attempt to obtain a migration lock by creating a new `.kibana_N+1` index. The instance that succeeds in creating the index will then read batches of documents from the existing index, migrate them, and write them to the new index. Once the objects are migrated, the lock is released by pointing the `.kibana` index alias the new upgraded `.kibana_N+1` index. 
 
-Once the objects are migrated, the `.kibana` index alias is updated to point to the new index, and {kib} finishes starting up and serving HTTP traffic.
+Instances that failed to acquire a lock will log `Another Kibana instance appears to be migrating the index. Waiting for that migration to complete`. The instance will then wait until `.kibana` points to an upgraded index before starting up and serving HTTP traffic.
 
-[float]
-[[upgrade-migrations-old-indices]]
-==== Handling old `.kibana` indices
-
-After migrations have run, there will be multiple {kib} indices in {es}: (`.kibana_1`, `.kibana_2`, etc). {kib} only uses the index that the `.kibana` alias points to. The other {kib} indices can be safely deleted, but are left around as a matter of historical record, and to facilitate rolling {kib} back to a previous version.
+NOTE: Prior to 6.5.0, saved objects were stored directly in an index named `.kibana`. After upgrading to version 6.5+, {kib} will migrate this index into `.kibana_N` and set `.kibana` up as an index alias. +
+Prior to 7.4.0, task manager tasks were stored directly in an index name `.kibana_task_manager`. After upgrading to version 7.4+, {kib} will migrate this index into `.kibana_task_manager_N` and set `.kibana_task_manager` up as an index alias.
 
 [float]
-[[upgrade-migrations-errors]]
-==== Handling errors during saved object migrations
-
-If {kib} terminates unexpectedly while migrating a saved object index, some additional work may be required in order to get {kib} to re-attempt the migration.
-
-For example, if the `.kibana` alias is pointing to `.kibana_4`, and there is a `.kibana_5` index in {es}, the `.kibana_5` index will need to be deleted. {kib} will never attempt to overwrite an existing index.
+[[preventing-migration-failures]]
+==== Preventing migration failures
+This section highlights common causes of {kib} upgrade failures and how to prevent them.
 
 [float]
-[[upgrade-migrations-multiple-instances]]
-==== Support for multiple {kib} instances
+===== Corrupt saved objects
+We highly recommend testing your {kib} upgrade in a development cluster to discover and remedy problems caused by corrupt documents, especially when there are custom integrations creating saved objects in your environment. Saved objects that were corrupted through manual editing or integrations will cause migration failures with a log message like `Failed to transform document. Transform: index-pattern:7.0.0\n Doc: {...}` or `Unable to migrate the corrupt Saved Object document ...`. Corrupt documents will have to be fixed or deleted before an upgrade migration can succeed.
 
-If you're running multiple {kib} instances for a single index behind a load balancer, it's important that you stop all instances before upgrading, so you do not have multiple different versions of {kib} trying to perform saved object migrations.
+[float]
+===== User defined index templates that causes new `.kibana*` indices to have incompatible settings or mappings
+Matching index templates which specify `settings.refresh_interval` or `mappings` are known to interfere with {kib} upgrades.
 
-The first instance that triggers saved object migrations will run the entire process. Any other instances started up while a migration is running will log a message and then wait until saved object migration has completed before they start serving HTTP traffic.
+Prevention: narrow down the index patterns of any user-defined index templates to ensure that these won't apply to new `.kibana*` indices.
+
+Note: {kib} < 6.5 creates it's own index template called `kibana_index_template:.kibana` and index pattern `.kibana`. This index template will not interfere and does not need to be changed or removed.
+
+[float]
+===== An unhealthy {es} cluster
+Problems with your {es} cluster can prevent {kib} upgrades from succeeding. Ensure that your cluster has:
+
+ * enough free disk space, at least twice the amount of storage taken up by the `.kibana` and `.kibana_task_manager` indices
+ * sufficient heap size
+ * a "green" cluster status
+
+[float]
+===== Running different versions of {kib} connected to the same {es} index
+Kibana does not support rolling upgrades. Stop all {kib} instances before starting a newer version to prevent upgrade failures and data loss.
+
+[float]
+===== Incompatible `xpack.tasks.index` configuration setting
+For {kib} < 7.5.1, if the task manager index is set to `.tasks` with the configuration setting `xpack.tasks.index: ".tasks"`, upgrade migrations will fail. {kib} 7.5.1 and later prevents this by refusing to start with an incompatible configuration setting.
+
+[float]
+[[resolve-migrations-failures]]
+==== Resolving migration failures
+
+If {kib} terminates unexpectedly while migrating a saved object index, manual intervention is required before {kib} will attempt to perform the migration again. Follow the advice in (preventing migration failures)[preventing-migration-failures] before retrying a migration upgrade.
+
+As mentioned above, {kib} will create a migration lock for each index that requires a migration by creating a new `.kibana_N+1` index. For example: if the `.kibana_task_manager` alias is pointing to `.kibana_task_manager_5` then the first {kib} that succeeds in creating `.kibana_task_manager_6` will obtain the lock to start migrations.
+
+However, if the instance that obtained the lock fails to migrate the index, all other {kib} instances will be blocked from performing this migration. This includes the instance that originally obtained the lock, it will be blocked from retrying the migration even when restarted.
+
+[float]
+===== Retry a migration by restoring a backup snapshot:
+
+1. Before proceeding ensure that you have a recent and successful backup snapshot of all `.kibana*` indices.
+2. Shutdown all {kib} instances to be 100% sure that there are no instances currently performing a migration.
+3. Delete all saved object indices with `DELETE /.kibana*`
+4. Restore the `.kibana* indices and their aliases from the backup snapshot. See {es} {ref}/modules-snapshots.html[snapshots]
+5. Start up all {kib} instances to retry the upgrade migration.
+
+[float]
+===== (Not recommended) Retry a migration without a backup snapshot:
+
+1. Shutdown all {kib} instances to be 100% sure that there are no instances currently performing a migration.
+2. Identify any migration locks by comparing the output of `GET /_cat/aliases` and `GET /_cat/indices`. If e.g. `.kibana` is pointing to `.kibana_4` and there is a `.kibana_5` index, the `.kibana_5` index will act like a migration lock blocking further attempts. Be sure to check both the `.kibana` and `.kibana_task_manager` aliases and their indices.
+3. Remove any migration locks e.g. `DELETE /.kibana_5`. 
+4. Start up all {kib} instances.
 
 [float]
 [[upgrade-migrations-rolling-back]]
 ==== Rolling back to a previous version of {kib}
 
-When rolling {kib} back to a previous version, point the `.kibana` alias to the appropriate {kib} index. When you have the previous version running again, delete the more recent `.kibana_N` index or indices so that future upgrades are based on the current {kib} index.
+If you've followed the advice in (preventing migration failures)[preventing-migration-failures] and (resolving migration failures)[resolve-migrations-failures] and {kib} is still not able to upgrade successfully, you might choose to rollback {kib} until you're able to identify the root cause.
 
-WARNING: Rolling back to a previous {kib} version can result in saved object data loss if you had successfully upgraded and made changes to saved objects before rolling back.
+WARNING: Before rolling back {kib}, ensure that the version you wish to rollback to is compatible with your {es} cluster. If the version you're rolling back to is not compatible, you will have to also rollback {es}. +
+Any changes made after an upgrade will be lost when rolling back to a previous version.
 
+In order to rollback after a failed upgrade migration, the saved object indices might also have to be rolled back to be compatible with the previous {kibana} version. 
 
+[float]
+===== Rollback by restoring a backup snapshot:
+
+1. Before proceeding ensure that you have a recent and successful backup snapshot of all `.kibana*` indices.
+2. Shutdown all {kib} instances to be 100% sure that there are no instances currently performing a migration.
+3. Delete all saved object indices with `DELETE /.kibana*`
+4. Restore the `.kibana* indices and their aliases from the backup snapshot. See {es} {ref}/modules-snapshots.html[snapshots]
+5. Start up all {kib} instances on the older version you wish to rollback to.
+
+[float]
+===== (Not recommended) Rollback without a backup snapshot:
+
+WARNING: {kib} does not run a migration for every saved object index on every upgrade. A {kib} version upgrade can cause no migrations, migrate only the `.kibana` or the `.kibana_task_manager` index or both. Carefully read the logs to ensure that you're only deleting indices created by a later version of {kib} to avoid data loss.
+
+1. Shutdown all {kib} instances to be 100% sure that there are no {kib} instances currently performing a migration.
+2. Create a backup snapshot of the `.kibana*` indices.
+3. Use the logs from the upgraded instances to identify which indices {kib} attempted to upgrade. The server logs will contain an entry like `[savedobjects-service] Creating index .kibana_4.` and/or `[savedobjects-service] Creating index .kibana_task_manager_2.` If no indices were created after upgrading {kib} then no further action is required to perform a rollback, skip ahead to step (5). If you're running multiple {kib} instances, be sure to inspect all instances' logs.
+4. Delete each of the indices identified in step (2). e.g. `DELETE /.kibana_task_manager_2`
+5. Inspect the output of `GET /_cat/aliases`. If either the `.kibana` and/or `.kibana_task_manager` alias is missing, these will have to be created manually. Find the latest index from the output of `GET /_cat/indices` and create the missing alias to point to the latest index. E.g. if the `.kibana` alias was missing and the latest index is `.kibana_3` create a new alias with `POST /.kibana_3/_aliases/.kibana`.
+6. Start up {kib} on the older version you wish to rollback to.
+
+[float]
+[[upgrade-migrations-old-indices]]
+==== Handling old `.kibana_N` indices
+
+After migrations have completed, there will be multiple {kib} indices in {es}: (`.kibana_1`, `.kibana_2`, etc). {kib} only uses the index that the `.kibana` alias points to. The other {kib} indices can be safely deleted, but are left around as a matter of historical record, and to facilitate rolling {kib} back to a previous version.

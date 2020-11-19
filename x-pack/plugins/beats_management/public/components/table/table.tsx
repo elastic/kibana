@@ -8,7 +8,7 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { AutocompleteField } from '../autocomplete_field/index';
 import { ControlSchema } from './action_schema';
@@ -31,7 +31,7 @@ export interface KueryBarProps {
   loadSuggestions: (value: string, cursorPosition: number, maxCount?: number) => void;
   onChange?: (value: string) => void;
   onSubmit?: (value: string) => void;
-  suggestions: AutocompleteSuggestion[];
+  suggestions: QuerySuggestion[];
   value: string;
 }
 
@@ -93,7 +93,7 @@ export class Table extends React.Component<TableProps, TableState> {
     };
 
     const selectionOptions = hideTableControls
-      ? null
+      ? undefined
       : {
           onSelectionChange: this.setSelection,
           selectable: () => true,
@@ -108,7 +108,7 @@ export class Table extends React.Component<TableProps, TableState> {
       <TableContainer>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           {actions &&
-            actions.map(action => (
+            actions.map((action) => (
               <EuiFlexItem grow={false} key={action.name}>
                 <OptionControl
                   {...action}
@@ -148,7 +148,7 @@ export class Table extends React.Component<TableProps, TableState> {
     );
   }
 
-  private onTableChange = (page: { index: number; size: number } = { index: 0, size: 50 }) => {
+  private onTableChange = ({ page }: { page: { index: number; size: number } }) => {
     if (this.props.onTableChange) {
       this.props.onTableChange(page.index, page.size);
     }

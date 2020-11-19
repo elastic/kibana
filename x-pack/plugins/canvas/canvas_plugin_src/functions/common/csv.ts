@@ -5,8 +5,9 @@
  */
 
 import Papa from 'papaparse';
-import { Datatable, NullContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Datatable } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   data: string;
@@ -14,20 +15,20 @@ interface Arguments {
   newline: string;
 }
 
-export function csv(): NullContextFunction<'csv', Arguments, Datatable> {
+export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().csv;
+  const errorMessages = getFunctionErrors().csv;
 
   return {
     name: 'csv',
     type: 'datatable',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       data: {
         aliases: ['_'],
         types: ['string'],
+        required: true,
         help: argHelp.data,
       },
       delimiter: {
@@ -39,7 +40,7 @@ export function csv(): NullContextFunction<'csv', Arguments, Datatable> {
         help: argHelp.newline,
       },
     },
-    fn(_context, args) {
+    fn(input, args) {
       const { data: csvString, delimiter, newline } = args;
 
       const config: Papa.ParseConfig = {
@@ -62,7 +63,7 @@ export function csv(): NullContextFunction<'csv', Arguments, Datatable> {
       const { data, errors } = output;
 
       if (errors.length > 0) {
-        throw new Error('Error parsing input CSV.');
+        throw errorMessages.invalidInputCSV();
       }
 
       // output.data is an array of arrays, rows and values in each row

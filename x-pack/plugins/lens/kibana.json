@@ -1,0 +1,23 @@
+{
+  "id": "lens",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "charts",
+    "expressions",
+    "navigation",
+    "urlForwarding",
+    "visualizations",
+    "dashboard",
+    "charts",
+    "uiActions",
+    "embeddable"
+  ],
+  "optionalPlugins": ["usageCollection", "taskManager", "globalSearch", "savedObjectsTagging"],
+  "configPath": ["xpack", "lens"],
+  "extraPublicDirs": ["common/constants"],
+  "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable", "lensOss"]
+}

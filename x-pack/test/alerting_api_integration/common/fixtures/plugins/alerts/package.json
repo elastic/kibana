@@ -1,0 +1,14 @@
+{
+  "name": "alerts-fixtures",
+  "version": "1.0.0",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "main": "target/test/plugin_api_integration/plugins/alerts",
+  "scripts": {
+    "kbn": "node ../../../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../../../node_modules/.bin/tsc"
+  },
+  "license": "Apache-2.0"
+}

@@ -1,13 +1,14 @@
 {
   "name": "kbn_tp_custom_visualizations",
   "version": "1.0.0",
+  "main": "target/test/plugin_functional/plugins/kbn_tp_custom_visualizations",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
   },
   "license": "Apache-2.0",
-  "dependencies": {
-    "@elastic/eui": "10.4.0",
-    "react": "^16.8.0"
+  "scripts": {
+    "kbn": "node ../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../node_modules/.bin/tsc"
   }
 }

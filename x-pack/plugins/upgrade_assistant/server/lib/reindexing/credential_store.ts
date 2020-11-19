@@ -5,12 +5,11 @@
  */
 
 import { createHash } from 'crypto';
-import { Request } from 'hapi';
 import stringify from 'json-stable-stringify';
 
 import { ReindexSavedObject } from '../../../common/types';
 
-export type Credential = Request['headers'];
+export type Credential = Record<string, any>;
 
 /**
  * An in-memory cache for user credentials to be used for reindexing operations. When looking up

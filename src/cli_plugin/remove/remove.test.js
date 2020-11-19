@@ -17,19 +17,18 @@
  * under the License.
  */
 
+import { join } from 'path';
+import { writeFileSync, existsSync, mkdirSync } from 'fs';
+
 import sinon from 'sinon';
 import glob from 'glob-all';
-import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
-import Logger from '../lib/logger';
-import remove from './remove';
-import { join } from 'path';
-import { writeFileSync, existsSync } from 'fs';
+import del from 'del';
+
+import { Logger } from '../lib/logger';
+import { remove } from './remove';
 
 describe('kibana cli', function () {
-
   describe('plugin remover', function () {
-
     const pluginDir = join(__dirname, '.test.data.remove');
     let processExitStub;
     let logger;
@@ -41,15 +40,15 @@ describe('kibana cli', function () {
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      rimraf.sync(pluginDir);
-      mkdirp.sync(pluginDir);
+      del.sync(pluginDir);
+      mkdirSync(pluginDir, { recursive: true });
     });
 
     afterEach(function () {
       processExitStub.restore();
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(pluginDir);
+      del.sync(pluginDir);
     });
 
     it('throw an error if the plugin is not installed.', function () {
@@ -72,7 +71,7 @@ describe('kibana cli', function () {
     it('remove x-pack if it exists', () => {
       settings.pluginPath = join(pluginDir, 'x-pack');
       settings.plugin = 'x-pack';
-      mkdirp.sync(join(pluginDir, 'x-pack'));
+      mkdirSync(join(pluginDir, 'x-pack'), { recursive: true });
       expect(existsSync(settings.pluginPath)).toEqual(true);
       remove(settings, logger);
       expect(existsSync(settings.pluginPath)).toEqual(false);
@@ -83,13 +82,15 @@ describe('kibana cli', function () {
       settings.plugin = 'x-pack';
       expect(existsSync(settings.pluginPath)).toEqual(false);
       remove(settings, logger);
-      expect(logger.error.getCall(0).args[0]).toMatch(/Please install the OSS-only distribution to remove X-Pack features/);
+      expect(logger.error.getCall(0).args[0]).toMatch(
+        /Please install the OSS-only distribution to remove X-Pack features/
+      );
     });
 
     it('delete the specified folder.', function () {
       settings.pluginPath = join(pluginDir, 'foo');
-      mkdirp.sync(join(pluginDir, 'foo'));
-      mkdirp.sync(join(pluginDir, 'bar'));
+      mkdirSync(join(pluginDir, 'foo'), { recursive: true });
+      mkdirSync(join(pluginDir, 'bar'), { recursive: true });
 
       remove(settings, logger);
 
@@ -97,7 +98,5 @@ describe('kibana cli', function () {
       const expected = ['bar'];
       expect(files.sort()).toEqual(expected.sort());
     });
-
   });
-
 });

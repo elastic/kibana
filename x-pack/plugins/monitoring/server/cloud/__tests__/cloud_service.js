@@ -65,7 +65,7 @@ describe('CloudService', () => {
       // invalid JSON
       expect(() => service._stringToJson('{"xyz"}')).to.throwException();
       // (single quotes are not actually valid in serialized JSON)
-      expect(() => service._stringToJson('{\'a\': \'xyz\'}')).to.throwException();
+      expect(() => service._stringToJson("{'a': 'xyz'}")).to.throwException();
       expect(() => service._stringToJson('{{}')).to.throwException();
       expect(() => service._stringToJson('{}}')).to.throwException();
     });
@@ -74,22 +74,22 @@ describe('CloudService', () => {
       const testObject = {
         arbitrary: {
           nesting: {
-            works: [ 1, 2, '3' ]
-          }
+            works: [1, 2, '3'],
+          },
         },
         bool: true,
         and: false,
-        etc: 'abc'
+        etc: 'abc',
       };
 
-      expect(service._stringToJson(' {} ')).to.eql({ });
+      expect(service._stringToJson(' {} ')).to.eql({});
       expect(service._stringToJson('{ "a" : "key" }\n')).to.eql({ a: 'key' });
       expect(service._stringToJson(JSON.stringify(testObject))).to.eql(testObject);
     });
   });
 
   describe('_parseResponse', () => {
-    const body = { some: { body: { } } };
+    const body = { some: { body: {} } };
     const tryParseResponse = async (...args) => {
       try {
         await service._parseResponse(...args);

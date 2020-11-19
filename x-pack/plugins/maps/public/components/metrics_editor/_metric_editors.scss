@@ -1,0 +1,23 @@
+.mapMetricEditorPanel {
+  margin-bottom: $euiSizeS;
+}
+
+.mapMetricEditorPanel__metricEditor {
+  padding: $euiSizeM 0;
+  border-top: $euiBorderThin;
+
+  &:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+
+  &:last-child {
+    margin-bottom: $euiSizeM;
+    border-bottom: 1px solid $euiColorLightShade;
+  }
+}
+
+.mapMetricEditorPanel__metricRemoveButton {
+  padding-top: $euiSizeM;
+  text-align: right;
+}

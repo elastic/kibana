@@ -14,15 +14,15 @@ import { getSelectedElement, getSelectedPage } from '../../state/selectors/workp
 import { setArgumentAtIndex, setAstAtIndex, flushContext } from '../../state/actions/elements';
 import { Datasource as Component } from './datasource';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   element: getSelectedElement(state),
   pageId: getSelectedPage(state),
   functionDefinitions: getServerFunctions(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  dispatchArgumentAtIndex: props => arg => dispatch(setArgumentAtIndex({ ...props, arg })),
-  dispatchAstAtIndex: ({ index, element, pageId }) => ast => {
+const mapDispatchToProps = (dispatch) => ({
+  dispatchArgumentAtIndex: (props) => (arg) => dispatch(setArgumentAtIndex({ ...props, arg })),
+  dispatchAstAtIndex: ({ index, element, pageId }) => (ast) => {
     dispatch(flushContext(element.id));
     dispatch(setAstAtIndex(index, ast, element, pageId));
   },
@@ -32,8 +32,8 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId, functionDefinitions } = stateProps;
   const { dispatchArgumentAtIndex, dispatchAstAtIndex } = dispatchProps;
 
-  const getDataTableFunctionsByName = name =>
-    functionDefinitions.find(fn => fn.name === name && fn.type === 'datatable');
+  const getDataTableFunctionsByName = (name) =>
+    functionDefinitions.find((fn) => fn.name === name && fn.type === 'datatable');
 
   // find the matching datasource from the expression AST
   const datasourceAst = get(element, 'ast.chain', [])
@@ -82,11 +82,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 export const Datasource = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('stateArgs', 'updateArgs', ({ args }) => args),
   withState('selecting', 'setSelecting', false),
   withState('previewing', 'setPreviewing', false),

@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './search_results_api';
-export * from './search_summary_api';
+export * from './log_analysis';
+export * from './metadata_api';
+export * from './log_entries';
+export * from './metrics_explorer';
+export * from './metrics_api';
+export * from './log_alerts';
+export * from './snapshot_api';
+export * from './host_details';

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './license_service.factory';
+export { LogstashLicenseService } from './logstash_license_service';

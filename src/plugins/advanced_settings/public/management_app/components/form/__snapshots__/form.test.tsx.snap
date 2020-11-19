@@ -1,0 +1,1065 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Form should not render no settings message when instructed not to 1`] = `
+<Fragment>
+  <div>
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                General
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": -1,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="general:test:date"
+          setting={
+            Object {
+              "ariaName": "general test date",
+              "category": Array [
+                "general",
+              ],
+              "defVal": "defVal",
+              "description": "bar",
+              "displayName": "Test date",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:date",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="setting:test"
+          setting={
+            Object {
+              "ariaName": "setting test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": "defVal",
+              "description": "foo",
+              "displayName": "Test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "setting:test",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="general:test:array"
+          setting={
+            Object {
+              "ariaName": "array test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": Array [
+                "test",
+              ],
+              "description": "array foo",
+              "displayName": "Test array setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:array",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "array",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                Dashboard
+              </h2>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="dashboard:test:setting"
+          setting={
+            Object {
+              "ariaName": "dashboard test setting",
+              "category": Array [
+                "dashboard",
+              ],
+              "defVal": "defVal",
+              "description": "description",
+              "displayName": "Dashboard test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "dashboard:test:setting",
+              "readOnly": false,
+              "requiresPageReload": true,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                X-pack
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": 9,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="xpack:test:setting"
+          setting={
+            Object {
+              "ariaName": "xpack test setting",
+              "category": Array [
+                "x-pack",
+              ],
+              "defVal": "defVal",
+              "description": "bar",
+              "displayName": "X-Pack test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "xpack:test:setting",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+  </div>
+</Fragment>
+`;
+
+exports[`Form should render no settings message when there are no settings 1`] = `
+<Fragment>
+  <div>
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                General
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": -1,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="general:test:date"
+          setting={
+            Object {
+              "ariaName": "general test date",
+              "category": Array [
+                "general",
+              ],
+              "defVal": "defVal",
+              "description": "bar",
+              "displayName": "Test date",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:date",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="setting:test"
+          setting={
+            Object {
+              "ariaName": "setting test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": "defVal",
+              "description": "foo",
+              "displayName": "Test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "setting:test",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="general:test:array"
+          setting={
+            Object {
+              "ariaName": "array test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": Array [
+                "test",
+              ],
+              "description": "array foo",
+              "displayName": "Test array setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:array",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "array",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                Dashboard
+              </h2>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="dashboard:test:setting"
+          setting={
+            Object {
+              "ariaName": "dashboard test setting",
+              "category": Array [
+                "dashboard",
+              ],
+              "defVal": "defVal",
+              "description": "description",
+              "displayName": "Dashboard test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "dashboard:test:setting",
+              "readOnly": false,
+              "requiresPageReload": true,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                X-pack
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": 9,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="xpack:test:setting"
+          setting={
+            Object {
+              "ariaName": "xpack test setting",
+              "category": Array [
+                "x-pack",
+              ],
+              "defVal": "defVal",
+              "description": "bar",
+              "displayName": "X-Pack test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "xpack:test:setting",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+  </div>
+</Fragment>
+`;
+
+exports[`Form should render normally 1`] = `
+<Fragment>
+  <div>
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                General
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": -1,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="general:test:date"
+          setting={
+            Object {
+              "ariaName": "general test date",
+              "category": Array [
+                "general",
+              ],
+              "defVal": "defVal",
+              "description": "bar",
+              "displayName": "Test date",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:date",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="setting:test"
+          setting={
+            Object {
+              "ariaName": "setting test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": "defVal",
+              "description": "foo",
+              "displayName": "Test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "setting:test",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="general:test:array"
+          setting={
+            Object {
+              "ariaName": "array test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": Array [
+                "test",
+              ],
+              "description": "array foo",
+              "displayName": "Test array setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:array",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "array",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                Dashboard
+              </h2>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="dashboard:test:setting"
+          setting={
+            Object {
+              "ariaName": "dashboard test setting",
+              "category": Array [
+                "dashboard",
+              ],
+              "defVal": "defVal",
+              "description": "description",
+              "displayName": "Dashboard test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "dashboard:test:setting",
+              "readOnly": false,
+              "requiresPageReload": true,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                X-pack
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": 9,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={true}
+          handleChange={[Function]}
+          key="xpack:test:setting"
+          setting={
+            Object {
+              "ariaName": "xpack test setting",
+              "category": Array [
+                "x-pack",
+              ],
+              "defVal": "defVal",
+              "description": "bar",
+              "displayName": "X-Pack test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "xpack:test:setting",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+  </div>
+</Fragment>
+`;
+
+exports[`Form should render read-only when saving is disabled 1`] = `
+<Fragment>
+  <div>
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                General
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": -1,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={false}
+          handleChange={[Function]}
+          key="general:test:date"
+          setting={
+            Object {
+              "ariaName": "general test date",
+              "category": Array [
+                "general",
+              ],
+              "defVal": "defVal",
+              "description": "bar",
+              "displayName": "Test date",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:date",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={false}
+          handleChange={[Function]}
+          key="setting:test"
+          setting={
+            Object {
+              "ariaName": "setting test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": "defVal",
+              "description": "foo",
+              "displayName": "Test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "setting:test",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={false}
+          handleChange={[Function]}
+          key="general:test:array"
+          setting={
+            Object {
+              "ariaName": "array test",
+              "category": Array [
+                "general",
+              ],
+              "defVal": Array [
+                "test",
+              ],
+              "description": "array foo",
+              "displayName": "Test array setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "general:test:array",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "array",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                Dashboard
+              </h2>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={false}
+          handleChange={[Function]}
+          key="dashboard:test:setting"
+          setting={
+            Object {
+              "ariaName": "dashboard test setting",
+              "category": Array [
+                "dashboard",
+              ],
+              "defVal": "defVal",
+              "description": "description",
+              "displayName": "Dashboard test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "dashboard:test:setting",
+              "readOnly": false,
+              "requiresPageReload": true,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      paddingSize="l"
+    >
+      <EuiForm>
+        <EuiText>
+          <EuiFlexGroup
+            alignItems="baseline"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <h2>
+                X-pack
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <em>
+                <FormattedMessage
+                  defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                  id="advancedSettings.form.searchResultText"
+                  values={
+                    Object {
+                      "clearSearch": <EuiLink
+                        onClick={[Function]}
+                      >
+                        <em>
+                          <FormattedMessage
+                            defaultMessage="(clear search)"
+                            id="advancedSettings.form.clearSearchResultText"
+                            values={Object {}}
+                          />
+                        </em>
+                      </EuiLink>,
+                      "settingsCount": 9,
+                    }
+                  }
+                />
+              </em>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+        <Field
+          clearChange={[Function]}
+          dockLinks={Object {}}
+          enableSaving={false}
+          handleChange={[Function]}
+          key="xpack:test:setting"
+          setting={
+            Object {
+              "ariaName": "xpack test setting",
+              "category": Array [
+                "x-pack",
+              ],
+              "defVal": "defVal",
+              "description": "bar",
+              "displayName": "X-Pack test setting",
+              "isCustom": false,
+              "isOverridden": false,
+              "name": "xpack:test:setting",
+              "readOnly": false,
+              "requiresPageReload": false,
+              "type": "string",
+              "value": "value",
+            }
+          }
+          toasts={Object {}}
+        />
+      </EuiForm>
+    </EuiPanel>
+    <EuiSpacer
+      size="l"
+    />
+  </div>
+</Fragment>
+`;

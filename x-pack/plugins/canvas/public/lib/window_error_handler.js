@@ -15,7 +15,7 @@ function showError(err) {
 
   const close = document.createElement('a');
   close.textContent = 'close';
-  close.onclick = ev => {
+  close.onclick = (ev) => {
     ev.preventDefault();
     body.removeChild(notice);
   };
@@ -29,11 +29,7 @@ function showError(err) {
 
   if (err.stack) {
     const stack = document.createElement('pre');
-    stack.textContent = err.stack
-      .split('\n')
-      .slice(0, 2)
-      .concat('...')
-      .join('\n');
+    stack.textContent = err.stack.split('\n').slice(0, 2).concat('...').join('\n');
     notice.appendChild(stack);
   }
 
@@ -47,9 +43,16 @@ window.canvasInitErrorHandler = () => {
   window.onerror = (...args) => {
     const [message, , , , err] = args;
 
-    const isKnownError = Object.keys(knownErrors).find(errorName => {
-      return err.constructor.name === errorName || message.indexOf(errorName) >= 0;
-    });
+    // ResizeObserver error does not have an `err` object
+    // It is thrown during workpad loading due to layout thrashing
+    // https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
+    // https://github.com/elastic/eui/issues/3346
+    console.log(message);
+    const isKnownError =
+      message.includes('ResizeObserver loop') ||
+      Object.keys(knownErrors).find((errorName) => {
+        return err.constructor.name === errorName || message.indexOf(errorName) >= 0;
+      });
     if (isKnownError) {
       return;
     }

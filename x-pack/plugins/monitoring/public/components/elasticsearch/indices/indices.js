@@ -8,6 +8,7 @@ import React from 'react';
 import { capitalize } from 'lodash';
 import { LARGE_FLOAT, LARGE_BYTES, LARGE_ABBREVIATED } from '../../../../common/formatting';
 import { formatMetric } from '../../../lib/format_number';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ElasticsearchStatusIcon } from '../status_icon';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
@@ -19,9 +20,11 @@ import {
   EuiPanel,
   EuiSwitch,
   EuiSpacer,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import './indices.scss';
 
 const columns = [
   {
@@ -34,7 +37,7 @@ const columns = [
     render: (value) => (
       <div data-test-subj="name">
         <EuiLink
-          href={`#/elasticsearch/indices/${value}`}
+          href={getSafeForExternalLink(`#/elasticsearch/indices/${value}`)}
           data-test-subj={`indexLink-${value}`}
         >
           {value}
@@ -49,11 +52,12 @@ const columns = [
     field: 'status',
     sortable: true,
     render: (value) => (
-      <div title={`Index status: ${value}`}>
-        <ElasticsearchStatusIcon status={value} />&nbsp;
+      <div className="monElasticsearchIndicesTable__status" title={`Index status: ${value}`}>
+        <ElasticsearchStatusIcon status={value} />
+        &nbsp;
         {capitalize(value)}
       </div>
-    )
+    ),
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.indices.documentCountTitle', {
@@ -61,11 +65,9 @@ const columns = [
     }),
     field: 'doc_count',
     sortable: true,
-    render: value => (
-      <div data-test-subj="documentCount">
-        {formatMetric(value, LARGE_ABBREVIATED)}
-      </div>
-    )
+    render: (value) => (
+      <div data-test-subj="documentCount">{formatMetric(value, LARGE_ABBREVIATED)}</div>
+    ),
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.indices.dataTitle', {
@@ -73,11 +75,7 @@ const columns = [
     }),
     field: 'data_size',
     sortable: true,
-    render: value => (
-      <div data-test-subj="dataSize">
-        {formatMetric(value, LARGE_BYTES)}
-      </div>
-    )
+    render: (value) => <div data-test-subj="dataSize">{formatMetric(value, LARGE_BYTES)}</div>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.indices.indexRateTitle', {
@@ -85,11 +83,9 @@ const columns = [
     }),
     field: 'index_rate',
     sortable: true,
-    render: value => (
-      <div data-test-subj="indexRate">
-        {formatMetric(value, LARGE_FLOAT, '/s')}
-      </div>
-    )
+    render: (value) => (
+      <div data-test-subj="indexRate">{formatMetric(value, LARGE_FLOAT, '/s')}</div>
+    ),
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.indices.searchRateTitle', {
@@ -97,11 +93,9 @@ const columns = [
     }),
     field: 'search_rate',
     sortable: true,
-    render: value => (
-      <div data-test-subj="searchRate">
-        {formatMetric(value, LARGE_FLOAT, '/s')}
-      </div>
-    )
+    render: (value) => (
+      <div data-test-subj="searchRate">{formatMetric(value, LARGE_FLOAT, '/s')}</div>
+    ),
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.indices.unassignedShardsTitle', {
@@ -109,12 +103,8 @@ const columns = [
     }),
     field: 'unassigned_shards',
     sortable: true,
-    render: value => (
-      <div data-test-subj="unassignedShards">
-        {formatMetric(value, '0')}
-      </div>
-    )
-  }
+    render: (value) => <div data-test-subj="unassignedShards">{formatMetric(value, '0')}</div>,
+  },
 ];
 
 const getNoDataMessage = () => {
@@ -136,10 +126,9 @@ const getNoDataMessage = () => {
   );
 };
 
-const ElasticsearchIndicesUI = ({
+export const ElasticsearchIndices = ({
   clusterStatus,
   indices,
-  intl,
   sorting,
   pagination,
   onTableChange,
@@ -149,22 +138,30 @@ const ElasticsearchIndicesUI = ({
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.indices.heading"
+              defaultMessage="Elasticsearch indices"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPanel>
           <ClusterStatus stats={clusterStatus} />
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPageContent>
           <EuiSwitch
-            label={(
+            label={
               <FormattedMessage
                 id="xpack.monitoring.elasticsearch.indices.systemIndicesLabel"
-                defaultMessage="System indices"
+                defaultMessage="Filter for system indices"
               />
-            )}
+            }
             checked={showSystemIndices}
-            onChange={e => toggleShowSystemIndices(e.target.checked)}
+            onChange={(e) => toggleShowSystemIndices(e.target.checked)}
           />
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m" />
           <EuiMonitoringTable
             className="elasticsearchIndicesTable"
             rows={indices}
@@ -175,15 +172,17 @@ const ElasticsearchIndicesUI = ({
             search={{
               box: {
                 incremental: true,
-                placeholder: intl.formatMessage({
-                  id: 'xpack.monitoring.elasticsearch.indices.monitoringTablePlaceholder',
-                  defaultMessage: 'Filter Indices…',
-                })
+                placeholder: i18n.translate(
+                  'xpack.monitoring.elasticsearch.indices.monitoringTablePlaceholder',
+                  {
+                    defaultMessage: 'Filter Indices…',
+                  }
+                ),
               },
             }}
             onTableChange={onTableChange}
             executeQueryOptions={{
-              defaultFields: ['name']
+              defaultFields: ['name'],
             }}
           />
         </EuiPageContent>
@@ -191,5 +190,3 @@ const ElasticsearchIndicesUI = ({
     </EuiPage>
   );
 };
-
-export const ElasticsearchIndices = injectI18n(ElasticsearchIndicesUI);

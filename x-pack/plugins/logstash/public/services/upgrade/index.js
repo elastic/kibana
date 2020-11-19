@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './upgrade_service.factory';
+export { UpgradeService } from './upgrade_service';

@@ -5,10 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  _vertexStats,
-  _enrichStateWithStatsAggregation
-} from '../get_pipeline';
+import { _vertexStats, _enrichStateWithStatsAggregation } from '../get_pipeline';
 
 describe('get_pipeline', () => {
   describe('_vertexStats function', () => {
@@ -19,7 +16,7 @@ describe('get_pipeline', () => {
 
     beforeEach(() => {
       vertex = {
-        plugin_type: 'input'
+        plugin_type: 'input',
       };
 
       vertexStatsBucket = {
@@ -27,7 +24,7 @@ describe('get_pipeline', () => {
         events_out_total: { value: 9000 },
         duration_in_millis_total: { value: 18000 },
         queue_push_duration_in_millis_total: { value: 100000 },
-        queue_push_duration_in_millis: { value: 20000 }
+        queue_push_duration_in_millis: { value: 20000 },
       };
 
       totalProcessorsDurationInMillis = 24000;
@@ -35,7 +32,12 @@ describe('get_pipeline', () => {
     });
 
     it('returns correct stats', () => {
-      const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
+      const result = _vertexStats(
+        vertex,
+        vertexStatsBucket,
+        totalProcessorsDurationInMillis,
+        timeseriesIntervalInSeconds
+      );
       expect(result).to.eql({
         events_out_per_millisecond: 0.01,
         millis_per_event: 2,
@@ -45,17 +47,22 @@ describe('get_pipeline', () => {
     describe('vertex represents filter plugin', () => {
       beforeEach(() => {
         vertex = {
-          plugin_type: 'filter'
+          plugin_type: 'filter',
         };
       });
 
       it('returns correct stats', () => {
-        const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
+        const result = _vertexStats(
+          vertex,
+          vertexStatsBucket,
+          totalProcessorsDurationInMillis,
+          timeseriesIntervalInSeconds
+        );
         expect(result).to.eql({
           events_in_per_millisecond: 0.011111111111111112,
           events_out_per_millisecond: 0.01,
           millis_per_event: 1.8,
-          percent_of_total_processor_duration: 0.75
+          percent_of_total_processor_duration: 0.75,
         });
       });
     });
@@ -63,17 +70,22 @@ describe('get_pipeline', () => {
     describe('vertex represents output plugin', () => {
       beforeEach(() => {
         vertex = {
-          plugin_type: 'output'
+          plugin_type: 'output',
         };
       });
 
       it('returns correct stats', () => {
-        const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
+        const result = _vertexStats(
+          vertex,
+          vertexStatsBucket,
+          totalProcessorsDurationInMillis,
+          timeseriesIntervalInSeconds
+        );
         expect(result).to.eql({
           events_in_per_millisecond: 0.011111111111111112,
           events_out_per_millisecond: 0.01,
           millis_per_event: 1.8,
-          percent_of_total_processor_duration: 0.75
+          percent_of_total_processor_duration: 0.75,
         });
       });
     });
@@ -97,8 +109,8 @@ describe('get_pipeline', () => {
           name: 'B0buMd-',
           attributes: {
             'ml.machine_memory': '17179869184',
-            'ml.max_open_jobs': '20'
-          }
+            'ml.max_open_jobs': '20',
+          },
         },
         logstash_state: {
           pipeline: {
@@ -117,34 +129,34 @@ describe('get_pipeline', () => {
                     config_name: 'stdin',
                     plugin_type: 'input',
                     id: 'mystdin',
-                    type: 'plugin'
+                    type: 'plugin',
                   },
                   {
                     config_name: 'stdout',
                     plugin_type: 'output',
                     id: 'mystdout',
-                    type: 'plugin'
-                  }
+                    type: 'plugin',
+                  },
                 ],
                 edges: [
                   {
                     from: 'mystdin',
                     to: '__QUEUE__',
                     id: 'c56369ba2e160c8add43e8f105ca17c374b27f4b4627ea4566f066b0ead0bcc7',
-                    type: 'plain'
+                    type: 'plain',
                   },
                   {
                     from: '__QUEUE__',
                     to: 'mystdout',
                     id: '8a5222282b023399a14195011f2a14aa54a4d97810cd9e0a63c5cd98856bb70f',
-                    type: 'plain'
-                  }
-                ]
-              }
+                    type: 'plain',
+                  },
+                ],
+              },
             },
-            hash: 'eada8baceee81726f6be9d0a071beefad3d9a2fd1b5f5d916011dca9fa66d081'
-          }
-        }
+            hash: 'eada8baceee81726f6be9d0a071beefad3d9a2fd1b5f5d916011dca9fa66d081',
+          },
+        },
       };
 
       statsAggregation = {
@@ -165,27 +177,31 @@ describe('get_pipeline', () => {
                       events_in_total: { value: 0 },
                       events_out_total: { value: 1000 },
                       duration_in_millis_total: { value: 0 },
-                    }
-                  ]
-                }
+                    },
+                  ],
+                },
               },
               total_processor_duration_stats: {
                 count: 276,
                 min: 0,
                 max: 15904756,
                 avg: 6591773.384057971,
-                sum: 1819329454
-              }
-            }
-          }
-        }
+                sum: 1819329454,
+              },
+            },
+          },
+        },
       };
 
       timeseriesInterval = 30;
     });
 
     it('enriches the state document correctly with stats', () => {
-      const enrichedStateDocument = _enrichStateWithStatsAggregation(stateDocument, statsAggregation, timeseriesInterval);
+      const enrichedStateDocument = _enrichStateWithStatsAggregation(
+        stateDocument,
+        statsAggregation,
+        timeseriesInterval
+      );
       expect(enrichedStateDocument).to.eql({
         batch_size: 125,
         ephemeral_id: '2c53e689-62e8-4ef3-bc57-ea968531a848',
@@ -204,8 +220,8 @@ describe('get_pipeline', () => {
                 plugin_type: 'input',
                 stats: {
                   events_out_per_millisecond: 0.03333333333333333,
-                  millis_per_event: 0
-                }
+                  millis_per_event: 0,
+                },
               },
               {
                 config_name: 'stdout',
@@ -216,28 +232,28 @@ describe('get_pipeline', () => {
                   events_in_per_millisecond: 0.03333333333333333,
                   events_out_per_millisecond: 0.03333333333333333,
                   millis_per_event: 0.015,
-                  percent_of_total_processor_duration: 0.0000009431141225932671
-                }
-              }
+                  percent_of_total_processor_duration: 0.0000009431141225932671,
+                },
+              },
             ],
             edges: [
               {
                 id: 'c56369ba2e160c8add43e8f105ca17c374b27f4b4627ea4566f066b0ead0bcc7',
                 from: 'mystdin',
                 to: '__QUEUE__',
-                type: 'plain'
+                type: 'plain',
               },
               {
                 id: '8a5222282b023399a14195011f2a14aa54a4d97810cd9e0a63c5cd98856bb70f',
                 from: '__QUEUE__',
                 to: 'mystdout',
-                type: 'plain'
-              }
-            ]
+                type: 'plain',
+              },
+            ],
           },
-          plugins: []
+          plugins: [],
         },
-        workers: 1
+        workers: 1,
       });
     });
   });

@@ -12,10 +12,12 @@ import { sortBy } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
 import { createStatefulPropHoc } from '../../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../../../i18n';
 import { SimpleMathFunction } from './simple_math_function';
 import { getFormObject } from './get_form_object';
 
-const maybeQuoteValue = val => (val.match(/\s/) ? `'${val}'` : val);
+const { DataColumn: strings } = ArgumentStrings;
+const maybeQuoteValue = (val) => (val.match(/\s/) ? `'${val}'` : val);
 
 // TODO: Garbage, we could make a much nicer math form that can handle way more.
 class DatacolumnArgInput extends Component {
@@ -49,7 +51,7 @@ class DatacolumnArgInput extends Component {
 
     const allowedTypes = typeInstance.options.allowedTypes || false;
     const onlyShowMathFunctions = typeInstance.options.onlyMath || false;
-    const valueNotSet = val => !val || val.length === 0;
+    const valueNotSet = (val) => !val || val.length === 0;
 
     const updateFunctionValue = () => {
       const fn = this.inputRefs.fn.value;
@@ -77,11 +79,12 @@ class DatacolumnArgInput extends Component {
       onValueChange(`${fn}(${maybeQuoteValue(column)})`);
     };
 
-    const column = columns.map(col => col.name).find(colName => colName === mathValue.column) || '';
+    const column =
+      columns.map((col) => col.name).find((colName) => colName === mathValue.column) || '';
 
     const options = [{ value: '', text: 'select column', disabled: true }];
 
-    sortBy(columns, 'name').forEach(column => {
+    sortBy(columns, 'name').forEach((column) => {
       if (allowedTypes && !allowedTypes.includes(column.type)) {
         return;
       }
@@ -89,12 +92,12 @@ class DatacolumnArgInput extends Component {
     });
 
     return (
-      <EuiFlexGroup gutterSize="s" id={argId}>
+      <EuiFlexGroup gutterSize="s" id={argId} direction="row">
         <EuiFlexItem grow={false}>
           <SimpleMathFunction
             id={argId}
             value={mathValue.fn}
-            inputRef={ref => (this.inputRefs.fn = ref)}
+            inputRef={(ref) => (this.inputRefs.fn = ref)}
             onlymath={onlyShowMathFunctions}
             onChange={updateFunctionValue}
           />
@@ -104,7 +107,7 @@ class DatacolumnArgInput extends Component {
             compressed
             options={options}
             value={column}
-            inputRef={ref => (this.inputRefs.column = ref)}
+            inputRef={(ref) => (this.inputRefs.column = ref)}
             onChange={updateFunctionValue}
           />
         </EuiFlexItem>
@@ -115,7 +118,7 @@ class DatacolumnArgInput extends Component {
 
 const EnhancedDatacolumnArgInput = compose(
   withPropsOnChange(['argValue', 'columns'], ({ argValue, columns }) => ({
-    mathValue: (argValue => {
+    mathValue: ((argValue) => {
       if (getType(argValue) !== 'string') {
         return { error: 'argValue is not a string type' };
       }
@@ -130,7 +133,7 @@ const EnhancedDatacolumnArgInput = compose(
   })),
   createStatefulPropHoc('mathValue', 'setMathValue'),
   withHandlers({
-    setMathFunction: ({ mathValue, setMathValue }) => fn => setMathValue({ ...mathValue, fn }),
+    setMathFunction: ({ mathValue, setMathValue }) => (fn) => setMathValue({ ...mathValue, fn }),
   })
 )(DatacolumnArgInput);
 
@@ -141,8 +144,8 @@ EnhancedDatacolumnArgInput.propTypes = {
 
 export const datacolumn = () => ({
   name: 'datacolumn',
-  displayName: 'Column',
-  help: 'Select the data column',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   default: '""',
   simpleTemplate: templateFromReactComponent(EnhancedDatacolumnArgInput),
 });

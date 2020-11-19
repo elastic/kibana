@@ -5,8 +5,9 @@
  */
 
 import moment from 'moment';
-import { ContextFunction, Datatable, Position } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Position } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   show: boolean;
@@ -20,22 +21,29 @@ interface AxisConfig extends Arguments {
   type: 'axisConfig';
 }
 
-export function axisConfig(): ContextFunction<'axisConfig', Datatable, Arguments, AxisConfig> {
+export function axisConfig(): ExpressionFunctionDefinition<
+  'axisConfig',
+  null,
+  Arguments,
+  AxisConfig
+> {
   const { help, args: argHelp } = getFunctionHelp().axisConfig;
+  const errors = getFunctionErrors().axisConfig;
 
   return {
     name: 'axisConfig',
     aliases: [],
     type: 'axisConfig',
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['null'],
     help,
     args: {
-      show: {
-        types: ['boolean'],
-        help: argHelp.show,
-        default: true,
+      max: {
+        types: ['number', 'string', 'null'],
+        help: argHelp.max,
+      },
+      min: {
+        types: ['number', 'string', 'null'],
+        help: argHelp.min,
       },
       position: {
         types: ['string'],
@@ -43,24 +51,21 @@ export function axisConfig(): ContextFunction<'axisConfig', Datatable, Arguments
         options: Object.values(Position),
         default: 'left',
       },
-      min: {
-        types: ['number', 'date', 'string', 'null'],
-        help: argHelp.min,
-      },
-      max: {
-        types: ['number', 'date', 'string', 'null'],
-        help: argHelp.max,
+      show: {
+        types: ['boolean'],
+        help: argHelp.show,
+        default: true,
       },
       tickSize: {
         types: ['number', 'null'],
         help: argHelp.tickSize,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const { position, min, max, ...rest } = args;
 
       if (!Object.values(Position).includes(position)) {
-        throw new Error(`Invalid position: '${args.position}'`);
+        throw errors.invalidPosition(position);
       }
 
       const minVal = typeof min === 'string' ? moment.utc(min).valueOf() : min;
@@ -68,20 +73,14 @@ export function axisConfig(): ContextFunction<'axisConfig', Datatable, Arguments
 
       // This != check is not !== in order to handle NaN cases properly.
       if (minVal != null && isNaN(minVal)) {
-        throw new Error(
-          `Invalid date string: '${
-            args.min
-          }'. 'min' must be a number, date in ms, or ISO8601 date string`
-        );
+        // using `as` because of typing constraint: we know it's a string at this point.
+        throw errors.invalidMinDateString(min as string);
       }
 
       // This != check is not !== in order to handle NaN cases properly.
       if (maxVal != null && isNaN(maxVal)) {
-        throw new Error(
-          `Invalid date string: '${
-            args.max
-          }'. 'max' must be a number, date in ms, or ISO8601 date string`
-        );
+        // using `as` because of typing constraint: we know it's a string at this point.
+        throw errors.invalidMaxDateString(max as string);
       }
 
       return {

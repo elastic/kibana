@@ -1,0 +1,130 @@
+[role="xpack"]
+[[apm-alerts]]
+=== Alerts
+
+++++
+<titleabbrev>Create an alert</titleabbrev>
+++++
+
+beta::[]
+
+The APM app integrates with Kibana's {kibana-ref}/alerting-getting-started.html[alerting and actions] feature.
+It provides a set of built-in **actions** and APM specific threshold **alerts** for you to use
+and enables central management of all alerts from <<management,Kibana Management>>.
+
+[role="screenshot"]
+image::apm/images/apm-alert.png[Create an alert in the APM app]
+
+For a walkthrough of the alert flyout panel, including detailed information on each configurable property,
+see Kibana's <<defining-alerts,defining alerts>>.
+
+The APM app supports four different types of alerts:
+
+* Transaction duration anomaly:
+alerts when the service's transaction duration reaches a certain anomaly score
+* Transaction duration threshold:
+alerts when the service's transaction duration exceeds a given time limit over a given time frame
+* Transaction error rate threshold:
+alerts when the service's transaction error rate is above the selected rate over a given time frame
+* Error count threshold:
+alerts when service exceeds a selected number of errors over a given time frame
+
+Below, we'll walk through the creation of two of these alerts.
+
+[float]
+[[apm-create-transaction-alert]]
+=== Example: create a transaction duration alert
+
+Transaction duration alerts trigger when the duration of a specific transaction type in a service exceeds a defined threshold.
+This guide will create an alert for the `opbeans-java` service based on the following criteria:
+
+* Environment: Production
+* Transaction type: `transaction.type:request`
+* Average request is above `1500ms` for the last 5 minutes
+* Check every 10 minutes, and repeat the alert every 30 minutes
+* Send the alert via Slack
+
+From the APM app, navigate to the `opbeans-java` service and select
+**Alerts** > **Create threshold alert** > **Transaction duration**.
+
+`Transaction duration | opbeans-java` is automatically set as the name of the alert,
+and `apm` and `service.name:opbeans-java` are added as tags.
+It's fine to change the name of the alert, but do not edit the tags.
+
+Based on the alert criteria, define the following alert details:
+
+* **Check every** - `10 minutes`
+* **Notify every** - `30 minutes`
+* **TYPE** - `request`
+* **WHEN** - `avg`
+* **IS ABOVE** - `1500ms`
+* **FOR THE LAST** - `5 minutes`
+
+Select an action type.
+Multiple action types can be selected, but in this example, we want to post to a Slack channel.
+Select **Slack** > **Create a connector**.
+Enter a name for the connector,
+and paste the webhook URL.
+See Slack's webhook documentation if you need to create one.
+
+A default message is provided as a starting point for your alert.
+You can use the https://mustache.github.io/[Mustache] template syntax, i.e., `{{variable}}`
+to pass additional alert values at the time a condition is detected to an action.
+A list of available variables can be accessed by selecting the
+**add variable** button image:apm/images/add-variable.png[add variable button].
+
+Select **Save**. The alert has been created and is now active!
+
+[float]
+[[apm-create-error-alert]]
+=== Example: create an error rate alert
+
+Error rate alerts trigger when the number of errors in a service exceeds a defined threshold.
+This guide creates an alert for the `opbeans-python` service based on the following criteria:
+
+* Environment: Production
+* Error rate is above 25 for the last minute
+* Check every 1 minute, and repeat the alert every 10 minutes
+* Send the alert via email to the `opbeans-python` team
+
+From the APM app, navigate to the `opbeans-python` service and select
+**Alerts** > **Create threshold alert** > **Error rate**.
+
+`Error rate | opbeans-python` is automatically set as the name of the alert,
+and `apm` and `service.name:opbeans-python` are added as tags.
+It's fine to change the name of the alert, but do not edit the tags.
+
+Based on the alert criteria, define the following alert details:
+
+* **Check every** - `1 minute`
+* **Notify every** - `10 minutes`
+* **IS ABOVE** - `25 errors`
+* **FOR THE LAST** - `1 minute`
+
+Select the **Email** action type and click **Create a connector**.
+Fill out the required details: sender, host, port, etc., and click **save**.
+
+A default message is provided as a starting point for your alert.
+You can use the https://mustache.github.io/[Mustache] template syntax, i.e., `{{variable}}`
+to pass additional alert values at the time a condition is detected to an action.
+A list of available variables can be accessed by selecting the
+**add variable** button image:apm/images/add-variable.png[add variable button].
+
+Select **Save**. The alert has been created and is now active!
+
+[float]
+[[apm-alert-manage]]
+=== Manage alerts and actions
+
+From the APM app, select **Alerts** > **View active alerts** to be taken to the Kibana alerts and actions management page.
+From this page, you can create, edit, disable, mute, and delete alerts, and create, edit, and disable connectors.
+
+[float]
+[[apm-alert-more-info]]
+=== More information
+
+See {kibana-ref}/alerting-getting-started.html[alerting and actions] for more information.
+
+NOTE: If you are using an **on-premise** Elastic Stack deployment with security,
+communication between Elasticsearch and Kibana must have TLS configured.
+More information is in the alerting {kibana-ref}/alerting-getting-started.html#alerting-setup-prerequisites[prerequisites].

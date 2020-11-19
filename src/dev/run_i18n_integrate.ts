@@ -18,10 +18,11 @@
  */
 
 import chalk from 'chalk';
+import Listr from 'listr';
 
-import { integrateLocaleFiles, mergeConfigs } from './i18n';
-import { extractDefaultMessages } from './i18n/tasks';
-import { createFailError, run } from './run';
+import { createFailError, run } from '@kbn/dev-utils';
+import { ErrorReporter, integrateLocaleFiles } from './i18n';
+import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
 
 run(
   async ({
@@ -30,6 +31,7 @@ run(
       'ignore-incompatible': ignoreIncompatible = false,
       'ignore-missing': ignoreMissing = false,
       'ignore-unused': ignoreUnused = false,
+      'ignore-malformed': ignoreMalformed = false,
       'include-config': includeConfig,
       path,
       source,
@@ -65,32 +67,66 @@ run(
       typeof ignoreIncompatible !== 'boolean' ||
       typeof ignoreUnused !== 'boolean' ||
       typeof ignoreMissing !== 'boolean' ||
+      typeof ignoreMalformed !== 'boolean' ||
       typeof dryRun !== 'boolean'
     ) {
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} --ignore-incompatible, --ignore-unused, --ignore-missing, and --dry-run can't have values`
+        )} --ignore-incompatible, --ignore-unused, --ignore-malformed, --ignore-missing, and --dry-run can't have values`
       );
     }
 
-    const config = await mergeConfigs(includeConfig);
-    const defaultMessages = await extractDefaultMessages({ path, config });
+    const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
 
-    await integrateLocaleFiles(defaultMessages, {
-      sourceFileName: source,
-      targetFileName: target,
-      dryRun,
-      ignoreIncompatible,
-      ignoreUnused,
-      ignoreMissing,
-      config,
-      log,
-    });
+    const list = new Listr([
+      {
+        title: 'Merging .i18nrc.json files',
+        task: () => new Listr(mergeConfigs(includeConfig), { exitOnError: true }),
+      },
+      {
+        title: 'Extracting Default Messages',
+        task: ({ config }) =>
+          new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
+      },
+      {
+        title: 'Integrating Locale File',
+        task: async ({ messages, config }) => {
+          await integrateLocaleFiles(messages, {
+            sourceFileName: source,
+            targetFileName: target,
+            dryRun,
+            ignoreIncompatible,
+            ignoreUnused,
+            ignoreMissing,
+            ignoreMalformed,
+            config,
+            log,
+          });
+        },
+      },
+    ]);
+
+    try {
+      const reporter = new ErrorReporter();
+      const messages: Map<string, { message: string }> = new Map();
+      await list.run({ messages, reporter });
+      process.exitCode = 0;
+    } catch (error) {
+      process.exitCode = 1;
+      if (error instanceof ErrorReporter) {
+        error.errors.forEach((e: string | Error) => log.error(e));
+      } else {
+        log.error('Unhandled exception!');
+        log.error(error);
+      }
+    }
+    process.exit();
   },
   {
     flags: {
       allowUnexpected: true,
+      guessTypesForUnexpectedFlags: true,
     },
   }
 );

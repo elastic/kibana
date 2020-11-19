@@ -6,14 +6,13 @@
 
 import * as runtimeTypes from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
-import { Legacy } from 'kibana';
-
-import { Pick3 } from '../../../common/utility_types';
-import { InfraConfigurationAdapter } from '../adapters/configuration';
-import { InfraFrameworkRequest, internalInfraFrameworkRequest } from '../adapters/framework';
+import { identity, constant } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fold } from 'fp-ts/lib/Either';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { defaultSourceConfiguration } from './defaults';
 import { NotFoundError } from './errors';
-import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
+import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import {
   InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
@@ -21,24 +20,29 @@ import {
   pickSavedSourceConfiguration,
   SourceConfigurationSavedObjectRuntimeType,
   StaticSourceConfigurationRuntimeType,
-} from './types';
+  InfraSource,
+} from '../../../common/http_api/source_api';
+import { InfraConfig } from '../../../server';
+
+interface Libs {
+  config: InfraConfig;
+}
 
 export class InfraSources {
   private internalSourceConfigurations: Map<string, InfraStaticSourceConfiguration> = new Map();
+  private readonly libs: Libs;
 
-  constructor(
-    private readonly libs: {
-      configuration: InfraConfigurationAdapter;
-      savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
-        Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isNotFoundError'>;
-    }
-  ) {}
+  constructor(libs: Libs) {
+    this.libs = libs;
+  }
 
-  public async getSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
+  public async getSourceConfiguration(
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId: string
+  ): Promise<InfraSource> {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
-
     const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
-      .then(internalSourceConfiguration => ({
+      .then((internalSourceConfiguration) => ({
         id: sourceId,
         version: undefined,
         updatedAt: undefined,
@@ -48,9 +52,9 @@ export class InfraSources {
           internalSourceConfiguration
         ),
       }))
-      .catch(err =>
+      .catch((err) =>
         err instanceof NotFoundError
-          ? this.getSavedSourceConfiguration(request, sourceId).then(result => ({
+          ? this.getSavedSourceConfiguration(savedObjectsClient, sourceId).then((result) => ({
               ...result,
               configuration: mergeSourceConfiguration(
                 staticDefaultSourceConfiguration,
@@ -59,8 +63,8 @@ export class InfraSources {
             }))
           : Promise.reject(err)
       )
-      .catch(err =>
-        this.libs.savedObjects.SavedObjectsClient.errors.isNotFoundError(err)
+      .catch((err) =>
+        savedObjectsClient.errors.isNotFoundError(err)
           ? Promise.resolve({
               id: sourceId,
               version: undefined,
@@ -74,12 +78,14 @@ export class InfraSources {
     return savedSourceConfiguration;
   }
 
-  public async getAllSourceConfigurations(request: InfraFrameworkRequest) {
+  public async getAllSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
-    const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(request);
+    const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(
+      savedObjectsClient
+    );
 
-    return savedSourceConfigurations.map(savedSourceConfiguration => ({
+    return savedSourceConfigurations.map((savedSourceConfiguration) => ({
       ...savedSourceConfiguration,
       configuration: mergeSourceConfiguration(
         staticDefaultSourceConfiguration,
@@ -89,7 +95,7 @@ export class InfraSources {
   }
 
   public async createSourceConfiguration(
-    request: InfraFrameworkRequest,
+    savedObjectsClient: SavedObjectsClientContract,
     sourceId: string,
     source: InfraSavedSourceConfiguration
   ) {
@@ -101,13 +107,11 @@ export class InfraSources {
     );
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await this.libs.savedObjects
-        .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
-        .create(
-          infraSourceConfigurationSavedObjectType,
-          pickSavedSourceConfiguration(newSourceConfiguration) as any,
-          { id: sourceId }
-        )
+      await savedObjectsClient.create(
+        infraSourceConfigurationSavedObjectName,
+        pickSavedSourceConfiguration(newSourceConfiguration) as any,
+        { id: sourceId }
+      )
     );
 
     return {
@@ -119,20 +123,24 @@ export class InfraSources {
     };
   }
 
-  public async deleteSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
-    await this.libs.savedObjects
-      .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
-      .delete(infraSourceConfigurationSavedObjectType, sourceId);
+  public async deleteSourceConfiguration(
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId: string
+  ) {
+    await savedObjectsClient.delete(infraSourceConfigurationSavedObjectName, sourceId);
   }
 
   public async updateSourceConfiguration(
-    request: InfraFrameworkRequest,
+    savedObjectsClient: SavedObjectsClientContract,
     sourceId: string,
     sourceProperties: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
-    const { configuration, version } = await this.getSourceConfiguration(request, sourceId);
+    const { configuration, version } = await this.getSourceConfiguration(
+      savedObjectsClient,
+      sourceId
+    );
 
     const updatedSourceConfigurationAttributes = mergeSourceConfiguration(
       configuration,
@@ -140,16 +148,14 @@ export class InfraSources {
     );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await this.libs.savedObjects
-        .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
-        .update(
-          infraSourceConfigurationSavedObjectType,
-          sourceId,
-          pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
-          {
-            version,
-          }
-        )
+      await savedObjectsClient.update(
+        infraSourceConfigurationSavedObjectName,
+        sourceId,
+        pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
+        {
+          version,
+        }
+      )
     );
 
     return {
@@ -181,40 +187,36 @@ export class InfraSources {
   }
 
   private async getStaticDefaultSourceConfiguration() {
-    const staticConfiguration = await this.libs.configuration.get();
-    const staticSourceConfiguration = runtimeTypes
-      .type({
-        sources: runtimeTypes.type({
-          default: StaticSourceConfigurationRuntimeType,
-        }),
-      })
-      .decode(staticConfiguration)
-      .map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration)
-      .getOrElse({});
+    const staticSourceConfiguration = pipe(
+      runtimeTypes
+        .type({
+          sources: runtimeTypes.type({
+            default: StaticSourceConfigurationRuntimeType,
+          }),
+        })
+        .decode(this.libs.config),
+      map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
+      fold(constant({}), identity)
+    );
 
     return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
   }
 
-  private async getSavedSourceConfiguration(request: InfraFrameworkRequest, sourceId: string) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalInfraFrameworkRequest]
-    );
-
+  private async getSavedSourceConfiguration(
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId: string
+  ) {
     const savedObject = await savedObjectsClient.get(
-      infraSourceConfigurationSavedObjectType,
+      infraSourceConfigurationSavedObjectName,
       sourceId
     );
 
     return convertSavedObjectToSavedSourceConfiguration(savedObject);
   }
 
-  private async getAllSavedSourceConfigurations(request: InfraFrameworkRequest) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalInfraFrameworkRequest]
-    );
-
+  private async getAllSavedSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
     const savedObjects = await savedObjectsClient.find({
-      type: infraSourceConfigurationSavedObjectType,
+      type: infraSourceConfigurationSavedObjectName,
     });
 
     return savedObjects.saved_objects.map(convertSavedObjectToSavedSourceConfiguration);
@@ -237,15 +239,17 @@ const mergeSourceConfiguration = (
     first
   );
 
-const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
-  SourceConfigurationSavedObjectRuntimeType.decode(savedObject)
-    .map(savedSourceConfiguration => ({
+export const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
+  pipe(
+    SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
+    map((savedSourceConfiguration) => ({
       id: savedSourceConfiguration.id,
       version: savedSourceConfiguration.version,
       updatedAt: savedSourceConfiguration.updated_at,
       origin: 'stored' as 'stored',
       configuration: savedSourceConfiguration.attributes,
-    }))
-    .getOrElseL(errors => {
+    })),
+    fold((errors) => {
       throw new Error(failure(errors).join('\n'));
-    });
+    }, identity)
+  );

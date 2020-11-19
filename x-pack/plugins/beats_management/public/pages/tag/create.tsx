@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
@@ -69,7 +69,7 @@ class TagCreatePageComponent extends React.PureComponent<
               total: this.state.configuration_blocks.length,
             }}
             onTagChange={(field: string, value: string | number) =>
-              this.setState(oldState => ({
+              this.setState((oldState) => ({
                 tag: { ...oldState.tag, [field]: value },
               }))
             }
@@ -79,13 +79,13 @@ class TagCreatePageComponent extends React.PureComponent<
               });
             }}
             onConfigAddOrEdit={(block: ConfigurationBlock) => {
-              this.setState(previousState => ({
+              this.setState((previousState) => ({
                 configuration_blocks: previousState.configuration_blocks.concat([block]),
               }));
             }}
             onConfigRemoved={(block: ConfigurationBlock) => {
-              this.setState(previousState => {
-                const selectedIndex = previousState.configuration_blocks.findIndex(c => {
+              this.setState((previousState) => {
+                const selectedIndex = previousState.configuration_blocks.findIndex((c) => {
                   return isEqual(block, c);
                 });
                 const blocks = [...previousState.configuration_blocks];
@@ -138,7 +138,7 @@ class TagCreatePageComponent extends React.PureComponent<
       );
     }
     const createBlocksResponse = await this.props.libs.configBlocks.upsert(
-      this.state.configuration_blocks.map(block => ({ ...block, tag: this.state.tag.id }))
+      this.state.configuration_blocks.map((block) => ({ ...block, tag: this.state.tag.id }))
     );
     const creationError = createBlocksResponse.results.reduce(
       (err: string, resp) => (!err ? (err = resp.error ? resp.error.message : '') : err),
@@ -152,7 +152,7 @@ class TagCreatePageComponent extends React.PureComponent<
   };
   private getNumExclusiveConfigurationBlocks = () =>
     this.state.configuration_blocks
-      .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some(uniqueType => uniqueType === type))
+      .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some((uniqueType) => uniqueType === type))
       .reduce((acc, cur) => (cur ? acc + 1 : acc), 0);
 }
 

@@ -26,7 +26,7 @@ function SelectionMarker({ innerHeight, marginTop, start, end }) {
 SelectionMarker.requiresSVG = true;
 SelectionMarker.propTypes = {
   start: PropTypes.number,
-  end: PropTypes.number
+  end: PropTypes.number,
 };
 
 export default SelectionMarker;

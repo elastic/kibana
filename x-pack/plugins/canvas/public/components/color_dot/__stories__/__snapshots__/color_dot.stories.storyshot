@@ -1,0 +1,278 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Color/ColorDot color dots 1`] = `
+Array [
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "white",
+        }
+      }
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#000",
+        }
+      }
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#abcd",
+        }
+      }
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#aabbcc",
+        }
+      }
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#aabbccdd",
+        }
+      }
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "rgb(100, 150, 250)",
+        }
+      }
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "rgba(100, 150, 250, .5)",
+        }
+      }
+    />
+  </div>,
+]
+`;
+
+exports[`Storyshots components/Color/ColorDot color dots with children 1`] = `
+Array [
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#FFF",
+        }
+      }
+    >
+      <span
+        color="#000"
+        data-euiicon-type="plusInCircle"
+      />
+    </div>
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#666",
+        }
+      }
+    >
+      <span
+        color="#fff"
+        data-euiicon-type="minusInCircle"
+      />
+    </div>
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "rgba(100, 150, 250, .5)",
+        }
+      }
+    >
+      <span
+        color="#fff"
+        data-euiicon-type="alert"
+      />
+    </div>
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#000",
+        }
+      }
+    >
+      <span
+        color="#fff"
+        data-euiicon-type="check"
+      />
+    </div>
+  </div>,
+]
+`;
+
+exports[`Storyshots components/Color/ColorDot invalid dots 1`] = `
+Array [
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={Object {}}
+    />
+  </div>,
+]
+`;

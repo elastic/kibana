@@ -4,30 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Function } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
-  condition: boolean[] | null;
+  condition: boolean[];
 }
 
-export function any(): Function<'any', Arguments, boolean> {
+export function any(): ExpressionFunctionDefinition<'any', null, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().any;
 
   return {
     name: 'any',
     type: 'boolean',
+    inputTypes: ['null'],
     help,
     args: {
       condition: {
         aliases: ['_'],
-        types: ['boolean', 'null'],
+        types: ['boolean'],
         required: true,
         multi: true,
         help: argHelp.condition,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const conditions = args.condition || [];
       return conditions.some(Boolean);
     },

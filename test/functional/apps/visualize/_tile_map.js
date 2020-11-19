@@ -23,63 +23,58 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const find = getService('find');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'settings']);
-
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+    'tileMap',
+  ]);
 
   describe('tile map visualize app', function () {
-
     describe('incomplete config', function describeIndexTests() {
-
       before(async function () {
         await browser.setWindowSize(1280, 1000);
 
-        const fromTime = '2015-09-19 06:31:44.000';
-        const toTime = '2015-09-23 18:31:44.000';
-
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         //do not configure aggs
       });
 
-
       it('should be able to zoom in twice', async () => {
         //should not throw
-        await PageObjects.visualize.clickMapZoomIn();
-        await PageObjects.visualize.clickMapZoomIn();
+        await PageObjects.tileMap.clickMapZoomIn();
+        await PageObjects.tileMap.clickMapZoomIn();
       });
     });
-
 
     describe('complete config', function describeIndexTests() {
       before(async function () {
         await browser.setWindowSize(1280, 1000);
 
-        const fromTime = '2015-09-19 06:31:44.000';
-        const toTime = '2015-09-23 18:31:44.000';
-
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Geo Coordinates');
-        await PageObjects.visualize.clickBucket('Geo Coordinates');
+        await PageObjects.visEditor.clickBucket('Geo coordinates');
         log.debug('Click aggregation Geohash');
-        await PageObjects.visualize.selectAggregation('Geohash');
+        await PageObjects.visEditor.selectAggregation('Geohash');
         log.debug('Click field geo.coordinates');
         await retry.try(async function tryingForTime() {
-          await PageObjects.visualize.selectField('geo.coordinates');
+          await PageObjects.visEditor.selectField('geo.coordinates');
         });
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.clickGo();
       });
 
       /**
@@ -89,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('comparing expected: ', expected);
         log.debug('with actual: ', actual);
 
-        const roundedValues = actual.map(row => {
+        const roundedValues = actual.map((row) => {
           // Parse last element in each row as JSON and floor the lat/long value
           const coords = JSON.parse(row[row.length - 1]);
           row[row.length - 1] = {
@@ -109,17 +104,17 @@ export default function ({ getService, getPageObjects }) {
 
         it('should show correct tile map data on default zoom level', async function () {
           const expectedTableData = [
-            ['-', '9', '5,787', { 'lat': 37, 'lon': -104 } ],
-            ['-', 'd', '5,600', { 'lat': 37, 'lon': -82 } ],
-            ['-', 'c', '1,319', { 'lat': 47, 'lon': -110 } ],
-            ['-', 'b', '999', { 'lat': 62, 'lon': -156 } ],
-            ['-', 'f', '187', { 'lat': 45, 'lon': -83 } ],
-            ['-', '8', '108', { 'lat': 18, 'lon': -157 } ]
+            ['-', '9', '5,787', { lat: 37, lon: -104 }],
+            ['-', 'd', '5,600', { lat: 37, lon: -82 }],
+            ['-', 'c', '1,319', { lat: 47, lon: -110 }],
+            ['-', 'b', '999', { lat: 62, lon: -156 }],
+            ['-', 'f', '187', { lat: 45, lon: -83 }],
+            ['-', '8', '108', { lat: 18, lon: -157 }],
           ];
           //level 1
-          await PageObjects.visualize.clickMapZoomOut();
+          await PageObjects.tileMap.clickMapZoomOut();
           //level 0
-          await PageObjects.visualize.clickMapZoomOut();
+          await PageObjects.tileMap.clickMapZoomOut();
 
           await inspector.open();
           await inspector.setTablePageSize(50);
@@ -129,37 +124,36 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('should not be able to zoom out beyond 0', async function () {
-          await PageObjects.visualize.zoomAllTheWayOut();
-          const enabled = await PageObjects.visualize.getMapZoomOutEnabled();
+          await PageObjects.tileMap.zoomAllTheWayOut();
+          const enabled = await PageObjects.tileMap.getMapZoomOutEnabled();
           expect(enabled).to.be(false);
         });
 
-        // See https://github.com/elastic/kibana/issues/13137 if this test starts failing intermittently
         it('Fit data bounds should zoom to level 3', async function () {
           const expectedPrecision2DataTable = [
-            ['-', 'dn', '1,429', { 'lat': 36, 'lon': -85 }],
-            ['-', 'dp', '1,418', { 'lat': 41, 'lon': -85 }],
-            ['-', '9y', '1,215', { 'lat': 36, 'lon': -96 }],
-            ['-', '9z', '1,099', { 'lat': 42, 'lon': -96 }],
-            ['-', 'dr', '1,076', { 'lat': 42, 'lon': -74 }],
-            ['-', 'dj', '982', { 'lat': 31, 'lon': -85 }],
-            ['-', '9v', '938', { 'lat': 31, 'lon': -96 }],
-            ['-', '9q', '722', { 'lat': 36, 'lon': -120 }],
-            ['-', '9w', '475', { 'lat': 36, 'lon': -107 }],
-            ['-', 'cb', '457', { 'lat': 46, 'lon': -96 }],
-            [ '-', 'c2', '453', { lat: 47, lon: -120 } ],
-            [ '-', '9x', '420', { lat: 41, lon: -107 } ],
-            [ '-', 'dq', '399', { lat: 37, lon: -78 } ],
-            [ '-', '9r', '396', { lat: 41, lon: -120 } ],
-            [ '-', '9t', '274', { lat: 32, lon: -107 } ],
-            [ '-', 'c8', '271', { lat: 47, lon: -107 } ],
-            [ '-', 'dh', '214', { lat: 26, lon: -82 } ],
-            [ '-', 'b6', '207', { lat: 60, lon: -162 } ],
-            [ '-', 'bd', '206', { lat: 59, lon: -153 } ],
-            [ '-', 'b7', '167', { lat: 64, lon: -163 } ],
+            ['-', 'dr4', '127', { lat: 40, lon: -76 }],
+            ['-', 'dr7', '92', { lat: 41, lon: -74 }],
+            ['-', '9q5', '91', { lat: 34, lon: -119 }],
+            ['-', '9qc', '89', { lat: 38, lon: -122 }],
+            ['-', 'drk', '87', { lat: 41, lon: -73 }],
+            ['-', 'dps', '82', { lat: 42, lon: -84 }],
+            ['-', 'dph', '82', { lat: 40, lon: -84 }],
+            ['-', 'dp3', '79', { lat: 41, lon: -88 }],
+            ['-', 'dpe', '78', { lat: 42, lon: -86 }],
+            ['-', 'dp8', '77', { lat: 43, lon: -90 }],
+            ['-', 'dp6', '74', { lat: 41, lon: -87 }],
+            ['-', 'djv', '74', { lat: 33, lon: -83 }],
+            ['-', '9qh', '74', { lat: 34, lon: -118 }],
+            ['-', 'dpq', '73', { lat: 41, lon: -81 }],
+            ['-', 'dpp', '73', { lat: 40, lon: -80 }],
+            ['-', '9y7', '73', { lat: 35, lon: -97 }],
+            ['-', '9vg', '73', { lat: 32, lon: -97 }],
+            ['-', 'drs', '71', { lat: 42, lon: -73 }],
+            ['-', '9ys', '71', { lat: 37, lon: -95 }],
+            ['-', '9yn', '71', { lat: 34, lon: -93 }],
           ];
 
-          await PageObjects.visualize.clickMapFitDataBounds();
+          await PageObjects.tileMap.clickMapFitDataBounds();
           await inspector.open();
           const data = await inspector.getTableData();
           await inspector.close();
@@ -175,8 +169,8 @@ export default function ({ getService, getPageObjects }) {
 
           await filterBar.addFilter('bytes', 'is between', '19980', '19990');
           await filterBar.toggleFilterPinned('bytes');
-          await PageObjects.visualize.zoomAllTheWayOut();
-          await PageObjects.visualize.clickMapFitDataBounds();
+          await PageObjects.tileMap.zoomAllTheWayOut();
+          await PageObjects.tileMap.clickMapFitDataBounds();
 
           await inspector.open();
           const data = await inspector.getTableData();
@@ -189,15 +183,15 @@ export default function ({ getService, getPageObjects }) {
         it('Newly saved visualization retains map bounds', async () => {
           const vizName1 = 'Visualization TileMap';
 
-          await PageObjects.visualize.clickMapZoomIn();
-          await PageObjects.visualize.clickMapZoomIn();
+          await PageObjects.tileMap.clickMapZoomIn();
+          await PageObjects.tileMap.clickMapZoomIn();
 
-          const mapBounds = await PageObjects.visualize.getMapBounds();
+          const mapBounds = await PageObjects.tileMap.getMapBounds();
           await inspector.close();
 
           await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
 
-          const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();
+          const afterSaveMapBounds = await PageObjects.tileMap.getMapBounds();
 
           await inspector.close();
           // For some reason the values are slightly different, so we can't check that they are equal. But we did
@@ -206,36 +200,36 @@ export default function ({ getService, getPageObjects }) {
           expect(mapBounds).to.not.be(undefined);
           expect(afterSaveMapBounds).to.not.be(undefined);
         });
-
       });
 
-      describe('Only request data around extent of map option', async () => {
-
+      describe('Only request data around extent of map option', () => {
         it('when checked adds filters to aggregation', async () => {
           const vizName1 = 'Visualization TileMap';
           await PageObjects.visualize.loadSavedVisualization(vizName1);
           await inspector.open();
-          await inspector.expectTableHeaders(['filter', 'geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.expectTableHeaders(['Filter', 'Geohash', 'Count', 'Geo Centroid']);
           await inspector.close();
         });
 
         it('when not checked does not add filters to aggregation', async () => {
-          await PageObjects.visualize.toggleOpenEditor(2);
-          await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
-          await PageObjects.visualize.clickGo();
+          await PageObjects.visEditor.toggleOpenEditor(2);
+          await PageObjects.visEditor.setIsFilteredByCollarCheckbox(false);
+          await PageObjects.visEditor.clickGo();
           await inspector.open();
-          await inspector.expectTableHeaders(['geohash_grid', 'Count', 'Geo Centroid']);
+          await inspector.expectTableHeaders(['Geohash', 'Count', 'Geo Centroid']);
           await inspector.close();
         });
 
         after(async () => {
-          await PageObjects.visualize.toggleIsFilteredByCollarCheckbox();
-          await PageObjects.visualize.clickGo();
+          await PageObjects.visEditor.setIsFilteredByCollarCheckbox(true);
+          await PageObjects.visEditor.clickGo();
         });
       });
     });
 
     describe('zoom warning behavior', function describeIndexTests() {
+      // Zoom warning is only applicable to OSS
+      this.tags(['skipCloud', 'skipFirefox']);
 
       const waitForLoading = false;
       let zoomWarningEnabled;
@@ -246,7 +240,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickTileMap');
         await PageObjects.visualize.clickTileMap();
         await PageObjects.visualize.clickNewSearch();
@@ -256,43 +250,39 @@ export default function ({ getService, getPageObjects }) {
 
         const zoomLevel = 9;
         for (let i = 0; i < zoomLevel; i++) {
-          await PageObjects.visualize.clickMapZoomIn();
+          await PageObjects.tileMap.clickMapZoomIn();
         }
-
       });
 
       beforeEach(async function () {
-        await PageObjects.visualize.clickMapZoomIn(waitForLoading);
+        await PageObjects.tileMap.clickMapZoomIn(waitForLoading);
       });
 
       afterEach(async function () {
         if (!last) {
           await PageObjects.common.sleep(toastDefaultLife);
-          await PageObjects.visualize.clickMapZoomOut(waitForLoading);
+          await PageObjects.tileMap.clickMapZoomOut(waitForLoading);
         }
       });
 
-      it('should show warning at zoom 10',
-        async () => {
-          await testSubjects.existOrFail('maxZoomWarning');
-        });
+      it('should show warning at zoom 10', async () => {
+        await testSubjects.existOrFail('maxZoomWarning');
+      });
 
-      it('should continue providing zoom warning if left alone',
-        async () => {
-          await testSubjects.existOrFail('maxZoomWarning');
-        });
+      it('should continue providing zoom warning if left alone', async () => {
+        await testSubjects.existOrFail('maxZoomWarning');
+      });
 
-      it('should suppress zoom warning if suppress warnings button clicked',
-        async () => {
-          last = true;
-          await PageObjects.visualize.waitForVisualization();
-          await find.clickByCssSelector('[data-test-subj="suppressZoomWarnings"]');
-          await PageObjects.visualize.clickMapZoomOut(waitForLoading);
-          await testSubjects.waitForDeleted('suppressZoomWarnings');
-          await PageObjects.visualize.clickMapZoomIn(waitForLoading);
+      it('should suppress zoom warning if suppress warnings button clicked', async () => {
+        last = true;
+        await PageObjects.visChart.waitForVisualization();
+        await testSubjects.click('suppressZoomWarnings');
+        await PageObjects.tileMap.clickMapZoomOut(waitForLoading);
+        await testSubjects.waitForDeleted('suppressZoomWarnings');
+        await PageObjects.tileMap.clickMapZoomIn(waitForLoading);
 
-          await testSubjects.missingOrFail('maxZoomWarning');
-        });
+        await testSubjects.missingOrFail('maxZoomWarning');
+      });
     });
   });
 }

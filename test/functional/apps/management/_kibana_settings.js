@@ -22,21 +22,20 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'timePicker']);
+  const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'timePicker', 'header']);
 
   describe('kibana settings', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
-      await PageObjects.settings.createIndexPattern();
+      await PageObjects.settings.createIndexPattern('logstash-*');
       await PageObjects.settings.navigateTo();
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
-      await PageObjects.settings.removeIndexPattern();
+      await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     it('should allow setting advanced settings', async function () {
@@ -47,20 +46,31 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('state:storeInSessionStorage', () => {
-      it ('defaults to false', async () => {
+      async function getStateFromUrl() {
+        const currentUrl = await browser.getCurrentUrl();
+        let match = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
+        if (match) return [match[2], match[3]];
+        match = currentUrl.match(/(.*)?_a=(.*)&_g=(.*)/);
+        if (match) return [match[3], match[2]];
+
+        if (!match) {
+          throw new Error('State in url is missing or malformed: ' + currentUrl);
+        }
+      }
+
+      it('defaults to null', async () => {
         await PageObjects.settings.clickKibanaSettings();
-        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be(false);
+        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
+          'state:storeInSessionStorage'
+        );
+        expect(storeInSessionStorage).to.be(null);
       });
 
       it('when false, dashboard state is unhashed', async function () {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
-        const currentUrl = await browser.getCurrentUrl();
-        const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
-        const globalState = urlPieces[2];
-        const appState = urlPieces[3];
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        const [globalState, appState] = await getStateFromUrl();
 
         // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
         // which is less than 20 characters.
@@ -72,18 +82,17 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
-        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        expect(storeInSessionStorage).to.be(true);
+        const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
+          'state:storeInSessionStorage'
+        );
+        expect(storeInSessionStorage).to.be('true');
       });
 
       it('when true, dashboard state is hashed', async function () {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
-        const currentUrl = await browser.getCurrentUrl();
-        const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
-        const globalState = urlPieces[2];
-        const appState = urlPieces[3];
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        const [globalState, appState] = await getStateFromUrl();
 
         // We don't have to be exact, just need to ensure it's less than the unhashed version, which will be
         // greater than 20 characters with the default state plus a time.
@@ -91,16 +100,23 @@ export default function ({ getService, getPageObjects }) {
         expect(appState.length).to.be.lessThan(20);
       });
 
-      after('navigate to settings page and turn state:storeInSessionStorage back to false', async () => {
-        await PageObjects.settings.navigateTo();
+      it("changing 'state:storeInSessionStorage' also takes effect without full page reload", async () => {
+        await PageObjects.dashboard.preserveCrossAppState();
+        await PageObjects.header.clickStackManagement();
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
+        await PageObjects.header.clickDashboard();
+        const [globalState, appState] = await getStateFromUrl();
+        // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
+        // which is less than 20 characters.
+        expect(globalState.length).to.be.greaterThan(20);
+        expect(appState.length).to.be.greaterThan(20);
       });
     });
 
     after(async function () {
-      await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'UTC');
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+      await browser.refresh();
     });
   });
 }

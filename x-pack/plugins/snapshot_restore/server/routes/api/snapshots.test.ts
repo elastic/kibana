@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
-import { getAllHandler, getOneHandler } from './snapshots';
+import { addBasePath } from '../helpers';
+import { registerSnapshotsRoutes } from './snapshots';
+import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
 
 const defaultSnapshot = {
   repository: undefined,
@@ -14,7 +15,8 @@ const defaultSnapshot = {
   versionId: undefined,
   version: undefined,
   indices: [],
-  includeGlobalState: 0,
+  dataStreams: [],
+  includeGlobalState: undefined,
   state: undefined,
   startTime: undefined,
   startTimeInMillis: undefined,
@@ -26,69 +28,123 @@ const defaultSnapshot = {
 };
 
 describe('[Snapshot and Restore API Routes] Snapshots', () => {
-  const mockResponseToolkit = {} as ResponseToolkit;
+  const router = new RouterMock('snapshotRestore.client');
+
+  beforeAll(() => {
+    registerSnapshotsRoutes({
+      router: router as any,
+      ...routeDependencies,
+    });
+  });
 
   describe('getAllHandler()', () => {
-    const mockRequest = {} as Request;
+    const mockRequest: RequestMock = {
+      method: 'get',
+      path: addBasePath('snapshots'),
+    };
+
+    const mockSnapshotGetManagedRepositoryEsResponse = {
+      defaults: {
+        'cluster.metadata.managed_repository': 'myManagedRepository',
+      },
+    };
 
     test('combines snapshots and their repositories returned from ES', async () => {
+      const mockSnapshotGetPolicyEsResponse = {
+        fooPolicy: {},
+      };
+
       const mockSnapshotGetRepositoryEsResponse = {
         fooRepository: {},
         barRepository: {},
       };
 
       const mockGetSnapshotsFooResponse = Promise.resolve({
-        snapshots: [
+        responses: [
           {
-            snapshot: 'snapshot1',
+            repository: 'fooRepository',
+            snapshots: [{ snapshot: 'snapshot1' }],
           },
         ],
       });
 
       const mockGetSnapshotsBarResponse = Promise.resolve({
-        snapshots: [
+        responses: [
           {
-            snapshot: 'snapshot2',
+            repository: 'barRepository',
+            snapshots: [{ snapshot: 'snapshot2' }],
           },
         ],
       });
 
-      const callWithRequest = jest
-        .fn()
-        .mockReturnValueOnce(mockSnapshotGetRepositoryEsResponse)
-        .mockReturnValueOnce(mockGetSnapshotsFooResponse)
-        .mockReturnValueOnce(mockGetSnapshotsBarResponse);
+      router.callAsCurrentUserResponses = [
+        mockSnapshotGetManagedRepositoryEsResponse,
+        mockSnapshotGetPolicyEsResponse,
+        mockSnapshotGetRepositoryEsResponse,
+        mockGetSnapshotsFooResponse,
+        mockGetSnapshotsBarResponse,
+      ];
 
       const expectedResponse = {
         errors: {},
         repositories: ['fooRepository', 'barRepository'],
+        policies: ['fooPolicy'],
         snapshots: [
-          { ...defaultSnapshot, repository: 'fooRepository', snapshot: 'snapshot1' },
-          { ...defaultSnapshot, repository: 'barRepository', snapshot: 'snapshot2' },
+          {
+            ...defaultSnapshot,
+            repository: 'fooRepository',
+            snapshot: 'snapshot1',
+            managedRepository:
+              mockSnapshotGetManagedRepositoryEsResponse.defaults[
+                'cluster.metadata.managed_repository'
+              ],
+          },
+          {
+            ...defaultSnapshot,
+            repository: 'barRepository',
+            snapshot: 'snapshot2',
+            managedRepository:
+              mockSnapshotGetManagedRepositoryEsResponse.defaults[
+                'cluster.metadata.managed_repository'
+              ],
+          },
         ],
       };
 
-      const response = await getAllHandler(mockRequest, callWithRequest, mockResponseToolkit);
-      expect(response).toEqual(expectedResponse);
+      const response = await router.runRequest(mockRequest);
+      expect(response).toEqual({ body: expectedResponse });
     });
 
     test('returns empty arrays if no snapshots returned from ES', async () => {
+      const mockSnapshotGetPolicyEsResponse = {};
       const mockSnapshotGetRepositoryEsResponse = {};
-      const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetRepositoryEsResponse);
-      const expectedResponse = { errors: [], snapshots: [], repositories: [] };
 
-      const response = await getAllHandler(mockRequest, callWithRequest, mockResponseToolkit);
-      expect(response).toEqual(expectedResponse);
+      router.callAsCurrentUserResponses = [
+        mockSnapshotGetManagedRepositoryEsResponse,
+        mockSnapshotGetPolicyEsResponse,
+        mockSnapshotGetRepositoryEsResponse,
+      ];
+
+      const expectedResponse = {
+        errors: [],
+        snapshots: [],
+        repositories: [],
+        policies: [],
+      };
+
+      const response = await router.runRequest(mockRequest);
+      expect(response).toEqual({ body: expectedResponse });
     });
 
     test('throws if ES error', async () => {
-      const callWithRequest = jest.fn().mockImplementation(() => {
-        throw new Error();
-      });
+      router.callAsCurrentUserResponses = [
+        jest.fn().mockRejectedValueOnce(new Error('Error getting managed repository')),
+        jest.fn().mockRejectedValueOnce(new Error('Error getting policies')),
+        jest.fn().mockRejectedValueOnce(new Error('Error getting repository')),
+      ];
 
-      await expect(
-        getAllHandler(mockRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      const response = await router.runRequest(mockRequest);
+      expect(response.status).toBe(500);
     });
   });
 
@@ -96,36 +152,160 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     const repository = 'fooRepository';
     const snapshot = 'snapshot1';
 
-    const mockOneRequest = ({
+    const mockRequest: RequestMock = {
+      method: 'get',
+      path: addBasePath('snapshots/{repository}/{snapshot}'),
       params: {
         repository,
         snapshot,
       },
-    } as unknown) as Request;
+    };
+
+    const mockSnapshotGetManagedRepositoryEsResponse = {
+      defaults: {
+        'cluster.metadata.managed_repository': 'myManagedRepository',
+      },
+    };
 
     test('returns snapshot object with repository name if returned from ES', async () => {
       const mockSnapshotGetEsResponse = {
-        snapshots: [{ snapshot }],
+        responses: [
+          {
+            repository,
+            snapshots: [{ snapshot }],
+          },
+        ],
       };
-      const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetEsResponse);
+
+      router.callAsCurrentUserResponses = [
+        mockSnapshotGetManagedRepositoryEsResponse,
+        mockSnapshotGetEsResponse,
+      ];
+
       const expectedResponse = {
         ...defaultSnapshot,
         snapshot,
         repository,
+        managedRepository:
+          mockSnapshotGetManagedRepositoryEsResponse.defaults[
+            'cluster.metadata.managed_repository'
+          ],
       };
 
-      const response = await getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit);
-      expect(response).toEqual(expectedResponse);
+      const response = await router.runRequest(mockRequest);
+      expect(response).toEqual({ body: expectedResponse });
     });
 
-    test('throws if ES error (including 404s)', async () => {
-      const callWithRequest = jest.fn().mockImplementation(() => {
-        throw new Error();
-      });
+    test('throws if ES error', async () => {
+      const mockSnapshotGetEsResponse = {
+        responses: [
+          {
+            repository,
+            error: {
+              root_cause: [
+                {
+                  type: 'snapshot_missing_exception',
+                  reason: `[${repository}:${snapshot}] is missing`,
+                },
+              ],
+              type: 'snapshot_missing_exception',
+              reason: `[${repository}:${snapshot}] is missing`,
+            },
+          },
+        ],
+      };
 
-      await expect(
-        getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
-      ).rejects.toThrow();
+      router.callAsCurrentUserResponses = [
+        mockSnapshotGetManagedRepositoryEsResponse,
+        mockSnapshotGetEsResponse,
+      ];
+
+      const response = await router.runRequest(mockRequest);
+      expect(response.status).toBe(500);
+    });
+  });
+
+  describe('deleteHandler()', () => {
+    const mockRequest: RequestMock = {
+      method: 'post',
+      path: addBasePath('snapshots/bulk_delete'),
+      body: [
+        {
+          repository: 'fooRepository',
+          snapshot: 'snapshot-1',
+        },
+        {
+          repository: 'barRepository',
+          snapshot: 'snapshot-2',
+        },
+      ],
+    };
+
+    it('should return successful ES responses', async () => {
+      const mockEsResponse = { acknowledged: true };
+
+      router.callAsCurrentUserResponses = [mockEsResponse, mockEsResponse];
+
+      const expectedResponse = {
+        itemsDeleted: [
+          { snapshot: 'snapshot-1', repository: 'fooRepository' },
+          { snapshot: 'snapshot-2', repository: 'barRepository' },
+        ],
+        errors: [],
+      };
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+    });
+
+    it('should return error ES responses', async () => {
+      const mockEsError = new Error('Test error') as any;
+      mockEsError.response = '{}';
+      mockEsError.statusCode = 500;
+
+      router.callAsCurrentUserResponses = [
+        jest.fn().mockRejectedValueOnce(mockEsError),
+        jest.fn().mockRejectedValueOnce(mockEsError),
+      ];
+
+      const expectedResponse = {
+        itemsDeleted: [],
+        errors: [
+          {
+            id: { snapshot: 'snapshot-1', repository: 'fooRepository' },
+            error: { cause: mockEsError.message, statusCode: 500 },
+          },
+          {
+            id: { snapshot: 'snapshot-2', repository: 'barRepository' },
+            error: { cause: mockEsError.message, statusCode: 500 },
+          },
+        ],
+      };
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+    });
+
+    it('should return combination of ES successes and errors', async () => {
+      const mockEsError = new Error('Test error') as any;
+      mockEsError.response = '{}';
+      mockEsError.statusCode = 500;
+      const mockEsResponse = { acknowledged: true };
+
+      router.callAsCurrentUserResponses = [
+        jest.fn().mockRejectedValueOnce(mockEsError),
+        mockEsResponse,
+      ];
+
+      const expectedResponse = {
+        itemsDeleted: [{ snapshot: 'snapshot-2', repository: 'barRepository' }],
+        errors: [
+          {
+            id: { snapshot: 'snapshot-1', repository: 'fooRepository' },
+            error: { cause: mockEsError.message, statusCode: 500 },
+          },
+        ],
+      };
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
   });
 });

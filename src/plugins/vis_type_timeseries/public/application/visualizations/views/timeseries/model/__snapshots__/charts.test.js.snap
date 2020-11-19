@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/model/charts.js ChartsEntities should match a snapshot of ChartsEntities 1`] = `
+Object {
+  "AreaChart": Object {
+    "color": [Function],
+    "data": [Function],
+    "enableHistogramMode": [Function],
+    "hideInLegend": [Function],
+    "lines": [Function],
+    "name": [Function],
+    "points": [Function],
+    "seriesGroupId": [Function],
+    "seriesId": [Function],
+    "sortIndex": [Function],
+    "stackAccessors": [Function],
+    "stackMode": [Function],
+    "timeZone": [Function],
+    "useDefaultGroupDomain": [Function],
+    "xScaleType": [Function],
+    "yScaleType": [Function],
+  },
+  "BarChart": Object {
+    "bars": [Function],
+    "color": [Function],
+    "data": [Function],
+    "enableHistogramMode": [Function],
+    "hideInLegend": [Function],
+    "name": [Function],
+    "seriesGroupId": [Function],
+    "seriesId": [Function],
+    "sortIndex": [Function],
+    "stackAccessors": [Function],
+    "stackMode": [Function],
+    "timeZone": [Function],
+    "useDefaultGroupDomain": [Function],
+    "xScaleType": [Function],
+    "yScaleType": [Function],
+  },
+}
+`;

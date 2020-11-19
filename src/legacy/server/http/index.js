@@ -18,80 +18,17 @@
  */
 
 import { format } from 'url';
-import { resolve } from 'path';
-import _ from 'lodash';
-import Boom from 'boom';
-import Hapi from 'hapi';
-import { setupVersionCheck } from './version_check';
+import Boom from '@hapi/boom';
+
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
-import { setupXsrf } from './xsrf';
 
-export default async function (kbnServer, server, config) {
-  kbnServer.server = new Hapi.Server(kbnServer.newPlatform.params.serverOptions);
+export default async function (kbnServer, server) {
   server = kbnServer.server;
 
   setupBasePathProvider(kbnServer);
 
   await registerHapiPlugins(server);
-
-  // provide a simple way to expose static directories
-  server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
-    this.route({
-      path: routePath,
-      method: 'GET',
-      handler: {
-        directory: {
-          path: dirPath,
-          listing: false,
-          lookupCompressed: true
-        }
-      },
-      config: { auth: false }
-    });
-  });
-
-  // helper for creating view managers for servers
-  server.decorate('server', 'setupViews', function (path, engines) {
-    this.views({
-      path: path,
-      isCached: config.get('optimize.viewCaching'),
-      engines: _.assign({ pug: require('pug') }, engines || {})
-    });
-  });
-
-  // attach the app name to the server, so we can be sure we are actually talking to kibana
-  server.ext('onPreResponse', function onPreResponse(req, h) {
-    const response = req.response;
-
-    const customHeaders = {
-      ...config.get('server.customResponseHeaders'),
-      'kbn-name': kbnServer.name,
-    };
-
-    if (response.isBoom) {
-      response.output.headers = {
-        ...response.output.headers,
-        ...customHeaders
-      };
-    } else {
-      Object.keys(customHeaders).forEach(name => {
-        response.header(name, customHeaders[name]);
-      });
-    }
-
-    return h.continue;
-  });
-
-  server.route({
-    path: '/',
-    method: 'GET',
-    handler(req, h) {
-      const basePath = req.getBasePath();
-      const defaultRoute = config.get('server.defaultRoute');
-      return h.redirect(`${basePath}${defaultRoute}`);
-    }
-  });
 
   server.route({
     method: 'GET',
@@ -104,17 +41,13 @@ export default async function (kbnServer, server, config) {
 
       const pathPrefix = req.getBasePath() ? `${req.getBasePath()}/` : '';
       return h
-        .redirect(format({
-          search: req.url.search,
-          pathname: pathPrefix + path.slice(0, -1),
-        }))
+        .redirect(
+          format({
+            search: req.url.search,
+            pathname: pathPrefix + path.slice(0, -1),
+          })
+        )
         .permanent(true);
-    }
+    },
   });
-
-  // Expose static assets
-  server.exposeStaticDir('/ui/{path*}', resolve(__dirname, '../../ui/public/assets'));
-
-  setupVersionCheck(server, config);
-  setupXsrf(server, config);
 }

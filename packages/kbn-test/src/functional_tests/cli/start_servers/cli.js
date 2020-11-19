@@ -27,7 +27,7 @@ import { processOptions, displayHelp } from './args';
  *                                   if no config option is passed
  */
 export async function startServersCli(defaultConfigPath) {
-  await runCli(displayHelp, async userOptions => {
+  await runCli(displayHelp, async (userOptions) => {
     const options = processOptions(userOptions, defaultConfigPath);
     await startServers(options);
   });

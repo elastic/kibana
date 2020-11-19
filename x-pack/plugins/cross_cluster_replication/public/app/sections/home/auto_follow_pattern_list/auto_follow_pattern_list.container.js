@@ -31,10 +31,10 @@ const mapStateToProps = (state) => ({
   isAuthorized: isApiAuthorized(scope)(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   loadAutoFollowPatterns: (inBackground) => dispatch(loadAutoFollowPatterns(inBackground)),
   selectAutoFollowPattern: (id) => dispatch(selectDetailAutoFollowPattern(id)),
-  loadAutoFollowStats: () => dispatch(loadAutoFollowStats())
+  loadAutoFollowStats: () => dispatch(loadAutoFollowStats()),
 });
 
 export const AutoFollowPatternList = connect(

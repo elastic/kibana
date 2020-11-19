@@ -1,0 +1,47 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a suspicious managed code hosting process which could indicate code injection or other form of suspicious code execution.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Suspicious Managed Code Hosting Process",
+  "query": "event.category:file and not event.type:deletion and file.name:(wscript.exe.log or mshta.exe.log or wscript.exe.log or wmic.exe.log or svchost.exe.log or dllhost.exe.log or cmstp.exe.log or regsvr32.exe.log)",
+  "references": [
+    "https://blog.menasec.net/2019/07/interesting-difr-traces-of-net-clr.html"
+  ],
+  "risk_score": 73,
+  "rule_id": "acf738b5-b5b2-4acc-bad9-1e18ee234f40",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

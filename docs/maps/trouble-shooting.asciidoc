@@ -1,0 +1,57 @@
+[role="xpack"]
+[[maps-troubleshooting]]
+== Troubleshoot Maps
+
+++++
+<titleabbrev>Troubleshoot</titleabbrev>
+++++
+
+
+Use the information in this section to inspect Elasticsearch requests and find solutions to common problems.
+
+[float]
+=== Inspect Elasticsearch requests
+
+Maps uses the {ref}/search-search.html[{es} search API] to get documents and aggregation results from {es}. To troubleshoot these requests, open the Inspector, which shows the most recent requests for each layer. You can switch between different requests using the *Request* dropdown.
+
+[role="screenshot"]
+image::maps/images/inspector.png[]
+
+[float]
+=== Solutions to common problems
+
+[float]
+==== Index not listed when adding layer
+
+* Verify your geospatial data is correctly mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
+  ** Run `GET myIndexPatternTitle/_field_caps?fields=myGeoFieldName` in <<console-kibana, Console>>, replacing `myIndexPatternTitle` and `myGeoFieldName` with your index pattern title and geospatial field name.
+  ** Ensure response specifies `type` as `geo_point` or `geo_shape`.
+* Verify your geospatial data is correctly mapped in your <<managing-fields, Kibana index pattern>>.
+  ** Open your index pattern in <<management, Stack Management>>.
+  ** Ensure your geospatial field type is `geo_point` or `geo_shape`.
+  ** Ensure your geospatial field is searchable and aggregatable.
+  ** If your geospatial field type does not match your Elasticsearch mapping, click the *Refresh* button to refresh the field list from Elasticsearch.
+* Index patterns with thousands of fields can exceed the default maximum payload size.
+Increase <<settings, `server.maxPayloadBytes`>> for large index patterns.
+
+[float]
+==== Features are not displayed
+
+* Use Inspector to view {es} responses. Ensure the response is not empty.
+* Ensure geometry uses the correct latitude and longitude ordering.
+  ** Geo-points expressed as strings are ordered as `"latitude,longitude"`. Geo-points expressed as arrays are ordered as the reverse: `[longitude, latitude]`.
+  ** Geo-shapes expressed as geojson provide coordinates as `[longitude, latitude]`.
+* Ensure fill color and border color are distinguishable from map tiles. It's hard to see white features on a white background.
+
+[float]
+==== Tiles are not displayed
+
+* Ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your Kibana domain have permission to access your tile server domain.
+* Ensure tiles have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
+
+[float]
+==== Coordinate and region map visualizations not available in New Visualization menu
+
+Kibana’s out-of-the-box settings no longer offers coordinate and region maps as a
+choice in the New Visualization menu because you can create these maps in the Maps app.
+If you want to create new coordinate and region map visualizations, set `xpack.maps.showMapVisualizationTypes` to `true`.

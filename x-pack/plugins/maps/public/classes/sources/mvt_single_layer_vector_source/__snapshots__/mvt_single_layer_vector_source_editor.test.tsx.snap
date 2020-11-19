@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render source creation editor (fields should _not_ be included) 1`] = `
+<EuiPanel>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText="URL of the .mvt vector tile service. e.g. http://company.com/{z}/{x}/{y}.pbf"
+    label="Url"
+    labelType="label"
+  >
+    <EuiFieldText
+      compressed={true}
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <MVTSingleLayerSourceSettings
+    fields={Array []}
+    handleChange={[Function]}
+    layerName=""
+    maxSourceZoom={24}
+    minSourceZoom={0}
+    showFields={false}
+  />
+</EuiPanel>
+`;

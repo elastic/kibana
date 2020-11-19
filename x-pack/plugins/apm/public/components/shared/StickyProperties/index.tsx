@@ -6,17 +6,14 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import {
   fontFamilyCode,
   fontSizes,
   px,
   truncate,
-  units
+  units,
 } from '../../../style/variables';
 
 export interface IStickyProperty {
@@ -34,17 +31,13 @@ const TooltipFieldName = styled.span`
 const PropertyLabel = styled.div`
   margin-bottom: ${px(units.half)};
   font-size: ${fontSizes.small};
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
 
   span {
     cursor: help;
   }
 `;
 PropertyLabel.displayName = 'PropertyLabel';
-
-const PropertyValueDimmed = styled.span`
-  color: ${theme.euiColorMediumShade};
-`;
 
 const propertyValueLineHeight = 1.2;
 const PropertyValue = styled.div`
@@ -58,20 +51,6 @@ const PropertyValueTruncated = styled.span`
   line-height: ${propertyValueLineHeight};
   ${truncate('100%')};
 `;
-
-function TimestampValue({ timestamp }: { timestamp: Date }) {
-  const time = moment(timestamp);
-  const timeAgo = timestamp ? time.fromNow() : NOT_AVAILABLE_LABEL;
-  const timestampFull = timestamp
-    ? time.format('MMMM Do YYYY, HH:mm:ss.SSS')
-    : NOT_AVAILABLE_LABEL;
-
-  return (
-    <PropertyValue>
-      {timeAgo} <PropertyValueDimmed>({timestampFull})</PropertyValueDimmed>
-    </PropertyValue>
-  );
-}
 
 function getPropertyLabel({ fieldName, label }: Partial<IStickyProperty>) {
   if (fieldName) {
@@ -89,13 +68,8 @@ function getPropertyLabel({ fieldName, label }: Partial<IStickyProperty>) {
 
 function getPropertyValue({
   val,
-  fieldName,
-  truncated = false
+  truncated = false,
 }: Partial<IStickyProperty>) {
-  if (fieldName === '@timestamp') {
-    return <TimestampValue timestamp={val as Date} />;
-  }
-
   if (truncated) {
     return (
       <EuiToolTip content={String(val)}>
@@ -108,7 +82,7 @@ function getPropertyValue({
 }
 
 export function StickyProperties({
-  stickyProperties
+  stickyProperties,
 }: {
   stickyProperties: IStickyProperty[];
 }) {
@@ -124,11 +98,11 @@ export function StickyProperties({
    * Hopefully we can make EUI handle this better and remove all this.
    */
   const itemStyles = {
-    padding: '1em 1em 1em 0'
+    padding: '1em 1em 1em 0',
   };
   const groupStyles = {
     marginTop: '-1em',
-    marginBottom: '-1em'
+    marginBottom: '-1em',
   };
 
   return (
@@ -140,8 +114,9 @@ export function StickyProperties({
               key={i}
               style={{
                 minWidth: width,
-                ...itemStyles
+                ...itemStyles,
               }}
+              grow={false}
             >
               {getPropertyLabel(prop)}
               {getPropertyValue(prop)}

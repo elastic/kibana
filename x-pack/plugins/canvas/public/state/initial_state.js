@@ -5,15 +5,18 @@
  */
 
 import { get } from 'lodash';
-import { capabilities } from 'ui/capabilities';
+import { platformService } from '../services';
 import { getDefaultWorkpad } from './defaults';
 
-export const getInitialState = path => {
+export const getInitialState = (path) => {
+  const { getHasWriteAccess } = platformService.getService();
+
   const state = {
     app: {}, // Kibana stuff in here
     assets: {}, // assets end up here
     transient: {
-      canUserWrite: capabilities.get().canvas.save,
+      canUserWrite: getHasWriteAccess(),
+      zoomScale: 1,
       elementStats: {
         total: 0,
         ready: 0,
@@ -25,6 +28,10 @@ export const getInitialState = path => {
       resolvedArgs: {},
       refresh: {
         interval: 0,
+      },
+      autoplay: {
+        enabled: false,
+        interval: 10000,
       },
       // values in resolvedArgs should live under a unique index so they can be looked up.
       // The ID of the element is a great example.

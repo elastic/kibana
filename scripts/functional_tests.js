@@ -17,10 +17,25 @@
  * under the License.
  */
 
+// eslint-disable-next-line no-restricted-syntax
+const alwaysImportedTests = [
+  require.resolve('../test/functional/config.js'),
+  require.resolve('../test/plugin_functional/config.ts'),
+  require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
+  require.resolve('../test/new_visualize_flow/config.ts'),
+  require.resolve('../test/security_functional/config.ts'),
+];
+// eslint-disable-next-line no-restricted-syntax
+const onlyNotInCoverageTests = [
+  require.resolve('../test/api_integration/config.js'),
+  require.resolve('../test/interpreter_functional/config.ts'),
+  require.resolve('../test/examples/config.js'),
+];
+
 require('../src/setup_node_env');
 require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.js'),
-  require.resolve('../test/interpreter_functional/config.js'),
+  // eslint-disable-next-line no-restricted-syntax
+  ...alwaysImportedTests,
+  // eslint-disable-next-line no-restricted-syntax
+  ...(!!process.env.CODE_COVERAGE ? [] : onlyNotInCoverageTests),
 ]);

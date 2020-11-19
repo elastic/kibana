@@ -17,9 +17,9 @@ To run these tests during development you can use the following commands:
 
 ```
 # Start the test server (can continue running)
-node scripts/functional_tests_server.js --config test/plugin_functional/config.js
+node scripts/functional_tests_server.js --config test/plugin_functional/config.ts
 # Start a test run
-node scripts/functional_test_runner.js --config test/plugin_functional/config.js
+node scripts/functional_test_runner.js --config test/plugin_functional/config.ts
 ```
 
 ## Run Kibana with a test plugin
@@ -42,7 +42,7 @@ If you wish to load up specific es archived data for your test, you can do so vi
 Another option, which will automatically use any specific settings the test environment may rely on, is to boot up the functional test server pointing to the plugin configuration file.
 
 ```
-node scripts/functional_tests_server --config test/plugin_functional/config.js
+node scripts/functional_tests_server --config test/plugin_functional/config.ts
 ```
 
 *Note:* you may still need to use the es_archiver script to boot up any required data.

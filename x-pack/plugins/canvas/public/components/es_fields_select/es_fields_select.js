@@ -9,11 +9,11 @@ import PropTypes from 'prop-types';
 import { EuiComboBox } from '@elastic/eui';
 
 export const ESFieldsSelect = ({ selected, fields, onChange, onFocus, onBlur }) => {
-  const options = fields.map(value => ({
+  const options = fields.map((value) => ({
     label: value,
   }));
 
-  const selectedOptions = selected.map(value => ({
+  const selectedOptions = selected.map((value) => ({
     label: value,
   }));
 
@@ -21,10 +21,11 @@ export const ESFieldsSelect = ({ selected, fields, onChange, onFocus, onBlur }) 
     <EuiComboBox
       selectedOptions={selectedOptions}
       options={options}
-      onChange={values => onChange(values.map(({ label }) => label))}
+      onChange={(values) => onChange(values.map(({ label }) => label))}
       className="canvasFieldsSelect"
       onFocus={onFocus}
       onBlur={onBlur}
+      compressed
     />
   );
 };

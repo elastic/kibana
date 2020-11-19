@@ -4,49 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg, ESFilter } from 'elasticsearch';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
-  PROCESSOR_EVENT,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../helpers/range_filter';
-import { Setup } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { rangeFilter } from '../../../../common/utils/range_filter';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getBuckets({
   serviceName,
   groupId,
   bucketSize,
-  setup
+  setup,
 }: {
   serviceName: string;
   groupId?: string;
   bucketSize: number;
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, esFilterQuery, client, config } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'error' } },
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) }
+    { range: rangeFilter(start, end) },
+    ...esFilter,
   ];
 
   if (groupId) {
     filter.push({ term: { [ERROR_GROUP_ID]: groupId } });
   }
 
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
-  }
-
   const params = {
-    index: config.get<string>('apm_oss.errorIndices'),
+    apm: {
+      events: [ProcessorEvent.error],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter
-        }
+          filter,
+        },
       },
       aggs: {
         distribution: {
@@ -56,29 +54,25 @@ export async function getBuckets({
             interval: bucketSize,
             extended_bounds: {
               min: start,
-              max: end
-            }
-          }
-        }
-      }
-    }
+              max: end,
+            },
+          },
+        },
+      },
+    },
   };
 
-  interface Aggs {
-    distribution: {
-      buckets: Array<BucketAgg<number>>;
-    };
-  }
+  const resp = await apmEventClient.search(params);
 
-  const resp = await client<void, Aggs>('search', params);
-
-  const buckets = resp.aggregations.distribution.buckets.map(bucket => ({
-    key: bucket.key,
-    count: bucket.doc_count
-  }));
+  const buckets = (resp.aggregations?.distribution.buckets || []).map(
+    (bucket) => ({
+      key: bucket.key,
+      count: bucket.doc_count,
+    })
+  );
 
   return {
-    totalHits: resp.hits.total,
-    buckets
+    noHits: resp.hits.total.value === 0,
+    buckets: resp.hits.total.value > 0 ? buckets : [],
   };
 }

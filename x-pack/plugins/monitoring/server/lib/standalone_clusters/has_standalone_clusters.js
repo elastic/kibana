@@ -22,9 +22,9 @@ export async function hasStandaloneClusters(req, indexPatterns) {
     const timeRangeFilter = {
       range: {
         timestamp: {
-          format: 'epoch_millis'
-        }
-      }
+          format: 'epoch_millis',
+        },
+      },
     };
 
     if (start) {
@@ -44,9 +44,9 @@ export async function hasStandaloneClusters(req, indexPatterns) {
       query: {
         bool: {
           filter: filters,
-        }
-      }
-    }
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

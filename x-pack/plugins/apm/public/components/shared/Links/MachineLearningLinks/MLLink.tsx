@@ -6,11 +6,9 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import chrome from 'ui/chrome';
-import url from 'url';
-import rison, { RisonValue } from 'rison-node';
-import { useLocation } from '../../../../hooks/useLocation';
-import { getTimepickerRisonData, TimepickerRisonData } from '../rison_helpers';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 interface MlRisonData {
   ml?: {
@@ -22,23 +20,47 @@ interface Props {
   query?: MlRisonData;
   path?: string;
   children?: React.ReactNode;
+  external?: boolean;
 }
 
-export function MLLink({ children, path = '', query = {} }: Props) {
-  const location = useLocation();
+export function MLLink({ children, path = '', query = {}, external }: Props) {
+  const {
+    core,
+    plugins: { ml },
+  } = useApmPluginContext();
 
-  const risonQuery: MlRisonData & TimepickerRisonData = getTimepickerRisonData(
-    location.search
-  );
-
-  if (query.ml) {
-    risonQuery.ml = query.ml;
+  let jobIds: string[] = [];
+  if (query.ml?.jobIds) {
+    jobIds = query.ml.jobIds;
   }
+  const { urlParams } = useUrlParams();
+  const { rangeFrom, rangeTo, refreshInterval, refreshPaused } = urlParams;
 
-  const href = url.format({
-    pathname: chrome.addBasePath('/app/ml'),
-    hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`
+  // default to link to ML Anomaly Detection jobs management page
+  const mlADLink = useMlHref(ml, core.http.basePath.get(), {
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    pageState: {
+      jobId: jobIds,
+      groupIds: ['apm'],
+      globalState: {
+        time:
+          rangeFrom !== undefined && rangeTo !== undefined
+            ? { from: rangeFrom, to: rangeTo }
+            : undefined,
+        refreshInterval:
+          refreshPaused !== undefined && refreshInterval !== undefined
+            ? { pause: refreshPaused, value: refreshInterval }
+            : undefined,
+      },
+    },
   });
 
-  return <EuiLink children={children} href={href} />;
+  return (
+    <EuiLink
+      children={children}
+      href={mlADLink}
+      external={external}
+      target={external ? '_blank' : undefined}
+    />
+  );
 }

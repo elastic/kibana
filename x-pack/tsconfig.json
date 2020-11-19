@@ -1,38 +1,40 @@
 {
-  "extends": "../tsconfig.json",
-  "include": [
-    "typings/**/*",
-    "common/**/*",
-    "server/**/*",
-    "plugins/**/*",
-    "test_utils/**/*"
-  ],
+  "extends": "../tsconfig.base.json",
+  "include": ["mocks.ts", "typings/**/*", "plugins/**/*", "test_utils/**/*", "tasks/**/*"],
   "exclude": [
-    "test/**/*",
-    "**/typespec_tests.ts"
+    "plugins/apm/e2e/cypress/**/*",
+    "plugins/apm/scripts/**/*",
+    "plugins/global_search/**/*",
+    "plugins/licensing/**/*",
+    "plugins/security_solution/cypress/**/*",
+    "plugins/telemetry_collection_xpack/**/*",
+    "test/**/*"
   ],
   "compilerOptions": {
-    "outDir": ".",
     "paths": {
-      "ui/*": [
-        "src/legacy/ui/public/*"
-      ],
-      "plugins/xpack_main/*": [
-        "x-pack/plugins/xpack_main/public/*"
-      ],
-      "plugins/security/*": [
-        "x-pack/plugins/security/public/*"
-      ],
-      "plugins/spaces/*": [
-        "x-pack/plugins/spaces/public/*"
-      ],
-      "test_utils/*": [
-        "x-pack/test_utils/*"
-      ]
+      "kibana/public": ["src/core/public"],
+      "kibana/server": ["src/core/server"],
+      "test_utils/*": ["x-pack/test_utils/*"],
+      "fixtures/*": ["src/fixtures/*"]
     },
-    "types": [
-      "node",
-      "jest"
-    ]
-  }
+    // overhead is too significant
+    "incremental": false
+  },
+  "references": [
+    { "path": "../src/core/tsconfig.json" },
+    { "path": "../src/plugins/inspector/tsconfig.json" },
+    { "path": "../src/plugins/kibana_legacy/tsconfig.json" },
+    { "path": "../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../src/plugins/kibana_usage_collection/tsconfig.json" },
+    { "path": "../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../src/plugins/newsfeed/tsconfig.json" },
+    { "path": "../src/plugins/share/tsconfig.json" },
+    { "path": "../src/plugins/telemetry_collection_manager/tsconfig.json" },
+    { "path": "../src/plugins/telemetry/tsconfig.json" },
+    { "path": "../src/plugins/url_forwarding/tsconfig.json" },
+    { "path": "../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "./plugins/global_search/tsconfig.json" },
+    { "path": "./plugins/licensing/tsconfig.json" },
+    { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" }
+  ]
 }

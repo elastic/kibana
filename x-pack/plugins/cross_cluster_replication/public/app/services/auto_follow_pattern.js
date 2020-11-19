@@ -6,16 +6,14 @@
 
 import moment from 'moment';
 
-const getFollowPattern = (prefix = '', suffix = '', template = '{{leader_index}}') => (
-  {
-    followPattern: {
-      prefix,
-      suffix,
-      template,
-    },
-    toString: prefix + template + suffix
-  }
-);
+const getFollowPattern = (prefix = '', suffix = '', template = '{{leader_index}}') => ({
+  followPattern: {
+    prefix,
+    suffix,
+    template,
+  },
+  toString: prefix + template + suffix,
+});
 
 /**
  * Generate an array of indices preview that would be generated for an auto-follow pattern.
@@ -33,7 +31,7 @@ export const getPreviewIndicesFromAutoFollowPattern = ({
     moment().format('YYYY-MM-DD'),
     moment().add(1, 'days').format('YYYY-MM-DD'),
     moment().add(2, 'days').format('YYYY-MM-DD'),
-  ]
+  ],
 }) => {
   const indicesPreview = [];
   let indexPreview;
@@ -44,7 +42,9 @@ export const getPreviewIndicesFromAutoFollowPattern = ({
       leaderIndexTemplate = leaderIndexPattern.replace(/\*/g, placeHolder);
       indexPreview = getFollowPattern(prefix, suffix, leaderIndexTemplate);
 
-      if (!indicesPreview.some((_indexPreview) => indexPreview.toString === _indexPreview.toString)) {
+      if (
+        !indicesPreview.some((_indexPreview) => indexPreview.toString === _indexPreview.toString)
+      ) {
         indicesPreview.push(indexPreview);
       }
     });

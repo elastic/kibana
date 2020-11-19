@@ -6,13 +6,13 @@
 
 Canvas is included with X-Pack and requires a Basic license or better to use.
 
-### Developing in Canvas
+## Developing in Canvas
 
 To develop your own Canvas plugins, you simply create a Kibana plugin, and register your customizations with Canvas.
 
 The following is a step-by-step guide to adding your own custom random number Canvas plugin.
 
-#### Generating a Kibana plugin
+### Generating a Kibana plugin
 
 ```bash
 # in the kibana directory
@@ -24,12 +24,13 @@ This will prompt you for some input. Generally, you can answer as follows:
 
 ```
 ❯ node scripts/generate_plugin.js canvas_example
+? Would you like to create the plugin in a different folder? No
 ? Provide a short description An awesome Kibana plugin
 ? What Kibana version are you targeting? master
 ? Should an app component be generated? No
-? Should translation files be generated? No
-? Should a hack component be generated? No
 ? Should a server API be generated? No
+? Should translation files be generated? No
+? Would you like to use a custom eslint file? No
 ```
 
 Once this has completed, go to your plugin directory:
@@ -41,55 +42,52 @@ cd plugins/canvas_example
 Open that folder in your code editor of choice: `code .`
 
 #### Creating a Canvas element and function
+Open your plugin's `kibana.json` file. Make sure that `ui` has a value of true, and that `'canvas'` is included in `requiredPlugins`.  It should look something like this.  
 
-Open your plugin's `index.js` file, and modify it to look something like this (but replace canvas_example with whatever you named your plugin):
-
-```js
-export default function (kibana) {
-  return new kibana.Plugin({
-    // Tell Kibana that this plugin needs canvas and the Kibana interpreter
-    require: ['interpreter', 'canvas'],
-
-    // The name of your plugin. Make this whatever you want.
-    name: 'canvas_example',
-
-    uiExports: {
-      // Tell Kibana that the files in `/public` should be loaded into the
-      // browser only when the user is in the Canvas app.
-      canvas: ['plugins/canvas_example']
-    },
-
-    // Enable the plugin by default
-    config(Joi) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-  });
+```json
+{
+  "id": "canvasExample",
+  "version": "7.8.0",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["canvas"],
+  "optionalPlugins": []
 }
 ```
 
-Now that the Kibana plugin boilerplate is out of the way, you can write a Canvas plugin.
+In your plugin folder, create a new folder `public` and an `index.ts` file within it.
 
-Create a new file: `public/index.js` and make it look like this:
+This `index.ts` will need export a Kibana Plugin. You can use this as a starting point for your plugin.
 
-```js
-/*global kbnInterpreter */
+```typescript
+import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
+import { CanvasSetup } from '../../../x-pack/plugins/canvas/public';
 
-// Elements show up in the Canvas elements menu and can be visually added to a canvas
-const elements = [
-  () => ({
-    name: 'randomNumber',
-    displayName: 'Random Number',
-    help: 'A random number between 1 and 100',
-    image: 'https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltb59c89a07c05b937/5c583a6602ac90e80ba0ab8f/icon-white-circle-elastic-stack.svg',
-    expression: 'random | metric "Random Number"',
-  }),
-];
+interface CanvasExampleSetupPlugins {
+  canvas: CanvasSetup;
+}
 
-// Browser functions are Canvas functions which run in the browser, and can be used in
-// expressions (such as `random | metric "Random Number"`)
-const browserFunctions = [
+interface CanvasExampleStartPlugins {}
+
+class CanvasExamplePlugin
+  implements Plugin<void, void, CanvasExampleSetupPlugins, CanvasExampleStartPlugins> {
+  setup(core: CoreSetup, plugins: CanvasExampleSetupPlugins) {}
+
+  start(core: CoreStart) {}
+}
+
+export const plugin = () => new CanvasExamplePlugin();
+```
+
+
+Now that the Kibana plugin boilerplate is out of the way, you can start adding functionality to Canvas.  
+
+Let's start by adding a new function.
+
+In your `index.ts` add a new function definition:
+
+```typescript
+const canvasFunctions = [
   () => ({
     name: 'random',
     help: 'Make a random number between 1 and 100',
@@ -99,14 +97,40 @@ const browserFunctions = [
     }
   }),
 ];
-
-// Register our elements and browserFunctions with the Canvas interpreter.
-kbnInterpreter.register({
-  elements,
-  browserFunctions,
-});
-
 ```
+
+Then, in the `setup` method of your plugin, you can add this new function definition to Canvas:
+
+```typescript
+setup(core: CoreSetup, plugins: CanvasExampleSetupPlugins) {
+  plugins.canvas.addFunctions(canvasFunctions);
+}
+```
+
+Now, let's add a new Element type.  In your `index.ts` add a new element definition:
+
+```typescript
+const elements = [
+  () => ({
+    name: 'randomNumber',
+    displayName: 'Random Number',
+    help: 'A random number between 1 and 100',
+    image: 'https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltb59c89a07c05b937/5c583a6602ac90e80ba0ab8f/icon-white-circle-elastic-stack.svg',
+    expression: 'random | metric "Random Number"',
+  }),
+];
+```
+
+And then, in the `setup` method of the plugin, add this new element definition to Canvas, just like you did with the function:
+
+```typescript
+setup(core: CoreSetup, plugins: CanvasExampleSetupPlugins) {
+  plugins.canvas.addFunctions(canvasFunctions);
+  plugins.canvas.addElements(elements);
+}
+```
+
+Now, your 'Random Number' element will show up in the list of other Canvas elements.
 
 #### Trying out your new plugin
 
@@ -120,53 +144,71 @@ yarn start
 - Pull up Kibana in your browser: `http://localhost:5601`
 - Go to canvas, and click: "Create workpad"
 - Click: "Add element"
+- Click: "Other"
 - Click: "Random Number"
 
 #### Adding a server-side function
 
+> Server side functions may be deprecated in a later version of Kibana as they require using an API marked _legacy_
+
 Now, let's add a function which runs on the server.
 
-In your plugin's root `index.js` file, modify the `kibana.Plugin` definition to have an init function:
+In your plugin's `kibana.json` file, set `server` to true, and add `"expressions"` as a requiredPlugin. 
 
-```js
-export default function (kibana) {
-  return new kibana.Plugin({
-    // Tell Kibana that this plugin needs canvas and the Kibana interpreter
-    require: ['interpreter', 'canvas'],
+```typescript
+{
+  "id": "canvasExample",
+  "version": "8.0.0",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["canvas", "expressions"],
+  "optionalPlugins": []
+}
+```
 
-    // The name of your plugin. Make this whatever you want.
-    name: 'canvas_example',
+Now, much like we made the client plugin, we'll make a server plugin.  
 
-    uiExports: {
-      // Tell Kibana that the files in `/public` should be loaded into the
-      // browser only when the user is in the Canvas app.
-      canvas: ['plugins/canvas_example']
+Start by making the `server` directory and an `index.ts` file with a shell for your server plugin:
+
+```typescript
+import { Plugin, CoreSetup, CoreStart } from '../../../src/core/server';
+import { ExpressionsServerSetup } from '../../../src/plugins/expressions/server';
+
+interface CanvasExamplePluginsSetup {
+  expressions: ExpressionsServerSetup;
+}
+
+class CanvasExamplePlugin implements Plugin {
+  setup(core: CoreSetup, plugins: CanvasExamplePluginsSetup) {}
+
+  start(core: CoreStart) {}
+}
+
+export const plugin = () => new CanvasExamplePlugin();
+```
+
+Now, we'll create a simple function definition that we will register on the server:
+
+```typescript
+const serverFunctions = [
+  () => ({
+    name: 'serverTime',
+    help: 'Get the server time in milliseconds',
+    args: {},
+    fn() {
+      return Date.now();
     },
+  }),
+];
+```
 
-    // Enable the plugin by default
-    config(Joi) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
+And then in our setup method, register it with the Expressions plugin:
 
-    // Add this init function, which registers a new function with Canvas: `serverTime`
-    init(server) {
-      const { register } = server.plugins.interpreter;
-      register({
-        serverFunctions: [
-          () => ({
-            name: 'serverTime',
-            help: 'Get the server time in milliseconds',
-            args: {},
-            fn() {
-              return Date.now();
-            },
-          })
-        ],
-      });
-    },
-  });
+```typescript
+setup(core: CoreSetup, plugins: CanvasExamplePluginsSetup) {
+  // .register requires serverFunctions and types, so pass an empty array
+  // if you don't have any custom types to register
+  plugins.expressions.__LEGACY.register({ serverFunctions, types: [] });
 }
 ```
 
@@ -181,6 +223,22 @@ Now, let's try out our new server function.
   - Click "Run"
 
 You should now see one random number and one "Server Time in ms" value.
+
+> More information about building Kibana Plugins can be found in [src/core](https://github.com/elastic/kibana/blob/master/src/core/README.md)
+
+#### My Canvas Plugin stopped working
+
+If your Kibana Server is crashing on startup with a message like
+
+> **FATAL** Error: Unmet requirement "canvas" for plugin "your_plugin_name"
+
+or
+
+> **FATAL** Error: Unmet requirement "interpreter" for plugin "your_plugin_name"
+
+then your plugin was likely created to work on a previous version of Kibana. Starting with version 7.8, the plugin system was redesigned and caused breaking changes to these earlier plugins.  
+
+The good news is that all of your existing Canvas extension code can be reused, it just needs to be in an updated Kibana plugin.  Follow the [instructions](#generating-a-kibana-plugin) for creating a new Canvas Kibana plugin, and then add in your existing functions and elements.  
 
 ## Scripts
 
@@ -219,11 +277,3 @@ While both can be used as a way to build up reports, Canvas and Dashboard have d
 Elasticon 2017 keynote (starts at 01:27:00): https://www.elastic.co/elasticon/conf/2017/sf/opening-keynote
 
 Shane Connelly's SQL webinar: https://www.elastic.co/webinars/introduction-to-elasticsearch-sql
-
-**How can I get an early build?**
-
-Check the technical previews out, see http://canvas.elastic.co/stories/installing.html
-
-**Where can I get screenshots?**
-
-If you want a stream of conciousness of the absolute latest development, check out the technical preview microsite at http://canvas.elastic.co/

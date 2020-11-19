@@ -5,7 +5,7 @@ Array [
   Object {
     "isOnline": false,
     "name": "hello01",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "resolver": "_x_V2YzPQU-a9KRRBxUxZQ",
     "shardCount": 6,
@@ -15,7 +15,7 @@ Array [
   Object {
     "isOnline": false,
     "name": "hello02",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "resolver": "DAiX7fFjS3Wii7g2HYKrOg",
     "shardCount": 6,
@@ -25,12 +25,14 @@ Array [
 ]
 `;
 
+exports[`map response of nodes data should handle empty pageOfNodes 1`] = `Array []`;
+
 exports[`map response of nodes data should handle empty shardStats 1`] = `
 Array [
   Object {
     "isOnline": true,
     "name": "hello01",
-    "nodeTypeClass": "fa-star",
+    "nodeTypeClass": "starFilled",
     "nodeTypeLabel": "Master Node",
     "node_cgroup_quota": Object {
       "metric": Object {
@@ -46,10 +48,10 @@ Array [
         "units": "%",
       },
       "summary": Object {
-        "lastVal": 37.3891333,
-        "maxVal": 41.948963750000004,
-        "minVal": 11.02918065,
-        "slope": 1,
+        "lastVal": 14.58673435,
+        "maxVal": 80.3369142,
+        "minVal": 11.0291808,
+        "slope": -1,
       },
     },
     "node_cgroup_throttled": Object {
@@ -66,8 +68,8 @@ Array [
         "units": "ns",
       },
       "summary": Object {
-        "lastVal": 123012140,
-        "maxVal": 30063709491,
+        "lastVal": 0,
+        "maxVal": 23311083802,
         "minVal": 0,
         "slope": -1,
       },
@@ -85,10 +87,10 @@ Array [
         "units": "%",
       },
       "summary": Object {
-        "lastVal": 3,
-        "maxVal": 4,
+        "lastVal": 1,
+        "maxVal": 7,
         "minVal": 1,
-        "slope": 1,
+        "slope": -1,
       },
     },
     "node_free_space": Object {
@@ -104,9 +106,9 @@ Array [
         "units": "",
       },
       "summary": Object {
-        "lastVal": 3141324800,
+        "lastVal": 3140956160,
         "maxVal": 3195629568,
-        "minVal": 3141324800,
+        "minVal": 3140956160,
         "slope": -1,
       },
     },
@@ -124,10 +126,10 @@ Array [
         "units": "%",
       },
       "summary": Object {
-        "lastVal": 40,
+        "lastVal": 42,
         "maxVal": 52,
-        "minVal": 25,
-        "slope": -1,
+        "minVal": 24,
+        "slope": 1,
       },
     },
     "node_load_average": Object {
@@ -144,9 +146,9 @@ Array [
         "units": "",
       },
       "summary": Object {
-        "lastVal": 1.0400390625,
-        "maxVal": 2.439453125,
-        "minVal": 1.0400390625,
+        "lastVal": 1.0302734375,
+        "maxVal": 3.0703125,
+        "minVal": 1.0302734375,
         "slope": -1,
       },
     },
@@ -158,7 +160,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello02",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "node_cgroup_quota": undefined,
     "node_cgroup_throttled": Object {
@@ -194,8 +196,8 @@ Array [
         "units": "%",
       },
       "summary": Object {
-        "lastVal": 0,
-        "maxVal": 8,
+        "lastVal": 1,
+        "maxVal": 39,
         "minVal": 0,
         "slope": -1,
       },
@@ -213,9 +215,9 @@ Array [
         "units": "",
       },
       "summary": Object {
-        "lastVal": 3141402624,
-        "maxVal": 3148406784,
-        "minVal": 3141402624,
+        "lastVal": 3141033984,
+        "maxVal": 3162230784,
+        "minVal": 3141033984,
         "slope": -1,
       },
     },
@@ -253,9 +255,9 @@ Array [
         "units": "",
       },
       "summary": Object {
-        "lastVal": 1.0400390625,
-        "maxVal": 2.439453125,
-        "minVal": 1.0400390625,
+        "lastVal": 1.0302734375,
+        "maxVal": 3.0703125,
+        "minVal": 1.0302734375,
         "slope": -1,
       },
     },
@@ -272,7 +274,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello01",
-    "nodeTypeClass": "fa-star",
+    "nodeTypeClass": "starFilled",
     "nodeTypeLabel": "Master Node",
     "node_cgroup_quota": null,
     "node_cgroup_throttled": null,
@@ -288,7 +290,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello02",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "node_cgroup_quota": null,
     "node_cgroup_throttled": null,
@@ -309,7 +311,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello01",
-    "nodeTypeClass": "fa-star",
+    "nodeTypeClass": "starFilled",
     "nodeTypeLabel": "Master Node",
     "node_cgroup_quota": Object {
       "metric": Object {
@@ -325,10 +327,10 @@ Array [
         "units": "%",
       },
       "summary": Object {
-        "lastVal": 37.3891333,
-        "maxVal": 41.948963750000004,
-        "minVal": 11.02918065,
-        "slope": 1,
+        "lastVal": 14.58673435,
+        "maxVal": 80.3369142,
+        "minVal": 11.0291808,
+        "slope": -1,
       },
     },
     "node_cgroup_throttled": Object {
@@ -345,8 +347,8 @@ Array [
         "units": "ns",
       },
       "summary": Object {
-        "lastVal": 123012140,
-        "maxVal": 30063709491,
+        "lastVal": 0,
+        "maxVal": 23311083802,
         "minVal": 0,
         "slope": -1,
       },
@@ -364,10 +366,10 @@ Array [
         "units": "%",
       },
       "summary": Object {
-        "lastVal": 3,
-        "maxVal": 4,
+        "lastVal": 1,
+        "maxVal": 7,
         "minVal": 1,
-        "slope": 1,
+        "slope": -1,
       },
     },
     "node_free_space": Object {
@@ -383,9 +385,9 @@ Array [
         "units": "",
       },
       "summary": Object {
-        "lastVal": 3141324800,
+        "lastVal": 3140956160,
         "maxVal": 3195629568,
-        "minVal": 3141324800,
+        "minVal": 3140956160,
         "slope": -1,
       },
     },
@@ -403,10 +405,10 @@ Array [
         "units": "%",
       },
       "summary": Object {
-        "lastVal": 40,
+        "lastVal": 42,
         "maxVal": 52,
-        "minVal": 25,
-        "slope": -1,
+        "minVal": 24,
+        "slope": 1,
       },
     },
     "node_load_average": Object {
@@ -423,9 +425,9 @@ Array [
         "units": "",
       },
       "summary": Object {
-        "lastVal": 1.0400390625,
-        "maxVal": 2.439453125,
-        "minVal": 1.0400390625,
+        "lastVal": 1.0302734375,
+        "maxVal": 3.0703125,
+        "minVal": 1.0302734375,
         "slope": -1,
       },
     },
@@ -437,7 +439,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello02",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "node_cgroup_quota": undefined,
     "node_cgroup_throttled": Object {
@@ -473,8 +475,8 @@ Array [
         "units": "%",
       },
       "summary": Object {
-        "lastVal": 0,
-        "maxVal": 8,
+        "lastVal": 1,
+        "maxVal": 39,
         "minVal": 0,
         "slope": -1,
       },
@@ -492,9 +494,9 @@ Array [
         "units": "",
       },
       "summary": Object {
-        "lastVal": 3141402624,
-        "maxVal": 3148406784,
-        "minVal": 3141402624,
+        "lastVal": 3141033984,
+        "maxVal": 3162230784,
+        "minVal": 3141033984,
         "slope": -1,
       },
     },
@@ -532,9 +534,9 @@ Array [
         "units": "",
       },
       "summary": Object {
-        "lastVal": 1.0400390625,
-        "maxVal": 2.439453125,
-        "minVal": 1.0400390625,
+        "lastVal": 1.0302734375,
+        "maxVal": 3.0703125,
+        "minVal": 1.0302734375,
         "slope": -1,
       },
     },

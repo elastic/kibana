@@ -4,22 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
+import { SavedObjectsServiceStart } from 'src/core/server';
 import {
   UIOpen,
   UIOpenOption,
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
-  UpgradeAssistantTelemetryServer,
 } from '../../../common/types';
 
-async function incrementUIOpenOptionCounter(
-  server: UpgradeAssistantTelemetryServer,
-  uiOpenOptionCounter: UIOpenOption
-) {
-  const { getSavedObjectsRepository } = server.savedObjects;
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+interface IncrementUIOpenDependencies {
+  uiOpenOptionCounter: UIOpenOption;
+  savedObjects: SavedObjectsServiceStart;
+}
+
+async function incrementUIOpenOptionCounter({
+  savedObjects,
+  uiOpenOptionCounter,
+}: IncrementUIOpenDependencies) {
+  const internalRepository = savedObjects.createInternalRepository();
 
   await internalRepository.incrementCounter(
     UPGRADE_ASSISTANT_TYPE,
@@ -28,22 +30,24 @@ async function incrementUIOpenOptionCounter(
   );
 }
 
-export async function upsertUIOpenOption(
-  server: UpgradeAssistantTelemetryServer,
-  req: Legacy.Request
-): Promise<UIOpen> {
-  const { overview, cluster, indices } = req.payload as UIOpen;
+type UpsertUIOpenOptionDependencies = UIOpen & { savedObjects: SavedObjectsServiceStart };
 
+export async function upsertUIOpenOption({
+  overview,
+  cluster,
+  indices,
+  savedObjects,
+}: UpsertUIOpenOptionDependencies): Promise<UIOpen> {
   if (overview) {
-    await incrementUIOpenOptionCounter(server, 'overview');
+    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'overview' });
   }
 
   if (cluster) {
-    await incrementUIOpenOptionCounter(server, 'cluster');
+    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'cluster' });
   }
 
   if (indices) {
-    await incrementUIOpenOptionCounter(server, 'indices');
+    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'indices' });
   }
 
   return {

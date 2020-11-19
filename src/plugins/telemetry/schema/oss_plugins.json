@@ -1,0 +1,2795 @@
+{
+  "properties": {
+    "kql": {
+      "properties": {
+        "optInCount": {
+          "type": "long"
+        },
+        "optOutCount": {
+          "type": "long"
+        },
+        "defaultQueryLanguage": {
+          "type": "keyword"
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "long"
+        },
+        "errorCount": {
+          "type": "long"
+        },
+        "averageDuration": {
+          "type": "float"
+        }
+      }
+    },
+    "sample-data": {
+      "properties": {
+        "installed": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        },
+        "last_install_date": {
+          "type": "date"
+        },
+        "last_install_set": {
+          "type": "keyword"
+        },
+        "last_uninstall_date": {
+          "type": "date"
+        },
+        "last_uninstall_set": {
+          "type": "keyword"
+        },
+        "uninstalled": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        }
+      }
+    },
+    "application_usage": {
+      "properties": {
+        "dashboards": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "dev_tools": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "discover": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "home": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "kibana": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "management": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "short_url_redirect": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "timelion": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "visualize": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "apm": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "csm": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "canvas": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "dashboard_mode": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "enterpriseSearch": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "appSearch": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "workplaceSearch": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "graph": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "logs": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "metrics": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "infra": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "ingestManager": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "lens": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "maps": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "ml": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "monitoring": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "observability-overview": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_account": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_access_agreement": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_capture_url": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_logged_out": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_login": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_logout": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "security_overwritten_session": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:overview": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:detections": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:hosts": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:network": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:timelines": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:case": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "securitySolution:administration": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "siem": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "space_selector": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        },
+        "uptime": {
+          "properties": {
+            "clicks_total": {
+              "type": "long"
+            },
+            "clicks_7_days": {
+              "type": "long"
+            },
+            "clicks_30_days": {
+              "type": "long"
+            },
+            "clicks_90_days": {
+              "type": "long"
+            },
+            "minutes_on_screen_total": {
+              "type": "float"
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float"
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float"
+            }
+          }
+        }
+      }
+    },
+    "core": {
+      "properties": {
+        "config": {
+          "properties": {
+            "elasticsearch": {
+              "properties": {
+                "sniffOnStart": {
+                  "type": "boolean"
+                },
+                "sniffIntervalMs": {
+                  "type": "long"
+                },
+                "sniffOnConnectionFault": {
+                  "type": "boolean"
+                },
+                "numberOfHostsConfigured": {
+                  "type": "long"
+                },
+                "requestHeadersWhitelistConfigured": {
+                  "type": "boolean"
+                },
+                "customHeadersConfigured": {
+                  "type": "boolean"
+                },
+                "shardTimeoutMs": {
+                  "type": "long"
+                },
+                "requestTimeoutMs": {
+                  "type": "long"
+                },
+                "pingTimeoutMs": {
+                  "type": "long"
+                },
+                "logQueries": {
+                  "type": "boolean"
+                },
+                "ssl": {
+                  "properties": {
+                    "verificationMode": {
+                      "type": "keyword"
+                    },
+                    "certificateAuthoritiesConfigured": {
+                      "type": "boolean"
+                    },
+                    "certificateConfigured": {
+                      "type": "boolean"
+                    },
+                    "keyConfigured": {
+                      "type": "boolean"
+                    },
+                    "keystoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "truststoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "alwaysPresentCertificate": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "apiVersion": {
+                  "type": "keyword"
+                },
+                "healthCheckDelayMs": {
+                  "type": "long"
+                }
+              }
+            },
+            "http": {
+              "properties": {
+                "basePathConfigured": {
+                  "type": "boolean"
+                },
+                "maxPayloadInBytes": {
+                  "type": "long"
+                },
+                "rewriteBasePath": {
+                  "type": "boolean"
+                },
+                "keepaliveTimeout": {
+                  "type": "long"
+                },
+                "socketTimeout": {
+                  "type": "long"
+                },
+                "compression": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "referrerWhitelistConfigured": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "xsrf": {
+                  "properties": {
+                    "disableProtection": {
+                      "type": "boolean"
+                    },
+                    "whitelistConfigured": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "requestId": {
+                  "properties": {
+                    "allowFromAnyIp": {
+                      "type": "boolean"
+                    },
+                    "ipAllowlistConfigured": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "ssl": {
+                  "properties": {
+                    "certificateAuthoritiesConfigured": {
+                      "type": "boolean"
+                    },
+                    "certificateConfigured": {
+                      "type": "boolean"
+                    },
+                    "cipherSuites": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "keyConfigured": {
+                      "type": "boolean"
+                    },
+                    "keystoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "truststoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "redirectHttpFromPortConfigured": {
+                      "type": "boolean"
+                    },
+                    "supportedProtocols": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "clientAuthentication": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "logging": {
+              "properties": {
+                "appendersTypesUsed": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                },
+                "loggersConfiguredCount": {
+                  "type": "long"
+                }
+              }
+            },
+            "savedObjects": {
+              "properties": {
+                "maxImportPayloadBytes": {
+                  "type": "long"
+                },
+                "maxImportExportSizeBytes": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "environment": {
+          "properties": {
+            "memory": {
+              "properties": {
+                "heapSizeLimit": {
+                  "type": "long"
+                },
+                "heapTotalBytes": {
+                  "type": "long"
+                },
+                "heapUsedBytes": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "properties": {
+            "savedObjects": {
+              "properties": {
+                "indices": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "docsCount": {
+                        "type": "long"
+                      },
+                      "docsDeleted": {
+                        "type": "long"
+                      },
+                      "alias": {
+                        "type": "text"
+                      },
+                      "primaryStoreSizeBytes": {
+                        "type": "long"
+                      },
+                      "storeSizeBytes": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "csp": {
+      "properties": {
+        "strict": {
+          "type": "boolean"
+        },
+        "warnLegacyBrowsers": {
+          "type": "boolean"
+        },
+        "rulesChangedFromDefault": {
+          "type": "boolean"
+        }
+      }
+    },
+    "kibana": {
+      "properties": {
+        "index": {
+          "type": "keyword"
+        },
+        "dashboard": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "index_pattern": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "graph_workspace": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "timelion_sheet": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "localization": {
+      "properties": {
+        "locale": {
+          "type": "keyword"
+        },
+        "integrities": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "text"
+            }
+          }
+        },
+        "labelsCount": {
+          "type": "long"
+        }
+      }
+    },
+    "stack_management": {
+      "properties": {
+        "visualize:enableLabs": {
+          "type": "boolean"
+        },
+        "visualization:heatmap:maxBuckets": {
+          "type": "long"
+        },
+        "visualization:colorMapping": {
+          "type": "text"
+        },
+        "visualization:regionmap:showWarnings": {
+          "type": "boolean"
+        },
+        "visualization:dimmingOpacity": {
+          "type": "float"
+        },
+        "visualization:tileMap:maxPrecision": {
+          "type": "long"
+        },
+        "securitySolution:ipReputationLinks": {
+          "type": "text"
+        },
+        "csv:separator": {
+          "type": "keyword"
+        },
+        "visualization:tileMap:WMSdefaults": {
+          "type": "text"
+        },
+        "timelion:target_buckets": {
+          "type": "long"
+        },
+        "timelion:max_buckets": {
+          "type": "long"
+        },
+        "timelion:es.timefield": {
+          "type": "keyword"
+        },
+        "timelion:min_interval": {
+          "type": "keyword"
+        },
+        "timelion:default_rows": {
+          "type": "long"
+        },
+        "timelion:default_columns": {
+          "type": "long"
+        },
+        "timelion:quandl.key": {
+          "type": "keyword"
+        },
+        "timelion:es.default_index": {
+          "type": "keyword"
+        },
+        "timelion:showTutorial": {
+          "type": "boolean"
+        },
+        "securitySolution:timeDefaults": {
+          "type": "keyword"
+        },
+        "securitySolution:defaultAnomalyScore": {
+          "type": "long"
+        },
+        "securitySolution:defaultIndex": {
+          "type": "keyword"
+        },
+        "securitySolution:refreshIntervalDefaults": {
+          "type": "keyword"
+        },
+        "securitySolution:newsFeedUrl": {
+          "type": "keyword"
+        },
+        "securitySolution:enableNewsFeed": {
+          "type": "boolean"
+        },
+        "search:includeFrozen": {
+          "type": "boolean"
+        },
+        "courier:maxConcurrentShardRequests": {
+          "type": "long"
+        },
+        "courier:batchSearches": {
+          "type": "boolean"
+        },
+        "courier:setRequestPreference": {
+          "type": "keyword"
+        },
+        "courier:customRequestPreference": {
+          "type": "keyword"
+        },
+        "courier:ignoreFilterIfFieldNotInIndex": {
+          "type": "boolean"
+        },
+        "rollups:enableIndexPatterns": {
+          "type": "boolean"
+        },
+        "xpackReporting:customPdfLogo": {
+          "type": "text"
+        },
+        "notifications:lifetime:warning": {
+          "type": "long"
+        },
+        "notifications:lifetime:banner": {
+          "type": "long"
+        },
+        "notifications:lifetime:info": {
+          "type": "long"
+        },
+        "notifications:banner": {
+          "type": "text"
+        },
+        "notifications:lifetime:error": {
+          "type": "long"
+        },
+        "doc_table:highlight": {
+          "type": "boolean"
+        },
+        "discover:searchOnPageLoad": {
+          "type": "boolean"
+        },
+        "doc_table:hideTimeColumn": {
+          "type": "boolean"
+        },
+        "discover:sampleSize": {
+          "type": "long"
+        },
+        "defaultColumns": {
+          "type": "keyword"
+        },
+        "context:defaultSize": {
+          "type": "long"
+        },
+        "discover:aggs:terms:size": {
+          "type": "long"
+        },
+        "context:tieBreakerFields": {
+          "type": "keyword"
+        },
+        "discover:sort:defaultOrder": {
+          "type": "keyword"
+        },
+        "context:step": {
+          "type": "long"
+        },
+        "accessibility:disableAnimations": {
+          "type": "boolean"
+        },
+        "ml:fileDataVisualizerMaxFileSize": {
+          "type": "keyword"
+        },
+        "ml:anomalyDetection:results:enableTimeDefaults": {
+          "type": "boolean"
+        },
+        "ml:anomalyDetection:results:timeDefaults": {
+          "type": "keyword"
+        },
+        "truncate:maxHeight": {
+          "type": "long"
+        },
+        "timepicker:timeDefaults": {
+          "type": "keyword"
+        },
+        "timepicker:refreshIntervalDefaults": {
+          "type": "keyword"
+        },
+        "timepicker:quickRanges": {
+          "type": "keyword"
+        },
+        "theme:version": {
+          "type": "keyword"
+        },
+        "theme:darkMode": {
+          "type": "boolean"
+        },
+        "state:storeInSessionStorage": {
+          "type": "boolean"
+        },
+        "savedObjects:perPage": {
+          "type": "long"
+        },
+        "search:queryLanguage": {
+          "type": "keyword"
+        },
+        "shortDots:enable": {
+          "type": "boolean"
+        },
+        "sort:options": {
+          "type": "keyword"
+        },
+        "savedObjects:listingLimit": {
+          "type": "long"
+        },
+        "query:queryString:options": {
+          "type": "keyword"
+        },
+        "pageNavigation": {
+          "type": "keyword"
+        },
+        "metrics:max_buckets": {
+          "type": "long"
+        },
+        "query:allowLeadingWildcards": {
+          "type": "boolean"
+        },
+        "metaFields": {
+          "type": "keyword"
+        },
+        "indexPattern:placeholder": {
+          "type": "keyword"
+        },
+        "histogram:barTarget": {
+          "type": "long"
+        },
+        "histogram:maxBars": {
+          "type": "long"
+        },
+        "format:number:defaultLocale": {
+          "type": "keyword"
+        },
+        "format:percent:defaultPattern": {
+          "type": "keyword"
+        },
+        "format:number:defaultPattern": {
+          "type": "keyword"
+        },
+        "history:limit": {
+          "type": "long"
+        },
+        "format:defaultTypeMap": {
+          "type": "keyword"
+        },
+        "format:currency:defaultPattern": {
+          "type": "keyword"
+        },
+        "defaultIndex": {
+          "type": "keyword"
+        },
+        "format:bytes:defaultPattern": {
+          "type": "keyword"
+        },
+        "filters:pinnedByDefault": {
+          "type": "boolean"
+        },
+        "filterEditor:suggestValues": {
+          "type": "boolean"
+        },
+        "fields:popularLimit": {
+          "type": "long"
+        },
+        "dateNanosFormat": {
+          "type": "keyword"
+        },
+        "defaultRoute": {
+          "type": "keyword"
+        },
+        "dateFormat:tz": {
+          "type": "keyword"
+        },
+        "dateFormat:scaled": {
+          "type": "keyword"
+        },
+        "csv:quoteValues": {
+          "type": "boolean"
+        },
+        "dateFormat:dow": {
+          "type": "keyword"
+        },
+        "dateFormat": {
+          "type": "keyword"
+        }
+      }
+    },
+    "ui_metric": {
+      "properties": {
+        "console": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "DashboardPanelVersionInUrl": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "Kibana_home": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "visualize": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "canvas": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "cross_cluster_replication": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "index_lifecycle_management": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "index_management": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "ingest_pipelines": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "apm": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "infra_logs": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "infra_metrics": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "stack_monitoring": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "remote_clusters": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "rollup_jobs": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "snapshot_restore": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "dashboards": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "dev_tools": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "discover": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "home": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "kibana": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "management": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "short_url_redirect": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "timelion": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "csm": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "dashboard_mode": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "enterpriseSearch": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "appSearch": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "workplaceSearch": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "graph": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "logs": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "infra": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "ingestManager": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "lens": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "maps": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "ml": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "monitoring": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "observability-overview": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_account": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_access_agreement": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_capture_url": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_logged_out": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_login": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_logout": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "security_overwritten_session": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:overview": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:detections": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:hosts": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:network": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:timelines": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:case": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "securitySolution:administration": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "siem": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "space_selector": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "uptime": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "long"
+              }
+            }
+          }
+        }
+      }
+    },
+    "telemetry": {
+      "properties": {
+        "opt_in_status": {
+          "type": "boolean"
+        },
+        "usage_fetcher": {
+          "type": "keyword"
+        },
+        "last_reported": {
+          "type": "long"
+        }
+      }
+    },
+    "static_telemetry": {
+      "properties": {
+        "ece": {
+          "properties": {
+            "kb_uuid": {
+              "type": "keyword"
+            },
+            "es_uuid": {
+              "type": "keyword"
+            },
+            "account_id": {
+              "type": "keyword"
+            },
+            "license": {
+              "properties": {
+                "uuid": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "issued_to": {
+                  "type": "text"
+                },
+                "issuer": {
+                  "type": "text"
+                },
+                "issue_date_in_millis": {
+                  "type": "long"
+                },
+                "start_date_in_millis": {
+                  "type": "long"
+                },
+                "expiry_date_in_millis": {
+                  "type": "long"
+                },
+                "max_resource_units": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "ess": {
+          "properties": {
+            "kb_uuid": {
+              "type": "keyword"
+            },
+            "es_uuid": {
+              "type": "keyword"
+            },
+            "account_id": {
+              "type": "keyword"
+            },
+            "license": {
+              "properties": {
+                "uuid": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "issued_to": {
+                  "type": "text"
+                },
+                "issuer": {
+                  "type": "text"
+                },
+                "issue_date_in_millis": {
+                  "type": "long"
+                },
+                "start_date_in_millis": {
+                  "type": "long"
+                },
+                "expiry_date_in_millis": {
+                  "type": "long"
+                },
+                "max_resource_units": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "eck": {
+          "properties": {
+            "operator_uuid": {
+              "type": "keyword"
+            },
+            "operator_roles": {
+              "type": "keyword"
+            },
+            "custom_operator_namespace": {
+              "type": "boolean"
+            },
+            "distribution": {
+              "type": "text"
+            },
+            "build": {
+              "properties": {
+                "hash": {
+                  "type": "text"
+                },
+                "date": {
+                  "type": "date"
+                },
+                "version": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tsvb-validation": {
+      "properties": {
+        "failed_validations": {
+          "type": "long"
+        }
+      }
+    },
+    "vis_type_vega": {
+      "properties": {
+        "vega_lib_specs_total": {
+          "type": "long"
+        },
+        "vega_lite_lib_specs_total": {
+          "type": "long"
+        },
+        "vega_use_map_total": {
+          "type": "long"
+        }
+      }
+    },
+    "visualization_types": {
+      "properties": {
+        "DYNAMIC_KEY": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "spaces_min": {
+              "type": "long"
+            },
+            "spaces_max": {
+              "type": "long"
+            },
+            "spaces_avg": {
+              "type": "long"
+            },
+            "saved_7_days_total": {
+              "type": "long"
+            },
+            "saved_30_days_total": {
+              "type": "long"
+            },
+            "saved_90_days_total": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    }
+  }
+}

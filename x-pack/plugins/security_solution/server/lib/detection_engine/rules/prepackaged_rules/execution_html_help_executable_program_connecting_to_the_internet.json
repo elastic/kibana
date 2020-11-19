@@ -1,0 +1,59 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Compiled HTML files (.chm) are commonly distributed as part of the Microsoft HTML Help system. Adversaries may conceal malicious code in a CHM file and deliver it to a victim for execution. CHM content is loaded by the HTML Help executable program (hh.exe).",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License",
+  "name": "Network Connection via Compiled HTML File",
+  "query": "sequence by process.entity_id\n  [process where process.name : \"hh.exe\" and event.type == \"start\"]\n  [network where process.name : \"hh.exe\" and\n     not cidrmatch(destination.ip, \"10.0.0.0/8\", \"172.16.0.0/12\", \"192.168.0.0/16\")]\n",
+  "risk_score": 21,
+  "rule_id": "b29ee2be-bf99-446c-ab1a-2dc0183394b8",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1223",
+          "name": "Compiled HTML File",
+          "reference": "https://attack.mitre.org/techniques/T1223/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1223",
+          "name": "Compiled HTML File",
+          "reference": "https://attack.mitre.org/techniques/T1223/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 5
+}

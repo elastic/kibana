@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`table vis toExpressionAst function should match snapshot based on params & dimensions 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggConfigs": Array [
+          "[]",
+        ],
+        "includeFormatHints": Array [
+          false,
+        ],
+        "index": Array [
+          "123",
+        ],
+        "metricsAtAllLevels": Array [
+          false,
+        ],
+        "partialRows": Array [
+          true,
+        ],
+      },
+      "function": "esaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "visConfig": Array [
+          "{\\"perPage\\":20,\\"percentageCol\\":\\"Count\\",\\"showMetricsAtAllLevels\\":true,\\"showPartialRows\\":true,\\"showTotal\\":true,\\"sort\\":{\\"columnIndex\\":null,\\"direction\\":null},\\"totalFunc\\":\\"sum\\",\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":1,\\"format\\":{\\"id\\":\\"number\\"},\\"params\\":{},\\"label\\":\\"Count\\",\\"aggType\\":\\"count\\"}],\\"buckets\\":[{\\"accessor\\":0,\\"format\\":{\\"id\\":\\"date\\",\\"params\\":{\\"pattern\\":\\"YYYY-MM-DD HH:mm\\"}},\\"params\\":{},\\"label\\":\\"order_date per 3 hours\\",\\"aggType\\":\\"date_histogram\\"}]}}",
+        ],
+      },
+      "function": "kibana_table",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;
+
+exports[`table vis toExpressionAst function should match snapshot without params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggConfigs": Array [
+          "[]",
+        ],
+        "includeFormatHints": Array [
+          false,
+        ],
+        "index": Array [
+          "123",
+        ],
+        "metricsAtAllLevels": Array [
+          false,
+        ],
+      },
+      "function": "esaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "visConfig": Array [
+          "{\\"showLabel\\":false,\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":1,\\"format\\":{\\"id\\":\\"number\\"},\\"params\\":{},\\"label\\":\\"Count\\",\\"aggType\\":\\"count\\"}],\\"buckets\\":[{\\"accessor\\":0,\\"format\\":{\\"id\\":\\"date\\",\\"params\\":{\\"pattern\\":\\"YYYY-MM-DD HH:mm\\"}},\\"params\\":{},\\"label\\":\\"order_date per 3 hours\\",\\"aggType\\":\\"date_histogram\\"}]}}",
+        ],
+      },
+      "function": "kibana_table",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

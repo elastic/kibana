@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React, { Fragment, PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -19,8 +18,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 
-import routing from '../services/routing';
-import { BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
+import { routing } from '../services/routing';
 
 const errorMessages = {
   noClusterFound: () => (
@@ -49,8 +47,8 @@ const errorMessages = {
 export class RemoteClustersFormField extends PureComponent {
   errorMessages = {
     ...errorMessages,
-    ...this.props.errorMessages
-  }
+    ...this.props.errorMessages,
+  };
 
   componentDidMount() {
     const { selected, onError } = this.props;
@@ -61,16 +59,20 @@ export class RemoteClustersFormField extends PureComponent {
 
   validateRemoteCluster(clusterName) {
     const { remoteClusters } = this.props;
-    const remoteCluster = remoteClusters.find(c => c.name === clusterName);
+    const remoteCluster = remoteClusters.find((c) => c.name === clusterName);
 
     return remoteCluster && remoteCluster.isConnected
       ? { error: null }
-      : { error: { message: (
-        <FormattedMessage
-          id="xpack.crossClusterReplication.remoteClustersFormField.invalidRemoteClusterError"
-          defaultMessage="Invalid remote cluster"
-        />
-      ) } };
+      : {
+          error: {
+            message: (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.remoteClustersFormField.invalidRemoteClusterError"
+                defaultMessage="Invalid remote cluster"
+              />
+            ),
+          },
+        };
   }
 
   onRemoteClusterChange = (cluster) => {
@@ -93,8 +95,8 @@ export class RemoteClustersFormField extends PureComponent {
           isInvalid={areErrorsVisible && Boolean(errorMessage)}
           data-test-subj="remoteClusterInput"
         />
-        { areErrorsVisible && Boolean(errorMessage) ? this.renderValidRemoteClusterRequired() : null }
-        { errorMessage }
+        {areErrorsVisible && Boolean(errorMessage) ? this.renderValidRemoteClusterRequired() : null}
+        {errorMessage}
       </Fragment>
     );
   };
@@ -111,17 +113,21 @@ export class RemoteClustersFormField extends PureComponent {
   renderDropdown = () => {
     const { remoteClusters, selected, currentUrl, areErrorsVisible } = this.props;
     const hasClusters = Boolean(remoteClusters.length);
-    const remoteClustersOptions = hasClusters ? remoteClusters.map(({ name, isConnected }) => ({
-      value: name,
-      text: isConnected ? name : i18n.translate(
-        'xpack.crossClusterReplication.remoteClustersFormField.remoteClusterDropdownNotConnected',
-        {
-          defaultMessage: '{name} (not connected)',
-          values: { name },
-        }
-      ),
-      'data-test-subj': `option-${name}`
-    })) : [];
+    const remoteClustersOptions = hasClusters
+      ? remoteClusters.map(({ name, isConnected }) => ({
+          value: name,
+          text: isConnected
+            ? name
+            : i18n.translate(
+                'xpack.crossClusterReplication.remoteClustersFormField.remoteClusterDropdownNotConnected',
+                {
+                  defaultMessage: '{name} (not connected)',
+                  values: { name },
+                }
+              ),
+          'data-test-subj': `option-${name}`,
+        }))
+      : [];
     const errorMessage = this.renderErrorMessage();
 
     return (
@@ -130,18 +136,26 @@ export class RemoteClustersFormField extends PureComponent {
           fullWidth
           options={remoteClustersOptions}
           value={hasClusters ? selected : ''}
-          onChange={(e) => { this.onRemoteClusterChange(e.target.value); }}
+          onChange={(e) => {
+            this.onRemoteClusterChange(e.target.value);
+          }}
           hasNoInitialSelection={!hasClusters}
           isInvalid={areErrorsVisible && Boolean(errorMessage)}
           data-test-subj="remoteClusterSelect"
         />
-        { areErrorsVisible && Boolean(errorMessage) ? this.renderValidRemoteClusterRequired() : null }
-        { errorMessage }
+        {areErrorsVisible && Boolean(errorMessage) ? this.renderValidRemoteClusterRequired() : null}
+        {errorMessage}
 
         <EuiSpacer size="s" />
-        <div> {/* Break out of EuiFormRow's flexbox layout */}
+        <div>
+          {' '}
+          {/* Break out of EuiFormRow's flexbox layout */}
           <EuiButtonEmpty
-            {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
+            href={routing.getHrefToRemoteClusters(
+              '/add',
+              { redirect: `/data/cross_cluster_replication${currentUrl}` },
+              true
+            )}
             size="s"
             iconType="plusInCircle"
             flush="left"
@@ -159,9 +173,12 @@ export class RemoteClustersFormField extends PureComponent {
 
   renderNoClusterFound = () => {
     const { currentUrl } = this.props;
-    const title = i18n.translate('xpack.crossClusterReplication.remoteClustersFormField.emptyRemoteClustersCallOutTitle', {
-      defaultMessage: `You don't have any remote clusters`
-    });
+    const title = i18n.translate(
+      'xpack.crossClusterReplication.remoteClustersFormField.emptyRemoteClustersCallOutTitle',
+      {
+        defaultMessage: `You don't have any remote clusters`,
+      }
+    );
 
     return (
       <Fragment>
@@ -171,12 +188,14 @@ export class RemoteClustersFormField extends PureComponent {
           iconType="cross"
           data-test-subj="noClusterFoundError"
         >
-          <p>
-            { this.errorMessages.noClusterFound() }
-          </p>
+          <p>{this.errorMessages.noClusterFound()}</p>
 
           <EuiButton
-            {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
+            href={routing.getHrefToRemoteClusters(
+              '/add',
+              { redirect: `/data/cross_cluster_replication${currentUrl}` },
+              true
+            )}
             iconType="plusInCircle"
             color="danger"
             data-test-subj="addButton"
@@ -209,12 +228,14 @@ export class RemoteClustersFormField extends PureComponent {
         iconType="cross"
         data-test-subj="notConnectedError"
       >
-        <p>
-          { description }
-        </p>
+        <p>{description}</p>
 
         <EuiButton
-          {...routing.getRouterLinkProps(`/edit/${name}`, BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
+          href={routing.getHrefToRemoteClusters(
+            `/edit/${name}`,
+            { redirect: `/data/cross_cluster_replication${currentUrl}` },
+            true
+          )}
           color={fatal ? 'danger' : 'warning'}
           data-test-subj="editButton"
         >
@@ -229,22 +250,23 @@ export class RemoteClustersFormField extends PureComponent {
 
   renderRemoteClusterDoesNotExist = (name) => {
     const { currentUrl } = this.props;
-    const title = i18n.translate('xpack.crossClusterReplication.remoteClustersFormField.remoteClusterNotFoundTitle', {
-      defaultMessage: `Couldn't find remote cluster '{name}'`,
-      values: { name }
-    });
+    const title = i18n.translate(
+      'xpack.crossClusterReplication.remoteClustersFormField.remoteClusterNotFoundTitle',
+      {
+        defaultMessage: `Couldn't find remote cluster '{name}'`,
+        values: { name },
+      }
+    );
 
     return (
-      <EuiCallOut
-        title={title}
-        color="danger"
-        iconType="cross"
-      >
-        <p>
-          { this.errorMessages.remoteClusterDoesNotExist(name) }
-        </p>
+      <EuiCallOut title={title} color="danger" iconType="cross">
+        <p>{this.errorMessages.remoteClusterDoesNotExist(name)}</p>
         <EuiButton
-          {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
+          href={routing.getHrefToRemoteClusters(
+            `/add`,
+            { redirect: `/data/cross_cluster_replication${currentUrl}` },
+            true
+          )}
           iconType="plusInCircle"
           color="danger"
           data-test-subj="addButton"
@@ -256,11 +278,11 @@ export class RemoteClustersFormField extends PureComponent {
         </EuiButton>
       </EuiCallOut>
     );
-  }
+  };
 
   renderErrorMessage = () => {
     const { selected, remoteClusters, isEditable } = this.props;
-    const remoteCluster = remoteClusters.find(c => c.name === selected);
+    const remoteCluster = remoteClusters.find((c) => c.name === selected);
     const isSelectedRemoteClusterConnected = remoteCluster && remoteCluster.isConnected;
     let error;
 
@@ -288,18 +310,18 @@ export class RemoteClustersFormField extends PureComponent {
         {error}
       </Fragment>
     ) : null;
-  }
+  };
 
   render() {
     const { remoteClusters, selected, isEditable, areErrorsVisible } = this.props;
-    const remoteCluster = remoteClusters.find(c => c.name === selected);
+    const remoteCluster = remoteClusters.find((c) => c.name === selected);
     const hasClusters = Boolean(remoteClusters.length);
     const isSelectedRemoteClusterConnected = remoteCluster && remoteCluster.isConnected;
     const isInvalid = areErrorsVisible && (!hasClusters || !isSelectedRemoteClusterConnected);
     let field;
 
-    if(isEditable) {
-      if(hasClusters) {
+    if (isEditable) {
+      if (hasClusters) {
         field = this.renderDropdown();
       } else {
         field = this.renderErrorMessage();
@@ -310,12 +332,12 @@ export class RemoteClustersFormField extends PureComponent {
 
     return (
       <EuiFormRow
-        label={(
+        label={
           <FormattedMessage
             id="xpack.crossClusterReplication.remoteClustersFormField.fieldClusterLabel"
             defaultMessage="Remote cluster"
           />
-        )}
+        }
         isInvalid={isInvalid}
         fullWidth
         data-test-subj="remoteClusterFormField"

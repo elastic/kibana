@@ -28,16 +28,13 @@ export interface InfraSource {
   configuration: InfraSourceConfiguration;
   /** The status of the source */
   status: InfraSourceStatus;
-  /** A hierarchy of metadata entries by node */
-  metadataByNode: InfraNodeMetadata;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
   logEntriesBetween: InfraLogEntryInterval;
-  /** A consecutive span of summary buckets within an interval */
-  logSummaryBetween: InfraLogSummaryInterval;
+  /** Sequences of log entries matching sets of highlighting queries within an interval */
+  logEntryHighlights: InfraLogEntryInterval[];
 
-  logItem: InfraLogItem;
   /** A snapshot of nodes */
   snapshot?: InfraSnapshotResponse | null;
 
@@ -129,20 +126,8 @@ export interface InfraIndexField {
   searchable: boolean;
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
-}
-/** One metadata entry for a node. */
-export interface InfraNodeMetadata {
-  id: string;
-
-  name: string;
-
-  features: InfraNodeFeature[];
-}
-
-export interface InfraNodeFeature {
-  name: string;
-
-  source: string;
+  /** Whether the field should be displayed based on event.module and a ECS allowed list */
+  displayable: boolean;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -181,11 +166,15 @@ export interface InfraLogEntry {
 }
 /** A special built-in column that contains the log entry's timestamp */
 export interface InfraLogEntryTimestampColumn {
+  /** The id of the corresponding column configuration */
+  columnId: string;
   /** The timestamp */
   timestamp: number;
 }
 /** A special built-in column that contains the log entry's constructed message */
 export interface InfraLogEntryMessageColumn {
+  /** The id of the corresponding column configuration */
+  columnId: string;
   /** A list of the formatted log entry segments */
   message: InfraLogMessageSegment[];
 }
@@ -205,48 +194,14 @@ export interface InfraLogMessageConstantSegment {
 }
 /** A column that contains the value of a field of the log entry */
 export interface InfraLogEntryFieldColumn {
+  /** The id of the corresponding column configuration */
+  columnId: string;
   /** The field name of the column */
   field: string;
   /** The value of the field in the log entry */
   value: string;
-}
-/** A consecutive sequence of log summary buckets */
-export interface InfraLogSummaryInterval {
-  /** The millisecond timestamp corresponding to the start of the interval covered by the summary */
-  start?: number | null;
-  /** The millisecond timestamp corresponding to the end of the interval covered by the summary */
-  end?: number | null;
-  /** The query the log entries were filtered by */
-  filterQuery?: string | null;
-  /** A list of the log entries */
-  buckets: InfraLogSummaryBucket[];
-}
-/** A log summary bucket */
-export interface InfraLogSummaryBucket {
-  /** The start timestamp of the bucket */
-  start: number;
-  /** The end timestamp of the bucket */
-  end: number;
-  /** The number of entries inside the bucket */
-  entriesCount: number;
-}
-
-export interface InfraLogItem {
-  /** The ID of the document */
-  id: string;
-  /** The index where the document was found */
-  index: string;
-  /** Time key for the document - derived from the source configuration timestamp and tiebreaker settings */
-  key: InfraTimeKey;
-  /** An array of flattened fields and values */
-  fields: InfraLogItemField[];
-}
-
-export interface InfraLogItemField {
-  /** The flattened field name */
-  field: string;
-  /** The value for the Field as a string */
-  value: string;
+  /** A list of highlighted substrings of the value */
+  highlights: string[];
 }
 
 export interface InfraSnapshotResponse {
@@ -287,6 +242,8 @@ export interface InfraMetricData {
 export interface InfraDataSeries {
   id: string;
 
+  label: string;
+
   data: InfraDataPoint[];
 }
 
@@ -324,6 +281,15 @@ export interface InfraTimeKeyInput {
 
   tiebreaker: number;
 }
+/** A highlighting definition */
+export interface InfraLogEntryHighlightInput {
+  /** The query to highlight by */
+  query: string;
+  /** The number of highlighted documents to include beyond the beginning of the interval */
+  countBefore: number;
+  /** The number of highlighted documents to include beyond the end of the interval */
+  countAfter: number;
+}
 
 export interface InfraTimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
@@ -345,6 +311,12 @@ export interface InfraSnapshotMetricInput {
   /** The type of metric */
   type: InfraSnapshotMetricType;
 }
+
+export interface InfraNodeIdsInput {
+  nodeId: string;
+
+  cloudId?: string | null;
+}
 /** The properties to update the source with */
 export interface UpdateSourceInput {
   /** The name of the data source */
@@ -357,6 +329,10 @@ export interface UpdateSourceInput {
   logAlias?: string | null;
   /** The field mapping to use for this source */
   fields?: UpdateSourceFieldsInput | null;
+  /** Default view for inventory */
+  inventoryDefaultView?: string | null;
+  /** Default view for Metrics Explorer */
+  metricsExplorerDefaultView?: string | null;
   /** The log columns to display for this source */
   logColumns?: UpdateSourceLogColumnInput[] | null;
 }
@@ -405,11 +381,6 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface MetadataByNodeInfraSourceArgs {
-  nodeId: string;
-
-  nodeType: InfraNodeType;
-}
 export interface LogEntriesAroundInfraSourceArgs {
   /** The sort key that corresponds to the point in time */
   key: InfraTimeKeyInput;
@@ -419,8 +390,6 @@ export interface LogEntriesAroundInfraSourceArgs {
   countAfter?: number | null;
   /** The query to filter the log entries by */
   filterQuery?: string | null;
-  /** The query to highlight the log entries with */
-  highlightQuery?: string | null;
 }
 export interface LogEntriesBetweenInfraSourceArgs {
   /** The sort key that corresponds to the start of the interval */
@@ -429,21 +398,16 @@ export interface LogEntriesBetweenInfraSourceArgs {
   endKey: InfraTimeKeyInput;
   /** The query to filter the log entries by */
   filterQuery?: string | null;
-  /** The query to highlight the log entries with */
-  highlightQuery?: string | null;
 }
-export interface LogSummaryBetweenInfraSourceArgs {
-  /** The millisecond timestamp that corresponds to the start of the interval */
-  start: number;
-  /** The millisecond timestamp that corresponds to the end of the interval */
-  end: number;
-  /** The size of each bucket in milliseconds */
-  bucketSize: number;
+export interface LogEntryHighlightsInfraSourceArgs {
+  /** The sort key that corresponds to the start of the interval */
+  startKey: InfraTimeKeyInput;
+  /** The sort key that corresponds to the end of the interval */
+  endKey: InfraTimeKeyInput;
   /** The query to filter the log entries by */
   filterQuery?: string | null;
-}
-export interface LogItemInfraSourceArgs {
-  id: string;
+  /** The highlighting to apply to the log entries */
+  highlights: InfraLogEntryHighlightInput[];
 }
 export interface SnapshotInfraSourceArgs {
   timerange: InfraTimerangeInput;
@@ -451,7 +415,7 @@ export interface SnapshotInfraSourceArgs {
   filterQuery?: string | null;
 }
 export interface MetricsInfraSourceArgs {
-  nodeId: string;
+  nodeIds: InfraNodeIdsInput;
 
   nodeType: InfraNodeType;
 
@@ -500,6 +464,10 @@ export enum InfraNodeType {
   pod = 'pod',
   container = 'container',
   host = 'host',
+  awsEC2 = 'awsEC2',
+  awsS3 = 'awsS3',
+  awsRDS = 'awsRDS',
+  awsSQS = 'awsSQS',
 }
 
 export enum InfraSnapshotMetricType {
@@ -510,6 +478,22 @@ export enum InfraSnapshotMetricType {
   tx = 'tx',
   rx = 'rx',
   logRate = 'logRate',
+  diskIOReadBytes = 'diskIOReadBytes',
+  diskIOWriteBytes = 'diskIOWriteBytes',
+  s3TotalRequests = 's3TotalRequests',
+  s3NumberOfObjects = 's3NumberOfObjects',
+  s3BucketSize = 's3BucketSize',
+  s3DownloadBytes = 's3DownloadBytes',
+  s3UploadBytes = 's3UploadBytes',
+  rdsConnections = 'rdsConnections',
+  rdsQueriesExecuted = 'rdsQueriesExecuted',
+  rdsActiveTransactions = 'rdsActiveTransactions',
+  rdsLatency = 'rdsLatency',
+  sqsMessagesVisible = 'sqsMessagesVisible',
+  sqsMessagesDelayed = 'sqsMessagesDelayed',
+  sqsMessagesSent = 'sqsMessagesSent',
+  sqsMessagesEmpty = 'sqsMessagesEmpty',
+  sqsOldestMessage = 'sqsOldestMessage',
 }
 
 export enum InfraMetric {
@@ -524,6 +508,10 @@ export enum InfraMetric {
   hostLoad = 'hostLoad',
   hostMemoryUsage = 'hostMemoryUsage',
   hostNetworkTraffic = 'hostNetworkTraffic',
+  hostDockerOverview = 'hostDockerOverview',
+  hostDockerInfo = 'hostDockerInfo',
+  hostDockerTop5ByCpu = 'hostDockerTop5ByCpu',
+  hostDockerTop5ByMemory = 'hostDockerTop5ByMemory',
   podOverview = 'podOverview',
   podCpuUsage = 'podCpuUsage',
   podMemoryUsage = 'podMemoryUsage',
@@ -540,6 +528,31 @@ export enum InfraMetric {
   nginxRequestRate = 'nginxRequestRate',
   nginxActiveConnections = 'nginxActiveConnections',
   nginxRequestsPerConnection = 'nginxRequestsPerConnection',
+  awsOverview = 'awsOverview',
+  awsCpuUtilization = 'awsCpuUtilization',
+  awsNetworkBytes = 'awsNetworkBytes',
+  awsNetworkPackets = 'awsNetworkPackets',
+  awsDiskioBytes = 'awsDiskioBytes',
+  awsDiskioOps = 'awsDiskioOps',
+  awsEC2CpuUtilization = 'awsEC2CpuUtilization',
+  awsEC2DiskIOBytes = 'awsEC2DiskIOBytes',
+  awsEC2NetworkTraffic = 'awsEC2NetworkTraffic',
+  awsS3TotalRequests = 'awsS3TotalRequests',
+  awsS3NumberOfObjects = 'awsS3NumberOfObjects',
+  awsS3BucketSize = 'awsS3BucketSize',
+  awsS3DownloadBytes = 'awsS3DownloadBytes',
+  awsS3UploadBytes = 'awsS3UploadBytes',
+  awsRDSCpuTotal = 'awsRDSCpuTotal',
+  awsRDSConnections = 'awsRDSConnections',
+  awsRDSQueriesExecuted = 'awsRDSQueriesExecuted',
+  awsRDSActiveTransactions = 'awsRDSActiveTransactions',
+  awsRDSLatency = 'awsRDSLatency',
+  awsSQSMessagesVisible = 'awsSQSMessagesVisible',
+  awsSQSMessagesDelayed = 'awsSQSMessagesDelayed',
+  awsSQSMessagesSent = 'awsSQSMessagesSent',
+  awsSQSMessagesEmpty = 'awsSQSMessagesEmpty',
+  awsSQSOldestMessage = 'awsSQSOldestMessage',
+  custom = 'custom',
 }
 
 // ====================================================
@@ -569,56 +582,13 @@ export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessa
 // Documents
 // ====================================================
 
-export namespace FlyoutItemQuery {
-  export type Variables = {
-    sourceId: string;
-    itemId: string;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    logItem: LogItem;
-  };
-
-  export type LogItem = {
-    __typename?: 'InfraLogItem';
-
-    id: string;
-
-    index: string;
-
-    key: Key;
-
-    fields: Fields[];
-  };
-
-  export type Key = InfraTimeKeyFields.Fragment;
-
-  export type Fields = {
-    __typename?: 'InfraLogItemField';
-
-    field: string;
-
-    value: string;
-  };
-}
-
-export namespace LogSummary {
+export namespace LogEntryHighlightsQuery {
   export type Variables = {
     sourceId?: string | null;
-    start: number;
-    end: number;
-    bucketSize: number;
+    startKey: InfraTimeKeyInput;
+    endKey: InfraTimeKeyInput;
     filterQuery?: string | null;
+    highlights: InfraLogEntryHighlightInput[];
   };
 
   export type Query = {
@@ -632,66 +602,24 @@ export namespace LogSummary {
 
     id: string;
 
-    logSummaryBetween: LogSummaryBetween;
+    logEntryHighlights: LogEntryHighlights[];
   };
 
-  export type LogSummaryBetween = {
-    __typename?: 'InfraLogSummaryInterval';
+  export type LogEntryHighlights = {
+    __typename?: 'InfraLogEntryInterval';
 
-    start?: number | null;
+    start?: Start | null;
 
-    end?: number | null;
+    end?: End | null;
 
-    buckets: Buckets[];
+    entries: Entries[];
   };
 
-  export type Buckets = {
-    __typename?: 'InfraLogSummaryBucket';
+  export type Start = InfraTimeKeyFields.Fragment;
 
-    start: number;
+  export type End = InfraTimeKeyFields.Fragment;
 
-    end: number;
-
-    entriesCount: number;
-  };
-}
-
-export namespace MetadataQuery {
-  export type Variables = {
-    sourceId: string;
-    nodeId: string;
-    nodeType: InfraNodeType;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    metadataByNode: MetadataByNode;
-  };
-
-  export type MetadataByNode = {
-    __typename?: 'InfraNodeMetadata';
-
-    name: string;
-
-    features: Features[];
-  };
-
-  export type Features = {
-    __typename?: 'InfraNodeFeature';
-
-    name: string;
-
-    source: string;
-  };
+  export type Entries = InfraLogEntryHighlightFields.Fragment;
 }
 
 export namespace MetricsQuery {
@@ -700,6 +628,7 @@ export namespace MetricsQuery {
     timerange: InfraTimerangeInput;
     metrics: InfraMetric[];
     nodeId: string;
+    cloudId?: string | null;
     nodeType: InfraNodeType;
   };
 
@@ -729,6 +658,8 @@ export namespace MetricsQuery {
     __typename?: 'InfraDataSeries';
 
     id: string;
+
+    label: string;
 
     data: Data[];
   };
@@ -948,6 +879,10 @@ export namespace SourceConfigurationFields {
     fields: Fields;
 
     logColumns: LogColumns[];
+
+    inventoryDefaultView: string;
+
+    metricsExplorerDefaultView: string;
   };
 
   export type Fields = {
@@ -1031,6 +966,8 @@ export namespace SourceStatusFields {
     searchable: boolean;
 
     aggregatable: boolean;
+
+    displayable: boolean;
   };
 }
 
@@ -1085,11 +1022,15 @@ export namespace InfraLogEntryFields {
   export type InfraLogEntryTimestampColumnInlineFragment = {
     __typename?: 'InfraLogEntryTimestampColumn';
 
+    columnId: string;
+
     timestamp: number;
   };
 
   export type InfraLogEntryMessageColumnInlineFragment = {
     __typename?: 'InfraLogEntryMessageColumn';
+
+    columnId: string;
 
     message: Message[];
   };
@@ -1115,8 +1056,62 @@ export namespace InfraLogEntryFields {
   export type InfraLogEntryFieldColumnInlineFragment = {
     __typename?: 'InfraLogEntryFieldColumn';
 
+    columnId: string;
+
     field: string;
 
     value: string;
+  };
+}
+
+export namespace InfraLogEntryHighlightFields {
+  export type Fragment = {
+    __typename?: 'InfraLogEntry';
+
+    gid: string;
+
+    key: Key;
+
+    columns: Columns[];
+  };
+
+  export type Key = {
+    __typename?: 'InfraTimeKey';
+
+    time: number;
+
+    tiebreaker: number;
+  };
+
+  export type Columns =
+    | InfraLogEntryMessageColumnInlineFragment
+    | InfraLogEntryFieldColumnInlineFragment;
+
+  export type InfraLogEntryMessageColumnInlineFragment = {
+    __typename?: 'InfraLogEntryMessageColumn';
+
+    columnId: string;
+
+    message: Message[];
+  };
+
+  export type Message = InfraLogMessageFieldSegmentInlineFragment;
+
+  export type InfraLogMessageFieldSegmentInlineFragment = {
+    __typename?: 'InfraLogMessageFieldSegment';
+
+    field: string;
+
+    highlights: string[];
+  };
+
+  export type InfraLogEntryFieldColumnInlineFragment = {
+    __typename?: 'InfraLogEntryFieldColumn';
+
+    columnId: string;
+
+    field: string;
+
+    highlights: string[];
   };
 }

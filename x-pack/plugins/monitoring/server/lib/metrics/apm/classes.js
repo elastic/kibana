@@ -7,20 +7,21 @@
 import { ClusterMetric, Metric } from '../classes';
 import { SMALL_FLOAT, LARGE_FLOAT } from '../../../../common/formatting';
 import { i18n } from '@kbn/i18n';
+import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 export class ApmClusterMetric extends ClusterMetric {
   constructor(opts) {
     super({
       ...opts,
       app: 'apm',
-      ...ApmClusterMetric.getMetricFields()
+      ...ApmClusterMetric.getMetricFields(),
     });
   }
 
   static getMetricFields() {
     return {
       uuidField: 'cluster_uuid',
-      timestampField: 'beats_stats.timestamp'
+      timestampField: 'beats_stats.timestamp',
     };
   }
 }
@@ -30,14 +31,14 @@ export class ApmMetric extends Metric {
     super({
       ...opts,
       app: 'apm',
-      ...ApmMetric.getMetricFields()
+      ...ApmMetric.getMetricFields(),
     });
   }
 
   static getMetricFields() {
     return {
       uuidField: 'beats_stats.beat.uuid',
-      timestampField: 'beats_stats.timestamp'
+      timestampField: 'beats_stats.timestamp',
     };
   }
 }
@@ -49,27 +50,19 @@ export class ApmCpuUtilizationMetric extends ApmMetric {
       format: SMALL_FLOAT,
       metricAgg: 'max',
       units: '%',
-      derivative: true
+      derivative: true,
     });
 
     /*
      * Convert a counter of milliseconds of utilization time into a percentage of the bucket size
      */
-    this.calculation = (
-      { metric_deriv: metricDeriv } = {},
-      _key,
-      _metric,
-      bucketSizeInSeconds
-    ) => {
+    this.calculation = ({ metric_deriv: metricDeriv } = {}, _key, _metric, bucketSizeInSeconds) => {
       if (metricDeriv) {
-        const { normalized_value: metricDerivNormalizedValue } = metricDeriv;
+        const { value: metricDerivValue } = metricDeriv;
         const bucketSizeInMillis = bucketSizeInSeconds * 1000;
 
-        if (
-          metricDerivNormalizedValue >= 0 &&
-          metricDerivNormalizedValue !== null
-        ) {
-          return metricDerivNormalizedValue / bucketSizeInMillis * 100;
+        if (metricDerivValue >= 0 && metricDerivValue !== null) {
+          return (metricDerivValue / bucketSizeInMillis) * 100;
         }
       }
       return null;
@@ -84,38 +77,38 @@ export class ApmEventsRateClusterMetric extends ApmClusterMetric {
       derivative: true,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: i18n.translate('xpack.monitoring.metrics.apm.perMinuteUnitLabel', {
-        defaultMessage: '/m'
-      })
+      units: i18n.translate('xpack.monitoring.metrics.apm.perSecondUnitLabel', {
+        defaultMessage: '/s',
+      }),
     });
 
     this.aggs = {
       beats_uuids: {
         terms: {
           field: 'beats_stats.beat.uuid',
-          size: 10000
+          size: 10000,
         },
         aggs: {
           event_rate_per_beat: {
             max: {
-              field: this.field
-            }
-          }
-        }
+              field: this.field,
+            },
+          },
+        },
       },
       event_rate: {
         sum_bucket: {
           buckets_path: 'beats_uuids>event_rate_per_beat',
-          gap_policy: 'skip'
-        }
+          gap_policy: 'skip',
+        },
       },
       metric_deriv: {
         derivative: {
           buckets_path: 'event_rate',
           gap_policy: 'skip',
-          unit: '1m'
-        }
-      }
+          unit: NORMALIZED_DERIVATIVE_UNIT,
+        },
+      },
     };
   }
 }

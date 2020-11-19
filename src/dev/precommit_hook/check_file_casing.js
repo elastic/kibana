@@ -21,7 +21,7 @@ import { relative, basename } from 'path';
 
 import { dim } from 'chalk';
 
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 import { matchesAnyGlob } from '../globs';
 
 import {
@@ -29,15 +29,14 @@ import {
   IGNORE_FILE_GLOBS,
   TEMPORARILY_IGNORED_PATHS,
   KEBAB_CASE_DIRECTORY_GLOBS,
+  REMOVE_EXTENSION,
 } from './casing_check_config';
 
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z \_]/;
 
 function listPaths(paths) {
-  return paths
-    .map(path => ` - ${path}`)
-    .join('\n');
+  return paths.map((path) => ` - ${path}`).join('\n');
 }
 
 /**
@@ -78,13 +77,15 @@ async function checkForKebabCase(log, files) {
     .reduce((acc, file) => {
       const parents = file.getRelativeParentDirs();
 
-      return acc.concat(parents.filter(parent => (
-        matchesAnyGlob(parent, KEBAB_CASE_DIRECTORY_GLOBS) && NON_KEBAB_CASE_RE.test(basename(parent))
-      )));
+      return acc.concat(
+        parents.filter(
+          (parent) =>
+            matchesAnyGlob(parent, KEBAB_CASE_DIRECTORY_GLOBS) &&
+            NON_KEBAB_CASE_RE.test(basename(parent))
+        )
+      );
     }, [])
-    .reduce((acc, path) => (
-      acc.includes(path) ? acc : acc.concat(path)
-    ), []);
+    .reduce((acc, path) => (acc.includes(path) ? acc : acc.concat(path)), []);
 
   if (errorPaths.length) {
     throw createFailError(`These directories MUST use kebab-case.\n${listPaths(errorPaths)}`);
@@ -109,7 +110,7 @@ async function checkForSnakeCase(log, files) {
   const errorPaths = [];
   const warningPaths = [];
 
-  files.forEach(file => {
+  files.forEach((file) => {
     const path = file.getRelativePath();
 
     if (TEMPORARILY_IGNORED_PATHS.includes(path)) {
@@ -143,6 +144,10 @@ async function checkForSnakeCase(log, files) {
 }
 
 export async function checkFileCasing(log, files) {
+  files = files.map((f) =>
+    matchesAnyGlob(f.getRelativePath(), REMOVE_EXTENSION) ? f.getWithoutExtension() : f
+  );
+
   await checkForKebabCase(log, files);
   await checkForSnakeCase(log, files);
 }

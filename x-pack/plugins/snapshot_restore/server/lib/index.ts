@@ -8,5 +8,8 @@ export {
   deserializeRepositorySettings,
   serializeRepositorySettings,
 } from './repository_serialization';
-export { deserializeSnapshotDetails } from './snapshot_serialization';
 export { cleanSettings } from './clean_settings';
+export { getManagedRepositoryName } from './get_managed_repository_name';
+export { getManagedPolicyNames } from './get_managed_policy_names';
+export { deserializeRestoreShard } from './restore_serialization';
+export { wrapEsError } from './wrap_es_error';

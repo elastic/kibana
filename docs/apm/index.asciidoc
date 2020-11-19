@@ -4,23 +4,37 @@
 
 [partintro]
 --
-Elastic Application Performance Monitoring (APM) automatically collects in-depth
-performance metrics and errors from inside your applications.
+The APM app in {kib} is provided with the basic license.
+It allows you to monitor your software services and applications in real-time;
+visualize detailed performance information on your services,
+identify and analyze errors,
+and monitor host-level and agent-specific metrics like JVM and Go runtime metrics.
 
-The **APM** page in {kib} is provided with the basic license. It
-enables developers to drill down into the performance data for their applications
-and quickly locate the performance bottlenecks.
+[float]
+[[apm-bottlenecks]]
+== Visualizing application bottlenecks
 
-* <<apm-getting-started>>
-* <<apm-bottlenecks>>
-* <<apm-ui>>
+Having access to application-level insights with just a few clicks can drastically decrease the time you spend
+debugging errors, slow response times, and crashes.
 
-NOTE: For more information about the components of Elastic APM,
-see the {apm-get-started-ref}/overview.html[APM Overview].
+For example, you can see information about response times, requests per minute, and status codes per endpoint.
+You can even dive into a specific request sample and get a complete waterfall view of what your application is spending its time on.
+You might see that your bottlenecks are in database queries, cache calls, or external requests.
+For each incoming request and each application error,
+you can also see contextual information such as the request header, user information,
+system values, or custom data that you manually attached to the request.
 --
+
+include::set-up.asciidoc[]
 
 include::getting-started.asciidoc[]
 
-include::bottlenecks.asciidoc[]
+include::how-to-guides.asciidoc[]
 
-include::using-the-apm-ui.asciidoc[]
+include::apm-app-users.asciidoc[]
+
+include::settings.asciidoc[]
+
+include::api.asciidoc[]
+
+include::troubleshooting.asciidoc[]

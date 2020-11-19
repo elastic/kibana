@@ -10,19 +10,22 @@ import { compose, branch, renderComponent } from 'recompose';
 import { EuiSpacer } from '@elastic/eui';
 import { getSelectedToplevelNodes, getSelectedElementId } from '../../state/selectors/workpad';
 import { SidebarHeader } from '../sidebar_header';
+import { ComponentStrings } from '../../../i18n';
 import { MultiElementSettings } from './multi_element_settings';
 import { GroupSettings } from './group_settings';
 import { GlobalConfig } from './global_config';
 import { ElementSettings } from './element_settings';
 
-const mapStateToProps = state => ({
+const { SidebarContent: strings } = ComponentStrings;
+
+const mapStateToProps = (state) => ({
   selectedToplevelNodes: getSelectedToplevelNodes(state),
   selectedElementId: getSelectedElementId(state),
 });
 
 const MultiElementSidebar = () => (
   <Fragment>
-    <SidebarHeader title="Multiple elements" />
+    <SidebarHeader title={strings.getMultiElementSidebarTitle()} />
     <EuiSpacer />
     <MultiElementSettings />
   </Fragment>
@@ -30,7 +33,7 @@ const MultiElementSidebar = () => (
 
 const GroupedElementSidebar = () => (
   <Fragment>
-    <SidebarHeader title="Grouped element" groupIsSelected />
+    <SidebarHeader title={strings.getGroupedElementSidebarTitle()} groupIsSelected />
     <EuiSpacer />
     <GroupSettings />
   </Fragment>
@@ -38,7 +41,7 @@ const GroupedElementSidebar = () => (
 
 const SingleElementSidebar = ({ selectedElementId }) => (
   <Fragment>
-    <SidebarHeader title="Selected element" showLayerControls />
+    <SidebarHeader title={strings.getSingleElementSidebarTitle()} showLayerControls />
     <ElementSettings selectedElementId={selectedElementId} />
   </Fragment>
 );
@@ -62,7 +65,4 @@ const branches = [
   ),
 ];
 
-export const SidebarContent = compose(
-  connect(mapStateToProps),
-  ...branches
-)(GlobalConfig);
+export const SidebarContent = compose(connect(mapStateToProps), ...branches)(GlobalConfig);

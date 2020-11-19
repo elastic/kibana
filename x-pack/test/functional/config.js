@@ -4,68 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable import/no-default-export */
-
 import { resolve } from 'path';
 
-import {
-  CanvasPageProvider,
-  SecurityPageProvider,
-  MonitoringPageProvider,
-  LogstashPageProvider,
-  GraphPageProvider,
-  GrokDebuggerPageProvider,
-  WatcherPageProvider,
-  ReportingPageProvider,
-  SpaceSelectorPageProvider,
-  AccountSettingProvider,
-  InfraHomePageProvider,
-  InfraLogsPageProvider,
-  GisPageProvider,
-  StatusPagePageProvider,
-  UpgradeAssistantProvider,
-  CodeHomePageProvider,
-  RollupPageProvider,
-  UptimePageProvider,
-} from './page_objects';
-
-import {
-  MonitoringNoDataProvider,
-  MonitoringClusterListProvider,
-  MonitoringClusterOverviewProvider,
-  MonitoringClusterAlertsProvider,
-  MonitoringElasticsearchSummaryStatusProvider,
-  MonitoringElasticsearchOverviewProvider,
-  MonitoringElasticsearchNodesProvider,
-  MonitoringElasticsearchNodeDetailProvider,
-  MonitoringElasticsearchIndicesProvider,
-  MonitoringElasticsearchIndexDetailProvider,
-  MonitoringElasticsearchShardsProvider,
-  MonitoringBeatsOverviewProvider,
-  MonitoringBeatsListingProvider,
-  MonitoringBeatDetailProvider,
-  MonitoringBeatsSummaryStatusProvider,
-  MonitoringLogstashPipelinesProvider,
-  MonitoringLogstashSummaryStatusProvider,
-  MonitoringKibanaOverviewProvider,
-  MonitoringKibanaInstancesProvider,
-  MonitoringKibanaInstanceProvider,
-  MonitoringKibanaSummaryStatusProvider,
-  PipelineListProvider,
-  PipelineEditorProvider,
-  RandomProvider,
-  AceEditorProvider,
-  GrokDebuggerProvider,
-  UserMenuProvider,
-  UptimeProvider,
-  InfraSourceConfigurationFlyoutProvider,
-  InfraLogStreamProvider,
-} from './services';
-
-import {
-  SecurityServiceProvider,
-  SpacesServiceProvider,
-} from '../common/services';
+import { services } from './services';
+import { pageObjects } from './page_objects';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -75,9 +17,6 @@ export default async function ({ readConfigFile }) {
   );
   const kibanaFunctionalConfig = await readConfigFile(
     require.resolve('../../../test/functional/config.js')
-  );
-  const kibanaAPITestsConfig = await readConfigFile(
-    require.resolve('../../../test/api_integration/config.js')
   );
 
   return {
@@ -93,95 +32,46 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
+      resolve(__dirname, './apps/lens'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/machine_learning'),
+      resolve(__dirname, './apps/ml'),
       resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
-      resolve(__dirname, './apps/code'),
       resolve(__dirname, './apps/visualize'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
-      resolve(__dirname, './apps/index_patterns')
+      resolve(__dirname, './apps/api_keys'),
+      resolve(__dirname, './apps/index_patterns'),
+      resolve(__dirname, './apps/index_management'),
+      resolve(__dirname, './apps/index_lifecycle_management'),
+      resolve(__dirname, './apps/ingest_pipelines'),
+      resolve(__dirname, './apps/snapshot_restore'),
+      resolve(__dirname, './apps/cross_cluster_replication'),
+      resolve(__dirname, './apps/remote_clusters'),
+      resolve(__dirname, './apps/transform'),
+      resolve(__dirname, './apps/reporting_management'),
+      resolve(__dirname, './apps/management'),
+
+      // This license_management file must be last because it is destructive.
+      resolve(__dirname, './apps/license_management'),
     ],
 
-    // define the name and providers for services that should be
-    // available to your tests. If you don't specify anything here
-    // only the built-in services will be available
-    services: {
-      ...kibanaFunctionalConfig.get('services'),
-      esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
-      monitoringNoData: MonitoringNoDataProvider,
-      monitoringClusterList: MonitoringClusterListProvider,
-      monitoringClusterOverview: MonitoringClusterOverviewProvider,
-      monitoringClusterAlerts: MonitoringClusterAlertsProvider,
-      monitoringElasticsearchSummaryStatus: MonitoringElasticsearchSummaryStatusProvider,
-      monitoringElasticsearchOverview: MonitoringElasticsearchOverviewProvider,
-      monitoringElasticsearchNodes: MonitoringElasticsearchNodesProvider,
-      monitoringElasticsearchNodeDetail: MonitoringElasticsearchNodeDetailProvider,
-      monitoringElasticsearchIndices: MonitoringElasticsearchIndicesProvider,
-      monitoringElasticsearchIndexDetail: MonitoringElasticsearchIndexDetailProvider,
-      monitoringElasticsearchShards: MonitoringElasticsearchShardsProvider,
-      monitoringBeatsOverview: MonitoringBeatsOverviewProvider,
-      monitoringBeatsListing: MonitoringBeatsListingProvider,
-      monitoringBeatDetail: MonitoringBeatDetailProvider,
-      monitoringBeatsSummaryStatus: MonitoringBeatsSummaryStatusProvider,
-      monitoringLogstashPipelines: MonitoringLogstashPipelinesProvider,
-      monitoringLogstashSummaryStatus: MonitoringLogstashSummaryStatusProvider,
-      monitoringKibanaOverview: MonitoringKibanaOverviewProvider,
-      monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
-      monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
-      monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
-      pipelineList: PipelineListProvider,
-      pipelineEditor: PipelineEditorProvider,
-      random: RandomProvider,
-      aceEditor: AceEditorProvider,
-      grokDebugger: GrokDebuggerProvider,
-      security: SecurityServiceProvider,
-      spaces: SpacesServiceProvider,
-      userMenu: UserMenuProvider,
-      uptime: UptimeProvider,
-      rollup: RollupPageProvider,
-      infraSourceConfigurationFlyout: InfraSourceConfigurationFlyoutProvider,
-      infraLogStream: InfraLogStreamProvider,
-    },
-
-    // just like services, PageObjects are defined as a map of
-    // names to Providers. Merge in Kibana's or pick specific ones
-    pageObjects: {
-      ...kibanaFunctionalConfig.get('pageObjects'),
-      canvas: CanvasPageProvider,
-      security: SecurityPageProvider,
-      accountSetting: AccountSettingProvider,
-      monitoring: MonitoringPageProvider,
-      logstash: LogstashPageProvider,
-      graph: GraphPageProvider,
-      grokDebugger: GrokDebuggerPageProvider,
-      watcher: WatcherPageProvider,
-      reporting: ReportingPageProvider,
-      spaceSelector: SpaceSelectorPageProvider,
-      infraHome: InfraHomePageProvider,
-      infraLogs: InfraLogsPageProvider,
-      maps: GisPageProvider,
-      statusPage: StatusPagePageProvider,
-      upgradeAssistant: UpgradeAssistantProvider,
-      code: CodeHomePageProvider,
-      uptime: UptimePageProvider,
-      rollup: RollupPageProvider,
-    },
+    services,
+    pageObjects,
 
     servers: kibanaFunctionalConfig.get('servers'),
 
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: [],
+      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
     },
 
     kbnTestServer: {
@@ -190,16 +80,21 @@ export default async function ({ readConfigFile }) {
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
-        '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.maps.showMapsInspectorAdapter=true',
+        '--xpack.maps.preserveDrawingBuffer=true',
+        '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
+        '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
+        '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-        '--xpack.code.security.enableGitCertCheck=false', // Disable git certificate check
+        '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
+        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
       ],
     },
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
+        'dateFormat:tz': 'UTC',
       },
     },
     // the apps section defines the urls that
@@ -208,6 +103,9 @@ export default async function ({ readConfigFile }) {
     // Kibana's config in order to use this helper
     apps: {
       ...kibanaFunctionalConfig.get('apps'),
+      lens: {
+        pathname: '/app/lens',
+      },
       login: {
         pathname: '/login',
       },
@@ -215,8 +113,7 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/monitoring',
       },
       logstashPipelines: {
-        pathname: '/app/kibana',
-        hash: '/management/logstash/pipelines',
+        pathname: '/app/management/ingest/pipelines',
       },
       maps: {
         pathname: '/app/maps',
@@ -225,51 +122,78 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/graph',
       },
       grokDebugger: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/grokdebugger',
+        pathname: '/app/dev_tools',
+        hash: '/grokdebugger',
       },
       searchProfiler: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/searchprofiler',
+        pathname: '/app/dev_tools',
+        hash: '/searchprofiler',
+      },
+      painlessLab: {
+        pathname: '/app/dev_tools',
+        hash: '/painless_lab',
       },
       spaceSelector: {
         pathname: '/',
       },
       infraOps: {
-        pathname: '/app/infra',
+        pathname: '/app/metrics',
       },
       infraLogs: {
-        pathname: '/app/infra',
-        hash: '/logs',
+        pathname: '/app/logs',
       },
       canvas: {
         pathname: '/app/canvas',
         hash: '/',
       },
-      code: {
-        pathname: '/app/code',
-        hash: '/admin',
-      },
-      codeSearch: {
-        pathname: '/app/code',
-        hash: '/search',
-      },
       uptime: {
         pathname: '/app/uptime',
       },
-      apm: {
-        pathname: '/app/apm'
-      },
       ml: {
-        pathname: '/app/ml'
+        pathname: '/app/ml',
+      },
+      roleMappings: {
+        pathname: '/app/management/security/role_mappings',
       },
       rollupJob: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/rollup_jobs/',
+        pathname: '/app/management/data/rollup_jobs',
+      },
+      apiKeys: {
+        pathname: '/app/management/security/api_keys',
+      },
+      licenseManagement: {
+        pathname: '/app/management/stack/license_management',
+      },
+      indexManagement: {
+        pathname: '/app/management/data/index_management',
+      },
+      indexLifecycleManagement: {
+        pathname: '/app/management/data/index_lifecycle_management',
+      },
+      ingestPipelines: {
+        pathname: '/app/management/ingest/ingest_pipelines',
+      },
+      snapshotRestore: {
+        pathname: '/app/management/data/snapshot_restore',
+      },
+      remoteClusters: {
+        pathname: '/app/management/data/remote_clusters',
+      },
+      crossClusterReplication: {
+        pathname: '/app/management/data/cross_cluster_replication',
       },
       apm: {
         pathname: '/app/apm',
-      }
+      },
+      watcher: {
+        pathname: '/app/management/insightsAndAlerting/watcher/watches',
+      },
+      transform: {
+        pathname: '/app/management/data/transform',
+      },
+      reporting: {
+        pathname: '/app/management/insightsAndAlerting/reporting',
+      },
     },
 
     // choose where esArchiver should load archives from
@@ -283,7 +207,283 @@ export default async function ({ readConfigFile }) {
     },
 
     junit: {
-      reportName: 'X-Pack Functional Tests',
+      reportName: 'Chrome X-Pack UI Functional Tests',
+    },
+    security: {
+      roles: {
+        test_logstash_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['logstash*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        global_canvas_all: {
+          kibana: [
+            {
+              feature: {
+                canvas: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_discover_all: {
+          kibana: [
+            {
+              feature: {
+                discover: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_dashboard_read: {
+          kibana: [
+            {
+              feature: {
+                dashboard: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_discover_read: {
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_visualize_read: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_visualize_all: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_dashboard_all: {
+          kibana: [
+            {
+              feature: {
+                dashboard: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_maps_all: {
+          kibana: [
+            {
+              feature: {
+                maps: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_maps_read: {
+          kibana: [
+            {
+              feature: {
+                maps: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+        antimeridian_points_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['antimeridian_points*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+        antimeridian_shapes_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['antimeridian_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        meta_for_geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['meta_for_geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        geoconnections_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['connections*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+
+        global_devtools_read: {
+          kibana: [
+            {
+              feature: {
+                dev_tools: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_upgrade_assistant_role: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        // using this role even for remote clusters
+        global_ccr_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
+        test_api_keys: {
+          elasticsearch: {
+            cluster: ['manage_security', 'manage_api_key'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
+        },
+
+        manage_security: {
+          elasticsearch: {
+            cluster: ['manage_security'],
+          },
+        },
+
+        ccr_user: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+        },
+
+        manage_ilm: {
+          elasticsearch: {
+            cluster: ['manage_ilm'],
+          },
+        },
+
+        index_management_user: {
+          elasticsearch: {
+            cluster: ['monitor', 'manage_index_templates'],
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+
+        ingest_pipelines_user: {
+          elasticsearch: {
+            cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+          },
+        },
+
+        license_management_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
+        },
+
+        logstash_read_user: {
+          elasticsearch: {
+            cluster: ['manage_logstash_pipelines'],
+          },
+        },
+
+        remote_clusters_user: {
+          elasticsearch: {
+            cluster: ['manage'],
+          },
+        },
+      },
+      defaultRoles: ['superuser'],
     },
   };
 }

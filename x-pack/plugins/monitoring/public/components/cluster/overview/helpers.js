@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { formatBytesUsage, formatPercentageUsage } from 'plugins/monitoring/lib/format_number';
-
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
+import { formatBytesUsage, formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import {
   EuiSpacer,
   EuiFlexItem,
@@ -15,27 +16,48 @@ import {
   EuiIcon,
   EuiHealth,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
+export function HealthLabel(props) {
+  if (props.status === 'green') {
+    return i18n.translate('xpack.monitoring.cluster.health.healthy', {
+      defaultMessage: 'Healthy',
+    });
+  }
+
+  if (props.status === 'yellow') {
+    return i18n.translate('xpack.monitoring.cluster.health.replicaShards', {
+      defaultMessage: 'Missing replica shards',
+    });
+  }
+
+  if (props.status === 'red') {
+    return i18n.translate('xpack.monitoring.cluster.health.primaryShards', {
+      defaultMessage: 'Missing primary shards',
+    });
+  }
+
+  return 'N/A';
+}
 
 export function HealthStatusIndicator(props) {
-
   const statusColorMap = {
     green: 'success',
     yellow: 'warning',
-    red: 'danger'
+    red: 'danger',
   };
 
-  const statusColor = statusColorMap[props.status];
+  const statusColor = statusColorMap[props.status] || 'n/a';
 
   return (
-    <EuiHealth color={statusColor} data-test-subj="statusIcon">
-      <FormattedMessage
-        id="xpack.monitoring.cluster.overview.healthStatusDescription"
-        defaultMessage="Health is {status}"
-        values={{ status: props.status }}
-      />
-    </EuiHealth>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiHealth color={statusColor} data-test-subj="statusIcon">
+          <HealthLabel status={props.status} />
+        </EuiHealth>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
@@ -45,11 +67,7 @@ const PanelExtras = ({ extras }) => {
   }
 
   // mimic the spacing of an EuiHealth which this is adjacent to
-  return (
-    <EuiFlexItem grow={false}>
-      {extras}
-    </EuiFlexItem>
-  );
+  return <EuiFlexItem grow={false}>{extras}</EuiFlexItem>;
 };
 
 export function ClusterItemContainer(props) {
@@ -58,7 +76,7 @@ export function ClusterItemContainer(props) {
     kibana: 'logoKibana',
     logstash: 'logoLogstash',
     beats: 'logoBeats',
-    apm: 'apmApp'
+    apm: 'apmApp',
   };
   const icon = iconMap[props.url];
 
@@ -72,20 +90,16 @@ export function ClusterItemContainer(props) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>
-                  { props.title }
-                </h2>
+                <h2>{props.title}</h2>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          { props.statusIndicator }
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{props.statusIndicator}</EuiFlexItem>
         <PanelExtras extras={props.extras} />
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      { props.children }
+      {props.children}
 
       <EuiSpacer size="xxl" />
     </div>
@@ -96,12 +110,13 @@ export function BytesUsage({ usedBytes, maxBytes }) {
   if (usedBytes && maxBytes) {
     return (
       <span>
-        <EuiText>
-          { formatPercentageUsage(usedBytes, maxBytes) }
-        </EuiText>
-        <EuiText color="subdued" size="s">
-          { formatBytesUsage(usedBytes, maxBytes) }
-        </EuiText>
+        <EuiText>{formatBytesUsage(usedBytes, maxBytes)}</EuiText>
+      </span>
+    );
+  } else if (usedBytes) {
+    return (
+      <span>
+        <EuiText>{formatNumber(usedBytes, 'byte')}</EuiText>
       </span>
     );
   }
@@ -113,15 +128,26 @@ export function BytesPercentageUsage({ usedBytes, maxBytes }) {
   if (usedBytes && maxBytes) {
     return (
       <span>
-        <EuiText>
-          { formatPercentageUsage(usedBytes, maxBytes) }
-        </EuiText>
+        <EuiText>{formatPercentageUsage(usedBytes, maxBytes)}</EuiText>
         <EuiText color="subdued" size="s">
-          { formatBytesUsage(usedBytes, maxBytes) }
+          {formatBytesUsage(usedBytes, maxBytes)}
         </EuiText>
       </span>
     );
   }
 
-  return null;
+  return <EuiText>0</EuiText>;
+}
+
+export function DisabledIfNoDataAndInSetupModeLink({
+  setupModeEnabled,
+  setupModeData,
+  children,
+  ...props
+}) {
+  if (setupModeEnabled && get(setupModeData, 'totalUniqueInstanceCount', 0) === 0) {
+    return children;
+  }
+
+  return <EuiLink {...props}>{children}</EuiLink>;
 }

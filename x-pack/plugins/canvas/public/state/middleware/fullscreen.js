@@ -5,10 +5,11 @@
  */
 
 import { setFullscreen } from '../../lib/fullscreen';
+import { setFullscreen as setAppStateFullscreen } from '../../lib/app_state';
 import { setFullscreen as setFullscreenAction } from '../actions/transient';
 import { getFullscreen } from '../selectors/app';
 
-export const fullscreen = ({ getState }) => next => action => {
+export const fullscreen = ({ getState }) => (next) => (action) => {
   // execute the default action
   next(action);
 
@@ -16,5 +17,6 @@ export const fullscreen = ({ getState }) => next => action => {
   if (action.type === setFullscreenAction.toString()) {
     const fullscreen = getFullscreen(getState());
     setFullscreen(fullscreen);
+    setAppStateFullscreen(fullscreen);
   }
 };

@@ -4,14 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  initClusterHelpers
-} from './clusters';
+export { registerHelpers } from './elasticsearch';
 
-export {
-  initElasticsearchIndicesHelpers
-} from './es_index';
-
-export {
-  getRandomString,
-} from './random';
+export { getRandomString } from './random';

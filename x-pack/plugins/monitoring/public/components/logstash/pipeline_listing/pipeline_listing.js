@@ -7,15 +7,26 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 import { partialRight } from 'lodash';
-import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiLink,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPanel,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
-import { Sparkline } from 'plugins/monitoring/components/sparkline';
-import { EuiMonitoringTable } from '../../table';
-import { injectI18n } from '@kbn/i18n/react';
+import { Sparkline } from '../../../components/sparkline';
+import { EuiMonitoringSSPTable } from '../../table';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
-class PipelineListingUI extends Component {
+export class PipelineListing extends Component {
   tooltipXValueFormatter(xValue, dateFormat) {
     return moment(xValue).format(dateFormat);
   }
@@ -26,95 +37,83 @@ class PipelineListingUI extends Component {
 
   getColumns() {
     const { onBrush, dateFormat } = this.props;
-    const { kbnUrl, scope } = this.props.angular;
 
     return [
       {
         name: i18n.translate('xpack.monitoring.logstash.pipelines.idTitle', {
-          defaultMessage: 'ID'
+          defaultMessage: 'ID',
         }),
         field: 'id',
         sortable: true,
         render: (id) => (
-          <EuiLink
-            data-test-subj="id"
-            onClick={() => {
-              scope.$evalAsync(() => {
-                kbnUrl.changePath(`/logstash/pipelines/${id}`);
-              });
-            }}
-          >
+          <EuiLink data-test-subj="id" href={getSafeForExternalLink(`#/logstash/pipelines/${id}`)}>
             {id}
           </EuiLink>
-        )
+        ),
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.pipelines.eventsEmittedRateTitle', {
-          defaultMessage: 'Events Emitted Rate'
+          defaultMessage: 'Events Emitted Rate',
         }),
         field: 'latestThroughput',
         sortable: true,
         render: (value, pipeline) => {
           const throughput = pipeline.metrics.throughput;
           return (
-            <EuiFlexGroup
-              gutterSize="none"
-              alignItems="center"
-            >
+            <EuiFlexGroup gutterSize="none" alignItems="center">
               <EuiFlexItem>
                 <Sparkline
                   series={throughput.data}
                   onBrush={onBrush}
                   tooltip={{
-                    xValueFormatter: value => this.tooltipXValueFormatter(value, dateFormat),
-                    yValueFormatter: partialRight(this.tooltipYValueFormatter, throughput.metric.format, throughput.metric.units)
+                    xValueFormatter: (value) => this.tooltipXValueFormatter(value, dateFormat),
+                    yValueFormatter: partialRight(
+                      this.tooltipYValueFormatter,
+                      throughput.metric.format,
+                      throughput.metric.units
+                    ),
                   }}
                   options={{ xaxis: throughput.timeRange }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem
-                className="monTableCell__number"
-                data-test-subj="eventsEmittedRate"
-              >
-                { formatMetric(value, '0.[0]a', throughput.metric.units) }
+              <EuiFlexItem className="monTableCell__number" data-test-subj="eventsEmittedRate">
+                {formatMetric(value, '0.[0]a', throughput.metric.units)}
               </EuiFlexItem>
             </EuiFlexGroup>
           );
-        }
+        },
       },
       {
         name: i18n.translate('xpack.monitoring.logstash.pipelines.numberOfNodesTitle', {
-          defaultMessage: 'Number of Nodes'
+          defaultMessage: 'Number of Nodes',
         }),
         field: 'latestNodesCount',
         sortable: true,
         render: (value, pipeline) => {
           const nodesCount = pipeline.metrics.nodesCount;
           return (
-            <EuiFlexGroup
-              gutterSize="none"
-              alignItems="center"
-            >
+            <EuiFlexGroup gutterSize="none" alignItems="center">
               <EuiFlexItem>
                 <Sparkline
                   series={nodesCount.data}
                   onBrush={onBrush}
                   tooltip={{
-                    xValueFormatter: value => this.tooltipXValueFormatter(value, dateFormat),
-                    yValueFormatter: partialRight(this.tooltipYValueFormatter, nodesCount.metric.format, nodesCount.metric.units)
+                    xValueFormatter: (value) => this.tooltipXValueFormatter(value, dateFormat),
+                    yValueFormatter: partialRight(
+                      this.tooltipYValueFormatter,
+                      nodesCount.metric.format,
+                      nodesCount.metric.units
+                    ),
                   }}
                   options={{ xaxis: nodesCount.timeRange }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem
-                className="monTableCell__number"
-                data-test-subj="nodeCount"
-              >
-                { formatMetric(value, '0a') }
+              <EuiFlexItem className="monTableCell__number" data-test-subj="nodeCount">
+                {formatMetric(value, '0a')}
               </EuiFlexItem>
             </EuiFlexGroup>
           );
-        }
+        },
       },
     ];
   }
@@ -122,14 +121,10 @@ class PipelineListingUI extends Component {
   renderStats() {
     if (this.props.statusComponent) {
       const Component = this.props.statusComponent;
-      return (
-        <Component stats={this.props.stats}/>
-      );
+      return <Component stats={this.props.stats} />;
     }
 
-    return (
-      <ClusterStatus stats={this.props.stats}/>
-    );
+    return <ClusterStatus stats={this.props.stats} />;
   }
 
   render() {
@@ -138,47 +133,50 @@ class PipelineListingUI extends Component {
       sorting,
       pagination,
       onTableChange,
+      fetchMoreData,
       upgradeMessage,
       className,
-      intl
     } = this.props;
 
+    const sortingOptions = sorting || { field: 'id', direction: 'asc' };
+    if (sortingOptions.field === 'name') {
+      sortingOptions.field = 'id';
+    }
     const columns = this.getColumns();
 
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPanel>
-            {this.renderStats()}
-          </EuiPanel>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.logstash.pipline_listing.heading"
+                defaultMessage="Logstash pipelines"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
+          <EuiPanel>{this.renderStats()}</EuiPanel>
           <EuiSpacer size="m" />
           <EuiPageContent>
-            <EuiMonitoringTable
+            <EuiMonitoringSSPTable
               className={className || 'logstashNodesTable'}
               rows={data}
               columns={columns}
-              sorting={{
-                ...sorting,
-                sort: {
-                  ...sorting.sort,
-                  field: 'id'
-                }
-              }}
+              sorting={sortingOptions}
               message={upgradeMessage}
               pagination={pagination}
+              fetchMoreData={fetchMoreData}
               search={{
                 box: {
-                  incremental: true,
-                  placeholder: intl.formatMessage({
-                    id: 'xpack.monitoring.logstash.filterPipelinesPlaceholder',
-                    defaultMessage: 'Filter Pipelines…'
-                  })
+                  placeholder: i18n.translate(
+                    'xpack.monitoring.logstash.filterPipelinesPlaceholder',
+                    {
+                      defaultMessage: 'Filter Pipelines…',
+                    }
+                  ),
                 },
               }}
               onTableChange={onTableChange}
-              executeQueryOptions={{
-                defaultFields: ['id']
-              }}
             />
           </EuiPageContent>
         </EuiPageBody>
@@ -186,5 +184,3 @@ class PipelineListingUI extends Component {
     );
   }
 }
-
-export const PipelineListing = injectI18n(PipelineListingUI);

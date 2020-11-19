@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getMlJobs } from '../../../../lib/elasticsearch/get_ml_jobs';
-import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 
 export function mlJobRoute(server) {
   server.route({
@@ -19,17 +19,17 @@ export function mlJobRoute(server) {
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ml_jobs',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required()
+        params: schema.object({
+          clusterUuid: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -39,16 +39,20 @@ export function mlJobRoute(server) {
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
-        const shardStats = await getShardStats(req, esIndexPattern, clusterStats);
+        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
+          req,
+          esIndexPattern,
+          clusterStats
+        );
         const rows = await getMlJobs(req, esIndexPattern);
 
         return {
-          clusterStatus: getClusterStatus(clusterStats, shardStats),
-          rows
+          clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),
+          rows,
         };
-      } catch(err) {
+      } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
 }

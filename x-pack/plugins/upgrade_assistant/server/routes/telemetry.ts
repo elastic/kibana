@@ -4,53 +4,67 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import Joi from 'joi';
-import { UpgradeAssistantTelemetryServer } from '../../common/types';
+import { schema } from '@kbn/config-schema';
 import { upsertUIOpenOption } from '../lib/telemetry/es_ui_open_apis';
 import { upsertUIReindexOption } from '../lib/telemetry/es_ui_reindex_apis';
+import { RouteDependencies } from '../types';
 
-export function registerTelemetryRoutes(server: UpgradeAssistantTelemetryServer) {
-  server.route({
-    path: '/api/upgrade_assistant/telemetry/ui_open',
-    method: 'PUT',
-    options: {
+export function registerTelemetryRoutes({ router, getSavedObjectsService }: RouteDependencies) {
+  router.put(
+    {
+      path: '/api/upgrade_assistant/stats/ui_open',
       validate: {
-        payload: Joi.object({
-          overview: Joi.boolean().default(false),
-          cluster: Joi.boolean().default(false),
-          indices: Joi.boolean().default(false),
+        body: schema.object({
+          overview: schema.boolean({ defaultValue: false }),
+          cluster: schema.boolean({ defaultValue: false }),
+          indices: schema.boolean({ defaultValue: false }),
         }),
       },
     },
-    async handler(request) {
+    async (ctx, request, response) => {
+      const { cluster, indices, overview } = request.body;
       try {
-        return await upsertUIOpenOption(server, request);
+        return response.ok({
+          body: await upsertUIOpenOption({
+            savedObjects: getSavedObjectsService(),
+            cluster,
+            indices,
+            overview,
+          }),
+        });
       } catch (e) {
-        return Boom.boomify(e, { statusCode: 500 });
+        return response.internalError({ body: e });
       }
-    },
-  });
+    }
+  );
 
-  server.route({
-    path: '/api/upgrade_assistant/telemetry/ui_reindex',
-    method: 'PUT',
-    options: {
+  router.put(
+    {
+      path: '/api/upgrade_assistant/stats/ui_reindex',
       validate: {
-        payload: Joi.object({
-          close: Joi.boolean().default(false),
-          open: Joi.boolean().default(false),
-          start: Joi.boolean().default(false),
-          stop: Joi.boolean().default(false),
+        body: schema.object({
+          close: schema.boolean({ defaultValue: false }),
+          open: schema.boolean({ defaultValue: false }),
+          start: schema.boolean({ defaultValue: false }),
+          stop: schema.boolean({ defaultValue: false }),
         }),
       },
     },
-    async handler(request) {
+    async (ctx, request, response) => {
+      const { close, open, start, stop } = request.body;
       try {
-        return await upsertUIReindexOption(server, request);
+        return response.ok({
+          body: await upsertUIReindexOption({
+            savedObjects: getSavedObjectsService(),
+            close,
+            open,
+            start,
+            stop,
+          }),
+        });
       } catch (e) {
-        return Boom.boomify(e, { statusCode: 500 });
+        return response.internalError({ body: e });
       }
-    },
-  });
+    }
+  );
 }

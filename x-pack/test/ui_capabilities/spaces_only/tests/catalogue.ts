@@ -6,16 +6,25 @@
 
 import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { SpaceScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function catalogueTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function catalogueTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
+  const esFeatureExceptions = [
+    'security',
+    'index_lifecycle_management',
+    'snapshot_restore',
+    'rollup_jobs',
+    'reporting',
+    'transform',
+    'watcher',
+  ];
+
   describe('catalogue', () => {
-    SpaceScenarios.forEach(scenario => {
+    SpaceScenarios.forEach((scenario) => {
       it(`${scenario.name}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({ spaceId: scenario.id });
         switch (scenario.id) {
@@ -30,8 +39,12 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
           case 'nothing_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything is disabled
-            const expected = mapValues(uiCapabilities.value!.catalogue, () => false);
+            // everything is disabled except for ES features and spaces management
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) =>
+                esFeatureExceptions.includes(catalogueId) || catalogueId === 'spaces'
+            );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }

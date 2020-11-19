@@ -6,8 +6,8 @@
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import React from 'react';
-import chrome from 'ui/chrome';
 import url from 'url';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;
@@ -15,9 +15,10 @@ interface Props extends EuiLinkAnchorProps {
 }
 
 export function KibanaLink({ path, ...rest }: Props) {
+  const { core } = useApmPluginContext();
   const href = url.format({
-    pathname: chrome.addBasePath('/app/kibana'),
-    hash: path
+    pathname: core.http.basePath.prepend('/app/kibana'),
+    hash: path,
   });
   return <EuiLink {...rest} href={href} />;
 }

@@ -17,11 +17,13 @@
  * under the License.
  */
 
+/* eslint-disable import/no-extraneous-dependencies */
 const sass = require('node-sass');
 const postcss = require('postcss');
-const postcssConfig = require('../../src/optimize/postcss.config');
+const postcssConfig = require('@kbn/optimizer/postcss.config.js');
 const chokidar = require('chokidar');
-const debounce = require('lodash/function/debounce');
+const path = require('path');
+const { debounce } = require('lodash');
 
 const platform = require('os').platform();
 const isPlatformWindows = /^win/.test(platform);
@@ -43,28 +45,26 @@ module.exports = function (grunt) {
           '!**/__snapshots__/**/*',
         ],
         dest: 'target',
-      }
+      },
     },
     babel: {
       prodBuild: {
         expand: true,
-        src: [
-          'target/components/**/*.js',
-          'target/src/**/*.js',
-        ],
+        src: ['target/components/**/*.js', 'target/src/**/*.js'],
         dest: '.',
         options: {
-          presets: [
-            require.resolve('@kbn/babel-preset/webpack_preset')
-          ]
+          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
         },
-      }
-    }
+      },
+    },
   });
 
+  const cwd = process.cwd();
+  grunt.file.setBase(path.resolve(__dirname, '../..'));
   grunt.loadNpmTasks('grunt-babel');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.file.setBase(cwd);
   grunt.registerTask('prodBuild', ['clean:target', 'copy:makeProdBuild', 'babel:prodBuild']);
 
   grunt.registerTask('docSiteBuild', function () {
@@ -77,7 +77,7 @@ module.exports = function (grunt) {
         '--config=doc_site/webpack.config.js',
         '--devtool=null', // Prevent the source map from being generated
       ],
-      opts: { stdio: 'inherit' }
+      opts: { stdio: 'inherit' },
     };
 
     const uiFrameworkServerBuild = new Promise((resolve, reject) => {
@@ -116,7 +116,9 @@ module.exports = function (grunt) {
 
   function uiFrameworkServerStart() {
     const serverCmd = {
-      cmd: isPlatformWindows ? '.\\node_modules\\.bin\\webpack-dev-server.cmd' : './node_modules/.bin/webpack-dev-server',
+      cmd: isPlatformWindows
+        ? '.\\node_modules\\.bin\\webpack-dev-server.cmd'
+        : './node_modules/.bin/webpack-dev-server',
       args: [
         '--config=doc_site/webpack.config.js',
         '--hot',
@@ -125,7 +127,7 @@ module.exports = function (grunt) {
         '--host=0.0.0.0',
         '--port=8020',
       ],
-      opts: { stdio: 'inherit' }
+      opts: { stdio: 'inherit' },
     };
 
     return new Promise((resolve, reject) => {
@@ -142,7 +144,6 @@ module.exports = function (grunt) {
 
         resolve();
       });
-
     });
   }
 
@@ -150,26 +151,29 @@ module.exports = function (grunt) {
     const src = 'src/kui_light.scss';
     const dest = 'dist/kui_light.css';
 
-    return new Promise(resolve => {
-      sass.render({
-        file: src,
-      }, function (error, result) {
-        if (error) {
-          grunt.log.error(error);
+    return new Promise((resolve) => {
+      sass.render(
+        {
+          file: src,
+        },
+        function (error, result) {
+          if (error) {
+            grunt.log.error(error);
+          }
+
+          postcss([postcssConfig])
+            .process(result.css, { from: src, to: dest })
+            .then((result) => {
+              grunt.file.write(dest, result.css);
+
+              if (result.map) {
+                grunt.file.write(`${dest}.map`, result.map);
+              }
+
+              resolve();
+            });
         }
-
-        postcss([postcssConfig])
-          .process(result.css, { from: src, to: dest })
-          .then(result => {
-            grunt.file.write(dest, result.css);
-
-            if (result.map) {
-              grunt.file.write(`${dest}.map`, result.map);
-            }
-
-            resolve();
-          });
-      });
+      );
     });
   }
 
@@ -177,47 +181,56 @@ module.exports = function (grunt) {
     const src = 'src/kui_dark.scss';
     const dest = 'dist/kui_dark.css';
 
-    return new Promise(resolve => {
-      sass.render({
-        file: src,
-      }, function (error, result) {
-        if (error) {
-          grunt.log.error(error);
+    return new Promise((resolve) => {
+      sass.render(
+        {
+          file: src,
+        },
+        function (error, result) {
+          if (error) {
+            grunt.log.error(error);
+          }
+
+          postcss([postcssConfig])
+            .process(result.css, { from: src, to: dest })
+            .then((result) => {
+              grunt.file.write(dest, result.css);
+
+              if (result.map) {
+                grunt.file.write(`${dest}.map`, result.map);
+              }
+
+              resolve();
+            });
         }
-
-        postcss([postcssConfig])
-          .process(result.css, { from: src, to: dest })
-          .then(result => {
-            grunt.file.write(dest, result.css);
-
-            if (result.map) {
-              grunt.file.write(`${dest}.map`, result.map);
-            }
-
-            resolve();
-          });
-      });
+      );
     });
   }
 
   function uiFrameworkWatch() {
-    const debouncedCompile = debounce(() => {
-      // Compile the SCSS in a separate process because node-sass throws a fatal error if it fails
-      // to compile.
-      grunt.util.spawn({
-        cmd: isPlatformWindows ? '.\\node_modules\\.bin\\grunt.cmd' : './node_modules/.bin/grunt',
-        args: [
-          'compileCssLight',
-          'compileCssDark',
-        ],
-      }, (error, result) => {
-        if (error) {
-          grunt.log.error(result.stdout);
-        } else {
-          grunt.log.writeln(result);
-        }
-      });
-    }, 400, { leading: true });
+    const debouncedCompile = debounce(
+      () => {
+        // Compile the SCSS in a separate process because node-sass throws a fatal error if it fails
+        // to compile.
+        grunt.util.spawn(
+          {
+            cmd: isPlatformWindows
+              ? '.\\node_modules\\.bin\\grunt.cmd'
+              : './node_modules/.bin/grunt',
+            args: ['compileCssLight', 'compileCssDark'],
+          },
+          (error, result) => {
+            if (error) {
+              grunt.log.error(result.stdout);
+            } else {
+              grunt.log.writeln(result);
+            }
+          }
+        );
+      },
+      400,
+      { leading: true }
+    );
 
     return new Promise(() => {
       debouncedCompile();

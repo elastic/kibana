@@ -12,25 +12,34 @@ describe('Elasticsearch Cluster Settings', () => {
     const result = {
       persistent: {},
       transient: {},
-      defaults: {}
+      defaults: {},
     };
     result[property] = response;
     return result;
   };
 
-  const getReq = response => {
+  const getReq = (response) => {
     return {
       server: {
+        newPlatform: {
+          setup: {
+            plugins: {
+              cloud: {
+                isCloudEnabled: false,
+              },
+            },
+          },
+        },
         plugins: {
           elasticsearch: {
             getCluster() {
               return {
-                callWithRequest: () => Promise.resolve(response)
+                callWithRequest: () => Promise.resolve(response),
               };
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     };
   };
 
@@ -42,15 +51,16 @@ describe('Elasticsearch Cluster Settings', () => {
 
   it('should find default collection interval reason', async () => {
     const setting = {
-      xpack: { monitoring: { collection: { interval: -1 } } }
+      xpack: { monitoring: { collection: { interval: -1 } } },
     };
-    const makeExpected = source => ({
+    const makeExpected = (source) => ({
       found: true,
       reason: {
         context: `cluster ${source}`,
         data: '-1',
-        property: 'xpack.monitoring.collection.interval'
-      }
+        isCloudEnabled: false,
+        property: 'xpack.monitoring.collection.interval',
+      },
     });
 
     let mockReq;
@@ -71,15 +81,16 @@ describe('Elasticsearch Cluster Settings', () => {
 
   it('should find exporters reason', async () => {
     const setting = {
-      xpack: { monitoring: { exporters: { myCoolExporter: {} } } }
+      xpack: { monitoring: { exporters: { myCoolExporter: {} } } },
     };
-    const makeExpected = source => ({
+    const makeExpected = (source) => ({
       found: true,
       reason: {
         context: `cluster ${source}`,
         data: 'Remote exporters indicate a possible misconfiguration: myCoolExporter',
-        property: 'xpack.monitoring.exporters'
-      }
+        isCloudEnabled: false,
+        property: 'xpack.monitoring.exporters',
+      },
     });
 
     let mockReq;
@@ -100,15 +111,16 @@ describe('Elasticsearch Cluster Settings', () => {
 
   it('should find enabled reason', async () => {
     const setting = {
-      xpack: { monitoring: { enabled: 'false' } }
+      xpack: { monitoring: { enabled: 'false' } },
     };
-    const makeExpected = source => ({
+    const makeExpected = (source) => ({
       found: true,
       reason: {
         context: `cluster ${source}`,
         data: 'false',
-        property: 'xpack.monitoring.enabled'
-      }
+        isCloudEnabled: false,
+        property: 'xpack.monitoring.enabled',
+      },
     });
 
     let mockReq;

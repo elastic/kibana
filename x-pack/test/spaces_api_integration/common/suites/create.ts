@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { getUrlPrefix } from '../lib/space_test_utils';
+import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface CreateTest {
@@ -67,56 +67,58 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     { user = {}, spaceId, tests }: CreateTestDefinition
   ) => {
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      beforeEach(() => esArchiver.load('saved_objects/spaces'));
+      afterEach(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.newSpace.statusCode}`, async () => {
-        return supertest
-          .post(`${getUrlPrefix(spaceId)}/api/spaces/space`)
-          .auth(user.username, user.password)
-          .send({
-            name: 'marketing',
-            id: 'marketing',
-            description: 'a description',
-            color: '#5c5959',
-            disabledFeatures: [],
-          })
-          .expect(tests.newSpace.statusCode)
-          .then(tests.newSpace.response);
-      });
-
-      describe('when it already exists', () => {
-        it(`should return ${tests.alreadyExists.statusCode}`, async () => {
+      getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
+        it(`should return ${tests.newSpace.statusCode} ${scenario}`, async () => {
           return supertest
-            .post(`${getUrlPrefix(spaceId)}/api/spaces/space`)
+            .post(`${urlPrefix}/api/spaces/space`)
             .auth(user.username, user.password)
             .send({
-              name: 'space_1',
-              id: 'space_1',
-              color: '#ffffff',
-              description: 'a description',
-              disabledFeatures: [],
-            })
-            .expect(tests.alreadyExists.statusCode)
-            .then(tests.alreadyExists.response);
-        });
-      });
-
-      describe('when _reserved is specified', () => {
-        it(`should return ${tests.reservedSpecified.statusCode} and ignore _reserved`, async () => {
-          return supertest
-            .post(`${getUrlPrefix(spaceId)}/api/spaces/space`)
-            .auth(user.username, user.password)
-            .send({
-              name: 'reserved space',
-              id: 'reserved',
+              name: 'marketing',
+              id: 'marketing',
               description: 'a description',
               color: '#5c5959',
-              _reserved: true,
               disabledFeatures: [],
             })
-            .expect(tests.reservedSpecified.statusCode)
-            .then(tests.reservedSpecified.response);
+            .expect(tests.newSpace.statusCode)
+            .then(tests.newSpace.response);
+        });
+
+        describe('when it already exists', () => {
+          it(`should return ${tests.alreadyExists.statusCode} ${scenario}`, async () => {
+            return supertest
+              .post(`${urlPrefix}/api/spaces/space`)
+              .auth(user.username, user.password)
+              .send({
+                name: 'space_1',
+                id: 'space_1',
+                color: '#ffffff',
+                description: 'a description',
+                disabledFeatures: [],
+              })
+              .expect(tests.alreadyExists.statusCode)
+              .then(tests.alreadyExists.response);
+          });
+        });
+
+        describe('when _reserved is specified', () => {
+          it(`should return ${tests.reservedSpecified.statusCode} and ignore _reserved ${scenario}`, async () => {
+            return supertest
+              .post(`${urlPrefix}/api/spaces/space`)
+              .auth(user.username, user.password)
+              .send({
+                name: 'reserved space',
+                id: 'reserved',
+                description: 'a description',
+                color: '#5c5959',
+                _reserved: true,
+                disabledFeatures: [],
+              })
+              .expect(tests.reservedSpecified.statusCode)
+              .then(tests.reservedSpecified.response);
+          });
         });
       });
     });

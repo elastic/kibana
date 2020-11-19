@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-import { ColorPalette as Component } from './color_palette';
-
-export { Props } from './color_palette';
-export const ColorPalette = pure(Component);
+export { ColorPalette } from './color_palette';

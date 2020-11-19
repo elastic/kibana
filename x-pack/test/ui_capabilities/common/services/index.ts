@@ -4,5 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FeaturesProvider, FeaturesService } from './features';
-export { UICapabilitiesProvider } from './ui_capabilities';
+import { FeaturesProvider } from './features';
+import { UICapabilitiesProvider } from './ui_capabilities';
+import { services as commonServices } from '../../../common/services';
+
+export const services = {
+  ...commonServices,
+
+  uiCapabilities: UICapabilitiesProvider,
+  features: FeaturesProvider,
+};
+
+export { FeaturesService } from './features';

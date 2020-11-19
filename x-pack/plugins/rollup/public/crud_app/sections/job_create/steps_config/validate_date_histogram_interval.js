@@ -6,37 +6,38 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
+import { search } from '../../../../../../../../src/plugins/data/public';
+const {
   InvalidEsIntervalFormatError,
   InvalidEsCalendarIntervalError,
   parseEsInterval,
-} from 'ui/utils/parse_es_interval';
+} = search.aggs;
 
 export function validateDateHistogramInterval(dateHistogramInterval) {
   if (!dateHistogramInterval || !dateHistogramInterval.trim()) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.dateHistogramIntervalMissing"
         defaultMessage="Interval is required."
-      />
-    )];
+      />,
+    ];
   }
 
   try {
     parseEsInterval(dateHistogramInterval);
-  } catch(error) {
+  } catch (error) {
     if (error instanceof InvalidEsIntervalFormatError) {
-      return [(
+      return [
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidFormat"
           defaultMessage="Invalid interval format."
-        />
-      )];
+        />,
+      ];
     }
 
     if (error instanceof InvalidEsCalendarIntervalError) {
       const { unit } = error;
-      return [(
+      return [
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidCalendarInterval"
           defaultMessage="The '{unit}' unit only allows values of 1. Try {suggestion}."
@@ -50,13 +51,13 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
                   values={{ unit }}
                 />
               </strong>
-            )
+            ),
           }}
-        />
-      )];
+        />,
+      ];
     }
 
-    throw(error);
+    throw error;
   }
 
   return undefined;

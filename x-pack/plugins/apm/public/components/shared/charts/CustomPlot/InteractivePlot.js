@@ -14,34 +14,38 @@ import { MarkSeries, VerticalGridLines } from 'react-vis';
 import Tooltip from '../Tooltip';
 
 function getPointByX(serie, x) {
-  return serie.data.find(point => point.x === x);
+  return serie.data.find((point) => point.x === x);
 }
 
 class InteractivePlot extends PureComponent {
-  getMarkPoints = hoverX => {
-    return this.props.series
-      .filter(serie =>
-        serie.data.some(point => point.x === hoverX && point.y != null)
-      )
-      .map(serie => {
-        const { x, y } = getPointByX(serie, hoverX) || {};
-        return {
-          x,
-          y,
-          color: serie.color
-        };
-      });
+  getMarkPoints = (hoverX) => {
+    return (
+      this.props.series
+        .filter((serie) =>
+          serie.data.some((point) => point.x === hoverX && point.y != null)
+        )
+        .map((serie) => {
+          const { x, y } = getPointByX(serie, hoverX) || {};
+          return {
+            x,
+            y,
+            color: serie.color,
+          };
+        })
+        // needs to be reversed, as StaticPlot.js does the same
+        .reverse()
+    );
   };
 
-  getTooltipPoints = hoverX => {
+  getTooltipPoints = (hoverX) => {
     return this.props.series
-      .filter(series => !series.hideTooltipValue)
-      .map(serie => {
+      .filter((series) => !series.hideTooltipValue)
+      .map((serie) => {
         const point = getPointByX(serie, hoverX) || {};
         return {
           color: serie.color,
           value: this.props.formatTooltipValue(point),
-          text: serie.titleShort || serie.title
+          text: serie.titleShort || serie.title,
         };
       });
   };
@@ -53,7 +57,7 @@ class InteractivePlot extends PureComponent {
       series,
       isDrawing,
       selectionStart,
-      selectionEnd
+      selectionEnd,
     } = this.props;
 
     if (isEmpty(series)) {
@@ -62,8 +66,12 @@ class InteractivePlot extends PureComponent {
 
     const tooltipPoints = this.getTooltipPoints(hoverX);
     const markPoints = this.getMarkPoints(hoverX);
-    const { x, yTickValues } = plotValues;
+    const { x, xTickValues, yTickValues } = plotValues;
     const yValueMiddle = yTickValues[1];
+
+    if (isEmpty(xTickValues)) {
+      return <SharedPlot plotValues={plotValues} />;
+    }
 
     return (
       <SharedPlot plotValues={plotValues}>
@@ -89,7 +97,7 @@ InteractivePlot.propTypes = {
   plotValues: PropTypes.object.isRequired,
   selectionEnd: PropTypes.number,
   selectionStart: PropTypes.number,
-  series: PropTypes.array.isRequired
+  series: PropTypes.array.isRequired,
 };
 
 export default InteractivePlot;

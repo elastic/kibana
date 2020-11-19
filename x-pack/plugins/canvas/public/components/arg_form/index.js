@@ -25,7 +25,7 @@ export const ArgForm = compose(
       }
     },
   }),
-  connect(state => ({ workpad: getWorkpadInfo(state), assets: getAssets(state) }))
+  connect((state) => ({ workpad: getWorkpadInfo(state), assets: getAssets(state) }))
 )(Component);
 
 ArgForm.propTypes = {

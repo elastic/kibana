@@ -5,25 +5,26 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import uiRoutes from 'ui/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchIndices } from '../../../components';
 import template from './index.html';
-import { I18nContext } from 'ui/i18n';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/indices', {
   template,
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
-    }
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
+    },
   },
   controllerAs: 'elasticsearchIndices',
   controller: class ElasticsearchIndicesController extends MonitoringViewBaseEuiTableController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       const features = $injector.get('features');
@@ -34,23 +35,27 @@ uiRoutes.when('/elasticsearch/indices', {
       let showSystemIndices = features.isEnabled('showSystemIndices', false);
 
       super({
-        title: i18n('xpack.monitoring.elasticsearch.indices.routeTitle', {
-          defaultMessage: 'Elasticsearch - Indices'
+        title: i18n.translate('xpack.monitoring.elasticsearch.indices.routeTitle', {
+          defaultMessage: 'Elasticsearch - Indices',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.elasticsearch.indices.pageTitle', {
+          defaultMessage: 'Elasticsearch indices',
         }),
         storageKey: 'elasticsearch.indices',
-        apiUrlFn: () => `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
+        apiUrlFn: () =>
+          `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
         reactNodeId: 'elasticsearchIndicesReact',
         defaultData: {},
         $scope,
         $injector,
         $scope,
-        $injector
+        $injector,
       });
 
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
 
       // for binding
-      const toggleShowSystemIndices = isChecked => {
+      const toggleShowSystemIndices = (isChecked) => {
         // flip the boolean
         showSystemIndices = isChecked;
         // preserve setting in localStorage
@@ -59,13 +64,15 @@ uiRoutes.when('/elasticsearch/indices', {
         this.updateData();
       };
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(data);
-      });
+      $scope.$watch(
+        () => this.data,
+        (data) => {
+          if (!data) {
+            return;
+          }
 
-      this.renderReact = ({ clusterStatus, indices }) => {
-        super.renderReact(
-          <I18nContext>
+          const { clusterStatus, indices } = data;
+          this.renderReact(
             <ElasticsearchIndices
               clusterStatus={clusterStatus}
               indices={indices}
@@ -75,9 +82,9 @@ uiRoutes.when('/elasticsearch/indices', {
               pagination={this.pagination}
               onTableChange={this.onTableChange}
             />
-          </I18nContext>
-        );
-      };
+          );
+        }
+      );
     }
-  }
+  },
 });

@@ -1,10 +1,13 @@
 [[production]]
-== Using Kibana in a production environment
+== Use {kib} in a production environment
 
 * <<configuring-kibana-shield>>
 * <<csp-strict-mode>>
 * <<enabling-ssl>>
-* <<load-balancing>>
+* <<load-balancing-es>>
+* <<load-balancing-kibana>>
+* <<high-availability>>
+* <<memory>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
@@ -16,26 +19,24 @@ While Kibana isn't terribly resource intensive, we still recommend running Kiban
 separate from  your Elasticsearch data or master nodes. To distribute Kibana
 traffic across the nodes in your Elasticsearch cluster, you can run Kibana
 and an Elasticsearch client node on the same machine. For more information, see
-<<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>.
+<<load-balancing-es, Load balancing across multiple Elasticsearch nodes>>.
 
 [float]
 [[configuring-kibana-shield]]
-=== Using {stack} {security-features}
+=== Use {stack} {security-features}
 
-You can use {stack-ov}/elasticsearch-security.html[{stack} {security-features}] 
-to control what {es} data users can access through Kibana.
+You can use {stack} {security-features} to control what {es} data users can
+access through Kibana.
 
 When {security-features} are enabled, Kibana users have to log in. They need to
-have the `kibana_user` role as well as access to the indices they
-will be working with in Kibana.
+have a role granting <<kibana-privileges, Kibana privileges>> as well as access
+to the indices they will be working with in Kibana.
 
 If a user loads a Kibana dashboard that accesses data in an index that they
 are not authorized to view, they get an error that indicates the index does
-not exist. The {security-features} do not currently provide a way to control 
-which users can load which dashboards.
+not exist.
 
-For information about setting up Kibana users, see
-{kibana-ref}/using-kibana-with-security.html[Configuring security in Kibana].
+For more information on granting access to Kibana, see <<xpack-security-authorization>>.
 
 [float]
 [[csp-strict-mode]]
@@ -58,13 +59,13 @@ csp.strict: true
 
 [float]
 [[enabling-ssl]]
-=== Enabling SSL
+=== Enable SSL
 
 See <<configuring-tls>>.
 
 [float]
-[[load-balancing]]
-=== Load Balancing Across Multiple Elasticsearch Nodes
+[[load-balancing-es]]
+=== Load Balancing across multiple {es} nodes
 If you have multiple nodes in your Elasticsearch cluster, the easiest way to distribute Kibana requests
 across the nodes is to run an Elasticsearch _Coordinating only_ node on the same machine as Kibana.
 Elasticsearch Coordinating only nodes are essentially smart load balancers that are part of the cluster. They
@@ -108,4 +109,68 @@ transport.tcp.port: 9300 - 9400
 --------
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.hosts: ["http://localhost:9200"]
+--------
+
+[float]
+[[load-balancing-kibana]]
+=== Load balancing across multiple Kibana instances
+To serve multiple Kibana installations behind a load balancer, you must change the configuration. See {kibana-ref}/settings.html[Configuring Kibana] for details on each setting.
+
+Settings unique across each Kibana instance:
+--------
+server.uuid
+server.name
+--------
+
+Settings unique across each host (for example, running multiple installations on the same virtual machine):
+--------
+logging.dest
+path.data
+pid.file
+server.port
+--------
+
+Settings that must be the same:
+--------
+xpack.security.encryptionKey //decrypting session information
+xpack.reporting.encryptionKey //decrypting reports
+xpack.encryptedSavedObjects.encryptionKey // decrypting saved objects
+xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys // saved objects encryption key rotation, if any
+--------
+
+Separate configuration files can be used from the command line by using the `-c` flag:
+--------
+bin/kibana -c config/instance1.yml
+bin/kibana -c config/instance2.yml
+--------
+
+[float]
+[[high-availability]]
+=== High availability across multiple {es} nodes
+Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
+Kibana will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
+
+Currently the Console application is limited to connecting to the first node listed.
+
+In kibana.yml:
+--------
+elasticsearch.hosts:
+  - http://elasticsearch1:9200
+  - http://elasticsearch2:9200
+--------
+
+Related configurations include `elasticsearch.sniffInterval`, `elasticsearch.sniffOnStart`, and `elasticsearch.sniffOnConnectionFault`.
+These can be used to automatically update the list of hosts as a cluster is resized.  Parameters can be found on the {kibana-ref}/settings.html[settings page].
+
+[float]
+[[memory]]
+=== Memory
+Kibana has a default maximum memory limit of 1.4 GB, and in most cases, we recommend leaving this unconfigured.  In some scenarios, such as large reporting jobs,
+it may make sense to tweak limits to meet more specific requirements.
+
+You can modify this limit by setting `--max-old-space-size` in the `node.options` config file that can be found inside `kibana/config` folder or any other configured with the environment variable `KBN_PATH_CONF` (for example in debian based system would be `/etc/kibana`).
+
+The option accepts a limit in MB:
+--------
+--max-old-space-size=2048
 --------

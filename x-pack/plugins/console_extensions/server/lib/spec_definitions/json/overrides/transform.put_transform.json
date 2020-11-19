@@ -1,0 +1,49 @@
+{
+  "transform.put_transform": {
+    "data_autocomplete_rules": {
+      "description": "",
+      "dest": {
+        "__template": {
+          "index": "DESTINATION_INDEX_NAME"
+        },
+        "index": "DESTINATION_INDEX_NAME",
+        "pipeline": ""
+      },
+      "frequency": "1m",
+      "pivot": {
+        "group_by": {
+          "__template": {
+            "NAME": {}
+          },
+          "__scope_link": "GLOBAL.groupByAggs"
+        },
+        "aggregations": {
+          "__template": {
+            "NAME": {}
+          },
+          "__scope_link": "GLOBAL.aggregations"
+        }
+      },
+      "source": {
+        "__template": {
+          "index": "SOURCE_INDEX_NAME"
+        },
+        "index": "SOURCE_INDEX_NAME",
+        "query": {
+          "__scope_link": "GLOBAL.query"
+        }
+      },
+      "sync": {
+        "__template": {
+          "time": {
+            "field": ""
+          }
+        },
+        "time": {
+          "field": "",
+          "delay": "60s"
+        }
+      }
+    }
+  }
+}

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import yaml from 'js-yaml';
-import { get, has, omit, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get, has, omit } from 'lodash';
 import { ConfigBlockSchema, ConfigurationBlock } from '../../common/domain_types';
 import { FrontendConfigBlocksAdapter } from './adapters/configuration_blocks/adapter_types';
 
@@ -18,16 +18,17 @@ export class ConfigBlocksLib {
   ) {}
 
   public upsert = async (blocks: ConfigurationBlock[]) => {
-    return await this.adapter.upsert(this.userConfigsToJson(blocks));
+    return await this.adapter.upsert(await this.userConfigsToJson(blocks));
   };
 
   public getForTags = async (tagIds: string[], page: number) => {
     const result = await this.adapter.getForTags(tagIds, page);
-    result.list = this.jsonConfigToUserYaml(result.list);
+    result.list = await this.jsonConfigToUserYaml(result.list);
     return result;
   };
 
-  public jsonConfigToUserYaml(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
+  public async jsonConfigToUserYaml(blocks: ConfigurationBlock[]): Promise<ConfigurationBlock[]> {
+    const yaml = await import('js-yaml');
     // configuration_blocks yaml, JS cant read YAML so we parse it into JS,
     // because beats flattens all fields, and we need more structure.
     // we take tagConfigs, grab the config that applies here, render what we can into
@@ -36,16 +37,16 @@ export class ConfigBlocksLib {
     // NOTE: The perk of this, is that as we support more features via controls
     // vs yaml editing, it should "just work", and things that were in YAML
     // will now be in the UI forms...
-    return blocks.map(block => {
+    return blocks.map((block) => {
       const { type, config } = block;
 
-      const thisConfigSchema = this.configSchemas.find(conf => conf.id === type);
+      const thisConfigSchema = this.configSchemas.find((conf) => conf.id === type);
       const thisConfigBlockSchema = thisConfigSchema ? thisConfigSchema.configs : null;
       if (!thisConfigBlockSchema) {
         throw new Error('No config block schema ');
       }
 
-      const knownConfigIds: string[] = thisConfigBlockSchema.map(schema => schema.id);
+      const knownConfigIds: string[] = thisConfigBlockSchema.map((schema) => schema.id);
 
       const convertedConfig: ConfigurationBlock['config'] = knownConfigIds.reduce(
         (blockObj: any, configKey: string, index: number) => {
@@ -72,13 +73,14 @@ export class ConfigBlocksLib {
     });
   }
 
-  public userConfigsToJson(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
+  public async userConfigsToJson(blocks: ConfigurationBlock[]): Promise<ConfigurationBlock[]> {
+    const yaml = await import('js-yaml');
     // configurations is the JS representation of the config yaml,
     // so here we take that JS and convert it into a YAML string.
     // we do so while also flattening "other" into the flat yaml beats expect
-    return blocks.map(block => {
+    return blocks.map((block) => {
       const { type, config } = block;
-      const thisConfigSchema = this.configSchemas.find(conf => conf.id === type);
+      const thisConfigSchema = this.configSchemas.find((conf) => conf.id === type);
       const thisConfigBlockSchema = thisConfigSchema ? thisConfigSchema.configs : null;
       if (!thisConfigBlockSchema) {
         throw new Error('No config block schema ');
@@ -109,7 +111,7 @@ export class ConfigBlocksLib {
 
   private pickDeep(obj: { [key: string]: any }, keys: string[]) {
     const copy = {};
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (has(obj, key)) {
         const val = get(obj, key);
         set(copy, key, val);

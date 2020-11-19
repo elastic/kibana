@@ -6,40 +6,53 @@
 
 import {
   EuiButtonEmpty,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiTitle
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import React from 'react';
-import styled from 'styled-components';
 import { first } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
-import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { px, unit } from '../../../../style/variables';
+import { px, unit, units } from '../../../../style/variables';
+import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { history } from '../../../../utils/history';
 import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
 import { Stacktrace } from '../../../shared/Stacktrace';
+import { Summary } from '../../../shared/Summary';
+import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
+import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import {
   ErrorTab,
   exceptionStacktraceTab,
   getTabs,
-  logStacktraceTab
+  logStacktraceTab,
 } from './ErrorTabs';
-import { StickyErrorProperties } from './StickyErrorProperties';
+import { ExceptionStacktrace } from './ExceptionStacktrace';
 
 const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: ${px(unit)};
+`;
+
+const TransactionLinkName = styled.div`
+  margin-left: ${px(units.half)};
+  display: inline-block;
+  vertical-align: middle;
 `;
 
 interface Props {
@@ -52,12 +65,13 @@ interface Props {
 function getCurrentTab(
   tabs: ErrorTab[] = [],
   currentTabKey: string | undefined
-) {
+): ErrorTab | {} {
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
   return selectedTab ? selectedTab : first(tabs) || {};
 }
 
 export function DetailView({ errorGroup, urlParams, location }: Props) {
+  const history = useHistory();
   const { transaction, error, occurrencesCount } = errorGroup;
 
   if (!error) {
@@ -65,7 +79,12 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   }
 
   const tabs = getTabs(error);
-  const currentTab = getCurrentTab(tabs, urlParams.detailTab);
+  const currentTab = getCurrentTab(tabs, urlParams.detailTab) as ErrorTab;
+
+  const errorUrl = error.error.page?.url || error.url?.full;
+
+  const method = error.http?.request?.method;
+  const status = error.http?.response?.status_code;
 
   return (
     <EuiPanel>
@@ -75,7 +94,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
             {i18n.translate(
               'xpack.apm.errorGroupDetails.errorOccurrenceTitle',
               {
-                defaultMessage: 'Error occurrence'
+                defaultMessage: 'Error occurrence',
               }
             )}
           </h3>
@@ -86,15 +105,52 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
               'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
               {
                 defaultMessage:
-                  'View {occurrencesCount} occurrences in Discover',
-                values: { occurrencesCount }
+                  'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
+                values: { occurrencesCount },
               }
             )}
           </EuiButtonEmpty>
         </DiscoverErrorLink>
       </HeaderContainer>
 
-      <StickyErrorProperties error={error} transaction={transaction} />
+      <Summary
+        items={[
+          <TimestampTooltip time={error.timestamp.us / 1000} />,
+          errorUrl && method ? (
+            <HttpInfoSummaryItem
+              url={errorUrl}
+              method={method}
+              status={status}
+            />
+          ) : null,
+          transaction && transaction.user_agent ? (
+            <UserAgentSummaryItem {...transaction.user_agent} />
+          ) : null,
+          transaction && (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.apm.errorGroupDetails.relatedTransactionSample',
+                {
+                  defaultMessage: 'Related transaction sample',
+                }
+              )}
+            >
+              <TransactionDetailLink
+                traceId={transaction.trace.id}
+                transactionId={transaction.transaction.id}
+                transactionName={transaction.transaction.name}
+                transactionType={transaction.transaction.type}
+                serviceName={transaction.service.name}
+              >
+                <EuiIcon type="merge" />
+                <TransactionLinkName>
+                  {transaction.transaction.name}
+                </TransactionLinkName>
+              </TransactionDetailLink>
+            </EuiToolTip>
+          ),
+        ]}
+      />
 
       <EuiSpacer />
 
@@ -107,8 +163,8 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
                   ...location,
                   search: fromQuery({
                     ...toQuery(location.search),
-                    detailTab: key
-                  })
+                    detailTab: key,
+                  }),
                 });
               }}
               isSelected={currentTab.key === key}
@@ -125,16 +181,16 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   );
 }
 
-export function TabContent({
+function TabContent({
   error,
-  currentTab
+  currentTab,
 }: {
   error: APMError;
   currentTab: ErrorTab;
 }) {
-  const codeLanguage = error.service.name;
-  const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
-  const logStackframes = idx(error, _ => _.error.exception[0].stacktrace);
+  const codeLanguage = error.service.language?.name;
+  const exceptions = error.error.exception || [];
+  const logStackframes = error.error.log?.stacktrace;
 
   switch (currentTab.key) {
     case logStacktraceTab.key:
@@ -143,7 +199,10 @@ export function TabContent({
       );
     case exceptionStacktraceTab.key:
       return (
-        <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
+        <ExceptionStacktrace
+          codeLanguage={codeLanguage}
+          exceptions={exceptions}
+        />
       );
     default:
       return <ErrorMetadata error={error} />;

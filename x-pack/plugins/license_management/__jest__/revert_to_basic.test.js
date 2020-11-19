@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RevertToBasic } from '../public/sections/license_dashboard/revert_to_basic';
+import { RevertToBasic } from '../public/application/sections/license_dashboard/revert_to_basic';
 import { createMockLicense, getComponent } from './util';
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
 
 describe('RevertToBasic component', () => {
   test('should display when trial is active', () => {
     const rendered = getComponent(
       {
-        license: createMockLicense('trial')
+        license: createMockLicense('trial'),
       },
       RevertToBasic
     );
@@ -21,7 +25,7 @@ describe('RevertToBasic component', () => {
   test('should display when license is expired', () => {
     const rendered = getComponent(
       {
-        license: createMockLicense('platinum', 0)
+        license: createMockLicense('platinum', 0),
       },
       RevertToBasic
     );
@@ -29,10 +33,10 @@ describe('RevertToBasic component', () => {
   });
   test('should display when license is about to expire', () => {
     // ten days from now
-    const imminentExpirationTime = new Date().getTime() + (10 * 24 * 60 * 60 * 1000);
+    const imminentExpirationTime = new Date().getTime() + 10 * 24 * 60 * 60 * 1000;
     const rendered = getComponent(
       {
-        license: createMockLicense('platinum', imminentExpirationTime)
+        license: createMockLicense('platinum', imminentExpirationTime),
       },
       RevertToBasic
     );
@@ -41,28 +45,28 @@ describe('RevertToBasic component', () => {
   test('should not display for active basic license', () => {
     const rendered = getComponent(
       {
-        license: createMockLicense('basic')
+        license: createMockLicense('basic'),
       },
       RevertToBasic
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should not display for active gold license', () => {
     const rendered = getComponent(
       {
-        license: createMockLicense('gold')
+        license: createMockLicense('gold'),
       },
       RevertToBasic
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
   test('should not display for active platinum license', () => {
     const rendered = getComponent(
       {
-        license: createMockLicense('platinum')
+        license: createMockLicense('platinum'),
       },
       RevertToBasic
     );
-    expect(rendered.html()).toBeNull();
+    expect(rendered.isEmptyRender()).toBeTruthy();
   });
 });

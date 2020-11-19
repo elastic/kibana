@@ -8,15 +8,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { ShapePickerMini } from '../../../public/components/shape_picker_mini/';
+import { ShapePickerPopover } from '../../../public/components/shape_picker_popover/';
+import { ArgumentStrings } from '../../../i18n';
+
+const { Shape: strings } = ArgumentStrings;
 
 const ShapeArgInput = ({ onValueChange, argValue, typeInstance }) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={false}>
-      <ShapePickerMini
+      <ShapePickerPopover
         value={argValue}
         onChange={onValueChange}
         shapes={typeInstance.options.shapes}
+        ariaLabel={typeInstance.displayName}
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -32,8 +36,8 @@ ShapeArgInput.propTypes = {
 
 export const shape = () => ({
   name: 'shape',
-  displayName: 'Shape',
-  help: 'Shape picker',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(ShapeArgInput),
   default: '"square"',
 });

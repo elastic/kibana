@@ -4,40 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nServiceType } from '@kbn/i18n/angular';
+import { i18n } from '@kbn/i18n';
 import {
+  HomePublicPluginSetup,
   FeatureCatalogueCategory,
-  FeatureCatalogueRegistryProvider,
-} from 'ui/registry/feature_catalogue';
+} from '../../../../src/plugins/home/public';
 
-const APP_ID = 'infra';
+export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
+  homePlugin.featureCatalogue.register({
+    id: 'metrics',
+    title: i18n.translate('xpack.infra.registerFeatures.infraOpsTitle', {
+      defaultMessage: 'Metrics',
+    }),
+    description: i18n.translate('xpack.infra.registerFeatures.infraOpsDescription', {
+      defaultMessage:
+        'Explore infrastructure metrics and logs for common servers, containers, and services.',
+    }),
+    icon: 'metricsApp',
+    path: `/app/metrics`,
+    showOnHomePage: false,
+    category: FeatureCatalogueCategory.DATA,
+  });
 
-FeatureCatalogueRegistryProvider.register((i18n: I18nServiceType) => ({
-  id: 'infraops',
-  title: i18n('xpack.infra.registerFeatures.infraOpsTitle', {
-    defaultMessage: 'Infrastructure',
-  }),
-  description: i18n('xpack.infra.registerFeatures.infraOpsDescription', {
-    defaultMessage:
-      'Explore infrastructure metrics and logs for common servers, containers, and services.',
-  }),
-  icon: 'infraApp',
-  path: `/app/${APP_ID}#infrastructure`,
-  showOnHomePage: true,
-  category: FeatureCatalogueCategory.DATA,
-}));
-
-FeatureCatalogueRegistryProvider.register((i18n: I18nServiceType) => ({
-  id: 'infralogging',
-  title: i18n('xpack.infra.registerFeatures.logsTitle', {
-    defaultMessage: 'Logs',
-  }),
-  description: i18n('xpack.infra.registerFeatures.logsDescription', {
-    defaultMessage:
-      'Stream logs in real time or scroll through historical views in a console-like experience.',
-  }),
-  icon: 'loggingApp',
-  path: `/app/${APP_ID}#logs`,
-  showOnHomePage: true,
-  category: FeatureCatalogueCategory.DATA,
-}));
+  homePlugin.featureCatalogue.register({
+    id: 'logs',
+    title: i18n.translate('xpack.infra.registerFeatures.logsTitle', {
+      defaultMessage: 'Logs',
+    }),
+    description: i18n.translate('xpack.infra.registerFeatures.logsDescription', {
+      defaultMessage:
+        'Stream logs in real time or scroll through historical views in a console-like experience.',
+    }),
+    icon: 'logsApp',
+    path: `/app/logs`,
+    showOnHomePage: false,
+    category: FeatureCatalogueCategory.DATA,
+  });
+};

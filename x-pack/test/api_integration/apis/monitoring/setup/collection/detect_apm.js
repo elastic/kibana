@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/setup/collection/detect_apm';
     const timeRange = {
       min: '2019-04-16T00:00:00.741Z',
-      max: '2019-04-16T23:59:59.741Z'
+      max: '2019-04-16T23:59:59.741Z',
     };
 
     before('load archive', () => {
@@ -28,7 +28,7 @@ export default function ({ getService }) {
 
     it('should get collection status', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/setup/collection')
+        .post('/api/monitoring/v1/setup/collection/cluster?skipLiveData=true')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);

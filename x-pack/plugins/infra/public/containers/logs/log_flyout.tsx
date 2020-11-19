@@ -4,83 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import createContainer from 'constate-latest';
+import createContainer from 'constate';
 import { isString } from 'lodash';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 
-import { FlyoutItemQuery, InfraLogItem } from '../../graphql/types';
-import { useApolloClient } from '../../utils/apollo_context';
+import { LogEntriesItem } from '../../../common/http_api';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { UrlStateContainer } from '../../utils/url_state';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import { Source } from '../source';
-import { flyoutItemQuery } from './flyout_item.gql_query';
+import { fetchLogEntriesItem } from './log_entries/api/fetch_log_entries_item';
+import { useLogSourceContext } from './log_source';
 
 export enum FlyoutVisibility {
   hidden = 'hidden',
   visible = 'visible',
 }
 
-interface FlyoutOptionsUrlState {
+export interface FlyoutOptionsUrlState {
   flyoutId?: string | null;
   flyoutVisibility?: string | null;
   surroundingLogsId?: string | null;
 }
 
 export const useLogFlyout = () => {
-  const { sourceId } = useContext(Source.Context);
+  const { services } = useKibanaContextForPlugin();
+  const { sourceId } = useLogSourceContext();
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
   const [flyoutId, setFlyoutId] = useState<string | null>(null);
-  const [flyoutItem, setFlyoutItem] = useState<InfraLogItem | null>(null);
+  const [flyoutItem, setFlyoutItem] = useState<LogEntriesItem | null>(null);
   const [surroundingLogsId, setSurroundingLogsId] = useState<string | null>(null);
-
-  const apolloClient = useApolloClient();
 
   const [loadFlyoutItemRequest, loadFlyoutItem] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
-        if (!apolloClient) {
-          throw new Error('Failed to load flyout item: No apollo client available.');
-        }
-
         if (!flyoutId) {
           return;
         }
-
-        return await apolloClient.query<FlyoutItemQuery.Query, FlyoutItemQuery.Variables>({
-          fetchPolicy: 'no-cache',
-          query: flyoutItemQuery,
-          variables: {
-            itemId: flyoutId,
-            sourceId,
-          },
-        });
+        return await fetchLogEntriesItem({ sourceId, id: flyoutId }, services.http.fetch);
       },
-      onResolve: response => {
+      onResolve: (response) => {
         if (response) {
           const { data } = response;
-          setFlyoutItem((data && data.source && data.source.logItem) || null);
+          setFlyoutItem(data || null);
         }
       },
     },
-    [apolloClient, sourceId, flyoutId]
+    [sourceId, flyoutId]
   );
 
-  const isLoading = useMemo(
-    () => {
-      return loadFlyoutItemRequest.state === 'pending';
-    },
-    [loadFlyoutItemRequest.state]
-  );
+  const isLoading = useMemo(() => {
+    return loadFlyoutItemRequest.state === 'pending';
+  }, [loadFlyoutItemRequest.state]);
 
-  useEffect(
-    () => {
-      if (flyoutId) {
-        loadFlyoutItem();
-      }
-    },
-    [loadFlyoutItem, flyoutId]
-  );
+  useEffect(() => {
+    if (flyoutId) {
+      loadFlyoutItem();
+    }
+  }, [loadFlyoutItem, flyoutId]);
 
   return {
     flyoutVisible,
@@ -115,7 +96,7 @@ export const WithFlyoutOptionsUrlState = () => {
       }}
       urlStateKey="flyoutOptions"
       mapToUrlState={mapToUrlState}
-      onChange={newUrlState => {
+      onChange={(newUrlState) => {
         if (newUrlState && newUrlState.flyoutId) {
           setFlyoutId(newUrlState.flyoutId);
         }
@@ -129,7 +110,7 @@ export const WithFlyoutOptionsUrlState = () => {
           setFlyoutVisibility(false);
         }
       }}
-      onInitialize={initialUrlState => {
+      onInitialize={(initialUrlState) => {
         if (initialUrlState && initialUrlState.flyoutId) {
           setFlyoutId(initialUrlState.flyoutId);
         }

@@ -12,13 +12,20 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiCode,
-  EuiText,
   EuiTextArea,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { DataSourceStrings, TIMELION_QUERY_URL, TIMELION, CANVAS } from '../../../i18n';
 
-const TimelionDatasource = ({ args, updateArgs }) => {
+const { Timelion: strings } = DataSourceStrings;
+
+const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
+  const DEFAULT_QUERY = `.es(index=${defaultIndex})`;
+
   const setArg = (name, value) => {
     updateArgs &&
       updateArgs({
@@ -42,7 +49,7 @@ const TimelionDatasource = ({ args, updateArgs }) => {
   // TODO: This is a terrible way of doing defaults. We need to find a way to read the defaults for the function
   // and set them for the data source UI.
   const getQuery = () => {
-    return getSimpleArg(argName, args)[0] || '.es(*)';
+    return getSimpleArg(argName, args)[0] || DEFAULT_QUERY;
   };
 
   const getInterval = () => {
@@ -51,46 +58,66 @@ const TimelionDatasource = ({ args, updateArgs }) => {
 
   return (
     <div>
-      <EuiText size="xs">
-        <h3>Timelion</h3>
-        <p>
-          Canvas integrates with Kibana's Timelion application to allow you to use Timelion queries
-          to pull back timeseries data in a tabular format that can be used with Canvas elements.
-        </p>
-      </EuiText>
+      <EuiCallOut title={strings.getTipsHeading()} size="s" iconType="iInCircle">
+        <ul>
+          <li>
+            <FormattedMessage
+              id="xpack.canvas.uis.dataSources.timelion.tips.time"
+              defaultMessage="{timelion} requires a time range. Add a time filter element to your page or use the expression editor to pass one in."
+              values={{
+                timelion: TIMELION,
+              }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.canvas.uis.dataSources.timelion.tips.functions"
+              defaultMessage="Some {timelion} functions, such as {functionExample}, do not translate to a {canvas} data table. However, anything todo with data manipulation should work as expected."
+              values={{
+                timelion: TIMELION,
+                canvas: CANVAS,
+                functionExample: <EuiCode>.color()</EuiCode>,
+              }}
+            />
+          </li>
+        </ul>
+      </EuiCallOut>
 
-      <EuiSpacer />
+      <EuiSpacer size="m" />
 
-      <EuiFormRow label="Query" helpText="Lucene Query String syntax">
+      <EuiFormRow
+        label={strings.getQueryLabel()}
+        labelAppend={
+          <EuiText size="xs">
+            <EuiLink href={TIMELION_QUERY_URL} target="_blank">
+              {strings.queryLabel()}
+            </EuiLink>
+          </EuiText>
+        }
+        display="rowCompressed"
+      >
         <EuiTextArea
-          className="canvasTextArea--code"
+          className="canvasTextArea__code"
           value={getQuery()}
-          onChange={e => setArg(argName, e.target.value)}
+          onChange={(e) => setArg(argName, e.target.value)}
+          rows={15}
         />
       </EuiFormRow>
+
       {
         // TODO: Time timelion interval picker should be a drop down
       }
       <EuiFormRow
-        label="Interval"
-        helpText="Accepts Elasticsearch date math: 1w, 5d, 10s, or auto"
-        compressed
+        label={strings.getIntervalLabel()}
+        helpText={strings.getIntervalHelp()}
+        display="columnCompressed"
       >
-        <EuiFieldText value={getInterval()} onChange={e => setArg('interval', e.target.value)} />
+        <EuiFieldText
+          compressed
+          value={getInterval()}
+          onChange={(e) => setArg('interval', e.target.value)}
+        />
       </EuiFormRow>
-
-      <EuiCallOut color="warning" title="Some tips" size="s">
-        <ul>
-          <li>
-            Timelion requires a time range, you should add a time filter element to your page
-            somewhere, or use the code editor to pass in a time filter.
-          </li>
-          <li>
-            Some Timelion functions, such as <EuiCode>.color()</EuiCode>, don't translate to a
-            Canvas data table. Anything todo with data manipulation should work grand.
-          </li>
-        </ul>
-      </EuiCallOut>
     </div>
   );
 };
@@ -98,12 +125,13 @@ const TimelionDatasource = ({ args, updateArgs }) => {
 TimelionDatasource.propTypes = {
   args: PropTypes.object.isRequired,
   updateArgs: PropTypes.func,
+  defaultIndex: PropTypes.string,
 };
 
 export const timelion = () => ({
   name: 'timelion',
-  displayName: 'Timelion',
-  help: 'Use Timelion syntax to retrieve a timeseries',
-  image: 'timelionApp',
+  displayName: TIMELION,
+  help: strings.getHelp(),
+  image: 'visTimelion',
   template: templateFromReactComponent(TimelionDatasource),
 });

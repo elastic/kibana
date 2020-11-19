@@ -1,0 +1,251 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`APIKeysGridPage renders a callout when API keys are not enabled 1`] = `
+<NotEnabled
+  docLinks={
+    DocumentationLinksService {
+      "esDocBasePath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/",
+    }
+  }
+>
+  <EuiCallOut
+    color="danger"
+    iconType="alert"
+    title={
+      <FormattedMessage
+        defaultMessage="API keys not enabled in Elasticsearch"
+        id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorTitle"
+        values={Object {}}
+      />
+    }
+  >
+    <div
+      className="euiCallOut euiCallOut--danger"
+    >
+      <div
+        className="euiCallOutHeader"
+      >
+        <EuiIcon
+          aria-hidden="true"
+          className="euiCallOutHeader__icon"
+          size="m"
+          type="alert"
+        >
+          <span
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            data-euiicon-type="alert"
+            size="m"
+          />
+        </EuiIcon>
+        <span
+          className="euiCallOutHeader__title"
+        >
+          <FormattedMessage
+            defaultMessage="API keys not enabled in Elasticsearch"
+            id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorTitle"
+            values={Object {}}
+          >
+            API keys not enabled in Elasticsearch
+          </FormattedMessage>
+        </span>
+      </div>
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
+        >
+          <FormattedMessage
+            defaultMessage="Contact your system administrator and refer to the {link} to enable API keys."
+            id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorDescription"
+            values={
+              Object {
+                "link": <EuiLink
+                  href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    defaultMessage="docs"
+                    id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          >
+            Contact your system administrator and refer to the 
+            <EuiLink
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
+              target="_blank"
+            >
+              <a
+                className="euiLink euiLink--primary"
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"
+                rel="noopener"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="docs"
+                  id="xpack.security.management.apiKeys.table.apiKeysDisabledErrorLinkText"
+                  values={Object {}}
+                >
+                  docs
+                </FormattedMessage>
+                <EuiIcon
+                  aria-label="External link"
+                  className="euiLink__externalIcon"
+                  size="s"
+                  type="popout"
+                >
+                  <span
+                    aria-label="External link"
+                    className="euiLink__externalIcon"
+                    data-euiicon-type="popout"
+                    size="s"
+                  />
+                </EuiIcon>
+                <EuiScreenReaderOnly>
+                  <span
+                    className="euiScreenReaderOnly"
+                  >
+                    <EuiI18n
+                      default="(opens in a new tab or window)"
+                      token="euiLink.newTarget.screenReaderOnlyText"
+                    >
+                      (opens in a new tab or window)
+                    </EuiI18n>
+                  </span>
+                </EuiScreenReaderOnly>
+              </a>
+            </EuiLink>
+             to enable API keys.
+          </FormattedMessage>
+        </div>
+      </EuiText>
+    </div>
+  </EuiCallOut>
+</NotEnabled>
+`;
+
+exports[`APIKeysGridPage renders permission denied if user does not have required permissions 1`] = `
+<PermissionDenied>
+  <EuiFlexGroup
+    gutterSize="none"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiPageContent
+        horizontalPosition="center"
+      >
+        <EuiPanel
+          className="euiPageContent euiPageContent--horizontalCenter"
+          paddingSize="l"
+        >
+          <div
+            className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--horizontalCenter"
+          >
+            <EuiEmptyPrompt
+              body={
+                <p
+                  data-test-subj="permissionDeniedMessage"
+                >
+                  <FormattedMessage
+                    defaultMessage="Contact your system administrator."
+                    id="xpack.security.management.apiKeys.noPermissionToManageRolesDescription"
+                    values={Object {}}
+                  />
+                </p>
+              }
+              iconType="securityApp"
+              title={
+                <h2
+                  data-test-subj="apiKeysPermissionDeniedMessage"
+                >
+                  <FormattedMessage
+                    defaultMessage="You need permission to manage API keys"
+                    id="xpack.security.management.apiKeys.deniedPermissionTitle"
+                    values={Object {}}
+                  />
+                </h2>
+              }
+            >
+              <div
+                className="euiEmptyPrompt"
+              >
+                <EuiIcon
+                  color="subdued"
+                  size="xxl"
+                  type="securityApp"
+                >
+                  <span
+                    color="subdued"
+                    data-euiicon-type="securityApp"
+                    size="xxl"
+                  />
+                </EuiIcon>
+                <EuiSpacer
+                  size="s"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--s"
+                  />
+                </EuiSpacer>
+                <EuiTextColor
+                  color="subdued"
+                >
+                  <span
+                    className="euiTextColor euiTextColor--subdued"
+                  >
+                    <EuiTitle
+                      size="m"
+                    >
+                      <h2
+                        className="euiTitle euiTitle--medium"
+                        data-test-subj="apiKeysPermissionDeniedMessage"
+                      >
+                        <FormattedMessage
+                          defaultMessage="You need permission to manage API keys"
+                          id="xpack.security.management.apiKeys.deniedPermissionTitle"
+                          values={Object {}}
+                        >
+                          You need permission to manage API keys
+                        </FormattedMessage>
+                      </h2>
+                    </EuiTitle>
+                    <EuiSpacer
+                      size="m"
+                    >
+                      <div
+                        className="euiSpacer euiSpacer--m"
+                      />
+                    </EuiSpacer>
+                    <EuiText>
+                      <div
+                        className="euiText euiText--medium"
+                      >
+                        <p
+                          data-test-subj="permissionDeniedMessage"
+                        >
+                          <FormattedMessage
+                            defaultMessage="Contact your system administrator."
+                            id="xpack.security.management.apiKeys.noPermissionToManageRolesDescription"
+                            values={Object {}}
+                          >
+                            Contact your system administrator.
+                          </FormattedMessage>
+                        </p>
+                      </div>
+                    </EuiText>
+                  </span>
+                </EuiTextColor>
+              </div>
+            </EuiEmptyPrompt>
+          </div>
+        </EuiPanel>
+      </EuiPageContent>
+    </div>
+  </EuiFlexGroup>
+</PermissionDenied>
+`;

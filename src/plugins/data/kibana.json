@@ -1,0 +1,18 @@
+{
+  "id": "data",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "expressions",
+    "uiActions"
+  ],
+  "optionalPlugins": ["usageCollection"],
+  "extraPublicDirs": ["common"],
+  "requiredBundles": [
+    "usageCollection",
+    "kibanaUtils",
+    "kibanaReact",
+    "inspector"
+  ]
+}

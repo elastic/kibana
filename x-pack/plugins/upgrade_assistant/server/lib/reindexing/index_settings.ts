@@ -88,6 +88,7 @@ const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
     'index.routing.allocation.initial_recovery._id',
     'index.version.created',
     'index.version.upgraded',
+    'index.verified_before_close',
   ]);
 
 // Use `flow` to pipe the settings through each function.

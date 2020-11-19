@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Function } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   condition: boolean | null;
@@ -12,7 +12,7 @@ interface Arguments {
   else: () => Promise<any>;
 }
 
-export function ifFn(): Function<'if', Arguments, any> {
+export function ifFn(): ExpressionFunctionDefinition<'if', unknown, Arguments, unknown> {
   const { help, args: argHelp } = getFunctionHelp().if;
 
   return {
@@ -20,9 +20,10 @@ export function ifFn(): Function<'if', Arguments, any> {
     help,
     args: {
       condition: {
-        types: ['boolean', 'null'],
+        types: ['boolean'],
         aliases: ['_'],
         help: argHelp.condition,
+        required: true,
       },
       then: {
         resolve: false,
@@ -33,15 +34,15 @@ export function ifFn(): Function<'if', Arguments, any> {
         help: argHelp.else,
       },
     },
-    fn: async (context, args) => {
+    fn: async (input, args) => {
       if (args.condition) {
         if (typeof args.then === 'undefined') {
-          return context;
+          return input;
         }
         return await args.then();
       } else {
         if (typeof args.else === 'undefined') {
-          return context;
+          return input;
         }
         return await args.else();
       }

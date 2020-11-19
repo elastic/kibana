@@ -19,9 +19,9 @@
 
 import globby from 'globby';
 
-import { run } from './run';
+import { REPO_ROOT } from '@kbn/utils';
+import { run } from '@kbn/dev-utils';
 import { File } from './file';
-import { REPO_ROOT } from './constants';
 import { checkFileCasing } from './precommit_hook/check_file_casing';
 
 run(async ({ log }) => {
@@ -36,10 +36,10 @@ run(async ({ log }) => {
       // so it's still super slow. This prevents loading the files
       // and still relies on gitignore to to final ignores
       '**/node_modules',
-    ]
+    ],
   });
 
-  const files = paths.map(path => new File(path));
+  const files = paths.map((path) => new File(path));
 
   await checkFileCasing(log, files);
 });

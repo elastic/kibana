@@ -11,46 +11,46 @@ import { ApmStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function StatusUI({ stats, intl }) {
+export function Status({ alerts, stats }) {
   const {
-    apms: {
-      total
-    },
+    apms: { total },
     totalEvents,
     timeOfLastEvent,
   } = stats;
 
   const metrics = [
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instances.status.serversLabel',
+      label: i18n.translate('xpack.monitoring.apm.instances.status.serversLabel', {
         defaultMessage: 'Servers',
       }),
       value: total,
-      'data-test-subj': 'total'
+      'data-test-subj': 'total',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instances.status.totalEventsLabel',
+      label: i18n.translate('xpack.monitoring.apm.instances.status.totalEventsLabel', {
         defaultMessage: 'Total Events',
       }),
       value: formatMetric(totalEvents, '0.[0]a'),
-      'data-test-subj': 'totalEvents'
+      'data-test-subj': 'totalEvents',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instances.status.lastEventLabel',
+      label: i18n.translate('xpack.monitoring.apm.instances.status.lastEventLabel', {
         defaultMessage: 'Last Event',
       }),
-      value: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instances.status.lastEventDescription',
-        defaultMessage: '{timeOfLastEvent} ago' }, {
-        timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
+      value: i18n.translate('xpack.monitoring.apm.instances.status.lastEventDescription', {
+        defaultMessage: '{timeOfLastEvent} ago',
+        values: {
+          timeOfLastEvent: formatTimestampToDuration(
+            +moment(timeOfLastEvent),
+            CALCULATE_DURATION_SINCE
+          ),
+        },
       }),
       'data-test-subj': 'timeOfLastEvent',
-    }
+    },
   ];
 
   const IconComponent = ({ status }) => (
@@ -59,9 +59,7 @@ function StatusUI({ stats, intl }) {
         id="xpack.monitoring.apm.instances.statusDescription"
         defaultMessage="Status: {apmStatusIcon}"
         values={{
-          apmStatusIcon: (
-            <ApmStatusIcon status={status} />
-          )
+          apmStatusIcon: <ApmStatusIcon status={status} />,
         }}
       />
     </Fragment>
@@ -70,10 +68,9 @@ function StatusUI({ stats, intl }) {
   return (
     <SummaryStatus
       metrics={metrics}
+      alerts={alerts}
       IconComponent={IconComponent}
       data-test-subj="apmDetailStatus"
     />
   );
 }
-
-export const Status = injectI18n(StatusUI);

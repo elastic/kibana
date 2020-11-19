@@ -5,28 +5,32 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { ContextFunction, Render, Style } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Render, Style, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
-type Context = string | null;
+type Input = number | string | null;
 
 interface Arguments {
   label: string;
   metricFont: Style;
+  metricFormat: string;
   labelFont: Style;
 }
 
-export function metric(): ContextFunction<'metric', Context, Arguments, Render<Arguments>> {
+export function metric(): ExpressionFunctionDefinition<
+  'metric',
+  Input,
+  Arguments,
+  Render<Arguments>
+> {
   const { help, args: argHelp } = getFunctionHelp().metric;
 
   return {
     name: 'metric',
     aliases: [],
     type: 'render',
+    inputTypes: ['number', 'string', 'null'],
     help,
-    context: {
-      types: ['string', 'null'],
-    },
     args: {
       label: {
         types: ['string'],
@@ -34,28 +38,32 @@ export function metric(): ContextFunction<'metric', Context, Arguments, Render<A
         help: argHelp.label,
         default: '""',
       },
-      metricFont: {
-        types: ['style'],
-        help: argHelp.metricFont,
-        default: `{font size=48 family="${
-          openSans.value
-        }" color="#000000" align=center lHeight=48}`,
-      },
       labelFont: {
         types: ['style'],
         help: argHelp.labelFont,
         default: `{font size=14 family="${openSans.value}" color="#000000" align=center}`,
       },
+      metricFont: {
+        types: ['style'],
+        help: argHelp.metricFont,
+        default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
+      },
+      metricFormat: {
+        types: ['string'],
+        aliases: ['format'],
+        help: argHelp.metricFormat,
+      },
     },
-    fn: (context, { label, metricFont, labelFont }) => {
+    fn: (input, { label, labelFont, metricFont, metricFormat }) => {
       return {
         type: 'render',
         as: 'metric',
         value: {
-          metric: context === null ? '?' : context,
+          metric: input === null ? '?' : input,
           label,
-          metricFont,
           labelFont,
+          metricFont,
+          metricFormat,
         },
       };
     },

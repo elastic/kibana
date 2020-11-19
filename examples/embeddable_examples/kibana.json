@@ -1,0 +1,11 @@
+{
+  "id": "embeddableExamples",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["embeddable", "uiActions", "savedObjects", "dashboard"],
+  "optionalPlugins": [],
+  "extraPublicDirs": ["public/todo", "public/hello_world", "public/todo/todo_ref_embeddable"],
+  "requiredBundles": ["kibanaReact"]
+}

@@ -53,16 +53,8 @@ export const KuiTableHeaderCell = ({
     const statefulAriaLabel = `Sort ${columnTitle} ${isSortAscending ? 'descending' : 'ascending'}`;
 
     return (
-      <th
-        className={classes}
-        scope={scope}
-        {...rest}
-      >
-        <button
-          className={buttonClasses}
-          onClick={onSort}
-          aria-label={statefulAriaLabel}
-        >
+      <th className={classes} scope={scope} {...rest}>
+        <button className={buttonClasses} onClick={onSort} aria-label={statefulAriaLabel}>
           <span className="kuiTableHeaderCell__liner">
             {children}
             {sortIcon}
@@ -73,15 +65,8 @@ export const KuiTableHeaderCell = ({
   }
 
   return (
-    <th
-      className={classes}
-      aria-label={ariaLabel}
-      scope={scope}
-      {...rest}
-    >
-      <div className="kuiTableHeaderCell__liner">
-        {children}
-      </div>
+    <th className={classes} aria-label={ariaLabel} scope={scope} {...rest}>
+      <div className="kuiTableHeaderCell__liner">{children}</div>
     </th>
   );
 };

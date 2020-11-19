@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginInitializerContext } from '../../../../src/core/server';
+import { Plugin } from './plugin';
+
 export { initServerWithKibana, KibanaServer } from './kibana.index';
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new Plugin(initializerContext);

@@ -3,14 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Datatable, ContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
+
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   fn: (datatable: Datatable) => Promise<boolean>;
 }
 
-export function filterrows(): ContextFunction<
+export function filterrows(): ExpressionFunctionDefinition<
   'filterrows',
   Datatable,
   Arguments,
@@ -22,32 +23,31 @@ export function filterrows(): ContextFunction<
     name: 'filterrows',
     aliases: [],
     type: 'datatable',
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['datatable'],
     help,
     args: {
       fn: {
         resolve: false,
-        aliases: ['_'],
+        aliases: ['_', 'exp', 'expression', 'function'],
         types: ['boolean'],
+        required: true,
         help: argHelp.fn,
       },
     },
-    fn(context, { fn }) {
-      const checks = context.rows.map(row =>
+    fn(input, { fn }) {
+      const checks = input.rows.map((row) =>
         fn({
-          ...context,
+          ...input,
           rows: [row],
         })
       );
 
       return Promise.all(checks)
-        .then(results => context.rows.filter((row, i) => results[i]))
+        .then((results) => input.rows.filter((row, i) => results[i]))
         .then(
-          rows =>
+          (rows) =>
             ({
-              ...context,
+              ...input,
               rows,
             } as Datatable)
         );

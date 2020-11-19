@@ -21,9 +21,12 @@ import { InvalidElementType } from './invalid_element_type';
 */
 const branches = [
   // no renderable or renderable config value, render loading
-  branch(({ renderable, state }) => {
-    return !state || !renderable;
-  }, renderComponent(({ backgroundColor }) => <Loading backgroundColor={backgroundColor} />)),
+  branch(
+    ({ renderable, state }) => {
+      return !state || !renderable;
+    },
+    renderComponent(({ backgroundColor }) => <Loading backgroundColor={backgroundColor} />)
+  ),
 
   // renderable is available, but no matching element is found, render invalid
   branch(({ renderable, renderFunction }) => {
@@ -43,15 +46,15 @@ const branches = [
 export const ElementContent = compose(
   pure,
   ...branches
-)(({ renderable, renderFunction, size, handlers }) => {
-  const { getFilter, setFilter, done, onComplete } = handlers;
+)(({ renderable, renderFunction, width, height, handlers }) => {
+  const { onComplete } = handlers;
 
   return Style.it(
     renderable.css,
     <div
       // TODO: 'canvas__element' was added for BWC, It can be removed after a while
       className={'canvas__element canvasElement'}
-      style={{ ...renderable.containerStyle, ...size }}
+      style={{ ...renderable.containerStyle, width, height }}
       data-test-subj="canvasWorkpadPageElementContent"
     >
       <ElementShareContainer
@@ -65,8 +68,9 @@ export const ElementContent = compose(
           reuseNode={renderFunction.reuseDomNode}
           config={renderable.value}
           css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
-          size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
-          handlers={{ getFilter, setFilter, done }}
+          width={width}
+          height={height}
+          handlers={handlers}
         />
       </ElementShareContainer>
     </div>

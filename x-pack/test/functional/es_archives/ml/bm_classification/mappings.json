@@ -1,0 +1,96 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "ft_bank_marketing",
+    "mappings": {
+      "properties": {
+        "age": {
+          "type": "integer"
+        },
+        "balance": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "campaign": {
+          "type": "integer"
+        },
+        "cons_conf_idx": {
+          "type": "float"
+        },
+        "contact": {
+          "type": "keyword"
+        },
+        "day": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "day_of_week": {
+          "type": "keyword"
+        },
+        "default": {
+          "type": "keyword"
+        },
+        "duration": {
+          "type": "integer"
+        },
+        "education": {
+          "type": "keyword"
+        },
+        "emp_var_rate": {
+          "type": "float"
+        },
+        "euribor3m": {
+          "type": "float"
+        },
+        "housing": {
+          "type": "keyword"
+        },
+        "job": {
+          "type": "keyword"
+        },
+        "loan": {
+          "type": "keyword"
+        },
+        "marital": {
+          "type": "keyword"
+        },
+        "month": {
+          "type": "keyword"
+        },
+        "nr_employed": {
+          "type": "integer"
+        },
+        "pdays": {
+          "type": "integer"
+        },
+        "poutcome": {
+          "type": "keyword"
+        },
+        "previous": {
+          "type": "integer"
+        },
+        "y": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

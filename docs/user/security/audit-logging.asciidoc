@@ -1,0 +1,148 @@
+[role="xpack"]
+[[xpack-security-audit-logging]]
+=== Audit logs
+
+You can enable auditing to keep track of security-related events such as
+authorization success and failures. Logging these events enables you to monitor
+{kib} for suspicious activity and provides evidence in the event of an attack.
+
+Use the {kib} audit logs in conjunction with {ref}/enable-audit-logging.html[{es} audit logging] to get a
+holistic view of all security related events. {kib} defers to the {es} security
+model for authentication, data index authorization, and features that are driven
+by cluster-wide privileges. For more information on enabling audit logging in
+{es}, refer to {ref}/auditing.html[Auditing security events].
+
+[IMPORTANT]
+============================================================================
+Audit logs are **disabled** by default. To enable this functionality, you must
+set `xpack.security.audit.enabled` to `true` in `kibana.yml`.
+============================================================================
+
+The current version of the audit logger uses the standard {kib} logging output,
+which can be configured in `kibana.yml`. For more information, refer to <<settings>>.
+The audit logger uses a separate logger and can be configured using
+the options in <<audit-logging-settings>>. 
+
+==== Audit event types
+
+When you are auditing security events, each request can generate multiple audit
+events. The following is a list of the events that can be generated:
+
+|======
+| `saved_objects_authorization_success`    | Logged when a user is authorized to access a saved
+                                             objects when using a role with <<kibana-privileges>>
+| `saved_objects_authorization_failure`    | Logged when a user isn't authorized to access a saved
+                                             objects when using a role with <<kibana-privileges>>
+|======
+
+[[xpack-security-ecs-audit-logging]]
+==== ECS audit events
+
+[IMPORTANT]
+============================================================================
+The following events are only logged if the ECS audit logger is enabled.
+For information on how to configure `xpack.security.audit.appender`, refer to
+<<ecs-audit-logging-settings>>.
+============================================================================
+
+Refer to the table of events that can be logged for auditing purposes. 
+
+Each event is broken down into `category`, `type`, `action` and `outcome` fields
+to make it easy to filter, query and aggregate the resulting logs. 
+
+[NOTE]
+============================================================================
+To ensure that a record of every operation is persisted even in case of an
+unexpected error, asynchronous write operations are logged immediately after all
+authorization checks have passed, but before the response from {es} is received.
+Refer to the corresponding {es} logs for potential write errors.
+============================================================================
+
+
+[cols="3*<"]
+|======
+3+a|
+===== Category: authentication
+
+| *Action*
+| *Outcome*
+| *Description*
+
+.2+| `user_login`
+| `success` | User has logged in successfully.
+| `failure` | Failed login attempt (e.g. due to invalid credentials).
+
+3+a|
+===== Category: database
+====== Type: creation
+
+| *Action*
+| *Outcome*
+| *Description*
+
+.2+| `saved_object_create`
+| `unknown` | User is creating a saved object.
+| `failure` | User is not authorized to create a saved object.
+
+
+3+a|
+====== Type: change
+
+| *Action*
+| *Outcome*
+| *Description*
+
+.2+| `saved_object_update`
+| `unknown` | User is updating a saved object.
+| `failure` | User is not authorized to update a saved object.
+
+.2+| `saved_object_add_to_spaces`
+| `unknown` | User is adding a saved object to other spaces.
+| `failure` | User is not authorized to add a saved object to other spaces.
+
+.2+| `saved_object_delete_from_spaces`
+| `unknown` | User is removing a saved object from other spaces.
+| `failure` | User is not authorized to remove a saved object from other spaces.
+
+.2+| `saved_object_remove_references`
+| `unknown` | User is removing references to a saved object.
+| `failure` | User is not authorized to remove references to a saved object.
+
+
+3+a|
+====== Type: deletion
+
+| *Action*
+| *Outcome*
+| *Description*
+
+.2+| `saved_object_delete`
+| `unknown` | User is deleting a saved object.
+| `failure` | User is not authorized to delete a saved object.
+
+3+a|
+====== Type: access
+
+| *Action*
+| *Outcome*
+| *Description*
+
+.2+| `saved_object_get`
+| `success` | User has accessed a saved object.
+| `failure` | User is not authorized to access a saved object.
+
+.2+| `saved_object_find`
+| `success` | User has accessed a saved object as part of a search operation.
+| `failure` | User is not authorized to search for saved objects.
+
+
+3+a|
+===== Category: web
+
+| *Action*
+| *Outcome*
+| *Description*
+
+| `http_request`
+| `unknown` | User is making an HTTP request.
+|======

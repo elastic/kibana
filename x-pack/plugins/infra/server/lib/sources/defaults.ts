@@ -4,21 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceConfiguration } from './types';
+import {
+  METRICS_INDEX_PATTERN,
+  LOGS_INDEX_PATTERN,
+  TIMESTAMP_FIELD,
+} from '../../../common/constants';
+import { InfraSourceConfiguration } from '../../../common/http_api/source_api';
 
 export const defaultSourceConfiguration: InfraSourceConfiguration = {
   name: 'Default',
   description: '',
-  metricAlias: 'metricbeat-*',
-  logAlias: 'filebeat-*,kibana_sample_data_logs*',
+  metricAlias: METRICS_INDEX_PATTERN,
+  logAlias: LOGS_INDEX_PATTERN,
   fields: {
     container: 'container.id',
     host: 'host.name',
     message: ['message', '@message'],
     pod: 'kubernetes.pod.uid',
     tiebreaker: '_doc',
-    timestamp: '@timestamp',
+    timestamp: TIMESTAMP_FIELD,
   },
+  inventoryDefaultView: '0',
+  metricsExplorerDefaultView: '0',
   logColumns: [
     {
       timestampColumn: {

@@ -8,28 +8,28 @@ export function UserMenuProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  return new class UserMenu {
+  return new (class UserMenu {
     async clickLogoutButton() {
       await this._ensureMenuOpen();
-      await testSubjects.click('userMenu logoutLink');
+      await testSubjects.click('userMenu > logoutLink');
     }
 
     async clickProvileLink() {
       await this._ensureMenuOpen();
-      await testSubjects.click('userMenu profileLink');
+      await testSubjects.click('userMenu > profileLink');
     }
 
     async logoutLinkExists() {
-      if (!await testSubjects.exists('userMenuButton')) {
+      if (!(await testSubjects.exists('userMenuButton'))) {
         return;
       }
 
       await this._ensureMenuOpen();
-      return await testSubjects.exists('userMenu logoutLink');
+      return await testSubjects.exists('userMenu > logoutLink');
     }
 
     async closeMenu() {
-      if (!await testSubjects.exists('userMenu')) {
+      if (!(await testSubjects.exists('userMenu'))) {
         return;
       }
 
@@ -42,10 +42,10 @@ export function UserMenuProvider({ getService }) {
         return;
       }
 
-      await testSubjects.click('userMenuButton');
-      await retry.waitFor('user menu opened', async () => (
-        await testSubjects.exists('userMenu')
-      ));
+      await retry.try(async () => {
+        await testSubjects.click('userMenuButton');
+        await testSubjects.existOrFail('userMenu');
+      });
     }
-  };
+  })();
 }

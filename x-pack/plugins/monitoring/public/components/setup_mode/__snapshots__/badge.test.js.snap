@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`setupMode SetupModeBadge internal collection should render each product consistently 1`] = `
+<EuiBadge
+  color="danger"
+  iconType="flag"
+  onClick={[Function]}
+  onClickAriaLabel="Monitor with Metricbeat"
+>
+  Monitor with Metricbeat
+</EuiBadge>
+`;
+
+exports[`setupMode SetupModeBadge metricbeat collection should render each product consistently 1`] = `
+<EuiBadge
+  color="primary"
+  iconType="flag"
+>
+  Monitored with Metricbeat
+</EuiBadge>
+`;
+
+exports[`setupMode SetupModeBadge net new user should render each product consistently 1`] = `
+<EuiBadge
+  color="danger"
+  iconType="flag"
+  onClick={[Function]}
+  onClickAriaLabel="Monitor with Metricbeat"
+>
+  Monitor with Metricbeat
+</EuiBadge>
+`;
+
+exports[`setupMode SetupModeBadge partially migrated should render each product consistently 1`] = `
+<EuiBadge
+  color="warning"
+  iconType="flag"
+  onClick={[Function]}
+  onClickAriaLabel="Disable self monitoring"
+>
+  Disable self monitoring
+</EuiBadge>
+`;
+
+exports[`setupMode SetupModeBadge should use a text status if internal collection cannot be disabled yet for elasticsearch 1`] = `
+<Fragment>
+  <EuiIcon
+    type="flag"
+  />
+   
+  <EuiTextColor
+    color="warning"
+    size="xs"
+  >
+    Some nodes use only self monitoring
+  </EuiTextColor>
+</Fragment>
+`;
+
+exports[`setupMode SetupModeBadge unknown should render each product consistently 1`] = `
+<EuiBadge
+  color="danger"
+  iconType="flag"
+>
+  N/A
+</EuiBadge>
+`;

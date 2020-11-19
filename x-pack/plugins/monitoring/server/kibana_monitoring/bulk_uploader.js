@@ -5,19 +5,13 @@
  */
 
 import { defaultsDeep, uniq, compact } from 'lodash';
-import { callClusterFactory } from '../../../xpack_main';
-
+import { ServiceStatusLevels } from '../../../../../src/core/server';
 import {
-  LOGGING_TAG,
-  KIBANA_MONITORING_LOGGING_TAG,
+  TELEMETRY_COLLECTION_INTERVAL,
+  KIBANA_STATS_TYPE_MONITORING,
 } from '../../common/constants';
-import {
-  sendBulkPayload,
-  monitoringBulk,
-  getKibanaInfoForStats,
-} from './lib';
 
-const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
+import { sendBulkPayload, monitoringBulk } from './lib';
 
 /*
  * Handles internal Kibana stats collection and uploading data to Monitoring
@@ -26,7 +20,7 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * NOTE: internal collection will be removed in 7.0
  *
  * Depends on
- *   - 'xpack.monitoring.kibana.collection.enabled' config
+ *   - 'monitoring.kibana.collection.enabled' config
  *   - monitoring enabled in ES (checked against xpack_main.info license info change)
  * The dependencies are handled upstream
  * - Ops Events - essentially Kibana's /api/status
@@ -36,65 +30,74 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor(server, { kbnServer, interval }) {
+  constructor({ log, interval, elasticsearch, statusGetter$, kibanaStats }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
 
     this._timer = null;
+    // Hold sending and fetching usage until monitoring.bulk is successful. This means that we
+    // send usage data on the second tick. But would save a lot of bandwidth fetching usage on
+    // every tick when ES is failing or monitoring is disabled.
+    this._holdSendingUsage = false;
     this._interval = interval;
     this._lastFetchUsageTime = null;
-    this._usageInterval = server.plugins.xpack_main.telemetryCollectionInterval;
+    // Limit sending and fetching usage to once per day once usage is successfully stored
+    // into the monitoring indices.
+    this._usageInterval = TELEMETRY_COLLECTION_INTERVAL;
+    this._log = log;
 
-    this._log = {
-      debug: message => server.log(['debug', ...LOGGING_TAGS], message),
-      info: message => server.log(['info', ...LOGGING_TAGS], message),
-      warn: message => server.log(['warning', ...LOGGING_TAGS], message)
-    };
-
-    this._cluster = server.plugins.elasticsearch.createCluster('admin', {
+    this._cluster = elasticsearch.legacy.createClient('admin', {
       plugins: [monitoringBulk],
     });
 
-    this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
-    this._getKibanaInfoForStats = () => getKibanaInfoForStats(server, kbnServer);
+    this.kibanaStats = kibanaStats;
+
+    this.kibanaStatus = null;
+    this.kibanaStatusGetter$ = statusGetter$.subscribe((nextStatus) => {
+      this.kibanaStatus = nextStatus.level;
+    });
+  }
+
+  filterCollectorSet(usageCollection) {
+    const successfulUploadInLastDay =
+      this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
+
+    return usageCollection.getFilteredCollectorSet((c) => {
+      // this is internal bulk upload, so filter out API-only collectors
+      if (c.ignoreForInternalUploader) {
+        return false;
+      }
+      // Only collect usage data at the same interval as telemetry would (default to once a day)
+      if (usageCollection.isUsageCollector(c)) {
+        if (this._holdSendingUsage) {
+          return false;
+        }
+        if (successfulUploadInLastDay) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }
 
   /*
    * Start the interval timer
-   * @param {CollectorSet} collectorSet object to use for initial the fetch/upload and fetch/uploading on interval
+   * @param {usageCollection} usageCollection object to use for initial the fetch/upload and fetch/uploading on interval
    * @return undefined
    */
-  start(collectorSet) {
+  start(usageCollection) {
     this._log.info('Starting monitoring stats collection');
-    const filterCollectorSet = _collectorSet => {
-      const filterUsage = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
-      this._lastFetchWithUsage = !filterUsage;
-      if (!filterUsage) {
-        this._lastFetchUsageTime = Date.now();
-      }
-
-      return _collectorSet.getFilteredCollectorSet(c => {
-        // this is internal bulk upload, so filter out API-only collectors
-        if (c.ignoreForInternalUploader) {
-          return false;
-        }
-        // Only collect usage data at the same interval as telemetry would (default to once a day)
-        if (filterUsage && _collectorSet.isUsageCollector(c)) {
-          return false;
-        }
-        return true;
-      });
-    };
 
     if (this._timer) {
       clearInterval(this._timer);
     } else {
-      this._fetchAndUpload(filterCollectorSet(collectorSet)); // initial fetch
+      this._fetchAndUpload(this.filterCollectorSet(usageCollection)); // initial fetch
     }
 
     this._timer = setInterval(() => {
-      this._fetchAndUpload(filterCollectorSet(collectorSet));
+      this._fetchAndUpload(this.filterCollectorSet(usageCollection));
     }, this._interval);
   }
 
@@ -119,17 +122,42 @@ export class BulkUploader {
   }
 
   /*
-   * @param {CollectorSet} collectorSet
+   * @param {usageCollection} usageCollection
    * @return {Promise} - resolves to undefined
    */
-  async _fetchAndUpload(collectorSet) {
-    const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
-    const payload = this.toBulkUploadFormat(compact(data), collectorSet);
+  async _fetchAndUpload(usageCollection) {
+    const collectorsReady = await usageCollection.areAllCollectorsReady();
+    const hasUsageCollectors = usageCollection.some(usageCollection.isUsageCollector);
+    if (!collectorsReady) {
+      this._log.debug('Skipping bulk uploading because not all collectors are ready');
+      if (hasUsageCollectors) {
+        this._lastFetchUsageTime = null;
+        this._log.debug('Resetting lastFetchWithUsage because not all collectors are ready');
+      }
+      return;
+    }
 
-    if (payload) {
+    const data = await usageCollection.bulkFetch(this._cluster.callAsInternalUser);
+    const payload = this.toBulkUploadFormat(compact(data), usageCollection);
+    if (payload && payload.length > 0) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
-        await this._onPayload(payload);
+        const result = await this._onPayload(payload);
+        const sendSuccessful = !result.ignored && !result.errors;
+        if (!sendSuccessful && hasUsageCollectors) {
+          this._lastFetchUsageTime = null;
+          this._holdSendingUsage = true;
+          this._log.debug(
+            'Resetting lastFetchWithUsage because uploading to the cluster was not successful.'
+          );
+        }
+
+        if (sendSuccessful) {
+          this._holdSendingUsage = false;
+          if (hasUsageCollectors) {
+            this._lastFetchUsageTime = Date.now();
+          }
+        }
         this._log.debug(`Uploaded bulk stats payload to the local cluster`);
       } catch (err) {
         this._log.warn(err.stack);
@@ -140,8 +168,35 @@ export class BulkUploader {
     }
   }
 
-  _onPayload(payload) {
-    return sendBulkPayload(this._cluster, this._interval, payload);
+  async _onPayload(payload) {
+    return await sendBulkPayload(this._cluster, this._interval, payload, this._log);
+  }
+
+  getConvertedKibanaStatuss() {
+    if (this.kibanaStatus === ServiceStatusLevels.available) {
+      return 'green';
+    }
+    if (this.kibanaStatus === ServiceStatusLevels.critical) {
+      return 'red';
+    }
+    if (this.kibanaStatus === ServiceStatusLevels.degraded) {
+      return 'yellow';
+    }
+    return 'unknown';
+  }
+
+  getKibanaStats(type) {
+    const stats = {
+      ...this.kibanaStats,
+      status: this.getConvertedKibanaStatuss(),
+    };
+
+    if (type === KIBANA_STATS_TYPE_MONITORING) {
+      delete stats.port;
+      delete stats.locale;
+    }
+
+    return stats;
   }
 
   /*
@@ -181,15 +236,17 @@ export class BulkUploader {
    *      }
    *    ]
    */
-  toBulkUploadFormat(rawData, collectorSet) {
+  toBulkUploadFormat(rawData, usageCollection) {
     if (rawData.length === 0) {
-      return;
+      return [];
     }
 
     // convert the raw data to a nested object by taking each payload through
     // its formatter, organizing it per-type
     const typesNested = rawData.reduce((accum, { type, result }) => {
-      const { type: uploadType, payload: uploadData } = collectorSet.getCollectorByType(type).formatForBulkUpload(result);
+      const { type: uploadType, payload: uploadData } = usageCollection
+        .getCollectorByType(type)
+        .formatForBulkUpload(result);
       return defaultsDeep(accum, { [uploadType]: uploadData });
     }, {});
     // convert the nested object into a flat array, with each payload prefixed
@@ -199,9 +256,9 @@ export class BulkUploader {
         ...accum,
         { index: { _type: type } },
         {
-          kibana: this._getKibanaInfoForStats(),
+          kibana: this.getKibanaStats(type),
           ...typesNested[type],
-        }
+        },
       ];
     }, []);
 
@@ -209,7 +266,7 @@ export class BulkUploader {
   }
 
   static checkPayloadTypesUnique(payload) {
-    const ids = payload.map(item => item[0].index._type);
+    const ids = payload.map((item) => item[0].index._type);
     const uniques = uniq(ids);
     if (ids.length !== uniques.length) {
       throw new Error('Duplicate collector type identifiers found in payload! ' + ids.join(','));

@@ -31,7 +31,7 @@ const mapStateToProps = (state) => {
     pager: getPager(state),
     filter: getFilter(state),
     sortField: getSortField(state),
-    isSortAscending: isSortAscending(state)
+    isSortAscending: isSortAscending(state),
   };
 };
 
@@ -58,7 +58,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export const JobTable = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(JobTableComponent);
+export const JobTable = connect(mapStateToProps, mapDispatchToProps)(JobTableComponent);

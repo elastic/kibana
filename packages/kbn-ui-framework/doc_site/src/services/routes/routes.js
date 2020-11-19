@@ -19,184 +19,136 @@
 
 import Slugify from '../string/slugify';
 
-import BarExample
-  from '../../views/bar/bar_example';
+import BarExample from '../../views/bar/bar_example';
 
-import ButtonExample
-  from '../../views/button/button_example';
+import ButtonExample from '../../views/button/button_example';
 
-import CollapseButtonExample
-  from '../../views/collapse_button/collapse_button_example';
+import CollapseButtonExample from '../../views/collapse_button/collapse_button_example';
 
-import ExpressionExample
-  from '../../views/expression/expression_example';
-import FormExample
-  from '../../views/form/form_example';
+import FormExample from '../../views/form/form_example';
 
-import FormLayoutExample
-  from '../../views/form_layout/form_layout_example';
+import FormLayoutExample from '../../views/form_layout/form_layout_example';
 
-import IconExample
-  from '../../views/icon/icon_example';
+import IconExample from '../../views/icon/icon_example';
 
-import InfoPanelExample
-  from '../../views/info_panel/info_panel_example';
+import InfoPanelExample from '../../views/info_panel/info_panel_example';
 
-import LinkExample
-  from '../../views/link/link_example';
+import LinkExample from '../../views/link/link_example';
 
-import LocalNavExample
-  from '../../views/local_nav/local_nav_example';
+import LocalNavExample from '../../views/local_nav/local_nav_example';
 
-import MenuExample
-  from '../../views/menu/menu_example';
+import PagerExample from '../../views/pager/pager_example';
 
-import MenuButtonExample
-  from '../../views/menu_button/menu_button_example';
+import PanelExample from '../../views/panel/panel_example';
 
-import ModalExample
-  from '../../views/modal/modal_example';
+import EmptyTablePromptExample from '../../views/empty_table_prompt/empty_table_prompt_example';
 
-import PagerExample
-  from '../../views/pager/pager_example';
+import StatusTextExample from '../../views/status_text/status_text_example';
 
-import PanelExample
-  from '../../views/panel/panel_example';
+import TableExample from '../../views/table/table_example';
 
-import PanelSimpleExample
-  from '../../views/panel_simple/panel_simple_example';
+import TabsExample from '../../views/tabs/tabs_example';
 
-import PopoverExample
-  from '../../views/popover/popover_example';
+import ToolBarExample from '../../views/tool_bar/tool_bar_example';
 
-import EmptyTablePromptExample
-  from '../../views/empty_table_prompt/empty_table_prompt_example';
+import TypographyExample from '../../views/typography/typography_example';
 
-import StatusTextExample
-  from '../../views/status_text/status_text_example';
+import VerticalRhythmExample from '../../views/vertical_rhythm/vertical_rhythm_example';
 
-import TableExample
-  from '../../views/table/table_example';
-
-import TabsExample
-  from '../../views/tabs/tabs_example';
-
-import ToggleButtonExample
-  from '../../views/toggle_button/toggle_button_example';
-
-import ToolBarExample
-  from '../../views/tool_bar/tool_bar_example';
-
-import TypographyExample
-  from '../../views/typography/typography_example';
-
-import VerticalRhythmExample
-  from '../../views/vertical_rhythm/vertical_rhythm_example';
-
-import ViewSandbox
-  from '../../views/view/view_sandbox';
+import ViewSandbox from '../../views/view/view_sandbox';
 
 // Component route names should match the component name exactly.
-const components = [{
-  name: 'Bar',
-  component: BarExample,
-  hasReact: true,
-}, {
-  name: 'Button',
-  component: ButtonExample,
-  hasReact: true,
-}, {
-  name: 'CollapseButton',
-  component: CollapseButtonExample,
-  hasReact: true,
-}, {
-  name: 'CollapseButton',
-  component: CollapseButtonExample,
-  hasReact: true,
-}, {
-  name: 'EmptyTablePrompt',
-  component: EmptyTablePromptExample,
-  hasReact: true,
-}, {
-  name: 'Expression',
-  component: ExpressionExample,
-  hasReact: true,
-}, {
-  name: 'Form',
-  component: FormExample,
-}, {
-  name: 'FormLayout',
-  component: FormLayoutExample,
-  hasReact: true,
-}, {
-  name: 'Icon',
-  component: IconExample,
-}, {
-  name: 'InfoPanel',
-  component: InfoPanelExample,
-}, {
-  name: 'Link',
-  component: LinkExample,
-}, {
-  name: 'LocalNav',
-  component: LocalNavExample,
-  hasReact: true,
-}, {
-  name: 'Menu',
-  component: MenuExample,
-  hasReact: true,
-}, {
-  name: 'MenuButton',
-  component: MenuButtonExample,
-}, {
-  name: 'Modal',
-  component: ModalExample,
-  hasReact: true,
-}, {
-  name: 'Pager',
-  component: PagerExample,
-  hasReact: true,
-}, {
-  name: 'Panel',
-  component: PanelExample,
-}, {
-  name: 'PanelSimple',
-  component: PanelSimpleExample,
-  hasReact: true,
-}, {
-  name: 'Popover',
-  component: PopoverExample,
-  hasReact: true,
-}, {
-  name: 'StatusText',
-  component: StatusTextExample,
-}, {
-  name: 'Table',
-  component: TableExample,
-  hasReact: true,
-}, {
-  name: 'Tabs',
-  component: TabsExample,
-  hasReact: true,
-}, {
-  name: 'ToggleButton',
-  component: ToggleButtonExample,
-}, {
-  name: 'ToolBar',
-  component: ToolBarExample,
-  hasReact: true,
-}, {
-  name: 'Typography',
-  component: TypographyExample,
-}, {
-  name: 'VerticalRhythm',
-  component: VerticalRhythmExample,
-}];
+const components = [
+  {
+    name: 'Bar',
+    component: BarExample,
+    hasReact: true,
+  },
+  {
+    name: 'Button',
+    component: ButtonExample,
+    hasReact: true,
+  },
+  {
+    name: 'CollapseButton',
+    component: CollapseButtonExample,
+    hasReact: true,
+  },
+  {
+    name: 'EmptyTablePrompt',
+    component: EmptyTablePromptExample,
+    hasReact: true,
+  },
+  {
+    name: 'Form',
+    component: FormExample,
+  },
+  {
+    name: 'FormLayout',
+    component: FormLayoutExample,
+    hasReact: true,
+  },
+  {
+    name: 'Icon',
+    component: IconExample,
+  },
+  {
+    name: 'InfoPanel',
+    component: InfoPanelExample,
+  },
+  {
+    name: 'Link',
+    component: LinkExample,
+  },
+  {
+    name: 'LocalNav',
+    component: LocalNavExample,
+    hasReact: true,
+  },
+  {
+    name: 'Pager',
+    component: PagerExample,
+    hasReact: true,
+  },
+  {
+    name: 'Panel',
+    component: PanelExample,
+  },
+  {
+    name: 'StatusText',
+    component: StatusTextExample,
+  },
+  {
+    name: 'Table',
+    component: TableExample,
+    hasReact: true,
+  },
+  {
+    name: 'Tabs',
+    component: TabsExample,
+    hasReact: true,
+  },
+  {
+    name: 'ToolBar',
+    component: ToolBarExample,
+    hasReact: true,
+  },
+  {
+    name: 'Typography',
+    component: TypographyExample,
+  },
+  {
+    name: 'VerticalRhythm',
+    component: VerticalRhythmExample,
+  },
+];
 
-const sandboxes = [{
-  name: 'View',
-  component: ViewSandbox,
-}];
+const sandboxes = [
+  {
+    name: 'View',
+    component: ViewSandbox,
+  },
+];
 
 const allRoutes = components.concat(sandboxes);
 
@@ -207,14 +159,14 @@ export default {
     return allRoutes;
   },
   getPreviousRoute: function getPreviousRoute(routeName) {
-    const index = allRoutes.findIndex(item => {
+    const index = allRoutes.findIndex((item) => {
       return item.name === routeName;
     });
 
     return index >= 0 ? allRoutes[index - 1] : undefined;
   },
   getNextRoute: function getNextRoute(routeName) {
-    const index = allRoutes.findIndex(item => {
+    const index = allRoutes.findIndex((item) => {
       return item.name === routeName;
     });
 

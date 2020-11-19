@@ -5,13 +5,6 @@
  */
 
 import { camelCase } from 'lodash';
-// @ts-ignore not typed yet
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import 'ui/autoload/all';
-import chrome from 'ui/chrome';
-// @ts-ignore not typed yet
-import { management } from 'ui/management';
-import routes from 'ui/routes';
 import { configBlockSchemas } from '../../../common/config_schemas';
 import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
@@ -27,15 +20,33 @@ import { ConfigBlocksLib } from '../configuration_blocks';
 import { ElasticsearchLib } from '../elasticsearch';
 import { TagsLib } from '../tags';
 import { FrontendLibs } from '../types';
-import { PLUGIN } from './../../../common/constants/plugin';
+import { PLUGIN } from '../../../common/constants/plugin';
 import { FrameworkLib } from './../framework';
+import { ManagementSetup } from '../../../../../../src/plugins/management/public';
+import { SecurityPluginSetup } from '../../../../security/public';
+import { CoreSetup } from '../../../../../../src/core/public';
+import { LicensingPluginSetup } from '../../../../licensing/public';
+import { BeatsManagementConfigType } from '../../../common';
 
-// A super early spot in kibana loading that we can use to hook before most other things
-const onKibanaReady = chrome.dangerouslyGetActiveInjector;
+interface ComposeDeps {
+  core: CoreSetup;
+  management: ManagementSetup;
+  licensing: LicensingPluginSetup;
+  config: BeatsManagementConfigType;
+  version: string;
+  security?: SecurityPluginSetup;
+}
 
-export function compose(): FrontendLibs {
-  const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
-  const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.BEATS);
+export function compose({
+  core,
+  management,
+  licensing,
+  config,
+  version,
+  security,
+}: ComposeDeps): FrontendLibs {
+  const api = new AxiosRestAPIAdapter(version, core.http.basePath.get());
+  const esAdapter = new RestElasticsearchAdapter(INDEX_NAMES.BEATS);
   const elasticsearchLib = new ElasticsearchLib(esAdapter);
   const configBlocks = new ConfigBlocksLib(
     new RestConfigBlocksAdapter(api),
@@ -49,11 +60,11 @@ export function compose(): FrontendLibs {
     new KibanaFrameworkAdapter(
       camelCase(PLUGIN.ID),
       management,
-      routes,
-      chrome.getBasePath,
-      onKibanaReady,
-      XPackInfoProvider,
-      chrome.getKibanaVersion()
+      core.http.basePath.get,
+      licensing,
+      security,
+      config,
+      version
     )
   );
 

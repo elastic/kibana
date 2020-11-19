@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
-  const spacesService: SpacesService = getService('spaces');
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -32,15 +30,15 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('APM');
       });
 
       it('can navigate to Uptime app', async () => {
         await PageObjects.common.navigateToApp('apm');
-        await testSubjects.existOrFail('apmMainContainer', 10000);
+        await testSubjects.existOrFail('apmMainContainer', {
+          timeout: 10000,
+        });
       });
     });
 
@@ -61,9 +59,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('APM');
       });
 

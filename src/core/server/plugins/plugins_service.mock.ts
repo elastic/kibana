@@ -16,19 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PluginsService, PluginsServiceSetup } from './plugins_service';
 
-import { PluginsService } from './plugins_service';
+type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
 
-type ServiceContract = PublicMethodsOf<PluginsService>;
-const createServiceMock = () => {
-  const mocked: jest.Mocked<ServiceContract> = {
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
+const createSetupContractMock = (): PluginsServiceSetup => ({
+  contracts: new Map(),
+  initialized: true,
+});
+const createStartContractMock = () => ({ contracts: new Map() });
+
+const createServiceMock = (): PluginsServiceMock => ({
+  discover: jest.fn(),
+  setup: jest.fn().mockResolvedValue(createSetupContractMock()),
+  start: jest.fn().mockResolvedValue(createStartContractMock()),
+  stop: jest.fn(),
+});
+
+function createUiPlugins() {
+  return {
+    browserConfigs: new Map(),
+    internal: new Map(),
+    public: new Map(),
   };
-  return mocked;
-};
+}
 
 export const pluginServiceMock = {
   create: createServiceMock,
+  createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
+  createUiPlugins,
 };

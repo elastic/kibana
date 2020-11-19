@@ -3,15 +3,2924 @@
 == Canvas function reference
 
 Behind the scenes, Canvas is driven by a powerful expression language,
-with dozens of functions and other capabilities, including table transforms, 
+with dozens of functions and other capabilities, including table transforms,
 type casting, and sub-expressions.
-
-For the purpose of this documentation, 
-the Canvas functions are divided by the environment they run in:
-
-* <<canvas-common-functions>> can run anywhere
-* <<canvas-server-functions>> can only execute on the server
-* <<canvas-client-functions>> must execute in a browser
 
 The Canvas expression language also supports <<canvas-tinymath-functions>>, which
 perform complex math calculations.
+
+A *** denotes a required argument.
+
+A † denotes an argument can be passed multiple times.
+
+<<a_fns>> | B | <<c_fns>> | <<d_fns>> | <<e_fns>> | <<f_fns>> | <<g_fns>> | <<h_fns>> | <<i_fns>> | <<j_fns>> | K | <<l_fns>> | <<m_fns>> | <<n_fns>> | O | <<p_fns>> | Q | <<r_fns>> | <<s_fns>> | <<t_fns>> | <<u_fns>> | <<v_fns>> | W | X | Y | Z
+
+[float]
+[[a_fns]]
+== A
+
+[float]
+[[all_fn]]
+=== `all`
+
+Returns `true` if all of the conditions are met. See also <<any_fn>>.
+
+*Expression syntax*
+[source,js]
+----
+all {neq "foo"} {neq "bar"} {neq "fizz"}
+all condition={gt 10} condition={lt 20}
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| math "mean(percent_uptime)"
+| formatnumber "0.0%"
+| metric "Average uptime"
+  metricFont={
+    font size=48 family="'Open Sans', Helvetica, Arial, sans-serif"
+      color={
+        if {all {gte 0} {lt 0.8}} then="red" else="green"
+      }
+      align="center" lHeight=48
+  }
+| render
+----
+This sets the color of the metric text to `"red"` if the context passed into `metric` is greater than or equal to 0 and less than 0.8. Otherwise, the color is set to `"green"`.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ *** †
+
+Alias: `condition`
+|`boolean`
+|The conditions to check.
+|===
+
+*Returns:* `boolean`
+
+
+[float]
+[[alterColumn_fn]]
+=== `alterColumn`
+
+Converts between core types, including `string`, `number`, `null`, `boolean`, and `date`, and renames columns. See also <<mapColumn_fn>> and <<staticColumn_fn>>.
+
+*Expression syntax*
+[source,js]
+----
+alterColumn "cost" type="string"
+alterColumn column="@timestamp" name="foo"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| alterColumn "time" name="time_in_ms" type="number"
+| table
+| render
+----
+This renames the `time` column to `time_in_ms` and converts the type of the column’s values from `date` to `number`.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `column`
+|`string`
+|The name of the column to alter.
+
+|`name`
+|`string`
+|The resultant column name. Leave blank to not rename.
+
+|`type`
+|`string`
+|The type to convert the column to. Leave blank to not change the type.
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[any_fn]]
+=== `any`
+
+Returns `true` if at least one of the conditions is met. See also <<all_fn>>.
+
+*Expression syntax*
+[source,js]
+----
+any {eq "foo"} {eq "bar"} {eq "fizz"}
+any condition={lte 10} condition={gt 30}
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| filterrows {
+    getCell "project" | any {eq "elasticsearch"} {eq "kibana"} {eq "x-pack"}
+  }
+| pointseries color="project" size="max(price)"
+| pie
+| render
+----
+This filters out any rows that don’t contain `"elasticsearch"`, `"kibana"` or `"x-pack"` in the `project` field.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ *** †
+
+Alias: `condition`
+|`boolean`
+|The conditions to check.
+|===
+
+*Returns:* `boolean`
+
+
+[float]
+[[as_fn]]
+=== `as`
+
+Creates a `datatable` with a single value. See also <<getCell_fn>>.
+
+*Expression syntax*
+[source,js]
+----
+as
+as "foo"
+as name="bar"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| ply by="project" fn={math "count(username)" | as "num_users"} fn={math "mean(price)" | as "price"}
+| pointseries x="project" y="num_users" size="price" color="project"
+| plot
+| render
+----
+`as` casts any primitive value (`string`, `number`, `date`, `null`) into a `datatable` with a single row and a single column with the given name (or defaults to `"value"` if no name is provided). This is useful when piping a primitive value into a function that only takes `datatable` as an input.
+
+In the example, `ply` expects each `fn` subexpression to return a `datatable` in order to merge the results of each `fn` back into a `datatable`, but using a `math` aggregation in the subexpressions returns a single `math` value, which is then cast into a `datatable` using `as`.
+
+*Accepts:* `string`, `boolean`, `number`, `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `name`
+|`string`
+|The name to give the column.
+
+Default: `"value"`
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[asset_fn]]
+=== `asset`
+
+Retrieves Canvas workpad asset objects to provide as argument values. Usually images.
+
+*Expression syntax*
+[source,js]
+----
+asset "asset-52f14f2b-fee6-4072-92e8-cd2642665d02"
+asset id="asset-498f7429-4d56-42a2-a7e4-8bf08d98d114"
+----
+
+*Code example*
+[source,text]
+----
+image dataurl={asset "asset-c661a7cc-11be-45a1-a401-d7592ea7917a"} mode="contain"
+| render
+----
+The image asset stored with the ID `"asset-c661a7cc-11be-45a1-a401-d7592ea7917a"` is passed into the `dataurl` argument of the `image` function to display the stored asset.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `id`
+|`string`
+|The ID of the asset to retrieve.
+|===
+
+*Returns:* `string`
+
+
+[float]
+[[axisConfig_fn]]
+=== `axisConfig`
+
+Configures the axis of a visualization. Only used with <<plot_fn>>.
+
+*Expression syntax*
+[source,js]
+----
+axisConfig show=false
+axisConfig position="right" min=0 max=10 tickSize=1
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| pointseries x="size(cost)" y="project" color="project"
+| plot defaultStyle={seriesStyle bars=0.75 horizontalBars=true}
+  legend=false
+  xaxis={axisConfig position="top" min=0 max=400 tickSize=100}
+  yaxis={axisConfig position="right"}
+| render
+----
+This sets the `x-axis` to display on the top of the chart and sets the range of values to `0-400` with ticks displayed at `100` intervals. The `y-axis` is configured to display on the `right`.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`max`
+|`number`, `string`, `null`
+|The maximum value displayed in the axis. Must be a number, a date in milliseconds since epoch, or an ISO8601 string.
+
+|`min`
+|`number`, `string`, `null`
+|The minimum value displayed in the axis. Must be a number, a date in milliseconds since epoch, or an ISO8601 string.
+
+|`position`
+|`string`
+|The position of the axis labels. For example, `"top"`, `"bottom"`, `"left"`, or `"right"`.
+
+Default: `"left"`
+
+|`show`
+|`boolean`
+|Show the axis labels?
+
+Default: `true`
+
+|`tickSize`
+|`number`, `null`
+|The increment size between each tick. Use for `number` axes only.
+|===
+
+*Returns:* `axisConfig`
+
+[float]
+[[c_fns]]
+== C
+
+[float]
+[[case_fn]]
+=== `case`
+
+Builds a <<case_fn>>, including a condition and a result, to pass to the <<switch_fn>> function.
+
+*Expression syntax*
+[source,js]
+----
+case 0 then="red"
+case when=5 then="yellow"
+case if={lte 50} then="green"
+----
+
+*Code example*
+[source,text]
+----
+math "random()"
+| progress shape="gauge" label={formatnumber "0%"}
+  font={
+    font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" align="center"
+      color={
+        switch {case if={lte 0.5} then="green"}
+          {case if={all {gt 0.5} {lte 0.75}} then="orange"}
+          default="red"
+      }
+  }
+  valueColor={
+    switch {case if={lte 0.5} then="green"}
+      {case if={all {gt 0.5} {lte 0.75}} then="orange"}
+      default="red"
+  }
+| render
+----
+This sets the color of the progress indicator and the color of the label to `"green"` if the value is less than or equal to `0.5`, `"orange"` if the value is greater than `0.5` and less than or equal to `0.75`, and `"red"` if `none` of the case conditions are met.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `when`
+|`any`
+|The value compared to the _context_ to see if they are equal. The `when` argument is ignored when the `if` argument is also specified.
+
+|`if`
+|`boolean`
+|This value indicates whether the condition is met. The `if` argument overrides the `when` argument when both are provided.
+
+|`then` ***
+|`any`
+|The value returned if the condition is met.
+|===
+
+*Returns:* `case`
+
+
+[float]
+[[clear_fn]]
+=== `clear`
+
+Clears the _context_, and returns `null`.
+
+*Accepts:* `null`
+
+*Returns:* `null`
+
+
+[float]
+[[columns_fn]]
+=== `columns`
+
+Includes or excludes columns from a `datatable`. When both arguments are specified, the excluded columns will be removed first.
+
+*Expression syntax*
+[source,js]
+----
+columns include="@timestamp, projects, cost"
+columns exclude="username, country, age"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| columns include="price, cost, state, project"
+| table
+| render
+----
+This only keeps the `price`, `cost`, `state`, and `project` columns from the `demodata` data source and removes all other columns.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `include`
+|`string`
+|A comma-separated list of column names to keep in the `datatable`.
+
+|`exclude`
+|`string`
+|A comma-separated list of column names to remove from the `datatable`.
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[compare_fn]]
+=== `compare`
+
+Compares the _context_ to specified value to determine `true` or `false`. Usually used in combination with `<<if_fn>>` or <<case_fn>>. This only works with primitive types, such as `number`, `string`, `boolean`, `null`. See also <<eq_fn>>, <<gt_fn>>, <<gte_fn>>, <<lt_fn>>, <<lte_fn>>, <<neq_fn>>
+
+*Expression syntax*
+[source,js]
+----
+compare "neq" to="elasticsearch"
+compare op="lte" to=100
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| mapColumn project
+  fn={getCell project |
+    switch
+      {case if={compare eq to=kibana} then=kibana}
+      {case if={compare eq to=elasticsearch} then=elasticsearch}
+      default="other"
+  }
+| pointseries size="size(cost)" color="project"
+| pie
+| render
+----
+This maps all `project` values that aren’t `"kibana"` and `"elasticsearch"` to `"other"`. Alternatively, you can use the individual comparator functions instead of compare.
+
+*Accepts:* `string`, `number`, `boolean`, `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `op`
+|`string`
+|The operator to use in the comparison: `"eq"` (equal to), `"gt"` (greater than), `"gte"` (greater than or equal to), `"lt"` (less than), `"lte"` (less than or equal to), `"ne"` or `"neq"` (not equal to).
+
+Default: `"eq"`
+
+|`to`
+
+Aliases: `b`, `this`
+|`any`
+|The value compared to the _context_.
+|===
+
+*Returns:* `boolean`
+
+
+[float]
+[[containerStyle_fn]]
+=== `containerStyle`
+
+Creates an object used for styling an element's container, including background, border, and opacity.
+
+*Expression syntax*
+[source,js]
+----
+containerStyle backgroundColor="red"’
+containerStyle borderRadius="50px"
+containerStyle border="1px solid black"
+containerStyle padding="5px"
+containerStyle opacity="0.5"
+containerStyle overflow="hidden"
+containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e949c}
+  backgroundRepeat="no-repeat"
+  backgroundSize="cover"
+----
+
+*Code example*
+[source,text]
+----
+shape "star" fill="#E61D35" maintainAspect=true
+| render containerStyle={
+    containerStyle backgroundColor="#F8D546"
+      borderRadius="200px"
+      border="4px solid #05509F"
+      padding="0px"
+      opacity="0.9"
+      overflow="hidden"
+  }
+----
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`backgroundColor`
+|`string`
+|A valid CSS background color.
+
+|`backgroundImage`
+|`string`
+|A valid CSS background image.
+
+|`backgroundRepeat`
+|`string`
+|A valid CSS background repeat.
+
+Default: `"no-repeat"`
+
+|`backgroundSize`
+|`string`
+|A valid CSS background size.
+
+Default: `"contain"`
+
+|`border`
+|`string`
+|A valid CSS border.
+
+|`borderRadius`
+|`string`
+|The number of pixels to use when rounding the corners.
+
+|`opacity`
+|`number`
+|A number between 0 and 1 that represents the degree of transparency of the element.
+
+|`overflow`
+|`string`
+|A valid CSS overflow.
+
+Default: `"hidden"`
+
+|`padding`
+|`string`
+|The distance of the content, in pixels, from the border.
+|===
+
+*Returns:* `containerStyle`
+
+
+[float]
+[[context_fn]]
+=== `context`
+
+Returns whatever you pass into it. This can be useful when you need to use _context_ as argument to a function as a sub-expression.
+
+*Expression syntax*
+[source,js]
+----
+context
+----
+
+*Code example*
+[source,text]
+----
+date
+| formatdate "LLLL"
+| markdown "Last updated: " {context}
+| render
+----
+Using the `context` function allows us to pass the output, or _context_, of the previous function as a value to an argument in the next function. Here we get the formatted date string from the previous function and pass it as `content` for the markdown element.
+
+*Accepts:* `any`
+
+*Returns:* Depends on your input and arguments
+
+
+[float]
+[[csv_fn]]
+=== `csv`
+
+Creates a `datatable` from CSV input.
+
+*Expression syntax*
+[source,js]
+----
+csv "fruit, stock
+  kiwi, 10
+  Banana, 5"
+----
+
+*Code example*
+[source,text]
+----
+csv "fruit,stock
+  kiwi,10
+  banana,5"
+| pointseries color=fruit size=stock
+| pie
+| render
+----
+This creates a `datatable` with `fruit` and `stock` columns with two rows. This is useful for quickly mocking data.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `data`
+|`string`
+|The CSV data to use.
+
+|`delimiter`
+|`string`
+|The data separation character.
+
+|`newline`
+|`string`
+|The row separation character.
+|===
+
+*Returns:* `datatable`
+
+[float]
+[[d_fns]]
+== D
+
+[float]
+[[date_fn]]
+=== `date`
+
+Returns the current time, or a time parsed from a specified string, as milliseconds since epoch.
+
+*Expression syntax*
+[source,js]
+----
+date
+date value=1558735195
+date "2019-05-24T21:59:55+0000"
+date "01/31/2019" format="MM/DD/YYYY"
+----
+
+*Code example*
+[source,text]
+----
+date
+| formatdate "LLL"
+| markdown {context}
+  font={font family="Arial, sans-serif" size=30 align="left"
+    color="#000000"
+    weight="normal"
+    underline=false
+    italic=false}
+| render
+----
+Using `date` without passing any arguments will return the current date and time.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `value`
+|`string`
+|An optional date string that is parsed into milliseconds since epoch. The date string can be either a valid JavaScript `Date` input or a string to parse using the `format` argument. Must be an ISO8601 string, or you must provide the format.
+
+|`format`
+|`string`
+|The MomentJS format used to parse the specified date string. For more information, see https://momentjs.com/docs/#/displaying/.
+|===
+
+*Returns:* `number`
+
+
+[float]
+[[demodata_fn]]
+=== `demodata`
+
+A sample data set that includes project CI times with usernames, countries, and run phases.
+
+*Expression syntax*
+[source,js]
+----
+demodata
+demodata "ci"
+demodata type="shirts"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| table
+| render
+----
+`demodata` is a mock data set that you can use to start playing around in Canvas.
+
+*Accepts:* `filter`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `type`
+|`string`
+|The name of the demo data set to use.
+
+Default: `"ci"`
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[do_fn]]
+=== `do`
+
+Executes multiple sub-expressions, then returns the original _context_. Use for running functions that produce an action or a side effect without changing the original _context_.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ †
+
+Aliases: `exp`, `expression`, `fn`, `function`
+|`any`
+|The sub-expressions to execute. The return values of these sub-expressions are not available in the root pipeline as this function simply returns the original _context_.
+|===
+
+*Returns:* Depends on your input and arguments
+
+
+[float]
+[[dropdownControl_fn]]
+=== `dropdownControl`
+
+Configures a dropdown filter control element.
+
+*Expression syntax*
+[source,js]
+----
+dropdownControl valueColumn=project filterColumn=project
+dropdownControl valueColumn=agent filterColumn=agent.keyword filterGroup=group1
+----
+
+*Code example*
+[source,text]
+----
+demodata
+| dropdownControl valueColumn=project filterColumn=project
+| render
+----
+This creates a dropdown filter element. It requires a data source and uses the unique values from the given `valueColumn` (i.e. `project`) and applies the filter to the `project` column. Note: `filterColumn` should point to a keyword type field for Elasticsearch data sources.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`filterColumn` ***
+|`string`
+|The column or field that you want to filter.
+
+|`filterGroup`
+|`string`
+|The group name for the filter.
+
+|`valueColumn` ***
+|`string`
+|The column or field from which to extract the unique values for the dropdown control.
+|===
+
+*Returns:* `render`
+
+[float]
+[[e_fns]]
+== E
+
+[float]
+[[eq_fn]]
+=== `eq`
+
+Returns whether the _context_ is equal to the argument.
+
+*Expression syntax*
+[source,js]
+----
+eq true
+eq null
+eq 10
+eq "foo"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| mapColumn project
+  fn={getCell project |
+    switch
+      {case if={eq kibana} then=kibana}
+      {case if={eq elasticsearch} then=elasticsearch}
+      default="other"
+  }
+| pointseries size="size(cost)" color="project"
+| pie
+| render
+----
+This changes all values in the project column that don’t equal `"kibana"` or `"elasticsearch"` to `"other"`.
+
+*Accepts:* `boolean`, `number`, `string`, `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `value`
+|`boolean`, `number`, `string`, `null`
+|The value compared to the _context_.
+|===
+
+*Returns:* `boolean`
+
+
+[float]
+[[escount_fn]]
+=== `escount`
+
+Query Elasticsearch for the number of hits matching the specified query.
+
+*Expression syntax*
+[source,js]
+----
+escount index="logstash-*"
+escount "currency:"EUR"" index="kibana_sample_data_ecommerce"
+escount query="response:404" index="kibana_sample_data_logs"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| escount "Cancelled:true" index="kibana_sample_data_flights"
+| math "value"
+| progress shape="semicircle"
+  label={formatnumber 0,0}
+  font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}
+  max={filters | escount index="kibana_sample_data_flights"}
+| render
+----
+The first `escount` expression retrieves the number of flights that were cancelled. The second `escount` expression retrieves the total number of flights.
+
+*Accepts:* `filter`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Aliases: `q`, `query`
+|`string`
+|A Lucene query string.
+
+Default: `"-_index:.kibana"`
+
+|`index`
+|`string`
+|An index or index pattern. For example, `"logstash-*"`.
+
+Default: `"_all"`
+|===
+
+*Returns:* `number`
+
+
+[float]
+[[esdocs_fn]]
+=== `esdocs`
+
+Query Elasticsearch for raw documents. Specify the fields you want to retrieve, especially if you are asking for a lot of rows.
+
+*Expression syntax*
+[source,js]
+----
+esdocs index="logstash-*"
+esdocs "currency:"EUR"" index="kibana_sample_data_ecommerce"
+esdocs query="response:404" index="kibana_sample_data_logs"
+esdocs index="kibana_sample_data_flights" count=100
+esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| esdocs index="kibana_sample_data_ecommerce"
+  fields="customer_gender, taxful_total_price, order_date"
+  sort="order_date, asc"
+  count=10000
+| mapColumn "order_date"
+  fn={getCell "order_date" | date {context} | rounddate "YYYY-MM-DD"}
+| alterColumn "order_date" type="date"
+| pointseries x="order_date" y="sum(taxful_total_price)" color="customer_gender"
+| plot defaultStyle={seriesStyle lines=3}
+  palette={palette "#7ECAE3" "#003A4D" gradient=true}
+| render
+----
+This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
+
+*Accepts:* `filter`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Aliases: `q`, `query`
+|`string`
+|A Lucene query string.
+
+Default: `"-_index:.kibana"`
+
+|`count`
+|`number`
+|The number of documents to retrieve. For better performance, use a smaller data set.
+
+Default: `1000`
+
+|`fields`
+|`string`
+|A comma-separated list of fields. For better performance, use fewer fields.
+
+|`index`
+|`string`
+|An index or index pattern. For example, `"logstash-*"`.
+
+Default: `"_all"`
+
+|`metaFields`
+|`string`
+|Comma separated list of meta fields. For example, `"_index,_type"`.
+
+|`sort`
+|`string`
+|The sort direction formatted as `"field, direction"`. For example, `"@timestamp, desc"` or `"bytes, asc"`.
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[essql_fn]]
+=== `essql`
+
+Queries Elasticsearch using Elasticsearch SQL.
+
+*Expression syntax*
+[source,js]
+----
+essql query="SELECT * FROM "logstash*""
+essql "SELECT * FROM "apm*"" count=10000
+----
+
+*Code example*
+[source,text]
+----
+filters
+| essql query="SELECT Carrier, FlightDelayMin, AvgTicketPrice FROM   "kibana_sample_data_flights""
+| table
+| render
+----
+This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from the "kibana_sample_data_flights" index.
+
+*Accepts:* `filter`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Aliases: `q`, `query`
+|`string`
+|An Elasticsearch SQL query.
+
+|`count`
+|`number`
+|The number of documents to retrieve. For better performance, use a smaller data set.
+
+Default: `1000`
+
+|`timezone`
+
+Alias: `tz`
+|`string`
+|The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.
+
+Default: `"UTC"`
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[exactly_fn]]
+=== `exactly`
+
+Creates a filter that matches a given column to an exact value.
+
+*Expression syntax*
+[source,js]
+----
+exactly "state" value="running"
+exactly "age" value=50 filterGroup="group2"
+exactly column="project" value="beats"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| exactly column=project value=elasticsearch
+| demodata
+| pointseries x=project y="mean(age)"
+| plot defaultStyle={seriesStyle bars=1}
+| render
+----
+The `exactly` filter here is added to existing filters retrieved by the `filters` function and further filters down the data to only have `"elasticsearch"` data. The `exactly` filter only applies to this one specific element and will not affect other elements in the workpad.
+
+*Accepts:* `filter`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`column` ***
+
+Aliases: `c`, `field`
+|`string`
+|The column or field that you want to filter.
+
+|`filterGroup`
+|`string`
+|The group name for the filter.
+
+|`value` ***
+
+Aliases: `v`, `val`
+|`string`
+|The value to match exactly, including white space and capitalization.
+|===
+
+*Returns:* `filter`
+
+[float]
+[[f_fns]]
+== F
+
+[float]
+[[filterrows_fn]]
+=== `filterrows`
+
+Filters rows in a `datatable` based on the return value of a sub-expression.
+
+*Expression syntax*
+[source,js]
+----
+filterrows {getCell "project" | eq "kibana"}
+filterrows fn={getCell "age" | gt 50}
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| filterrows {getCell "country" | any {eq "IN"} {eq "US"} {eq "CN"}}
+| mapColumn "@timestamp"
+  fn={getCell "@timestamp" | rounddate "YYYY-MM"}
+| alterColumn "@timestamp" type="date"
+| pointseries x="@timestamp" y="mean(cost)" color="country"
+| plot defaultStyle={seriesStyle points="2" lines="1"}
+  palette={palette "#01A4A4" "#CC6666" "#D0D102" "#616161" "#00A1CB" "#32742C" "#F18D05" "#113F8C" "#61AE24" "#D70060" gradient=false}
+| render
+----
+This uses `filterrows` to only keep data from India (`IN`), the United States (`US`), and China (`CN`).
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Aliases: `exp`, `expression`, `fn`, `function`
+|`boolean`
+|An expression to pass into each row in the `datatable`. The expression should return a `boolean`. A `true` value preserves the row, and a `false` value removes it.
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[filters_fn]]
+=== `filters`
+
+Aggregates element filters from the workpad for use elsewhere, usually a data source.
+
+*Expression syntax*
+[source,js]
+----
+filters
+filters group="timefilter1"
+filters group="timefilter2" group="dropdownfilter1" ungrouped=true
+----
+
+*Code example*
+[source,text]
+----
+filters group=group2 ungrouped=true
+| demodata
+| pointseries x="project" y="size(cost)" color="project"
+| plot defaultStyle={seriesStyle bars=0.75} legend=false
+  font={
+    font size=14
+    family="'Open Sans', Helvetica, Arial, sans-serif"
+    align="left"
+    color="#FFFFFF"
+    weight="lighter"
+    underline=true
+    italic=true
+  }
+| render
+----
+`filters` sets the existing filters as context and accepts a `group` parameter to opt into specific filter groups. Setting `ungrouped` to `true` opts out of using global filters.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ †
+
+Alias: `group`
+|`string`
+|The name of the filter group to use.
+
+|`ungrouped`
+
+Aliases: `nogroup`, `nogroups`
+|`boolean`
+|Exclude filters that belong to a filter group?
+
+Default: `false`
+|===
+
+*Returns:* `filter`
+
+
+[float]
+[[font_fn]]
+=== `font`
+
+Create a font style.
+
+*Expression syntax*
+[source,js]
+----
+font size=12
+font family=Arial
+font align=middle
+font color=pink
+font weight=lighter
+font underline=true
+font italic=false
+font lHeight=32
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| pointseries x="project" y="size(cost)" color="project"
+| plot defaultStyle={seriesStyle bars=0.75} legend=false
+  font={
+    font size=14
+    family="'Open Sans', Helvetica, Arial, sans-serif"
+    align="left"
+    color="#FFFFFF"
+    weight="lighter"
+    underline=true
+    italic=true
+  }
+| render
+----
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`align`
+|`string`
+|The horizontal text alignment.
+
+Default: `"left"`
+
+|`color`
+|`string`
+|The text color.
+
+|`family`
+|`string`
+|An acceptable CSS web font string
+
+Default: `"'Open Sans', Helvetica, Arial, sans-serif"`
+
+|`italic`
+|`boolean`
+|Italicize the text?
+
+Default: `false`
+
+|`lHeight`
+
+Alias: `lineHeight`
+|`number`, `null`
+|The line height in pixels
+
+Default: `null`
+
+|`size`
+|`number`
+|The font size in pixels
+
+Default: `14`
+
+|`underline`
+|`boolean`
+|Underline the text?
+
+Default: `false`
+
+|`weight`
+|`string`
+|The font weight. For example, `"normal"`, `"bold"`, `"bolder"`, `"lighter"`, `"100"`, `"200"`, `"300"`, `"400"`, `"500"`, `"600"`, `"700"`, `"800"`, or `"900"`.
+
+Default: `"normal"`
+|===
+
+*Returns:* `style`
+
+
+[float]
+[[formatdate_fn]]
+=== `formatdate`
+
+Formats an ISO8601 date string or a date in milliseconds since epoch using MomentJS. See https://momentjs.com/docs/#/displaying/.
+
+*Expression syntax*
+[source,js]
+----
+formatdate format="YYYY-MM-DD"
+formatdate "MM/DD/YYYY"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| mapColumn "time" fn={getCell time | formatdate "MMM 'YY"}
+| pointseries x="time" y="sum(price)" color="state"
+| plot defaultStyle={seriesStyle points=5}
+| render
+----
+This transforms the dates in the `time` field into strings that look like `"Jan ‘19"`, `"Feb ‘19"`, etc. using a MomentJS format.
+
+*Accepts:* `number`, `string`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `format`
+|`string`
+|A MomentJS format. For example, `"MM/DD/YYYY"`. See https://momentjs.com/docs/#/displaying/.
+|===
+
+*Returns:* `string`
+
+
+[float]
+[[formatnumber_fn]]
+=== `formatnumber`
+
+Formats a number into a formatted number string using the Numeral pattern.
+
+*Expression syntax*
+[source,js]
+----
+formatnumber format="$0,0.00"
+formatnumber "0.0a"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| math "mean(percent_uptime)"
+| progress shape="gauge"
+  label={formatnumber "0%"}
+  font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align="center"}
+| render
+----
+The `formatnumber` subexpression receives the same `context` as the `progress` function, which is the output of the `math` function. It formats the value into a percentage.
+
+*Accepts:* `number`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `format`
+|`string`
+|A Numeral pattern format string. For example, `"0.0a"` or `"0%"`.
+|===
+
+*Returns:* `string`
+
+[float]
+[[g_fns]]
+== G
+
+[float]
+[[getCell_fn]]
+=== `getCell`
+
+Fetches a single cell from a `datatable`.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Aliases: `c`, `column`
+|`string`
+|The name of the column to fetch the value from. If not provided, the value is retrieved from the first column.
+
+|`row`
+
+Alias: `r`
+|`number`
+|The row number, starting at 0.
+
+Default: `0`
+|===
+
+*Returns:* Depends on your input and arguments
+
+
+[float]
+[[gt_fn]]
+=== `gt`
+
+Returns whether the _context_ is greater than the argument.
+
+*Accepts:* `number`, `string`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `value`
+|`number`, `string`
+|The value compared to the _context_.
+|===
+
+*Returns:* `boolean`
+
+
+[float]
+[[gte_fn]]
+=== `gte`
+
+Returns whether the _context_ is greater or equal to the argument.
+
+*Accepts:* `number`, `string`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `value`
+|`number`, `string`
+|The value compared to the _context_.
+|===
+
+*Returns:* `boolean`
+
+[float]
+[[h_fns]]
+== H
+
+[float]
+[[head_fn]]
+=== `head`
+
+Retrieves the first N rows from the `datatable`. See also <<tail_fn>>.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `count`
+|`number`
+|The number of rows to retrieve from the beginning of the `datatable`.
+
+Default: `1`
+|===
+
+*Returns:* `datatable`
+
+[float]
+[[i_fns]]
+== I
+
+[float]
+[[if_fn]]
+=== `if`
+
+Performs conditional logic.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `condition`
+|`boolean`
+|A `true` or `false` indicating whether a condition is met, usually returned by a sub-expression. When unspecified, the original _context_ is returned.
+
+|`else`
+|`any`
+|The return value when the condition is `false`. When unspecified and the condition is not met, the original _context_ is returned.
+
+|`then`
+|`any`
+|The return value when the condition is `true`. When unspecified and the condition is met, the original _context_ is returned.
+|===
+
+*Returns:* Depends on your input and arguments
+
+
+[float]
+[[image_fn]]
+=== `image`
+
+Displays an image. Provide an image asset as a `base64` data URL, or pass in a sub-expression.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Aliases: `dataurl`, `url`
+|`string`, `null`
+|The HTTP(S) URL or `base64` data URL of an image.
+
+Example value for the _Unnamed_ argument, formatted as a `base64` data URL:
+[source, url]
+------------
+data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcKICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIgogICB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiCiAgIHhtbG5zOnN2Zz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgdmlld0JveD0iMCAwIDI3MC42MDAwMSAyNjkuNTQ2NjYiCiAgIGhlaWdodD0iMjY5LjU0NjY2IgogICB3aWR0aD0iMjcwLjYwMDAxIgogICB4bWw6c3BhY2U9InByZXNlcnZlIgogICBpZD0ic3ZnMiIKICAgdmVyc2lvbj0iMS4xIj48bWV0YWRhdGEKICAgICBpZD0ibWV0YWRhdGE4Ij48cmRmOlJERj48Y2M6V29yawogICAgICAgICByZGY6YWJvdXQ9IiI+PGRjOmZvcm1hdD5pbWFnZS9zdmcreG1sPC9kYzpmb3JtYXQ+PGRjOnR5cGUKICAgICAgICAgICByZGY6cmVzb3VyY2U9Imh0dHA6Ly9wdXJsLm9yZy9kYy9kY21pdHlwZS9TdGlsbEltYWdlIiAvPjwvY2M6V29yaz48L3JkZjpSREY+PC9tZXRhZGF0YT48ZGVmcwogICAgIGlkPSJkZWZzNiIgLz48ZwogICAgIHRyYW5zZm9ybT0ibWF0cml4KDEuMzMzMzMzMywwLDAsLTEuMzMzMzMzMywwLDI2OS41NDY2NykiCiAgICAgaWQ9ImcxMCI+PGcKICAgICAgIHRyYW5zZm9ybT0ic2NhbGUoMC4xKSIKICAgICAgIGlkPSJnMTIiPjxwYXRoCiAgICAgICAgIGlkPSJwYXRoMTQiCiAgICAgICAgIHN0eWxlPSJmaWxsOiNmZmZmZmY7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gMjAyOS40OCw5NjIuNDQxIGMgMCwxNzAuMDk5IC0xMDUuNDYsMzE4Ljc5OSAtMjY0LjE3LDM3Ni42NTkgNi45OCwzNS44NiAxMC42Miw3MS43MSAxMC42MiwxMDkuMDUgMCwzMTYuMTkgLTI1Ny4yNCw1NzMuNDMgLTU3My40Nyw1NzMuNDMgLTE4NC43MiwwIC0zNTYuNTU4LC04OC41OSAtNDY0LjUzLC0yMzcuODUgLTUzLjA5LDQxLjE4IC0xMTguMjg1LDYzLjc1IC0xODYuMzA1LDYzLjc1IC0xNjcuODM2LDAgLTMwNC4zODMsLTEzNi41NCAtMzA0LjM4MywtMzA0LjM4IDAsLTM3LjA4IDYuNjE3LC03Mi41OCAxOS4wMzEsLTEwNi4wOCBDIDEwOC40ODgsMTM4MC4wOSAwLDEyMjcuODkgMCwxMDU4Ljg4IDAsODg3LjkxIDEwNS45NzcsNzM4LjUzOSAyNjUuMzk4LDY4MS4wOSBjIC02Ljc2OSwtMzUuNDQyIC0xMC40NiwtNzIuMDIgLTEwLjQ2LC0xMDkgQyAyNTQuOTM4LDI1Ni42MjEgNTExLjU2NiwwIDgyNy4wMjcsMCAxMDEyLjIsMCAxMTgzLjk0LDg4Ljk0MTQgMTI5MS4zLDIzOC44MzIgYyA1My40NSwtNDEuOTYxIDExOC44LC02NC45OTIgMTg2LjU2LC02NC45OTIgMTY3LjgzLDAgMzA0LjM4LDEzNi40OTIgMzA0LjM4LDMwNC4zMzIgMCwzNy4wNzggLTYuNjIsNzIuNjI5IC0xOS4wMywxMDYuMTI5IDE1Ny43OCw1Ni44NzkgMjY2LjI3LDIwOS4xMjkgMjY2LjI3LDM3OC4xNCIgLz48cGF0aAogICAgICAgICBpZD0icGF0aDE2IgogICAgICAgICBzdHlsZT0iZmlsbDojZmFjZjA5O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIgogICAgICAgICBkPSJtIDc5Ny44OTgsMTE1MC45MyA0NDQuMDcyLC0yMDIuNDUgNDQ4LjA1LDM5Mi41OCBjIDYuNDksMzIuMzkgOS42Niw2NC42NyA5LjY2LDk4LjQ2IDAsMjc2LjIzIC0yMjQuNjgsNTAwLjk1IC01MDAuOSw1MDAuOTUgLTE2NS4yNCwwIC0zMTkuMzcsLTgxLjM2IC00MTMuMDUzLC0yMTcuNzkgbCAtNzQuNTI0LC0zODYuNjQgODYuNjk1LC0xODUuMTEiIC8+PHBhdGgKICAgICAgICAgaWQ9InBhdGgxOCIKICAgICAgICAgc3R5bGU9ImZpbGw6IzQ5YzFhZTtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIKICAgICAgICAgZD0ibSAzMzguMjIzLDY4MC42NzIgYyAtNi40ODksLTMyLjM4MyAtOS44MDksLTY1Ljk4MSAtOS44MDksLTk5Ljk3MyAwLC0yNzYuOTI5IDIyNS4zMzYsLTUwMi4yNTc2IDUwMi4zMTMsLTUwMi4yNTc2IDE2Ni41OTMsMCAzMjEuNDczLDgyLjExNzYgNDE1LjAxMywyMTkuOTQ5NiBsIDczLjk3LDM4NS4zNDcgLTk4LjcyLDE4OC42MjEgTCA3NzUuMTU2LDEwNzUuNTcgMzM4LjIyMyw2ODAuNjcyIiAvPjxwYXRoCiAgICAgICAgIGlkPSJwYXRoMjAiCiAgICAgICAgIHN0eWxlPSJmaWxsOiNlZjI5OWI7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gMzM1LjQxLDE0NDkuMTggMzA0LjMzMiwtNzEuODYgNjYuNjgsMzQ2LjAyIGMgLTQxLjU4NiwzMS43OCAtOTIuOTMsNDkuMTggLTE0NS43MzEsNDkuMTggLTEzMi4yNSwwIC0yMzkuODEyLC0xMDcuNjEgLTIzOS44MTIsLTIzOS44NyAwLC0yOS4yMSA0Ljg3OSwtNTcuMjIgMTQuNTMxLC04My40NyIgLz48cGF0aAogICAgICAgICBpZD0icGF0aDIyIgogICAgICAgICBzdHlsZT0iZmlsbDojNGNhYmU0O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIgogICAgICAgICBkPSJNIDMwOC45OTIsMTM3Ni43IEMgMTczLjAyLDEzMzEuNjQgNzguNDgwNSwxMjAxLjMgNzguNDgwNSwxMDU3LjkzIDc4LjQ4MDUsOTE4LjM0IDE2NC44Miw3OTMuNjggMjk0LjQwNiw3NDQuMzUyIGwgNDI2Ljk4MSwzODUuOTM4IC03OC4zOTUsMTY3LjUxIC0zMzQsNzguOSIgLz48cGF0aAogICAgICAgICBpZD0icGF0aDI0IgogICAgICAgICBzdHlsZT0iZmlsbDojODVjZTI2O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIgogICAgICAgICBkPSJtIDEzMjMuOCwyOTguNDEgYyA0MS43NCwtMzIuMDkgOTIuODMsLTQ5LjU5IDE0NC45OCwtNDkuNTkgMTMyLjI1LDAgMjM5LjgxLDEwNy41NTkgMjM5LjgxLDIzOS44MjEgMCwyOS4xNiAtNC44OCw1Ny4xNjggLTE0LjUzLDgzLjQxOCBsIC0zMDQuMDgsNzEuMTYgLTY2LjE4LC0zNDQuODA5IiAvPjxwYXRoCiAgICAgICAgIGlkPSJwYXRoMjYiCiAgICAgICAgIHN0eWxlPSJmaWxsOiMzMTc3YTc7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiCiAgICAgICAgIGQ9Im0gMTM4NS42Nyw3MjIuOTMgMzM0Ljc2LC03OC4zMDEgYyAxMzYuMDIsNDQuOTYxIDIzMC41NiwxNzUuMzUxIDIzMC41NiwzMTguNzYyIDAsMTM5LjMzOSAtODYuNTQsMjYzLjg1OSAtMjE2LjM4LDMxMy4wMzkgbCAtNDM3Ljg0LC0zODMuNTkgODguOSwtMTY5LjkxIiAvPjwvZz48L2c+PC9zdmc+
+------------
+
+|`mode`
+|`string`
+|`"contain"` shows the entire image, scaled to fit. `"cover"` fills the container with the image, cropping from the sides or bottom as needed. `"stretch"` resizes the height and width of the image to 100% of the container.
+
+Default: `"contain"`
+|===
+
+*Returns:* `image`
+
+[float]
+[[j_fns]]
+== J
+
+[float]
+[[joinRows_fn]]
+=== `joinRows`
+
+Concatenates values from rows in a `datatable` into a single string.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `column`
+|`string`
+|The column or field from which to extract the values.
+
+|`distinct`
+|`boolean`
+|Extract only unique values?
+
+Default: `true`
+
+|`quote`
+|`string`
+|The quote character to wrap around each extracted value.
+
+Default: `"'"`
+
+|`separator`
+
+Aliases: `delimiter`, `sep`
+|`string`
+|The delimiter to insert between each extracted value.
+
+Default: `","`
+|===
+
+*Returns:* `string`
+
+[float]
+[[l_fns]]
+== L
+
+[float]
+[[location_fn]]
+=== `location`
+
+Find your current location using the Geolocation API of the browser. Performance can vary, but is fairly accurate. See https://developer.mozilla.org/en-US/docs/Web/API/Navigator/geolocation. Don’t use <<location_fn>> if you plan to generate PDFs as this function requires user input.
+
+*Accepts:* `null`
+
+*Returns:* `datatable`
+
+
+[float]
+[[lt_fn]]
+=== `lt`
+
+Returns whether the _context_ is less than the argument.
+
+*Accepts:* `number`, `string`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `value`
+|`number`, `string`
+|The value compared to the _context_.
+|===
+
+*Returns:* `boolean`
+
+
+[float]
+[[lte_fn]]
+=== `lte`
+
+Returns whether the _context_ is less than or equal to the argument.
+
+*Accepts:* `number`, `string`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `value`
+|`number`, `string`
+|The value compared to the _context_.
+|===
+
+*Returns:* `boolean`
+
+[float]
+[[m_fns]]
+== M
+
+[float]
+[[mapCenter_fn]]
+=== `mapCenter`
+
+Returns an object with the center coordinates and zoom level of the map.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`lat` ***
+|`number`
+|Latitude for the center of the map
+
+|`lon` ***
+|`number`
+|Longitude for the center of the map
+
+|`zoom` ***
+|`number`
+|Zoom level of the map
+|===
+
+*Returns:* `mapCenter`
+
+
+[float]
+[[mapColumn_fn]]
+=== `mapColumn`
+
+Adds a column calculated as the result of other columns. Changes are made only when you provide arguments.See also <<alterColumn_fn>> and <<staticColumn_fn>>.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Aliases: `column`, `name`
+|`string`
+|The name of the resulting column.
+
+|`expression` ***
+
+Aliases: `exp`, `fn`, `function`
+|`boolean`, `number`, `string`, `null`
+|A Canvas expression that is passed to each row as a single row `datatable`.
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[markdown_fn]]
+=== `markdown`
+
+Adds an element that renders Markdown text. TIP: Use the <<markdown_fn>> function for single numbers, metrics, and paragraphs of text.
+
+*Accepts:* `datatable`, `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ †
+
+Aliases: `content`, `expression`
+|`string`
+|A string of text that contains Markdown. To concatenate, pass the `string` function multiple times.
+
+Default: `""`
+
+|`font`
+|`style`
+|The CSS font properties for the content. For example, "font-family" or "font-weight".
+
+Default: `${font}`
+
+|`openLinksInNewTab`
+|`boolean`
+|A true or false value for opening links in a new tab. The default value is `false`. Setting to `true` opens all links in a new tab.
+
+Default: `false`
+|===
+
+*Returns:* `render`
+
+
+[float]
+[[math_fn]]
+=== `math`
+
+Interprets a `TinyMath` math expression using a `number` or `datatable` as _context_. The `datatable` columns are available by their column name. If the _context_ is a number it is available as `value`.
+
+*Accepts:* `number`, `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `expression`
+|`string`
+|An evaluated `TinyMath` expression. See https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html.
+|===
+
+*Returns:* `number`
+
+
+[float]
+[[metric_fn]]
+=== `metric`
+
+Displays a number over a label.
+
+*Accepts:* `number`, `string`, `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Aliases: `description`, `label`, `text`
+|`string`
+|The text describing the metric.
+
+Default: `""`
+
+|`labelFont`
+|`style`
+|The CSS font properties for the label. For example, `font-family` or `font-weight`.
+
+Default: `${font size=14 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`
+
+|`metricFont`
+|`style`
+|The CSS font properties for the metric. For example, `font-family` or `font-weight`.
+
+Default: `${font size=48 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}`
+
+|`metricFormat`
+
+Alias: `format`
+|`string`
+|A Numeral pattern format string. For example, `"0.0a"` or `"0%"`.
+|===
+
+*Returns:* `render`
+
+[float]
+[[n_fns]]
+== N
+
+[float]
+[[neq_fn]]
+=== `neq`
+
+Returns whether the _context_ is not equal to the argument.
+
+*Accepts:* `boolean`, `number`, `string`, `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `value`
+|`boolean`, `number`, `string`, `null`
+|The value compared to the _context_.
+|===
+
+*Returns:* `boolean`
+
+[float]
+[[p_fns]]
+== P
+
+[float]
+[[palette_fn]]
+=== `palette`
+
+Creates a color palette.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ †
+
+Alias: `color`
+|`string`
+|The palette colors. Accepts an HTML color name, HEX, HSL, HSLA, RGB, or RGBA.
+
+|`gradient`
+|`boolean`
+|Make a gradient palette where supported?
+
+Default: `false`
+
+|`reverse`
+|`boolean`
+|Reverse the palette?
+
+Default: `false`
+|===
+
+*Returns:* `palette`
+
+
+[float]
+[[pie_fn]]
+=== `pie`
+
+Configures a pie chart element.
+
+*Accepts:* `pointseries`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`font`
+|`style`
+|The CSS font properties for the labels. For example, `font-family` or `font-weight`.
+
+Default: `${font}`
+
+|`hole`
+|`number`
+|Draws a hole in the pie, between `0` and `100`, as a percentage of the pie radius.
+
+Default: `0`
+
+|`labelRadius`
+|`number`
+|The percentage of the container area to use as a radius for the label circle.
+
+Default: `100`
+
+|`labels`
+|`boolean`
+|Display the pie labels?
+
+Default: `true`
+
+|`legend`
+|`string`, `boolean`
+|The legend position. For example, `"nw"`, `"sw"`, `"ne"`, `"se"`, or `false`. When `false`, the legend is hidden.
+
+Default: `false`
+
+|`palette`
+|`palette`
+|A `palette` object for describing the colors to use in this pie chart.
+
+Default: `${palette}`
+
+|`radius`
+|`string`, `number`
+|The radius of the pie as a percentage, between `0` and `1`, of the available space. To automatically set the radius, use `"auto"`.
+
+Default: `"auto"`
+
+|`seriesStyle` †
+|`seriesStyle`
+|A style of a specific series
+
+|`tilt`
+|`number`
+|The percentage of tilt where `1` is fully vertical, and `0` is completely flat.
+
+Default: `1`
+|===
+
+*Returns:* `render`
+
+
+[float]
+[[plot_fn]]
+=== `plot`
+
+Configures a chart element.
+
+*Accepts:* `pointseries`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`defaultStyle`
+|`seriesStyle`
+|The default style to use for every series.
+
+Default: `${seriesStyle points=5}`
+
+|`font`
+|`style`
+|The CSS font properties for the labels. For example, `font-family` or `font-weight`.
+
+Default: `${font}`
+
+|`legend`
+|`string`, `boolean`
+|The legend position. For example, `"nw"`, `"sw"`, `"ne"`, `"se"`, or `false`. When `false`, the legend is hidden.
+
+Default: `"ne"`
+
+|`palette`
+|`palette`
+|A `palette` object for describing the colors to use in this chart.
+
+Default: `${palette}`
+
+|`seriesStyle` †
+|`seriesStyle`
+|A style of a specific series
+
+|`xaxis`
+|`boolean`, `axisConfig`
+|The axis configuration. When `false`, the axis is hidden.
+
+Default: `true`
+
+|`yaxis`
+|`boolean`, `axisConfig`
+|The axis configuration. When `false`, the axis is hidden.
+
+Default: `true`
+|===
+
+*Returns:* `render`
+
+
+[float]
+[[ply_fn]]
+=== `ply`
+
+Subdivides a `datatable` by the unique values of the specified columns, and passes the resulting tables into an expression, then merges the outputs of each expression.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`by` †
+|`string`
+|The column to subdivide the `datatable`.
+
+|`expression` †
+
+Aliases: `exp`, `fn`, `function`
+|`datatable`
+|An expression to pass each resulting `datatable` into. Tips: Expressions must return a `datatable`. Use <<as_fn>> to turn literals into `datatable`s. Multiple expressions must return the same number of rows.If you need to return a different row count, pipe into another instance of <<ply_fn>>. If multiple expressions returns the columns with the same name, the last one wins.
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[pointseries_fn]]
+=== `pointseries`
+
+Turn a `datatable` into a point series model. Currently we differentiate measure from dimensions by looking for a `TinyMath` expression. See https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html. If you enter a `TinyMath` expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique keys. Measures are then deduplicated by those keys using the specified `TinyMath` function
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`color`
+|`string`
+|An expression to use in determining the mark's color.
+
+|`size`
+|`string`
+|The size of the marks. Only applicable to supported elements.
+
+|`text`
+|`string`
+|The text to show on the mark. Only applicable to supported elements.
+
+|`x`
+|`string`
+|The values along the X-axis.
+
+|`y`
+|`string`
+|The values along the Y-axis.
+|===
+
+*Returns:* `pointseries`
+
+
+[float]
+[[progress_fn]]
+=== `progress`
+
+Configures a progress element.
+
+*Accepts:* `number`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `shape`
+|`string`
+|Select `"gauge"`, `"horizontalBar"`, `"horizontalPill"`, `"semicircle"`, `"unicorn"`, `"verticalBar"`, `"verticalPill"`, or `"wheel"`.
+
+Default: `"gauge"`
+
+|`barColor`
+|`string`
+|The color of the background bar.
+
+Default: `"#f0f0f0"`
+
+|`barWeight`
+|`number`
+|The thickness of the background bar.
+
+Default: `20`
+
+|`font`
+|`style`
+|The CSS font properties for the label. For example, `font-family` or `font-weight`.
+
+Default: `${font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`
+
+|`label`
+|`boolean`, `string`
+|To show or hide the label, use `true` or `false`. Alternatively, provide a string to display as a label.
+
+Default: `true`
+
+|`max`
+|`number`
+|The maximum value of the progress element.
+
+Default: `1`
+
+|`valueColor`
+|`string`
+|The color of the progress bar.
+
+Default: `"#1785b0"`
+
+|`valueWeight`
+|`number`
+|The thickness of the progress bar.
+
+Default: `20`
+|===
+
+*Returns:* `render`
+
+[float]
+[[r_fns]]
+== R
+
+[float]
+[[render_fn]]
+=== `render`
+
+Renders the _context_ as a specific element and sets element level options, such as background and border styling.
+
+*Accepts:* `render`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`as`
+|`string`
+|The element type to render. You probably want a specialized function instead, such as <<plot_fn>> or <<shape_fn>>.
+
+|`containerStyle`
+|`containerStyle`
+|The style for the container, including background, border, and opacity.
+
+Default: `${containerStyle}`
+
+|`css`
+|`string`
+|Any block of custom CSS to be scoped to the element.
+
+Default: `".canvasRenderEl${}"`
+|===
+
+*Returns:* `render`
+
+
+[float]
+[[repeatImage_fn]]
+=== `repeatImage`
+
+Configures a repeating image element.
+
+*Accepts:* `number`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`emptyImage`
+|`string`, `null`
+|Fills the difference between the _context_ and `max` parameter for the element with this image. Provide an image asset as a `base64` data URL, or pass in a sub-expression.
+
+Default: `null`
+
+|`image`
+|`string`, `null`
+|The image to repeat. Provide an image asset as a `base64` data URL, or pass in a sub-expression.
+
+Example value for the `image` argument, formatted as a `base64` data URL:
+[source, url]
+------------
+data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22utf-8%22%3F%3E%0A%3Csvg%20viewBox%3D%22-3.948730230331421%20-1.7549896240234375%20245.25946044921875%20241.40370178222656%22%20width%3D%22245.25946044921875%22%20height%3D%22241.40370178222656%22%20style%3D%22enable-background%3Anew%200%200%20686.2%20235.7%3B%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3Cstyle%20type%3D%22text%2Fcss%22%3E%0A%09.st0%7Bfill%3A%232D2D2D%3B%7D%0A%3C%2Fstyle%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cg%20transform%3D%22matrix%281%2C%200%2C%200%2C%201%2C%200%2C%200%29%22%3E%0A%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M329.4%2C160.3l4.7-0.5l0.3%2C9.6c-12.4%2C1.7-23%2C2.6-31.8%2C2.6c-11.7%2C0-20-3.4-24.9-10.2%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-4.9-6.8-7.3-17.4-7.3-31.7c0-28.6%2C11.4-42.9%2C34.1-42.9c11%2C0%2C19.2%2C3.1%2C24.6%2C9.2c5.4%2C6.1%2C8.1%2C15.8%2C8.1%2C28.9l-0.7%2C9.3h-53.8%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc0%2C9%2C1.6%2C15.7%2C4.9%2C20c3.3%2C4.3%2C8.9%2C6.5%2C17%2C6.5C312.8%2C161.2%2C321.1%2C160.9%2C329.4%2C160.3z%20M325%2C124.9c0-10-1.6-17.1-4.8-21.2%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-3.2-4.1-8.4-6.2-15.6-6.2c-7.2%2C0-12.7%2C2.2-16.3%2C6.5c-3.6%2C4.3-5.5%2C11.3-5.6%2C20.9H325z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M354.3%2C171.4V64h12.2v107.4H354.3z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M443.5%2C113.5v41.1c0%2C4.1%2C10.1%2C3.9%2C10.1%2C3.9l-0.6%2C10.8c-8.6%2C0-15.7%2C0.7-20-3.4c-9.8%2C4.3-19.5%2C6.1-29.3%2C6.1%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-7.5%2C0-13.2-2.1-17.1-6.4c-3.9-4.2-5.9-10.3-5.9-18.3c0-7.9%2C2-13.8%2C6-17.5c4-3.7%2C10.3-6.1%2C18.9-6.9l25.6-2.4v-7%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc0-5.5-1.2-9.5-3.6-11.9c-2.4-2.4-5.7-3.6-9.8-3.6l-32.1%2C0V87.2h31.3c9.2%2C0%2C15.9%2C2.1%2C20.1%2C6.4C441.4%2C97.8%2C443.5%2C104.5%2C443.5%2C113.5%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bz%20M393.3%2C146.7c0%2C10%2C4.1%2C15%2C12.4%2C15c7.4%2C0%2C14.7-1.2%2C21.8-3.7l3.7-1.3v-26.9l-24.1%2C2.3c-4.9%2C0.4-8.4%2C1.8-10.6%2C4.2%26%2310%3B%26%239%3B%26%239%3B%26%239%3BC394.4%2C138.7%2C393.3%2C142.2%2C393.3%2C146.7z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M491.2%2C98.2c-11.8%2C0-17.8%2C4.1-17.8%2C12.4c0%2C3.8%2C1.4%2C6.5%2C4.1%2C8.1c2.7%2C1.6%2C8.9%2C3.2%2C18.6%2C4.9%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc9.7%2C1.7%2C16.5%2C4%2C20.5%2C7.1c4%2C3%2C6%2C8.7%2C6%2C17.1c0%2C8.4-2.7%2C14.5-8.1%2C18.4c-5.4%2C3.9-13.2%2C5.9-23.6%2C5.9c-6.7%2C0-29.2-2.5-29.2-2.5%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bl0.7-10.6c12.9%2C1.2%2C22.3%2C2.2%2C28.6%2C2.2c6.3%2C0%2C11.1-1%2C14.4-3c3.3-2%2C5-5.4%2C5-10.1c0-4.7-1.4-7.9-4.2-9.6c-2.8-1.7-9-3.3-18.6-4.8%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-9.6-1.5-16.4-3.7-20.4-6.7c-4-2.9-6-8.4-6-16.3c0-7.9%2C2.8-13.8%2C8.4-17.6c5.6-3.8%2C12.6-5.7%2C20.9-5.7c6.6%2C0%2C29.6%2C1.7%2C29.6%2C1.7%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bv10.7C508.1%2C99%2C498.2%2C98.2%2C491.2%2C98.2z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M581.7%2C99.5h-25.9v39c0%2C9.3%2C0.7%2C15.5%2C2%2C18.4c1.4%2C2.9%2C4.6%2C4.4%2C9.7%2C4.4l14.5-1l0.8%2C10.1%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-7.3%2C1.2-12.8%2C1.8-16.6%2C1.8c-8.5%2C0-14.3-2.1-17.6-6.2c-3.3-4.1-4.9-12-4.9-23.6V99.5h-11.6V88.9h11.6V63.9h12.1v24.9h25.9V99.5z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M598.7%2C78.4V64.3h12.2v14.2H598.7z%20M598.7%2C171.4V88.9h12.2v82.5H598.7z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M663.8%2C87.2c3.6%2C0%2C9.7%2C0.7%2C18.3%2C2l3.9%2C0.5l-0.5%2C9.9c-8.7-1-15.1-1.5-19.2-1.5c-9.2%2C0-15.5%2C2.2-18.8%2C6.6%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-3.3%2C4.4-5%2C12.6-5%2C24.5c0%2C11.9%2C1.5%2C20.2%2C4.6%2C24.9c3.1%2C4.7%2C9.5%2C7%2C19.3%2C7l19.2-1.5l0.5%2C10.1c-10.1%2C1.5-17.7%2C2.3-22.7%2C2.3%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-12.7%2C0-21.5-3.3-26.3-9.8c-4.8-6.5-7.3-17.5-7.3-33c0-15.5%2C2.6-26.4%2C7.8-32.6C643%2C90.4%2C651.7%2C87.2%2C663.8%2C87.2z%22%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M236.6%2C123.5c0-19.8-12.3-37.2-30.8-43.9c0.8-4.2%2C1.2-8.4%2C1.2-12.7C207%2C30%2C177%2C0%2C140.2%2C0%26%2310%3B%26%239%3B%26%239%3BC118.6%2C0%2C98.6%2C10.3%2C86%2C27.7c-6.2-4.8-13.8-7.4-21.7-7.4c-19.6%2C0-35.5%2C15.9-35.5%2C35.5c0%2C4.3%2C0.8%2C8.5%2C2.2%2C12.4%26%2310%3B%26%239%3B%26%239%3BC12.6%2C74.8%2C0%2C92.5%2C0%2C112.2c0%2C19.9%2C12.4%2C37.3%2C30.9%2C44c-0.8%2C4.1-1.2%2C8.4-1.2%2C12.7c0%2C36.8%2C29.9%2C66.7%2C66.7%2C66.7%26%2310%3B%26%239%3B%26%239%3Bc21.6%2C0%2C41.6-10.4%2C54.1-27.8c6.2%2C4.9%2C13.8%2C7.6%2C21.7%2C7.6c19.6%2C0%2C35.5-15.9%2C35.5-35.5c0-4.3-0.8-8.5-2.2-12.4%26%2310%3B%26%239%3B%26%239%3BC223.9%2C160.9%2C236.6%2C143.2%2C236.6%2C123.5z%20M91.6%2C34.8c10.9-15.9%2C28.9-25.4%2C48.1-25.4c32.2%2C0%2C58.4%2C26.2%2C58.4%2C58.4%26%2310%3B%26%239%3B%26%239%3Bc0%2C3.9-0.4%2C7.7-1.1%2C11.5l-52.2%2C45.8L93%2C101.5L82.9%2C79.9L91.6%2C34.8z%20M65.4%2C29c6.2%2C0%2C12.1%2C2%2C17%2C5.7l-7.8%2C40.3l-35.5-8.4%26%2310%3B%26%239%3B%26%239%3Bc-1.1-3.1-1.7-6.3-1.7-9.7C37.4%2C41.6%2C49.9%2C29%2C65.4%2C29z%20M9.1%2C112.3c0-16.7%2C11-31.9%2C26.9-37.2L75%2C84.4l9.1%2C19.5l-49.8%2C45%26%2310%3B%26%239%3B%26%239%3BC19.2%2C143.1%2C9.1%2C128.6%2C9.1%2C112.3z%20M145.2%2C200.9c-10.9%2C16.1-29%2C25.6-48.4%2C25.6c-32.3%2C0-58.6-26.3-58.6-58.5c0-4%2C0.4-7.9%2C1.1-11.7%26%2310%3B%26%239%3B%26%239%3Bl50.9-46l52%2C23.7l11.5%2C22L145.2%2C200.9z%20M171.2%2C206.6c-6.1%2C0-12-2-16.9-5.8l7.7-40.2l35.4%2C8.3c1.1%2C3.1%2C1.7%2C6.3%2C1.7%2C9.7%26%2310%3B%26%239%3B%26%239%3BC199.2%2C194.1%2C186.6%2C206.6%2C171.2%2C206.6z%20M200.5%2C160.5l-39-9.1l-10.4-19.8l51-44.7c15.1%2C5.7%2C25.2%2C20.2%2C25.2%2C36.5%26%2310%3B%26%239%3B%26%239%3BC227.4%2C140.1%2C216.4%2C155.3%2C200.5%2C160.5z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E
+------------
+
+|`max`
+|`number`
+|The maximum number of times the image can repeat.
+
+Default: `1000`
+
+|`size`
+|`number`
+|The maximum height or width of the image, in pixels. When the image is taller than it is wide, this function limits the height.
+
+Default: `100`
+|===
+
+*Returns:* `render`
+
+
+[float]
+[[replace_fn]]
+=== `replace`
+
+Uses a regular expression to replace parts of a string.
+
+*Accepts:* `string`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Aliases: `pattern`, `regex`
+|`string`
+|The text or pattern of a JavaScript regular expression. For example, `"[aeiou]"`. You can use capturing groups here.
+
+|`flags`
+
+Alias: `modifiers`
+|`string`
+|Specify flags. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp.
+
+Default: `"g"`
+
+|`replacement`
+|`string`
+|The replacement for the matching parts of string. Capturing groups can be accessed by their index. For example, `"$1"`.
+
+Default: `""`
+|===
+
+*Returns:* `string`
+
+
+[float]
+[[revealImage_fn]]
+=== `revealImage`
+
+Configures an image reveal element.
+
+*Accepts:* `number`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`emptyImage`
+|`string`, `null`
+|An optional background image to reveal over. Provide an image asset as a ``base64`` data URL, or pass in a sub-expression.
+
+Default: `null`
+
+|`image`
+|`string`, `null`
+|The image to reveal. Provide an image asset as a `base64` data URL, or pass in a sub-expression.
+
+Example value for the `image` argument, formatted as a `base64` data URL:
+[source, url]
+------------
+data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22utf-8%22%3F%3E%0A%3Csvg%20viewBox%3D%22-3.948730230331421%20-1.7549896240234375%20245.25946044921875%20241.40370178222656%22%20width%3D%22245.25946044921875%22%20height%3D%22241.40370178222656%22%20style%3D%22enable-background%3Anew%200%200%20686.2%20235.7%3B%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3Cstyle%20type%3D%22text%2Fcss%22%3E%0A%09.st0%7Bfill%3A%232D2D2D%3B%7D%0A%3C%2Fstyle%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cg%20transform%3D%22matrix%281%2C%200%2C%200%2C%201%2C%200%2C%200%29%22%3E%0A%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M329.4%2C160.3l4.7-0.5l0.3%2C9.6c-12.4%2C1.7-23%2C2.6-31.8%2C2.6c-11.7%2C0-20-3.4-24.9-10.2%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-4.9-6.8-7.3-17.4-7.3-31.7c0-28.6%2C11.4-42.9%2C34.1-42.9c11%2C0%2C19.2%2C3.1%2C24.6%2C9.2c5.4%2C6.1%2C8.1%2C15.8%2C8.1%2C28.9l-0.7%2C9.3h-53.8%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc0%2C9%2C1.6%2C15.7%2C4.9%2C20c3.3%2C4.3%2C8.9%2C6.5%2C17%2C6.5C312.8%2C161.2%2C321.1%2C160.9%2C329.4%2C160.3z%20M325%2C124.9c0-10-1.6-17.1-4.8-21.2%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-3.2-4.1-8.4-6.2-15.6-6.2c-7.2%2C0-12.7%2C2.2-16.3%2C6.5c-3.6%2C4.3-5.5%2C11.3-5.6%2C20.9H325z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M354.3%2C171.4V64h12.2v107.4H354.3z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M443.5%2C113.5v41.1c0%2C4.1%2C10.1%2C3.9%2C10.1%2C3.9l-0.6%2C10.8c-8.6%2C0-15.7%2C0.7-20-3.4c-9.8%2C4.3-19.5%2C6.1-29.3%2C6.1%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-7.5%2C0-13.2-2.1-17.1-6.4c-3.9-4.2-5.9-10.3-5.9-18.3c0-7.9%2C2-13.8%2C6-17.5c4-3.7%2C10.3-6.1%2C18.9-6.9l25.6-2.4v-7%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc0-5.5-1.2-9.5-3.6-11.9c-2.4-2.4-5.7-3.6-9.8-3.6l-32.1%2C0V87.2h31.3c9.2%2C0%2C15.9%2C2.1%2C20.1%2C6.4C441.4%2C97.8%2C443.5%2C104.5%2C443.5%2C113.5%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bz%20M393.3%2C146.7c0%2C10%2C4.1%2C15%2C12.4%2C15c7.4%2C0%2C14.7-1.2%2C21.8-3.7l3.7-1.3v-26.9l-24.1%2C2.3c-4.9%2C0.4-8.4%2C1.8-10.6%2C4.2%26%2310%3B%26%239%3B%26%239%3B%26%239%3BC394.4%2C138.7%2C393.3%2C142.2%2C393.3%2C146.7z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M491.2%2C98.2c-11.8%2C0-17.8%2C4.1-17.8%2C12.4c0%2C3.8%2C1.4%2C6.5%2C4.1%2C8.1c2.7%2C1.6%2C8.9%2C3.2%2C18.6%2C4.9%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc9.7%2C1.7%2C16.5%2C4%2C20.5%2C7.1c4%2C3%2C6%2C8.7%2C6%2C17.1c0%2C8.4-2.7%2C14.5-8.1%2C18.4c-5.4%2C3.9-13.2%2C5.9-23.6%2C5.9c-6.7%2C0-29.2-2.5-29.2-2.5%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bl0.7-10.6c12.9%2C1.2%2C22.3%2C2.2%2C28.6%2C2.2c6.3%2C0%2C11.1-1%2C14.4-3c3.3-2%2C5-5.4%2C5-10.1c0-4.7-1.4-7.9-4.2-9.6c-2.8-1.7-9-3.3-18.6-4.8%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-9.6-1.5-16.4-3.7-20.4-6.7c-4-2.9-6-8.4-6-16.3c0-7.9%2C2.8-13.8%2C8.4-17.6c5.6-3.8%2C12.6-5.7%2C20.9-5.7c6.6%2C0%2C29.6%2C1.7%2C29.6%2C1.7%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bv10.7C508.1%2C99%2C498.2%2C98.2%2C491.2%2C98.2z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M581.7%2C99.5h-25.9v39c0%2C9.3%2C0.7%2C15.5%2C2%2C18.4c1.4%2C2.9%2C4.6%2C4.4%2C9.7%2C4.4l14.5-1l0.8%2C10.1%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-7.3%2C1.2-12.8%2C1.8-16.6%2C1.8c-8.5%2C0-14.3-2.1-17.6-6.2c-3.3-4.1-4.9-12-4.9-23.6V99.5h-11.6V88.9h11.6V63.9h12.1v24.9h25.9V99.5z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M598.7%2C78.4V64.3h12.2v14.2H598.7z%20M598.7%2C171.4V88.9h12.2v82.5H598.7z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M663.8%2C87.2c3.6%2C0%2C9.7%2C0.7%2C18.3%2C2l3.9%2C0.5l-0.5%2C9.9c-8.7-1-15.1-1.5-19.2-1.5c-9.2%2C0-15.5%2C2.2-18.8%2C6.6%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-3.3%2C4.4-5%2C12.6-5%2C24.5c0%2C11.9%2C1.5%2C20.2%2C4.6%2C24.9c3.1%2C4.7%2C9.5%2C7%2C19.3%2C7l19.2-1.5l0.5%2C10.1c-10.1%2C1.5-17.7%2C2.3-22.7%2C2.3%26%2310%3B%26%239%3B%26%239%3B%26%239%3Bc-12.7%2C0-21.5-3.3-26.3-9.8c-4.8-6.5-7.3-17.5-7.3-33c0-15.5%2C2.6-26.4%2C7.8-32.6C643%2C90.4%2C651.7%2C87.2%2C663.8%2C87.2z%22%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%20%20%3Cpath%20class%3D%22st0%22%20d%3D%22M236.6%2C123.5c0-19.8-12.3-37.2-30.8-43.9c0.8-4.2%2C1.2-8.4%2C1.2-12.7C207%2C30%2C177%2C0%2C140.2%2C0%26%2310%3B%26%239%3B%26%239%3BC118.6%2C0%2C98.6%2C10.3%2C86%2C27.7c-6.2-4.8-13.8-7.4-21.7-7.4c-19.6%2C0-35.5%2C15.9-35.5%2C35.5c0%2C4.3%2C0.8%2C8.5%2C2.2%2C12.4%26%2310%3B%26%239%3B%26%239%3BC12.6%2C74.8%2C0%2C92.5%2C0%2C112.2c0%2C19.9%2C12.4%2C37.3%2C30.9%2C44c-0.8%2C4.1-1.2%2C8.4-1.2%2C12.7c0%2C36.8%2C29.9%2C66.7%2C66.7%2C66.7%26%2310%3B%26%239%3B%26%239%3Bc21.6%2C0%2C41.6-10.4%2C54.1-27.8c6.2%2C4.9%2C13.8%2C7.6%2C21.7%2C7.6c19.6%2C0%2C35.5-15.9%2C35.5-35.5c0-4.3-0.8-8.5-2.2-12.4%26%2310%3B%26%239%3B%26%239%3BC223.9%2C160.9%2C236.6%2C143.2%2C236.6%2C123.5z%20M91.6%2C34.8c10.9-15.9%2C28.9-25.4%2C48.1-25.4c32.2%2C0%2C58.4%2C26.2%2C58.4%2C58.4%26%2310%3B%26%239%3B%26%239%3Bc0%2C3.9-0.4%2C7.7-1.1%2C11.5l-52.2%2C45.8L93%2C101.5L82.9%2C79.9L91.6%2C34.8z%20M65.4%2C29c6.2%2C0%2C12.1%2C2%2C17%2C5.7l-7.8%2C40.3l-35.5-8.4%26%2310%3B%26%239%3B%26%239%3Bc-1.1-3.1-1.7-6.3-1.7-9.7C37.4%2C41.6%2C49.9%2C29%2C65.4%2C29z%20M9.1%2C112.3c0-16.7%2C11-31.9%2C26.9-37.2L75%2C84.4l9.1%2C19.5l-49.8%2C45%26%2310%3B%26%239%3B%26%239%3BC19.2%2C143.1%2C9.1%2C128.6%2C9.1%2C112.3z%20M145.2%2C200.9c-10.9%2C16.1-29%2C25.6-48.4%2C25.6c-32.3%2C0-58.6-26.3-58.6-58.5c0-4%2C0.4-7.9%2C1.1-11.7%26%2310%3B%26%239%3B%26%239%3Bl50.9-46l52%2C23.7l11.5%2C22L145.2%2C200.9z%20M171.2%2C206.6c-6.1%2C0-12-2-16.9-5.8l7.7-40.2l35.4%2C8.3c1.1%2C3.1%2C1.7%2C6.3%2C1.7%2C9.7%26%2310%3B%26%239%3B%26%239%3BC199.2%2C194.1%2C186.6%2C206.6%2C171.2%2C206.6z%20M200.5%2C160.5l-39-9.1l-10.4-19.8l51-44.7c15.1%2C5.7%2C25.2%2C20.2%2C25.2%2C36.5%26%2310%3B%26%239%3B%26%239%3BC227.4%2C140.1%2C216.4%2C155.3%2C200.5%2C160.5z%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E
+------------
+
+|`origin`
+|`string`
+|The position to start the image fill. For example, `"top"`, `"bottom"`, `"left"`, or right.
+
+Default: `"bottom"`
+|===
+
+*Returns:* `render`
+
+
+[float]
+[[rounddate_fn]]
+=== `rounddate`
+
+Uses a MomentJS formatting string to round milliseconds since epoch, and returns milliseconds since epoch.
+
+*Accepts:* `number`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `format`
+|`string`
+|The MomentJS format to use for bucketing. For example, `"YYYY-MM"` rounds to months. See https://momentjs.com/docs/#/displaying/.
+|===
+
+*Returns:* `number`
+
+
+[float]
+[[rowCount_fn]]
+=== `rowCount`
+
+Returns the number of rows. Pairs with <<ply_fn>> to get the count of unique column values, or combinations of unique column values.
+
+*Accepts:* `datatable`
+
+*Returns:* `number`
+
+[float]
+[[s_fns]]
+== S
+
+[float]
+[[savedLens_fn]]
+=== `savedLens`
+
+Returns an embeddable for a saved Lens visualization object.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`id`
+|`string`
+|The ID of the saved Lens visualization object
+
+|`timerange`
+|`timerange`
+|The timerange of data that should be included
+
+|`title`
+|`string`
+|The title for the Lens visualization object
+|===
+
+*Returns:* `embeddable`
+
+
+[float]
+[[savedMap_fn]]
+=== `savedMap`
+
+Returns an embeddable for a saved map object.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`center`
+|`mapCenter`
+|The center and zoom level the map should have
+
+|`hideLayer` †
+|`string`
+|The IDs of map layers that should be hidden
+
+|`id`
+|`string`
+|The ID of the saved map object
+
+|`timerange`
+|`timerange`
+|The timerange of data that should be included
+
+|`title`
+|`string`
+|The title for the map
+|===
+
+*Returns:* `embeddable`
+
+
+[float]
+[[savedVisualization_fn]]
+=== `savedVisualization`
+
+Returns an embeddable for a saved visualization object.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`colors` †
+|`seriesStyle`
+|Defines the color to use for a specific series
+
+|`hideLegend`
+|`boolean`
+|Specifies the option to hide the legend
+
+|`id`
+|`string`
+|The ID of the saved visualization object
+
+|`timerange`
+|`timerange`
+|The timerange of data that should be included
+|===
+
+*Returns:* `embeddable`
+
+
+[float]
+[[seriesStyle_fn]]
+=== `seriesStyle`
+
+Creates an object used for describing the properties of a series on a chart. Use <<seriesStyle_fn>> inside of a charting function, like <<plot_fn>> or <<pie_fn>>.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`bars`
+|`number`
+|The width of bars.
+
+|`color`
+|`string`
+|The line color.
+
+|`fill`
+|`number`, `boolean`
+|Should we fill in the points?
+
+Default: `false`
+
+|`horizontalBars`
+|`boolean`
+|Sets the orientation of the bars in the chart to horizontal.
+
+|`label`
+|`string`
+|The name of the series to style.
+
+|`lines`
+|`number`
+|The width of the line.
+
+|`points`
+|`number`
+|The size of points on line.
+
+|`stack`
+|`number`, `null`
+|Specifies if the series should be stacked. The number is the stack ID. Series with the same stack ID are stacked together.
+|===
+
+*Returns:* `seriesStyle`
+
+
+[float]
+[[shape_fn]]
+=== `shape`
+
+Creates a shape.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `shape`
+|`string`
+|Pick a shape.
+
+Default: `"square"`
+
+|`border`
+
+Alias: `stroke`
+|`string`
+|An SVG color for the border outlining the shape.
+
+|`borderWidth`
+
+Alias: `strokeWidth`
+|`number`
+|The thickness of the border.
+
+Default: `0`
+
+|`fill`
+|`string`
+|An SVG color to fill the shape.
+
+Default: `"black"`
+
+|`maintainAspect`
+|`boolean`
+|Maintain the shape's original aspect ratio?
+
+Default: `false`
+|===
+
+*Returns:* `shape`
+
+
+[float]
+[[sort_fn]]
+=== `sort`
+
+Sorts a `datatable` by the specified column.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Aliases: `by`, `column`
+|`string`
+|The column to sort by. When unspecified, the `datatable` is sorted by the first column.
+
+|`reverse`
+|`boolean`
+|Reverses the sorting order. When unspecified, the `datatable` is sorted in ascending order.
+
+Default: `false`
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[staticColumn_fn]]
+=== `staticColumn`
+
+Adds a column with the same static value in every row. See also <<alterColumn_fn>> and <<mapColumn_fn>>.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Aliases: `column`, `name`
+|`string`
+|The name of the new column.
+
+|`value`
+|`string`, `number`, `boolean`, `null`
+|The value to insert in each row in the new column. TIP: use a sub-expression to rollup other columns into a static value.
+
+Default: `null`
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[string_fn]]
+=== `string`
+
+Concatenates all of the arguments into a single string.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ †
+
+Alias: `value`
+|`string`, `number`, `boolean`
+|The values to join together into one string. Include spaces where needed.
+|===
+
+*Returns:* `string`
+
+
+[float]
+[[switch_fn]]
+=== `switch`
+
+Performs conditional logic with multiple conditions. See also <<case_fn>>, which builds a `case` to pass to the <<switch_fn>> function.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ *** †
+
+Alias: `case`
+|`case`
+|The conditions to check.
+
+|`default`
+
+Alias: `finally`
+|`any`
+|The value returned when no conditions are met. When unspecified and no conditions are met, the original _context_ is returned.
+|===
+
+*Returns:* Depends on your input and arguments
+
+[float]
+[[t_fns]]
+== T
+
+[float]
+[[table_fn]]
+=== `table`
+
+Configures a table element.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`font`
+|`style`
+|The CSS font properties for the contents of the table. For example, `font-family` or `font-weight`.
+
+Default: `${font}`
+
+|`paginate`
+|`boolean`
+|Show pagination controls? When `false`, only the first page is displayed.
+
+Default: `true`
+
+|`perPage`
+|`number`
+|The number of rows to display on each page.
+
+Default: `10`
+
+|`showHeader`
+|`boolean`
+|Show or hide the header row with titles for each column.
+
+Default: `true`
+|===
+
+*Returns:* `render`
+
+
+[float]
+[[tail_fn]]
+=== `tail`
+
+Retrieves the last N rows from the end of a `datatable`. See also <<head_fn>>.
+
+*Accepts:* `datatable`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Alias: `count`
+|`number`
+|The number of rows to retrieve from the end of the `datatable`.
+
+Default: `1`
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[timefilter_fn]]
+=== `timefilter`
+
+Creates a time filter for querying a source.
+
+*Accepts:* `filter`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`column`
+
+Aliases: `c`, `field`
+|`string`
+|The column or field that you want to filter.
+
+Default: `"@timestamp"`
+
+|`filterGroup`
+|`string`
+|The group name for the filter
+
+|`from`
+
+Aliases: `f`, `start`
+|`string`
+|The beginning of the range, in ISO8601 or Elasticsearch `datemath` format
+
+|`to`
+
+Aliases: `end`, `t`
+|`string`
+|The end of the range, in ISO8601 or Elasticsearch `datemath` format
+|===
+
+*Returns:* `filter`
+
+
+[float]
+[[timefilterControl_fn]]
+=== `timefilterControl`
+
+Configures a time filter control element.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`column`
+
+Aliases: `c`, `field`
+|`string`
+|The column or field that you want to filter.
+
+Default: `"@timestamp"`
+
+|`compact`
+|`boolean`
+|Shows the time filter as a button, which triggers a popover.
+
+Default: `true`
+
+|`filterGroup`
+|`string`
+|The group name for the filter.
+|===
+
+*Returns:* `render`
+
+
+[float]
+[[timelion_fn]]
+=== `timelion`
+
+Uses Timelion to extract one or more time series from many sources.
+
+*Accepts:* `filter`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_
+
+Aliases: `q`, `query`
+|`string`
+|A Timelion query
+
+Default: `".es(*)"`
+
+|`from`
+|`string`
+|The Elasticsearch `datemath` string for the beginning of the time range.
+
+Default: `"now-1y"`
+
+|`interval`
+|`string`
+|The bucket interval for the time series.
+
+Default: `"auto"`
+
+|`timezone`
+|`string`
+|The timezone for the time range. See https://momentjs.com/timezone/.
+
+Default: `"UTC"`
+
+|`to`
+|`string`
+|The Elasticsearch `datemath` string for the end of the time range.
+
+Default: `"now"`
+|===
+
+*Returns:* `datatable`
+
+
+[float]
+[[timerange_fn]]
+=== `timerange`
+
+An object that represents a span of time.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`from` ***
+|`string`
+|The start of the time range
+
+|`to` ***
+|`string`
+|The end of the time range
+|===
+
+*Returns:* `timerange`
+
+
+[float]
+[[to_fn]]
+=== `to`
+
+Explicitly casts the type of the _context_ from one type to the specified type.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ †
+
+Alias: `type`
+|`string`
+|A known data type in the expression language.
+|===
+
+*Returns:* Depends on your input and arguments
+
+[float]
+[[u_fns]]
+== U
+
+[float]
+[[urlparam_fn]]
+=== `urlparam`
+
+Retrieves a URL parameter to use in an expression. The <<urlparam_fn>> function always returns a `string`. For example, you can retrieve the value `"20"` from the parameter `myVar` from the URL `https://localhost:5601/app/canvas?myVar=20`.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Aliases: `param`, `var`, `variable`
+|`string`
+|The URL hash parameter to retrieve.
+
+|`default`
+|`string`
+|The string returned when the URL parameter is unspecified.
+
+Default: `""`
+|===
+
+*Returns:* `string`
+
+[float]
+[[v_fns]]
+== V
+
+[float]
+[[var_fn]]
+=== `var`
+
+Updates the Kibana global context.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `name`
+|`string`
+|Specify the name of the variable.
+|===
+
+*Returns:* Depends on your input and arguments
+
+
+[float]
+[[var_set_fn]]
+=== `var_set`
+
+Updates the Kibana global context.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|_Unnamed_ ***
+
+Alias: `name`
+|`string`
+|Specify the name of the variable.
+
+|`value`
+
+Alias: `val`
+|`any`
+|Specify the value for the variable. When unspecified, the input context is used.
+|===
+
+*Returns:* Depends on your input and arguments

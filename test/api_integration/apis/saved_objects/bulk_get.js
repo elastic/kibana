@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 
   const BULK_REQUESTS = [
@@ -44,12 +44,12 @@ export default function ({ getService }) {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
 
-      it('should return 200 with individual responses', async () => (
+      it('should return 200 with individual responses', async () =>
         await supertest
           .post(`/api/saved_objects/_bulk_get`)
           .send(BULK_REQUESTS)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               saved_objects: [
                 {
@@ -64,22 +64,27 @@ export default function ({ getService }) {
                     // cheat for some of the more complex attributes
                     visState: resp.body.saved_objects[0].attributes.visState,
                     uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
-                    kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
+                    kibanaSavedObjectMeta:
+                      resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                  references: [{
-                    name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                    type: 'index-pattern',
-                    id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                  }],
+                  namespaces: ['default'],
+                  references: [
+                    {
+                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                      type: 'index-pattern',
+                      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                    },
+                  ],
                 },
                 {
                   id: 'does not exist',
                   type: 'dashboard',
                   error: {
+                    error: 'Not Found',
+                    message: 'Saved object [dashboard/does not exist] not found',
                     statusCode: 404,
-                    message: 'Not found'
-                  }
+                  },
                 },
                 {
                   id: '7.0.0-alpha1',
@@ -88,62 +93,67 @@ export default function ({ getService }) {
                   version: resp.body.saved_objects[2].version,
                   attributes: {
                     buildNum: 8467,
-                    defaultIndex: '91200a00-9efd-11e7-acb3-3dab96693fab'
+                    defaultIndex: '91200a00-9efd-11e7-acb3-3dab96693fab',
                   },
+                  namespaces: ['default'],
+                  migrationVersion: resp.body.saved_objects[2].migrationVersion,
                   references: [],
-                }
-              ]
+                },
+              ],
             });
             expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
-          })
-      ));
+          }));
     });
 
     describe('without kibana index', () => {
-      before(async () => (
-        // just in case the kibana server has recreated it
-        await es.indices.delete({
-          index: '.kibana',
-          ignore: [404],
-        })
-      ));
+      before(
+        async () =>
+          // just in case the kibana server has recreated it
+          await es.indices.delete({
+            index: '.kibana',
+            ignore: [404],
+          })
+      );
 
-      it('should return 200 with individual responses', async () => (
+      it('should return 200 with individual responses', async () =>
         await supertest
           .post('/api/saved_objects/_bulk_get')
           .send(BULK_REQUESTS)
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               saved_objects: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                   type: 'visualization',
                   error: {
+                    error: 'Not Found',
+                    message:
+                      'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found',
                     statusCode: 404,
-                    message: 'Not found'
-                  }
+                  },
                 },
                 {
                   id: 'does not exist',
                   type: 'dashboard',
                   error: {
+                    error: 'Not Found',
+                    message: 'Saved object [dashboard/does not exist] not found',
                     statusCode: 404,
-                    message: 'Not found'
-                  }
+                  },
                 },
                 {
                   id: '7.0.0-alpha1',
                   type: 'config',
                   error: {
+                    error: 'Not Found',
+                    message: 'Saved object [config/7.0.0-alpha1] not found',
                     statusCode: 404,
-                    message: 'Not found'
-                  }
-                }
-              ]
+                  },
+                },
+              ],
             });
-          })
-      ));
+          }));
     });
   });
 }

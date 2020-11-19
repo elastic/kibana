@@ -11,14 +11,14 @@ import { get } from 'lodash';
 
 export const ESFieldSelect = ({ value, fields = [], onChange, onFocus, onBlur }) => {
   const selectedOption = value ? [{ label: value }] : [];
-  const options = fields.map(field => ({ label: field }));
+  const options = fields.map((field) => ({ label: field }));
 
   return (
     <EuiComboBox
       selectedOptions={selectedOption}
       options={options}
       onChange={([field]) => onChange(get(field, 'label', null))}
-      onSearchChange={searchValue => {
+      onSearchChange={(searchValue) => {
         // resets input when user starts typing
         if (searchValue) {
           onChange(null);
@@ -28,6 +28,7 @@ export const ESFieldSelect = ({ value, fields = [], onChange, onFocus, onBlur })
       onBlur={onBlur}
       singleSelection={{ asPlainText: true }}
       isClearable={false}
+      compressed
     />
   );
 };

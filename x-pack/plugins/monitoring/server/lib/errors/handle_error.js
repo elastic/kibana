@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify } from 'boom';
+import { boomify } from '@hapi/boom';
 import { isKnownError, handleKnownError } from './known_errors';
 import { isAuthError, handleAuthError } from './auth_errors';
-import { LOGGING_TAG } from '../../../common/constants';
 
 export function handleError(err, req) {
-  req.log(['error', LOGGING_TAG], err);
+  req && req.logger && req.logger.error(err);
 
   // specially handle auth errors
   if (isAuthError(err)) {

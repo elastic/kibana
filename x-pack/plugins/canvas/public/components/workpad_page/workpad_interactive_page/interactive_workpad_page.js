@@ -6,14 +6,18 @@
 
 import React, { PureComponent } from 'react';
 import { ElementWrapper } from '../../element_wrapper';
-import { AlignmentGuide } from '../../alignment_guide';
-import { HoverAnnotation } from '../../hover_annotation';
-import { TooltipAnnotation } from '../../tooltip_annotation';
-import { RotationHandle } from '../../rotation_handle';
-import { BorderConnection } from '../../border_connection';
-import { BorderResizeHandle } from '../../border_resize_handle';
+import {
+  AlignmentGuide,
+  DragBoxAnnotation,
+  HoverAnnotation,
+  TooltipAnnotation,
+  RotationHandle,
+  BorderConnection,
+  BorderResizeHandle,
+} from '../../layout_annotations';
 import { WorkpadShortcuts } from '../../workpad_shortcuts';
 import { interactiveWorkpadPagePropTypes } from '../prop_types';
+import { InteractionBoundary } from './interaction_boundary';
 
 export class InteractiveWorkpadPage extends PureComponent {
   static propTypes = interactiveWorkpadPagePropTypes;
@@ -47,6 +51,8 @@ export class InteractiveWorkpadPage extends PureComponent {
       canvasOrigin,
       saveCanvasOrigin,
       commit,
+      setMultiplePositions,
+      zoomScale,
     } = this.props;
 
     let shortcuts = null;
@@ -59,6 +65,7 @@ export class InteractiveWorkpadPage extends PureComponent {
       selectedNodes,
       selectToplevelNodes,
       commit,
+      setMultiplePositions,
     };
     shortcuts = <WorkpadShortcuts {...shortcutProps} />;
 
@@ -66,7 +73,7 @@ export class InteractiveWorkpadPage extends PureComponent {
       <div
         key={pageId}
         id={pageId}
-        ref={node => {
+        ref={(node) => {
           if (!canvasOrigin && node && node.getBoundingClientRect) {
             saveCanvasOrigin(() => () => node.getBoundingClientRect());
           }
@@ -84,9 +91,10 @@ export class InteractiveWorkpadPage extends PureComponent {
         onAnimationEnd={onAnimationEnd}
         onWheel={onWheel}
       >
+        <InteractionBoundary />
         {shortcuts}
         {elements
-          .map(node => {
+          .map((node) => {
             if (node.type === 'annotation') {
               const props = {
                 key: node.id,
@@ -95,6 +103,7 @@ export class InteractiveWorkpadPage extends PureComponent {
                 width: node.width,
                 height: node.height,
                 text: node.text,
+                zoomScale,
               };
 
               switch (node.subtype) {
@@ -103,6 +112,8 @@ export class InteractiveWorkpadPage extends PureComponent {
                 case 'adHocChildAnnotation': // now sharing aesthetics but may diverge in the future
                 case 'hoverAnnotation': // fixme: with the upcoming TS work, use enumerative types here
                   return <HoverAnnotation {...props} />;
+                case 'dragBoxAnnotation':
+                  return <DragBoxAnnotation {...props} />;
                 case 'rotationHandle':
                   return <RotationHandle {...props} />;
                 case 'resizeHandle':
@@ -118,7 +129,7 @@ export class InteractiveWorkpadPage extends PureComponent {
               return <ElementWrapper key={node.id} element={node} />;
             }
           })
-          .filter(element => !!element)}
+          .filter((element) => !!element)}
       </div>
     );
   }

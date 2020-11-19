@@ -6,11 +6,16 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mountWithIntl } from '../../../../../../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ExplainCollectionInterval } from '../collection_interval';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 const enabler = {};
+const reason = {
+  property: 'xpack.monitoring.collection.interval',
+  data: '-1',
+  context: 'cluster',
+};
 
 describe('ExplainCollectionInterval', () => {
   beforeEach(() => {
@@ -20,9 +25,7 @@ describe('ExplainCollectionInterval', () => {
   test('should explain about xpack.monitoring.collection.interval setting', () => {
     const component = (
       <ExplainCollectionInterval
-        context="cluster"
-        property="xpack.monitoring.collection.interval"
-        data="-1"
+        reason={reason}
         isCollectionIntervalUpdating={false}
         isCollectionIntervalUpdated={false}
         enabler={enabler}
@@ -35,9 +38,7 @@ describe('ExplainCollectionInterval', () => {
   test('should have a button that triggers ajax action', () => {
     const component = (
       <ExplainCollectionInterval
-        context="cluster"
-        property="xpack.monitoring.collection.interval"
-        data="-1"
+        reason={reason}
         isCollectionIntervalUpdating={false}
         isCollectionIntervalUpdated={false}
         enabler={enabler}
@@ -53,9 +54,7 @@ describe('ExplainCollectionInterval', () => {
     test('should show a waiting indicator while updating = true', () => {
       const component = (
         <ExplainCollectionInterval
-          context="cluster"
-          property="xpack.monitoring.collection.interval"
-          data="-1"
+          reason={reason}
           isCollectionIntervalUpdating={true}
           isCollectionIntervalUpdated={false}
           enabler={enabler}
@@ -68,9 +67,7 @@ describe('ExplainCollectionInterval', () => {
     test('should show a success message while updated = true', () => {
       const component = (
         <ExplainCollectionInterval
-          context="cluster"
-          property="xpack.monitoring.collection.interval"
-          data="-1"
+          reason={reason}
           isCollectionIntervalUpdating={false}
           isCollectionIntervalUpdated={true}
           enabler={enabler}

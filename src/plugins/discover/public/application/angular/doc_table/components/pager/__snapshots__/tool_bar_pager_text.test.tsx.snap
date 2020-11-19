@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders ToolBarPagerText without crashing 1`] = `
+<div
+  class="kuiToolBarText"
+  data-test-subj="toolBarPagerText"
+>
+  1–2 of 3
+</div>
+`;

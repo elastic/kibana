@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
-import { getMlIndex } from '../../../../../common/ml_job_constants';
-import { Setup } from '../../../helpers/setup_request';
+import { Logger } from 'kibana/server';
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 interface IOptions {
-  serviceName: string;
-  transactionType: string;
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
+  jobId: string;
+  logger: Logger;
 }
 
 interface ESResponse {
@@ -19,43 +18,44 @@ interface ESResponse {
 }
 
 export async function getMlBucketSize({
-  serviceName,
-  transactionType,
-  setup
-}: IOptions): Promise<number> {
-  const { client, start, end } = setup;
+  setup,
+  jobId,
+  logger,
+}: IOptions): Promise<number | undefined> {
+  const { ml, start, end } = setup;
+  if (!ml) {
+    return;
+  }
+
   const params = {
-    index: getMlIndex(serviceName, transactionType),
     body: {
       _source: 'bucket_span',
       size: 1,
+      terminate_after: 1,
       query: {
         bool: {
           filter: [
+            { term: { job_id: jobId } },
             { exists: { field: 'bucket_span' } },
             {
               range: {
-                timestamp: {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
+                timestamp: { gte: start, lte: end, format: 'epoch_millis' },
+              },
+            },
+          ],
+        },
+      },
+    },
   };
 
   try {
-    const resp = await client<ESResponse>('search', params);
-    return idx(resp, _ => _.hits.hits[0]._source.bucket_span) || 0;
+    const resp = await ml.mlSystem.mlAnomalySearch<ESResponse>(params, [jobId]);
+    return resp.hits.hits[0]?._source.bucket_span;
   } catch (err) {
     const isHttpError = 'statusCode' in err;
     if (isHttpError) {
-      return 0;
+      return;
     }
-    throw err;
+    logger.error(err);
   }
 }

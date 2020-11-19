@@ -1,0 +1,190 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MetricsAxisOptions component should init with the default set of props 1`] = `
+<Fragment>
+  <SeriesPanel
+    changeValueAxis={[Function]}
+    seriesParams={
+      Array [
+        Object {
+          "data": Object {
+            "id": "1",
+            "label": "Count",
+          },
+          "drawLinesBetweenPoints": true,
+          "interpolate": "linear",
+          "lineWidth": 2,
+          "mode": "stacked",
+          "show": true,
+          "showCircles": true,
+          "type": "area",
+          "valueAxis": "ValueAxis-1",
+        },
+      ]
+    }
+    setParamByIndex={[Function]}
+    valueAxes={
+      Array [
+        Object {
+          "id": "ValueAxis-1",
+          "labels": Object {
+            "color": "black",
+            "filter": true,
+            "show": true,
+            "truncate": 0,
+          },
+          "name": "LeftAxis-1",
+          "position": "left",
+          "scale": Object {
+            "boundsMargin": 1,
+            "defaultYExtents": true,
+            "max": 2,
+            "min": 1,
+            "setYExtents": true,
+            "type": "linear",
+          },
+          "show": true,
+          "style": Object {},
+          "title": Object {
+            "text": "",
+          },
+          "type": "value",
+        },
+      ]
+    }
+    vis={
+      Object {
+        "serialize": [MockFunction],
+        "setState": [MockFunction],
+        "type": Object {
+          "schemas": Object {
+            "metrics": Array [
+              Object {
+                "name": "metric",
+              },
+            ],
+          },
+          "type": "area",
+        },
+      }
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <ValueAxesPanel
+    addValueAxis={[Function]}
+    isCategoryAxisHorizontal={true}
+    onValueAxisPositionChanged={[Function]}
+    removeValueAxis={[Function]}
+    seriesParams={
+      Array [
+        Object {
+          "data": Object {
+            "id": "1",
+            "label": "Count",
+          },
+          "drawLinesBetweenPoints": true,
+          "interpolate": "linear",
+          "lineWidth": 2,
+          "mode": "stacked",
+          "show": true,
+          "showCircles": true,
+          "type": "area",
+          "valueAxis": "ValueAxis-1",
+        },
+      ]
+    }
+    setParamByIndex={[Function]}
+    valueAxes={
+      Array [
+        Object {
+          "id": "ValueAxis-1",
+          "labels": Object {
+            "color": "black",
+            "filter": true,
+            "show": true,
+            "truncate": 0,
+          },
+          "name": "LeftAxis-1",
+          "position": "left",
+          "scale": Object {
+            "boundsMargin": 1,
+            "defaultYExtents": true,
+            "max": 2,
+            "min": 1,
+            "setYExtents": true,
+            "type": "linear",
+          },
+          "show": true,
+          "style": Object {},
+          "title": Object {
+            "text": "",
+          },
+          "type": "value",
+        },
+      ]
+    }
+    vis={
+      Object {
+        "serialize": [MockFunction],
+        "setState": [MockFunction],
+        "type": Object {
+          "schemas": Object {
+            "metrics": Array [
+              Object {
+                "name": "metric",
+              },
+            ],
+          },
+          "type": "area",
+        },
+      }
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <CategoryAxisPanel
+    axis={
+      Object {
+        "id": "CategoryAxis-1",
+        "labels": Object {
+          "color": "black",
+          "filter": true,
+          "show": true,
+          "truncate": 0,
+        },
+        "position": "bottom",
+        "scale": Object {
+          "type": "linear",
+        },
+        "show": true,
+        "style": Object {},
+        "title": Object {
+          "text": "",
+        },
+        "type": "category",
+      }
+    }
+    onPositionChanged={[Function]}
+    setCategoryAxis={[Function]}
+    vis={
+      Object {
+        "serialize": [MockFunction],
+        "setState": [MockFunction],
+        "type": Object {
+          "schemas": Object {
+            "metrics": Array [
+              Object {
+                "name": "metric",
+              },
+            ],
+          },
+          "type": "area",
+        },
+      }
+    }
+  />
+</Fragment>
+`;

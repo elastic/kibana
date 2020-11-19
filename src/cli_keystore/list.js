@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import Logger from '../cli_plugin/lib/logger';
+import { Logger } from '../cli_plugin/lib/logger';
 
 export function list(keystore, command, options = {}) {
   const logger = new Logger(options);
 
   if (!keystore.exists()) {
-    return logger.error('ERROR: Kibana keystore not found. Use \'create\' command to create one.');
+    return logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");
   }
 
   const keys = keystore.keys();

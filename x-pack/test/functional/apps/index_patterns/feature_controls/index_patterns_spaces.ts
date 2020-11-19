@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
+  const config = getService('config');
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -42,10 +41,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.contain('Management');
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`index pattern listing shows create button`, async () => {
@@ -72,13 +69,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await esArchiver.unload('empty_kibana');
       });
 
-      it(`redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/index_patterns', {
+      it(`redirects to management home`, async () => {
+        await PageObjects.common.navigateToUrl('management', 'kibana/indexPatterns', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('managementHome', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
     });
   });

@@ -1,0 +1,11 @@
+{
+  "id": "expressions",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "extraPublicDirs": ["common", "common/fonts"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "inspector"
+  ]
+}

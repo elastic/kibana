@@ -7,6 +7,7 @@
 import React, { PureComponent } from 'react';
 import { ElementWrapper } from '../../element_wrapper';
 import { staticWorkpadPagePropTypes } from '../prop_types';
+import { isGroupId } from '../positioning_utils';
 
 export class StaticWorkpadPage extends PureComponent {
   static propTypes = staticWorkpadPagePropTypes;
@@ -23,9 +24,11 @@ export class StaticWorkpadPage extends PureComponent {
         data-shared-items-container
         style={{ ...pageStyle, ...animationStyle, height, width }}
       >
-        {elements.map(element => (
-          <ElementWrapper key={element.id} element={element} />
-        ))}
+        {elements
+          .filter((node) => !isGroupId(node.id))
+          .map((element) => (
+            <ElementWrapper key={element.id} element={element} />
+          ))}
       </div>
     );
   }

@@ -26,7 +26,7 @@ const { log } = require('./utils');
 
 function help() {
   const availableCommands = Object.keys(commands).map(
-    name => `${name} - ${commands[name].description}`
+    (name) => `${name} - ${commands[name].description}`
   );
 
   console.log(dedent`

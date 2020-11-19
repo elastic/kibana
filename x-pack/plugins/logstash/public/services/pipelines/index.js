@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './pipelines_service.factory';
+export { PipelinesService } from './pipelines_service';

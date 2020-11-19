@@ -17,11 +17,11 @@
  * under the License.
  */
 
+require('../src/setup_node_env/no_transpilation');
+
 var resolve = require('path').resolve;
 var pkg = require('../package.json');
 var kbnEs = require('@kbn/es');
-
-require('../src/setup_node_env');
 
 kbnEs
   .run({
@@ -30,6 +30,7 @@ kbnEs
     version: pkg.version,
     'source-path': resolve(__dirname, '../../elasticsearch'),
     'base-path': resolve(__dirname, '../.es'),
+    ssl: false,
   })
   .catch(function (e) {
     console.error(e);

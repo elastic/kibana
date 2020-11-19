@@ -7,7 +7,6 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { Hint } from 'react-vis';
-import moment from 'moment';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import {
@@ -16,27 +15,27 @@ import {
   px,
   borderRadius,
   fontSize,
-  fontSizes
+  fontSizes,
 } from '../../../../style/variables';
-import Legend from '../Legend';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { Legend } from '../Legend';
+import { asAbsoluteDateTime } from '../../../../../common/utils/formatters';
 
 const TooltipElm = styled.div`
   margin: 0 ${px(unit)};
   transform: translateY(-50%);
-  border: 1px solid ${theme.euiColorLightShade};
-  background: ${theme.euiColorEmptyShade};
+  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-radius: ${borderRadius};
   font-size: ${fontSize};
-  color: ${theme.euiColorFullShade};
+  color: ${({ theme }) => theme.eui.euiColorFullShade};
 `;
 
 const Header = styled.div`
-  background: ${theme.euiColorLightestShade};
-  border-bottom: 1px solid ${theme.euiColorLightShade};
+  background: ${({ theme }) => theme.eui.euiColorLightestShade};
+  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: ${borderRadius} ${borderRadius} 0 0;
   padding: ${px(units.half)};
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
 const Content = styled.div`
@@ -46,7 +45,7 @@ const Content = styled.div`
 `;
 
 const Footer = styled.div`
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
   margin: ${px(units.half)};
   font-size: ${fontSizes.small};
 `;
@@ -59,12 +58,13 @@ const LegendContainer = styled.div`
 `;
 
 const LegendGray = styled(Legend)`
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
   padding-bottom: 0;
+  padding-right: ${px(units.half)};
 `;
 
 const Value = styled.div`
-  color: ${theme.euiColorDarkShade};
+  color: ${({ theme }) => theme.eui.euiColorDarkShade};
   font-size: ${fontSize};
 `;
 
@@ -86,7 +86,7 @@ export default function Tooltip({
   return (
     <Hint {...props} value={{ x, y }}>
       <TooltipElm>
-        <Header>{header || moment(x).format('MMMM Do YYYY, HH:mm:ss')}</Header>
+        <Header>{header || asAbsoluteDateTime(x, 'seconds')}</Header>
 
         <Content>
           {showLegends ? (
@@ -116,7 +116,7 @@ Tooltip.propTypes = {
   header: PropTypes.string,
   tooltipPoints: PropTypes.array.isRequired,
   x: PropTypes.number,
-  y: PropTypes.number
+  y: PropTypes.number,
 };
 
 Tooltip.defaultProps = {};

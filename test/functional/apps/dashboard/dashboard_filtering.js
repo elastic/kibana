@@ -31,25 +31,46 @@ export default function ({ getService, getPageObjects }) {
   const renderable = getService('renderable');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  describe('dashboard filtering', async () => {
+  describe('dashboard filtering', function () {
+    this.tags('includeFirefox');
+
     before(async () => {
+      await esArchiver.load('dashboard/current/kibana');
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    describe('adding a filter that excludes all data', async () => {
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
+    describe('adding a filter that excludes all data', () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.timePicker.setDefaultDataRange();
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
 
         await dashboardAddPanel.closeAddPanel();
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
         await filterBar.addFilter('bytes', 'is', '12345678');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        // first round of requests sometimes times out, refresh all visualizations to fetch again
+        await queryBar.clickQuerySubmitButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
       });
@@ -72,7 +93,6 @@ export default function ({ getService, getPageObjects }) {
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
-        await dashboardExpect.tsvbTimeSeriesLegendCount(0);
       });
 
       it('metric value shows no data', async () => {
@@ -105,7 +125,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('using a pinned filter that excludes all data', async () => {
+    describe('using a pinned filter that excludes all data', () => {
       before(async () => {
         await filterBar.toggleFilterPinned('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -132,11 +152,6 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
       });
 
-      it('tsvb time series shows no data message', async () => {
-        expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
-        await dashboardExpect.tsvbTimeSeriesLegendCount(0);
-      });
-
       it('metric value shows no data', async () => {
         await dashboardExpect.metricValuesExist(['-']);
       });
@@ -167,7 +182,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('disabling a filter unfilters the data on', async () => {
+    describe('disabling a filter unfilters the data on', function () {
       before(async () => {
         await filterBar.toggleFilterEnabled('bytes');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -187,12 +202,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('goal and guages', async () => {
-        await dashboardExpect.goalAndGuageLabelsExist(['40%', '7,544']);
-      });
-
-      it('tsvb time series', async () => {
-        expect(await testSubjects.exists('noTSVBDataMessage')).to.be(false);
-        await dashboardExpect.tsvbTimeSeriesLegendCount(10);
+        await dashboardExpect.goalAndGuageLabelsExist(['39.958%', '7,544']);
       });
 
       it('metric value', async () => {
@@ -224,14 +234,14 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('nested filtering', async () => {
+    describe('nested filtering', () => {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
       it('visualization saved with a query filters data', async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.timePicker.setDefaultDataRange();
 
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -250,7 +260,9 @@ export default function ({ getService, getPageObjects }) {
         await renderable.waitForRender();
         await pieChart.expectPieSliceCount(3);
 
-        await PageObjects.visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess(
+          'Rendering Test: animal sounds pie'
+        );
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -283,14 +295,18 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await pieChart.expectPieSliceCount(5);
 
-        await PageObjects.visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess(
+          'Rendering Test: animal sounds pie'
+        );
         await PageObjects.header.clickDashboard();
 
         await pieChart.expectPieSliceCount(5);
       });
 
       it('Pie chart linked to saved search filters data', async () => {
-        await dashboardAddPanel.addVisualization('Filter Test: animals: linked to search with filter');
+        await dashboardAddPanel.addVisualization(
+          'Filter Test: animals: linked to search with filter'
+        );
         await pieChart.expectPieSliceCount(7);
       });
 

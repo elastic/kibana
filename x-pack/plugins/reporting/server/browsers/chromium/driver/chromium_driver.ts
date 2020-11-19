@@ -4,65 +4,102 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { map, truncate } from 'lodash';
 import open from 'opn';
-import * as Chrome from 'puppeteer-core';
+import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import {
-  ConditionalHeaders,
-  ConditionalHeadersConditions,
-  ElementPosition,
-  EvalArgs,
-  EvalFn,
-  EvaluateOptions,
-  Logger,
-  ViewZoomWidthHeight,
-} from '../../../../types';
+import { getDisallowedOutgoingUrlError } from '../';
+import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
+import { LevelLogger } from '../../../lib';
+import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
+import { ElementPosition } from '../../../lib/screenshots';
+import { allowRequest, NetworkPolicy } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
-  logger: Logger;
   inspect: boolean;
+  networkPolicy: NetworkPolicy;
 }
 
 interface WaitForSelectorOpts {
-  silent?: boolean;
+  timeout: number;
+}
+
+interface EvaluateOpts {
+  fn: EvaluateFn;
+  args: SerializableOrJSHandle[];
+}
+
+interface EvaluateMetaOpts {
+  context: string;
+}
+
+interface InterceptedRequest {
+  requestId: string;
+  request: {
+    url: string;
+    method: string;
+    headers: {
+      [key: string]: string;
+    };
+    initialPriority: string;
+    referrerPolicy: string;
+  };
+  frameId: string;
+  resourceType: string;
 }
 
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
-  private readonly page: Chrome.Page;
-  private readonly logger: Logger;
+  private readonly page: Page;
   private readonly inspect: boolean;
+  private readonly networkPolicy: NetworkPolicy;
 
-  constructor(page: Chrome.Page, { logger, inspect }: ChromiumDriverOptions) {
+  private listenersAttached = false;
+  private interceptedCount = 0;
+
+  constructor(page: Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
     this.page = page;
-    this.logger = logger.clone(['headless-chromium-driver']);
     this.inspect = inspect;
+    this.networkPolicy = networkPolicy;
   }
 
+  private allowRequest(url: string) {
+    return !this.networkPolicy.enabled || allowRequest(url, this.networkPolicy.rules);
+  }
+
+  private truncateUrl(url: string) {
+    return truncate(url, {
+      length: 100,
+      omission: '[truncated]',
+    });
+  }
+
+  /*
+   * Call Page.goto and wait to see the Kibana DOM content
+   */
   public async open(
     url: string,
     {
       conditionalHeaders,
-      waitForSelector,
-    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string }
-  ) {
-    this.logger.debug(`opening url ${url}`);
+      waitForSelector: pageLoadSelector,
+      timeout,
+    }: {
+      conditionalHeaders: ConditionalHeaders;
+      waitForSelector: string;
+      timeout: number;
+    },
+    logger: LevelLogger
+  ): Promise<void> {
+    logger.info(`opening url ${url}`);
+
+    // Reset intercepted request count
+    this.interceptedCount = 0;
+
     await this.page.setRequestInterception(true);
-    this.page.on('request', (interceptedRequest: any) => {
-      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedRequest.url())) {
-        this.logger.debug(`Using custom headers for ${interceptedRequest.url()}`);
-        interceptedRequest.continue({
-          headers: {
-            ...interceptedRequest.headers(),
-            ...conditionalHeaders.headers,
-          },
-        });
-      } else {
-        this.logger.debug(`No custom headers for ${interceptedRequest.url()}`);
-        interceptedRequest.continue();
-      }
-    });
+
+    this.registerListeners(conditionalHeaders, logger);
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
@@ -70,71 +107,99 @@ export class HeadlessChromiumDriver {
       await this.launchDebugger();
     }
 
-    await this.waitForSelector(waitForSelector);
+    await this.waitForSelector(
+      pageLoadSelector,
+      { timeout },
+      { context: 'waiting for page load selector' },
+      logger
+    );
+    logger.info(`handled ${this.interceptedCount} page requests`);
   }
 
-  public async screenshot(elementPosition: ElementPosition) {
-    let clip;
-    if (elementPosition) {
-      const { boundingClientRect, scroll = { x: 0, y: 0 } } = elementPosition;
-      clip = {
+  /*
+   * Let modules poll if Chrome is still running so they can short circuit if needed
+   */
+  public isPageOpen() {
+    return !this.page.isClosed();
+  }
+
+  /*
+   * Call Page.screenshot and return a base64-encoded string of the image
+   */
+  public async screenshot(elementPosition: ElementPosition): Promise<string> {
+    const { boundingClientRect, scroll } = elementPosition;
+    const screenshot = await this.page.screenshot({
+      clip: {
         x: boundingClientRect.left + scroll.x,
         y: boundingClientRect.top + scroll.y,
         height: boundingClientRect.height,
         width: boundingClientRect.width,
-      };
-    }
-
-    const screenshot = await this.page.screenshot({
-      clip,
+      },
     });
 
     return screenshot.toString('base64');
   }
 
-  public async evaluate({ fn, args = [] }: EvaluateOptions) {
+  public async evaluate(
+    { fn, args = [] }: EvaluateOpts,
+    meta: EvaluateMetaOpts,
+    logger: LevelLogger
+  ) {
+    logger.debug(`evaluate ${meta.context}`);
     const result = await this.page.evaluate(fn, ...args);
     return result;
   }
 
-  public async waitForSelector(selector: string, opts: WaitForSelectorOpts = {}) {
-    const { silent = false } = opts;
-    this.logger.debug(`waitForSelector ${selector}`);
-
-    let resp;
-    try {
-      resp = await this.page.waitFor(selector);
-    } catch (err) {
-      if (!silent) {
-        // Provide some troubleshooting info to see if we're on the login page,
-        // "Kibana could not load correctly", etc
-        this.logger.error(`waitForSelector ${selector} failed on ${this.page.url()}`);
-        const pageText = await this.evaluate({
-          fn: () => document.querySelector('body')!.innerText,
-          args: [],
-        });
-        this.logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
-      }
-      throw err;
-    }
-
-    this.logger.debug(`waitForSelector ${selector} resolved`);
+  public async waitForSelector(
+    selector: string,
+    opts: WaitForSelectorOpts,
+    context: EvaluateMetaOpts,
+    logger: LevelLogger
+  ): Promise<ElementHandle<Element>> {
+    const { timeout } = opts;
+    logger.debug(`waitForSelector ${selector}`);
+    const resp = await this.page.waitFor(selector, { timeout }); // override default 30000ms
+    logger.debug(`waitForSelector ${selector} resolved`);
     return resp;
   }
 
-  public async waitFor<T>({ fn, args, toEqual }: { fn: EvalFn<T>; args: EvalArgs; toEqual: T }) {
+  public async waitFor(
+    {
+      fn,
+      args,
+      toEqual,
+      timeout,
+    }: {
+      fn: EvaluateFn;
+      args: SerializableOrJSHandle[];
+      toEqual: number;
+      timeout: number;
+    },
+    context: EvaluateMetaOpts,
+    logger: LevelLogger
+  ): Promise<void> {
+    const startTime = Date.now();
+
     while (true) {
-      const result = await this.evaluate({ fn, args });
+      const result = await this.evaluate({ fn, args }, context, logger);
       if (result === toEqual) {
         return;
       }
 
-      await new Promise(r => setTimeout(r, WAIT_FOR_DELAY_MS));
+      if (Date.now() - startTime > timeout) {
+        throw new Error(
+          `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
+        );
+      }
+      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
     }
   }
 
-  public async setViewport({ width, height, zoom }: ViewZoomWidthHeight) {
-    this.logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
+  public async setViewport(
+    { width, height, zoom }: ViewZoomWidthHeight,
+    logger: LevelLogger
+  ): Promise<void> {
+    logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
 
     await this.page.setViewport({
       width: Math.floor(width / zoom),
@@ -142,6 +207,106 @@ export class HeadlessChromiumDriver {
       deviceScaleFactor: zoom,
       isMobile: false,
     });
+  }
+
+  private registerListeners(conditionalHeaders: ConditionalHeaders, logger: LevelLogger) {
+    if (this.listenersAttached) {
+      return;
+    }
+
+    // @ts-ignore
+    const client = this.page._client;
+
+    // We have to reach into the Chrome Devtools Protocol to apply headers as using
+    // puppeteer's API will cause map tile requests to hang indefinitely:
+    //    https://github.com/puppeteer/puppeteer/issues/5003
+    // Docs on this client/protocol can be found here:
+    //    https://chromedevtools.github.io/devtools-protocol/tot/Fetch
+    client.on('Fetch.requestPaused', async (interceptedRequest: InterceptedRequest) => {
+      const {
+        requestId,
+        request: { url: interceptedUrl },
+      } = interceptedRequest;
+
+      const allowed = !interceptedUrl.startsWith('file://');
+      const isData = interceptedUrl.startsWith('data:');
+
+      // We should never ever let file protocol requests go through
+      if (!allowed || !this.allowRequest(interceptedUrl)) {
+        await client.send('Fetch.failRequest', {
+          errorReason: 'Aborted',
+          requestId,
+        });
+        this.page.browser().close();
+        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        return;
+      }
+
+      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
+        logger.debug(`Using custom headers for ${interceptedUrl}`);
+        const headers = map(
+          {
+            ...interceptedRequest.request.headers,
+            ...conditionalHeaders.headers,
+          },
+          (value, name) => ({
+            name,
+            value,
+          })
+        );
+
+        try {
+          await client.send('Fetch.continueRequest', {
+            requestId,
+            headers,
+          });
+        } catch (err) {
+          logger.error(
+            i18n.translate('xpack.reporting.chromiumDriver.failedToCompleteRequestUsingHeaders', {
+              defaultMessage: 'Failed to complete a request using headers: {error}',
+              values: { error: err },
+            })
+          );
+        }
+      } else {
+        const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
+        logger.debug(`No custom headers for ${loggedUrl}`);
+        try {
+          await client.send('Fetch.continueRequest', { requestId });
+        } catch (err) {
+          logger.error(
+            i18n.translate('xpack.reporting.chromiumDriver.failedToCompleteRequest', {
+              defaultMessage: 'Failed to complete a request: {error}',
+              values: { error: err },
+            })
+          );
+        }
+      }
+
+      this.interceptedCount = this.interceptedCount + (isData ? 0 : 1);
+    });
+
+    // Even though 3xx redirects go through our request
+    // handler, we should probably inspect responses just to
+    // avoid being bamboozled by some malicious request
+    this.page.on('response', (interceptedResponse: Response) => {
+      const interceptedUrl = interceptedResponse.url();
+      const allowed = !interceptedUrl.startsWith('file://');
+
+      if (!interceptedResponse.ok()) {
+        logger.warn(
+          `Chromium received a non-OK response (${interceptedResponse.status()}) for request ${interceptedUrl}`
+        );
+      }
+
+      if (!allowed || !this.allowRequest(interceptedUrl)) {
+        this.page.browser().close();
+        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        return;
+      }
+    });
+
+    this.listenersAttached = true;
   }
 
   private async launchDebugger() {
@@ -168,17 +333,32 @@ export class HeadlessChromiumDriver {
   private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
     const { hostname, protocol, port, pathname } = parseUrl(url);
 
-    if (pathname === undefined) {
-      // There's a discrepancy between the NodeJS docs and the typescript types. NodeJS docs
-      // just say 'string' and the typescript types say 'string | undefined'. We haven't hit a
-      // situation where it's undefined but here's an explicit Error if we do.
-      throw new Error(`pathname is undefined, don't know how to proceed`);
-    }
+    // `port` is null in URLs that don't explicitly state it,
+    // however we can derive the port from the protocol (http/https)
+    // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
+    const derivedPort = (() => {
+      if (port) {
+        return port;
+      }
+
+      if (protocol === 'http:') {
+        return '80';
+      }
+
+      if (protocol === 'https:') {
+        return '443';
+      }
+
+      return null;
+    })();
+
+    if (derivedPort === null) throw new Error(`URL missing port: ${url}`);
+    if (pathname === null) throw new Error(`URL missing pathname: ${url}`);
 
     return (
       hostname === conditions.hostname &&
       protocol === `${conditions.protocol}:` &&
-      this._shouldUseCustomHeadersForPort(conditions, port) &&
+      this._shouldUseCustomHeadersForPort(conditions, derivedPort) &&
       pathname.startsWith(`${conditions.basePath}/`)
     );
   }

@@ -4,10 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type LoginLayout = 'form' | 'error-es-unavailable' | 'error-xpack-unavailable';
+import { LoginLayout } from './licensing';
+
+export interface LoginSelectorProvider {
+  type: string;
+  name: string;
+  usesLoginForm: boolean;
+  description?: string;
+  hint?: string;
+  icon?: string;
+}
+
+export interface LoginSelector {
+  enabled: boolean;
+  providers: LoginSelectorProvider[];
+}
 
 export interface LoginState {
   layout: LoginLayout;
   allowLogin: boolean;
-  loginMessage: string;
+  requiresSecureConnection: boolean;
+  loginHelp?: string;
+  selector: LoginSelector;
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import rimraf from 'rimraf';
+import del from 'del';
 import fs from 'fs';
 
 export function cleanPrevious(settings, logger) {
@@ -27,7 +27,7 @@ export function cleanPrevious(settings, logger) {
 
       logger.log('Found previous install attempt. Deleting...');
       try {
-        rimraf.sync(settings.workingPath);
+        del.sync(settings.workingPath, { force: true });
       } catch (e) {
         reject(e);
       }
@@ -44,8 +44,6 @@ export function cleanArtifacts(settings) {
   // delete the working directory.
   // At this point we're bailing, so swallow any errors on delete.
   try {
-    rimraf.sync(settings.workingPath);
-    rimraf.sync(settings.plugins[0].path);
-  }
-  catch (e) {} // eslint-disable-line no-empty
+    del.sync(settings.workingPath);
+  } catch (e) {} // eslint-disable-line no-empty
 }

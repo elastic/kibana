@@ -1,0 +1,36 @@
+[[logstash-configuration-management-api-retrieve]]
+=== Retrieve pipeline API
+++++
+<titleabbrev>Retrieve pipeline</titleabbrev>
+++++
+
+experimental[] Retrieve a centrally-managed Logstash pipeline.
+
+[[logstash-configuration-management-api-retrieve-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/logstash/pipeline/<id>`
+
+[[logstash-configuration-management-api-retrieve-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The pipeline ID.
+
+[[logstash-configuration-management-api-retrieve-example]]
+==== Example
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "hello-world",
+  "description": "Just a simple pipeline",
+  "username": "elastic",
+  "pipeline": "input { stdin {} } output { stdout {} }",
+  "settings": {
+    "queue.type": "persistent"
+  }
+}
+--------------------------------------------------

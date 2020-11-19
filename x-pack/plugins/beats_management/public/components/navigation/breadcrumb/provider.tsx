@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Component, ReactElement } from 'react';
-import chrome from 'ui/chrome';
 import { Provider } from './context';
 import { Breadcrumb } from './types';
+import { services } from '../../../kbn_services';
 
 interface ComponentProps {
   useGlobalBreadcrumbs: boolean;
@@ -41,7 +41,7 @@ export class BreadcrumbProvider extends Component<ComponentProps, ComponentState
 
   public removeCrumb = (crumbToRemove: Breadcrumb) => {
     this.setState(({ breadcrumbs: prevCrumbs }) => {
-      const breadcrumbs = prevCrumbs.filter(prevCrumb => {
+      const breadcrumbs = prevCrumbs.filter((prevCrumb) => {
         const { href } = prevCrumb;
         return !(crumbToRemove.href === href);
       });
@@ -53,21 +53,18 @@ export class BreadcrumbProvider extends Component<ComponentProps, ComponentState
     const { breadcrumbs } = this.state;
 
     const context = {
-      breadcrumbs: breadcrumbs.reduce(
-        (crumbs, crumbStorageItem) => {
-          if (crumbStorageItem.parents) {
-            crumbs = crumbs.concat(crumbStorageItem.parents);
-          }
-          crumbs.push(crumbStorageItem.breadcrumb);
-          return crumbs;
-        },
-        [] as Breadcrumb[]
-      ),
+      breadcrumbs: breadcrumbs.reduce((crumbs, crumbStorageItem) => {
+        if (crumbStorageItem.parents) {
+          crumbs = crumbs.concat(crumbStorageItem.parents);
+        }
+        crumbs.push(crumbStorageItem.breadcrumb);
+        return crumbs;
+      }, [] as Breadcrumb[]),
       addCrumb: this.addCrumb,
       removeCrumb: this.removeCrumb,
     };
     if (this.props.useGlobalBreadcrumbs) {
-      chrome.breadcrumbs.set(context.breadcrumbs);
+      services.setBreadcrumbs(context.breadcrumbs);
     }
     return <Provider value={context}>{this.props.children}</Provider>;
   }

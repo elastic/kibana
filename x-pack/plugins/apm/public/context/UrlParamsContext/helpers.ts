@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { compact, pick } from 'lodash';
+import { compact, pickBy } from 'lodash';
 import datemath from '@elastic/datemath';
 import { IUrlParams } from './types';
 
@@ -52,38 +52,6 @@ export function getPathAsArray(pathname: string = '') {
   return compact(pathname.split('/'));
 }
 
-export function removeUndefinedProps<T>(obj: T): Partial<T> {
-  return pick(obj, value => value !== undefined);
-}
-
-export function getPathParams(pathname: string = '') {
-  const paths = getPathAsArray(pathname);
-  const pageName = paths[1];
-
-  // TODO: use react router's real match params instead of guessing the path order
-  switch (pageName) {
-    case 'transactions':
-      return {
-        processorEvent: 'transaction',
-        serviceName: paths[0],
-        transactionType: paths[2],
-        transactionName: paths[3]
-      };
-    case 'errors':
-      return {
-        processorEvent: 'error',
-        serviceName: paths[0],
-        errorGroupId: paths[2]
-      };
-    case 'metrics':
-      return {
-        processorEvent: 'metric',
-        serviceName: paths[0]
-      };
-    default:
-      return {
-        processorEvent: 'transaction',
-        serviceName: paths[0]
-      };
-  }
+export function removeUndefinedProps<T extends object>(obj: T): Partial<T> {
+  return pickBy(obj, (value) => value !== undefined);
 }

@@ -17,23 +17,27 @@
  * under the License.
  */
 
-import { LoggingConfig } from '.';
-import { Appender } from './appenders/appenders';
-import { LogLevel } from './log_level';
+import { LogLevel, Appender } from '@kbn/logging';
+import { LoggingConfig } from './logging_config';
 import { BaseLogger } from './logger';
 
 const context = LoggingConfig.getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];
 let logger: BaseLogger;
+const factory = {
+  get: jest.fn().mockImplementation(() => logger),
+};
+
 const timestamp = new Date(2012, 1, 1);
 beforeEach(() => {
   jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
 
   appenderMocks = [{ append: jest.fn() }, { append: jest.fn() }];
-  logger = new BaseLogger(context, LogLevel.All, appenderMocks);
+  logger = new BaseLogger(context, LogLevel.All, appenderMocks, factory);
 });
 
 afterEach(() => {
+  jest.resetAllMocks();
   jest.restoreAllMocks();
 });
 
@@ -48,6 +52,7 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -61,6 +66,7 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: { trace: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -76,6 +82,7 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -89,6 +96,7 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: { debug: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -104,6 +112,7 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -117,6 +126,7 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-2',
       meta: { info: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -132,6 +142,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -146,6 +157,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-2',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -159,6 +171,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-3',
       meta: { warn: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -174,6 +187,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -188,6 +202,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -201,6 +216,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-3',
       meta: { error: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -216,6 +232,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -230,6 +247,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: undefined,
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -243,6 +261,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-3',
       meta: { fatal: true },
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
@@ -253,6 +272,7 @@ test('`log()` just passes the record to all appenders.', () => {
     level: LogLevel.Info,
     message: 'message-1',
     timestamp,
+    pid: 5355,
   };
 
   logger.log(record);
@@ -263,8 +283,22 @@ test('`log()` just passes the record to all appenders.', () => {
   }
 });
 
+test('`get()` calls the logger factory with proper context and return the result', () => {
+  logger.get('sub', 'context');
+  expect(factory.get).toHaveBeenCalledTimes(1);
+  expect(factory.get).toHaveBeenCalledWith(context, 'sub', 'context');
+
+  factory.get.mockClear();
+  factory.get.mockImplementation(() => 'some-logger');
+
+  const childLogger = logger.get('other', 'sub');
+  expect(factory.get).toHaveBeenCalledTimes(1);
+  expect(factory.get).toHaveBeenCalledWith(context, 'other', 'sub');
+  expect(childLogger).toEqual('some-logger');
+});
+
 test('logger with `Off` level does not pass any records to appenders.', () => {
-  const turnedOffLogger = new BaseLogger(context, LogLevel.Off, appenderMocks);
+  const turnedOffLogger = new BaseLogger(context, LogLevel.Off, appenderMocks, factory);
   turnedOffLogger.trace('trace-message');
   turnedOffLogger.debug('debug-message');
   turnedOffLogger.info('info-message');
@@ -278,7 +312,7 @@ test('logger with `Off` level does not pass any records to appenders.', () => {
 });
 
 test('logger with `All` level passes all records to appenders.', () => {
-  const catchAllLogger = new BaseLogger(context, LogLevel.All, appenderMocks);
+  const catchAllLogger = new BaseLogger(context, LogLevel.All, appenderMocks, factory);
 
   catchAllLogger.trace('trace-message');
   for (const appenderMock of appenderMocks) {
@@ -288,6 +322,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Trace,
       message: 'trace-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -299,6 +334,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Debug,
       message: 'debug-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -310,6 +346,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Info,
       message: 'info-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -321,6 +358,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Warn,
       message: 'warn-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -332,6 +370,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Error,
       message: 'error-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -343,12 +382,13 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Fatal,
       message: 'fatal-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });
 
 test('passes log record to appenders only if log level is supported.', () => {
-  const warnLogger = new BaseLogger(context, LogLevel.Warn, appenderMocks);
+  const warnLogger = new BaseLogger(context, LogLevel.Warn, appenderMocks, factory);
 
   warnLogger.trace('trace-message');
   warnLogger.debug('debug-message');
@@ -366,6 +406,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       level: LogLevel.Warn,
       message: 'warn-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -377,6 +418,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       level: LogLevel.Error,
       message: 'error-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 
@@ -388,6 +430,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       level: LogLevel.Fatal,
       message: 'fatal-message',
       timestamp,
+      pid: expect.any(Number),
     });
   }
 });

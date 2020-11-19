@@ -24,7 +24,6 @@ export function checkAccessRoute(server) {
         throw handleError(err, req);
       }
       return response;
-    }
+    },
   });
 }
-

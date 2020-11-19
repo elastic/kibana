@@ -32,7 +32,6 @@ out an open PR:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) will help you get Kibana up and running.
 - If you would like to contribute code, please follow our [STYLEGUIDE.md](STYLEGUIDE.md).
-- Learn more about our UI code with [UI_SYSTEMS.md](src/legacy/ui/public/UI_SYSTEMS.md).
 - For all other questions, check out the [FAQ.md](FAQ.md) and
 [wiki](https://github.com/elastic/kibana/wiki).
 
@@ -60,7 +59,7 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
 
 ## Questions? Problems? Suggestions?
 
-- If you've found a bug or want to request a feature, please create a [GitHub Issue](https://github.com/elastic/kibana/issues/new).
-Please check to make sure someone else hasn't already created an issue for the same topic.
+- If you've found a bug or want to request a feature, please create a [GitHub Issue](https://github.com/elastic/kibana/issues/new/choose).
+  Please check to make sure someone else hasn't already created an issue for the same topic.
 - Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or
 Elastic engineer will be glad to help you out.

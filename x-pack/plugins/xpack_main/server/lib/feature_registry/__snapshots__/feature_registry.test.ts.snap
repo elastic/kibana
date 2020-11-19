@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`FeatureRegistry prevents features from being registered with an ID of "catalogue" 1`] = `"child \\"id\\" fails because [\\"id\\" contains an invalid value]"`;
-
-exports[`FeatureRegistry prevents features from being registered with an ID of "doesn't match valid regex" 1`] = `"child \\"id\\" fails because [\\"id\\" with value \\"doesn't match valid regex\\" fails to match the required pattern: /^[a-zA-Z0-9_-]+$/]"`;
-
-exports[`FeatureRegistry prevents features from being registered with an ID of "management" 1`] = `"child \\"id\\" fails because [\\"id\\" contains an invalid value]"`;
-
-exports[`FeatureRegistry prevents features from being registered with an ID of "navLinks" 1`] = `"child \\"id\\" fails because [\\"id\\" contains an invalid value]"`;

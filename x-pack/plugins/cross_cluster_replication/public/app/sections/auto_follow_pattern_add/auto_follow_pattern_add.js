@@ -7,14 +7,10 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
-import {
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiPageContent } from '@elastic/eui';
 
-import { listBreadcrumb, addBreadcrumb } from '../../services/breadcrumbs';
+import { listBreadcrumb, addBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
 import {
   AutoFollowPatternForm,
   AutoFollowPatternPageTitle,
@@ -28,10 +24,10 @@ export class AutoFollowPatternAdd extends PureComponent {
     clearApiError: PropTypes.func.isRequired,
     apiError: PropTypes.object,
     apiStatus: PropTypes.string.isRequired,
-  }
+  };
 
   componentDidMount() {
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, addBreadcrumb ]);
+    setBreadcrumbs([listBreadcrumb('/auto_follow_patterns'), addBreadcrumb]);
   }
 
   componentWillUnmount() {
@@ -39,17 +35,22 @@ export class AutoFollowPatternAdd extends PureComponent {
   }
 
   render() {
-    const { saveAutoFollowPattern, apiStatus, apiError, match: { url: currentUrl } } = this.props;
+    const {
+      saveAutoFollowPattern,
+      apiStatus,
+      apiError,
+      match: { url: currentUrl },
+    } = this.props;
 
     return (
       <EuiPageContent>
         <AutoFollowPatternPageTitle
-          title={(
+          title={
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
               defaultMessage="Add auto-follow pattern"
             />
-          )}
+          }
         />
 
         <RemoteClustersProvider>
@@ -72,12 +73,12 @@ export class AutoFollowPatternAdd extends PureComponent {
                 currentUrl={currentUrl}
                 remoteClusters={error ? [] : remoteClusters}
                 saveAutoFollowPattern={saveAutoFollowPattern}
-                saveButtonLabel={(
+                saveButtonLabel={
                   <FormattedMessage
                     id="xpack.crossClusterReplication.autoFollowPatternCreateForm.saveButtonLabel"
                     defaultMessage="Create"
                   />
-                )}
+                }
               />
             );
           }}

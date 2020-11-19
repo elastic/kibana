@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Function } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
-export function context(): Function<'context', {}, any> {
+export function context(): ExpressionFunctionDefinition<'context', unknown, {}, unknown> {
   const { help } = getFunctionHelp().context;
 
   return {
     name: 'context',
     help,
     args: {},
-    fn: obj => obj,
+    fn: (obj) => obj,
   };
 }

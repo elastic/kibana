@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getLatestStats, getStats } from '../../../../lib/beats';
@@ -18,31 +18,26 @@ export function beatsOverviewRoute(server) {
     path: '/api/monitoring/v1/clusters/{clusterUuid}/beats',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required()
+        params: schema.object({
+          clusterUuid: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+        }),
+      },
     },
     async handler(req) {
-
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
-        const [
-          latest,
-          stats,
-          metrics,
-        ] = await Promise.all([
+        const [latest, stats, metrics] = await Promise.all([
           getLatestStats(req, beatsIndexPattern, clusterUuid),
           getStats(req, beatsIndexPattern, clusterUuid),
           getMetrics(req, beatsIndexPattern, metricSet),
@@ -51,12 +46,11 @@ export function beatsOverviewRoute(server) {
         return {
           ...latest,
           stats,
-          metrics
+          metrics,
         };
       } catch (err) {
         throw handleError(err, req);
       }
-
-    }
+    },
   });
 }

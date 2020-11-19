@@ -17,49 +17,62 @@
  * under the License.
  */
 
+import { Writable } from 'stream';
+
 import chalk from 'chalk';
 import execa from 'execa';
-import logSymbols from 'log-symbols';
 import logTransformer from 'strong-log-transformer';
 
-function generateColors() {
-  const colorWheel = [chalk.cyan, chalk.magenta, chalk.blue, chalk.yellow, chalk.green];
+import { log } from './log';
 
-  const count = colorWheel.length;
-  let children = 0;
-
-  return () => colorWheel[children++ % count];
-}
+const colorWheel = [chalk.cyan, chalk.magenta, chalk.blue, chalk.yellow, chalk.green];
+const getColor = () => {
+  const color = colorWheel.shift()!;
+  colorWheel.push(color);
+  return color;
+};
 
 export function spawn(command: string, args: string[], opts: execa.Options) {
   return execa(command, args, {
     stdio: 'inherit',
+    preferLocal: true,
     ...opts,
   });
 }
 
-const nextColor = generateColors();
+function streamToLog(debug: boolean = true) {
+  return new Writable({
+    objectMode: true,
+    write(line, _, cb) {
+      if (line.endsWith('\n')) {
+        log[debug ? 'debug' : 'write'](line.slice(0, -1));
+      } else {
+        log[debug ? 'debug' : 'write'](line);
+      }
+
+      cb();
+    },
+  });
+}
 
 export function spawnStreaming(
   command: string,
   args: string[],
   opts: execa.Options,
-  { prefix }: { prefix: string }
+  { prefix, debug }: { prefix: string; debug?: boolean }
 ) {
   const spawned = execa(command, args, {
     stdio: ['ignore', 'pipe', 'pipe'],
+    preferLocal: true,
     ...opts,
   });
 
-  const color = nextColor();
-  const prefixedStdout = logTransformer({ tag: `${color.bold(prefix)}:` });
-  const prefixedStderr = logTransformer({
-    mergeMultiline: true,
-    tag: `${logSymbols.error} ${color.bold(prefix)}:`,
-  });
+  const color = getColor();
+  const prefixedStdout = logTransformer({ tag: color.bold(prefix) });
+  const prefixedStderr = logTransformer({ mergeMultiline: true, tag: color.bold(prefix) });
 
-  spawned.stdout.pipe(prefixedStdout).pipe(process.stdout);
-  spawned.stderr.pipe(prefixedStderr).pipe(process.stderr);
+  spawned.stdout!.pipe(prefixedStdout).pipe(streamToLog(debug)); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+  spawned.stderr!.pipe(prefixedStderr).pipe(streamToLog(debug)); // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
 
   return spawned;
 }

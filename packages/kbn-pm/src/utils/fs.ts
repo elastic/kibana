@@ -18,22 +18,23 @@
  */
 
 import cmdShimCb from 'cmd-shim';
+import del from 'del';
 import fs from 'fs';
-import mkdirpCb from 'mkdirp';
 import { ncp } from 'ncp';
 import { dirname, relative } from 'path';
 import { promisify } from 'util';
 
 const lstat = promisify(fs.lstat);
-const readFile = promisify(fs.readFile);
+export const readFile = promisify(fs.readFile);
+export const writeFile = promisify(fs.writeFile);
 const symlink = promisify(fs.symlink);
-const chmod = promisify(fs.chmod);
+export const chmod = promisify(fs.chmod);
 const cmdShim = promisify<string, string>(cmdShimCb);
-const mkdirp = promisify(mkdirpCb);
+const mkdir = promisify(fs.mkdir);
+export const mkdirp = async (path: string) => await mkdir(path, { recursive: true });
+export const rmdirp = async (path: string) => await del(path, { force: true });
 export const unlink = promisify(fs.unlink);
 export const copyDirectory = promisify(ncp);
-
-export { chmod, readFile, mkdirp };
 
 async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
   try {
@@ -51,7 +52,7 @@ async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
  * @param path
  */
 export async function isSymlink(path: string) {
-  return await statTest(path, stats => stats.isSymbolicLink());
+  return await statTest(path, (stats) => stats.isSymbolicLink());
 }
 
 /**
@@ -59,7 +60,7 @@ export async function isSymlink(path: string) {
  * @param path
  */
 export async function isDirectory(path: string) {
-  return await statTest(path, stats => stats.isDirectory());
+  return await statTest(path, (stats) => stats.isDirectory());
 }
 
 /**
@@ -67,7 +68,7 @@ export async function isDirectory(path: string) {
  * @param path
  */
 export async function isFile(path: string) {
-  return await statTest(path, stats => stats.isFile());
+  return await statTest(path, (stats) => stats.isFile());
 }
 
 /**

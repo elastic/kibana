@@ -6,8 +6,8 @@
 
 import { get } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
-import { ContextFunction, Render, Style } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Render, Style, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Shape {
   GAUGE = 'gauge',
@@ -20,7 +20,7 @@ export enum Shape {
   WHEEL = 'wheel',
 }
 
-interface Arguments {
+export interface Arguments {
   barColor: string;
   barWeight: number;
   font: Style;
@@ -31,67 +31,75 @@ interface Arguments {
   valueWeight: number;
 }
 
-export function progress(): ContextFunction<'progress', number, Arguments, Render<Arguments>> {
+export type Output = Arguments & {
+  value: number;
+};
+
+export function progress(): ExpressionFunctionDefinition<
+  'progress',
+  number,
+  Arguments,
+  Render<Arguments>
+> {
   const { help, args: argHelp } = getFunctionHelp().progress;
+  const errors = getFunctionErrors().progress;
 
   return {
     name: 'progress',
     aliases: [],
     type: 'render',
+    inputTypes: ['number'],
     help,
-    context: {
-      types: ['number'],
-    },
     args: {
-      barColor: {
-        default: `#f0f0f0`,
-        help: argHelp.barColor,
-        types: ['string'],
-      },
-      barWeight: {
-        default: 20,
-        help: argHelp.barWeight,
-        types: ['number'],
-      },
-      font: {
-        default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,
-        help: argHelp.font,
-        types: ['style'],
-      },
-      label: {
-        default: true,
-        help: argHelp.label,
-        types: ['boolean', 'string'],
-      },
-      max: {
-        default: 1,
-        help: argHelp.max,
-        types: ['number'],
-      },
       shape: {
         aliases: ['_'],
-        default: 'gauge',
+        types: ['string'],
         help: argHelp.shape,
         options: Object.values(Shape),
+        default: 'gauge',
+      },
+      barColor: {
         types: ['string'],
+        help: argHelp.barColor,
+        default: `#f0f0f0`,
+      },
+      barWeight: {
+        types: ['number'],
+        help: argHelp.barWeight,
+        default: 20,
+      },
+      font: {
+        types: ['style'],
+        help: argHelp.font,
+        default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,
+      },
+      label: {
+        types: ['boolean', 'string'],
+        help: argHelp.label,
+        default: true,
+      },
+      max: {
+        types: ['number'],
+        help: argHelp.max,
+        default: 1,
       },
       valueColor: {
-        default: `#1785b0`,
-        help: argHelp.valueColor,
         types: ['string'],
+        help: argHelp.valueColor,
+        default: `#1785b0`,
       },
       valueWeight: {
-        default: 20,
-        help: argHelp.valueWeight,
         types: ['number'],
+        help: argHelp.valueWeight,
+        default: 20,
       },
     },
     fn: (value, args) => {
       if (args.max <= 0) {
-        throw new Error(`Invalid max value: '${args.max}'. 'max' must be greater than 0`);
+        throw errors.invalidMaxValue(args.max);
       }
       if (value > args.max || value < 0) {
-        throw new Error(`Invalid value: '${value}'. Value must be between 0 and ${args.max}`);
+        throw errors.invalidValue(value, args.max);
       }
 
       let label = '';

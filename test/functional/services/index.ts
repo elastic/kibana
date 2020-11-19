@@ -17,50 +17,51 @@
  * under the License.
  */
 
+import { services as commonServiceProviders } from '../../common/services';
+
 import { AppsMenuProvider } from './apps_menu';
-import { BrowserProvider } from './browser';
-// @ts-ignore not TS yet
+import {
+  BrowserProvider,
+  FailureDebuggingProvider,
+  FindProvider,
+  ScreenshotsProvider,
+  SnapshotsProvider,
+  TestSubjectsProvider,
+} from './common';
 import { ComboBoxProvider } from './combo_box';
 import {
   DashboardAddPanelProvider,
+  DashboardReplacePanelProvider,
   DashboardExpectProvider,
   DashboardPanelActionsProvider,
   DashboardVisualizationProvider,
-  // @ts-ignore not TS yet
 } from './dashboard';
-// @ts-ignore not TS yet
 import { DocTableProvider } from './doc_table';
-// @ts-ignore not TS yet
 import { EmbeddingProvider } from './embedding';
-// @ts-ignore not TS yet
-import { FailureDebuggingProvider } from './failure_debugging';
-// @ts-ignore not TS yet
 import { FilterBarProvider } from './filter_bar';
-import { FindProvider } from './find';
-// @ts-ignore not TS yet
 import { FlyoutProvider } from './flyout';
-// @ts-ignore not TS yet
 import { GlobalNavProvider } from './global_nav';
-// @ts-ignore not TS yet
 import { InspectorProvider } from './inspector';
-// @ts-ignore not TS yet
+import { ManagementMenuProvider } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
-// @ts-ignore not TS yet
 import { RenderableProvider } from './renderable';
-// @ts-ignore not TS yet
-import { ScreenshotsProvider } from './screenshots';
-// @ts-ignore not TS yet
-import { SnapshotsProvider } from './snapshots';
-// @ts-ignore not TS yet
 import { TableProvider } from './table';
-import { TestSubjectsProvider } from './test_subjects';
-// @ts-ignore not TS yet
-import { PieChartProvider } from './visualizations';
-// @ts-ignore not TS yet
-import { VisualizeListingTableProvider } from './visualize_listing_table';
+import { ToastsProvider } from './toasts';
+import { DataGridProvider } from './data_grid';
+import {
+  PieChartProvider,
+  ElasticChartProvider,
+  VegaDebugInspectorViewProvider,
+} from './visualizations';
+import { ListingTableProvider } from './listing_table';
+import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
+import { KibanaSupertestProvider } from './supertest';
+import { MenuToggleProvider } from './menu_toggle';
 
 export const services = {
+  ...commonServiceProviders,
+
   __webdriver__: RemoteProvider,
   filterBar: FilterBarProvider,
   queryBar: QueryBarProvider,
@@ -72,17 +73,26 @@ export const services = {
   dashboardVisualizations: DashboardVisualizationProvider,
   dashboardExpect: DashboardExpectProvider,
   failureDebugging: FailureDebuggingProvider,
-  visualizeListingTable: VisualizeListingTableProvider,
+  listingTable: ListingTableProvider,
   dashboardAddPanel: DashboardAddPanelProvider,
+  dashboardReplacePanel: DashboardReplacePanelProvider,
   dashboardPanelActions: DashboardPanelActionsProvider,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,
+  dataGrid: DataGridProvider,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
   table: TableProvider,
   browser: BrowserProvider,
   pieChart: PieChartProvider,
   inspector: InspectorProvider,
+  vegaDebugInspector: VegaDebugInspectorViewProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
+  toasts: ToastsProvider,
+  savedQueryManagementComponent: SavedQueryManagementComponentProvider,
+  elasticChart: ElasticChartProvider,
+  supertest: KibanaSupertestProvider,
+  managementMenu: ManagementMenuProvider,
+  MenuToggle: MenuToggleProvider,
 };

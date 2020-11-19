@@ -15,27 +15,28 @@ export const initElasticsearchIndicesHelpers = (es) => {
 
   const createIndex = (index = getRandomString(), body = {}) => {
     indicesCreated.push(index);
-    return es.indices.create({
-      index,
-      body,
-    }).then(() => index);
+    return es.indices
+      .create({
+        index,
+        body,
+      })
+      .then(() => index);
   };
 
   const deleteIndex = (index) => {
     const indices = Array.isArray(index) ? index : [index];
     indices.forEach((_index) => {
-      indicesCreated = indicesCreated.filter(i => i !== _index);
+      indicesCreated = indicesCreated.filter((i) => i !== _index);
     });
     return es.indices.delete({ index: indices }, { ignoreUnavailable: true });
   };
 
-  const deleteAllIndicesCreated = () => (
-    deleteIndex(indicesCreated).then(() => indicesCreated = [])
-  );
+  const deleteAllIndicesCreated = () =>
+    deleteIndex(indicesCreated).then(() => (indicesCreated = []));
 
-  return ({
+  return {
     createIndex,
     deleteIndex,
     deleteAllIndicesCreated,
-  });
+  };
 };

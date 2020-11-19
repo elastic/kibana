@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { badImplementation, badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ACTION_STATES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
@@ -15,20 +15,27 @@ export class ActionStatus {
     this.id = props.id;
     this.actionStatusJson = props.actionStatusJson;
     this.errors = props.errors;
+    this.lastCheckedRawFormat = props.lastCheckedRawFormat;
 
+    this.lastExecutionRawFormat = get(this.actionStatusJson, 'last_execution.timestamp');
     this.lastAcknowledged = getMoment(get(this.actionStatusJson, 'ack.timestamp'));
     this.lastExecution = getMoment(get(this.actionStatusJson, 'last_execution.timestamp'));
     this.lastExecutionSuccessful = get(this.actionStatusJson, 'last_execution.successful');
     this.lastExecutionReason = get(this.actionStatusJson, 'last_execution.reason');
     this.lastThrottled = getMoment(get(this.actionStatusJson, 'last_throttle.timestamp'));
-    this.lastSuccessfulExecution = getMoment(get(this.actionStatusJson, 'last_successful_execution.timestamp'));
+    this.lastSuccessfulExecution = getMoment(
+      get(this.actionStatusJson, 'last_successful_execution.timestamp')
+    );
   }
 
   get state() {
     const actionStatusJson = this.actionStatusJson;
     const ackState = actionStatusJson.ack.state;
 
-    if (this.lastExecutionSuccessful === false) {
+    if (
+      this.lastExecutionSuccessful === false &&
+      this.lastCheckedRawFormat === this.lastExecutionRawFormat
+    ) {
       return ACTION_STATES.ERROR;
     }
 
@@ -40,42 +47,35 @@ export class ActionStatus {
       return ACTION_STATES.OK;
     }
 
-    if ((ackState === 'acked') &&
-      (this.lastAcknowledged >= this.lastExecution)) {
+    if (ackState === 'acked' && this.lastAcknowledged >= this.lastExecution) {
       return ACTION_STATES.ACKNOWLEDGED;
     }
 
-    if ((ackState === 'ackable') &&
-      (this.lastThrottled >= this.lastExecution)) {
-      return ACTION_STATES.THROTTLED;
-    }
-
-    if ((ackState === 'ackable') &&
-      (this.lastSuccessfulExecution >= this.lastExecution)) {
-      return ACTION_STATES.FIRING;
-    }
-
-    if ((ackState === 'ackable') &&
-      (this.lastSuccessfulExecution < this.lastExecution)) {
+    // A user could potentially land in this state if running on multiple nodes and timing is off
+    if (ackState === 'acked' && this.lastAcknowledged < this.lastExecution) {
       return ACTION_STATES.ERROR;
     }
 
-    // At this point, we cannot determine the action status so we thrown an error.
+    if (ackState === 'ackable' && this.lastThrottled >= this.lastExecution) {
+      return ACTION_STATES.THROTTLED;
+    }
+
+    if (ackState === 'ackable' && this.lastSuccessfulExecution >= this.lastExecution) {
+      return ACTION_STATES.FIRING;
+    }
+
+    if (ackState === 'ackable' && this.lastSuccessfulExecution < this.lastExecution) {
+      return ACTION_STATES.ERROR;
+    }
+
+    // At this point, we cannot determine the action status so mark it as "unknown".
     // We should never get to this point in the code. If we do, it means we are
     // missing an action status and the logic to determine it.
-    throw badImplementation(
-      i18n.translate('xpack.watcher.models.actionStatus.notDetermineActionStatusBadImplementationMessage', {
-        defaultMessage: 'Could not determine action status; action = {actionStatusJson}',
-        values: {
-          actionStatusJson: JSON.stringify(actionStatusJson)
-        }
-      }),
-    );
+    return ACTION_STATES.UNKNOWN;
   }
 
   get isAckable() {
-    if ((this.state === ACTION_STATES.THROTTLED) ||
-      (this.state === ACTION_STATES.FIRING)) {
+    if (this.state === ACTION_STATES.THROTTLED || this.state === ACTION_STATES.FIRING) {
       return true;
     }
 
@@ -93,7 +93,7 @@ export class ActionStatus {
       lastExecution: this.lastExecution,
       lastExecutionSuccessful: this.lastExecutionSuccessful,
       lastExecutionReason: this.lastExecutionReason,
-      lastSuccessfulExecution: this.lastSuccessfulExecution
+      lastSuccessfulExecution: this.lastSuccessfulExecution,
     };
 
     return json;
@@ -101,25 +101,21 @@ export class ActionStatus {
 
   // generate object from elasticsearch response
   static fromUpstreamJson(json) {
+    const missingPropertyError = (missingProperty) =>
+      i18n.translate(
+        'xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage',
+        {
+          defaultMessage: 'JSON argument must contain an "{missingProperty}" property',
+          values: { missingProperty },
+        }
+      );
+
     if (!json.id) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.actionStatus.idPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {id} property',
-          values: {
-            id: 'id'
-          }
-        }),
-      );
+      throw badRequest(missingPropertyError('id'));
     }
+
     if (!json.actionStatusJson) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionStatusJson} property',
-          values: {
-            actionStatusJson: 'actionStatusJson'
-          }
-        }),
-      );
+      throw badRequest(missingPropertyError('actionStatusJson'));
     }
 
     return new ActionStatus(json);
@@ -142,5 +138,4 @@ export class ActionStatus {
     }
   }
   */
-
 }

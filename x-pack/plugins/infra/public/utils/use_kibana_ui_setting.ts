@@ -3,11 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { useCallback, useMemo } from 'react';
-
-import { getNewPlatform } from 'ui/new_platform';
-import { useObservable } from './use_observable';
+import { useMemo } from 'react';
+import { useUiSetting$ } from '../../../../../src/plugins/kibana_react/public';
 
 /**
  * This hook behaves like a `useState` hook in that it provides a requested
@@ -25,15 +22,30 @@ import { useObservable } from './use_observable';
  * Unlike the `useState`, it doesn't give type guarantees for the value,
  * because the underlying `UiSettingsClient` doesn't support that.
  */
-export const useKibanaUiSetting = (key: string, defaultValue?: any) => {
-  const uiSettingsClient = useMemo(() => getNewPlatform().setup.core.uiSettings, [getNewPlatform]);
 
-  const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [uiSettingsClient]);
-  const uiSetting = useObservable(uiSetting$);
+export interface TimePickerQuickRange {
+  from: string;
+  to: string;
+  display: string;
+}
 
-  const setUiSetting = useCallback((value: any) => uiSettingsClient.set(key, value), [
-    uiSettingsClient,
-  ]);
+export function useKibanaUiSetting(
+  key: 'timepicker:quickRanges',
+  defaultValue?: TimePickerQuickRange[]
+): [
+  TimePickerQuickRange[],
+  (key: 'timepicker:quickRanges', value: TimePickerQuickRange[]) => Promise<boolean>
+];
 
-  return [uiSetting, setUiSetting];
-};
+export function useKibanaUiSetting(
+  key: string,
+  defaultValue?: any
+): [any, (key: string, value: any) => Promise<boolean>];
+
+export function useKibanaUiSetting(key: string, defaultValue?: any) {
+  const [uiSetting, setUiSetting] = useUiSetting$(key);
+  const uiSettingValue = useMemo(() => {
+    return uiSetting ? uiSetting : defaultValue;
+  }, [uiSetting, defaultValue]);
+  return [uiSettingValue, setUiSetting];
+}

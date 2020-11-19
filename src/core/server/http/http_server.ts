@@ -16,103 +16,137 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Server } from '@hapi/hapi';
+import HapiStaticFiles from '@hapi/inert';
+import url from 'url';
+import uuid from 'uuid';
 
-import { Request, Server, ServerOptions } from 'hapi';
-
-import { modifyUrl } from '../../utils';
-import { Logger } from '../logging';
+import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getServerOptions } from './http_tools';
+import { createServer, getListenerOptions, getServerOptions, getRequestId } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
-import { adoptToHapiOnRequestFormat, OnRequestHandler } from './lifecycle/on_request';
-import { Router, KibanaRequest } from './router';
+import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
+import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
+import { adoptToHapiOnRequest, OnPreRoutingHandler } from './lifecycle/on_pre_routing';
+import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
+import {
+  IRouter,
+  RouteConfigOptions,
+  KibanaRouteOptions,
+  KibanaRequestState,
+  isSafeMethod,
+} from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
+import { IsAuthenticated, AuthStateStorage, GetAuthState } from './auth_state_storage';
+import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
+import { BasePath } from './base_path_service';
+import { HttpServiceSetup, HttpServerInfo } from './types';
 
+/** @internal */
 export interface HttpServerSetup {
   server: Server;
-  options: ServerOptions;
-  registerRouter: (router: Router) => void;
   /**
-   * Define custom authentication and/or authorization mechanism for incoming requests.
-   * Applied to all resources by default. Only one AuthenticationHandler can be registered.
+   * Add all the routes registered with `router` to HTTP server request listeners.
+   * @param router {@link IRouter} - a router with registered route handlers.
    */
-  registerAuth: <T>(
-    authenticationHandler: AuthenticationHandler<T>,
-    cookieOptions: SessionStorageCookieOptions<T>
-  ) => void;
-  /**
-   * Define custom logic to perform for incoming requests.
-   * Applied to all resources by default.
-   * Can register any number of OnRequestHandlers, which are called in sequence (from the first registered to the last)
-   */
-  registerOnRequest: (requestHandler: OnRequestHandler) => void;
-  getBasePathFor: (request: KibanaRequest | Request) => string;
-  setBasePathFor: (request: KibanaRequest | Request, basePath: string) => void;
+  registerRouter: (router: IRouter) => void;
+  registerStaticDir: (path: string, dirPath: string) => void;
+  basePath: HttpServiceSetup['basePath'];
+  csp: HttpServiceSetup['csp'];
+  createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
+  registerOnPreRouting: HttpServiceSetup['registerOnPreRouting'];
+  registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
+  registerAuth: HttpServiceSetup['registerAuth'];
+  registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
+  registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
+  getAuthHeaders: GetAuthHeaders;
+  auth: {
+    get: GetAuthState;
+    isAuthenticated: IsAuthenticated;
+  };
+  getServerInfo: () => HttpServerInfo;
 }
+
+/** @internal */
+export type LifecycleRegistrar = Pick<
+  HttpServerSetup,
+  | 'registerOnPreRouting'
+  | 'registerOnPreAuth'
+  | 'registerAuth'
+  | 'registerOnPostAuth'
+  | 'registerOnPreResponse'
+>;
 
 export class HttpServer {
   private server?: Server;
-  private registeredRouters = new Set<Router>();
+  private config?: HttpConfig;
+  private registeredRouters = new Set<IRouter>();
   private authRegistered = false;
-  private basePathCache = new WeakMap<
-    ReturnType<KibanaRequest['unstable_getIncomingMessage']>,
-    string
-  >();
+  private cookieSessionStorageCreated = false;
+  private stopped = false;
 
-  constructor(private readonly log: Logger) {}
+  private readonly log: Logger;
+  private readonly authState: AuthStateStorage;
+  private readonly authRequestHeaders: AuthHeadersStorage;
+  private readonly authResponseHeaders: AuthHeadersStorage;
+
+  constructor(private readonly logger: LoggerFactory, private readonly name: string) {
+    this.authState = new AuthStateStorage(() => this.authRegistered);
+    this.authRequestHeaders = new AuthHeadersStorage();
+    this.authResponseHeaders = new AuthHeadersStorage();
+    this.log = logger.get('http', 'server', name);
+  }
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
   }
 
-  private registerRouter(router: Router) {
+  private registerRouter(router: IRouter) {
     if (this.isListening()) {
       throw new Error('Routers can be registered only when HTTP server is stopped.');
     }
 
-    this.log.debug(`registering route handler for [${router.path}]`);
     this.registeredRouters.add(router);
   }
 
-  // passing hapi Request works for BWC. can be deleted once we remove legacy server.
-  private getBasePathFor(config: HttpConfig, request: KibanaRequest | Request) {
-    const incomingMessage =
-      request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
-
-    const requestScopePath = this.basePathCache.get(incomingMessage) || '';
-    const serverBasePath = config.basePath || '';
-    return `${serverBasePath}${requestScopePath}`;
-  }
-
-  // should work only for KibanaRequest as soon as spaces migrate to NP
-  private setBasePathFor(request: KibanaRequest | Request, basePath: string) {
-    const incomingMessage =
-      request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
-    if (this.basePathCache.has(incomingMessage)) {
-      throw new Error(
-        'Request basePath was previously set. Setting multiple times is not supported.'
-      );
-    }
-    this.basePathCache.set(incomingMessage, basePath);
-  }
-
-  public setup(config: HttpConfig): HttpServerSetup {
+  public async setup(config: HttpConfig): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
-    this.server = createServer(serverOptions);
+    const listenerOptions = getListenerOptions(config);
+    this.server = createServer(serverOptions, listenerOptions);
+    await this.server.register([HapiStaticFiles]);
+    this.config = config;
+
+    const basePathService = new BasePath(config.basePath);
+    this.setupBasePathRewrite(config, basePathService);
+    this.setupConditionalCompression(config);
+    this.setupRequestStateAssignment(config);
 
     return {
-      options: serverOptions,
       registerRouter: this.registerRouter.bind(this),
-      registerOnRequest: this.registerOnRequest.bind(this),
-      registerAuth: <T>(
-        fn: AuthenticationHandler<T>,
-        cookieOptions: SessionStorageCookieOptions<T>
-      ) => this.registerAuth(fn, cookieOptions, config.basePath),
-      getBasePathFor: this.getBasePathFor.bind(this, config),
-      setBasePathFor: this.setBasePathFor.bind(this),
+      registerStaticDir: this.registerStaticDir.bind(this),
+      registerOnPreRouting: this.registerOnPreRouting.bind(this),
+      registerOnPreAuth: this.registerOnPreAuth.bind(this),
+      registerAuth: this.registerAuth.bind(this),
+      registerOnPostAuth: this.registerOnPostAuth.bind(this),
+      registerOnPreResponse: this.registerOnPreResponse.bind(this),
+      createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
+        this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+      basePath: basePathService,
+      csp: config.csp,
+      auth: {
+        get: this.authState.get,
+        isAuthenticated: this.authState.isAuthenticated,
+      },
+      getAuthHeaders: this.authRequestHeaders.get,
+      getServerInfo: () => ({
+        name: config.name,
+        hostname: config.host,
+        port: config.port,
+        protocol: this.server!.info.protocol,
+      }),
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
       // needed anymore we shouldn't return the instance from this method.
@@ -120,110 +154,275 @@ export class HttpServer {
     };
   }
 
-  public async start(config: HttpConfig) {
+  public async start() {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
+    if (this.stopped) {
+      this.log.warn(`start called after stop`);
+      return;
+    }
     this.log.debug('starting http server');
-
-    this.setupBasePathRewrite(this.server, config);
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
+        this.log.debug(`registering route handler for [${route.path}]`);
+        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
+        const validate = isSafeMethod(route.method) ? undefined : { payload: true };
+        const { authRequired, tags, body = {}, timeout } = route.options;
+        const { accepts: allow, maxBytes, output, parse } = body;
+
+        const kibanaRouteOptions: KibanaRouteOptions = {
+          xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+        };
+
+        // To work around https://github.com/hapijs/hapi/issues/4122 until v20, set the socket
+        // timeout on the route to a fake timeout only when the payload timeout is specified.
+        // Within the onPreAuth lifecycle of the route itself, we'll override the timeout with the
+        // real socket timeout.
+        const fakeSocketTimeout = timeout?.payload ? timeout.payload + 1 : undefined;
+
         this.server.route({
           handler: route.handler,
           method: route.method,
-          path: this.getRouteFullPath(router.path, route.path),
+          path: route.path,
+          options: {
+            auth: this.getAuthOption(authRequired),
+            app: kibanaRouteOptions,
+            ext: {
+              onPreAuth: {
+                method: (request, h) => {
+                  // At this point, the socket timeout has only been set to work-around the HapiJS bug.
+                  // We need to either set the real per-route timeout or use the default idle socket timeout
+                  if (timeout?.idleSocket) {
+                    request.raw.req.socket.setTimeout(timeout.idleSocket);
+                  } else if (fakeSocketTimeout) {
+                    // NodeJS uses a socket timeout of `0` to denote "no timeout"
+                    request.raw.req.socket.setTimeout(this.config!.socketTimeout ?? 0);
+                  }
+
+                  return h.continue;
+                },
+              },
+            },
+            tags: tags ? Array.from(tags) : undefined,
+            // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
+            // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
+            // validation applied in ./http_tools#getServerOptions
+            // (All NP routes are already required to specify their own validation in order to access the payload)
+            validate,
+            payload: [allow, maxBytes, output, parse, timeout?.payload].some(
+              (v) => typeof v !== 'undefined'
+            )
+              ? {
+                  allow,
+                  maxBytes,
+                  output,
+                  parse,
+                  timeout: timeout?.payload,
+                }
+              : undefined,
+            timeout: {
+              socket: fakeSocketTimeout,
+            },
+          },
         });
       }
     }
 
     await this.server.start();
+    const serverPath =
+      this.config && this.config.rewriteBasePath && this.config.basePath !== undefined
+        ? this.config.basePath
+        : '';
 
-    this.log.debug(
-      `http server running at ${this.server.info.uri}${
-        config.rewriteBasePath ? config.basePath : ''
-      }`
-    );
+    this.log.info(`http server running at ${this.server.info.uri}${serverPath}`);
   }
 
   public async stop() {
+    this.stopped = true;
     if (this.server === undefined) {
       return;
     }
 
-    this.log.debug('stopping http server');
-    await this.server.stop();
-    this.server = undefined;
+    const hasStarted = this.server.info.started > 0;
+    if (hasStarted) {
+      this.log.debug('stopping http server');
+      await this.server.stop();
+    }
   }
 
-  private setupBasePathRewrite(server: Server, config: HttpConfig) {
+  private getAuthOption(
+    authRequired: RouteConfigOptions<any>['authRequired'] = true
+  ): undefined | false | { mode: 'required' | 'optional' } {
+    if (this.authRegistered === false) return undefined;
+
+    if (authRequired === true) {
+      return { mode: 'required' };
+    }
+    if (authRequired === 'optional') {
+      return { mode: 'optional' };
+    }
+    if (authRequired === false) {
+      return false;
+    }
+  }
+
+  private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {
     if (config.basePath === undefined || !config.rewriteBasePath) {
       return;
     }
 
-    const basePath = config.basePath;
-    server.ext('onRequest', (request, responseToolkit) => {
-      const newURL = modifyUrl(request.url.href!, urlParts => {
-        if (urlParts.pathname != null && urlParts.pathname.startsWith(basePath)) {
-          urlParts.pathname = urlParts.pathname.replace(basePath, '') || '/';
-        } else {
-          return {};
-        }
-      });
-
-      if (!newURL) {
-        return responseToolkit
-          .response('Not Found')
-          .code(404)
-          .takeover();
+    this.registerOnPreRouting((request, response, toolkit) => {
+      const oldUrl = request.url.pathname + request.url.search;
+      const newURL = basePathService.remove(oldUrl);
+      const shouldRedirect = newURL !== oldUrl;
+      if (shouldRedirect) {
+        return toolkit.rewriteUrl(newURL);
       }
+      return response.notFound();
+    });
+  }
 
-      request.setUrl(newURL);
-      // We should update raw request as well since it can be proxied to the old platform
-      // where base path isn't expected.
-      request.raw.req.url = request.url.href;
+  private setupConditionalCompression(config: HttpConfig) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`setupConditionalCompression called after stop`);
+    }
 
+    const { enabled, referrerWhitelist: list } = config.compression;
+    if (!enabled) {
+      this.log.debug('HTTP compression is disabled');
+      this.server.ext('onRequest', (request, h) => {
+        request.info.acceptEncoding = '';
+        return h.continue;
+      });
+    } else if (list) {
+      this.log.debug(`HTTP compression is only enabled for any referrer in the following: ${list}`);
+      this.server.ext('onRequest', (request, h) => {
+        const { referrer } = request.info;
+        if (referrer !== '') {
+          const { hostname } = url.parse(referrer);
+          if (!hostname || !list.includes(hostname)) {
+            request.info.acceptEncoding = '';
+          }
+        }
+        return h.continue;
+      });
+    }
+  }
+
+  private setupRequestStateAssignment(config: HttpConfig) {
+    this.server!.ext('onRequest', (request, responseToolkit) => {
+      request.app = {
+        ...(request.app ?? {}),
+        requestId: getRequestId(request, config.requestId),
+        requestUuid: uuid.v4(),
+      } as KibanaRequestState;
       return responseToolkit.continue;
     });
   }
 
-  private getRouteFullPath(routerPath: string, routePath: string) {
-    // If router's path ends with slash and route's path starts with slash,
-    // we should omit one of them to have a valid concatenated path.
-    const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
-    return `${routerPath}${routePath.slice(routePathStartIndex)}`;
-  }
-
-  private registerOnRequest(fn: OnRequestHandler) {
+  private registerOnPreAuth(fn: OnPreAuthHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
+    if (this.stopped) {
+      this.log.warn(`registerOnPreAuth called after stop`);
+    }
 
-    this.server.ext('onRequest', adoptToHapiOnRequestFormat(fn));
+    this.server.ext('onPreAuth', adoptToHapiOnPreAuth(fn, this.log));
   }
 
-  private async registerAuth<T>(
-    fn: AuthenticationHandler<T>,
+  private registerOnPostAuth(fn: OnPostAuthHandler) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerOnPostAuth called after stop`);
+    }
+
+    this.server.ext('onPostAuth', adoptToHapiOnPostAuthFormat(fn, this.log));
+  }
+
+  private registerOnPreRouting(fn: OnPreRoutingHandler) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerOnPreRouting called after stop`);
+    }
+
+    this.server.ext('onRequest', adoptToHapiOnRequest(fn, this.log));
+  }
+
+  private registerOnPreResponse(fn: OnPreResponseHandler) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerOnPreResponse called after stop`);
+    }
+
+    this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
+  }
+
+  private async createCookieSessionStorageFactory<T>(
     cookieOptions: SessionStorageCookieOptions<T>,
     basePath?: string
   ) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
+    if (this.stopped) {
+      this.log.warn(`createCookieSessionStorageFactory called after stop`);
+    }
+    if (this.cookieSessionStorageCreated) {
+      throw new Error('A cookieSessionStorageFactory was already created');
+    }
+    this.cookieSessionStorageCreated = true;
+    const sessionStorageFactory = await createCookieSessionStorageFactory<T>(
+      this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
+      this.server,
+      cookieOptions,
+      basePath
+    );
+    return sessionStorageFactory;
+  }
+
+  private registerAuth<T>(fn: AuthenticationHandler) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerAuth called after stop`);
+    }
     if (this.authRegistered) {
       throw new Error('Auth interceptor was already registered');
     }
     this.authRegistered = true;
 
-    const sessionStorage = await createCookieSessionStorageFactory<T>(
-      this.server,
-      cookieOptions,
-      basePath
-    );
-
     this.server.auth.scheme('login', () => ({
-      authenticate: adoptToHapiAuthFormat(fn, sessionStorage),
+      authenticate: adoptToHapiAuthFormat(
+        fn,
+        this.log,
+        (req, { state, requestHeaders, responseHeaders }) => {
+          this.authState.set(req, state);
+
+          if (responseHeaders) {
+            this.authResponseHeaders.set(req, responseHeaders);
+          }
+
+          if (requestHeaders) {
+            this.authRequestHeaders.set(req, requestHeaders);
+            // we mutate headers only for the backward compatibility with the legacy platform.
+            // where some plugin read directly from headers to identify whether a user is authenticated.
+            Object.assign(req.headers, requestHeaders);
+          }
+        }
+      ),
     }));
     this.server.auth.strategy('session', 'login');
 
@@ -232,5 +431,32 @@ export class HttpServer {
     // should be applied for all routes if they don't specify auth strategy in route declaration
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
+
+    this.registerOnPreResponse((request, preResponseInfo, t) => {
+      const authResponseHeaders = this.authResponseHeaders.get(request);
+      return t.next({ headers: authResponseHeaders });
+    });
+  }
+
+  private registerStaticDir(path: string, dirPath: string) {
+    if (this.server === undefined) {
+      throw new Error('Http server is not setup up yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerStaticDir called after stop`);
+    }
+
+    this.server.route({
+      path,
+      method: 'GET',
+      handler: {
+        directory: {
+          path: dirPath,
+          listing: false,
+          lookupCompressed: true,
+        },
+      },
+      options: { auth: false },
+    });
   }
 }

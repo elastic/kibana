@@ -6,13 +6,9 @@
 
 import React from 'react';
 
-import {
-  EuiCodeEditor,
-} from '@elastic/eui';
+import { EuiCodeEditor } from '@elastic/eui';
 
-export const TabJson = ({
-  json,
-}) => {
+export const TabJson = ({ json }) => {
   const jsonString = JSON.stringify(json, null, 2);
 
   return (
@@ -20,10 +16,10 @@ export const TabJson = ({
       mode="json"
       theme="textmate"
       isReadOnly
-      setOptions={{ maxLines: Infinity }}
+      setOptions={{ maxLines: Infinity, useWorker: false }}
       value={jsonString}
       editorProps={{
-        $blockScrolling: Infinity
+        $blockScrolling: Infinity,
       }}
     />
   );

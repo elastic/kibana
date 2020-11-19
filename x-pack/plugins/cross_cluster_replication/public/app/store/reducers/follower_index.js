@@ -13,7 +13,7 @@ const initialState = {
   selectedEditId: null,
 };
 
-const success = action => `${action}_SUCCESS`;
+const success = (action) => `${action}_SUCCESS`;
 
 const parseFollowerIndex = (followerIndex) => {
   // Extract status into boolean
@@ -22,10 +22,16 @@ const parseFollowerIndex = (followerIndex) => {
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
     case success(t.FOLLOWER_INDEX_LOAD): {
-      return { ...state, byId: arrayToObject(action.payload.indices.map(parseFollowerIndex), 'name') };
+      return {
+        ...state,
+        byId: arrayToObject(action.payload.indices.map(parseFollowerIndex), 'name'),
+      };
     }
     case success(t.FOLLOWER_INDEX_GET): {
-      return { ...state, byId: { ...state.byId, [action.payload.name]: parseFollowerIndex(action.payload) } };
+      return {
+        ...state,
+        byId: { ...state.byId, [action.payload.name]: parseFollowerIndex(action.payload) },
+      };
     }
     case t.FOLLOWER_INDEX_SELECT_DETAIL: {
       return { ...state, selectedDetailId: action.payload };
@@ -36,7 +42,7 @@ export const reducer = (state = initialState, action) => {
     case success(t.FOLLOWER_INDEX_UNFOLLOW): {
       const byId = { ...state.byId };
       const { itemsUnfollowed } = action.payload;
-      itemsUnfollowed.forEach(id => delete byId[id]);
+      itemsUnfollowed.forEach((id) => delete byId[id]);
       return { ...state, byId };
     }
     default:

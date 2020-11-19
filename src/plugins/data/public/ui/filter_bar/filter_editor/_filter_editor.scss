@@ -1,0 +1,5 @@
+.globalFilterEditor__fieldInput {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    max-width: $kbnGlobalFilterItemEditorWidth * 0.66;
+  }
+}

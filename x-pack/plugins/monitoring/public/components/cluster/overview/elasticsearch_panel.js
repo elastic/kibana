@@ -5,9 +5,15 @@
  */
 
 import React, { Fragment } from 'react';
+import moment from 'moment-timezone';
 import { get, capitalize } from 'lodash';
-import { formatNumber } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, HealthStatusIndicator, BytesUsage, BytesPercentageUsage } from './helpers';
+import { formatNumber } from '../../../lib/format_number';
+import {
+  ClusterItemContainer,
+  BytesPercentageUsage,
+  DisabledIfNoDataAndInSetupModeLink,
+  HealthLabel,
+} from './helpers';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -21,13 +27,34 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiFlexGroup,
+  EuiHealth,
+  EuiText,
 } from '@elastic/eui';
-import { LicenseText } from './license_text';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from '../../logs/reason';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import {
+  ELASTICSEARCH_SYSTEM_ID,
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CLUSTER_HEALTH,
+  ALERT_CPU_USAGE,
+  ALERT_DISK_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_MEMORY_USAGE,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_MISSING_MONITORING_DATA,
+} from '../../../../common/constants';
+import { AlertsBadge } from '../../../alerts/badge';
+import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+import { SetupModeFeature } from '../../../../common/enums';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
-const calculateShards = shards => {
+const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);
   let primaries = get(shards, 'primaries', 'N/A');
   let replicas = 'N/A';
@@ -41,9 +68,11 @@ const calculateShards = shards => {
 
   return {
     primaries,
-    replicas
+    replicas,
   };
 };
+
+const formatDateLocal = (input) => moment.tz(input, moment.tz.guess()).format('LL');
 
 function getBadgeColorFromLogLevel(level) {
   switch (level) {
@@ -62,7 +91,7 @@ function renderLogs(props) {
   if (!props.logs.enabled) {
     return (
       <EuiDescriptionList>
-        <Reason reason={props.logs.reason}/>
+        <Reason reason={props.logs.reason} />
       </EuiDescriptionList>
     );
   }
@@ -71,7 +100,7 @@ function renderLogs(props) {
     <EuiDescriptionList type="column">
       {props.logs.types.map((log, index) => (
         <Fragment key={index}>
-          <EuiDescriptionListTitle>
+          <EuiDescriptionListTitle className="eui-textBreakWord">
             <FormattedMessage
               id="xpack.monitoring.cluster.overview.logsPanel.logTypeTitle"
               defaultMessage="{type}"
@@ -80,39 +109,37 @@ function renderLogs(props) {
               }}
             />
           </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            {renderLog(log)}
-          </EuiDescriptionListDescription>
+          <EuiDescriptionListDescription>{renderLog(log)}</EuiDescriptionListDescription>
         </Fragment>
       ))}
-      {props.logs.types.length === 0
-        ? (
-          <FormattedMessage
-            id="xpack.monitoring.cluster.overview.logsPanel.noLogsFound"
-            defaultMessage="No logs found."
-          />
-        )
-        : null
-      }
+      {props.logs.types.length === 0 ? (
+        <FormattedMessage
+          id="xpack.monitoring.cluster.overview.logsPanel.noLogsFound"
+          defaultMessage="No logs found."
+        />
+      ) : null}
     </EuiDescriptionList>
   );
 }
 
 const logLevelText = {
   info: i18n.translate('xpack.monitoring.cluster.overview.esPanel.infoLogsTooltipText', {
-    defaultMessage: 'The number of information logs'
+    defaultMessage: 'The number of information logs',
   }),
   warn: i18n.translate('xpack.monitoring.cluster.overview.esPanel.warnLogsTooltipText', {
-    defaultMessage: 'The number of warning logs'
+    defaultMessage: 'The number of warning logs',
   }),
   debug: i18n.translate('xpack.monitoring.cluster.overview.esPanel.debugLogsTooltipText', {
-    defaultMessage: 'The number of debug logs'
+    defaultMessage: 'The number of debug logs',
   }),
   error: i18n.translate('xpack.monitoring.cluster.overview.esPanel.errorLogsTooltipText', {
-    defaultMessage: 'The number of error logs'
+    defaultMessage: 'The number of error logs',
   }),
   fatal: i18n.translate('xpack.monitoring.cluster.overview.esPanel.fatalLogsTooltipText', {
-    defaultMessage: 'The number of fatal logs'
+    defaultMessage: 'The number of fatal logs',
+  }),
+  unknown: i18n.translate('xpack.monitoring.cluster.overview.esPanel.unknownLogsTooltipText', {
+    defaultMessage: 'Unknown',
   }),
 };
 
@@ -121,10 +148,7 @@ function renderLog(log) {
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">
       {log.levels.map((level, index) => (
         <EuiFlexItem grow={false} key={index}>
-          <EuiToolTip
-            position="top"
-            content={logLevelText[level.level]}
-          >
+          <EuiToolTip position="top" content={logLevelText[level.level] || logLevelText.unknown}>
             <EuiBadge color={getBadgeColorFromLogLevel(level.level)}>
               {formatNumber(level.count, 'int_commas')}
             </EuiBadge>
@@ -135,123 +159,246 @@ function renderLog(log) {
   );
 }
 
-function ElasticsearchPanelUi(props) {
+const OVERVIEW_PANEL_ALERTS = [ALERT_CLUSTER_HEALTH, ALERT_LICENSE_EXPIRATION];
+
+const NODES_PANEL_ALERTS = [
+  ALERT_CPU_USAGE,
+  ALERT_DISK_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_MEMORY_USAGE,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  ALERT_MISSING_MONITORING_DATA,
+];
+
+export function ElasticsearchPanel(props) {
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
   const indices = clusterStats.indices;
+  const setupMode = props.setupMode;
+  const alerts = props.alerts;
+  const setupModeContext = React.useContext(SetupModeContext);
 
-  const goToElasticsearch = () => props.changeUrl('elasticsearch');
-  const goToNodes = () => props.changeUrl('elasticsearch/nodes');
-  const goToIndices = () => props.changeUrl('elasticsearch/indices');
+  const goToElasticsearch = () => getSafeForExternalLink('#/elasticsearch');
+  const goToNodes = () => getSafeForExternalLink('#/elasticsearch/nodes');
+  const goToIndices = () => getSafeForExternalLink('#/elasticsearch/indices');
 
   const { primaries, replicas } = calculateShards(get(props, 'cluster_stats.indices.shards', {}));
 
-  const statusIndicator = (
-    <HealthStatusIndicator status={clusterStats.status} />
-  );
+  const setupModeData = get(setupMode.data, 'elasticsearch');
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      productName={ELASTICSEARCH_SYSTEM_ID}
+      badgeClickLink={goToNodes()}
+    />
+  ) : null;
 
   const showMlJobs = () => {
     // if license doesn't support ML, then `ml === null`
     if (props.ml) {
-      return [
-        <EuiDescriptionListTitle key="mlJobsListTitle">
-          <FormattedMessage
-            id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
-            defaultMessage="Jobs"
-          />
-        </EuiDescriptionListTitle>,
-        <EuiDescriptionListDescription key="mlJobsCount" data-test-subj="esMlJobs">{ props.ml.jobs }</EuiDescriptionListDescription>
-      ];
+      const gotoURL = getSafeForExternalLink('#/elasticsearch/ml_jobs');
+      return (
+        <>
+          <EuiDescriptionListTitle className="eui-textBreakWord">
+            <DisabledIfNoDataAndInSetupModeLink
+              setupModeEnabled={setupMode.enabled}
+              setupModeData={setupModeData}
+              href={gotoURL}
+            >
+              <FormattedMessage
+                id="xpack.monitoring.cluster.overview.esPanel.jobsLabel"
+                defaultMessage="Machine learning jobs"
+              />
+            </DisabledIfNoDataAndInSetupModeLink>
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription data-test-subj="esMlJobs">
+            <DisabledIfNoDataAndInSetupModeLink
+              setupModeEnabled={setupMode.enabled}
+              setupModeData={setupModeData}
+              href={gotoURL}
+            >
+              {props.ml.jobs}
+            </DisabledIfNoDataAndInSetupModeLink>
+          </EuiDescriptionListDescription>
+        </>
+      );
     }
     return null;
   };
 
-  const licenseText = <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />;
+  const statusColorMap = {
+    green: 'success',
+    yellow: 'warning',
+    red: 'danger',
+  };
+
+  let nodesAlertStatus = null;
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS, setupModeContext)) {
+    const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    nodesAlertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertsBadge alerts={alertsList} />
+      </EuiFlexItem>
+    );
+  }
+
+  let overviewAlertStatus = null;
+  if (shouldShowAlertBadge(alerts, OVERVIEW_PANEL_ALERTS, setupModeContext)) {
+    const alertsList = OVERVIEW_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    overviewAlertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertsBadge alerts={alertsList} />
+      </EuiFlexItem>
+    );
+  }
 
   return (
-    <ClusterItemContainer
-      {...props}
-      statusIndicator={statusIndicator}
-      url="elasticsearch"
-      title="Elasticsearch"
-      extras={licenseText}
-    >
+    <ClusterItemContainer {...props} url="elasticsearch" title="Elasticsearch">
       <EuiFlexGrid columns={4}>
-
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <EuiLink
-                  onClick={goToElasticsearch}
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.esPanel.overviewLinkAriaLabel', defaultMessage: 'Elasticsearch Overview' })}
-                  data-test-subj="esOverview"
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.esPanel.overviewLinkLabel"
-                    defaultMessage="Overview"
-                  />
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <DisabledIfNoDataAndInSetupModeLink
+                      setupModeEnabled={setupMode.enabled}
+                      setupModeData={setupModeData}
+                      href={goToElasticsearch()}
+                      aria-label={i18n.translate(
+                        'xpack.monitoring.cluster.overview.esPanel.overviewLinkAriaLabel',
+                        {
+                          defaultMessage: 'Elasticsearch Overview',
+                        }
+                      )}
+                      data-test-subj="esOverview"
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.esPanel.overviewLinkLabel"
+                        defaultMessage="Overview"
+                      />
+                    </DisabledIfNoDataAndInSetupModeLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {overviewAlertStatus}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.healthLabel"
+                  defaultMessage="Health"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <EuiHealth color={statusColorMap[clusterStats.status]} data-test-subj="statusIcon">
+                  <HealthLabel status={clusterStats.status} />
+                </EuiHealth>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.versionLabel"
                   defaultMessage="Version"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esVersion">
-                { props.version || props.intl.formatMessage({
-                  id: 'xpack.monitoring.cluster.overview.esPanel.versionNotAvailableDescription', defaultMessage: 'N/A' }) }
+                {props.version ||
+                  i18n.translate(
+                    'xpack.monitoring.cluster.overview.esPanel.versionNotAvailableDescription',
+                    {
+                      defaultMessage: 'N/A',
+                    }
+                  )}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.uptimeLabel"
                   defaultMessage="Uptime"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esUptime">
-                { formatNumber(get(nodes, 'jvm.max_uptime_in_millis'), 'time_since') }
+                {formatNumber(get(nodes, 'jvm.max_uptime_in_millis'), 'time_since')}
               </EuiDescriptionListDescription>
               {showMlJobs()}
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.licenseLabel"
+                  defaultMessage="License"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="esLicenseType">
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiLink href={getSafeForExternalLink('#/license')}>
+                      {capitalize(props.license.type)}
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      {props.license.expiry_date_in_millis === undefined ? (
+                        ''
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.monitoring.cluster.overview.esPanel.expireDateText"
+                          defaultMessage="expires on {expiryDate}"
+                          values={{
+                            expiryDate: formatDateLocal(props.license.expiry_date_in_millis),
+                          }}
+                        />
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <EuiLink
-                  data-test-subj="esNumberOfNodes"
-                  onClick={goToNodes}
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.esPanel.nodesTotalLinkLabel"
-                    defaultMessage="Nodes: {nodesTotal}"
-                    values={{ nodesTotal: formatNumber(get(nodes, 'count.total'), 'int_commas') }}
-                  />
-                </EuiLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink data-test-subj="esNumberOfNodes" href={goToNodes()}>
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.esPanel.nodesTotalLinkLabel"
+                        defaultMessage="Nodes: {nodesTotal}"
+                        values={{
+                          nodesTotal: formatNumber(get(nodes, 'count.total'), 'int_commas'),
+                        }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  {setupModeMetricbeatMigrationTooltip}
+                  {nodesAlertStatus}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.diskAvailableLabel"
                   defaultMessage="Disk Available"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskAvailable">
-                <BytesUsage
+                <BytesPercentageUsage
                   usedBytes={get(nodes, 'fs.available_in_bytes')}
                   maxBytes={get(nodes, 'fs.total_in_bytes')}
                 />
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.jvmHeapLabel"
                   defaultMessage="{javaVirtualMachine} Heap"
@@ -272,62 +419,70 @@ function ElasticsearchPanelUi(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
-                  onClick={goToIndices}
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeData}
+                  href={goToIndices()}
                   data-test-subj="esNumberOfIndices"
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.esPanel.indicesCountLinkAriaLabel',
-                    defaultMessage: 'Elasticsearch Indices: {indicesCount}' },
-                  { indicesCount: formatNumber(get(indices, 'count'), 'int_commas') })}
+                  aria-label={i18n.translate(
+                    'xpack.monitoring.cluster.overview.esPanel.indicesCountLinkAriaLabel',
+                    {
+                      defaultMessage: 'Elasticsearch Indices: {indicesCount}',
+                      values: { indicesCount: formatNumber(get(indices, 'count'), 'int_commas') },
+                    }
+                  )}
                 >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.overview.esPanel.indicesCountLinkLabel"
                     defaultMessage="Indices: {indicesCount}"
                     values={{ indicesCount: formatNumber(get(indices, 'count'), 'int_commas') }}
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.documentsLabel"
                   defaultMessage="Documents"
                 />
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="esDocumentsCount">
-                { formatNumber(get(indices, 'docs.count'), 'int_commas') }
+              <EuiDescriptionListDescription
+                data-test-subj="esDocumentsCount"
+                className="eui-textBreakWord"
+              >
+                {formatNumber(get(indices, 'docs.count'), 'int_commas')}
               </EuiDescriptionListDescription>
 
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.diskUsageLabel"
                   defaultMessage="Disk Usage"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskUsage">
-                { formatNumber(get(indices, 'store.size_in_bytes'), 'byte') }
+                {formatNumber(get(indices, 'store.size_in_bytes'), 'byte')}
               </EuiDescriptionListDescription>
 
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.primaryShardsLabel"
                   defaultMessage="Primary Shards"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esPrimaryShards">
-                { primaries }
+                {primaries}
               </EuiDescriptionListDescription>
 
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.replicaShardsLabel"
                   defaultMessage="Replica Shards"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esReplicaShards">
-                { replicas }
+                {replicas}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
@@ -337,27 +492,30 @@ function ElasticsearchPanelUi(props) {
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                <EuiLink
-                  onClick={goToElasticsearch}
-                  aria-label={props.intl.formatMessage({
-                    id: 'xpack.monitoring.cluster.overview.esPanel.logsLinkAriaLabel', defaultMessage: 'Elasticsearch Logs' })}
+                <DisabledIfNoDataAndInSetupModeLink
+                  setupModeEnabled={setupMode.enabled}
+                  setupModeData={setupModeData}
+                  href={goToElasticsearch()}
+                  aria-label={i18n.translate(
+                    'xpack.monitoring.cluster.overview.esPanel.logsLinkAriaLabel',
+                    {
+                      defaultMessage: 'Elasticsearch Logs',
+                    }
+                  )}
                   data-test-subj="esLogs"
                 >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.overview.esPanel.logsLinkLabel"
                     defaultMessage="Logs"
                   />
-                </EuiLink>
+                </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             {renderLogs(props)}
           </EuiPanel>
         </EuiFlexItem>
-
       </EuiFlexGrid>
     </ClusterItemContainer>
   );
 }
-
-export const ElasticsearchPanel = injectI18n(ElasticsearchPanelUi);

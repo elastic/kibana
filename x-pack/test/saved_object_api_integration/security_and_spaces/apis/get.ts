@@ -4,248 +4,85 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
-import { getTestSuiteFactory } from '../../common/suites/get';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
+import { TestUser } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import {
+  getTestSuiteFactory,
+  TEST_CASES as CASES,
+  GetTestDefinition,
+} from '../../common/suites/get';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+const { fail404 } = testCaseFailures;
+
+const createTestCases = (spaceId: string) => {
+  // for each permitted (non-403) outcome, if failure !== undefined then we expect
+  // to receive an error; otherwise, we expect to receive a success result
+  const normalTypes = [
+    { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
+    { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
+    { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+    CASES.MULTI_NAMESPACE_ALL_SPACES,
+    {
+      ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+      ...fail404(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
+    },
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+    CASES.NAMESPACE_AGNOSTIC,
+    { ...CASES.DOES_NOT_EXIST, ...fail404() },
+  ];
+  const hiddenType = [{ ...CASES.HIDDEN, ...fail404() }];
+  const allTypes = normalTypes.concat(hiddenType);
+  return { normalTypes, hiddenType, allTypes };
+};
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const {
-    createExpectDoesntExistNotFound,
-    createExpectSpaceAwareResults,
-    createExpectNotSpaceAwareResults,
-    expectSpaceAwareRbacForbidden,
-    expectNotSpaceAwareRbacForbidden,
-    expectDoesntExistRbacForbidden,
-    getTest,
-  } = getTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = getTestSuiteFactory(esArchiver, supertest);
+  const createTests = (spaceId: string) => {
+    const { normalTypes, hiddenType, allTypes } = createTestCases(spaceId);
+    // use singleRequest to reduce execution time and/or test combined cases
+    return {
+      unauthorized: createTestDefinitions(allTypes, true),
+      authorized: [
+        createTestDefinitions(normalTypes, false),
+        createTestDefinitions(hiddenType, true),
+      ].flat(),
+      superuser: createTestDefinitions(allTypes, false),
+    };
+  };
 
-  describe('get', () => {
-    [
-      {
-        spaceId: SPACES.DEFAULT.spaceId,
-        users: {
-          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
-          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-          allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-          readAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
-          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-        },
-      },
-      {
-        spaceId: SPACES.SPACE_1.spaceId,
-        users: {
-          noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
-          legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
-          readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-          dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-          dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-          allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-          readAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-          allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-        },
-      },
-    ].forEach(scenario => {
-      getTest(`user with no access within the ${scenario.spaceId} space`, {
-        user: scenario.users.noAccess,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 403,
-            response: expectSpaceAwareRbacForbidden,
-          },
-          notSpaceAware: {
-            statusCode: 403,
-            response: expectNotSpaceAwareRbacForbidden,
-          },
-          doesntExist: {
-            statusCode: 403,
-            response: expectDoesntExistRbacForbidden,
-          },
-        },
-      });
+  describe('_get', () => {
+    getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
+      const suffix = ` within the ${spaceId} space`;
+      const { unauthorized, authorized, superuser } = createTests(spaceId);
+      const _addTests = (user: TestUser, tests: GetTestDefinition[]) => {
+        addTests(`${user.description}${suffix}`, { user, spaceId, tests });
+      };
 
-      getTest(`superuser within the ${scenario.spaceId} space`, {
-        user: scenario.users.superuser,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 200,
-            response: createExpectSpaceAwareResults(scenario.spaceId),
-          },
-          notSpaceAware: {
-            statusCode: 200,
-            response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: createExpectDoesntExistNotFound(scenario.spaceId),
-          },
-        },
+      [users.noAccess, users.legacyAll, users.allAtOtherSpace].forEach((user) => {
+        _addTests(user, unauthorized);
       });
-
-      getTest(`legacy user within the ${scenario.spaceId} space`, {
-        user: scenario.users.legacyAll,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 403,
-            response: expectSpaceAwareRbacForbidden,
-          },
-          notSpaceAware: {
-            statusCode: 403,
-            response: expectNotSpaceAwareRbacForbidden,
-          },
-          doesntExist: {
-            statusCode: 403,
-            response: expectDoesntExistRbacForbidden,
-          },
-        },
+      [
+        users.dualAll,
+        users.dualRead,
+        users.allGlobally,
+        users.readGlobally,
+        users.allAtSpace,
+        users.readAtSpace,
+      ].forEach((user) => {
+        _addTests(user, authorized);
       });
-
-      getTest(`dual-privileges user within the ${scenario.spaceId} space`, {
-        user: scenario.users.dualAll,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 200,
-            response: createExpectSpaceAwareResults(scenario.spaceId),
-          },
-          notSpaceAware: {
-            statusCode: 200,
-            response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: createExpectDoesntExistNotFound(scenario.spaceId),
-          },
-        },
-      });
-
-      getTest(`dual-privileges readonly user within the ${scenario.spaceId} space`, {
-        user: scenario.users.dualRead,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 200,
-            response: createExpectSpaceAwareResults(scenario.spaceId),
-          },
-          notSpaceAware: {
-            statusCode: 200,
-            response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: createExpectDoesntExistNotFound(scenario.spaceId),
-          },
-        },
-      });
-
-      getTest(`rbac user with all globally within the ${scenario.spaceId} space`, {
-        user: scenario.users.allGlobally,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 200,
-            response: createExpectSpaceAwareResults(scenario.spaceId),
-          },
-          notSpaceAware: {
-            statusCode: 200,
-            response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: createExpectDoesntExistNotFound(scenario.spaceId),
-          },
-        },
-      });
-
-      getTest(`rbac user with read globall within the ${scenario.spaceId} space`, {
-        user: scenario.users.readGlobally,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 200,
-            response: createExpectSpaceAwareResults(scenario.spaceId),
-          },
-          notSpaceAware: {
-            statusCode: 200,
-            response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: createExpectDoesntExistNotFound(scenario.spaceId),
-          },
-        },
-      });
-
-      getTest(`rbac user with all at the space within the ${scenario.spaceId} space`, {
-        user: scenario.users.allAtSpace,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 200,
-            response: createExpectSpaceAwareResults(scenario.spaceId),
-          },
-          notSpaceAware: {
-            statusCode: 200,
-            response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: createExpectDoesntExistNotFound(scenario.spaceId),
-          },
-        },
-      });
-
-      getTest(`rbac user with read at the space within the ${scenario.spaceId} space`, {
-        user: scenario.users.readAtSpace,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 200,
-            response: createExpectSpaceAwareResults(scenario.spaceId),
-          },
-          notSpaceAware: {
-            statusCode: 200,
-            response: createExpectNotSpaceAwareResults(scenario.spaceId),
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: createExpectDoesntExistNotFound(scenario.spaceId),
-          },
-        },
-      });
-
-      getTest(`rbac user with all at other space within the ${scenario.spaceId} space`, {
-        user: scenario.users.allAtOtherSpace,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
-            statusCode: 403,
-            response: expectSpaceAwareRbacForbidden,
-          },
-          notSpaceAware: {
-            statusCode: 403,
-            response: expectNotSpaceAwareRbacForbidden,
-          },
-          doesntExist: {
-            statusCode: 403,
-            response: expectDoesntExistRbacForbidden,
-          },
-        },
-      });
+      _addTests(users.superuser, superuser);
     });
   });
 }

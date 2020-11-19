@@ -28,7 +28,7 @@ const pagination = {
   hidePerPageOptions: true,
 };
 
-const ConfigListUi: React.SFC<ComponentProps> = props => (
+const ConfigListUi: React.FC<ComponentProps> = (props) => (
   <EuiBasicTable
     items={props.configs.list || []}
     itemId="id"
@@ -54,7 +54,7 @@ const ConfigListUi: React.SFC<ComponentProps> = props => (
         truncateText: false,
         render: (type: string, config: ConfigurationBlock) => {
           const translatedConfig = translateConfigSchema(configBlockSchemas).find(
-            sc => sc.id === type
+            (sc) => sc.id === type
           );
 
           return (

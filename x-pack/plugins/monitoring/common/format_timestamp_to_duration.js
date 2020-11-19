@@ -11,7 +11,7 @@ import {
   FORMAT_DURATION_TEMPLATE_SHORT,
   FORMAT_DURATION_TEMPLATE_LONG,
   CALCULATE_DURATION_SINCE,
-  CALCULATE_DURATION_UNTIL
+  CALCULATE_DURATION_UNTIL,
 } from './constants';
 
 /*
@@ -48,7 +48,7 @@ export function formatTimestampToDuration(timestamp, calculationFlag, initialTim
   }
 
   return duration
-    .replace(/ 0 min$/, '')
-    .replace(/ 0 hrs$/, '')
-    .replace(/ 0 days$/, ''); // See https://github.com/jsmreese/moment-duration-format/issues/64
+    .replace(/ -?0 mins$/, '')
+    .replace(/ -?0 hrs$/, '')
+    .replace(/ -?0 days$/, ''); // See https://github.com/jsmreese/moment-duration-format/issues/64
 }

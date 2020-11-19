@@ -38,7 +38,7 @@ function counter({ async = true }: { async?: boolean } = {}) {
     completedCounts += 1;
   }
 
-  return new Rx.Observable<string>(subscriber => {
+  return new Rx.Observable<string>((subscriber) => {
     if (!async) {
       sendCount(subscriber);
       return;
@@ -53,7 +53,7 @@ async function record<T>(observable: Rx.Observable<T>) {
   return observable
     .pipe(
       materialize(),
-      map(n => (n.kind === 'N' ? `N:${n.value}` : n.kind === 'E' ? `E:${n.error.message}` : 'C')),
+      map((n) => (n.kind === 'N' ? `N:${n.value}` : n.kind === 'E' ? `E:${n.error.message}` : 'C')),
       toArray()
     )
     .toPromise();
@@ -153,10 +153,7 @@ Array [
 });
 
 it('resubscribes if parent completes', async () => {
-  const shared = counter().pipe(
-    take(4),
-    shareWeakReplay(4)
-  );
+  const shared = counter().pipe(take(4), shareWeakReplay(4));
 
   await expect(Promise.all([record(shared.pipe(take(1))), record(shared)])).resolves
     .toMatchInlineSnapshot(`
@@ -199,10 +196,7 @@ Array [
 it('supports parents that complete synchronously', async () => {
   const next = jest.fn();
   const complete = jest.fn();
-  const shared = counter({ async: false }).pipe(
-    take(3),
-    shareWeakReplay(1)
-  );
+  const shared = counter({ async: false }).pipe(take(3), shareWeakReplay(1));
 
   shared.subscribe({ next, complete });
   expect(next.mock.calls).toMatchInlineSnapshot(`

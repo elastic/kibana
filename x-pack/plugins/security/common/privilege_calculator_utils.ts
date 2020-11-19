@@ -52,7 +52,7 @@ function actionToRegExp(action: string) {
   return new RegExp(
     action
       .split('*')
-      .map(part => _.escapeRegExp(part))
+      .map((part) => _.escapeRegExp(part))
       .join('.*')
   );
 }

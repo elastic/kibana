@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { QuerySuggestion } from '../../../../../../../src/plugins/data/public';
 import { ElasticsearchAdapter } from './adapter_types';
 
 export class MemoryElasticsearchAdapter implements ElasticsearchAdapter {
   constructor(
     private readonly mockIsKueryValid: (kuery: string) => boolean,
     private readonly mockKueryToEsQuery: (kuery: string) => string,
-    private readonly suggestions: AutocompleteSuggestion[]
+    private readonly suggestions: QuerySuggestion[]
   ) {}
 
   public isKueryValid(kuery: string): boolean {
@@ -20,10 +20,7 @@ export class MemoryElasticsearchAdapter implements ElasticsearchAdapter {
   public async convertKueryToEsQuery(kuery: string): Promise<string> {
     return this.mockKueryToEsQuery(kuery);
   }
-  public async getSuggestions(
-    kuery: string,
-    selectionStart: any
-  ): Promise<AutocompleteSuggestion[]> {
+  public async getSuggestions(kuery: string, selectionStart: any): Promise<QuerySuggestion[]> {
     return this.suggestions;
   }
 }

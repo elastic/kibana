@@ -17,29 +17,29 @@
  * under the License.
  */
 import { isPlainObject } from 'lodash';
-const symbol = Symbol('log message with metadata');
+
+import {
+  metadataSymbol,
+  attachMetaData,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 
 export const logWithMetadata = {
   isLogEvent(eventData) {
-    return Boolean(isPlainObject(eventData) && eventData[symbol]);
+    return Boolean(isPlainObject(eventData) && eventData[metadataSymbol]);
   },
 
   getLogEventData(eventData) {
-    const { message, metadata } = eventData[symbol];
+    const { message, metadata } = eventData[metadataSymbol];
     return {
       ...metadata,
-      message
+      message,
     };
   },
 
   decorateServer(server) {
     server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
-      server.log(tags, {
-        [symbol]: {
-          message,
-          metadata,
-        },
-      });
+      server.log(tags, attachMetaData(message, metadata));
     });
   },
 };

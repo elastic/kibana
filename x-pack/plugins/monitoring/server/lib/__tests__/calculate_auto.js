@@ -24,7 +24,7 @@ describe('Calculating Time Intervals Based on Size of Buckets', () => {
       [40, 282],
       [200, 56],
       [800, 14],
-      [10000, 1]
+      [10000, 1],
     ];
 
     _.each(tuples, (t) => {

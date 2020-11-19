@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiDescribedFormGroup,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
@@ -31,22 +38,36 @@ export const NameConfigurationPanel = ({
       </h3>
     </EuiTitle>
     <EuiSpacer size="m" />
-    <EuiFormRow
-      error={nameFieldProps.error}
-      fullWidth
-      isInvalid={nameFieldProps.isInvalid}
-      label={
-        <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
+    <EuiDescribedFormGroup
+      title={
+        <h4>
+          <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
+        </h4>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.nameDescription"
+          defaultMessage="A descriptive name for the source configuration"
+        />
       }
     >
-      <EuiFieldText
-        data-test-subj="nameInput"
+      <EuiFormRow
+        error={nameFieldProps.error}
         fullWidth
-        disabled={isLoading}
-        readOnly={readOnly}
-        isLoading={isLoading}
-        {...nameFieldProps}
-      />
-    </EuiFormRow>
+        isInvalid={nameFieldProps.isInvalid}
+        label={
+          <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
+        }
+      >
+        <EuiFieldText
+          data-test-subj="nameInput"
+          fullWidth
+          disabled={isLoading}
+          readOnly={readOnly}
+          isLoading={isLoading}
+          {...nameFieldProps}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
   </EuiForm>
 );

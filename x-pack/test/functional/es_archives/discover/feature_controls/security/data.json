@@ -35,3 +35,25 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "query:OKJpgs",
+    "source": {
+      "query": {
+        "title": "OKJpgs",
+        "description": "Ok responses for jpg files",
+        "query": {
+          "query": "response:200",
+          "language": "kuery"
+        },
+        "filters": [{"meta":{"index":"b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b","alias":null,"negate":false,"type":"phrase","key":"extension.raw","value":"jpg","params":{"query":"jpg"},"disabled":false},"query":{"match":{"extension.raw":{"query":"jpg","type":"phrase"}}},"$state":{"store":"appState"}}]
+      },
+      "type": "query",
+      "updated_at": "2019-07-17T17:54:26.378Z"
+    }
+  }
+}

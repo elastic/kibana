@@ -8,7 +8,7 @@ import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
-import euiStyled from '../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 
 interface LogCustomizationMenuState {
   isShown: boolean;
@@ -32,7 +32,7 @@ export class LogCustomizationMenu extends React.Component<{}, LogCustomizationMe
   };
 
   public toggleVisibility = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isShown: !state.isShown,
     }));
   };

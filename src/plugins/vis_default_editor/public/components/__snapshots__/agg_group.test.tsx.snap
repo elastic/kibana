@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DefaultEditorAgg component should init with the default set of props 1`] = `
+<eui-drag-drop-context
+  onDragEnd={[Function]}
+>
+  <eui-panel
+    data-test-subj="metricsAggGroup"
+    paddingSize="s"
+  >
+    <eui-title
+      size="xs"
+    >
+      <h3>
+        Metrics
+      </h3>
+    </eui-title>
+    <eui-spacer
+      size="s"
+    />
+    <eui-droppable
+      droppableId="agg_group_dnd_metrics"
+    >
+      <EuiDraggable
+        customDragHandle={true}
+        draggableId="agg_group_dnd_metrics_1"
+        index={0}
+        key="1"
+      >
+        <Component />
+      </EuiDraggable>
+      <EuiDraggable
+        customDragHandle={true}
+        draggableId="agg_group_dnd_metrics_3"
+        index={1}
+        key="3"
+      >
+        <Component />
+      </EuiDraggable>
+    </eui-droppable>
+  </eui-panel>
+</eui-drag-drop-context>
+`;

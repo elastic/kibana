@@ -11,18 +11,20 @@ import {
   EuiPageContent,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import './page_loading.scss';
+import { useTrackPageview } from '../../../../observability/public';
 
-export function PageLoading() {
+function PageLoadingUI() {
   return (
-    <EuiPage>
+    <EuiPage style={{ height: 'calc(100vh - 50px)' }}>
       <EuiPageBody>
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
-          className="noData__content"
+          className="monNoData__content"
         >
           <EuiFlexGroup justifyContent="spaceAround">
             <EuiFlexItem grow={false}>
@@ -43,4 +45,19 @@ export function PageLoading() {
       </EuiPageBody>
     </EuiPage>
   );
+}
+
+function PageLoadingTracking({ pageViewTitle }) {
+  const path = pageViewTitle.toLowerCase().replace(/-/g, '').replace(/\s+/g, '_');
+  useTrackPageview({ app: 'stack_monitoring', path });
+  useTrackPageview({ app: 'stack_monitoring', path, delay: 15000 });
+  return <PageLoadingUI />;
+}
+
+export function PageLoading({ pageViewTitle }) {
+  if (pageViewTitle) {
+    return <PageLoadingTracking pageViewTitle={pageViewTitle} />;
+  }
+
+  return <PageLoadingUI />;
 }

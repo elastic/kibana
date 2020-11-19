@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import uiRoutes from 'ui/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { uiRoutes } from '../../../angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../';
-import { Overview } from 'plugins/monitoring/components/cluster/overview';
-import { I18nContext } from 'ui/i18n';
+import { Overview } from '../../../components/cluster/overview';
+import { SetupModeRenderer } from '../../../components/renderers';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { CODE_PATH_ALL } from '../../../../common/constants';
+
+const CODE_PATHS = [CODE_PATH_ALL];
 
 uiRoutes.when('/overview', {
   template,
@@ -17,46 +23,70 @@ uiRoutes.when('/overview', {
     clusters(Private) {
       // checks license info of all monitored clusters for multi-cluster monitoring usage and capability
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: CODE_PATHS });
     },
-    cluster(monitoringClusters, globalState) {
-      return monitoringClusters(globalState.cluster_uuid, globalState.ccs);
-    }
   },
+  controllerAs: 'monitoringClusterOverview',
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
-      const kbnUrl = $injector.get('kbnUrl');
+    constructor($injector, $scope) {
       const monitoringClusters = $injector.get('monitoringClusters');
       const globalState = $injector.get('globalState');
+      const showLicenseExpiration = $injector.get('showLicenseExpiration');
 
       super({
-        title: i18n('xpack.monitoring.cluster.overviewTitle', {
-          defaultMessage: 'Overview'
+        title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
+          defaultMessage: 'Overview',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.cluster.overview.pageTitle', {
+          defaultMessage: 'Cluster overview',
         }),
         defaultData: {},
-        getPageData: () => monitoringClusters(globalState.cluster_uuid, globalState.ccs),
+        getPageData: async () => {
+          const clusters = await monitoringClusters(
+            globalState.cluster_uuid,
+            globalState.ccs,
+            CODE_PATHS
+          );
+          return clusters[0];
+        },
         reactNodeId: 'monitoringClusterOverviewApp',
         $scope,
-        $injector
+        $injector,
+        alerts: {
+          shouldFetch: true,
+        },
+        telemetryPageViewTitle: 'cluster_overview',
       });
 
-      const changeUrl = target => {
-        $scope.$evalAsync(() => {
-          kbnUrl.changePath(target);
-        });
-      };
+      this.init = () => this.renderReact(null);
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(
-          <I18nContext>
-            <Overview
-              cluster={data}
-              changeUrl={changeUrl}
-              showLicenseExpiration={true}
+      $scope.$watch(
+        () => this.data,
+        async (data) => {
+          if (isEmpty(data)) {
+            return;
+          }
+
+          this.renderReact(
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <Overview
+                    cluster={data}
+                    alerts={this.alerts}
+                    setupMode={setupMode}
+                    showLicenseExpiration={showLicenseExpiration}
+                  />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
             />
-          </I18nContext>
-        );
-      });
+          );
+        }
+      );
     }
-  }
+  },
 });

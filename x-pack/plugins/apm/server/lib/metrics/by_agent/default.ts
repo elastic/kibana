@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getCPUChartData } from './shared/cpu';
 import { getMemoryChartData } from './shared/memory';
 
 export async function getDefaultMetricsCharts(
-  setup: Setup,
+  setup: Setup & SetupTimeRange,
   serviceName: string
 ) {
   const charts = await Promise.all([
     getCPUChartData(setup, serviceName),
-    getMemoryChartData(setup, serviceName)
+    getMemoryChartData(setup, serviceName),
   ]);
 
   return { charts };

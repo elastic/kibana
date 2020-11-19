@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '../../../../../../../test_utils/enzyme_helpers';
+import { renderWithIntl } from '@kbn/test/jest';
 import { ReasonFound } from '../';
 
 const enabler = {};
@@ -17,7 +17,7 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.collection.interval',
           data: '-1',
-          context: 'cluster'
+          context: 'cluster',
         }}
         enabler={enabler}
       />
@@ -31,9 +31,23 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.exporters',
           data: 'myMonitoringClusterExporter1',
-          context: 'node001foo'
+          context: 'node001foo',
         }}
         enabler={enabler}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should load ExplainExportersCloud component', () => {
+    const component = renderWithIntl(
+      <ReasonFound
+        reason={{
+          property: 'xpack.monitoring.exporters.cloud_enabled',
+          data: 'false',
+          context: 'fakeContext',
+        }}
+        enabled={enabler}
       />
     );
     expect(component).toMatchSnapshot();
@@ -45,7 +59,7 @@ describe('ReasonFound', () => {
         reason={{
           property: 'xpack.monitoring.enabled',
           data: 'false',
-          context: 'node001foo'
+          context: 'node001foo',
         }}
         enabler={enabler}
       />

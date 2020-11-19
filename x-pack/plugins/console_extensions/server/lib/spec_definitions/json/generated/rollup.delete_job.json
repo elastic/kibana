@@ -1,0 +1,10 @@
+{
+  "rollup.delete_job": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_rollup/job/{id}"
+    ]
+  }
+}

@@ -4,16 +4,133 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
   EuiCodeBlock,
-  EuiPanel
+  EuiPanel,
+  EuiText,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+  EuiCard,
+  EuiButton,
+  EuiIcon,
+  EuiTitle,
+  EuiTextAlign,
 } from '@elastic/eui';
-import { LicenseStatus, AddLicense } from 'plugins/xpack_main/components';
+
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Legacy } from '../../legacy_shims';
+
+export const AddLicense = ({ uploadPath }) => {
+  return (
+    <EuiCard
+      title={
+        <FormattedMessage
+          id="xpack.monitoring.updateLicenseTitle"
+          defaultMessage="Update your license"
+        />
+      }
+      description={
+        <FormattedMessage
+          id="xpack.monitoring.useAvailableLicenseDescription"
+          defaultMessage="If you already have a new license, upload it now."
+        />
+      }
+      footer={
+        <EuiButton data-test-subj="updateLicenseButton" href={uploadPath}>
+          <FormattedMessage
+            id="xpack.monitoring.updateLicenseButtonLabel"
+            defaultMessage="Update license"
+          />
+        </EuiButton>
+      }
+    />
+  );
+};
+
+export class LicenseStatus extends React.PureComponent {
+  render() {
+    const { isExpired, status, type, expiryDate } = this.props;
+    const typeTitleCase = type.charAt(0).toUpperCase() + type.substr(1).toLowerCase();
+    let icon;
+    let title;
+    let message;
+    if (isExpired) {
+      icon = <EuiIcon color="danger" type="alert" />;
+      message = (
+        <Fragment>
+          <FormattedMessage
+            id="xpack.monitoring.expiredLicenseStatusDescription"
+            defaultMessage="Your license expired on {expiryDate}"
+            values={{
+              expiryDate: <strong>{expiryDate}</strong>,
+            }}
+          />
+        </Fragment>
+      );
+      title = (
+        <FormattedMessage
+          id="xpack.monitoring.expiredLicenseStatusTitle"
+          defaultMessage="Your {typeTitleCase} license has expired"
+          values={{
+            typeTitleCase,
+          }}
+        />
+      );
+    } else {
+      icon = <EuiIcon color="success" type="checkInCircleFilled" size="l" />;
+      message = expiryDate ? (
+        <Fragment>
+          <FormattedMessage
+            id="xpack.monitoring.activeLicenseStatusDescription"
+            defaultMessage="Your license will expire on {expiryDate}"
+            values={{
+              expiryDate: <strong>{expiryDate}</strong>,
+            }}
+          />
+        </Fragment>
+      ) : (
+        <Fragment>
+          <FormattedMessage
+            id="xpack.monitoring.permanentActiveLicenseStatusDescription"
+            defaultMessage="Your license will never expire."
+          />
+        </Fragment>
+      );
+      title = (
+        <FormattedMessage
+          id="xpack.monitoring.activeLicenseStatusTitle"
+          defaultMessage="Your {typeTitleCase} license is {status}"
+          values={{
+            typeTitleCase,
+            status: status.toLowerCase(),
+          }}
+        />
+      );
+    }
+    return (
+      <EuiTextAlign textAlign="center">
+        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m">
+              <h1 data-test-subj="licenseText">{title}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer />
+
+        <EuiText data-test-subj="licenseSubText">{message}</EuiText>
+      </EuiTextAlign>
+    );
+  }
+}
 
 const LicenseUpdateInfoForPrimary = ({ isPrimaryCluster, uploadLicensePath }) => {
   if (!isPrimaryCluster) {
@@ -38,7 +155,7 @@ const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
           defaultMessage="To update the license for this cluster, provide the license file through
           the Elasticsearch {apiText}:"
           values={{
-            apiText: 'API'
+            apiText: 'API',
           }}
         />
       </p>
@@ -52,22 +169,32 @@ const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
 
 export function License(props) {
   const { status, type, isExpired, expiryDate } = props;
+  const licenseManagement = `${Legacy.shims.getBasePath()}/app/management/stack/license_management`;
   return (
-    <EuiPage className="licenseManagement">
+    <EuiPage>
+      <EuiScreenReaderOnly>
+        <h1>
+          <FormattedMessage id="xpack.monitoring.license.heading" defaultMessage="License" />
+        </h1>
+      </EuiScreenReaderOnly>
       <EuiPageBody>
-        <div className="licManagement__contain">
-          <LicenseStatus
-            isExpired={isExpired}
-            status={status}
-            type={type}
-            expiryDate={expiryDate}
-          />
+        <LicenseStatus isExpired={isExpired} status={status} type={type} expiryDate={expiryDate} />
+        <EuiSpacer />
 
-          <EuiSpacer />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <LicenseUpdateInfoForPrimary {...props} />
+            <LicenseUpdateInfoForRemote {...props} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-          <LicenseUpdateInfoForPrimary {...props} />
-          <LicenseUpdateInfoForRemote {...props} />
-        </div>
+        <EuiSpacer />
+        <EuiText size="s" textAlign="center">
+          <p>
+            For more license options please visit&nbsp;
+            <EuiLink href={licenseManagement}>License Management</EuiLink>.
+          </p>
+        </EuiText>
       </EuiPageBody>
     </EuiPage>
   );

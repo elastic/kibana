@@ -13,48 +13,66 @@ import {
   EuiPage,
   EuiPageBody,
   EuiFlexGroup,
-  EuiPageContent
+  EuiPageContent,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { Status } from './status';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { AlertsCallout } from '../../../alerts/callout';
 
-export function ApmServerInstance({ summary, metrics, ...props }) {
+export function ApmServerInstance({ summary, metrics, alerts, ...props }) {
   const seriesToShow = [
+    metrics.apm_requests,
     metrics.apm_responses_valid,
+
     metrics.apm_responses_errors,
+    metrics.apm_acm_request_count,
+
+    metrics.apm_acm_response,
+    metrics.apm_acm_response_errors,
 
     metrics.apm_output_events_rate_success,
     metrics.apm_output_events_rate_failure,
 
-    metrics.apm_requests,
     metrics.apm_transformations,
-
-
     metrics.apm_cpu,
-    metrics.apm_memory,
 
+    metrics.apm_memory,
     metrics.apm_os_load,
   ];
 
   const charts = seriesToShow.map((data, index) => (
     <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
-      <EuiPanel>
-        <MonitoringTimeseriesContainer
-          series={data}
-          {...props}
-        />
-      </EuiPanel>
+      <MonitoringTimeseriesContainer series={data} {...props} />
     </EuiFlexItem>
   ));
 
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.apm.instance.heading"
+              defaultMessage="APM server instance"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
+        <EuiPanel>
+          <Status stats={summary} alerts={alerts} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <AlertsCallout
+          alerts={alerts}
+          nextStepsFilter={(nextStep) => {
+            if (nextStep.text.includes('APM servers')) {
+              return false;
+            }
+            return true;
+          }}
+        />
         <EuiPageContent>
-          <Status stats={summary}/>
-          <EuiSpacer size="s"/>
-          <EuiFlexGroup wrap>
-            {charts}
-          </EuiFlexGroup>
+          <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

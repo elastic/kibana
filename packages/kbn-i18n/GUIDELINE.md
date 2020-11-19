@@ -84,18 +84,24 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
 
 #### In ReactJS
 
+The long term plan is to rely on using `FormattedMessage` and `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using `injectI18n` and use `i18n.translate()` instead.**
+
 - You should use `<FormattedMessage>` most of the time.
-- In case when the string is expected (`aria-label`, `placeholder`), use `props.intl.formatmessage()` (where `intl` is  passed to `props` by `injectI18n` HOC).
-- In case if none of the above can not be applied (e.g. it's needed to translate any code that doesn't have access to the component props), you can call JS function `i18n.translate()` from `@kbn/i18n` package.
+- In the case where the string is expected (`aria-label`, `placeholder`), Call JS function `i18n.translate()` from the`@kbn/i18n` package.
+
+Currently, we support the following ReactJS `i18n` tools, but they will be removed in future releases:
+- Usage of `props.intl.formatmessage()` (where `intl` is  passed to `props` by `injectI18n` HOC).
 
 #### In AngularJS
 
-- Use `i18n` service in controllers, directives, services by injected it.
-- Use `i18nId` directive in template.
-- Use `i18n` filter in template for attribute translation.
-- In case if none of the above can not be applied, you can call JS function `i18n.translate()` from `@kbn/i18n` package.
+The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
 
-Note: Use one-time binding ("{{:: ... }}") in filters wherever it's possible to prevent unnecessary expression re-evaluation.
+- Call JS function `i18n.translate()` from the `@kbn/i18n` package.
+- Use `i18nId` directive in template.
+
+Currently, we support the following AngluarJS `i18n` tools, but they will be removed in future releases:
+- Usage of `i18n` service in controllers, directives, services by injecting it.
+- Usage of `i18n` filter in template for attribute translation. Note: Use one-time binding ("{{:: ... }}") in filters wherever it's possible to prevent unnecessary expression re-evaluation.
 
 #### In JavaScript
 
@@ -385,7 +391,7 @@ Testing React component that uses the `injectI18n` higher-order component is mor
 
 With shallow rendering only top level component is rendered, that is a wrapper itself, not the original component. Since we want to test the rendering of the original component, we need to access it via the wrapper's `WrappedComponent` property. Its value will be the component we passed into `injectI18n()`.
 
-When testing such component, use the `shallowWithIntl` helper function defined in `test_utils/enzyme_helpers` and pass the component's `WrappedComponent` property to render the wrapped component. This will shallow render the component with Enzyme and inject the necessary context and props to use the `intl` mock defined in `test_utils/mocks/intl`.
+When testing such component, use the `shallowWithIntl` helper function defined in `@kbn/test/jest` and pass the component's `WrappedComponent` property to render the wrapped component. This will shallow render the component with Enzyme and inject the necessary context and props to use the `intl` mock defined in `test_utils/mocks/intl`.
 
 Use the `mountWithIntl` helper function to mount render the component.
 

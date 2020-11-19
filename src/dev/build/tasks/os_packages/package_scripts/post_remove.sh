@@ -34,12 +34,6 @@ case $1 in
 esac
 
 if [ "$REMOVE_DIRS" = "true" ]; then
-  if [ -d "<%= optimizeDir %>" ]; then
-    echo -n "Deleting optimize directory..."
-    rm -rf "<%= optimizeDir %>"
-    echo " OK"
-  fi
-
   if [ -d "<%= pluginsDir %>" ]; then
     echo -n "Deleting plugins directory..."
     rm -rf "<%= pluginsDir %>"

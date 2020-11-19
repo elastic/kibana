@@ -34,13 +34,13 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
     it('should handle incomplete shardStats data', () => {
       const clusterState = {
         nodes: {
-          fooNode: {}
-        }
+          fooNode: {},
+        },
       };
       const shardStats = {
         nodes: {
-          fooNode: {}
-        }
+          fooNode: {},
+        },
       };
       const resolver = 'fooNode';
 
@@ -59,9 +59,10 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
         documents: undefined,
         dataSize: undefined,
         freeSpace: undefined,
+        totalSpace: undefined,
         usedHeap: undefined,
         nodeTypeLabel: 'Node',
-        nodeTypeClass: 'fa-server',
+        nodeTypeClass: 'storage',
         node_ids: [],
         status: 'Online',
         isOnline: true,
@@ -71,17 +72,17 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
     it('should handle incomplete shardStats data, master node', () => {
       const clusterState = {
         nodes: {
-          'fooNode-Uuid': {}
+          'fooNode-Uuid': {},
         },
-        master_node: 'fooNode-Uuid'
+        master_node: 'fooNode-Uuid',
       };
       const shardStats = {
         nodes: {
           'fooNode-Uuid': {
             shardCount: 22,
-            indexCount: 11
-          }
-        }
+            indexCount: 11,
+          },
+        },
       };
       const resolver = 'fooNode-Uuid';
 
@@ -100,27 +101,28 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
                 node_stats: {
                   indices: {
                     docs: {
-                      count: 11000
+                      count: 11000,
                     },
                     store: {
-                      size_in_bytes: 35000
-                    }
+                      size_in_bytes: 35000,
+                    },
                   },
                   fs: {
                     total: {
-                      available_in_bytes: 8700
-                    }
+                      available_in_bytes: 8700,
+                      total_in_bytes: 10000,
+                    },
                   },
                   jvm: {
                     mem: {
-                      heap_used_percent: 33
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        }
+                      heap_used_percent: 33,
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
       };
 
       const result = handleFn(response);
@@ -135,12 +137,11 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
         documents: 11000,
         dataSize: 35000,
         freeSpace: 8700,
+        totalSpace: 10000,
         usedHeap: 33,
         nodeTypeLabel: 'Master Node',
-        nodeTypeClass: 'fa-star',
-        node_ids: [
-          'fooNode-Uuid'
-        ],
+        nodeTypeClass: 'starFilled',
+        node_ids: ['fooNode-Uuid'],
         status: 'Online',
         isOnline: true,
       });

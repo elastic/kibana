@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SpacesManager } from './spaces_manager';
+export { DocumentationLinksService } from './documentation_links';

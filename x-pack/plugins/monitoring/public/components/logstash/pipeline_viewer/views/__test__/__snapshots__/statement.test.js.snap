@@ -21,10 +21,8 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
         aria-label="else"
         color="text"
         flush="left"
-        iconSide="left"
         onClick={[Function]}
         size="xs"
-        type="button"
       >
         <span
           className="monPipelineViewer__conditional"
@@ -58,10 +56,8 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
         aria-label="if"
         color="text"
         flush="left"
-        iconSide="left"
         onClick={[Function]}
         size="xs"
-        type="button"
       >
         <span
           className="monPipelineViewer__conditional"
@@ -91,7 +87,7 @@ exports[`Statement component renders a PluginStatement component for plugin mode
   <div
     className="monPipelineViewer__spaceContainer"
   />
-  <InjectIntl(PluginStatementUi)
+  <PluginStatement
     onShowVertexDetails={[MockFunction]}
     statement={
       PluginStatement {
@@ -146,10 +142,8 @@ exports[`Statement component renders spacers for element with depth > 0 1`] = `
         aria-label="else"
         color="text"
         flush="left"
-        iconSide="left"
         onClick={[Function]}
         size="xs"
-        type="button"
       >
         <span
           className="monPipelineViewer__conditional"

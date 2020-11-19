@@ -21,11 +21,21 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['dashboard']);
+  const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardExpect = getService('dashboardExpect');
+  const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  describe('empty dashboard', async () => {
+  describe('empty dashboard', () => {
     before(async () => {
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
     });
 
@@ -34,17 +44,27 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    it('should display add button', async () => {
-      const addButtonExists = await testSubjects.exists('emptyDashboardAddPanelButton');
-      expect(addButtonExists).to.be(true);
+    it('should display empty widget', async () => {
+      const emptyWidgetExists = await testSubjects.exists('emptyDashboardWidget');
+      expect(emptyWidgetExists).to.be(true);
     });
 
     it('should open add panel when add button is clicked', async () => {
-      await testSubjects.click('emptyDashboardAddPanelButton');
+      await testSubjects.click('dashboardAddPanelButton');
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
+      await testSubjects.click('euiFlyoutCloseButton');
     });
 
+    it('should add new visualization from dashboard', async () => {
+      await testSubjects.exists('addVisualizationButton');
+      await testSubjects.click('addVisualizationButton');
+      await dashboardVisualizations.createAndAddMarkdown({
+        name: 'Dashboard Test Markdown',
+        markdown: 'Markdown text',
+      });
+      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboardExpect.markdownWithValuesExists(['Markdown text']);
+    });
   });
 }
-

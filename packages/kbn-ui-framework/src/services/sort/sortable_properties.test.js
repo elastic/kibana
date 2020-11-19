@@ -17,26 +17,24 @@
  * under the License.
  */
 
-import {
-  SortableProperties,
-} from './sortable_properties';
+import { SortableProperties } from './sortable_properties';
 
 describe('SortProperties', () => {
   const name = {
     name: 'name',
-    getValue: bird => bird.name,
+    getValue: (bird) => bird.name,
     isAscending: true,
   };
 
   const size = {
     name: 'size',
-    getValue: bird => bird.size,
+    getValue: (bird) => bird.size,
     isAscending: false,
   };
 
   const color = {
     name: 'color',
-    getValue: bird => bird.color,
+    getValue: (bird) => bird.color,
     isAscending: true,
   };
 
@@ -55,7 +53,7 @@ describe('SortProperties', () => {
       name: 'chickadee',
       color: 'black and white',
       size: 3,
-    }
+    },
   ];
 
   describe('initialSortProperty', () => {

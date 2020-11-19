@@ -1,61 +1,67 @@
 [[upgrade]]
-== Upgrading {kib}
+== Upgrade {kib}
 
+Depending on the {kib} version you're upgrading from, the upgrade process to 7.0
+varies.
 
-[IMPORTANT]
-===========================================
-Before upgrading {kib}:
+[float]
+[[upgrade-before-you-begin]]
+=== Before you begin
 
-* Consult the <<breaking-changes,breaking changes>> docs.
-* Test upgrades in a dev environment before upgrading your production servers.
-* Backup your data using the {es} {ref}/modules-snapshots.html[snapshots] feature.
-  You **cannot roll back** to an earlier version unless you have a backup of
-  your data.
+WARNING: {kib} automatically runs upgrade migrations when required. To roll back to an earlier version in case of an upgrade failure, you **must** have a backup snapshot available. Use <<snapshot-repositories, Snapshot and Restore>> to back up {kib} data by targeting the `.kibana*` indices. For more information see <<upgrade-migrations, upgrade migrations>>.
+
+Before you upgrade {kib}:
+
+* Consult the <<breaking-changes,breaking changes>>.
+* Back up your data with <<snapshot-repositories, Snapshot and Restore>>. To roll back to an earlier version, you **must** have a snapshot of the `.kibana*` indices. 
+* Although not a requirement for rollbacks, we recommend taking a snapshot of all {kib} indices created by the plugins you use such as the `.reporting*` indices created by the reporting plugin.  
+* Before you upgrade production servers, test the upgrades in a dev environment.
+* See <<preventing-migration-failures, preventing migration failures>> for common reasons upgrades fail and how to prevent these.
 * If you are using custom plugins, check that a compatible version is
   available.
-===========================================
+* Shut down all {kib} instances. Running more than one {kib} version against
+  the same Elasticseach index is unsupported. Upgrading while older {kib}
+  instances are running can cause data loss or upgrade failures.
 
-Depending on which version of {kib} you're upgrading from, the upgrade process to 7.0
-will vary. 
+To identify the changes you need to make to upgrade, and to enable you to
+perform an Elasticsearch rolling upgrade with no downtime, you must upgrade to
+6.7 before you upgrade to 7.0.
 
-The recommended path is to upgrade to 6.7 before upgrading to 7.0. 
-This makes it easier to identify the changes you need to make to upgrade and enables 
-you to perform a rolling upgrade with no downtime. 
-
-Please see 
-*{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack]* for a 
-comprehensive overview of the upgrade process.
+For a comprehensive overview of the upgrade process, refer to
+*{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack]*.
 
 [float]
-==== Upgrading from 5.x or earlier
-{es} can read indices created in the previous major version. If you have indices 
-created in 5.x or before, you must reindex or delete them before upgrading to 7.0.0.
-See {stack-ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading the Elastic Stack] 
-for more information.
+[[upgrade-5x-earlier]]
+=== Upgrade from 5.x or earlier
+{es} can read indices created in the previous major version. Before you upgrade
+to 7.0.0, you must reindex or delete any indices created in 5.x or earlier.
+For more information, refer to
+{stack-ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading the Elastic Stack].
 
-Once your reindex is complete, you can follow the <<upgrade-standard, Standard upgrade>> 
-instructions. 
-
-[float]
-==== Upgrading from 6.x
-
-The recommended path is to upgrade to 6.7 before upgrading to 7.0. This makes it 
-easier to identify the required changes, and enables you to use the Upgrade Assistant
-to prepare for your upgrade to 7.0 (see below).
-
-*Note:* Saved searches, visualizations, and dashboards created in {kib} 6.x
-can be generally imported into 7.x.
+When your reindex is complete, follow the <<upgrade-standard, Standard upgrade>>
+instructions.
 
 [float]
-==== Upgrading from 6.7
-6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
-to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
+[[upgrade-6x]]
+=== Upgrade from 6.x
 
-After you have addressed any issues that were identified by the Upgrade Assistant, 
-<<upgrade-standard,upgrade to 7.0>>.
+The recommended path is to upgrade to 6.8 before upgrading to 7.0. This makes it
+easier to identify the required changes, and enables you to use the Upgrade
+Assistant to prepare for your upgrade to 7.0.
+
+TIP: The ability to import {kib} 6.x saved searches, visualizations, and
+dashboards is supported.
+
+[float]
+[[upgrade-67]]
+=== Upgrade from 6.8
+To help you prepare for your upgrade to 7.0, 6.8 includes an https://www.elastic.co/guide/en/kibana/6.8/upgrade-assistant.html[Upgrade Assistant]
+To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
+
+After you have addressed any issues that were identified by the Upgrade
+Assistant, <<upgrade-standard,upgrade to 7.0>>.
 
 
 include::upgrade/upgrade-standard.asciidoc[]
 
 include::upgrade/upgrade-migrations.asciidoc[]
-

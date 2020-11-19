@@ -5,22 +5,18 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const horizontalProgressPill: ElementFactory = () => ({
   name: 'horizontalProgressPill',
-  displayName: 'Horizontal progress pill',
-  tags: ['chart', 'proportion'],
+  displayName: 'Horizontal pill',
+  type: 'progress',
   help: 'Displays progress as a portion of a horizontal pill',
   width: 400,
   height: 30,
-  image: header,
   expression: `filters
 | demodata
 | math "mean(percent_uptime)"
-| progress shape="horizontalPill" label={formatnumber 0%} font={font size=24 family="${
-    openSans.value
-  }" color="#000000" align=center}
+| progress shape="horizontalPill" label={formatnumber 0%} font={font size=24 family="${openSans.value}" color="#000000" align=center}
 | render`,
 });

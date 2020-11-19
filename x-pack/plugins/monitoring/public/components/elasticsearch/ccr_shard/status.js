@@ -7,70 +7,58 @@
 import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function StatusUI({ stat, formattedLeader, oldestStat, intl }) {
+export function Status({ stat, formattedLeader, oldestStat }) {
   const {
     follower_index: followerIndex,
     shard_id: shardId,
     operations_written: operationsReceived,
-    failed_read_requests: failedFetches
+    failed_read_requests: failedFetches,
   } = stat;
 
   const {
     operations_written: oldestOperationsReceived,
-    failed_read_requests: oldestFailedFetches
+    failed_read_requests: oldestFailedFetches,
   } = oldestStat;
 
   const metrics = [
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.elasticsearch.ccrShard.status.followerIndexLabel',
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.followerIndexLabel', {
         defaultMessage: 'Follower Index',
       }),
       value: followerIndex,
-      'data-test-subj': 'followerIndex'
+      'data-test-subj': 'followerIndex',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.elasticsearch.ccrShard.status.shardIdLabel',
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.shardIdLabel', {
         defaultMessage: 'Shard Id',
       }),
       value: shardId,
-      'data-test-subj': 'shardId'
+      'data-test-subj': 'shardId',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.elasticsearch.ccrShard.status.leaderIndexLabel',
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.leaderIndexLabel', {
         defaultMessage: 'Leader Index',
       }),
       value: formattedLeader,
-      'data-test-subj': 'leaderIndex'
+      'data-test-subj': 'leaderIndex',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.elasticsearch.ccrShard.status.opsSyncedLabel',
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.opsSyncedLabel', {
         defaultMessage: 'Ops Synced',
       }),
       value: formatMetric(operationsReceived - oldestOperationsReceived, 'int_commas'),
-      'data-test-subj': 'operationsReceived'
+      'data-test-subj': 'operationsReceived',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.elasticsearch.ccrShard.status.failedFetchesLabel',
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.failedFetchesLabel', {
         defaultMessage: 'Failed Fetches',
       }),
       value: formatMetric(failedFetches - oldestFailedFetches, 'int_commas'),
-      'data-test-subj': 'failedFetches'
+      'data-test-subj': 'failedFetches',
     },
   ];
 
-  return (
-    <SummaryStatus
-      metrics={metrics}
-      data-test-subj="ccrDetailStatus"
-    />
-  );
+  return <SummaryStatus metrics={metrics} data-test-subj="ccrDetailStatus" />;
 }
-
-export const Status = injectI18n(StatusUI);

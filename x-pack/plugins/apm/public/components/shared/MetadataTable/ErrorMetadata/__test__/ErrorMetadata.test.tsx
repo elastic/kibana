@@ -4,15 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { render } from '@testing-library/react';
+import React, { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { ErrorMetadata } from '..';
-import { render, cleanup } from 'react-testing-library';
-import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
-import 'jest-dom/extend-expect';
+import { APMError } from '../../../../../../typings/es_schemas/ui/apm_error';
+import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
+
+function Wrapper({ children }: { children?: ReactNode }) {
+  return (
+    <MemoryRouter>
+      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    </MemoryRouter>
+  );
+}
+
+const renderOptions = {
+  wrapper: Wrapper,
+};
 
 function getError() {
   return ({
@@ -27,20 +40,19 @@ function getError() {
     user: { someKey: 'user value' },
     notIncluded: 'not included value',
     error: {
+      id: '7efbc7056b746fcb',
       notIncluded: 'error not included value',
       custom: {
-        someKey: 'custom value'
-      }
-    }
+        someKey: 'custom value',
+      },
+    },
   } as unknown) as APMError;
 }
 
 describe('ErrorMetadata', () => {
-  afterEach(cleanup);
-
   it('should render a error with all sections', () => {
     const error = getError();
-    const output = render(<ErrorMetadata error={error} />);
+    const output = render(<ErrorMetadata error={error} />, renderOptions);
 
     // sections
     expectTextsInDocument(output, [
@@ -53,13 +65,13 @@ describe('ErrorMetadata', () => {
       'Agent',
       'URL',
       'User',
-      'Custom'
+      'Custom',
     ]);
   });
 
   it('should render a error with all included dot notation keys', () => {
     const error = getError();
-    const output = render(<ErrorMetadata error={error} />);
+    const output = render(<ErrorMetadata error={error} />, renderOptions);
 
     // included keys
     expectTextsInDocument(output, [
@@ -72,7 +84,7 @@ describe('ErrorMetadata', () => {
       'agent.someKey',
       'url.someKey',
       'user.someKey',
-      'error.custom.someKey'
+      'error.custom.someKey',
     ]);
 
     // excluded keys
@@ -81,7 +93,7 @@ describe('ErrorMetadata', () => {
 
   it('should render a error with all included values', () => {
     const error = getError();
-    const output = render(<ErrorMetadata error={error} />);
+    const output = render(<ErrorMetadata error={error} />, renderOptions);
 
     // included values
     expectTextsInDocument(output, [
@@ -94,19 +106,19 @@ describe('ErrorMetadata', () => {
       'agent value',
       'url value',
       'user value',
-      'custom value'
+      'custom value',
     ]);
 
     // excluded values
     expectTextsNotInDocument(output, [
       'not included value',
-      'error not included value'
+      'error not included value',
     ]);
   });
 
   it('should render a error with only the required sections', () => {
     const error = {} as APMError;
-    const output = render(<ErrorMetadata error={error} />);
+    const output = render(<ErrorMetadata error={error} />, renderOptions);
 
     // required sections should be found
     expectTextsInDocument(output, ['Labels', 'User']);
@@ -120,7 +132,7 @@ describe('ErrorMetadata', () => {
       'Process',
       'Agent',
       'URL',
-      'Custom'
+      'Custom',
     ]);
   });
 });

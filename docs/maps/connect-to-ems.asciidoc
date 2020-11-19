@@ -1,21 +1,31 @@
 [role="xpack"]
 [[maps-connect-to-ems]]
-== Connecting to Elastic Maps Service
+== Connect to Elastic Maps Service
 
 https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] is a service that hosts
 tile layers and vector shapes of administrative boundaries.
-If you are using Kibana's out-of-the box settings, the **Maps** application is already configured to use EMS.
+If you are using Kibana's out-of-the-box settings, Maps is already configured to use EMS.
 
-Requests to EMS are made with two methods:
+EMS requests are made to the following domains:
 
-* Requests for tile layer meta data, vector shapes meta data, and vector shapes are proxied through the Kibana server.
-* Requests for EMS tiles are made directly from the browser to EMS.
+* tiles.maps.elastic.co
+* vector.maps.elastic.co
 
-NOTE: The legacy tilemap and regionmap visualizations make requests directly from the browser to EMS.
+Maps makes requests directly from the browser to EMS.
+
+[float]
+=== Connect to Elastic Maps Service from an internal network
+
+To connect to EMS when your Kibana server and browser are in an internal network:
+
+. Set `map.proxyElasticMapsServiceInMaps` to `true` in your <<settings, kibana.yml>> file to proxy EMS requests through the Kibana server.
+. Update your firewall rules to allow connections from your Kibana server to the EMS domains.
+
+NOTE: Coordinate map  and region map visualizations do not support `map.proxyElasticMapsServiceInMaps` and will not proxy EMS requests through the Kibana server.
 
 
 [float]
-=== Disabling Elastic Maps Service
+=== Disable Elastic Maps Service
 
 You might experience EMS connection issues if your Kibana server or browser are on a private network or
 behind a firewall. If this happens, you can disable the EMS connection to avoid unnecessary EMS requests.
@@ -23,5 +33,5 @@ behind a firewall. If this happens, you can disable the EMS connection to avoid 
 To disable EMS, change your <<settings, kibana.yml>> file.
 
 . Set `map.includeElasticMapsService` to `false` to turn off the EMS connection.
-. Set `map.tilemap.url` to the URL of your tile server. This configures the **Maps** default tile layer.
+. Set `map.tilemap.url` to the URL of your tile server. This configures the default tile layer of Maps.
 . (Optional) Set `map.regionmap` to the vector shapes of the administrative boundaries that you want to use.

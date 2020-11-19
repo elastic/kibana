@@ -125,6 +125,22 @@ describe('run tests CLI', () => {
       expect(exitMock).not.toHaveBeenCalledWith();
     });
 
+    it('accepts boolean value for updateSnapshots', async () => {
+      global.process.argv.push('--updateSnapshots');
+
+      await runTestsCli(['foo']);
+
+      expect(exitMock).not.toHaveBeenCalledWith();
+    });
+
+    it('accepts boolean value for -u', async () => {
+      global.process.argv.push('-u');
+
+      await runTestsCli(['foo']);
+
+      expect(exitMock).not.toHaveBeenCalledWith();
+    });
+
     it('accepts source value for esFrom', async () => {
       global.process.argv.push('--esFrom', 'source');
 
@@ -180,6 +196,22 @@ describe('run tests CLI', () => {
       await runTestsCli(['foo']);
 
       expect(exitMock).not.toHaveBeenCalled();
+    });
+
+    it('accepts network throttle option', async () => {
+      global.process.argv.push('--throttle');
+
+      await runTestsCli(['foo']);
+
+      expect(exitMock).toHaveBeenCalledWith(1);
+    });
+
+    it('accepts headless option', async () => {
+      global.process.argv.push('--headless');
+
+      await runTestsCli(['foo']);
+
+      expect(exitMock).toHaveBeenCalledWith(1);
     });
 
     it('accepts extra server options', async () => {

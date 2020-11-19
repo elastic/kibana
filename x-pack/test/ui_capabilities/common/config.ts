@@ -5,20 +5,19 @@
  */
 
 import path from 'path';
-import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
-import { FeaturesProvider, UICapabilitiesProvider } from './services';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+
+import { services } from './services';
 
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
 }
 
-// eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [] } = options;
 
-  return async ({ readConfigFile }: KibanaFunctionalTestDefaultProviders) => {
+  return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackFunctionalTestsConfig = await readConfigFile(
       require.resolve('../../functional/config.js')
     );
@@ -26,12 +25,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
       servers: xPackFunctionalTestsConfig.get('servers'),
-      services: {
-        security: SecurityServiceProvider,
-        spaces: SpacesServiceProvider,
-        uiCapabilities: UICapabilitiesProvider,
-        features: FeaturesProvider,
-      },
+      services,
       junit: {
         reportName: 'X-Pack UI Capabilities Functional Tests',
       },
@@ -48,9 +42,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackFunctionalTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'foo_plugin')}`,
-          '--optimize.enabled=false',
         ],
       },
     };

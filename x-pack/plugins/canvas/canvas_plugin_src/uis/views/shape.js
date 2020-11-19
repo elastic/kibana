@@ -5,16 +5,19 @@
  */
 
 import { shapes } from '../../renderers/shape/shapes';
+import { ViewStrings } from '../../../i18n';
+
+const { Shape: strings } = ViewStrings;
 
 export const shape = () => ({
   name: 'shape',
-  displayName: 'Shape',
+  displayName: strings.getDisplayName(),
   modelArgs: [],
   requiresContext: false,
   args: [
     {
       name: '_',
-      displayName: 'Select a shape',
+      displayName: strings.getShapeDisplayName(),
       argType: 'shape',
       options: {
         shapes,
@@ -22,27 +25,30 @@ export const shape = () => ({
     },
     {
       name: 'fill',
-      displayName: 'Fill',
+      displayName: strings.getFillDisplayName(),
       argType: 'color',
-      help: 'Accepts HEX, RGB or HTML Color names',
+      help: strings.getFillHelp(),
     },
     {
       name: 'border',
-      displayName: 'Border',
+      displayName: strings.getBorderDisplayName(),
       argType: 'color',
-      help: 'Accepts HEX, RGB or HTML Color names',
+      help: strings.getBorderHelp(),
     },
     {
       name: 'borderWidth',
-      displayName: 'Border width',
+      displayName: strings.getBorderWidthDisplayName(),
       argType: 'number',
-      help: 'Border width',
+      help: strings.getBorderWidthHelp(),
     },
     {
       name: 'maintainAspect',
-      displayName: 'Maintain aspect ratio',
+      displayName: strings.getMaintainAspectDisplayName(),
       argType: 'toggle',
-      help: `Select 'true' to maintain aspect ratio`,
+      help: strings.getMaintainAspectHelp(),
+      options: {
+        labelValue: strings.getMaintainAspectLabelName(),
+      },
     },
   ],
 });

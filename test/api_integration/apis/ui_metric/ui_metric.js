@@ -18,42 +18,68 @@
  */
 
 import expect from '@kbn/expect';
+import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
+
+  const createStatsMetric = (eventName) => ({
+    eventName,
+    appName: 'myApp',
+    type: METRIC_TYPE.CLICK,
+    count: 1,
+  });
+
+  const createUserAgentMetric = (appName) => ({
+    appName,
+    type: METRIC_TYPE.USER_AGENT,
+    userAgent:
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36',
+  });
 
   describe('ui_metric API', () => {
     it('increments the count field in the document defined by the {app}/{action_type} path', async () => {
+      const reportManager = new ReportManager();
+      const uiStatsMetric = createStatsMetric('myEvent');
+      const { report } = reportManager.assignReports([uiStatsMetric]);
       await supertest
-        .post('/api/ui_metric/myApp/myAction')
+        .post('/api/ui_metric/report')
         .set('kbn-xsrf', 'kibana')
+        .set('content-type', 'application/json')
+        .send({ report })
         .expect(200);
 
-      return es.search({
-        index: '.kibana',
-        q: 'type:user-action',
-      }).then(response => {
-        const ids = response.hits.hits.map(({ _id }) => _id);
-        expect(ids.includes('user-action:myApp:myAction'));
-      });
+      const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      const ids = response.hits.hits.map(({ _id }) => _id);
+      expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
     });
 
-    it('supports comma-delimited action types', async () => {
+    it('supports multiple events', async () => {
+      const reportManager = new ReportManager();
+      const userAgentMetric = createUserAgentMetric('kibana');
+      const uiStatsMetric1 = createStatsMetric('myEvent');
+      const hrTime = process.hrtime();
+      const nano = hrTime[0] * 1000000000 + hrTime[1];
+      const uniqueEventName = `myEvent${nano}`;
+      const uiStatsMetric2 = createStatsMetric(uniqueEventName);
+      const { report } = reportManager.assignReports([
+        userAgentMetric,
+        uiStatsMetric1,
+        uiStatsMetric2,
+      ]);
       await supertest
-        .post('/api/ui_metric/myApp/myAction1,myAction2')
+        .post('/api/ui_metric/report')
         .set('kbn-xsrf', 'kibana')
+        .set('content-type', 'application/json')
+        .send({ report })
         .expect(200);
 
-      return es.search({
-        index: '.kibana',
-        q: 'type:user-action',
-      }).then(response => {
-        const ids = response.hits.hits.map(({ _id }) => _id);
-        expect(ids.includes('user-action:myApp:myAction1'));
-        expect(ids.includes('user-action:myApp:myAction2'));
-      });
+      const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      const ids = response.hits.hits.map(({ _id }) => _id);
+      expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
+      expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).to.eql(true);
+      expect(ids.includes(`ui-metric:kibana-user_agent:${userAgentMetric.userAgent}`)).to.eql(true);
     });
   });
 }
-

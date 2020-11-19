@@ -1,19 +1,29 @@
 [role="xpack"]
 [[spaces-api]]
-== Kibana Spaces API
+== {kib} spaces APIs
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+Manage your {kib} spaces.
 
-The spaces API allows people to manage their spaces within {kib}.
+The following {kib} spaces APIs are available:
 
-NOTE: You cannot access these endpoints via the Console in Kibana.
+* <<spaces-api-post, Create space API>> to create a {kib} space
 
-* <<spaces-api-post>>
-* <<spaces-api-put>>
-* <<spaces-api-get>>
-* <<spaces-api-delete>>
+* <<spaces-api-put, Update space API>> to update an existing {kib} space
+
+* <<spaces-api-get, Get a space API>> to retrieve a specified {kib} space
+
+* <<spaces-api-get-all, Get all {kib} spaces API>> to retrieve all {kib} spaces
+
+* <<spaces-api-delete, Delete space API>> to delete a {kib} space
+
+* <<spaces-api-copy-saved-objects, Copy saved objects to space API>> to copy saved objects between spaces
+
+* <<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects to space conflicts API>> to overwrite saved objects returned as errors from the copy saved objects to space API
 
 include::spaces-management/post.asciidoc[]
 include::spaces-management/put.asciidoc[]
 include::spaces-management/get.asciidoc[]
+include::spaces-management/get_all.asciidoc[]
 include::spaces-management/delete.asciidoc[]
+include::spaces-management/copy_saved_objects.asciidoc[]
+include::spaces-management/resolve_copy_saved_objects_conflicts.asciidoc[]

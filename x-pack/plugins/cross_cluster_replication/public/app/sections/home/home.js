@@ -7,63 +7,61 @@
 import React, { PureComponent } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
-import {
-  EuiPageBody,
-  EuiPageContent,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
-import { BASE_PATH } from '../../../../common/constants';
-import { listBreadcrumb } from '../../services/breadcrumbs';
-import routing from '../../services/routing';
+import { setBreadcrumbs, listBreadcrumb } from '../../services/breadcrumbs';
+import { routing } from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
 import { FollowerIndicesList } from './follower_indices_list';
 
 export class CrossClusterReplicationHome extends PureComponent {
   state = {
-    activeSection: 'follower_indices'
-  }
+    activeSection: 'follower_indices',
+  };
 
-  tabs = [{
-    id: 'follower_indices',
-    name: (
-      <FormattedMessage
-        id="xpack.crossClusterReplication.autoFollowPatternList.followerIndicesTitle"
-        defaultMessage="Follower indices"
-      />
-    ),
-    testSubj: 'followerIndicesTab',
-  }, {
-    id: 'auto_follow_patterns',
-    name: (
-      <FormattedMessage
-        id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
-        defaultMessage="Auto-follow patterns"
-      />
-    ),
-    testSubj: 'autoFollowPatternsTab',
-  }]
+  tabs = [
+    {
+      id: 'follower_indices',
+      name: (
+        <FormattedMessage
+          id="xpack.crossClusterReplication.autoFollowPatternList.followerIndicesTitle"
+          defaultMessage="Follower indices"
+        />
+      ),
+      testSubj: 'followerIndicesTab',
+    },
+    {
+      id: 'auto_follow_patterns',
+      name: (
+        <FormattedMessage
+          id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsTitle"
+          defaultMessage="Auto-follow patterns"
+        />
+      ),
+      testSubj: 'autoFollowPatternsTab',
+    },
+  ];
 
   componentDidMount() {
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
+    setBreadcrumbs([listBreadcrumb()]);
   }
 
   static getDerivedStateFromProps(props) {
-    const { match: { params: { section } } } = props;
+    const {
+      match: {
+        params: { section },
+      },
+    } = props;
     return {
-      activeSection: section
+      activeSection: section,
     };
   }
 
   onSectionChange = (section) => {
+    setBreadcrumbs([listBreadcrumb(`/${section}`)]);
     routing.navigate(`/${section}`);
-  }
+  };
 
   render() {
     return (
@@ -81,7 +79,7 @@ export class CrossClusterReplicationHome extends PureComponent {
           <EuiSpacer size="s" />
 
           <EuiTabs>
-            {this.tabs.map(tab => (
+            {this.tabs.map((tab) => (
               <EuiTab
                 onClick={() => this.onSectionChange(tab.id)}
                 isSelected={tab.id === this.state.activeSection}
@@ -96,8 +94,8 @@ export class CrossClusterReplicationHome extends PureComponent {
           <EuiSpacer size="m" />
 
           <Switch>
-            <Route exact path={`${BASE_PATH}/follower_indices`} component={FollowerIndicesList} />
-            <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
+            <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
+            <Route exact path={`/auto_follow_patterns`} component={AutoFollowPatternList} />
           </Switch>
         </EuiPageContent>
       </EuiPageBody>

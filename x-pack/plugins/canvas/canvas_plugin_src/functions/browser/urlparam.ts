@@ -5,15 +5,20 @@
  */
 
 import { parse } from 'url';
-import { NullContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   param: string;
   default: string;
 }
 
-export function urlparam(): NullContextFunction<'urlparam', Arguments, string | string[]> {
+export function urlparam(): ExpressionFunctionDefinition<
+  'urlparam',
+  null,
+  Arguments,
+  string | string[]
+> {
   const { help, args: argHelp } = getFunctionHelp().urlparam;
 
   return {
@@ -21,15 +26,14 @@ export function urlparam(): NullContextFunction<'urlparam', Arguments, string | 
     aliases: [],
     type: 'string',
     help,
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       param: {
         types: ['string'],
         aliases: ['_', 'var', 'variable'],
         help: argHelp.param,
         multi: false,
+        required: true,
       },
       default: {
         types: ['string'],
@@ -37,7 +41,7 @@ export function urlparam(): NullContextFunction<'urlparam', Arguments, string | 
         help: argHelp.default,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const query = parse(window.location.href, true).query;
       return query[args.param] || args.default;
     },

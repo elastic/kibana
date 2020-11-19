@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaIndexPatterns();
     });
 
-
     beforeEach(async function () {
       await PageObjects.settings.createIndexPattern();
     });

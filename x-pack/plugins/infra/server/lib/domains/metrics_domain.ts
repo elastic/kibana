@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricData } from '../../graphql/types';
-import { InfraFrameworkRequest } from '../adapters/framework/adapter_types';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from '../adapters/metrics/adapter_types';
+import { NodeDetailsMetricData } from '../../../common/http_api/node_details_api';
 
 export class InfraMetricsDomain {
   private adapter: InfraMetricsAdapter;
@@ -16,9 +16,10 @@ export class InfraMetricsDomain {
   }
 
   public async getMetrics(
-    req: InfraFrameworkRequest,
-    options: InfraMetricsRequestOptions
-  ): Promise<InfraMetricData[]> {
-    return await this.adapter.getMetrics(req, options);
+    requestContext: RequestHandlerContext,
+    options: InfraMetricsRequestOptions,
+    rawRequest: KibanaRequest
+  ): Promise<NodeDetailsMetricData[]> {
+    return await this.adapter.getMetrics(requestContext, options, rawRequest);
   }
 }

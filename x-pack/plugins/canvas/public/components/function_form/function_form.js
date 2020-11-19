@@ -22,7 +22,7 @@ function checkState(state) {
 // alternate render paths based on expression state
 const branches = [
   // if no expressionType was provided, render the ArgTypeUnknown component
-  branch(props => !props.expressionType, renderComponent(FunctionUnknown)),
+  branch((props) => !props.expressionType, renderComponent(FunctionUnknown)),
   // if the expressionType is in a pending state, render ArgTypeContextPending
   branch(checkState('pending'), renderComponent(FunctionFormContextPending)),
   // if the expressionType is in an error state, render ArgTypeContextError
@@ -32,7 +32,6 @@ const branches = [
 export const FunctionForm = compose(...branches)(FunctionFormComponent);
 
 FunctionForm.propTypes = {
-  expressionType: PropTypes.object,
   context: PropTypes.object,
   expressionType: PropTypes.object,
 };

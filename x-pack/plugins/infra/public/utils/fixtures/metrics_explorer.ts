@@ -5,21 +5,22 @@
  */
 
 import {
-  MetricsExplorerAggregation,
   MetricsExplorerResponse,
   MetricsExplorerSeries,
-  MetricsExplorerColumnType,
-} from '../../../server/routes/metrics_explorer/types';
+} from '../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-} from '../../containers/metrics_explorer/use_metrics_explorer_options';
+  MetricsExplorerChartType,
+  MetricsExplorerYAxisMode,
+  MetricsExplorerChartOptions,
+} from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 export const options: MetricsExplorerOptions = {
   limit: 3,
   groupBy: 'host.name',
-  aggregation: MetricsExplorerAggregation.avg,
-  metrics: [{ aggregation: MetricsExplorerAggregation.avg, field: 'system.cpu.user.pct' }],
+  aggregation: 'avg',
+  metrics: [{ aggregation: 'avg', field: 'system.cpu.user.pct' }],
 };
 
 export const source = {
@@ -28,6 +29,8 @@ export const source = {
   logAlias: 'filebeat-*',
   metricAlias: 'metricbeat-*',
   logColumns: [],
+  inventoryDefaultView: 'host',
+  metricsExplorerDefaultView: 'host',
   fields: {
     host: 'host.name',
     container: 'container.id',
@@ -36,6 +39,12 @@ export const source = {
     message: ['message'],
     tiebreaker: '@timestamp',
   },
+};
+
+export const chartOptions: MetricsExplorerChartOptions = {
+  type: MetricsExplorerChartType.line,
+  yAxisMode: MetricsExplorerYAxisMode.fromZero,
+  stack: false,
 };
 
 export const derivedIndexPattern = { title: 'metricbeat-*', fields: [] };
@@ -49,9 +58,9 @@ export const timeRange: MetricsExplorerTimeOptions = {
 export const createSeries = (id: string): MetricsExplorerSeries => ({
   id,
   columns: [
-    { name: 'timestamp', type: MetricsExplorerColumnType.date },
-    { name: 'metric_0', type: MetricsExplorerColumnType.number },
-    { name: 'groupBy', type: MetricsExplorerColumnType.string },
+    { name: 'timestamp', type: 'date' },
+    { name: 'metric_0', type: 'number' },
+    { name: 'groupBy', type: 'string' },
   ],
   rows: [
     { timestamp: 1, metric_0: 0.5, groupBy: id },

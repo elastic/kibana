@@ -16,12 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { OverlayService, OverlayStart } from './overlay_service';
+import { overlayBannersServiceMock } from './banners/banners_service.mock';
+import { overlayFlyoutServiceMock } from './flyout/flyout_service.mock';
+import { overlayModalServiceMock } from './modal/modal_service.mock';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<PublicMethodsOf<OverlayStart>> = {
-    openFlyout: jest.fn(),
-    openModal: jest.fn(),
+  const overlayStart = overlayModalServiceMock.createStartContract();
+  const startContract: DeeplyMockedKeys<OverlayStart> = {
+    openFlyout: overlayFlyoutServiceMock.createStartContract().open,
+    openModal: overlayStart.open,
+    openConfirm: overlayStart.openConfirm,
+    banners: overlayBannersServiceMock.createStartContract(),
   };
   return startContract;
 };

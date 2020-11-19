@@ -22,6 +22,7 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
   const browser = getService('browser');
+  const listingTable = getService('listingTable');
 
   describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
@@ -30,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.initTests();
     });
 
-    describe('create prompt', async () => {
+    describe('create prompt', () => {
       it('appears when there are no dashboards', async function () {
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(true);
@@ -41,8 +42,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.saveDashboard(dashboardName);
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
-        const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
       });
 
       it('is not shown when there is a dashboard', async function () {
@@ -51,19 +51,18 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('is not shown when there are no dashboards shown during a search', async function () {
-        const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName('gobeldeguck');
-        expect(countOfDashboards).to.equal(0);
+        await listingTable.searchAndExpectItemsCount('dashboard', 'gobeldeguck', 0);
 
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
       });
     });
 
-    describe('delete', async function () {
+    describe('delete', function () {
       it('default confirm action is cancel', async function () {
-        await PageObjects.dashboard.searchForDashboardWithName(dashboardName);
-        await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
-        await PageObjects.dashboard.clickDeleteSelectedDashboards();
+        await listingTable.searchForItemWithName(dashboardName);
+        await listingTable.checkListingSelectAllCheckbox();
+        await listingTable.clickDeleteSelected();
 
         await PageObjects.common.expectConfirmModalOpenState(true);
 
@@ -71,62 +70,55 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.common.expectConfirmModalOpenState(false);
 
-        const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
       });
 
       it('succeeds on confirmation press', async function () {
-        await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
-        await PageObjects.dashboard.clickDeleteSelectedDashboards();
+        await listingTable.checkListingSelectAllCheckbox();
+        await listingTable.clickDeleteSelected();
 
         await PageObjects.common.clickConfirmOnModal();
 
-        const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
-        expect(countOfDashboards).to.equal(0);
+        await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 0);
       });
     });
 
     describe('search', function () {
       before(async () => {
-        await PageObjects.dashboard.clearSearchValue();
+        await listingTable.clearSearchFilter();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.saveDashboard('Two Words');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
       });
 
       it('matches on the first word', async function () {
-        await PageObjects.dashboard.searchForDashboardWithName('Two');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.searchForItemWithName('Two');
+        await listingTable.expectItemsCount('dashboard', 1);
       });
 
       it('matches the second word', async function () {
-        await PageObjects.dashboard.searchForDashboardWithName('Words');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.searchForItemWithName('Words');
+        await listingTable.expectItemsCount('dashboard', 1);
       });
 
       it('matches the second word prefix', async function () {
-        await PageObjects.dashboard.searchForDashboardWithName('Wor');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.searchForItemWithName('Wor');
+        await listingTable.expectItemsCount('dashboard', 1);
       });
 
       it('does not match mid word', async function () {
-        await PageObjects.dashboard.searchForDashboardWithName('ords');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
-        expect(countOfDashboards).to.equal(0);
+        await listingTable.searchForItemWithName('ords');
+        await listingTable.expectItemsCount('dashboard', 0);
       });
 
       it('is case insensitive', async function () {
-        await PageObjects.dashboard.searchForDashboardWithName('two words');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.searchForItemWithName('two words');
+        await listingTable.expectItemsCount('dashboard', 1);
       });
 
       it('is using AND operator', async function () {
-        await PageObjects.dashboard.searchForDashboardWithName('three words');
-        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
-        expect(countOfDashboards).to.equal(0);
+        await listingTable.searchForItemWithName('three words');
+        await listingTable.expectItemsCount('dashboard', 0);
       });
     });
 
@@ -168,7 +160,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('preloads search filter bar when there is no match', async function () {
-        const searchFilter = await PageObjects.dashboard.getSearchFilterValue();
+        const searchFilter = await listingTable.getSearchFilterValue();
         expect(searchFilter).to.equal('"nodashboardsnamedme"');
       });
 
@@ -188,7 +180,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('preloads search filter bar when there is more than one match', async function () {
-        const searchFilter = await PageObjects.dashboard.getSearchFilterValue();
+        const searchFilter = await listingTable.getSearchFilterValue();
         expect(searchFilter).to.equal('"two words"');
       });
 
@@ -198,7 +190,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
         // Need to encode that one.
-        const newUrl = currentUrl + '&title=i%20am%20%21%40%23%24%25%5E%26%2A%28%29_%2B~%60%2C.%3C%3E%7B%7D%5B%5D%3B%20so%20special';
+        const newUrl =
+          currentUrl +
+          '&title=i%20am%20%21%40%23%24%25%5E%26%2A%28%29_%2B~%60%2C.%3C%3E%7B%7D%5B%5D%3B%20so%20special';
         // Only works on a hard refresh.
         const useTimeStamp = true;
         await browser.get(newUrl.toString(), useTimeStamp);

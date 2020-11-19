@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HostWorkingDir renders correctly against snapshot 1`] = `
+<Fragment>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="test"
+      eventId="1"
+      field="host.name"
+      value="[hostname-123]"
+    />
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    in
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="test"
+      eventId="1"
+      field="process.working_directory"
+      iconType="folderOpen"
+      value="[working-directory-123]"
+    />
+  </TokensFlexItem>
+</Fragment>
+`;

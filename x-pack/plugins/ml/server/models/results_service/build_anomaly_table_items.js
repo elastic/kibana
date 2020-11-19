@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-import _ from 'lodash';
+import { sortBy, each } from 'lodash';
 import moment from 'moment-timezone';
 
 import {
   getEntityFieldName,
   getEntityFieldValue,
   showActualForFunction,
-  showTypicalForFunction
+  showTypicalForFunction,
 } from '../../../common/util/anomaly_utils';
-
 
 // Builds the items for display in the anomalies table from the supplied list of anomaly records.
 // Provide the timezone to use for aggregating anomalies (by day or hour) as set in the
 // Kibana dateFormat:tz setting.
 export function buildAnomalyTableItems(anomalyRecords, aggregationInterval, dateFormatTz) {
-
   // Aggregate the anomaly records if necessary, and create skeleton display records with
   // time, detector (description) and source record properties set.
   let displayRecords = [];
@@ -38,7 +35,7 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval, date
 
   // Fill out the remaining properties in each display record
   // for the columns to be displayed in the table.
-  const time = (new Date()).getTime();
+  const time = new Date().getTime();
   return displayRecords.map((record, index) => {
     const source = record.source;
     const jobId = source.job_id;
@@ -58,12 +55,12 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval, date
 
     if (source.influencers !== undefined) {
       const influencers = [];
-      const sourceInfluencers = _.sortBy(source.influencers, 'influencer_field_name');
+      const sourceInfluencers = sortBy(source.influencers, 'influencer_field_name');
       sourceInfluencers.forEach((influencer) => {
         const influencerFieldName = influencer.influencer_field_name;
         influencer.influencer_field_values.forEach((influencerFieldValue) => {
           influencers.push({
-            [influencerFieldName]: influencerFieldValue
+            [influencerFieldName]: influencerFieldValue,
           });
         });
       });
@@ -104,16 +101,19 @@ export function buildAnomalyTableItems(anomalyRecords, aggregationInterval, date
 
     // Add a sortable property for the magnitude of the factor by
     // which the actual value is different from the typical.
-    if (Array.isArray(record.actual) && record.actual.length === 1 &&
-      Array.isArray(record.typical) && record.typical.length === 1) {
+    if (
+      Array.isArray(record.actual) &&
+      record.actual.length === 1 &&
+      Array.isArray(record.typical) &&
+      record.typical.length === 1
+    ) {
       const actualVal = Number(record.actual[0]);
       const typicalVal = Number(record.typical[0]);
-      record.metricDescriptionSort = (actualVal > typicalVal) ?
-        actualVal / typicalVal : typicalVal / actualVal;
+      record.metricDescriptionSort =
+        actualVal > typicalVal ? actualVal / typicalVal : typicalVal / actualVal;
     }
 
     return record;
-
   });
 }
 
@@ -127,9 +127,10 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
   const aggregatedData = {};
   anomalyRecords.forEach((record) => {
     // Use moment.js to get start of interval.
-    const roundedTime = (dateFormatTz !== undefined) ?
-      moment(record.timestamp).tz(dateFormatTz).startOf(interval).valueOf() :
-      moment(record.timestamp).startOf(interval).valueOf();
+    const roundedTime =
+      dateFormatTz !== undefined
+        ? moment(record.timestamp).tz(dateFormatTz).startOf(interval).valueOf()
+        : moment(record.timestamp).startOf(interval).valueOf();
     if (aggregatedData[roundedTime] === undefined) {
       aggregatedData[roundedTime] = {};
     }
@@ -171,13 +172,13 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
   // Flatten the aggregatedData to give a list of records with
   // the highest score per bucketed time / jobId / detectorIndex.
   const summaryRecords = [];
-  _.each(aggregatedData, (times, roundedTime) => {
-    _.each(times, (jobIds) => {
-      _.each(jobIds, (entityDetectors) => {
-        _.each(entityDetectors, (record) => {
+  each(aggregatedData, (times, roundedTime) => {
+    each(times, (jobIds) => {
+      each(jobIds, (entityDetectors) => {
+        each(entityDetectors, (record) => {
           summaryRecords.push({
             time: +roundedTime,
-            source: record
+            source: record,
           });
         });
       });
@@ -185,12 +186,11 @@ function aggregateAnomalies(anomalyRecords, interval, dateFormatTz) {
   });
 
   return summaryRecords;
-
 }
 
 function getMetricSortValue(value) {
   // Returns a sortable value for a metric field (actual and typical values)
   // from the supplied value, which for metric functions will be a single
   // valued array.
-  return (Array.isArray(value) && value.length > 0) ? value[0] : value;
+  return Array.isArray(value) && value.length > 0 ? value[0] : value;
 }

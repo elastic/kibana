@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NullContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
+
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import { getFunctionHelp } from '../../../i18n';
 
 export enum Shape {
   ARROW = 'arrow',
@@ -26,49 +27,47 @@ export enum Shape {
 }
 
 interface Arguments {
-  border: string | null;
-  borderWidth: number | null;
-  shape: Shape | null;
-  fill: string | null;
+  border: string;
+  borderWidth: number;
+  shape: Shape;
+  fill: string;
   maintainAspect: boolean;
 }
 
-interface Return extends Arguments {
+export interface Output extends Arguments {
   type: 'shape';
 }
 
-export function shape(): NullContextFunction<'shape', Arguments, Return> {
+export function shape(): ExpressionFunctionDefinition<'shape', null, Arguments, Output> {
   const { help, args: argHelp } = getFunctionHelp().shape;
 
   return {
     name: 'shape',
     aliases: [],
     type: 'shape',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
-      border: {
-        types: ['string', 'null'],
-        aliases: ['stroke'],
-        help: argHelp.border,
-      },
-      borderWidth: {
-        types: ['number', 'null'],
-        aliases: ['strokeWidth'],
-        help: argHelp.borderWidth,
-        default: '0',
-      },
       shape: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.shape,
         aliases: ['_'],
         default: 'square',
         options: Object.values(Shape),
       },
+      border: {
+        types: ['string'],
+        aliases: ['stroke'],
+        help: argHelp.border,
+      },
+      borderWidth: {
+        types: ['number'],
+        aliases: ['strokeWidth'],
+        help: argHelp.borderWidth,
+        default: 0,
+      },
       fill: {
-        types: ['string', 'null'],
+        types: ['string'],
         help: argHelp.fill,
         default: 'black',
       },
@@ -79,7 +78,7 @@ export function shape(): NullContextFunction<'shape', Arguments, Return> {
         options: [true, false],
       },
     },
-    fn: (_context, args) => ({
+    fn: (input, args) => ({
       type: 'shape',
       ...args,
     }),

@@ -11,13 +11,12 @@
   }
 
   .canvasAssetManager__meterWrapper {
-    flex-grow: 0;
-    min-width: 40%;
-    align-items: center;
-
     @include euiBreakpoint('xs', 's') {
       flex-grow: 1;
     }
+    flex-grow: 0;
+    min-width: 40%;
+    align-items: center;
   }
 
   .canvasAssetManager__meterLabel {
@@ -47,18 +46,20 @@
     margin: -$euiSizeS;
     margin-bottom: 0;
     font-size: 0; // eliminates any extra space around img
+    height: 164px;
   }
 
   .canvasAsset__img {
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
 
     img {
       width: auto;
       max-width: 100%;
-      height: 164px; // nice default proportions for typical 4x3 images
-      opacity: 0; // only show the background image (which will properly keep proportions)
+      max-height: 164px; // nice default proportions for typical 4x3 images
     }
   }
 }

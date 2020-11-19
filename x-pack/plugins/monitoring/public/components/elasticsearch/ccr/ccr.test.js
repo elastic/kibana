@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 import { Ccr } from './ccr';
 
 describe('Ccr', () => {
@@ -25,7 +25,7 @@ describe('Ccr', () => {
             syncLagOps: 2,
             syncLagOpsFollower: 1,
             syncLagOpsLeader: 1,
-            syncLagTime: 45000
+            syncLagTime: 45000,
           },
           {
             opsSynced: 200,
@@ -33,9 +33,9 @@ describe('Ccr', () => {
             syncLagOps: 1,
             syncLagOpsFollower: 0,
             syncLagOpsLeader: 1,
-            syncLagTime: 60000
-          }
-        ]
+            syncLagTime: 60000,
+          },
+        ],
       },
       {
         follows: 'leader2',
@@ -52,7 +52,7 @@ describe('Ccr', () => {
             syncLagOps: 0,
             syncLagOpsFollower: 0,
             syncLagOpsLeader: 0,
-            syncLagTime: 11000
+            syncLagTime: 11000,
           },
           {
             opsSynced: 30,
@@ -61,13 +61,13 @@ describe('Ccr', () => {
             syncLagOpsFollower: 5,
             syncLagOpsLeader: 0,
             syncLagTime: 1000,
-            error: 'not_working_properly'
-          }
-        ]
-      }
+            error: 'not_working_properly',
+          },
+        ],
+      },
     ];
 
-    const component = shallowWithIntl(<Ccr.WrappedComponent data={data} />);
+    const component = shallow(<Ccr data={data} />);
     expect(component).toMatchSnapshot();
   });
 });

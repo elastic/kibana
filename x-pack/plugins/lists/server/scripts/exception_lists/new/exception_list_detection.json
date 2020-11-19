@@ -1,0 +1,8 @@
+{
+  "list_id": "detection_list",
+  "tags": ["detection", "sample_tag"],
+  "type": "detection",
+  "description": "This is a sample detection type exception list",
+  "name": "Sample Detection Exception List",
+  "namespace_type": "single"
+}

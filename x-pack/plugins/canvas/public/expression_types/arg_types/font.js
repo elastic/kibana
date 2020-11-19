@@ -6,12 +6,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get, mapValues, set } from 'lodash';
+import { get, mapValues } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { openSans } from '../../../common/lib/fonts';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
 import { TextStylePicker } from '../../components/text_style_picker';
+import { ArgTypesStrings } from '../../../i18n';
 
-export const FontArgInput = props => {
+const { Font: strings } = ArgTypesStrings;
+
+export const FontArgInput = (props) => {
   const { onValueChange, argValue, workpad } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -21,7 +25,11 @@ export const FontArgInput = props => {
   const spec = mapValues(chainArgs, '[0]');
 
   function handleChange(newSpec) {
-    const newValue = set(argValue, ['chain', 0, 'arguments'], mapValues(newSpec, v => [v]));
+    const newValue = set(
+      argValue,
+      ['chain', 0, 'arguments'],
+      mapValues(newSpec, (v) => [v])
+    );
     return onValueChange(newValue);
   }
 
@@ -53,8 +61,8 @@ FontArgInput.displayName = 'FontArgInput';
 
 export const font = () => ({
   name: 'font',
-  displayName: 'Text settings',
-  help: 'Set the font, size and color',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   template: templateFromReactComponent(FontArgInput),
   default: `{font size=14 family="${openSans.value}" color="#000000" align=left}`,
 });

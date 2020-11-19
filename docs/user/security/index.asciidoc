@@ -1,0 +1,47 @@
+[role="xpack"]
+[[xpack-security]]
+== Security
+
+The {stack} {security-features} enable you to easily secure a cluster. With
+security, you can
+password-protect your data as well as implement more advanced security measures
+such as encrypting communications, role-based access control, IP filtering, and
+auditing. For more information, see
+{ref}/secure-cluster.html[Secure a cluster] and
+<<using-kibana-with-security,Configuring Security in {kib}>>.
+
+[float]
+=== Required permissions
+
+The `manage_security` cluster privilege is required to access all Security features.
+
+
+[float]
+=== Users
+
+To create and manage users, open the main menu, then click *Stack Management > Users*.
+You can also change their passwords and roles. For more information about
+authentication and built-in users, see
+{ref}/setting-up-authentication.html[Setting up user authentication].
+
+[float]
+=== Roles
+
+To manage roles, open the main menu, then click *Stack Management > Roles*, or use
+the <<role-management-api>>. For more information on configuring roles for {kib}, see <<xpack-security-authorization, Granting access to {kib}>>.
+
+For a more holistic overview of configuring roles for the entire stack,
+see {ref}/authorization.html[User authorization].
+
+[NOTE]
+============================================================================
+Managing roles that grant <<kibana-privileges>> using the {es} 
+{ref}/security-api.html#security-role-apis[role management APIs] is not supported. Doing so will likely
+cause Kibana's authorization to behave unexpectedly.
+============================================================================
+
+include::authorization/index.asciidoc[]
+include::authorization/kibana-privileges.asciidoc[]
+include::api-keys/index.asciidoc[]
+include::role-mappings/index.asciidoc[]
+include::rbac_tutorial.asciidoc[]

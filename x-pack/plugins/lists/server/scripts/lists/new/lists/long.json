@@ -1,0 +1,6 @@
+{
+  "id": "long_list",
+  "name": "Simple list with long values",
+  "description": "This list has long values",
+  "type": "long"
+}

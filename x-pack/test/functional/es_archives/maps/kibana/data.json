@@ -20,7 +20,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern": {
-        "fields": "[{\"name\":\"@message\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"@message.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"@message\"},{\"name\":\"@tags\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"@tags.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"@tags\"},{\"name\":\"@timestamp\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"agent\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"agent.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"agent\"},{\"name\":\"bytes\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"clientip\",\"type\":\"ip\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"extension\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"extension.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"extension\"},{\"name\":\"geo.coordinates\",\"type\":\"geo_point\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"geo.dest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"geo.src\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"geo.srcdest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"headings\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"headings.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"headings\"},{\"name\":\"host\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"host.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"host\"},{\"name\":\"id\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"index.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"index\"},{\"name\":\"ip\",\"type\":\"ip\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"links\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"links.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"links\"},{\"name\":\"machine.os\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"machine.os.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"machine.os\"},{\"name\":\"machine.ram\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"memory\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"meta.char\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"meta.related\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"meta.user.firstname\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"meta.user.lastname\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"phpmemory\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"referer\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"relatedContent.article:modified_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"relatedContent.article:published_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"relatedContent.article:section\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.article:section.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.article:section\"},{\"name\":\"relatedContent.article:tag\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.article:tag.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.article:tag\"},{\"name\":\"relatedContent.og:description\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:description.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.og:description\"},{\"name\":\"relatedContent.og:image\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:image.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.og:image\"},{\"name\":\"relatedContent.og:image:height\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:image:height.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.og:image:height\"},{\"name\":\"relatedContent.og:image:width\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:image:width.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.og:image:width\"},{\"name\":\"relatedContent.og:site_name\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:site_name.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.og:site_name\"},{\"name\":\"relatedContent.og:title\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:title.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.og:title\"},{\"name\":\"relatedContent.og:type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:type.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.og:type\"},{\"name\":\"relatedContent.og:url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.og:url\"},{\"name\":\"relatedContent.twitter:card\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.twitter:card.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.twitter:card\"},{\"name\":\"relatedContent.twitter:description\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.twitter:description.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.twitter:description\"},{\"name\":\"relatedContent.twitter:image\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.twitter:image.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.twitter:image\"},{\"name\":\"relatedContent.twitter:site\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.twitter:site.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.twitter:site\"},{\"name\":\"relatedContent.twitter:title\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.twitter:title.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.twitter:title\"},{\"name\":\"relatedContent.url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"relatedContent.url\"},{\"name\":\"request\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"request.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"request\"},{\"name\":\"response\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"response.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"response\"},{\"name\":\"spaces\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"spaces.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"spaces\"},{\"name\":\"type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"url\"},{\"name\":\"utc_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"xss\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"xss.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":\"multi\",\"parent\":\"xss\"}]",
+        "fields" : "[{\"name\":\"@message\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"@message.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"@message\"}}},{\"name\":\"@tags\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"@tags.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"@tags\"}}},{\"name\":\"@timestamp\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"agent\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"agent.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"agent\"}}},{\"name\":\"bytes\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"clientip\",\"type\":\"ip\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"extension\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"extension.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"extension\"}}},{\"name\":\"geo.coordinates\",\"type\":\"geo_point\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"geo.dest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"geo.src\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"geo.srcdest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"headings\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"headings.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"headings\"}}},{\"name\":\"host\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"host.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"host\"}}},{\"name\":\"id\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"index.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"index\"}}},{\"name\":\"ip\",\"type\":\"ip\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"links\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"links.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"links\"}}},{\"name\":\"machine.os\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"machine.os.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"machine.os\"}}},{\"name\":\"machine.ram\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"memory\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"meta.char\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"meta.related\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"meta.user.firstname\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"meta.user.lastname\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"phpmemory\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"referer\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"relatedContent.article:modified_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"relatedContent.article:published_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"relatedContent.article:section\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.article:section.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.article:section\"}}},{\"name\":\"relatedContent.article:tag\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.article:tag.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.article:tag\"}}},{\"name\":\"relatedContent.og:description\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:description.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.og:description\"}}},{\"name\":\"relatedContent.og:image\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:image.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.og:image\"}}},{\"name\":\"relatedContent.og:image:height\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:image:height.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.og:image:height\"}}},{\"name\":\"relatedContent.og:image:width\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:image:width.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.og:image:width\"}}},{\"name\":\"relatedContent.og:site_name\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:site_name.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.og:site_name\"}}},{\"name\":\"relatedContent.og:title\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:title.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.og:title\"}}},{\"name\":\"relatedContent.og:type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:type.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.og:type\"}}},{\"name\":\"relatedContent.og:url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.og:url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.og:url\"}}},{\"name\":\"relatedContent.twitter:card\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.twitter:card.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.twitter:card\"}}},{\"name\":\"relatedContent.twitter:description\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.twitter:description.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.twitter:description\"}}},{\"name\":\"relatedContent.twitter:image\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.twitter:image.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.twitter:image\"}}},{\"name\":\"relatedContent.twitter:site\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.twitter:site.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.twitter:site\"}}},{\"name\":\"relatedContent.twitter:title\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.twitter:title.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.twitter:title\"}}},{\"name\":\"relatedContent.url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"relatedContent.url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"relatedContent.url\"}}},{\"name\":\"request\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"request.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"request\"}}},{\"name\":\"response\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"response.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"response\"}}},{\"name\":\"spaces\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"spaces.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"spaces\"}}},{\"name\":\"type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"url\"}}},{\"name\":\"utc_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"xss\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"xss.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\": \"xss\"}}},{\"name\":\"hour_of_day\",\"type\":\"number\",\"count\":0,\"scripted\":true,\"script\":\"doc['@timestamp'].value.getHour()\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
         "timeFieldName": "@timestamp",
         "title": "logstash-*"
       },
@@ -36,7 +36,7 @@
     "index": ".kibana",
     "source": {
       "index-pattern": {
-        "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"geometry\",\"type\":\"geo_shape\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"name\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+        "fields" : "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"geometry\",\"type\":\"geo_shape\",\"esTypes\":[\"geo_shape\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"name\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"prop1\",\"type\":\"number\",\"esTypes\":[\"byte\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
         "title": "geo_shapes*"
       },
       "type": "index-pattern"
@@ -85,6 +85,46 @@
         "title": "antimeridian_shapes"
       },
       "type": "index-pattern"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:f7fc94a0-936b-11e9-a43f-eb6ee3467b2b",
+    "index": ".kibana",
+    "source": {
+      "index-pattern" : {
+        "title" : "flights",
+        "fields" : "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"altitude\",\"type\":\"number\",\"esTypes\":[\"integer\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"heading\",\"type\":\"number\",\"esTypes\":[\"integer\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"location\",\"type\":\"geo_point\",\"esTypes\":[\"geo_point\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]"
+      },
+      "type" : "index-pattern",
+      "references" : [ ],
+      "migrationVersion" : {
+        "index-pattern" : "6.5.0"
+      },
+      "updated_at" : "2019-06-20T14:59:15.348Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:dedd3180-c8d8-11e9-b36c-81f9f9da524f",
+    "index": ".kibana",
+    "source": {
+      "index-pattern" : {
+        "title" : "connections",
+        "fields" : "[{\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"esTypes\":[\"_type\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"destination\",\"type\":\"geo_point\",\"esTypes\":[\"geo_point\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"source\",\"type\":\"geo_point\",\"esTypes\":[\"geo_point\"],\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]"
+      },
+      "type" : "index-pattern",
+      "references" : [ ],
+      "migrationVersion" : {
+        "index-pattern" : "6.5.0"
+      },
+      "updated_at" : "2019-08-27T14:42:20.061Z"
     }
   }
 }
@@ -154,6 +194,292 @@
 {
   "type": "doc",
   "value": {
+    "id": "map:7f047b80-b93b-11e9-b146-7d043e1b0586",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "bounds": {
+          "coordinates": [
+            [
+              -130.50168,
+              45.55574
+            ],
+            [
+              -70.72014,
+              18.91275
+            ]
+          ],
+          "type": "envelope"
+        },
+        "description": "",
+        "layerListJSON": "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[\"machine.os\"]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "description": "",
+        "mapStateJSON": "{\"zoom\":4.09,\"center\":{\"lon\":-100.58836,\"lat\":33.21778},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[{\"meta\":{\"index\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"alias\":null,\"negate\":false,\"disabled\":false,\"type\":\"phrase\",\"key\":\"machine.os.raw\",\"value\":\"ios\",\"params\":{\"query\":\"ios\"}},\"query\":{\"match\":{\"machine.os.raw\":{\"query\":\"ios\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}]}",
+        "title": "document example with filter",
+        "uiStateJSON": "{\"isDarkMode\":false}"
+      },
+      "type": "map"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:68305470-87bc-11e9-a991-3b492a7c3e09",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "document example top hits",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-24T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"}}",
+        "layerListJSON" : "[{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"topHitsTimeField\":\"@timestamp\",\"useTopHits\":true,\"topHitsSplitField\":\"machine.os.raw\",\"topHitsSize\":2,\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "polygon",
+          "coordinates" : [
+            [
+              [
+                -137.80011,
+                46.32557
+              ],
+              [
+                -137.80011,
+                17.86223
+              ],
+              [
+                -63.42171,
+                17.86223
+              ],
+              [
+                -63.42171,
+                46.32557
+              ],
+              [
+                -137.80011,
+                46.32557
+              ]
+            ]
+          ]
+        }
+      },
+      "type": "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.2.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:4ea1e4f0-4dba-11ea-b554-4ba0def79f86",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "document example top hits split with scripted field",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-24T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[]}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"VECTOR_TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"scalingType\":\"TOP_HITS\",\"topHitsSplitField\":\"hour_of_day\",\"topHitsSize\":1,\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\",\"applyGlobalQuery\":true,\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"airfield\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "Polygon",
+          "coordinates" : [
+            [
+              [
+                -141.61334,
+                47.30762
+              ],
+              [
+                -141.61334,
+                16.49119
+              ],
+              [
+                -59.60848,
+                16.49119
+              ],
+              [
+                -59.60848,
+                47.30762
+              ],
+              [
+                -141.61334,
+                47.30762
+              ]
+            ]
+          ]
+        }
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.7.0"
+      },
+      "updated_at" : "2020-02-12T17:08:36.671Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:c9734720-eb7f-11e9-8f42-fb14e91ef4b8",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "document example with data driven styles",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[]}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"VECTOR_TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Blues\",\"field\":{\"label\":\"hour_of_day\",\"name\":\"hour_of_day\",\"origin\":\"source\"}}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"minSize\":4,\"maxSize\":24,\"field\":{\"label\":\"bytes\",\"name\":\"bytes\",\"origin\":\"source\"}}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"symbol\":{\"options\":{\"symbolizeAs\":\"circle\",\"symbolId\":\"airfield\"}}}},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "Polygon",
+          "coordinates" : [
+            [
+              [
+                -137.80011,
+                45.99899
+              ],
+              [
+                -137.80011,
+                18.31046
+              ],
+              [
+                -63.42171,
+                18.31046
+              ],
+              [
+                -63.42171,
+                45.99899
+              ],
+              [
+                -137.80011,
+                45.99899
+              ]
+            ]
+          ]
+        }
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.5.0"
+      },
+      "updated_at" : "2019-10-10T17:02:48.465Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:c9277dd0-eb8f-11e9-ae47-693d6a50fb9e",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "document example with data driven styles on date field",
+        "description" : "",
+        "mapStateJSON": "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[]}",
+        "layerListJSON": "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"VECTOR_TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Blues\",\"field\":{\"label\":\"@timestamp\",\"name\":\"@timestamp\",\"origin\":\"source\"}}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"minSize\":4,\"maxSize\":24,\"field\":{\"label\":\"bytes\",\"name\":\"bytes\",\"origin\":\"source\"}}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"symbol\":{\"options\":{\"symbolizeAs\":\"circle\",\"symbolId\":\"airfield\"}}}},\"type\":\"VECTOR\"}]",
+        "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "Polygon",
+          "coordinates" : [
+            [
+              [
+                -132.42879,
+                44.5711
+              ],
+              [
+                -132.42879,
+                20.22627
+              ],
+              [
+                -68.79303,
+                20.22627
+              ],
+              [
+                -68.79303,
+                44.5711
+              ],
+              [
+                -132.42879,
+                44.5711
+              ]
+            ]
+          ]
+        }
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.5.0"
+      },
+      "updated_at" : "2019-10-10T18:57:19.916Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:2de4de10-cc82-11ea-9b0a-eb2886fc84af",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "document example hidden",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"maxZoom\":24,\"minZoom\":0,\"showSpatialFilters\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"VECTOR_TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"applyGlobalQuery\":true,\"scalingType\":\"LIMIT\",\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":false,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.9.0"
+      },
+      "updated_at" : "2020-07-23T01:16:47.600Z"
+    }
+  }
+}
+
+
+
+{
+  "type": "doc",
+  "value": {
     "id": "map:1649cc70-f736-11e8-8ce0-9723965e01e3",
     "index": ".kibana",
     "source": {
@@ -172,7 +498,7 @@
           "type": "envelope"
         },
         "description": "",
-        "layerListJSON": "[{\"id\":\"0hmz5\",\"label\":\"EMS base layer (road_map)\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"n1t6f\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"62eca1fc-fe42-11e8-8eb2-f2801f1b9fd1\",\"type\":\"ES_SEARCH\",\"geoField\":\"geometry\",\"limit\":2048,\"filterByMapBounds\":false,\"showTooltip\":true,\"tooltipProperties\":[],\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max(prop1) group by meta_for_geo_shapes*.shape_name\",\"name\":\"__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name\",\"origin\":\"join\"},\"color\":\"Blues\"}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\",\"joins\":[{\"leftField\":\"name\",\"right\":{\"id\":\"855ccb86-fe42-11e8-8eb2-f2801f1b9fd1\",\"indexPatternTitle\":\"meta_for_geo_shapes*\",\"term\":\"shape_name\",\"metrics\":[{\"type\":\"max\",\"field\":\"prop1\"}],\"indexPatternRefName\":\"layer_1_join_0_index_pattern\"}}]}]",
+        "layerListJSON" : "[{\"id\":\"n1t6f\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"62eca1fc-fe42-11e8-8eb2-f2801f1b9fd1\",\"type\":\"ES_SEARCH\",\"geoField\":\"geometry\",\"limit\":2048,\"filterByMapBounds\":false,\"showTooltip\":true,\"tooltipProperties\":[\"name\"],\"applyGlobalQuery\":false,\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3},\"field\":{\"label\":\"max(prop1) group by meta_for_geo_shapes*.shape_name\",\"name\":\"__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name\",\"origin\":\"join\"},\"color\":\"Blues\"}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\",\"joins\":[{\"leftField\":\"name\",\"right\":{\"id\":\"855ccb86-fe42-11e8-8eb2-f2801f1b9fd1\",\"indexPatternTitle\":\"meta_for_geo_shapes*\",\"term\":\"shape_name\",\"metrics\":[{\"type\":\"max\",\"field\":\"prop1\"}],\"applyGlobalQuery\":true,\"indexPatternRefName\":\"layer_1_join_0_index_pattern\"}}]}]",
         "mapStateJSON": "{\"zoom\":3.02,\"center\":{\"lon\":77.33426,\"lat\":-0.04647},\"timeFilters\":{\"from\":\"now-17m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
         "title": "join example",
         "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[\"n1t6f\"]}"
@@ -191,7 +517,7 @@
         }
       ],
       "migrationVersion" : {
-        "map" : "7.1.0"
+        "map" : "7.6.0"
       }
     }
   }
@@ -217,7 +543,7 @@
           ],
           "type": "envelope"
         },
-        "layerListJSON": "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"3xlvm\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"COARSE\",\"type\":\"ES_GEO_GRID\",\"id\":\"427aa49d-a552-4e7d-a629-67c47db27128\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"heatmap\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"HEATMAP\",\"refinement\":\"coarse\",\"properties\":{},\"previousStyle\":null},\"type\":\"HEATMAP\"}]",
+        "layerListJSON": "[{\"id\":\"3xlvm\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"COARSE\",\"type\":\"ES_GEO_GRID\",\"id\":\"427aa49d-a552-4e7d-a629-67c47db27128\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"heatmap\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"HEATMAP\",\"refinement\":\"coarse\",\"properties\":{},\"previousStyle\":null},\"type\":\"HEATMAP\"}]",
         "mapStateJSON": "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
         "title": "geo grid heatmap example",
         "uiStateJSON": "{\"isDarkMode\":false}"
@@ -248,9 +574,71 @@
           "type": "envelope"
         },
         "description": "",
-        "layerListJSON": "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"g1xkv\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"COARSE\",\"type\":\"ES_GEO_GRID\",\"id\":\"9305f6ea-4518-4c06-95b9-33321aa38d6a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\",\"metrics\":[{\"type\":\"count\"},{\"type\":\"max\",\"field\":\"bytes\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max of bytes\",\"name\":\"max_of_bytes\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "layerListJSON": "[{\"id\":\"g1xkv\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"COARSE\",\"type\":\"ES_GEO_GRID\",\"id\":\"9305f6ea-4518-4c06-95b9-33321aa38d6a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\",\"metrics\":[{\"type\":\"count\"},{\"type\":\"max\",\"field\":\"bytes\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max of bytes\",\"name\":\"max_of_bytes\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\"}]",
         "mapStateJSON": "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
         "title": "geo grid vector grid example",
+        "uiStateJSON": "{\"isDarkMode\":false}"
+      },
+      "type": "map"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:0c86d024-a767-11ea-bb37-0242ac130002",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "bounds": {
+          "coordinates": [
+            [
+              -160,
+              60
+            ],
+            [
+              160,
+              -60
+            ]
+          ],
+          "type": "envelope"
+        },
+        "description": "",
+        "layerListJSON": "[{\"id\":\"g1xkv\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"COARSE\",\"type\":\"ES_GEO_GRID\",\"id\":\"64ddd934-a767-11ea-bb37-0242ac130002\",\"indexPatternId\":\"561253e0-f731-11e8-8487-11b9dd924f96\",\"geoField\":\"geometry\",\"requestType\":\"grid\",\"metrics\":[{\"type\":\"count\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "mapStateJSON": "{\"zoom\":3,\"center\":{\"lon\":76,\"lat\":4},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
+        "title": "geo grid vector grid example with shape",
+        "uiStateJSON": "{\"isDarkMode\":false}"
+      },
+      "type": "map"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:78116c8c-fd2a-11ea-adc1-0242ac120002",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "bounds": {
+          "coordinates": [
+            [
+              -140.62361,
+              54.11832
+            ],
+            [
+              -55.49169,
+              18.17193
+            ]
+          ],
+          "type": "envelope"
+        },
+        "description": "",
+        "layerListJSON": "[{\"id\":\"g1xkv\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"resolution\": \"SUPER_FINE\",\"type\":\"ES_GEO_GRID\",\"id\":\"9305f6ea-4518-4c06-95b9-33321aa38d6a\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"requestType\":\"grid\",\"metrics\":[{\"type\":\"count\"},{\"type\":\"max\",\"field\":\"bytes\"}]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max of bytes\",\"name\":\"max_of_bytes\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#cccccc\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"Count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"TILED_VECTOR\"}]",
+        "mapStateJSON": "{\"zoom\":3.59,\"center\":{\"lon\":-98.05765,\"lat\":38.32288},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000}}",
+        "title": "geo grid vector grid example SUPER_FINE resolution",
         "uiStateJSON": "{\"isDarkMode\":false}"
       },
       "type": "map"
@@ -396,6 +784,298 @@
 {
   "type": "doc",
   "value": {
+    "id": "map:62914770-936c-11e9-a43f-eb6ee3467b2b",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "vector styling icon demo",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":4.13,\"center\":{\"lon\":-3.57807,\"lat\":2.04204},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"}}",
+        "layerListJSON" : "[{\"sourceDescriptor\":{\"id\":\"5b46884e-062f-4ff4-9dd2-bd410d9e8754\",\"type\":\"ES_SEARCH\",\"geoField\":\"location\",\"filterByMapBounds\":false,\"tooltipProperties\":[],\"useTopHits\":false,\"topHitsSize\":1,\"indexPatternRefName\":\"layer_0_source_index_pattern\"},\"id\":\"8fcb7c4b-7d6a-4b69-82c2-74f53ec0df24\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"applyGlobalQuery\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Reds\",\"field\":{\"label\":\"altitude\",\"name\":\"altitude\",\"origin\":\"source\"}}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"DYNAMIC\",\"options\":{\"minSize\":30,\"maxSize\":64,\"field\":{\"label\":\"altitude\",\"name\":\"altitude\",\"origin\":\"source\"}}},\"iconOrientation\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"heading\",\"name\":\"heading\",\"origin\":\"source\"}}},\"symbol\":{\"options\":{\"symbolizeAs\":\"icon\",\"symbolId\":\"airport\"}}}},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[\"8fcb7c4b-7d6a-4b69-82c2-74f53ec0df24\"]}",
+        "bounds" : {
+          "type" : "polygon",
+          "coordinates" : [
+            [
+              [
+                -40.00193,
+                19.58063
+              ],
+              [
+                -40.00193,
+                -15.68855
+              ],
+              [
+                32.84579,
+                -15.68855
+              ],
+              [
+                32.84579,
+                19.58063
+              ],
+              [
+                -40.00193,
+                19.58063
+              ]
+            ]
+          ]
+        }
+      },
+      "type": "map",
+      "references" : [
+        {
+          "name" : "layer_0_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "f7fc94a0-936b-11e9-a43f-eb6ee3467b2b"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.2.0"
+      },
+      "updated_at" : "2019-06-20T15:02:13.095Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:4cd3e220-bf64-11e9-bbcc-7db09a1519e9",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "join and dynamic coloring demo",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":3.42,\"center\":{\"lon\":81.67747,\"lat\":1.80586},\"timeFilters\":{\"from\":\"now-17m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[]}",
+        "layerListJSON" : "[{\"id\":\"n1t6f\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"62eca1fc-fe42-11e8-8eb2-f2801f1b9fd1\",\"type\":\"ES_SEARCH\",\"geoField\":\"geometry\",\"limit\":2048,\"filterByMapBounds\":false,\"showTooltip\":true,\"tooltipProperties\":[\"name\"],\"indexPatternRefName\":\"layer_0_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max(prop1) group by meta_for_geo_shapes*.shape_name\",\"name\":\"__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name\",\"origin\":\"join\"},\"color\":null,\"useCustomColorRamp\":true,\"customColorRamp\":[{\"stop\":0,\"color\":\"#E6C220\"},{\"stop\":5,\"color\":\"#F98510\"},{\"stop\":11,\"color\":\"#D36086\"}]}},\"lineColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Blues\",\"field\":{\"label\":\"prop1\",\"name\":\"prop1\",\"origin\":\"source\"},\"useCustomColorRamp\":false}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"symbol\":{\"options\":{\"symbolizeAs\":\"circle\",\"symbolId\":\"airfield\"}}}},\"type\":\"VECTOR\",\"joins\":[{\"leftField\":\"name\",\"right\":{\"id\":\"855ccb86-fe42-11e8-8eb2-f2801f1b9fd1\",\"indexPatternTitle\":\"meta_for_geo_shapes*\",\"term\":\"shape_name\",\"metrics\":[{\"type\":\"max\",\"field\":\"prop1\"}],\"indexPatternRefName\":\"layer_0_join_0_index_pattern\"}}]}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "Polygon",
+          "coordinates" : [
+            [
+              [
+                29.45263,
+                23.75812
+              ],
+              [
+                29.45263,
+                -20.41148
+              ],
+              [
+                133.90231,
+                -20.41148
+              ],
+              [
+                133.90231,
+                23.75812
+              ],
+              [
+                29.45263,
+                23.75812
+              ]
+            ]
+          ]
+        }
+      },
+      "type": "map",
+      "references" : [
+        {
+          "name" : "layer_0_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "561253e0-f731-11e8-8487-11b9dd924f96"
+        },
+        {
+          "name" : "layer_0_join_0_index_pattern",
+          "type" : "index-pattern",
+          "id" : "e20b2a30-f735-11e8-8ce0-9723965e01e3"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.2.0"
+      },
+      "updated_at" : "2019-08-15T13:56:15.793Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:3c9949f0-c8dc-11e9-9ea1-8b2710d4a86b",
+    "index": ".kibana",
+    "source": {
+      "map" : {
+        "title" : "pew pew demo",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":5.5,\"center\":{\"lon\":-71.34293,\"lat\":40.33097},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":false,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[]}",
+        "layerListJSON" : "[{\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#1EA593\"}},\"lineColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"color\":\"Blues\"}},\"lineWidth\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"count\",\"name\":\"doc_count\",\"origin\":\"source\"},\"minSize\":4,\"maxSize\":32}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"symbol\":{\"options\":{\"symbolizeAs\":\"circle\",\"symbolId\":\"airfield\"}}}},\"sourceDescriptor\":{\"type\":\"ES_PEW_PEW\",\"id\":\"d7ca27a8-dba2-4f5b-857c-8f529511ad81\",\"sourceGeoField\":\"source\",\"destGeoField\":\"destination\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"},\"id\":\"67c1de2c-2fc5-4425-8983-094b589afe61\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"applyGlobalQuery\":true,\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "Polygon",
+          "coordinates" : [
+            [
+              [
+                -83.72374,
+                44.30172
+              ],
+              [
+                -83.72374,
+                36.11211
+              ],
+              [
+                -58.96211,
+                36.11211
+              ],
+              [
+                -58.96211,
+                44.30172
+              ],
+              [
+                -83.72374,
+                44.30172
+              ]
+            ]
+          ]
+        }
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_0_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "dedd3180-c8d8-11e9-b36c-81f9f9da524f"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.4.0"
+      },
+      "updated_at" : "2019-08-27T15:06:24.654Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:279e1f20-6883-11ea-952a-b102add99cf8",
+    "index": ".kibana",
+    "source": {
+      "map" : {
+        "title" : "blended document example",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":10.27,\"center\":{\"lon\":-83.70716,\"lat\":32.73679},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-23T00:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[]}",
+        "layerListJSON" : "[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"isAutoSelect\":true},\"id\":\"43a70a86-00fd-43af-9e84-4d9fe2d7513d\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"style\":{},\"type\":\"VECTOR_TILE\"},{\"id\":\"307c8495-89f7-431b-83d8-78724d9a8f72\",\"label\":\"logstash-*\",\"sourceDescriptor\":{\"geoField\":\"geo.coordinates\",\"id\":\"20fc58c3-3c0a-4c7b-9cdc-37552cafdc21\",\"tooltipProperties\":[],\"type\":\"ES_SEARCH\",\"scalingType\":\"CLUSTERS\",\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"type\":\"BLENDED_VECTOR\",\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"airfield\"}},\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#54B399\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#41937c\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":6}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"labelText\":{\"type\":\"STATIC\",\"options\":{\"value\":\"\"}},\"labelColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#000000\"}},\"labelSize\":{\"type\":\"STATIC\",\"options\":{\"size\":14}},\"labelBorderColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"labelBorderSize\":{\"options\":{\"size\":\"SMALL\"}}},\"isTimeAware\":true}}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "Polygon",
+          "coordinates" : [
+            [
+              [
+                -84.07816,
+                32.95327
+              ],
+              [
+                -84.07816,
+                32.51978
+              ],
+              [
+                -83.33616,
+                32.51978
+              ],
+              [
+                -83.33616,
+                32.95327
+              ],
+              [
+                -84.07816,
+                32.95327
+              ]
+            ]
+          ]
+        }
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.7.0"
+      },
+      "updated_at" : "2020-03-17T19:11:50.290Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:13776f20-db37-11ea-8fbb-3da39bb9bff2",
+    "index": ".kibana",
+    "source": {
+      "map" : {
+        "title" : "document example - auto fit to bounds for initial location",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":5.2,\"center\":{\"lon\":-67.80052,\"lat\":-55.25331},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"initialLocation\":\"AUTO_FIT_TO_BOUNDS\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"maxZoom\":24,\"minZoom\":0,\"showSpatialFilters\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"VECTOR_TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"applyGlobalQuery\":true,\"scalingType\":\"LIMIT\",\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.9.0"
+      },
+      "updated_at" : "2020-08-10T18:27:39.805Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "map:bff99716-e3dc-11ea-87d0-0242ac130003",
+    "index": ".kibana",
+    "source": {
+      "map" : {
+        "description":"shapes with mvt scaling",
+        "layerListJSON":"[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"isAutoSelect\":true},\"id\":\"76b9fc1d-1e8a-4d2f-9f9e-6ba2b19f24bb\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"style\":{\"type\":\"TILE\"},\"type\":\"VECTOR_TILE\"},{\"sourceDescriptor\":{\"geoField\":\"geometry\",\"filterByMapBounds\":true,\"scalingType\":\"MVT\",\"topHitsSize\":1,\"id\":\"97f8555e-8db0-4bd8-8b18-22e32f468667\",\"type\":\"ES_SEARCH\",\"tooltipProperties\":[],\"sortField\":\"\",\"sortOrder\":\"desc\",\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"id\":\"caffa63a-ebfb-466d-8ff6-d797975b88ab\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}},\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"color\":\"Blues\",\"colorCategory\":\"palette_0\",\"field\":{\"name\":\"prop1\",\"origin\":\"source\"},\"fieldMetaOptions\":{\"isEnabled\":true,\"sigma\":1},\"type\":\"ORDINAL\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#41937c\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":6}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"labelText\":{\"type\":\"STATIC\",\"options\":{\"value\":\"\"}},\"labelColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#000000\"}},\"labelSize\":{\"type\":\"STATIC\",\"options\":{\"size\":14}},\"labelBorderColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"labelBorderSize\":{\"options\":{\"size\":\"SMALL\"}}},\"isTimeAware\":true},\"type\":\"TILED_VECTOR\",\"joins\":[]}]",
+        "mapStateJSON":"{\"zoom\":3.75,\"center\":{\"lon\":80.01106,\"lat\":3.65009},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"maxZoom\":24,\"minZoom\":0,\"showSpatialFilters\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+        "title":"geo_shape_mvt",
+        "uiStateJSON":"{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "id":"561253e0-f731-11e8-8487-11b9dd924f96",
+          "name":"layer_1_source_index_pattern",
+          "type":"index-pattern"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.9.0"
+      },
+      "updated_at" : "2020-08-10T18:27:39.805Z"
+    }
+  }
+}
+
+
+
+
+
+
+{
+  "type": "doc",
+  "value": {
     "id": "dashboard:19906970-2e40-11e9-85cb-6965aae20f13",
     "index": ".kibana",
     "source": {
@@ -419,6 +1099,67 @@
       },
       "type": "dashboard",
       "updated_at": "2018-04-11T21:57:52.253Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dashboard:03c7cbf0-8eae-11e9-b674-69d1999628e4",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "title" : "dash for tooltip filter action test",
+        "hits" : 0,
+        "description" : "Zoomed in so entire screen is covered by filter so click to open tooltip can not miss.",
+        "panelsJSON" : "[{\"version\":\"8.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":26,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":-1.31919,\"lon\":59.53306,\"zoom\":9.67},\"isLayerTOCOpen\":false,\"openTOCDetails\":[\"n1t6f\"],\"hiddenLayers\":[],\"enhancements\":{\"dynamicActions\":{\"events\":[{\"eventId\":\"669a3521-1215-4228-9ced-77e2edf5ad17\",\"triggers\":[\"FILTER_TRIGGER\"],\"action\":{\"name\":\"drilldown1\",\"config\":{\"dashboardId\":\"19906970-2e40-11e9-85cb-6965aae20f13\",\"useCurrentFilters\":true,\"useCurrentDateRange\":true},\"factoryId\":\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\"}}]}}},\"panelRefName\":\"panel_0\"}]",
+        "optionsJSON" : "{\"useMargins\":true,\"hidePanelTitles\":false}",
+        "version" : 1,
+        "timeRestore" : true,
+        "timeTo" : "2015-09-20T01:00:00.000Z",
+        "timeFrom" : "2015-09-20T00:00:00.000Z",
+        "refreshInterval" : {
+          "pause" : true,
+          "value" : 1000
+        },
+        "kibanaSavedObjectMeta" : {
+          "searchSourceJSON" : "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
+      },
+      "type" : "dashboard",
+      "references" : [
+        {
+          "name" : "panel_0",
+          "type" : "map",
+          "id" : "1649cc70-f736-11e8-8ce0-9723965e01e3"
+        }
+      ],
+      "migrationVersion" : {
+        "dashboard" : "7.3.0"
+      },
+      "updated_at" : "2020-08-26T14:32:27.854Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "query:OKJpgs",
+    "source": {
+      "query": {
+        "title": "OKJpgs",
+        "description": "Ok responses for jpg files",
+        "query": {
+          "query": "response:200",
+          "language": "kuery"
+        },
+        "filters": [{"meta":{"index":"b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b","alias":null,"negate":false,"type":"phrase","key":"extension.raw","value":"jpg","params":{"query":"jpg"},"disabled":false},"query":{"match":{"extension.raw":{"query":"jpg","type":"phrase"}}},"$state":{"store":"appState"}}]
+      },
+      "type": "query",
+      "updated_at": "2019-07-17T17:54:26.378Z"
     }
   }
 }

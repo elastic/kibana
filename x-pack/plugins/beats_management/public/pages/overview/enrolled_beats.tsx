@@ -64,7 +64,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
 
   public async updateBeatsData(beatsKBar?: string) {
     const beats = sortBy(await this.props.libs.beats.getAll(beatsKBar), 'id') || [];
-    const tags = await this.props.libs.tags.getTagsWithIds(flatten(beats.map(beat => beat.tags)));
+    const tags = await this.props.libs.tags.getTagsWithIds(flatten(beats.map((beat) => beat.tags)));
 
     this.setState({
       tags,
@@ -169,7 +169,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
           path={`/overview/enrolled_beats`}
         />
         <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
-          {autocompleteProps => (
+          {(autocompleteProps) => (
             <Table
               kueryBarProps={{
                 ...autocompleteProps,
@@ -212,9 +212,9 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                     break;
                 }
               }}
-              items={this.state.beats.map(beat => ({
+              items={this.state.beats.map((beat) => ({
                 ...beat,
-                tags: (this.state.tags || []).filter(tag => beat.tags.includes(tag.id)),
+                tags: (this.state.tags || []).filter((tag) => beat.tags.includes(tag.id)),
               }))}
               ref={this.tableRef}
               type={BeatsTableType}
@@ -345,7 +345,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     const selectedIds = this.tableRef.current.state.selection.map((beat: any) => beat.id);
     const beats: CMBeat[] = [];
     selectedIds.forEach((id: any) => {
-      const beat = this.props.containers.beats.state.list.find(b => b.id === id);
+      const beat = this.props.containers.beats.state.list.find((b) => b.id === id);
       if (beat) {
         beats.push(beat);
       }

@@ -29,7 +29,7 @@ import {
   extractValuesKeysFromNode,
 } from '../utils';
 import { DEFAULT_MESSAGE_KEY, DESCRIPTION_KEY, VALUES_KEY } from '../constants';
-import { createFailError } from '../../run';
+import { createFailError } from '@kbn/dev-utils';
 
 /**
  * Extract messages from `funcName('id', { defaultMessage: 'Message text' })` call expression AST
@@ -52,7 +52,7 @@ export function extractI18nCallMessages(node) {
     DEFAULT_MESSAGE_KEY,
     DESCRIPTION_KEY,
     VALUES_KEY,
-  ].map(key => optionsSubTree.properties.find(property => isPropertyWithKey(property, key)));
+  ].map((key) => optionsSubTree.properties.find((property) => isPropertyWithKey(property, key)));
 
   const message = messageProperty
     ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))

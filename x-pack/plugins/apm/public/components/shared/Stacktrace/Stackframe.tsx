@@ -4,75 +4,93 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiAccordion } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import {
-  IStackframe,
-  IStackframeWithLineContext
-} from '../../../../typings/es_schemas/raw/fields/Stackframe';
+  Stackframe as StackframeType,
+  StackframeWithLineContext,
+} from '../../../../typings/es_schemas/raw/fields/stackframe';
 import {
   borderRadius,
   fontFamilyCode,
-  fontSize
+  fontSize,
 } from '../../../style/variables';
-import { FrameHeading } from '../Stacktrace/FrameHeading';
 import { Context } from './Context';
+import { FrameHeading } from './FrameHeading';
 import { Variables } from './Variables';
+import { px, units } from '../../../style/variables';
 
-const CodeHeader = styled.div`
-  border-bottom: 1px solid ${theme.euiColorLightShade};
-  border-radius: ${borderRadius} ${borderRadius} 0 0;
-`;
-
-const Container = styled.div<{ isLibraryFrame: boolean }>`
+const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: relative;
   font-family: ${fontFamilyCode};
   font-size: ${fontSize};
-  border: 1px solid ${theme.euiColorLightShade};
+  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: ${borderRadius};
-  background: ${props =>
-    props.isLibraryFrame
-      ? theme.euiColorEmptyShade
-      : theme.euiColorLightestShade};
+  background: ${({ isLibraryFrame, theme }) =>
+    isLibraryFrame
+      ? theme.eui.euiColorEmptyShade
+      : theme.eui.euiColorLightestShade};
+`;
+
+// Indent the non-context frames the same amount as the accordion control
+const NoContextFrameHeadingWrapper = styled.div`
+  margin-left: ${px(units.unit + units.half + units.quarter)};
 `;
 
 interface Props {
-  stackframe: IStackframe;
+  stackframe: StackframeType;
   codeLanguage?: string;
+  id: string;
+  initialIsOpen?: boolean;
   isLibraryFrame?: boolean;
 }
 
 export function Stackframe({
   stackframe,
   codeLanguage,
-  isLibraryFrame = false
+  id,
+  initialIsOpen = false,
+  isLibraryFrame = false,
 }: Props) {
   if (!hasLineContext(stackframe)) {
     return (
-      <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
+      <NoContextFrameHeadingWrapper>
+        <FrameHeading
+          codeLanguage={codeLanguage}
+          stackframe={stackframe}
+          isLibraryFrame={isLibraryFrame}
+        />
+      </NoContextFrameHeadingWrapper>
     );
   }
 
   return (
-    <Container isLibraryFrame={isLibraryFrame}>
-      <CodeHeader>
-        <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
-      </CodeHeader>
-
-      <Context
-        stackframe={stackframe}
-        codeLanguage={codeLanguage}
-        isLibraryFrame={isLibraryFrame}
-      />
-
+    <EuiAccordion
+      buttonContent={
+        <FrameHeading
+          codeLanguage={codeLanguage}
+          stackframe={stackframe}
+          isLibraryFrame={isLibraryFrame}
+        />
+      }
+      id={id}
+      initialIsOpen={initialIsOpen}
+    >
+      <ContextContainer isLibraryFrame={isLibraryFrame}>
+        <Context
+          stackframe={stackframe}
+          codeLanguage={codeLanguage}
+          isLibraryFrame={isLibraryFrame}
+        />
+      </ContextContainer>
       <Variables vars={stackframe.vars} />
-    </Container>
+    </EuiAccordion>
   );
 }
 
 function hasLineContext(
-  stackframe: IStackframe
-): stackframe is IStackframeWithLineContext {
-  return stackframe.line.hasOwnProperty('context');
+  stackframe: StackframeType
+): stackframe is StackframeWithLineContext {
+  return stackframe.line?.hasOwnProperty('context') || false;
 }

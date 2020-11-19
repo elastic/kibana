@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WrapperPage it renders 1`] = `
+<Memo(WrapperPageComponent)>
+  <p>
+    Test page
+  </p>
+</Memo(WrapperPageComponent)>
+`;

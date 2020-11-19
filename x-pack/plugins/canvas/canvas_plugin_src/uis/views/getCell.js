@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ViewStrings } from '../../../i18n';
+
+const { GetCell: strings } = ViewStrings;
+
 export const getCell = () => ({
   name: 'getCell',
-  displayName: 'Get cell',
-  help: 'Grab the first row and first column',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   modelArgs: ['size'],
   requiresContext: true,
   args: [],

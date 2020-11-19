@@ -24,9 +24,9 @@ export class MemoryConfigBlocksAdapter implements FrontendConfigBlocksAdapter {
   public async getForTags(tagIds: string[]): Promise<ReturnTypeList<ConfigurationBlock>> {
     return {
       success: true,
-      list: this.db.filter(block => tagIds.includes(block.tag)),
+      list: this.db.filter((block) => tagIds.includes(block.tag)),
       page: 0,
-      total: this.db.filter(block => tagIds.includes(block.tag)).length,
+      total: this.db.filter((block) => tagIds.includes(block.tag)).length,
     };
   }
   public async delete(id: string): Promise<boolean> {
@@ -36,6 +36,6 @@ export class MemoryConfigBlocksAdapter implements FrontendConfigBlocksAdapter {
       }
       return newDB;
     }, []);
-    return !!this.db.find(block => block.id === id);
+    return !!this.db.find((block) => block.id === id);
   }
 }

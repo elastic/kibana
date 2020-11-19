@@ -11,6 +11,9 @@ import { EuiFieldNumber, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../../i18n';
+
+const { Number: strings } = ArgumentStrings;
 
 // This is basically a direct copy of the string input, but with some Number() goodness maybe you think that's cheating and it should be
 // abstracted. If you can think of a 3rd or 4th usage for that abstraction, cool, do it, just don't make it more confusing. Copying is the
@@ -24,7 +27,7 @@ const NumberArgInput = ({ updateValue, value, confirm, commit, argId }) => (
         compressed
         id={argId}
         value={Number(value)}
-        onChange={confirm ? updateValue : ev => commit(Number(ev.target.value))}
+        onChange={confirm ? updateValue : (ev) => commit(Number(ev.target.value))}
       />
     </EuiFlexItem>
     {confirm && (
@@ -62,8 +65,8 @@ EnhancedNumberArgInput.propTypes = {
 
 export const number = () => ({
   name: 'number',
-  displayName: 'number',
-  help: 'Input a number',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(EnhancedNumberArgInput),
   default: '0',
 });

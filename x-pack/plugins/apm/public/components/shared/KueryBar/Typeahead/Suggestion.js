@@ -13,35 +13,34 @@ import {
   px,
   units,
   fontSizes,
-  unit
+  unit,
 } from '../../../../style/variables';
 import { tint } from 'polished';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 
-function getIconColor(type) {
+function getIconColor(type, theme) {
   switch (type) {
     case 'field':
-      return theme.euiColorVis7;
+      return theme.eui.euiColorVis7;
     case 'value':
-      return theme.euiColorVis0;
+      return theme.eui.euiColorVis0;
     case 'operator':
-      return theme.euiColorVis1;
+      return theme.eui.euiColorVis1;
     case 'conjunction':
-      return theme.euiColorVis3;
+      return theme.eui.euiColorVis3;
     case 'recentSearch':
-      return theme.euiColorMediumShade;
+      return theme.eui.euiColorMediumShade;
   }
 }
 
 const Description = styled.div`
-  color: ${theme.euiColorDarkShade};
+  color: ${({ theme }) => theme.eui.euiColorDarkShade};
 
   p {
     display: inline;
 
     span {
       font-family: ${fontFamilyCode};
-      color: ${theme.euiColorFullShade};
+      color: ${({ theme }) => theme.eui.euiColorFullShade};
       padding: 0 ${px(units.quarter)};
       display: inline-block;
     }
@@ -53,25 +52,25 @@ const ListItem = styled.li`
   height: ${px(units.double)};
   align-items: center;
   display: flex;
-  background: ${props =>
-    props.selected ? theme.euiColorLightestShade : 'initial'};
+  background: ${({ selected, theme }) =>
+    selected ? theme.eui.euiColorLightestShade : 'initial'};
   cursor: pointer;
   border-radius: ${px(units.quarter)};
 
   ${Description} {
     p span {
-      background: ${props =>
-        props.selected
-          ? theme.euiColorEmptyShade
-          : theme.euiColorLightestShade};
+      background: ${({ selected, theme }) =>
+        selected
+          ? theme.eui.euiColorEmptyShade
+          : theme.eui.euiColorLightestShade};
     }
   }
 `;
 
 const Icon = styled.div`
   flex: 0 0 ${px(units.double)};
-  background: ${props => tint(0.1, getIconColor(props.type))};
-  color: ${props => getIconColor(props.type)};
+  background: ${({ type, theme }) => tint(0.1, getIconColor(type, theme))};
+  color: ${({ type, theme }) => getIconColor(type, theme)};
   width: 100%;
   height: 100%;
   text-align: center;
@@ -80,7 +79,7 @@ const Icon = styled.div`
 
 const TextValue = styled.div`
   flex: 0 0 ${px(unit * 16)};
-  color: ${theme.euiColorDarkestShade};
+  color: ${({ theme }) => theme.eui.euiColorDarkestShade};
   padding: 0 ${px(units.half)};
 `;
 
@@ -123,7 +122,7 @@ Suggestion.propTypes = {
   onMouseEnter: PropTypes.func.isRequired,
   selected: PropTypes.bool,
   suggestion: PropTypes.object.isRequired,
-  innerRef: PropTypes.func.isRequired
+  innerRef: PropTypes.func.isRequired,
 };
 
 export default Suggestion;

@@ -5,35 +5,39 @@
  */
 
 import moment from 'moment';
-import { ContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
-interface Arguments {
+export interface Arguments {
   format: string;
 }
 
-export function formatdate(): ContextFunction<'formatdate', number, Arguments, string> {
+export function formatdate(): ExpressionFunctionDefinition<
+  'formatdate',
+  number | string,
+  Arguments,
+  string
+> {
   const { help, args: argHelp } = getFunctionHelp().formatdate;
 
   return {
     name: 'formatdate',
     type: 'string',
+    inputTypes: ['number', 'string'],
     help,
-    context: {
-      types: ['number'],
-    },
     args: {
       format: {
         aliases: ['_'],
         types: ['string'],
+        required: true,
         help: argHelp.format,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.format) {
-        return moment.utc(new Date(context)).toISOString();
+        return moment.utc(new Date(input)).toISOString();
       }
-      return moment.utc(new Date(context)).format(args.format);
+      return moment.utc(new Date(input)).format(args.format);
     },
   };
 }

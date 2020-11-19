@@ -1,0 +1,32 @@
+[[cancel-reindex]]
+=== Cancel reindex API
+++++
+<titleabbrev>Cancel reindex</titleabbrev>
+++++
+
+experimental[] Cancel reindexes that are waiting for the {es} reindex task to complete. For example, `lastCompletedStep` set to `40`.
+
+Cancel reindexes that are waiting for the Elasticsearch reindex task to complete. For example, `lastCompletedStep` set to `40`.
+
+[[cancel-reindex-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/upgrade_assistant/reindex/myIndex/cancel`
+
+[[cancel-reindex-response-codes]]
+==== Response codes
+
+`200`::
+  Indicates a successful call.
+
+[[cancel-reindex-status-example]]
+==== Example
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "acknowledged": true
+}
+--------------------------------------------------

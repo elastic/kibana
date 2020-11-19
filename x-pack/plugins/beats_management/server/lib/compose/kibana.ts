@@ -5,14 +5,14 @@
  */
 
 import { camelCase } from 'lodash';
+import type { ElasticsearchServiceStart, Logger } from 'src/core/server';
+import { SecurityPluginSetup } from '../../../../security/server';
+import { LicensingPluginStart } from '../../../../licensing/server';
 import { PLUGIN } from '../../../common/constants';
-import { CONFIG_PREFIX } from '../../../common/constants/plugin';
+import { BeatsManagementConfigType } from '../../../common';
 import { ElasticsearchBeatsAdapter } from '../adapters/beats/elasticsearch_beats_adapter';
 import { ElasticsearchConfigurationBlockAdapter } from '../adapters/configuration_blocks/elasticsearch_configuration_block_adapter';
-import { DatabaseKbnESPlugin } from '../adapters/database/adapter_types';
 import { KibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
-import { ElasticsearchBeatEventsAdapter } from '../adapters/events/elasticsearch_beat_events_adapter';
-import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
 import { KibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { ElasticsearchTagsAdapter } from '../adapters/tags/elasticsearch_tags_adapter';
 import { ElasticsearchTokensAdapter } from '../adapters/tokens/elasticsearch_tokens_adapter';
@@ -24,11 +24,33 @@ import { CMTokensDomain } from '../tokens';
 import { CMServerLibs } from '../types';
 import { BackendFrameworkLib } from './../framework';
 
-export function compose(server: KibanaLegacyServer): CMServerLibs {
-  const framework = new BackendFrameworkLib(
-    new KibanaBackendFrameworkAdapter(camelCase(PLUGIN.ID), server, CONFIG_PREFIX)
+interface ComposeOptions {
+  elasticsearch: ElasticsearchServiceStart;
+  licensing: LicensingPluginStart;
+  security?: SecurityPluginSetup;
+  config: BeatsManagementConfigType;
+  logger: Logger;
+  kibanaVersion: string;
+}
+
+export function compose({
+  elasticsearch,
+  config,
+  kibanaVersion,
+  logger,
+  licensing,
+  security,
+}: ComposeOptions): CMServerLibs {
+  const backendAdapter = new KibanaBackendFrameworkAdapter(
+    camelCase(PLUGIN.ID),
+    kibanaVersion,
+    config,
+    logger,
+    licensing,
+    security
   );
-  const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);
+  const framework = new BackendFrameworkLib(backendAdapter, config);
+  const database = new KibanaDatabaseAdapter(elasticsearch);
   const beatsAdapter = new ElasticsearchBeatsAdapter(database);
   const configAdapter = new ElasticsearchConfigurationBlockAdapter(database);
 
@@ -46,7 +68,7 @@ export function compose(server: KibanaLegacyServer): CMServerLibs {
     tokens,
     framework,
   });
-  const beatEvents = new BeatEventsLib(new ElasticsearchBeatEventsAdapter(database), beats);
+  const beatEvents = new BeatEventsLib(beats);
 
   const libs: CMServerLibs = {
     beatEvents,

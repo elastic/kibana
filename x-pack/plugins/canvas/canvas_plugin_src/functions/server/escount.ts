@@ -4,43 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore untyped local
+import {
+  ExpressionFunctionDefinition,
+  ExpressionValueFilter,
+} from 'src/plugins/expressions/common';
+/* eslint-disable */
+// @ts-expect-error untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
-import { ContextFunction, Filter } from '../types';
-import { getFunctionHelp } from '../../strings';
+/* eslint-enable */
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   index: string | null;
   query: string;
 }
 
-export function escount(): ContextFunction<'escount', Filter, Arguments, any> {
+export function escount(): ExpressionFunctionDefinition<
+  'escount',
+  ExpressionValueFilter,
+  Arguments,
+  any
+> {
   const { help, args: argHelp } = getFunctionHelp().escount;
 
   return {
     name: 'escount',
     type: 'number',
-    help,
     context: {
       types: ['filter'],
     },
+    help,
     args: {
-      index: {
-        types: ['string', 'null'],
-        default: '_all',
-        help: argHelp.index,
-      },
       query: {
         types: ['string'],
         aliases: ['_', 'q'],
         help: argHelp.query,
         default: '"-_index:.kibana"',
       },
+      index: {
+        types: ['string'],
+        default: '_all',
+        help: argHelp.index,
+      },
     },
-    fn: (context, args, handlers) => {
-      context.and = context.and.concat([
+    fn: (input, args, handlers) => {
+      input.and = input.and.concat([
         {
-          type: 'luceneQueryString',
+          type: 'filter',
+          filterType: 'luceneQueryString',
           query: args.query,
           and: [],
         },
@@ -57,10 +68,10 @@ export function escount(): ContextFunction<'escount', Filter, Arguments, any> {
             },
           },
         },
-        context
+        input
       );
 
-      return handlers
+      return ((handlers as any) as { elasticsearchClient: any })
         .elasticsearchClient('count', esRequest)
         .then((resp: { count: number }) => resp.count);
     },

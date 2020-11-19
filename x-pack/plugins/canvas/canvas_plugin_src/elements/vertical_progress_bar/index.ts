@@ -5,22 +5,18 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const verticalProgressBar: ElementFactory = () => ({
   name: 'verticalProgressBar',
   displayName: 'Vertical progress bar',
-  tags: ['chart', 'proportion'],
+  type: 'progress',
   help: 'Displays progress as a portion of a vertical bar',
   width: 80,
   height: 400,
-  image: header,
   expression: `filters
 | demodata
 | math "mean(percent_uptime)"
-| progress shape="verticalBar" label={formatnumber 0%} font={font size=24 family="${
-    openSans.value
-  }" color="#000000" align=center}
+| progress shape="verticalBar" label={formatnumber 0%} font={font size=24 family="${openSans.value}" color="#000000" align=center}
 | render`,
 });

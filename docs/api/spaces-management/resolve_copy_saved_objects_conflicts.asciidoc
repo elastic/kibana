@@ -1,0 +1,311 @@
+[role="xpack"]
+[[spaces-api-resolve-copy-saved-objects-conflicts]]
+=== Resolve copy saved objects to space conflicts API
+++++
+<titleabbrev>Resolve copy to space conflicts</titleabbrev>
+++++
+
+experimental[] Overwrite saved objects that are returned as errors from the <<spaces-api-copy-saved-objects, copy saved objects to space API>>.
+
+[[spaces-api-resolve-copy-saved-objects-conflicts-request]]
+==== {api-request-title}
+
+`POST <kibana host>:<port>/api/spaces/_resolve_copy_saved_objects_errors`
+
+`POST <kibana host>:<port>/s/<space_id>/api/spaces/_resolve_copy_saved_objects_errors`
+
+[[spaces-api-resolve-copy-saved-objects-conflicts-prereqs]]
+==== {api-prereq-title}
+
+Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, which returns the errors for you to resolve.
+
+[[spaces-api-resolve-copy-saved-objects-conflicts-path-params]]
+==== {api-path-parms-title}
+
+`space_id`::
+(Optional, string) The ID of the space that contains the saved objects you want to copy. When `space_id` is unspecified in the URL, the default space is used. The `space_id` must be the same value used during the failed <<spaces-api-copy-saved-objects, copy saved objects to space API>> operation.
+
+[role="child_attributes"]
+[[spaces-api-resolve-copy-saved-objects-conflicts-request-body]]
+==== {api-request-body-title}
+
+`objects`::
+  (Required, object array) The saved objects to copy. The `objects` must be the same values used during the failed <<spaces-api-copy-saved-objects, copy saved objects to space API>> operation.
++
+.Properties of `objects`
+[%collapsible%open]
+=====
+  `type`:::
+    (Required, string) The saved object type.
+
+  `id`:::
+    (Required, string) The saved object ID.
+=====
+
+`includeReferences`::
+  (Optional, boolean) When set to `true`, all saved objects related to the specified saved objects are copied into the target spaces. The `includeReferences` must be the same values used during the failed <<spaces-api-copy-saved-objects, copy saved objects to space API>> operation. The default value is `false`.
+
+`retries`::
+  (Required, object) The retry operations to attempt, which can specify how to resolve different types of errors. Object keys represent the
+  target space IDs.
++
+.Properties of `retries`
+[%collapsible%open]
+=====
+  `<space_id>`:::
+  (Required, array) The errors to resolve for the specified `<space_id>`.
++
+
+.Properties of `<space_id>`
+[%collapsible%open]
+======
+    `type`::::
+    (Required, string) The saved object type.
+    `id`::::
+    (Required, string) The saved object ID.
+    `overwrite`::::
+    (Required, boolean) When set to `true`, the saved object from the source space (desigated by the <<spaces-api-resolve-copy-saved-objects-conflicts-path-params, `space_id` path parameter>>) overwrites the conflicting object in the destination space. When set to `false`, this does nothing.
+    `destinationId`::::
+    (Optional, string) Specifies the destination ID that the copied object should have, if different from the current ID.
+    `ignoreMissingReferences`:::
+    (Optional, boolean) When set to `true`, any missing references errors are ignored. When set to `false`, does nothing.
+======
+=====
+
+[role="child_attributes"]
+[[spaces-api-resolve-copy-saved-objects-conflicts-response-body]]
+==== {api-response-body-title}
+
+`<space_id>`::
+  (object) An object that describes the result of the copy operation for the space. Includes the dynamic keys in the response.
++
+.Properties of `<space_id>`
+[%collapsible%open]
+=====
+  `success`:::
+    (boolean) The copy operation was successful. When set to `false`, some objects may have been copied. For additional information, refer to the `successCount` and `errors` properties.
+
+  `successCount`:::
+    (number) The number of objects that successfully copied.
+
+  `errors`:::
+    (Optional, array) The errors that occurred during the copy operation. When errors are reported, the `success` flag is set to `false`.
++
+NOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and a
+`conflict` error.
++
+
+.Properties of `errors`
+[%collapsible%open]
+======
+    `id`::::
+      (string) The saved object ID that failed to copy.
+
+    `type`::::
+      (string) The type of saved object that failed to copy.
+
+    `error`::::
+      (object) The error that caused the copy operation to fail.
++
+
+.Properties of `error`
+[%collapsible%open]
+=======
+      `type`::::
+        (string) The type of error. For example, `conflict`, `ambiguous_conflict`, `missing_references`, `unsupported_type`, or `unknown`.
+      `destinationId`::::
+        (Optional, string) The destination ID that was used during the copy attempt. This is only present on `conflict` errors types.
+      `destinations`::::
+        (Optional, array) A list of possible object destinations with `id`, `title`, and `updatedAt` fields to describe each one. This is
+        only present on `ambiguous_conflict` error types.
+=======
+======
+
+`successResults`:::
+  (Optional, array) Indicates successfully copied objects, with any applicable metadata.
++
+NOTE: Objects are created when all resolvable errors are addressed, including conflict and missing references errors. For more information,
+refer to the <<spaces-api-resolve-copy-saved-objects-conflicts-example,examples>>.
+
+=====
+
+[[spaces-api-resolve-copy-saved-objects-conflicts-example]]
+==== {api-examples-title}
+
+[[spaces-api-resolve-copy-saved-objects-conflicts-example-1]]
+===== Resolve conflict errors
+
+This example builds upon the <<spaces-api-copy-saved-objects-example-3,Copy objects API example with conflict errors>>.
+
+Resolve conflict errors for an index pattern, visualization, and *Canvas* workpad by overwriting the existing saved objects:
+
+[source,sh]
+----
+$ curl -X POST api/spaces/_resolve_copy_saved_objects_errors
+{
+  "objects": [{
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }],
+  "includeReferences": true,
+  "retries": {
+    "sales": [
+      {
+        "type": "index-pattern",
+        "id": "my-pattern",
+        "overwrite": true
+      },
+      {
+        "type": "visualization",
+        "id": "my-vis",
+        "overwrite": true,
+        "destinationId": "another-vis"
+      },
+      {
+        "type": "canvas",
+        "id": "my-canvas",
+        "overwrite": true,
+        "destinationId": "yet-another-canvas"
+      },
+      {
+        "type": "dashboard",
+        "id": "my-dashboard"
+      }
+    ]
+  }
+}
+----
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+----
+{
+  "sales": {
+    "success": true,
+    "successCount": 4,
+    "successResults": [
+      {
+        "id": "my-pattern",
+        "type": "index-pattern",
+        "meta": {
+          "icon": "indexPatternApp",
+          "title": "my-pattern-*"
+        }
+      },
+      {
+        "id": "my-vis",
+        "type": "visualization",
+        "destinationId": "another-vis",
+        "meta": {
+          "icon": "visualizeApp",
+          "title": "Look at my visualization"
+        }
+      },
+      {
+        "id": "my-canvas",
+        "type": "canvas-workpad",
+        "destinationId": "yet-another-canvas",
+        "meta": {
+          "icon": "canvasApp",
+          "title": "Look at my canvas"
+        }
+      },
+      {
+        "id": "my-dashboard",
+        "type": "dashboard",
+        "meta": {
+          "icon": "dashboardApp",
+          "title": "Look at my dashboard"
+        }
+      }
+    ]
+  }
+}
+----
+
+The result indicates a successful copy, and all four objects are created.
+
+TIP: If a prior copy attempt resulted in resolvable errors, you must include a retry for each object you want to copy, including any that
+were returned in the `successResults` array. In this example, we retried copying the dashboard accordingly.
+
+[[spaces-api-resolve-copy-saved-objects-conflicts-example-2]]
+===== Resolve missing reference errors
+
+This example builds upon the <<spaces-api-copy-saved-objects-example-4,Copy objects API example with missing reference errors>>.
+
+Resolve missing reference errors for a visualization by ignoring the error:
+
+[source,sh]
+----
+$ curl -X POST api/spaces/_resolve_copy_saved_objects_errors
+{
+  "objects": [{
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }],
+  "includeReferences": true,
+  "retries": {
+    "marketing": [
+      {
+        "type": "visualization",
+        "id": "my-vis",
+        "ignoreMissingReferences": true
+      },
+      {
+        "type": "canvas",
+        "id": "my-canvas"
+      },
+      {
+        "type": "dashboard",
+        "id": "my-dashboard"
+      }
+    ]
+  }
+}
+----
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+----
+{
+  "marketing": {
+    "success": true,
+    "successCount": 3,
+    "successResults": [
+      {
+        "id": "my-vis",
+        "type": "visualization",
+        "meta": {
+          "icon": "visualizeApp",
+          "title": "Look at my visualization"
+        }
+      },
+      {
+        "id": "my-canvas",
+        "type": "canvas-workpad",
+        "meta": {
+          "icon": "canvasApp",
+          "title": "Look at my canvas"
+        }
+      },
+      {
+        "id": "my-dashboard",
+        "type": "dashboard",
+        "meta": {
+          "icon": "dashboardApp",
+          "title": "Look at my dashboard"
+        }
+      }
+    ]
+  }
+}
+----
+
+The result indicates a successful copy and all three objects are created.
+
+TIP: If a prior copy attempt resulted in resolvable errors, you must include a retry for each object you want to copy, including any that
+were returned in the `successResults` array. In this example, we retried copying the dashboard and canvas accordingly.

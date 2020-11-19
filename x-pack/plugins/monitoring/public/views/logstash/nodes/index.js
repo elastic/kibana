@@ -4,52 +4,86 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import uiRoutes from'ui/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { i18n } from '@kbn/i18n';
+import { uiRoutes } from '../../../angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/logstash/listing';
+import { SetupModeRenderer } from '../../../components/renderers';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import {
+  CODE_PATH_LOGSTASH,
+  LOGSTASH_SYSTEM_ID,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+  ALERT_MISSING_MONITORING_DATA,
+} from '../../../../common/constants';
 
 uiRoutes.when('/logstash/nodes', {
   template,
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
     },
-    pageData: getPageData
+    pageData: getPageData,
   },
   controllerAs: 'lsNodes',
   controller: class LsNodesList extends MonitoringViewBaseEuiTableController {
-
     constructor($injector, $scope) {
-      const kbnUrl = $injector.get('kbnUrl');
-
       super({
-        title: 'Logstash - Nodes',
+        title: i18n.translate('xpack.monitoring.logstash.nodes.routeTitle', {
+          defaultMessage: 'Logstash - Nodes',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.logstash.nodes.pageTitle', {
+          defaultMessage: 'Logstash nodes',
+        }),
         storageKey: 'logstash.nodes',
         getPageData,
         reactNodeId: 'monitoringLogstashNodesApp',
         $scope,
-        $injector
+        $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH, ALERT_MISSING_MONITORING_DATA],
+            filters: [
+              {
+                stackProduct: LOGSTASH_SYSTEM_ID,
+              },
+            ],
+          },
+        },
       });
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(
-          <I18nContext>
-            <Listing
-              data={data.nodes}
-              stats={data.clusterStatus}
-              sorting={this.sorting}
-              pagination={this.pagination}
-              onTableChange={this.onTableChange}
-              angular={{ kbnUrl, scope: $scope }}
+      $scope.$watch(
+        () => this.data,
+        (data) => {
+          this.renderReact(
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              productName={LOGSTASH_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <Listing
+                    data={data.nodes}
+                    setupMode={setupMode}
+                    stats={data.clusterStatus}
+                    alerts={this.alerts}
+                    sorting={this.sorting}
+                    pagination={this.pagination}
+                    onTableChange={this.onTableChange}
+                  />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
             />
-          </I18nContext>
-        );
-      });
+          );
+        }
+      );
     }
-  }
+  },
 });

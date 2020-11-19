@@ -4,78 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { GraphQLSchema } from 'graphql';
-import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
-import { Legacy } from 'kibana';
+import { GenericParams, SearchResponse } from 'elasticsearch';
+import { Lifecycle } from '@hapi/hapi';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
+import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
+import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
+import { APMPluginSetup } from '../../../../../../plugins/apm/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
+import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
+import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerts/server';
+import { MlPluginSetup } from '../../../../../ml/server';
+import { JsonArray, JsonValue } from '../../../../common/typed_json';
 
-import { JsonObject } from '../../../../common/typed_json';
-import { InfraMetricModel } from '../metrics/adapter_types';
-
-export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
-
-/* eslint-disable  @typescript-eslint/unified-signatures */
-export interface InfraBackendFrameworkAdapter {
-  version: string;
-  exposeStaticDir(urlPath: string, dir: string): void;
-  registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
-  registerRoute<RouteRequest extends InfraWrappableRequest, RouteResponse extends InfraResponse>(
-    route: InfraFrameworkRouteOptions<RouteRequest, RouteResponse>
-  ): void;
-  callWithRequest<Hit = {}, Aggregation = undefined>(
-    req: InfraFrameworkRequest,
-    method: 'search',
-    options?: object
-  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
-  callWithRequest<Hit = {}, Aggregation = undefined>(
-    req: InfraFrameworkRequest,
-    method: 'msearch',
-    options?: object
-  ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'fieldCaps',
-    options?: object
-  ): Promise<InfraDatabaseFieldCapsResponse>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'indices.existsAlias',
-    options?: object
-  ): Promise<boolean>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: 'indices.getAlias' | 'indices.get',
-    options?: object
-  ): Promise<InfraDatabaseGetIndicesResponse>;
-  callWithRequest(
-    req: InfraFrameworkRequest,
-    method: string,
-    options?: object
-  ): Promise<InfraDatabaseSearchResponse>;
-  getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
-  getSavedObjectsService(): Legacy.SavedObjectsService;
-  makeTSVBRequest(
-    req: InfraFrameworkRequest,
-    model: InfraMetricModel,
-    timerange: { min: number; max: number },
-    filters: JsonObject[]
-  ): Promise<InfraTSVBResponse>;
-}
-/* eslint-enable  @typescript-eslint/unified-signatures */
-
-export interface InfraFrameworkRequest<
-  InternalRequest extends InfraWrappableRequest = InfraWrappableRequest
-> {
-  [internalInfraFrameworkRequest]: InternalRequest;
-  payload: InternalRequest['payload'];
-  params: InternalRequest['params'];
-  query: InternalRequest['query'];
+export interface InfraServerPluginDeps {
+  home: HomeServerPluginSetup;
+  spaces: SpacesPluginSetup;
+  usageCollection: UsageCollectionSetup;
+  visTypeTimeseries: VisTypeTimeseriesSetup;
+  features: FeaturesPluginSetup;
+  apm: APMPluginSetup;
+  alerts: AlertingPluginContract;
+  ml?: MlPluginSetup;
 }
 
-export interface InfraWrappableRequest<Payload = any, Params = any, Query = any> {
-  payload: Payload;
-  params: Params;
-  query: Query;
+export interface CallWithRequestParams extends GenericParams {
+  max_concurrent_shard_requests?: number;
+  name?: string;
+  index?: string | string[];
+  ignore_unavailable?: boolean;
+  allow_no_indices?: boolean;
+  size?: number;
+  terminate_after?: number;
+  fields?: string | string[];
+  path?: string;
+  query?: string | object;
+  track_total_hits?: boolean | number;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
@@ -84,22 +48,6 @@ export interface InfraFrameworkPluginOptions {
   register: any;
   options: any;
 }
-
-export interface InfraFrameworkRouteOptions<
-  RouteRequest extends InfraWrappableRequest,
-  RouteResponse extends InfraResponse
-> {
-  path: string;
-  method: string | string[];
-  vhost?: string;
-  handler: InfraFrameworkRouteHandler<RouteRequest, RouteResponse>;
-  options?: Pick<RouteOptions, Exclude<keyof RouteOptions, 'handler'>>;
-}
-
-export type InfraFrameworkRouteHandler<
-  RouteRequest extends InfraWrappableRequest,
-  RouteResponse extends InfraResponse
-> = (request: InfraFrameworkRequest<RouteRequest>, h: ResponseToolkit) => RouteResponse;
 
 export interface InfraDatabaseResponse {
   took: number;
@@ -114,6 +62,7 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
     skipped: number;
     failed: number;
   };
+  timed_out: boolean;
   aggregations?: Aggregations;
   hits: {
     total: {
@@ -129,7 +78,16 @@ export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends InfraDatab
 }
 
 export interface InfraDatabaseFieldCapsResponse extends InfraDatabaseResponse {
+  indices: string[];
   fields: InfraFieldsResponse;
+}
+
+export interface InfraDatabaseGetIndicesAliasResponse {
+  [indexName: string]: {
+    aliases: {
+      [aliasName: string]: any;
+    };
+  };
 }
 
 export interface InfraDatabaseGetIndicesResponse {
@@ -137,6 +95,15 @@ export interface InfraDatabaseGetIndicesResponse {
     aliases: {
       [aliasName: string]: any;
     };
+    mappings: {
+      _meta: object;
+      dynamic_templates: any[];
+      date_detection: boolean;
+      properties: {
+        [fieldName: string]: any;
+      };
+    };
+    settings: { index: object };
   };
 }
 
@@ -145,19 +112,28 @@ export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 export interface SortedSearchHit extends SearchHit {
   sort: any[];
   _source: {
-    [field: string]: any;
+    [field: string]: JsonValue;
+  };
+  fields: {
+    [field: string]: JsonArray;
   };
 }
 
-export interface InfraDateRangeAggregationBucket {
+export type InfraDateRangeAggregationBucket<NestedAggregation extends object = {}> = {
   from?: number;
   to?: number;
   doc_count: number;
   key: string;
+} & NestedAggregation;
+
+export interface InfraDateRangeAggregationResponse<NestedAggregation extends object = {}> {
+  buckets: Array<InfraDateRangeAggregationBucket<NestedAggregation>>;
 }
 
-export interface InfraDateRangeAggregationResponse {
-  buckets: InfraDateRangeAggregationBucket[];
+export interface InfraTopHitsAggregationResponse {
+  hits: {
+    hits: [];
+  };
 }
 
 export interface InfraMetadataAggregationBucket {
@@ -193,7 +169,12 @@ export interface InfraTSVBPanel {
 
 export interface InfraTSVBSeries {
   id: string;
+  label: string;
   data: InfraTSVBDataPoint[];
 }
 
 export type InfraTSVBDataPoint = [number, number];
+
+export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
+  method: RouteMethod;
+} & RouteConfig<Params, Query, Body, Method>;

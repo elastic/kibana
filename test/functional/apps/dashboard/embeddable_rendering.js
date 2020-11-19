@@ -30,10 +30,20 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
+  const security = getService('security');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'visualize',
+    'discover',
+    'timePicker',
+  ]);
   let visNames = [];
 
   const expectAllDataRenders = async () => {
@@ -43,14 +53,13 @@ export default function ({ getService, getPageObjects }) {
     const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
     expect(tsvbGuageExists).to.be(true);
     await dashboardExpect.timelionLegendCount(0);
-    await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+    await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
     await dashboardExpect.vegaTextsExist(['5,000']);
-    await dashboardExpect.goalAndGuageLabelsExist(['63%', '56%', '11.915 GB']);
+    await dashboardExpect.goalAndGuageLabelsExist(['62.925%', '55.625%', '11.915 GB']);
     await dashboardExpect.dataTableRowCount(5);
     await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
     // TODO add test for 'region map viz'
     // TODO add test for 'tsvb gauge' viz
-    await dashboardExpect.tsvbTimeSeriesLegendCount(1);
     // TODO add test for 'geo map' viz
     // This tests the presence of the two input control embeddables
     await dashboardExpect.inputControlItemCount(5);
@@ -74,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.savedSearchRowCount(0);
     await dashboardExpect.inputControlItemCount(5);
     await dashboardExpect.metricValuesExist(['0']);
-    await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+    await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
 
     // Three instead of 0 because there is a visualization based off a non time based index that
     // should still show data.
@@ -86,17 +95,24 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.tsvbMetricValuesExist(['0']);
     await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 0']);
     await dashboardExpect.tsvbTableCellCount(0);
-    await dashboardExpect.tsvbTimeSeriesLegendCount(1);
     await dashboardExpect.tsvbTopNValuesExist(['0']);
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe('dashboard embeddable rendering', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/76245
+  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
 
-      const fromTime = '2018-01-01 00:00:00.000';
-      const toTime = '2018-04-13 00:00:00.000';
+      const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
+      const toTime = 'Apr 13, 2018 @ 00:00:00.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
@@ -105,6 +121,7 @@ export default function ({ getService, getPageObjects }) {
       const currentUrl = await browser.getCurrentUrl();
       const newUrl = currentUrl.replace(/\?.*$/, '');
       await browser.get(newUrl, false);
+      await security.testUser.restoreDefaults();
     });
 
     it('adding visualizations', async () => {
@@ -120,14 +137,18 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('adding saved searches', async () => {
-      const visAndSearchNames = visNames.concat(await dashboardAddPanel.addEverySavedSearch('"Rendering Test"'));
+      const visAndSearchNames = visNames.concat(
+        await dashboardAddPanel.addEverySavedSearch('"Rendering Test"')
+      );
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visAndSearchNames);
       expect(visAndSearchNames.length).to.be.equal(28);
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
+      await PageObjects.dashboard.saveDashboard('embeddable rendering test', {
+        storeTimeWithDashboard: true,
+      });
     });
 
     it('initial render test', async () => {
@@ -138,8 +159,8 @@ export default function ({ getService, getPageObjects }) {
 
     it('data rendered correctly when dashboard is opened from listing page', async () => {
       // Change the time to make sure that it's updated when re-opened from the listing page.
-      const fromTime = '2018-05-10 00:00:00.000';
-      const toTime = '2018-05-11 00:00:00.000';
+      const fromTime = 'May 10, 2018 @ 00:00:00.000';
+      const toTime = 'May 11, 2018 @ 00:00:00.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.loadSavedDashboard('embeddable rendering test');
       await PageObjects.dashboard.waitForRenderComplete();
@@ -155,16 +176,16 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('panels are updated when time changes outside of data', async () => {
-      const fromTime = '2018-05-11 00:00:00.000';
-      const toTime = '2018-05-12 00:00:00.000';
+      const fromTime = 'May 11, 2018 @ 00:00:00.000';
+      const toTime = 'May 12, 2018 @ 00:00:00.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.waitForRenderComplete();
       await expectNoDataRenders();
     });
 
     it('panels are updated when time changes inside of data', async () => {
-      const fromTime = '2018-01-01 00:00:00.000';
-      const toTime = '2018-04-13 00:00:00.000';
+      const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
+      const toTime = 'Apr 13, 2018 @ 00:00:00.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();

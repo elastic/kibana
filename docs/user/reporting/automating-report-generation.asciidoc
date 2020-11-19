@@ -1,0 +1,72 @@
+[role="xpack"]
+[[automating-report-generation]]
+== Automating report generation
+Automatically generate PDF and CSV reports by submitting HTTP `POST` requests using {watcher} or a script.
+
+include::report-intervals.asciidoc[]
+
+[float]
+=== Create a POST URL
+
+Create the POST
+URL that triggers a report to generate.
+
+To create the POST URL for PDF reports:
+
+. Open then main menu, click *Dashboard*, then open a dashboard.
++
+To specify a relative or absolute time period, use the time filter.
+
+. From the {kib} toolbar, click *Share*, then select *PDF Reports*.
+
+. Click *Copy POST URL*.
++
+[role="screenshot"]
+image::images/report-automate-pdf.png[Generate Visualize and Dashboard reports]
+
+
+To create the POST URL for CSV reports:
+
+. Load the saved search in *Discover*.
++
+To specify a relative or absolute time period, use the time filter.
+
+. From the {kib} toolbar, click *Share*, then select *CSV Reports*.
+
+. Click *Copy POST URL*.
++
+[role="screenshot"]
+image::images/report-automate-csv.png[Generate Discover reports]
+
+[float]
+=== Use Watcher
+
+include::watch-example.asciidoc[]
+
+[float]
+=== Use a script
+
+include::script-example.asciidoc[]
+
+[float]
+=== HTTP response codes
+
+include::response-codes.asciidoc[]
+
+[float]
+== Deprecated report URLs
+
+The following POST URL paths were once supported but are now deprecated. If there are
+any problems with using these paths after upgrading {kib}, use
+{kib} to regenerate the POST URL for a particular report.
+
+* Dashboard Reports:  `/api/reporting/generate/dashboard/<dashboard-id>`
+* Visualization Reports:  `/api/reporting/generate/visualization/<visualization-id>`
+* Saved Search Reports: `/api/reporting/generate/search/<saved-search-id>`
+
+[IMPORTANT]
+===================
+Previously there was a `&sync` parameter appended to generation URLs which would hold
+the request open until the document was fully generated. This feature has been removed.
+Existing use of the `&sync` parameter, in Watcher for example, will need to be updated.
+===================

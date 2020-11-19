@@ -1,0 +1,10 @@
+{
+  "get_script_context": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_script_context"
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders RangeControlEditor 1`] = `
+<Fragment>
+  <InjectIntl(IndexPatternSelectFormRowUi)
+    IndexPatternSelect={[Function]}
+    controlIndex={0}
+    indexPatternId="indexPattern1"
+    onChange={[Function]}
+  />
+  <InjectIntl(FieldSelectUi)
+    controlIndex={0}
+    fieldName="numberField"
+    filterField={[Function]}
+    getIndexPattern={[Function]}
+    indexPatternId="indexPattern1"
+    onChange={[Function]}
+  />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    id="stepSize-0"
+    label={
+      <FormattedMessage
+        defaultMessage="Step Size"
+        id="inputControl.editor.rangeControl.stepSizeLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldNumber
+      data-test-subj="rangeControlSizeInput0"
+      onChange={[Function]}
+      value={1}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    id="decimalPlaces-0"
+    label={
+      <FormattedMessage
+        defaultMessage="Decimal Places"
+        id="inputControl.editor.rangeControl.decimalPlacesLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldNumber
+      data-test-subj="rangeControlDecimalPlacesInput0"
+      min={0}
+      onChange={[Function]}
+      value={0}
+    />
+  </EuiFormRow>
+</Fragment>
+`;

@@ -6,68 +6,67 @@
 
 import React, { Fragment } from 'react';
 import { EuiText, EuiTitle, EuiLink, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
+import { EuiMonitoringTable } from '../../table';
 import { RecoveryIndex } from './recovery_index';
 import { TotalTime } from './total_time';
 import { SourceDestination } from './source_destination';
 import { FilesProgress, BytesProgress, TranslogProgress } from './progress';
 import { parseProps } from './parse_props';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const columns = [
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.indexTitle', {
-      defaultMessage: 'Index'
+      defaultMessage: 'Index',
     }),
     field: 'name',
-    render: (_name, shard) => <RecoveryIndex {...shard} />
+    render: (_name, shard) => <RecoveryIndex {...shard} />,
   },
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.stageTitle', {
-      defaultMessage: 'Stage'
+      defaultMessage: 'Stage',
     }),
-    field: 'stage'
+    field: 'stage',
   },
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.totalTimeTitle', {
-      defaultMessage: 'Total Time'
+      defaultMessage: 'Total Time',
     }),
     field: null,
-    render: shard => <TotalTime {...shard} />
+    render: (shard) => <TotalTime {...shard} />,
   },
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.sourceDestinationTitle', {
-      defaultMessage: 'Source / Destination'
+      defaultMessage: 'Source / Destination',
     }),
     field: null,
-    render: shard => <SourceDestination {...shard} />
+    render: (shard) => <SourceDestination {...shard} />,
   },
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.filesTitle', {
-      defaultMessage: 'Files'
+      defaultMessage: 'Files',
     }),
     field: null,
-    render: shard => <FilesProgress {...shard} />
+    render: (shard) => <FilesProgress {...shard} />,
   },
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.bytesTitle', {
-      defaultMessage: 'Bytes'
+      defaultMessage: 'Bytes',
     }),
     field: null,
-    render: shard => <BytesProgress {...shard} />
+    render: (shard) => <BytesProgress {...shard} />,
   },
   {
     name: i18n.translate('xpack.monitoring.kibana.shardActivity.translogTitle', {
-      defaultMessage: 'Translog'
+      defaultMessage: 'Translog',
     }),
     field: null,
-    render: shard => <TranslogProgress {...shard} />
-  }
+    render: (shard) => <TranslogProgress {...shard} />,
+  },
 ];
 
-
-class ShardActivityUI extends React.Component {
+export class ShardActivity extends React.Component {
   constructor(props) {
     super(props);
     this.getNoDataMessage = this.getNoDataMessage.bind(this);
@@ -75,9 +74,9 @@ class ShardActivityUI extends React.Component {
 
   getNoDataMessage() {
     if (this.props.showShardActivityHistory) {
-      return this.props.intl.formatMessage({
-        id: 'xpack.monitoring.elasticsearch.shardActivity.noDataMessage',
-        defaultMessage: 'There are no historical shard activity records for the selected time range.'
+      return i18n.translate('xpack.monitoring.elasticsearch.shardActivity.noDataMessage', {
+        defaultMessage:
+          'There are no historical shard activity records for the selected time range.',
       });
     }
     return (
@@ -85,7 +84,8 @@ class ShardActivityUI extends React.Component {
         <FormattedMessage
           id="xpack.monitoring.elasticsearch.shardActivity.noActiveShardRecoveriesMessage.completedRecoveriesLinkTextProblem"
           defaultMessage="There are no active shard recoveries for this cluster."
-        /><br />
+        />
+        <br />
         <FormattedMessage
           id="xpack.monitoring.elasticsearch.shardActivity.noActiveShardRecoveriesMessage.completedRecoveriesLinkTextSolution"
           defaultMessage="Try viewing {shardActivityHistoryLink}."
@@ -97,7 +97,7 @@ class ShardActivityUI extends React.Component {
                   defaultMessage="completed recoveries"
                 />
               </EuiLink>
-            )
+            ),
           }}
         />
       </Fragment>
@@ -112,7 +112,7 @@ class ShardActivityUI extends React.Component {
       pagination,
       onTableChange,
       toggleShardActivityHistory,
-      showShardActivityHistory
+      showShardActivityHistory,
     } = this.props;
 
     if (rawData === null) {
@@ -136,16 +136,16 @@ class ShardActivityUI extends React.Component {
         <EuiSpacer />
         <EuiSwitch
           id="monitoring_completed_recoveries"
-          label={(
+          label={
             <FormattedMessage
               id="xpack.monitoring.elasticsearch.shardActivity.completedRecoveriesLabel"
               defaultMessage="Completed recoveries"
             />
-          )}
+          }
           onChange={toggleShardActivityHistory}
           checked={showShardActivityHistory}
         />
-        <EuiSpacer/>
+        <EuiSpacer />
         <EuiMonitoringTable
           className="esShardActivityTable"
           rows={rows}
@@ -156,12 +156,10 @@ class ShardActivityUI extends React.Component {
           pagination={pagination}
           onTableChange={onTableChange}
           executeQueryOptions={{
-            defaultFields: ['name']
+            defaultFields: ['name'],
           }}
         />
       </Fragment>
     );
   }
 }
-
-export const ShardActivity = injectI18n(ShardActivityUI);

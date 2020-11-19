@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProcessDraggable rendering it renders against shallow snapshot 1`] = `
+<div>
+  <DraggableBadge
+    contextId="context-123"
+    eventId="event-123"
+    field="process.name"
+    iconType="console"
+    value="process-name-1"
+  />
+  <DraggableBadge
+    contextId="context-123"
+    eventId="event-123"
+    field="process.pid"
+    queryValue="123"
+    value="(123)"
+  />
+</div>
+`;

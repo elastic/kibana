@@ -1,0 +1,25 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "ft_event_rate_gen_trend_nanos",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "format": "yyyy-MM-dd HH:mm:ss.SSSSSSSSSXX",
+          "type": "date_nanos"
+        },
+        "count": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

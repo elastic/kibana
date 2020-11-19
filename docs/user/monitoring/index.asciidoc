@@ -1,0 +1,8 @@
+include::xpack-monitoring.asciidoc[]
+include::beats-details.asciidoc[leveloffset=+1]
+include::cluster-alerts.asciidoc[leveloffset=+1]
+include::elasticsearch-details.asciidoc[leveloffset=+1]
+include::kibana-alerts.asciidoc[leveloffset=+1]
+include::kibana-details.asciidoc[leveloffset=+1]
+include::logstash-details.asciidoc[leveloffset=+1]
+include::monitoring-troubleshooting.asciidoc[leveloffset=+1]

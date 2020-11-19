@@ -6,8 +6,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { ComponentStrings } from '../../../i18n';
 import { Loading } from '../loading';
 import { ArgLabel } from './arg_label';
+
+const { ArgFormPendingArgValue: strings } = ComponentStrings;
 
 export class PendingArgValue extends React.PureComponent {
   static propTypes = {
@@ -30,7 +33,7 @@ export class PendingArgValue extends React.PureComponent {
       setResolvedArgValue(null);
     } else {
       argResolver(argValue)
-        .then(val => setResolvedArgValue(val != null ? val : null))
+        .then((val) => setResolvedArgValue(val != null ? val : null))
         .catch(() => setResolvedArgValue(null)); // swallow error, it's not important
     }
   }
@@ -47,7 +50,7 @@ export class PendingArgValue extends React.PureComponent {
           expandable={false}
         >
           <div className="canvasArg--pending">
-            <Loading animated text="Loading" />
+            <Loading animated text={strings.getLoadingMessage()} />
           </div>
         </ArgLabel>
       </div>

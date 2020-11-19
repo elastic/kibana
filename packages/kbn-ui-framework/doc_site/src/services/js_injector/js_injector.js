@@ -17,13 +17,11 @@
  * under the License.
  */
 
-
 import $ from 'jquery';
 
 const ID_ATTRIBUTE = 'injected-js-tag-id';
 
 export default {
-
   inject(js, id) {
     if (id) {
       $(`[${ID_ATTRIBUTE}=${id}]`).remove();
@@ -36,5 +34,4 @@ export default {
   remove(id) {
     $(`[${ID_ATTRIBUTE}=${id}]`).remove();
   },
-
 };

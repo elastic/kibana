@@ -12,7 +12,7 @@
  *
  * I use 1 method to handling property values that are either primitives or
  * arrays, because it allows the callers to be a little more dumb. All they
-  * have to know is the property name, rather than the type as well.
+ * have to know is the property name, rather than the type as well.
  */
 export class ModelUpdater {
   constructor($scope, model) {
@@ -25,7 +25,7 @@ export class ModelUpdater {
     const { $scope, model } = this;
     const keys = Object.keys(properties);
     $scope.$evalAsync(() => {
-      keys.forEach(key => {
+      keys.forEach((key) => {
         if (Array.isArray(model[key])) {
           model[key].push(properties[key]);
         } else {

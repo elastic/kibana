@@ -5,8 +5,20 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 import { CcrShard } from './ccr_shard';
+
+jest.mock('../../../legacy_shims', () => {
+  return {
+    Legacy: {
+      shims: { getAngularInjector: () => ({ get: () => ({ get: () => 'utc' }) }) },
+    },
+  };
+});
+
+jest.mock('../../chart', () => ({
+  MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
+}));
 
 describe('CcrShard', () => {
   const props = {
@@ -39,13 +51,13 @@ describe('CcrShard', () => {
     },
     oldestStat: {
       failed_read_requests: 0,
-      operations_written: 2976
+      operations_written: 2976,
     },
-    timestamp: '2018-09-27T13:32:09.412Z'
+    timestamp: '2018-09-27T13:32:09.412Z',
   };
 
   test('that it renders normally', () => {
-    const component = shallowWithIntl(<CcrShard.WrappedComponent {...props} />);
+    const component = shallow(<CcrShard {...props} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -57,13 +69,13 @@ describe('CcrShard', () => {
         read_exceptions: [
           {
             type: 'something_is_wrong',
-            reason: 'not sure but something happened'
-          }
-        ]
-      }
+            reason: 'not sure but something happened',
+          },
+        ],
+      },
     };
 
-    const component = shallowWithIntl(<CcrShard.WrappedComponent {...localProps} />);
+    const component = shallow(<CcrShard {...localProps} />);
     expect(component.find('EuiPanel').get(0)).toMatchSnapshot();
   });
 });

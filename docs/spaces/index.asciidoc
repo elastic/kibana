@@ -2,16 +2,141 @@
 [[xpack-spaces]]
 == Spaces
 
-With spaces, you can organize your dashboards and other saved objects into meaningful categories.
-After creating your own spaces, you will be asked to choose a space when you enter {kib}. Once inside a space,
-you will only see the dashboards and other saved objects that belong to that space. You can change your active space at any time.
+Spaces enable you to organize your dashboards and other saved
+objects into meaningful categories. Once inside a space, you see only
+the dashboards and saved objects that belong to that space.
 
-With security enabled, you can control which users have access to individual spaces.
+{kib} creates a default space for you.
+After you create your own
+spaces, you're asked to choose a space when you log in to Kibana. You can change your
+current space at any time by using the menu.
 
 [role="screenshot"]
-image::spaces/images/space-selector.png["Space selector screen"]
+image::spaces/images/change-space.png["Change current space menu"]
 
-include::getting-started.asciidoc[]
-include::managing-spaces.asciidoc[]
-include::securing-spaces.asciidoc[]
-include::moving-saved-objects.asciidoc[]
+Kibana supports spaces in several ways.  You can:
+
+[[spaces-getting-started]]
+
+* <<spaces-managing, View&comma; create&comma; and delete spaces>>
+* <<spaces-control-feature-visibility, Control feature access based on user needs>>
+* <<spaces-control-user-access, Control feature access based on user privileges>>
+* <<spaces-moving-objects, Move objects between spaces>>
+* <<spaces-default-route, Configure a Space-level landing page>>
+* <<spaces-delete-started, Disable the Spaces feature>>
+
+[float]
+==== Required permissions
+
+The `kibana_admin` role or equivilent is required to manage **Spaces**.
+
+[float]
+[[spaces-managing]]
+=== View, create, and delete spaces
+
+Open the main menu, then click *Stack Management > Spaces* for an overview of your spaces.  This view provides actions
+for you to create, edit, and delete spaces.
+
+[role="screenshot"]
+image::spaces/images/space-management.png["Space management"]
+
+[float]
+==== Create or edit a space
+
+You can create as many spaces as you like. Click *Create a space* and provide a name,
+URL identifier, optional description.
+
+The URL identifier is a short text string that becomes part of the
+{kib} URL when you are inside that space. {kib} suggests a URL identifier based
+on the name of your space, but you can customize the identifier to your liking.
+You cannot change the space identifier once you create the space.
+
+{kib} also has an <<spaces-api, API>>
+if you prefer to create spaces programatically.
+
+[role="screenshot"]
+image::spaces/images/edit-space.png["Space management"]
+
+[float]
+==== Delete a space
+
+Deleting a space permanently removes the space and all of its contents.
+Find the space on the *Spaces* overview page and click the trash icon in the Actions column.
+You can't delete the default space, but you can customize it to your liking.
+
+[float]
+[[spaces-control-feature-visibility]]
+=== Control feature access based on user needs
+
+You have control over which features are visible in each space.
+For example, you might hide Dev Tools
+in your "Executive" space or show Stack Monitoring only in your "Admin" space.
+You can define which features to show or hide when you add or edit a space.
+
+Controlling feature
+visibility is not a security feature. To secure access
+to specific features on a per-user basis, you must configure
+<<xpack-security-authorization, Kibana Security>>.
+
+[role="screenshot"]
+image::spaces/images/edit-space-feature-visibility.png["Controlling features visiblity"]
+
+[float]
+[[spaces-control-user-access]]
+=== Control feature access based on user privileges
+
+When using Kibana with security, you can configure applications and features
+based on your users’ privileges. This means different roles can have access
+to different features in the same space.
+Power users might have privileges to create and edit visualizations and dashboards,
+while analysts or executives might have Dashboard and Canvas with read-only privileges.
+See <<adding_kibana_privileges>> for details.
+
+[role="screenshot"]
+image::spaces/images/spaces-roles.png["Controlling features visiblity"]
+
+[float]
+[[spaces-moving-objects]]
+=== Move saved objects between spaces
+
+To <<managing-saved-objects-copy-to-space, copy objects>> from one space to another, open the main menu,
+then click *Stack Management > Saved Objects*.
+
+Alternately, you can move objects using {kib}'s <<managing-saved-objects-export-objects, import and export>>
+interface.
+
+. Navigate to the space that contains your saved objects.
+. Export your saved objects.
+. Navigate to the space where you want to import the objects.
+. Import your saved objects.
+. (Optional) Delete objects in the export space that you no longer need.
+
+{kib} also has beta <<saved-objects-api-import, import>> and
+<<saved-objects-api-export, export>> APIs if you want to automate this process.
+
+[float]
+[[spaces-default-route]]
+=== Configure a Space-level landing page
+
+You can create a custom experience for users by configuring the {kib} landing page on a per-space basis.
+The landing page can route users to a specific dashboard, application, or saved object as they enter each space.
+
+To configure the landing page, use the default route setting in
+<<kibana-general-settings, Stack Management > {kib} > Advanced settings>>.
+For example, you might set the default route to `/app/kibana#/dashboards`.
+
+[role="screenshot"]
+image::spaces/images/spaces-configure-landing-page.png["Configure space-level landing page"]
+
+
+[float]
+[[spaces-delete-started]]
+=== Disable and version updates
+
+Spaces are automatically enabled in {kib}. If you don't want use this feature,
+you can disable it
+by setting `xpack.spaces.enabled` to `false` in your
+`kibana.yml` configuration file.
+
+If you are upgrading your
+version of {kib}, the default space will contain all of your existing saved objects.

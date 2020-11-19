@@ -1,6 +1,8 @@
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
-window.__kbnNonce__ = kbnCsp.nonce;
+window.__kbnThemeTag__ = "{{themeTag}}";
+window.__kbnPublicPath__ = {{publicPathMap}};
+window.__kbnBundles__ = {{kbnBundlesLoaderSource}}
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
@@ -13,13 +15,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   loadingMessage.style.display = 'flex';
 
   window.onload = function () {
-    var files = [
-      '{{dllBundlePath}}/vendors.bundle.dll.js',
-      '{{regularBundlePath}}/commons.bundle.js',
-      '{{regularBundlePath}}/{{appId}}.bundle.js'
-    ];
-
-    var failure = function () {
+    function failure() {
       // make subsequent calls to failure() noop
       failure = function () {};
 
@@ -34,42 +30,60 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       document.body.innerHTML = err.outerHTML;
     }
 
-    function loadStyleSheet(path) {
+    var stylesheetTarget = document.querySelector('head meta[name="add-styles-here"]')
+    function loadStyleSheet(url, cb) {
       var dom = document.createElement('link');
-
+      dom.rel = 'stylesheet';
+      dom.type = 'text/css';
+      dom.href = url;
       dom.addEventListener('error', failure);
-      dom.setAttribute('rel', 'stylesheet');
-      dom.setAttribute('type', 'text/css');
-      dom.setAttribute('href', path);
-      document.head.appendChild(dom);
+      dom.addEventListener('load', cb);
+      document.head.insertBefore(dom, stylesheetTarget);
     }
 
-    function createJavascriptElement(path) {
+    var scriptsTarget = document.querySelector('head meta[name="add-scripts-here"]')
+    function loadScript(url, cb) {
       var dom = document.createElement('script');
-
-      dom.setAttribute('async', '');
+      {{!-- NOTE: async = false is used to trigger async-download/ordered-execution as outlined here: https://www.html5rocks.com/en/tutorials/speed/script-loading/ --}}
+      dom.async = false;
+      dom.src = url;
       dom.addEventListener('error', failure);
-      dom.setAttribute('src', file);
-      dom.addEventListener('load', next);
-      document.head.appendChild(dom);
+      dom.addEventListener('load', cb);
+      document.head.insertBefore(dom, scriptsTarget);
     }
 
-    {{#each styleSheetPaths}}
-      loadStyleSheet('{{this}}');
-    {{/each}}
+    function load(urls, cb) {
+      var pending = urls.length;
+      urls.forEach(function (url) {
+        var innerCb = function () {
+          pending = pending - 1;
+          if (pending === 0 && typeof cb === 'function') {
+            cb();
+          }
+        }
 
-    (function next() {
-      var file = files.shift();
-      if (!file) return;
+        if (typeof url !== 'string') {
+          load(url, innerCb);
+        } else if (url.slice(-4) === '.css') {
+          loadStyleSheet(url, innerCb);
+        } else {
+          loadScript(url, innerCb);
+        }
+      });
+    }
 
-      var dom = document.createElement('script');
+    load([
+      {{#each jsDependencyPaths}}
+        '{{this}}',
+      {{/each}}
+    ], function () {
+      __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
 
-      dom.setAttribute('async', '');
-      dom.setAttribute('nonce', window.__kbnNonce__);
-      dom.addEventListener('error', failure);
-      dom.setAttribute('src', file);
-      dom.addEventListener('load', next);
-      document.head.appendChild(dom);
-    }());
-  };
+      load([
+        {{#each styleSheetPaths}}
+          '{{this}}',
+        {{/each}}
+      ]);
+    });
+  }
 }

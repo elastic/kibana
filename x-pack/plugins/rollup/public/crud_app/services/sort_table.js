@@ -13,7 +13,5 @@ const sorters = {};
 export const sortTable = (array = [], sortField, isSortAscending) => {
   const sorter = sorters[sortField] || stringSort(sortField);
   const sorted = sortBy(array, sorter);
-  return isSortAscending
-    ? sorted
-    : sorted.reverse();
+  return isSortAscending ? sorted : sorted.reverse();
 };

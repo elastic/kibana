@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 
 function fetchPipelineVersions(...args) {
-  const [ req, config, logstashIndexPattern, clusterUuid, pipelineId ] = args;
+  const [req, config, logstashIndexPattern, clusterUuid, pipelineId] = args;
   checkParam(logstashIndexPattern, 'logstashIndexPattern in getPipelineVersions');
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
@@ -20,27 +20,25 @@ function fetchPipelineVersions(...args) {
         path: 'logstash_stats.pipelines',
         query: {
           bool: {
-            filter: [
-              { term: { 'logstash_stats.pipelines.id': pipelineId } },
-            ]
-          }
-        }
-      }
-    }
+            filter: [{ term: { 'logstash_stats.pipelines.id': pipelineId } }],
+          },
+        },
+      },
+    },
   ];
   const query = createQuery({
     type: 'logstash_stats',
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,
-    filters
+    filters,
   });
 
   const filteredAggs = {
     by_pipeline_hash: {
       terms: {
         field: 'logstash_stats.pipelines.hash',
-        size: config.get('xpack.monitoring.max_bucket_size'),
-        order: { 'path_to_root>first_seen': 'desc' }
+        size: config.get('monitoring.ui.max_bucket_size'),
+        order: { 'path_to_root>first_seen': 'desc' },
       },
       aggs: {
         path_to_root: {
@@ -48,38 +46,36 @@ function fetchPipelineVersions(...args) {
           aggs: {
             first_seen: {
               min: {
-                field: 'logstash_stats.timestamp'
-              }
+                field: 'logstash_stats.timestamp',
+              },
             },
             last_seen: {
               max: {
-                field: 'logstash_stats.timestamp'
-              }
-            }
-          }
-        }
-      }
-    }
+                field: 'logstash_stats.timestamp',
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
   const aggs = {
     pipelines: {
       nested: {
-        path: 'logstash_stats.pipelines'
+        path: 'logstash_stats.pipelines',
       },
       aggs: {
         scoped: {
           filter: {
             bool: {
-              filter: [
-                { term: { 'logstash_stats.pipelines.id': pipelineId } }
-              ]
-            }
+              filter: [{ term: { 'logstash_stats.pipelines.id': pipelineId } }],
+            },
           },
-          aggs: filteredAggs
-        }
-      }
-    }
+          aggs: filteredAggs,
+        },
+      },
+    },
   };
 
   const params = {
@@ -87,9 +83,9 @@ function fetchPipelineVersions(...args) {
     size: 0,
     ignoreUnavailable: true,
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query,
-      aggs
+      aggs,
     },
   };
 
@@ -97,11 +93,15 @@ function fetchPipelineVersions(...args) {
 }
 
 export function _handleResponse(response) {
-  const pipelineHashes = get(response, 'aggregations.pipelines.scoped.by_pipeline_hash.buckets', []);
-  return pipelineHashes.map(pipelineHash => ({
+  const pipelineHashes = get(
+    response,
+    'aggregations.pipelines.scoped.by_pipeline_hash.buckets',
+    []
+  );
+  return pipelineHashes.map((pipelineHash) => ({
     hash: pipelineHash.key,
     firstSeen: get(pipelineHash, 'path_to_root.first_seen.value'),
-    lastSeen: get(pipelineHash, 'path_to_root.last_seen.value')
+    lastSeen: get(pipelineHash, 'path_to_root.last_seen.value'),
   }));
 }
 

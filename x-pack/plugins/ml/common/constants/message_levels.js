@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 export const MESSAGE_LEVEL = {
   ERROR: 'error',
   INFO: 'info',
   SUCCESS: 'success',
-  WARNING: 'warning'
+  WARNING: 'warning',
 };
-

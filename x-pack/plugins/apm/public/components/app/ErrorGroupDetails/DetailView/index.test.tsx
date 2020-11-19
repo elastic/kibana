@@ -32,14 +32,16 @@ describe('DetailView', () => {
       occurrencesCount: 10,
       transaction: undefined,
       error: {
-        '@timestamp': 'myTimestamp',
+        timestamp: {
+          us: 0,
+        },
         http: { request: { method: 'GET' } },
         url: { full: 'myUrl' },
         service: { name: 'myService' },
         user: { id: 'myUserId' },
         error: { exception: { handled: true } },
-        transaction: { id: 'myTransactionId', sampled: true }
-      } as any
+        transaction: { id: 'myTransactionId', sampled: true },
+      } as any,
     };
 
     const wrapper = shallow(
@@ -54,11 +56,16 @@ describe('DetailView', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('should render StickyProperties', () => {
+  it('should render a Summary', () => {
     const errorGroup = {
       occurrencesCount: 10,
-      error: {} as any,
-      transaction: undefined
+      error: {
+        error: {},
+        timestamp: {
+          us: 0,
+        },
+      } as any,
+      transaction: undefined,
     };
     const wrapper = shallow(
       <DetailView
@@ -66,7 +73,7 @@ describe('DetailView', () => {
         urlParams={{}}
         location={{} as Location}
       />
-    ).find('StickyErrorProperties');
+    ).find('Summary');
 
     expect(wrapper.exists()).toBe(true);
   });
@@ -76,10 +83,13 @@ describe('DetailView', () => {
       occurrencesCount: 10,
       transaction: undefined,
       error: {
-        '@timestamp': 'myTimestamp',
+        timestamp: {
+          us: 0,
+        },
+        error: {},
         service: {},
-        user: {}
-      } as any
+        user: {},
+      } as any,
     };
     const wrapper = shallow(
       <DetailView
@@ -98,9 +108,12 @@ describe('DetailView', () => {
       occurrencesCount: 10,
       transaction: undefined,
       error: {
-        '@timestamp': 'myTimestamp',
-        context: {}
-      } as any
+        timestamp: {
+          us: 0,
+        },
+        error: {},
+        context: {},
+      } as any,
     };
     const wrapper = shallow(
       <DetailView
@@ -112,5 +125,32 @@ describe('DetailView', () => {
 
     expect(wrapper.exists()).toBe(true);
     expect(wrapper).toMatchSnapshot();
+  });
+
+  it('should render without http request info', () => {
+    const errorGroup = {
+      occurrencesCount: 10,
+      transaction: undefined,
+      error: {
+        timestamp: {
+          us: 0,
+        },
+        http: { response: { status_code: 404 } },
+        url: { full: 'myUrl' },
+        service: { name: 'myService' },
+        user: { id: 'myUserId' },
+        error: { exception: { handled: true } },
+        transaction: { id: 'myTransactionId', sampled: true },
+      } as any,
+    };
+    expect(() =>
+      shallow(
+        <DetailView
+          errorGroup={errorGroup}
+          urlParams={{}}
+          location={{} as Location}
+        />
+      )
+    ).not.toThrowError();
   });
 });

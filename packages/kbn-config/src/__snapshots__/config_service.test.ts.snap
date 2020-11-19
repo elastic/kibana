@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`correctly passes context 1`] = `
+Object {
+  "branchRef": "feature-v1",
+  "buildNumRef": 100,
+  "buildShaRef": "feature-v1-build-sha",
+  "devRef": true,
+  "prodRef": false,
+  "versionRef": "v1",
+}
+`;

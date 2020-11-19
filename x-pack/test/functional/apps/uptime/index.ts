@@ -4,25 +4,79 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  settingsObjectId,
+  settingsObjectType,
+} from '../../../../plugins/uptime/server/lib/saved_objects';
 
 const ARCHIVE = 'uptime/full_heartbeat';
 
-// eslint-disable-next-line import/no-default-export
-export default ({ loadTestFile, getService }: KibanaFunctionalTestDefaultProviders) => {
+export const deleteUptimeSettingsObject = async (server: any) => {
+  // delete the saved object
+  try {
+    await server.savedObjects.delete({
+      type: settingsObjectType,
+      id: settingsObjectId,
+    });
+  } catch (e) {
+    // a 404 just means the doc is already missing
+    if (e.response.status !== 404) {
+      const { status, statusText, data, headers, config } = e.response;
+      throw new Error(
+        `error attempting to delete settings:\n${JSON.stringify(
+          { status, statusText, data, headers, config },
+          null,
+          2
+        )}`
+      );
+    }
+  }
+};
+
+export default ({ loadTestFile, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const server = getService('kibanaServer');
+  const uptime = getService('uptime');
 
-  describe('Uptime app', function() {
-    before(async () => {
-      await esArchiver.load(ARCHIVE);
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
-    });
-    after(async () => await esArchiver.unload(ARCHIVE));
+  describe('Uptime app', function () {
     this.tags('ciGroup6');
 
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./overview'));
-    loadTestFile(require.resolve('./monitor'));
+    beforeEach('delete settings', async () => {
+      await deleteUptimeSettingsObject(server);
+    });
+
+    describe('with generated data', () => {
+      beforeEach('load heartbeat data', async () => {
+        await esArchiver.load('uptime/blank');
+      });
+      afterEach('unload', async () => {
+        await esArchiver.unload('uptime/blank');
+      });
+
+      loadTestFile(require.resolve('./locations'));
+      loadTestFile(require.resolve('./settings'));
+      loadTestFile(require.resolve('./certificates'));
+    });
+
+    describe('with generated data but no data reset', () => {
+      loadTestFile(require.resolve('./ping_redirects'));
+    });
+
+    describe('with real-world data', () => {
+      before(async () => {
+        await esArchiver.unload(ARCHIVE);
+        await esArchiver.load(ARCHIVE);
+        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+        await uptime.navigation.goToUptime();
+      });
+      after(async () => await esArchiver.unload(ARCHIVE));
+
+      loadTestFile(require.resolve('./overview'));
+      loadTestFile(require.resolve('./monitor'));
+      loadTestFile(require.resolve('./ml_anomaly'));
+      loadTestFile(require.resolve('./feature_controls'));
+    });
   });
 };

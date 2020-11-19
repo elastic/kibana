@@ -34,24 +34,24 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
 
     const response = await this.database.get(user, params);
 
-    const tokenDetails = get<TokenEnrollmentData>(response, '_source.enrollment_token', {
+    const tokenDetails = get(response, '_source.enrollment_token', {
       expires_on: '0',
       token: null,
-    });
+    }) as TokenEnrollmentData;
 
     // Elasticsearch might return fast if the token is not found. OR it might return fast
     // if the token *is* found. Either way, an attacker could using a timing attack to figure
     // out whether a token is valid or not. So we introduce a random delay in returning from
     // this function to obscure the actual time it took for Elasticsearch to find the token.
     const randomDelayInMs = 25 + Math.round(Math.random() * 200); // between 25 and 225 ms
-    return new Promise<TokenEnrollmentData>(resolve =>
+    return new Promise<TokenEnrollmentData>((resolve) =>
       setTimeout(() => resolve(tokenDetails), randomDelayInMs)
     );
   }
 
   public async insertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]) {
     const body = flatten(
-      tokens.map(token => [
+      tokens.map((token) => [
         { index: { _id: `enrollment_token:${token.token}` } },
         {
           enrollment_token: token,

@@ -7,12 +7,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const FunctionFormComponent = props => {
+export const FunctionFormComponent = (props) => {
   const passedProps = {
     argResolver: props.argResolver,
     args: props.args,
     argType: props.argType,
     argTypeDef: props.argTypeDef,
+    filterGroups: props.filterGroups,
     context: props.context,
     expressionIndex: props.expressionIndex,
     expressionType: props.expressionType,
@@ -33,6 +34,7 @@ FunctionFormComponent.propTypes = {
   args: PropTypes.object.isRequired,
   argType: PropTypes.string.isRequired,
   argTypeDef: PropTypes.object.isRequired,
+  filterGroups: PropTypes.array.isRequired,
   context: PropTypes.object,
   expressionIndex: PropTypes.number.isRequired,
   expressionType: PropTypes.object.isRequired,

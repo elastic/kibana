@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { applyElementStrings } from '../strings';
+import { applyElementStrings } from '../../i18n/elements';
 import { areaChart } from './area_chart';
 import { bubbleChart } from './bubble_chart';
 import { debug } from './debug';
-import { donut } from './donut';
 import { dropdownFilter } from './dropdown_filter';
+import { filterDebug } from './filter_debug';
 import { horizontalBarChart } from './horizontal_bar_chart';
 import { horizontalProgressBar } from './horizontal_progress_bar';
 import { horizontalProgressPill } from './horizontal_progress_pill';
 import { image } from './image';
 import { lineChart } from './line_chart';
 import { markdown } from './markdown';
-import { metric } from './metric';
+import { metricElementInitializer } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
 import { progressGauge } from './progress_gauge';
@@ -26,25 +26,26 @@ import { repeatImage } from './repeat_image';
 import { revealImage } from './reveal_image';
 import { shape } from './shape';
 import { table } from './table';
-import { tiltedPie } from './tilted_pie';
 import { timeFilter } from './time_filter';
 import { verticalBarChart } from './vert_bar_chart';
 import { verticalProgressBar } from './vertical_progress_bar';
 import { verticalProgressPill } from './vertical_progress_pill';
 
-export const elementSpecs = applyElementStrings([
+import { SetupInitializer } from '../plugin';
+import { ElementFactory } from '../../types';
+
+const elementSpecs = [
   areaChart,
   bubbleChart,
   debug,
-  donut,
   dropdownFilter,
+  filterDebug,
   image,
   horizontalBarChart,
   horizontalProgressBar,
   horizontalProgressPill,
   lineChart,
   markdown,
-  metric,
   pie,
   plot,
   progressGauge,
@@ -54,9 +55,19 @@ export const elementSpecs = applyElementStrings([
   revealImage,
   shape,
   table,
-  tiltedPie,
   timeFilter,
   verticalBarChart,
   verticalProgressBar,
   verticalProgressPill,
-]);
+];
+
+const initializeElementFactories = [metricElementInitializer];
+
+export const initializeElements: SetupInitializer<ElementFactory[]> = (core, plugins) => {
+  const specs = [
+    ...elementSpecs,
+    ...initializeElementFactories.map((factory) => factory(core, plugins)),
+  ];
+
+  return applyElementStrings(specs);
+};

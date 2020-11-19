@@ -2,8 +2,6 @@
 
 exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collection.enabled setting 1`] = `
 <ExplainCollectionEnabled
-  context="cluster"
-  data="-1"
   enabler={
     Object {
       "enableCollectionEnabled": [Function],
@@ -111,7 +109,13 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       "timeZone": null,
     }
   }
-  property="xpack.monitoring.collection.enabled"
+  reason={
+    Object {
+      "context": "cluster",
+      "data": "-1",
+      "property": "xpack.monitoring.collection.enabled",
+    }
+  }
 >
   <WhatIs>
     <EuiTitle
@@ -183,19 +187,10 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
           We checked the cluster settings and found that 
           <EuiCode>
             <EuiCodeBlockImpl
-              fontSize="s"
               inline={true}
-              isCopyable={false}
-              paddingSize="l"
-              transparentBackground={false}
             >
-              <span
-                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                style={Object {}}
-              >
-                <code
-                  className="euiCodeBlock__code"
-                >
+              <span>
+                <code>
                   xpack.monitoring.collection.enabled
                 </code>
               </span>
@@ -204,19 +199,10 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
            is set to 
           <EuiCode>
             <EuiCodeBlockImpl
-              fontSize="s"
               inline={true}
-              isCopyable={false}
-              paddingSize="l"
-              transparentBackground={false}
             >
-              <span
-                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                style={Object {}}
-              >
-                <code
-                  className="euiCodeBlock__code"
-                >
+              <span>
+                <code>
                   -1
                 </code>
               </span>
@@ -256,36 +242,57 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <EuiButton
-            color="primary"
             data-test-subj="enableCollectionEnabled"
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
             type="button"
           >
-            <button
-              className="euiButton euiButton--primary euiButton--fill"
+            <EuiButtonDisplay
+              baseClassName="euiButton"
               data-test-subj="enableCollectionEnabled"
+              element="button"
+              fill={true}
               onClick={[Function]}
               type="button"
             >
-              <span
-                className="euiButton__content"
+              <button
+                className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="enableCollectionEnabled"
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
+                type="button"
               >
-                <span
-                  className="euiButton__text"
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  textProps={
+                    Object {
+                      "className": "euiButton__text",
+                    }
+                  }
                 >
-                  <FormattedMessage
-                    defaultMessage="Turn on monitoring"
-                    id="xpack.monitoring.noData.explanations.collectionEnabled.turnOnMonitoringButtonLabel"
-                    values={Object {}}
+                  <span
+                    className="euiButtonContent euiButton__content"
                   >
-                    Turn on monitoring
-                  </FormattedMessage>
-                </span>
-              </span>
-            </button>
+                    <span
+                      className="euiButton__text"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Turn on monitoring"
+                        id="xpack.monitoring.noData.explanations.collectionEnabled.turnOnMonitoringButtonLabel"
+                        values={Object {}}
+                      >
+                        Turn on monitoring
+                      </FormattedMessage>
+                    </span>
+                  </span>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
           </EuiButton>
         </div>
       </EuiFlexItem>

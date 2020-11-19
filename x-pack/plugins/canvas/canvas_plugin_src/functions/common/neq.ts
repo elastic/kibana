@@ -3,22 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
 
-type Context = boolean | number | string | null;
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
+
+type Input = boolean | number | string | null;
 
 interface Arguments {
-  value: Context;
+  value: Input;
 }
 
-export function neq(): ContextFunction<'neq', Context, Arguments, boolean> {
+export function neq(): ExpressionFunctionDefinition<'neq', Input, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().neq;
 
   return {
     name: 'neq',
     type: 'boolean',
     help,
+    context: {
+      types: ['boolean', 'number', 'string', 'null'],
+    },
     args: {
       value: {
         aliases: ['_'],
@@ -27,8 +31,8 @@ export function neq(): ContextFunction<'neq', Context, Arguments, boolean> {
         help: argHelp.value,
       },
     },
-    fn: (context, args) => {
-      return context !== args.value;
+    fn: (input, args) => {
+      return input !== args.value;
     },
   };
 }

@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const lineChart: ElementFactory = () => ({
   name: 'lineChart',
-  displayName: 'Line chart',
-  tags: ['chart'],
+  displayName: 'Line',
+  type: 'chart',
   help: 'A customizable line chart',
-  image: header,
+  icon: 'visLine',
   expression: `filters
 | demodata
 | pointseries x="time" y="mean(price)"

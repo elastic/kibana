@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { followerIndexUrl } from '../services/documentation_links';
+import { getFollowerIndexUrl } from '../services/documentation_links';
 
 export const FollowerIndexPageTitle = ({ title }) => (
   <Fragment>
@@ -35,7 +35,7 @@ export const FollowerIndexPageTitle = ({ title }) => (
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={followerIndexUrl}
+            href={getFollowerIndexUrl()}
             target="_blank"
             iconType="help"
             data-test-subj="docsButton"

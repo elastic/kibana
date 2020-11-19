@@ -4,56 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo } from 'react';
-import { TransactionListAPIResponse } from '../../server/lib/transactions/get_top_transactions';
-import { loadTransactionList } from '../services/rest/apm/transaction_groups';
+import { useParams } from 'react-router-dom';
+import { useUiFilters } from '../context/UrlParamsContext';
 import { IUrlParams } from '../context/UrlParamsContext/types';
+import { APIReturnType } from '../services/rest/createCallApmApi';
 import { useFetcher } from './useFetcher';
 
-const getRelativeImpact = (
-  impact: number,
-  impactMin: number,
-  impactMax: number
-) =>
-  Math.max(
-    ((impact - impactMin) / Math.max(impactMax - impactMin, 1)) * 100,
-    1
-  );
+type TransactionsAPIResponse = APIReturnType<
+  'GET /api/apm/services/{serviceName}/transaction_groups'
+>;
 
-function getWithRelativeImpact(items: TransactionListAPIResponse) {
-  const impacts = items.map(({ impact }) => impact);
-  const impactMin = Math.min(...impacts);
-  const impactMax = Math.max(...impacts);
-
-  return items.map(item => {
-    return {
-      ...item,
-      impactRelative: getRelativeImpact(item.impact, impactMin, impactMax)
-    };
-  });
-}
+const DEFAULT_RESPONSE: Partial<TransactionsAPIResponse> = {
+  items: undefined,
+  isAggregationAccurate: true,
+  bucketSize: 0,
+};
 
 export function useTransactionList(urlParams: IUrlParams) {
-  const { serviceName, transactionType, start, end, kuery } = urlParams;
-  const { data = [], error, status } = useFetcher(
-    () => {
+  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { transactionType, start, end } = urlParams;
+  const uiFilters = useUiFilters(urlParams);
+  const { data = DEFAULT_RESPONSE, error, status } = useFetcher(
+    (callApmApi) => {
       if (serviceName && start && end && transactionType) {
-        return loadTransactionList({
-          serviceName,
-          start,
-          end,
-          transactionType,
-          kuery
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/{serviceName}/transaction_groups',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              transactionType,
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
-    [serviceName, start, end, transactionType, kuery]
+    [serviceName, start, end, transactionType, uiFilters]
   );
 
-  const memoizedData = useMemo(() => getWithRelativeImpact(data), [data]);
   return {
-    data: memoizedData,
+    data,
     status,
-    error
+    error,
   };
 }

@@ -6,14 +6,14 @@
 import axios, { AxiosInstance } from 'axios';
 import { format as formatUrl } from 'url';
 import util from 'util';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { LogService } from '../../../types/services';
+import { ToolingLog } from '@kbn/dev-utils';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { Features } from '../features';
 
 export class FeaturesService {
   private readonly axios: AxiosInstance;
 
-  constructor(url: string, private readonly log: LogService) {
+  constructor(url: string, private readonly log: ToolingLog) {
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/features' },
       baseURL: url,
@@ -22,9 +22,11 @@ export class FeaturesService {
     });
   }
 
-  public async get(): Promise<Features> {
-    this.log.debug(`requesting /api/features/v1 to get the features`);
-    const response = await this.axios.get('/api/features/v1');
+  public async get({ ignoreValidLicenses } = { ignoreValidLicenses: false }): Promise<Features> {
+    this.log.debug('requesting /api/features to get the features');
+    const response = await this.axios.get(
+      `/api/features?ignoreValidLicenses=${ignoreValidLicenses}`
+    );
 
     if (response.status !== 200) {
       throw new Error(
@@ -38,7 +40,7 @@ export class FeaturesService {
       (acc: Features, feature: any) => ({
         ...acc,
         [feature.id]: {
-          navLinkId: feature.navLinkId,
+          app: feature.app,
         },
       }),
       {}
@@ -47,7 +49,7 @@ export class FeaturesService {
   }
 }
 
-export function FeaturesProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
+export function FeaturesProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const url = formatUrl(config.get('servers.kibana'));

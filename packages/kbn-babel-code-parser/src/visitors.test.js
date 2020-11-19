@@ -26,7 +26,7 @@ const visitorsApplier = (code) => {
   traverse(
     parser.parse(code, {
       sourceType: 'unambiguous',
-      plugins: ['exportDefaultFrom']
+      plugins: ['exportDefaultFrom'],
     }),
     dependenciesVisitorsGenerator(result)
   );

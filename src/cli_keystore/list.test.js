@@ -17,9 +17,10 @@
  * under the License.
  */
 
-const mockKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH'
-  + 'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M'
-  + 'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
+const mockKeystoreData =
+  '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH' +
+  'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M' +
+  'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
 jest.mock('fs', () => ({
   readFileSync: jest.fn().mockImplementation((path) => {
@@ -31,13 +32,13 @@ jest.mock('fs', () => ({
   }),
   existsSync: jest.fn().mockImplementation((path) => {
     return !path.includes('nonexistent');
-  })
+  }),
 }));
 
 import sinon from 'sinon';
-import { Keystore } from '../legacy/server/keystore';
+import { Keystore } from '../cli//keystore';
 import { list } from './list';
-import Logger from '../cli_plugin/lib/logger';
+import { Logger } from '../cli_plugin/lib/logger';
 
 describe('Kibana keystore', () => {
   describe('list', () => {
@@ -65,7 +66,10 @@ describe('Kibana keystore', () => {
       list(keystore);
 
       sinon.assert.calledOnce(Logger.prototype.error);
-      sinon.assert.calledWith(Logger.prototype.error, 'ERROR: Kibana keystore not found. Use \'create\' command to create one.');
+      sinon.assert.calledWith(
+        Logger.prototype.error,
+        "ERROR: Kibana keystore not found. Use 'create' command to create one."
+      );
     });
   });
 

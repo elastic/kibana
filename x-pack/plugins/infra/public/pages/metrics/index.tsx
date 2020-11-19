@@ -4,277 +4,203 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiHideFor,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-} from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { GraphQLFormattedError } from 'graphql';
-import React from 'react';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
-import euiStyled, { EuiTheme, withTheme } from '../../../../../common/eui_styled_components';
-import { InfraMetricsErrorCodes } from '../../../common/errors';
-import { AutoSizer } from '../../components/auto_sizer';
+import { i18n } from '@kbn/i18n';
+
+import React, { useContext } from 'react';
+import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+
+import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
+import { IIndexPattern } from 'src/plugins/data/common';
 import { DocumentTitle } from '../../components/document_title';
+import { HelpCenterContent } from '../../components/help_center_content';
+import { RoutedTabs } from '../../components/navigation/routed_tabs';
+import { ColumnarPage } from '../../components/page';
 import { Header } from '../../components/header';
-import { Metrics } from '../../components/metrics';
-import { InvalidNodeError } from '../../components/metrics/invalid_node';
-import { MetricsSideNav } from '../../components/metrics/side_nav';
-import { MetricsTimeControls } from '../../components/metrics/time_controls';
-import { ColumnarPage, PageContent } from '../../components/page';
-import { SourceConfigurationFlyout } from '../../components/source_configuration';
-import { WithMetadata } from '../../containers/metadata/with_metadata';
-import { WithMetrics } from '../../containers/metrics/with_metrics';
 import {
-  WithMetricsTime,
-  WithMetricsTimeUrlState,
-} from '../../containers/metrics/with_metrics_time';
+  MetricsExplorerOptionsContainer,
+  DEFAULT_METRICS_EXPLORER_VIEW_STATE,
+} from './metrics_explorer/hooks/use_metrics_explorer_options';
+import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { WithSource } from '../../containers/with_source';
-import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
-import { Error, ErrorPageBody } from '../error';
-import { layoutCreators } from './layouts';
-import { InfraMetricLayoutSection } from './layouts/types';
-import { MetricDetailPageProviders } from './page_providers';
+import { Source } from '../../containers/source';
+import { MetricsExplorerPage } from './metrics_explorer';
+import { SnapshotPage } from './inventory_view';
+import { MetricsSettingsPage } from './settings';
+import { AppNavigation } from '../../components/navigation/app_navigation';
+import { SourceLoadingPage } from '../../components/source_loading_page';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
+import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
+import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
 
-const DetailPageContent = euiStyled(PageContent)`
-  overflow: auto;
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
-`;
+import { InventoryAlertDropdown } from '../../alerting/inventory/components/alert_dropdown';
+import { MetricsAlertDropdown } from '../../alerting/metric_threshold/components/alert_dropdown';
+import { SavedView } from '../../containers/saved_view/saved_view';
+import { SourceConfigurationFields } from '../../graphql/types';
+import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
+import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
+import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomoly_detection_flyout';
 
-const EuiPageContentWithRelative = euiStyled(EuiPageContent)`
-  position: relative;
-`;
+const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
+  defaultMessage: 'Add data',
+});
 
-interface Props {
-  theme: EuiTheme;
-  match: {
-    params: {
-      type: string;
-      node: string;
-    };
-  };
-  intl: InjectedIntl;
-  uiCapabilities: UICapabilities;
-}
+export const InfrastructurePage = ({ match }: RouteComponentProps) => {
+  const uiCapabilities = useKibana().services.application?.capabilities;
 
-export const MetricDetail = injectUICapabilities(
-  withTheme(
-    injectI18n(
-      class extends React.PureComponent<Props> {
-        public static displayName = 'MetricDetailPage';
+  const kibana = useKibana();
 
-        public render() {
-          const { intl, uiCapabilities } = this.props;
-          const nodeId = this.props.match.params.node;
-          const nodeType = this.props.match.params.type as InfraNodeType;
-          const layoutCreator = layoutCreators[nodeType];
-          if (!layoutCreator) {
-            return (
-              <Error
-                message={intl.formatMessage(
-                  {
-                    id: 'xpack.infra.metricDetailPage.invalidNodeTypeErrorMessage',
-                    defaultMessage: '{nodeType} is not a valid node type',
-                  },
-                  {
-                    nodeType: `"${nodeType}"`,
-                  }
-                )}
-              />
-            );
-          }
-          const layouts = layoutCreator(this.props.theme);
+  return (
+    <EuiErrorBoundary>
+      <Source.Provider sourceId="default">
+        <AlertPrefillProvider>
+          <WaffleOptionsProvider>
+            <WaffleTimeProvider>
+              <WaffleFiltersProvider>
+                <InfraMLCapabilitiesProvider>
+                  <ColumnarPage>
+                    <DocumentTitle
+                      title={i18n.translate('xpack.infra.homePage.documentTitle', {
+                        defaultMessage: 'Metrics',
+                      })}
+                    />
 
-          return (
-            <MetricDetailPageProviders>
-              <WithSource>
-                {({ sourceId }) => (
-                  <WithMetricsTime>
-                    {({
-                      timeRange,
-                      setTimeRange,
-                      refreshInterval,
-                      setRefreshInterval,
-                      isAutoReloading,
-                      setAutoReload,
-                    }) => (
-                      <WithMetadata
-                        layouts={layouts}
-                        sourceId={sourceId}
-                        nodeType={nodeType}
-                        nodeId={nodeId}
-                      >
-                        {({ name, filteredLayouts, loading: metadataLoading }) => {
-                          const breadcrumbs = [
-                            {
-                              href: '#/',
-                              text: intl.formatMessage({
-                                id: 'xpack.infra.header.infrastructureTitle',
-                                defaultMessage: 'Infrastructure',
-                              }),
-                            },
-                            { text: name },
-                          ];
-                          return (
-                            <ColumnarPage>
-                              <Header
-                                breadcrumbs={breadcrumbs}
-                                readOnlyBadge={!uiCapabilities.infrastructure.save}
-                              />
-                              <SourceConfigurationFlyout
-                                shouldAllowEdit={
-                                  uiCapabilities.infrastructure.configureSource as boolean
-                                }
-                              />
-                              <WithMetricsTimeUrlState />
-                              <DocumentTitle
-                                title={intl.formatMessage(
+                    <HelpCenterContent
+                      feedbackLink="https://discuss.elastic.co/c/metrics"
+                      appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+                        defaultMessage: 'Metrics',
+                      })}
+                    />
+
+                    <Header
+                      breadcrumbs={[
+                        {
+                          text: i18n.translate('xpack.infra.header.infrastructureTitle', {
+                            defaultMessage: 'Metrics',
+                          }),
+                        },
+                      ]}
+                      readOnlyBadge={!uiCapabilities?.infrastructure?.save}
+                    />
+                    <AppNavigation
+                      aria-label={i18n.translate(
+                        'xpack.infra.header.infrastructureNavigationTitle',
+                        {
+                          defaultMessage: 'Metrics',
+                        }
+                      )}
+                    >
+                      <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
+                        <EuiFlexItem>
+                          <RoutedTabs
+                            tabs={[
+                              {
+                                app: 'metrics',
+                                title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
+                                  defaultMessage: 'Inventory',
+                                }),
+                                pathname: '/inventory',
+                              },
+                              {
+                                app: 'metrics',
+                                title: i18n.translate(
+                                  'xpack.infra.homePage.metricsExplorerTabTitle',
                                   {
-                                    id: 'xpack.infra.metricDetailPage.documentTitle',
-                                    defaultMessage: 'Infrastructure | Metrics | {name}',
-                                  },
-                                  {
-                                    name,
+                                    defaultMessage: 'Metrics Explorer',
                                   }
+                                ),
+                                pathname: '/explorer',
+                              },
+                              {
+                                app: 'metrics',
+                                title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+                                  defaultMessage: 'Settings',
+                                }),
+                                pathname: '/settings',
+                              },
+                            ]}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                          style={{ flexDirection: 'row', alignItems: 'center' }}
+                        >
+                          <EuiFlexItem grow={false}>
+                            <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <Route path={'/explorer'} component={MetricsAlertDropdown} />
+                            <Route path={'/inventory'} component={InventoryAlertDropdown} />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              href={kibana.services?.application?.getUrlForApp(
+                                '/home#/tutorial_directory/metrics'
+                              )}
+                              size="s"
+                              color="primary"
+                              iconType="plusInCircle"
+                            >
+                              {ADD_DATA_LABEL}
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </AppNavigation>
+
+                    <Switch>
+                      <Route path={'/inventory'} component={SnapshotPage} />
+                      <Route
+                        path={'/explorer'}
+                        render={(props) => (
+                          <WithSource>
+                            {({ configuration, createDerivedIndexPattern }) => (
+                              <MetricsExplorerOptionsContainer.Provider>
+                                <WithMetricsExplorerOptionsUrlState />
+                                {configuration ? (
+                                  <PageContent
+                                    configuration={configuration}
+                                    createDerivedIndexPattern={createDerivedIndexPattern}
+                                  />
+                                ) : (
+                                  <SourceLoadingPage />
                                 )}
-                              />
-                              <DetailPageContent data-test-subj="infraMetricsPage">
-                                <WithMetrics
-                                  layouts={filteredLayouts}
-                                  sourceId={sourceId}
-                                  timerange={timeRange as InfraTimerangeInput}
-                                  nodeType={nodeType}
-                                  nodeId={nodeId}
-                                >
-                                  {({ metrics, error, loading, refetch }) => {
-                                    if (error) {
-                                      const invalidNodeError = error.graphQLErrors.some(
-                                        (err: GraphQLFormattedError) =>
-                                          err.code === InfraMetricsErrorCodes.invalid_node
-                                      );
+                              </MetricsExplorerOptionsContainer.Provider>
+                            )}
+                          </WithSource>
+                        )}
+                      />
+                      <Route path={'/settings'} component={MetricsSettingsPage} />
+                    </Switch>
+                  </ColumnarPage>
+                </InfraMLCapabilitiesProvider>
+              </WaffleFiltersProvider>
+            </WaffleTimeProvider>
+          </WaffleOptionsProvider>
+        </AlertPrefillProvider>
+      </Source.Provider>
+    </EuiErrorBoundary>
+  );
+};
 
-                                      return (
-                                        <>
-                                          <DocumentTitle
-                                            title={(previousTitle: string) =>
-                                              intl.formatMessage(
-                                                {
-                                                  id:
-                                                    'xpack.infra.metricDetailPage.documentTitleError',
-                                                  defaultMessage: '{previousTitle} | Uh oh',
-                                                },
-                                                {
-                                                  previousTitle,
-                                                }
-                                              )
-                                            }
-                                          />
-                                          {invalidNodeError ? (
-                                            <InvalidNodeError nodeName={name} />
-                                          ) : (
-                                            <ErrorPageBody message={error.message} />
-                                          )}
-                                        </>
-                                      );
-                                    }
-                                    return (
-                                      <EuiPage style={{ flex: '1 0 auto' }}>
-                                        <MetricsSideNav
-                                          layouts={filteredLayouts}
-                                          loading={metadataLoading}
-                                          nodeName={name}
-                                          handleClick={this.handleClick}
-                                        />
-                                        <AutoSizer content={false} bounds detectAnyWindowResize>
-                                          {({ measureRef, bounds: { width = 0 } }) => {
-                                            return (
-                                              <MetricsDetailsPageColumn innerRef={measureRef}>
-                                                <EuiPageBody style={{ width: `${width}px` }}>
-                                                  <EuiPageHeader style={{ flex: '0 0 auto' }}>
-                                                    <EuiPageHeaderSection style={{ width: '100%' }}>
-                                                      <MetricsTitleTimeRangeContainer>
-                                                        <EuiHideFor sizes={['xs', 's']}>
-                                                          <EuiTitle size="m">
-                                                            <h1>{name}</h1>
-                                                          </EuiTitle>
-                                                        </EuiHideFor>
-                                                        <MetricsTimeControls
-                                                          currentTimeRange={timeRange}
-                                                          isLiveStreaming={isAutoReloading}
-                                                          refreshInterval={refreshInterval}
-                                                          setRefreshInterval={setRefreshInterval}
-                                                          onChangeTimeRange={setTimeRange}
-                                                          setAutoReload={setAutoReload}
-                                                        />
-                                                      </MetricsTitleTimeRangeContainer>
-                                                    </EuiPageHeaderSection>
-                                                  </EuiPageHeader>
+const PageContent = (props: {
+  configuration: SourceConfigurationFields.Fragment;
+  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
+}) => {
+  const { createDerivedIndexPattern, configuration } = props;
+  const { options } = useContext(MetricsExplorerOptionsContainer.Context);
 
-                                                  <EuiPageContentWithRelative>
-                                                    <Metrics
-                                                      label={name}
-                                                      nodeId={nodeId}
-                                                      layouts={filteredLayouts}
-                                                      metrics={metrics}
-                                                      loading={
-                                                        metrics.length > 0 && isAutoReloading
-                                                          ? false
-                                                          : loading
-                                                      }
-                                                      refetch={refetch}
-                                                      onChangeRangeTime={setTimeRange}
-                                                      isLiveStreaming={isAutoReloading}
-                                                      stopLiveStreaming={() => setAutoReload(false)}
-                                                    />
-                                                  </EuiPageContentWithRelative>
-                                                </EuiPageBody>
-                                              </MetricsDetailsPageColumn>
-                                            );
-                                          }}
-                                        </AutoSizer>
-                                      </EuiPage>
-                                    );
-                                  }}
-                                </WithMetrics>
-                              </DetailPageContent>
-                            </ColumnarPage>
-                          );
-                        }}
-                      </WithMetadata>
-                    )}
-                  </WithMetricsTime>
-                )}
-              </WithSource>
-            </MetricDetailPageProviders>
-          );
-        }
-
-        private handleClick = (section: InfraMetricLayoutSection) => () => {
-          const id = section.linkToId || section.id;
-          const el = document.getElementById(id);
-          if (el) {
-            el.scrollIntoView();
-          }
-        };
-      }
-    )
-  )
-);
-
-const MetricsDetailsPageColumn = euiStyled.div`
-  flex: 1 0 0%;
-  display: flex;
-  flex-direction: column;
-`;
-
-const MetricsTitleTimeRangeContainer = euiStyled.div`
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
-`;
+  return (
+    <SavedView.Provider
+      shouldLoadDefault={options.source === 'default'}
+      viewType={'metrics-explorer-view'}
+      defaultViewState={DEFAULT_METRICS_EXPLORER_VIEW_STATE}
+    >
+      <MetricsExplorerPage
+        derivedIndexPattern={createDerivedIndexPattern('metrics')}
+        source={configuration}
+        {...props}
+      />
+    </SavedView.Provider>
+  );
+};

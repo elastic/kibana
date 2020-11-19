@@ -5,11 +5,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  // @ts-ignore unconverted EUI component
-  EuiCard,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 import { TagList } from '../tag_list/';
 
 export interface Props {
@@ -45,7 +41,7 @@ export const ElementCard = ({ title, description, image, tags = [], onClick, ...
     description={description}
     footer={<TagList tags={tags} tagType={tagType} />}
     image={image}
-    icon={image ? null : <EuiIcon type="canvasApp" size="xxl" />}
+    icon={image ? undefined : <EuiIcon type="canvasApp" size="xxl" />}
     onClick={onClick}
     {...rest}
   />

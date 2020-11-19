@@ -17,6 +17,5 @@
  * under the License.
  */
 
-require('./root');
-require('./node_version_validator');
-require('./babel_register');
+require('./no_transpilation');
+require('@kbn/optimizer').registerNodeAutoTranspilation();

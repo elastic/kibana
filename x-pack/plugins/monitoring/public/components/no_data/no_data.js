@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiSpacer,
@@ -12,15 +12,27 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiText,
+  EuiTitle,
+  EuiTextColor,
+  EuiButtonEmpty,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { toggleSetupMode } from '../../lib/setup_mode';
 import { CheckingSettings } from './checking_settings';
 import { ReasonFound, WeTried } from './reasons';
 import { CheckerErrors } from './checker_errors';
+import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
 function NoDataMessage(props) {
   const { isLoading, reason, checkMessage } = props;
 
-  if (isLoading && checkMessage !== null) {
+  if (isLoading) {
     return <CheckingSettings checkMessage={checkMessage} />;
   }
 
@@ -32,9 +44,68 @@ function NoDataMessage(props) {
 }
 
 export function NoData(props) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [useInternalCollection, setUseInternalCollection] = useState(props.isCloudEnabled);
+
+  async function startSetup() {
+    setIsLoading(true);
+    await toggleSetupMode(true);
+    window.location.hash = getSafeForExternalLink('#/elasticsearch/nodes');
+  }
+
+  if (useInternalCollection) {
+    return (
+      <EuiPage>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.no_data.internal_collection.heading"
+              defaultMessage="No monitoring data found."
+            />
+          </h1>
+        </EuiScreenReaderOnly>
+        <EuiPageBody restrictWidth={600}>
+          <EuiPageContent
+            verticalPosition="center"
+            horizontalPosition="center"
+            className="eui-textCenter"
+          >
+            <EuiIcon type="monitoringApp" size="xxl" />
+            <EuiSpacer size="m" />
+            <NoDataMessage {...props} />
+            <CheckerErrors errors={props.errors} />
+            {!props.isCloudEnabled ? (
+              <Fragment>
+                <EuiHorizontalRule size="half" />
+                <EuiButtonEmpty
+                  isDisabled={props.isCollectionEnabledUpdated}
+                  onClick={() => setUseInternalCollection(false)}
+                >
+                  <EuiTextColor color="default">
+                    <FormattedMessage
+                      id="xpack.monitoring.noData.setupMetricbeatInstead"
+                      defaultMessage="Or, set up with Metricbeat (recommended)"
+                    />
+                  </EuiTextColor>
+                </EuiButtonEmpty>
+              </Fragment>
+            ) : null}
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    );
+  }
 
   return (
     <EuiPage>
+      <EuiScreenReaderOnly>
+        <h1>
+          <FormattedMessage
+            id="xpack.monitoring.no_data.heading"
+            defaultMessage="No monitoring data found."
+          />
+        </h1>
+      </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
         <EuiPageContent
           verticalPosition="center"
@@ -43,8 +114,53 @@ export function NoData(props) {
         >
           <EuiIcon type="monitoringApp" size="xxl" />
           <EuiSpacer size="m" />
-          <NoDataMessage {...props} />
-          <CheckerErrors errors={props.errors} />
+          <EuiTitle size="l">
+            <h2>
+              <FormattedMessage
+                id="xpack.monitoring.noData.noMonitoringDetected"
+                defaultMessage="No monitoring data found"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiHorizontalRule size="half" />
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.noData.noMonitoringDataFound"
+                defaultMessage="Have you set up monitoring yet? If so, make sure that the selected time period in
+                the upper right includes monitoring data."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer />
+          <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={true}
+                onClick={startSetup}
+                type="button"
+                data-test-subj="enableCollectionInterval"
+                isLoading={isLoading}
+              >
+                <FormattedMessage
+                  id="xpack.monitoring.noData.collectionInterval.turnOnMonitoringButtonLabel"
+                  defaultMessage="Set up monitoring with Metricbeat"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule size="half" />
+          <EuiButtonEmpty
+            onClick={() => setUseInternalCollection(true)}
+            data-test-subj="useInternalCollection"
+          >
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.monitoring.noData.setupInternalInstead"
+                defaultMessage="Or, set up with self monitoring"
+              />
+            </EuiTextColor>
+          </EuiButtonEmpty>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
@@ -54,5 +170,5 @@ export function NoData(props) {
 NoData.propTypes = {
   isLoading: PropTypes.bool.isRequired,
   reason: PropTypes.object,
-  checkMessage: PropTypes.string
+  checkMessage: PropTypes.string,
 };

@@ -15,7 +15,7 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
-*/
+ */
 
 import { isJSXIdentifier, isObjectExpression, isJSXExpressionContainer } from '@babel/types';
 
@@ -30,7 +30,7 @@ import {
   checkValuesProperty,
 } from '../utils';
 import { DEFAULT_MESSAGE_KEY, VALUES_KEY, DESCRIPTION_KEY } from '../constants';
-import { createFailError } from '../../run';
+import { createFailError } from '@kbn/dev-utils';
 
 /**
  * Extract default messages from ReactJS intl.formatMessage(...) AST
@@ -50,7 +50,7 @@ export function extractIntlMessages(node) {
     'id',
     DEFAULT_MESSAGE_KEY,
     DESCRIPTION_KEY,
-  ].map(key => options.properties.find(property => isPropertyWithKey(property, key)));
+  ].map((key) => options.properties.find((property) => isPropertyWithKey(property, key)));
 
   const messageId = messageIdProperty
     ? formatJSString(extractMessageIdFromNode(messageIdProperty.value))
@@ -92,7 +92,9 @@ export function extractFormattedMessages(node) {
     DEFAULT_MESSAGE_KEY,
     DESCRIPTION_KEY,
     VALUES_KEY,
-  ].map(key => node.attributes.find(attribute => isJSXIdentifier(attribute.name, { name: key })));
+  ].map((key) =>
+    node.attributes.find((attribute) => isJSXIdentifier(attribute.name, { name: key }))
+  );
 
   const messageId = messageIdAttribute
     ? formatHTMLString(extractMessageIdFromNode(messageIdAttribute.value))

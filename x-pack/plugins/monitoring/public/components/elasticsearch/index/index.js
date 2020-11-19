@@ -19,16 +19,7 @@ import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
 import { Logs } from '../../logs';
 
-export const Index = ({
-  scope,
-  indexSummary,
-  metrics,
-  clusterUuid,
-  indexUuid,
-  logs,
-  kbnUrl,
-  ...props
-}) => {
+export const Index = ({ scope, indexSummary, metrics, clusterUuid, indexUuid, logs, ...props }) => {
   const metricsToShow = [
     metrics.index_mem,
     metrics.index_size,
@@ -49,20 +40,17 @@ export const Index = ({
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>
-                <MonitoringTimeseriesContainer
-                  series={metric}
-                  {...props}
-                />
+                <MonitoringTimeseriesContainer series={metric} {...props} />
                 <EuiSpacer />
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-          <EuiSpacer size="m"/>
+          <EuiSpacer size="m" />
           <EuiPanel>
             <Logs logs={logs} indexUuid={indexUuid} clusterUuid={clusterUuid} />
           </EuiPanel>
-          <EuiSpacer size="m"/>
-          <ShardAllocation scope={scope} kbnUrl={kbnUrl} type="index" />
+          <EuiSpacer size="m" />
+          <ShardAllocation scope={scope} type="index" />
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

@@ -15,8 +15,9 @@ export default function ({ getService }) {
     const archive = 'monitoring/standalone_cluster';
     const timeRange = {
       min: '2019-02-04T16:52:11.741Z',
-      max: '2019-02-04T17:52:11.741Z'
+      max: '2019-02-04T17:52:11.741Z',
     };
+    const codePaths = ['all'];
 
     before('load archive', () => {
       return esArchiver.load(archive);
@@ -30,7 +31,7 @@ export default function ({ getService }) {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/__standalone_cluster__')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange })
+        .send({ timeRange, codePaths })
         .expect(200);
 
       expect(body).to.eql(clusterFixture);

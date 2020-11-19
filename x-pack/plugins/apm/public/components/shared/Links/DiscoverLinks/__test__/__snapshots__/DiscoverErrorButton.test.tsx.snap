@@ -7,7 +7,7 @@ exports[`DiscoverErrorLink with kuery should match snapshot 1`] = `
       "_a": Object {
         "interval": "auto",
         "query": Object {
-          "language": "lucene",
+          "language": "kuery",
           "query": "service.name:\\"myServiceName\\" AND error.grouping_key:\\"myGroupingKey\\" AND transaction.sampled: true",
         },
         "sort": Object {
@@ -26,7 +26,7 @@ exports[`DiscoverErrorLink without kuery should match snapshot 1`] = `
       "_a": Object {
         "interval": "auto",
         "query": Object {
-          "language": "lucene",
+          "language": "kuery",
           "query": "service.name:\\"myServiceName\\" AND error.grouping_key:\\"myGroupingKey\\"",
         },
         "sort": Object {

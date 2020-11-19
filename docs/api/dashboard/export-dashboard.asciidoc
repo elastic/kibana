@@ -1,0 +1,44 @@
+[[dashboard-api-export]]
+=== Export dashboard API
+++++
+<titleabbrev>Export dashboard</titleabbrev>
+++++
+
+experimental[] Export dashboards and corresponding saved objects.
+
+[[dashboard-api-export-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/kibana/dashboards/export`
+
+`GET <kibana host>:<port>/s/<space-id>/api/kibana/dashboards/export`
+
+[[dashboard-api-export-params]]
+==== Query parameters
+
+`dashboard`::
+  (Required, array|string) The IDs of the dashboards that you want to export.
+
+[[dashboard-api-export-response-body]]
+==== Response body
+
+`objects`::
+  (array) A top level property that includes the saved objects. The order of the objects is not guaranteed. Use the exact response body as the request body for the corresponding <<dashboard-import-api, Import dashboard API>>.
+
+[[dashboard-api-export-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+[float]
+[[dashboard-api-export-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c <1>
+--------------------------------------------------
+// KIBANA
+
+<1> The dashboard ID is `942dcef0-b2cd-11e8-ad8e-85441f0c2e5c`.

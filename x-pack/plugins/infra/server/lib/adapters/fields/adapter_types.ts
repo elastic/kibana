@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraFrameworkRequest } from '../framework';
+import { RequestHandlerContext } from 'src/core/server';
 
 export interface FieldsAdapter {
-  getIndexFields(req: InfraFrameworkRequest, indices: string): Promise<IndexFieldDescriptor[]>;
+  getIndexFields(
+    requestContext: RequestHandlerContext,
+    indices: string
+  ): Promise<IndexFieldDescriptor[]>;
 }
 
 export interface IndexFieldDescriptor {
@@ -15,4 +18,5 @@ export interface IndexFieldDescriptor {
   type: string;
   searchable: boolean;
   aggregatable: boolean;
+  displayable: boolean;
 }

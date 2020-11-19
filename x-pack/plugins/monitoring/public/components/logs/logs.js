@@ -4,44 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { PureComponent } from 'react';
-import { capitalize } from 'lodash';
-import chrome from 'ui/chrome';
-import {
-  EuiBasicTable,
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
-  EuiCallOut,
-  EuiLink,
-} from '@elastic/eui';
+import { upperFirst } from 'lodash';
+import { Legacy } from '../../legacy_shims';
+import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
+import { INFRA_SOURCE_ID } from '../../../common/constants';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from './reason';
-import { capabilities } from 'ui/capabilities';
+
+const getFormattedDateTimeLocal = (timestamp) => {
+  const injector = Legacy.shims.getAngularInjector();
+  const timezone = injector.get('config').get('dateFormat:tz');
+  return formatDateTimeLocal(timestamp, timezone);
+};
 
 const columnTimestampTitle = i18n.translate('xpack.monitoring.logs.listing.timestampTitle', {
-  defaultMessage: 'Timestamp'
+  defaultMessage: 'Timestamp',
 });
 
 const columnLevelTitle = i18n.translate('xpack.monitoring.logs.listing.levelTitle', {
-  defaultMessage: 'Level'
+  defaultMessage: 'Level',
 });
 
 const columnTypeTitle = i18n.translate('xpack.monitoring.logs.listing.typeTitle', {
-  defaultMessage: 'Type'
+  defaultMessage: 'Type',
 });
 
 const columnMessageTitle = i18n.translate('xpack.monitoring.logs.listing.messageTitle', {
-  defaultMessage: 'Message'
+  defaultMessage: 'Message',
 });
 
 const columnComponentTitle = i18n.translate('xpack.monitoring.logs.listing.componentTitle', {
-  defaultMessage: 'Component'
+  defaultMessage: 'Component',
 });
 
 const columnNodeTitle = i18n.translate('xpack.monitoring.logs.listing.nodeTitle', {
-  defaultMessage: 'Node'
+  defaultMessage: 'Node',
 });
 
 const columns = [
@@ -49,7 +48,7 @@ const columns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: timestamp => formatDateTimeLocal(timestamp),
+    render: (timestamp) => getFormattedDateTimeLocal(timestamp),
   },
   {
     field: 'level',
@@ -60,17 +59,17 @@ const columns = [
     field: 'type',
     name: columnTypeTitle,
     width: '10%',
-    render: type => capitalize(type),
+    render: (type) => upperFirst(type),
   },
   {
     field: 'message',
     name: columnMessageTitle,
-    width: '55%'
+    width: '55%',
   },
   {
     field: 'component',
     name: columnComponentTitle,
-    width: '18%'
+    width: '18%',
   },
 ];
 
@@ -79,7 +78,7 @@ const clusterColumns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: timestamp => formatDateTimeLocal(timestamp),
+    render: (timestamp) => getFormattedDateTimeLocal(timestamp),
   },
   {
     field: 'level',
@@ -90,27 +89,27 @@ const clusterColumns = [
     field: 'type',
     name: columnTypeTitle,
     width: '10%',
-    render: type => capitalize(type),
+    render: (type) => upperFirst(type),
   },
   {
     field: 'message',
     name: columnMessageTitle,
-    width: '45%'
+    width: '45%',
   },
   {
     field: 'component',
     name: columnComponentTitle,
-    width: '15%'
+    width: '15%',
   },
   {
     field: 'node',
     name: columnNodeTitle,
-    width: '13%'
+    width: '13%',
   },
 ];
 
 function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
-  const base = `${chrome.getBasePath()}/app/infra#/link-to/logs`;
+  const base = `${Legacy.shims.getBasePath()}/app/logs/link-to/${INFRA_SOURCE_ID}/logs`;
 
   const params = [];
   if (clusterUuid) {
@@ -132,32 +131,40 @@ function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
 
 export class Logs extends PureComponent {
   renderLogs() {
-    const { logs: { enabled, logs }, nodeId, indexUuid } = this.props;
+    const {
+      logs: { enabled, logs },
+      nodeId,
+      indexUuid,
+    } = this.props;
     if (!enabled) {
       return null;
     }
 
     return (
-      <EuiBasicTable
-        items={logs || []}
-        columns={nodeId || indexUuid ? columns : clusterColumns}
-      />
+      <EuiBasicTable items={logs || []} columns={nodeId || indexUuid ? columns : clusterColumns} />
     );
   }
 
   renderNoLogs() {
-    const { logs: { enabled, reason } } = this.props;
+    const {
+      logs: { enabled, reason },
+    } = this.props;
     if (enabled) {
       return null;
     }
 
-    return <Reason reason={reason}/>;
+    return <Reason reason={reason} />;
   }
 
   renderCallout() {
-    const uiCapabilities = capabilities.get();
+    const uiCapabilities = Legacy.shims.capabilities;
     const show = uiCapabilities.logs && uiCapabilities.logs.show;
-    const { logs: { enabled }, nodeId, clusterUuid, indexUuid } = this.props;
+    const {
+      logs: { enabled },
+      nodeId,
+      clusterUuid,
+      indexUuid,
+    } = this.props;
     if (!enabled || !show) {
       return null;
     }
@@ -166,9 +173,9 @@ export class Logs extends PureComponent {
       <EuiCallOut
         size="m"
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
-          defaultMessage: 'Want to see more logs?'
+          defaultMessage: 'Want to see more log entries?',
         })}
-        iconType="loggingApp"
+        iconType="logsApp"
       >
         <p>
           <FormattedMessage
@@ -178,10 +185,10 @@ export class Logs extends PureComponent {
               link: (
                 <EuiLink href={getLogsUiLink(clusterUuid, nodeId, indexUuid)}>
                   {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
-                    defaultMessage: 'Logs'
+                    defaultMessage: 'Logs',
                   })}
                 </EuiLink>
-              )
+              ),
             }}
           />
         </p>
@@ -190,32 +197,37 @@ export class Logs extends PureComponent {
   }
 
   render() {
-    const { nodeId, indexUuid, logs: { limit } } = this.props;
+    const {
+      nodeId,
+      indexUuid,
+      logs: { limit },
+    } = this.props;
 
     let description;
 
     if (nodeId) {
       description = i18n.translate('xpack.monitoring.logs.listing.nodePageDescription', {
-        defaultMessage: 'Showing the most recent logs for this node, up to {limit} total logs.',
+        defaultMessage:
+          'Showing the most recent log entries for this node, up to {limit} total log entries.',
         values: {
           limit,
-        }
+        },
       });
-    }
-    else if (indexUuid) {
+    } else if (indexUuid) {
       description = i18n.translate('xpack.monitoring.logs.listing.indexPageDescription', {
-        defaultMessage: 'Showing the most recent logs for this index, up to {limit} total logs.',
+        defaultMessage:
+          'Showing the most recent log entries for this index, up to {limit} total log entries.',
         values: {
           limit,
-        }
+        },
       });
-    }
-    else {
+    } else {
       description = i18n.translate('xpack.monitoring.logs.listing.clusterPageDescription', {
-        defaultMessage: 'Showing the most recent logs for this cluster, up to {limit} total logs.',
+        defaultMessage:
+          'Showing the most recent log entries for this cluster, up to {limit} total log entries.',
         values: {
           limit,
-        }
+        },
       });
     }
 
@@ -224,19 +236,17 @@ export class Logs extends PureComponent {
         <EuiTitle>
           <h1>
             {i18n.translate('xpack.monitoring.logs.listing.pageTitle', {
-              defaultMessage: 'Recent Logs'
+              defaultMessage: 'Recent Log Entries',
             })}
           </h1>
         </EuiTitle>
         <EuiText size="s">
-          <p>
-            {description}
-          </p>
+          <p>{description}</p>
         </EuiText>
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         {this.renderLogs()}
         {this.renderNoLogs()}
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         {this.renderCallout()}
       </div>
     );

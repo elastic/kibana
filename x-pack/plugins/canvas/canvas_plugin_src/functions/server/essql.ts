@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore untyped local
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+/* eslint-disable */
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
-import { ContextFunction, Filter } from '../types';
-import { getFunctionHelp } from '../../strings';
+/* eslint-enable */
+import { ExpressionValueFilter } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   query: string;
@@ -15,7 +17,12 @@ interface Arguments {
   timezone: string;
 }
 
-export function essql(): ContextFunction<'essql', Filter, Arguments, any> {
+export function essql(): ExpressionFunctionDefinition<
+  'essql',
+  ExpressionValueFilter,
+  Arguments,
+  any
+> {
   const { help, args: argHelp } = getFunctionHelp().essql;
 
   return {
@@ -43,7 +50,11 @@ export function essql(): ContextFunction<'essql', Filter, Arguments, any> {
         help: argHelp.timezone,
       },
     },
-    fn: (context, args, handlers) =>
-      queryEsSQL(handlers.elasticsearchClient, { ...args, filter: context.and }),
+    fn: (input, args, context) => {
+      return queryEsSQL(((context as any) as { elasticsearchClient: any }).elasticsearchClient, {
+        ...args,
+        filter: input.and,
+      });
+    },
   };
 }

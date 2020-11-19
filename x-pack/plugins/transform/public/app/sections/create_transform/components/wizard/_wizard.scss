@@ -1,0 +1,29 @@
+.transform__progress progress[value]::-webkit-progress-bar {
+  background-color: $euiColorGhost;
+}
+
+.transform__steps {
+  .euiStep__content {
+    padding-right: 0px;
+  }
+}
+
+.transform__stepDefineForm {
+  align-items: flex-start;
+}
+
+.transform__stepDefineFormLeftColumn {
+  min-width: 420px;
+  border-right: 1px solid $euiColorLightShade;
+}
+
+/*
+This is an override to replicate the previous full-page-width of the transforms creation wizard
+when it was in use within the ML plugin. The Kibana management section limits a max-width to 1200px
+which is a bit narrow for the two column layout of the transform wizard. We might revisit this for
+future versions to blend in more with the overall design of the Kibana management section.
+The management section's navigation width is 192px + 24px right margin
+*/
+.mgtPage__body--transformWizard {
+  max-width: calc(100% - 216px);
+}

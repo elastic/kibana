@@ -5,8 +5,10 @@
  */
 
 import { MonitoringViewBaseController } from './';
-import { euiTableStorageGetter, euiTableStorageSetter } from 'plugins/monitoring/components/table';
+import { euiTableStorageGetter, euiTableStorageSetter } from '../components/table';
 import { EUI_SORT_ASCENDING } from '../../common/constants';
+
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -19,7 +21,6 @@ import { EUI_SORT_ASCENDING } from '../../common/constants';
  * This is expected to be extended, and behavior enabled using super();
  */
 export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseController {
-
   /**
    * Create a table view controller
    * - used by parent class:
@@ -42,25 +43,87 @@ export class MonitoringViewBaseEuiTableController extends MonitoringViewBaseCont
     const setLocalStorageData = euiTableStorageSetter(storageKey);
     const { page, sort } = getLocalStorageData(storage);
 
-    this.pagination = page || {
+    this.pagination = {
+      pageSize: 20,
       initialPageSize: 20,
-      pageSizeOptions: [5, 10, 20, 50]
+      pageIndex: 0,
+      initialPageIndex: 0,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
 
-    this.sorting = sort || {
-      sort: {
-        field: 'name',
-        direction: EUI_SORT_ASCENDING
+    if (page) {
+      if (!PAGE_SIZE_OPTIONS.includes(page.size)) {
+        page.size = 20;
       }
-    };
+      this.setPagination(page);
+    }
+
+    this.setSorting(sort);
 
     this.onTableChange = ({ page, sort }) => {
       setLocalStorageData(storage, {
         page,
         sort: {
-          sort
-        }
+          sort,
+        },
       });
+    };
+
+    // For pages where we do not fetch immediately, we want to fetch after pagination is applied
+    args.fetchDataImmediately === false && this.updateData();
+  }
+
+  setPagination(page) {
+    this.pagination = {
+      initialPageSize: page.size,
+      pageSize: page.size,
+      initialPageIndex: page.index,
+      pageIndex: page.index,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
+    };
+  }
+
+  setSorting(sort) {
+    this.sorting = sort || { sort: {} };
+
+    if (!this.sorting.sort.field) {
+      this.sorting.sort.field = 'name';
+    }
+    if (!this.sorting.sort.direction) {
+      this.sorting.sort.direction = EUI_SORT_ASCENDING;
+    }
+  }
+
+  setQueryText(queryText) {
+    this.queryText = queryText;
+  }
+
+  getPaginationRouteOptions() {
+    if (!this.pagination || !this.sorting) {
+      return {};
+    }
+
+    return {
+      pagination: {
+        size: this.pagination.pageSize,
+        index: this.pagination.pageIndex,
+      },
+      ...this.sorting,
+      queryText: this.queryText,
+    };
+  }
+
+  getPaginationTableProps(pagination) {
+    return {
+      sorting: this.sorting,
+      pagination: pagination,
+      onTableChange: this.onTableChange,
+      fetchMoreData: async ({ page, sort, queryText }) => {
+        this.setPagination(page);
+        this.setSorting(sort);
+        this.setQueryText(queryText);
+        await this.updateData();
+      },
     };
   }
 }

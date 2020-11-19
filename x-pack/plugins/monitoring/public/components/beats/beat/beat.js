@@ -7,12 +7,22 @@
 import React from 'react';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { formatMetric } from '../../../lib/format_number';
-import { EuiFlexItem, EuiPage, EuiPageBody, EuiFlexGrid, EuiSpacer, EuiPageContent, EuiPanel } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import {
+  EuiFlexItem,
+  EuiPage,
+  EuiPageBody,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiPageContent,
+  EuiPanel,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SummaryStatus } from '../../summary_status';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { AlertsCallout } from '../../../alerts/callout';
 
-function BeatUi({ summary, metrics, intl, ...props }) {
-
+export function Beat({ summary, metrics, alerts, ...props }) {
   const metricsToShow = [
     metrics.beat_event_rates,
     metrics.beat_fail_rates,
@@ -26,72 +36,98 @@ function BeatUi({ summary, metrics, intl, ...props }) {
 
   const summarytStatsTop = [
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.nameLabel', defaultMessage: 'Name' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.nameLabel', {
+        defaultMessage: 'Name',
+      }),
       value: summary.name,
-      'data-test-subj': 'name'
+      'data-test-subj': 'name',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.hostLabel', defaultMessage: 'Host' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.hostLabel', {
+        defaultMessage: 'Host',
+      }),
       value: summary.transportAddress,
-      'data-test-subj': 'host'
+      'data-test-subj': 'host',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.versionLabel', defaultMessage: 'Version' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.versionLabel', {
+        defaultMessage: 'Version',
+      }),
       value: summary.version,
-      'data-test-subj': 'version'
+      'data-test-subj': 'version',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.typeLabel', defaultMessage: 'Type' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.typeLabel', {
+        defaultMessage: 'Type',
+      }),
       value: summary.type,
-      'data-test-subj': 'type'
+      'data-test-subj': 'type',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.outputLabel', defaultMessage: 'Output' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.outputLabel', {
+        defaultMessage: 'Output',
+      }),
       value: summary.output,
-      'data-test-subj': 'output'
+      'data-test-subj': 'output',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.configReloadsLabel', defaultMessage: 'Config reloads' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.configReloadsLabel', {
+        defaultMessage: 'Config reloads',
+      }),
       value: formatMetric(summary.configReloads, 'int_commas'),
-      'data-test-subj': 'configReloads'
+      'data-test-subj': 'configReloads',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.uptimeLabel', defaultMessage: 'Uptime' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.uptimeLabel', {
+        defaultMessage: 'Uptime',
+      }),
       value: formatMetric(summary.uptime, 'time_since'),
-      'data-test-subj': 'uptime'
+      'data-test-subj': 'uptime',
     },
   ];
 
   const summarytStatsBot = [
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.eventsTotalLabel', defaultMessage: 'Events total' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.eventsTotalLabel', {
+        defaultMessage: 'Events total',
+      }),
       value: formatMetric(summary.eventsTotal, 'int_commas'),
-      'data-test-subj': 'eventsTotal'
+      'data-test-subj': 'eventsTotal',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.eventsEmittedLabel', defaultMessage: 'Events emitted' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.eventsEmittedLabel', {
+        defaultMessage: 'Events emitted',
+      }),
       value: formatMetric(summary.eventsEmitted, 'int_commas'),
-      'data-test-subj': 'eventsEmitted'
+      'data-test-subj': 'eventsEmitted',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.eventsDroppedLabel', defaultMessage: 'Events dropped' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.eventsDroppedLabel', {
+        defaultMessage: 'Events dropped',
+      }),
       value: formatMetric(summary.eventsDropped, 'int_commas'),
-      'data-test-subj': 'eventsDropped'
+      'data-test-subj': 'eventsDropped',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.bytesSentLabel', defaultMessage: 'Bytes sent' }),
+      label: i18n.translate('xpack.monitoring.beats.instance.bytesSentLabel', {
+        defaultMessage: 'Bytes sent',
+      }),
       value: formatMetric(summary.bytesWritten, 'byte'),
-      'data-test-subj': 'bytesWritten'
+      'data-test-subj': 'bytesWritten',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.handlesLimitSoftLabel', defaultMessage: 'Handles limit (soft)' }),
-      value: formatMetric(summary.handlesSoftLimit, 'byte'),
-      'data-test-subj': 'handlesLimitSoft'
+      label: i18n.translate('xpack.monitoring.beats.instance.handlesLimitSoftLabel', {
+        defaultMessage: 'Handles limit (soft)',
+      }),
+      value: formatMetric(summary.handlesSoftLimit, 'int_commas'),
+      'data-test-subj': 'handlesLimitSoft',
     },
     {
-      label: intl.formatMessage({ id: 'xpack.monitoring.beats.instance.handlesLimitHardLabel', defaultMessage: 'Handles limit (hard)' }),
-      value: formatMetric(summary.handlesHardLimit, 'byte'),
-      'data-test-subj': 'handlesLimitHard'
+      label: i18n.translate('xpack.monitoring.beats.instance.handlesLimitHardLabel', {
+        defaultMessage: 'Handles limit (hard)',
+      }),
+      value: formatMetric(summary.handlesHardLimit, 'int_commas'),
+      'data-test-subj': 'handlesLimitHard',
     },
   ];
 
@@ -101,22 +137,34 @@ function BeatUi({ summary, metrics, intl, ...props }) {
         <EuiPanel>
           <SummaryStatus
             metrics={summarytStatsTop}
+            alerts={alerts}
             data-test-subj="beatSummaryStatus01"
-          />
-          <SummaryStatus
-            metrics={summarytStatsBot}
-            data-test-subj="beatSummaryStatus02"
           />
         </EuiPanel>
         <EuiSpacer size="m" />
+        <EuiPanel>
+          <SummaryStatus metrics={summarytStatsBot} data-test-subj="beatSummaryStatus02" />
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <AlertsCallout
+          alerts={alerts}
+          nextStepsFilter={(nextStep) => {
+            if (nextStep.text.includes('Beat instances')) {
+              return false;
+            }
+            return true;
+          }}
+        />
         <EuiPageContent>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage id="xpack.monitoring.beats.beat.heading" defaultMessage="Beat" />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>
-                <MonitoringTimeseriesContainer
-                  series={metric}
-                  {...props}
-                />
+                <MonitoringTimeseriesContainer series={metric} {...props} />
                 <EuiSpacer />
               </EuiFlexItem>
             ))}
@@ -126,5 +174,3 @@ function BeatUi({ summary, metrics, intl, ...props }) {
     </EuiPage>
   );
 }
-
-export const Beat = injectI18n(BeatUi);

@@ -1,0 +1,175 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Home component should render services 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "appMountParameters": Object {
+        "setHeaderActionMenu": [Function],
+      },
+      "config": Object {
+        "serviceMapEnabled": true,
+        "ui": Object {
+          "enabled": false,
+        },
+      },
+      "core": Object {
+        "application": Object {
+          "capabilities": Object {
+            "apm": Object {},
+            "ml": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+          },
+          "navigateToUrl": [Function],
+        },
+        "chrome": Object {
+          "docTitle": Object {
+            "change": [Function],
+          },
+          "setBadge": [Function],
+          "setBreadcrumbs": [Function],
+          "setHelpExtension": [Function],
+        },
+        "docLinks": Object {
+          "DOC_LINK_VERSION": "0",
+          "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
+        },
+        "http": Object {
+          "basePath": Object {
+            "get": [Function],
+            "prepend": [Function],
+          },
+        },
+        "i18n": Object {
+          "Context": [Function],
+        },
+        "notifications": Object {
+          "toasts": Object {
+            "addDanger": [Function],
+            "addWarning": [Function],
+          },
+        },
+        "uiSettings": Object {
+          "get": [Function],
+          "get$": [Function],
+        },
+      },
+      "plugins": Object {
+        "data": Object {
+          "query": Object {
+            "timefilter": Object {
+              "timefilter": Object {
+                "getTime": [Function],
+                "setTime": [Function],
+              },
+            },
+          },
+        },
+        "ml": Object {
+          "urlGenerator": MlUrlGenerator {
+            "createUrl": [Function],
+            "id": "ML_APP_URL_GENERATOR",
+            "params": Object {
+              "appBasePath": "/app/ml",
+              "useHash": false,
+            },
+          },
+        },
+      },
+    }
+  }
+>
+  <Home
+    tab="services"
+  />
+</ContextProvider>
+`;
+
+exports[`Home component should render traces 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "appMountParameters": Object {
+        "setHeaderActionMenu": [Function],
+      },
+      "config": Object {
+        "serviceMapEnabled": true,
+        "ui": Object {
+          "enabled": false,
+        },
+      },
+      "core": Object {
+        "application": Object {
+          "capabilities": Object {
+            "apm": Object {},
+            "ml": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+          },
+          "navigateToUrl": [Function],
+        },
+        "chrome": Object {
+          "docTitle": Object {
+            "change": [Function],
+          },
+          "setBadge": [Function],
+          "setBreadcrumbs": [Function],
+          "setHelpExtension": [Function],
+        },
+        "docLinks": Object {
+          "DOC_LINK_VERSION": "0",
+          "ELASTIC_WEBSITE_URL": "https://www.elastic.co/",
+        },
+        "http": Object {
+          "basePath": Object {
+            "get": [Function],
+            "prepend": [Function],
+          },
+        },
+        "i18n": Object {
+          "Context": [Function],
+        },
+        "notifications": Object {
+          "toasts": Object {
+            "addDanger": [Function],
+            "addWarning": [Function],
+          },
+        },
+        "uiSettings": Object {
+          "get": [Function],
+          "get$": [Function],
+        },
+      },
+      "plugins": Object {
+        "data": Object {
+          "query": Object {
+            "timefilter": Object {
+              "timefilter": Object {
+                "getTime": [Function],
+                "setTime": [Function],
+              },
+            },
+          },
+        },
+        "ml": Object {
+          "urlGenerator": MlUrlGenerator {
+            "createUrl": [Function],
+            "id": "ML_APP_URL_GENERATOR",
+            "params": Object {
+              "appBasePath": "/app/ml",
+              "useHash": false,
+            },
+          },
+        },
+      },
+    }
+  }
+>
+  <Home
+    tab="traces"
+  />
+</ContextProvider>
+`;

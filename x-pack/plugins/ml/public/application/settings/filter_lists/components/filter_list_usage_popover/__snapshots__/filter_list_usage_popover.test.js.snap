@@ -1,0 +1,120 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
+<div>
+  <EuiPopover
+    anchorPosition="downCenter"
+    button={
+      <EuiButtonEmpty
+        color="primary"
+        onClick={[Function]}
+        size="s"
+      >
+        3 detectors
+      </EuiButtonEmpty>
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="detector_filter_list_usage"
+    isOpen={true}
+    ownFocus={true}
+    panelClassName="ml-filter-list-usage-popover"
+    panelPaddingSize="m"
+  >
+    <ul>
+      <li
+        key="mean responsetime"
+      >
+        mean responsetime
+      </li>
+      <li
+        key="max responsetime"
+      >
+        max responsetime
+      </li>
+      <li
+        key="count"
+      >
+        count
+      </li>
+    </ul>
+  </EuiPopover>
+</div>
+`;
+
+exports[`FilterListUsagePopover renders the popover for 1 job 1`] = `
+<div>
+  <EuiPopover
+    anchorPosition="downCenter"
+    button={
+      <EuiButtonEmpty
+        color="primary"
+        onClick={[Function]}
+        size="s"
+      >
+        1 job
+      </EuiButtonEmpty>
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="job_filter_list_usage"
+    isOpen={false}
+    ownFocus={true}
+    panelClassName="ml-filter-list-usage-popover"
+    panelPaddingSize="m"
+  >
+    <ul>
+      <li
+        key="farequote"
+      >
+        farequote
+      </li>
+    </ul>
+  </EuiPopover>
+</div>
+`;
+
+exports[`FilterListUsagePopover renders the popover for 2 detectors 1`] = `
+<div>
+  <EuiPopover
+    anchorPosition="downCenter"
+    button={
+      <EuiButtonEmpty
+        color="primary"
+        onClick={[Function]}
+        size="s"
+      >
+        3 detectors
+      </EuiButtonEmpty>
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="detector_filter_list_usage"
+    isOpen={false}
+    ownFocus={true}
+    panelClassName="ml-filter-list-usage-popover"
+    panelPaddingSize="m"
+  >
+    <ul>
+      <li
+        key="mean responsetime"
+      >
+        mean responsetime
+      </li>
+      <li
+        key="max responsetime"
+      >
+        max responsetime
+      </li>
+      <li
+        key="count"
+      >
+        count
+      </li>
+    </ul>
+  </EuiPopover>
+</div>
+`;

@@ -2,8 +2,6 @@
 
 exports[`ExplainCollectionInterval collection interval setting updates should show a success message while updated = true 1`] = `
 <ExplainCollectionInterval
-  context="cluster"
-  data="-1"
   enabler={
     Object {
       "enableCollectionInterval": [Function],
@@ -113,7 +111,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   }
   isCollectionIntervalUpdated={true}
   isCollectionIntervalUpdating={false}
-  property="xpack.monitoring.collection.interval"
+  reason={
+    Object {
+      "context": "cluster",
+      "data": "-1",
+      "property": "xpack.monitoring.collection.interval",
+    }
+  }
 >
   <EuiTitle
     size="l"
@@ -169,8 +173,6 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
 
 exports[`ExplainCollectionInterval collection interval setting updates should show a waiting indicator while updating = true 1`] = `
 <ExplainCollectionInterval
-  context="cluster"
-  data="-1"
   enabler={
     Object {
       "enableCollectionInterval": [Function],
@@ -280,7 +282,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   }
   isCollectionIntervalUpdated={false}
   isCollectionIntervalUpdating={true}
-  property="xpack.monitoring.collection.interval"
+  reason={
+    Object {
+      "context": "cluster",
+      "data": "-1",
+      "property": "xpack.monitoring.collection.interval",
+    }
+  }
 >
   <WhatIs>
     <EuiTitle
@@ -352,19 +360,10 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
           We checked the cluster settings and found that 
           <EuiCode>
             <EuiCodeBlockImpl
-              fontSize="s"
               inline={true}
-              isCopyable={false}
-              paddingSize="l"
-              transparentBackground={false}
             >
-              <span
-                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                style={Object {}}
-              >
-                <code
-                  className="euiCodeBlock__code"
-                >
+              <span>
+                <code>
                   xpack.monitoring.collection.interval
                 </code>
               </span>
@@ -373,19 +372,10 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
            is set to 
           <EuiCode>
             <EuiCodeBlockImpl
-              fontSize="s"
               inline={true}
-              isCopyable={false}
-              paddingSize="l"
-              transparentBackground={false}
             >
-              <span
-                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                style={Object {}}
-              >
-                <code
-                  className="euiCodeBlock__code"
-                >
+              <span>
+                <code>
                   -1
                 </code>
               </span>
@@ -434,46 +424,71 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <EuiButton
-            color="primary"
             data-test-subj="enableCollectionInterval"
             fill={true}
-            iconSide="left"
             isLoading={true}
             onClick={[Function]}
-            size="m"
             type="button"
           >
-            <button
-              className="euiButton euiButton--primary euiButton--fill"
+            <EuiButtonDisplay
+              baseClassName="euiButton"
               data-test-subj="enableCollectionInterval"
               disabled={true}
+              element="button"
+              fill={true}
+              isDisabled={true}
+              isLoading={true}
               onClick={[Function]}
               type="button"
             >
-              <span
-                className="euiButton__content"
+              <button
+                className="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+                data-test-subj="enableCollectionInterval"
+                disabled={true}
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
+                type="button"
               >
-                <EuiLoadingSpinner
-                  className="euiButton__spinner"
-                  size="m"
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  isLoading={true}
+                  textProps={
+                    Object {
+                      "className": "euiButton__text",
+                    }
+                  }
                 >
                   <span
-                    className="euiLoadingSpinner euiLoadingSpinner--medium euiButton__spinner"
-                  />
-                </EuiLoadingSpinner>
-                <span
-                  className="euiButton__text"
-                >
-                  <FormattedMessage
-                    defaultMessage="Turn on monitoring"
-                    id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
-                    values={Object {}}
+                    className="euiButtonContent euiButton__content"
                   >
-                    Turn on monitoring
-                  </FormattedMessage>
-                </span>
-              </span>
-            </button>
+                    <EuiLoadingSpinner
+                      className="euiButtonContent__spinner"
+                      size="m"
+                    >
+                      <span
+                        className="euiLoadingSpinner euiLoadingSpinner--medium euiButtonContent__spinner"
+                      />
+                    </EuiLoadingSpinner>
+                    <span
+                      className="euiButton__text"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Turn on monitoring"
+                        id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
+                        values={Object {}}
+                      >
+                        Turn on monitoring
+                      </FormattedMessage>
+                    </span>
+                  </span>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
           </EuiButton>
         </div>
       </EuiFlexItem>
@@ -484,8 +499,6 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
 
 exports[`ExplainCollectionInterval should explain about xpack.monitoring.collection.interval setting 1`] = `
 <ExplainCollectionInterval
-  context="cluster"
-  data="-1"
   enabler={
     Object {
       "enableCollectionInterval": [Function],
@@ -595,7 +608,13 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   }
   isCollectionIntervalUpdated={false}
   isCollectionIntervalUpdating={false}
-  property="xpack.monitoring.collection.interval"
+  reason={
+    Object {
+      "context": "cluster",
+      "data": "-1",
+      "property": "xpack.monitoring.collection.interval",
+    }
+  }
 >
   <WhatIs>
     <EuiTitle
@@ -667,19 +686,10 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
           We checked the cluster settings and found that 
           <EuiCode>
             <EuiCodeBlockImpl
-              fontSize="s"
               inline={true}
-              isCopyable={false}
-              paddingSize="l"
-              transparentBackground={false}
             >
-              <span
-                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                style={Object {}}
-              >
-                <code
-                  className="euiCodeBlock__code"
-                >
+              <span>
+                <code>
                   xpack.monitoring.collection.interval
                 </code>
               </span>
@@ -688,19 +698,10 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
            is set to 
           <EuiCode>
             <EuiCodeBlockImpl
-              fontSize="s"
               inline={true}
-              isCopyable={false}
-              paddingSize="l"
-              transparentBackground={false}
             >
-              <span
-                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                style={Object {}}
-              >
-                <code
-                  className="euiCodeBlock__code"
-                >
+              <span>
+                <code>
                   -1
                 </code>
               </span>
@@ -749,37 +750,60 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <EuiButton
-            color="primary"
             data-test-subj="enableCollectionInterval"
             fill={true}
-            iconSide="left"
             isLoading={false}
             onClick={[Function]}
-            size="m"
             type="button"
           >
-            <button
-              className="euiButton euiButton--primary euiButton--fill"
+            <EuiButtonDisplay
+              baseClassName="euiButton"
               data-test-subj="enableCollectionInterval"
+              element="button"
+              fill={true}
+              isLoading={false}
               onClick={[Function]}
               type="button"
             >
-              <span
-                className="euiButton__content"
+              <button
+                className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="enableCollectionInterval"
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
+                type="button"
               >
-                <span
-                  className="euiButton__text"
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  isLoading={false}
+                  textProps={
+                    Object {
+                      "className": "euiButton__text",
+                    }
+                  }
                 >
-                  <FormattedMessage
-                    defaultMessage="Turn on monitoring"
-                    id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
-                    values={Object {}}
+                  <span
+                    className="euiButtonContent euiButton__content"
                   >
-                    Turn on monitoring
-                  </FormattedMessage>
-                </span>
-              </span>
-            </button>
+                    <span
+                      className="euiButton__text"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Turn on monitoring"
+                        id="xpack.monitoring.noData.explanations.collectionInterval.turnOnMonitoringButtonLabel"
+                        values={Object {}}
+                      >
+                        Turn on monitoring
+                      </FormattedMessage>
+                    </span>
+                  </span>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
           </EuiButton>
         </div>
       </EuiFlexItem>

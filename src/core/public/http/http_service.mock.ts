@@ -16,10 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { HttpService } from './http_service';
+import { HttpSetup } from './types';
+import { BehaviorSubject } from 'rxjs';
+import { BasePath } from './base_path';
 
-import { HttpService, HttpSetup, HttpStart } from './http_service';
+export type HttpSetupMock = jest.Mocked<HttpSetup> & {
+  basePath: BasePath;
+  anonymousPaths: jest.Mocked<HttpSetup['anonymousPaths']>;
+};
 
-const createSetupContractMock = (): jest.Mocked<HttpSetup> => ({
+const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   fetch: jest.fn(),
   get: jest.fn(),
   head: jest.fn(),
@@ -28,18 +36,29 @@ const createSetupContractMock = (): jest.Mocked<HttpSetup> => ({
   patch: jest.fn(),
   delete: jest.fn(),
   options: jest.fn(),
-  addLoadingCount: jest.fn(),
-  getLoadingCount$: jest.fn(),
+  basePath: new BasePath(basePath),
+  anonymousPaths: {
+    register: jest.fn(),
+    isAnonymous: jest.fn(),
+  },
+  addLoadingCountSource: jest.fn(),
+  getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
+  intercept: jest.fn(),
 });
-const createStartContractMock = (): jest.Mocked<HttpStart> => undefined;
-const createMock = (): jest.Mocked<PublicMethodsOf<HttpService>> => ({
-  setup: jest.fn().mockReturnValue(createSetupContractMock()),
-  start: jest.fn().mockReturnValue(createStartContractMock()),
-  stop: jest.fn(),
-});
+
+const createMock = ({ basePath = '' } = {}) => {
+  const mocked: jest.Mocked<PublicMethodsOf<HttpService>> = {
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mocked.setup.mockReturnValue(createServiceMock({ basePath }));
+  mocked.start.mockReturnValue(createServiceMock({ basePath }));
+  return mocked;
+};
 
 export const httpServiceMock = {
   create: createMock,
-  createSetupContract: createSetupContractMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createServiceMock,
+  createStartContract: createServiceMock,
 };

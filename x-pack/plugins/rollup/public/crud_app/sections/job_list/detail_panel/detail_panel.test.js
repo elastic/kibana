@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../../../test_utils';
+import { registerTestBed } from '@kbn/test/jest';
 import { getJob } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { DetailPanel } from './detail_panel';
@@ -17,8 +17,8 @@ import {
   tabToHumanizedMap,
 } from '../../components';
 
-jest.mock('../../../services', () => {
-  const services = require.requireActual('../../../services');
+jest.mock('../../../../kibana_services', () => {
+  const services = jest.requireActual('../../../../kibana_services');
   return {
     ...services,
     trackUiMetric: jest.fn(),
@@ -56,13 +56,13 @@ describe('<DetailPanel />', () => {
       expect(title.text()).toEqual(job.id);
     });
 
-    it('should have children if it\'s open', () => {
-      expect(component.find('DetailPanelUi').children().length).toBeTruthy();
+    it("should have children if it's open", () => {
+      expect(component.find('DetailPanel').children().length).toBeTruthy();
     });
 
-    it('should *not* have children if it\s closed', () => {
+    it('should *not* have children if its closed', () => {
       ({ component } = initTestBed({ isOpen: false }));
-      expect(component.find('DetailPanelUi').children().length).toBeFalsy();
+      expect(component.find('DetailPanel').children().length).toBeFalsy();
     });
 
     it('should show a loading when the job is loading', () => {
@@ -94,7 +94,7 @@ describe('<DetailPanel />', () => {
     };
 
     it('should have 5 tabs visible', () => {
-      const tabsLabel = tabs.map(tab => tab.text());
+      const tabsLabel = tabs.map((tab) => tab.text());
 
       expect(tabsLabel).toEqual(['Summary', 'Terms', 'Histogram', 'Metrics', 'JSON']);
     });
@@ -113,7 +113,7 @@ describe('<DetailPanel />', () => {
       expect(openDetailPanel.mock.calls.length).toBe(1);
       expect(openDetailPanel.mock.calls[0][0]).toEqual({
         jobId: job.id,
-        panelType: JOB_DETAILS_TAB_TERMS
+        panelType: JOB_DETAILS_TAB_TERMS,
       });
     });
   });
@@ -140,12 +140,15 @@ describe('<DetailPanel />', () => {
         const LOGISTICS_SUBSECTIONS = ['IndexPattern', 'RollupIndex', 'Cron', 'Delay'];
 
         it('should have "Index pattern", "Rollup index", "Cron" and "Delay" subsections', () => {
-          const logisticsSubsectionsTitles = LOGISTICS_SUBSECTIONS.reduce((subSections, subSection) => {
-            if (find(`rollupJobDetailLogistics${subSection}Title`)) {
-              subSections.push(subSection);
-            }
-            return subSections;
-          }, []);
+          const logisticsSubsectionsTitles = LOGISTICS_SUBSECTIONS.reduce(
+            (subSections, subSection) => {
+              if (find(`rollupJobDetailLogistics${subSection}Title`)) {
+                subSections.push(subSection);
+              }
+              return subSections;
+            },
+            []
+          );
           expect(logisticsSubsectionsTitles).toEqual(LOGISTICS_SUBSECTIONS);
         });
 
@@ -155,7 +158,7 @@ describe('<DetailPanel />', () => {
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
 
-            switch(subSection) {
+            switch (subSection) {
               case 'IndexPattern':
                 expect(description).toEqual(defaultJob.indexPattern);
                 break;
@@ -170,7 +173,9 @@ describe('<DetailPanel />', () => {
                 break;
               default:
                 // Should never get here... if it does a section is missing in the constant
-                throw(new Error('Should not get here. The constant LOGISTICS_SUBSECTIONS is probably missing a new subsection'));
+                throw new Error(
+                  'Should not get here. The constant LOGISTICS_SUBSECTIONS is probably missing a new subsection'
+                );
             }
           });
         });
@@ -180,12 +185,15 @@ describe('<DetailPanel />', () => {
         const DATE_HISTOGRAMS_SUBSECTIONS = ['TimeField', 'Timezone', 'Interval'];
 
         it('should have "Time field", "Timezone", "Interval" subsections', () => {
-          const dateHistogramSubsections = DATE_HISTOGRAMS_SUBSECTIONS.reduce((subSections, subSection) => {
-            if (find(`rollupJobDetailDateHistogram${subSection}Title`)) {
-              subSections.push(subSection);
-            }
-            return subSections;
-          }, []);
+          const dateHistogramSubsections = DATE_HISTOGRAMS_SUBSECTIONS.reduce(
+            (subSections, subSection) => {
+              if (find(`rollupJobDetailDateHistogram${subSection}Title`)) {
+                subSections.push(subSection);
+              }
+              return subSections;
+            },
+            []
+          );
           expect(dateHistogramSubsections).toEqual(DATE_HISTOGRAMS_SUBSECTIONS);
         });
 
@@ -195,7 +203,7 @@ describe('<DetailPanel />', () => {
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
 
-            switch(subSection) {
+            switch (subSection) {
               case 'TimeField':
                 expect(description).toEqual(defaultJob.dateHistogramField);
                 break;
@@ -207,14 +215,21 @@ describe('<DetailPanel />', () => {
                 break;
               default:
                 // Should never get here... if it does a section is missing in the constant
-                throw(new Error('Should not get here. The constant DATE_HISTOGRAMS_SUBSECTIONS is probably missing a new subsection'));
+                throw new Error(
+                  'Should not get here. The constant DATE_HISTOGRAMS_SUBSECTIONS is probably missing a new subsection'
+                );
             }
           });
         });
       });
 
       describe('Stats section', () => {
-        const STATS_SUBSECTIONS = ['DocumentsProcessed', 'PagesProcessed', 'RollupsIndexed', 'TriggerCount'];
+        const STATS_SUBSECTIONS = [
+          'DocumentsProcessed',
+          'PagesProcessed',
+          'RollupsIndexed',
+          'TriggerCount',
+        ];
 
         it('should have "Documents processed", "Pages processed", "Rollups indexed" and "Trigger count" subsections', () => {
           const statsSubSections = STATS_SUBSECTIONS.reduce((subSections, subSection) => {
@@ -232,7 +247,7 @@ describe('<DetailPanel />', () => {
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
 
-            switch(subSection) {
+            switch (subSection) {
               case 'DocumentsProcessed':
                 expect(description).toEqual(defaultJob.documentsProcessed.toString());
                 break;
@@ -247,7 +262,9 @@ describe('<DetailPanel />', () => {
                 break;
               default:
                 // Should never get here... if it does a section is missing in the constant
-                throw(new Error('Should not get here. The constant STATS_SUBSECTIONS is probably missing a new subsection'));
+                throw new Error(
+                  'Should not get here. The constant STATS_SUBSECTIONS is probably missing a new subsection'
+                );
             }
           });
         });
@@ -268,7 +285,7 @@ describe('<DetailPanel />', () => {
       const { tableCellsValues } = table.getMetaData('detailPanelTermsTabTable');
 
       it('should list the Job terms fields', () => {
-        const expected = defaultJob.terms.map(term => [term.name]);
+        const expected = defaultJob.terms.map((term) => [term.name]);
         expect(tableCellsValues).toEqual(expected);
       });
     });
@@ -280,7 +297,7 @@ describe('<DetailPanel />', () => {
       const { tableCellsValues } = table.getMetaData('detailPanelHistogramTabTable');
 
       it('should list the Job histogram fields', () => {
-        const expected = defaultJob.histogram.map(h => [h.name]);
+        const expected = defaultJob.histogram.map((h) => [h.name]);
         expect(tableCellsValues).toEqual(expected);
       });
     });
@@ -292,7 +309,7 @@ describe('<DetailPanel />', () => {
       const { tableCellsValues } = table.getMetaData('detailPanelMetricsTabTable');
 
       it('should list the Job metrics fields and their types', () => {
-        const expected = defaultJob.metrics.map(metric => [metric.name, metric.types.join(', ')]);
+        const expected = defaultJob.metrics.map((metric) => [metric.name, metric.types.join(', ')]);
         expect(tableCellsValues).toEqual(expected);
       });
     });

@@ -3,16 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ContextFunction } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Operation {
   EQ = 'eq',
-  NE = 'ne',
-  LT = 'lt',
   GT = 'gt',
-  LTE = 'lte',
   GTE = 'gte',
+  LT = 'lt',
+  LTE = 'lte',
+  NE = 'ne',
+  NEQ = 'neq',
 }
 
 interface Arguments {
@@ -22,17 +23,16 @@ interface Arguments {
 
 type Context = boolean | number | string | null;
 
-export function compare(): ContextFunction<'compare', Context, Arguments, boolean> {
+export function compare(): ExpressionFunctionDefinition<'compare', Context, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().compare;
+  const errors = getFunctionErrors().compare;
 
   return {
     name: 'compare',
     help,
     aliases: ['condition'],
     type: 'boolean',
-    context: {
-      types: ['null', 'string', 'number', 'boolean'],
-    },
+    inputTypes: ['string', 'number', 'boolean', 'null'],
     args: {
       op: {
         aliases: ['_'],
@@ -46,8 +46,8 @@ export function compare(): ContextFunction<'compare', Context, Arguments, boolea
         help: argHelp.to,
       },
     },
-    fn: (context, args) => {
-      const a = context;
+    fn: (input, args) => {
+      const a = input;
       const { to: b, op } = args;
       const typesMatch = typeof a === typeof b;
 
@@ -55,35 +55,34 @@ export function compare(): ContextFunction<'compare', Context, Arguments, boolea
         case Operation.EQ:
           return a === b;
         case Operation.NE:
+        case Operation.NEQ:
           return a !== b;
         case Operation.LT:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a < b;
           }
           return false;
         case Operation.LTE:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a <= b;
           }
           return false;
         case Operation.GT:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a > b;
           }
           return false;
         case Operation.GTE:
           if (typesMatch) {
-            // @ts-ignore #35433 This is a wonky comparison for nulls
+            // @ts-expect-error #35433 This is a wonky comparison for nulls
             return a >= b;
           }
           return false;
         default:
-          throw new Error(
-            `Invalid compare operator: '${op}'. Use ${Object.values(Operation).join(', ')}`
-          );
+          throw errors.invalidCompareOperator(op, Object.values(Operation).join(', '));
       }
     },
   };

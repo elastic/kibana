@@ -29,8 +29,7 @@ jest.mock('../../layouts/layouts', () => {
   };
 });
 
-import { LogLevel } from '../../log_level';
-import { LogRecord } from '../../log_record';
+import { LogRecord, LogLevel } from '@kbn/logging';
 import { ConsoleAppender } from './console_appender';
 
 test('`configSchema` creates correct schema.', () => {
@@ -59,12 +58,14 @@ test('`append()` correctly formats records and pushes them to console.', () => {
       level: LogLevel.All,
       message: 'message-1',
       timestamp: new Date(),
+      pid: 5355,
     },
     {
       context: 'context-2',
       level: LogLevel.Trace,
       message: 'message-2',
       timestamp: new Date(),
+      pid: 5355,
     },
     {
       context: 'context-3',
@@ -72,6 +73,7 @@ test('`append()` correctly formats records and pushes them to console.', () => {
       level: LogLevel.Fatal,
       message: 'message-3',
       timestamp: new Date(),
+      pid: 5355,
     },
   ];
 

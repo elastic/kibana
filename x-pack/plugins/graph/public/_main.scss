@@ -1,33 +1,4 @@
 /**
- * Nodes
- */
-
-.gphNode-disabled{
-  opacity:0.3;
-}
-
-.gphNode__circle {
-  fill: $euiColorMediumShade;
-
-  // SASSTODO: Can't definitively change modifier class
-  // because it's not easy to tell what's a class and what's
-  // part of the data object since they are named the same
-  &.selectedNode {
-    stroke-width: $euiSizeXS;
-    stroke: transparentize($euiColorPrimary, .25);
-  }
-}
-
-.gphNode__text {
-  fill: $euiColorDarkestShade;
-
-  &--lowOpacity{
-    fill-opacity: 0.5;
-  }
-}
-
-
-/**
  * Forms
  */
 
@@ -35,62 +6,14 @@
   margin-bottom: $euiSizeS;
 }
 
-.gphColorPicker__color,
-.gphIconPicker__icon {
+.gphColorPicker__color {
   margin: $euiSizeXS;
   cursor: pointer;
 
-  &.selectedNode,
   &:hover,
   &:focus {
     transform: scale(1.4);
   }
-}
-
-.gphIconPicker__icon {
-  opacity: .7;
-
-  &.selectedNode,
-  &:hover,
-  &:focus {
-    opacity: 1;
-  }
-}
-
-.gphIndexSelect{
-  max-width: $euiSizeL * 10;
-  margin-right: $euiSizeXS;
-
-  &-unselected {
-    @include euiFocusRing;
-  }
-}
-
-.gphAddButton {
-  background: $euiColorPrimary;
-  color: $euiColorEmptyShade;
-  border-radius: 50%;
-  font-size: $euiFontSizeXS;
-  margin: 2px $euiSizeS 0 $euiSizeXS;
-  @include size(26px); // same as svg
-
-  &:hover:not(:disabled) {
-    background: shadeOrTint($euiColorPrimary, 10%, 10%);
-    cursor: pointer;
-  }
-
-  &:disabled {
-    background: $euiColorMediumShade;
-    cursor: not-allowed;
-  }
-
-  &-focus {
-    @include euiFocusRing;
-  }
-}
-
-.gphFieldList {
-  min-width: $euiSizeXL * 10;
 }
 
 /**
@@ -101,4 +24,10 @@
   user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+.gphAppWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }

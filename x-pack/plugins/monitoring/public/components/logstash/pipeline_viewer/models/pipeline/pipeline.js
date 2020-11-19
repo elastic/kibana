@@ -9,8 +9,9 @@ import { QueueVertex } from '../graph/queue_vertex';
 import { isVertexPipelineStage } from './utils';
 
 function getInputStatements(pipelineGraph) {
-  return pipelineGraph.getVertices()
-    .filter(v => v.pipelineStage === 'input')
+  return pipelineGraph
+    .getVertices()
+    .filter((v) => v.pipelineStage === 'input')
     .map(makeStatement);
 }
 
@@ -23,19 +24,18 @@ function isVertexOrphan(vertex) {
 }
 
 function isVertexChildOfQueue(vertex) {
-  return vertex.incomingVertices.every(p => p instanceof QueueVertex);
+  return vertex.incomingVertices.every((p) => p instanceof QueueVertex);
 }
 
 function getFilterStatements(pipelineGraph) {
-
   // If the graph has a Queue vertex, then the first filter vertex whose parent is the Queue vertex
   // is where we want to start. If there is no Queue vertex then there are necessarily no input-stage vertices
   // either, so the first filter vertex that has no parents (orphan vertex) is where we want to start.
   const allVertices = pipelineGraph.getVertices();
-  const allFilterVertices = allVertices.filter(v => isFilterStageVertex(v));
+  const allFilterVertices = allVertices.filter((v) => isFilterStageVertex(v));
   const startFilterVertex = pipelineGraph.hasQueueVertex
-    ? allFilterVertices.find(v => isVertexChildOfQueue(v))
-    : allFilterVertices.find(v => isVertexOrphan(v));
+    ? allFilterVertices.find((v) => isVertexChildOfQueue(v))
+    : allFilterVertices.find((v) => isVertexOrphan(v));
 
   if (!startFilterVertex) {
     return [];
@@ -52,15 +52,18 @@ function getFilterStatements(pipelineGraph) {
 }
 
 function getQueue(pipelineGraph) {
-  return pipelineGraph.hasQueueVertex
-    ? makeStatement(pipelineGraph.queueVertex)
-    : null;
+  return pipelineGraph.hasQueueVertex ? makeStatement(pipelineGraph.queueVertex) : null;
 }
 
 function getOutputStatements(pipelineGraph) {
-  return pipelineGraph.getVertices()
-    .filter(v => (v.pipelineStage === 'output') && !v.incomingVertices.some(p => p.pipelineStage === 'output'))
-    .map(v => makeStatement(v, 'output'));
+  return pipelineGraph
+    .getVertices()
+    .filter(
+      (v) =>
+        v.pipelineStage === 'output' &&
+        !v.incomingVertices.some((p) => p.pipelineStage === 'output')
+    )
+    .map((v) => makeStatement(v, 'output'));
 }
 
 export class Pipeline {

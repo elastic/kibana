@@ -1,0 +1,111 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render default props 1`] = `
+<EuiPopover
+  anchorPosition="leftCenter"
+  button={
+    <EuiExpression
+      description="and use metric"
+      onClick={[Function]}
+      uppercase={false}
+      value="count"
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="metricsPopover"
+  initialFocus="body"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+  withTitle={true}
+>
+  <div
+    style={
+      Object {
+        "width": 400,
+      }
+    }
+  >
+    <EuiPopoverTitle>
+      <FormattedMessage
+        defaultMessage="Metrics"
+        id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
+        values={Object {}}
+      />
+    </EuiPopoverTitle>
+    <EuiFormHelpText
+      className="mapJoinExpressionHelpText"
+    >
+      <FormattedMessage
+        defaultMessage="Configure the metrics for the right source. These values are added to the layer features."
+        id="xpack.maps.layerPanel.metricsExpression.helpText"
+        values={Object {}}
+      />
+    </EuiFormHelpText>
+    <EuiFormErrorText>
+      <FormattedMessage
+        defaultMessage="JOIN must be set"
+        id="xpack.maps.layerPanel.metricsExpression.joinMustBeSetErrorMessage"
+        values={Object {}}
+      />
+    </EuiFormErrorText>
+  </div>
+</EuiPopover>
+`;
+
+exports[`Should render metrics expression for metrics 1`] = `
+<EuiPopover
+  anchorPosition="leftCenter"
+  button={
+    <EuiExpression
+      description="and use metrics"
+      onClick={[Function]}
+      uppercase={false}
+      value="count, max prop1"
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="metricsPopover"
+  initialFocus="body"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+  withTitle={true}
+>
+  <div
+    style={
+      Object {
+        "width": 400,
+      }
+    }
+  >
+    <EuiPopoverTitle>
+      <FormattedMessage
+        defaultMessage="Metrics"
+        id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
+        values={Object {}}
+      />
+    </EuiPopoverTitle>
+    <EuiFormHelpText
+      className="mapJoinExpressionHelpText"
+    >
+      <FormattedMessage
+        defaultMessage="Configure the metrics for the right source. These values are added to the layer features."
+        id="xpack.maps.layerPanel.metricsExpression.helpText"
+        values={Object {}}
+      />
+    </EuiFormHelpText>
+    <EuiFormErrorText>
+      <FormattedMessage
+        defaultMessage="JOIN must be set"
+        id="xpack.maps.layerPanel.metricsExpression.joinMustBeSetErrorMessage"
+        values={Object {}}
+      />
+    </EuiFormErrorText>
+  </div>
+</EuiPopover>
+`;

@@ -4,40 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FetchOptions } from 'apollo-link-http';
+import { HttpSetup } from 'kibana/public';
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
-import { kfetch, KFetchOptions } from 'ui/kfetch';
-import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
+import { FetchOptions } from '../../../common/fetch_options';
 
-function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
+function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
   const debugEnabled =
     sessionStorage.getItem('apm_debug') === 'true' &&
     startsWith(fetchOptions.pathname, '/api/apm');
 
-  if (!debugEnabled) {
-    return fetchOptions;
-  }
+  const { body, ...rest } = fetchOptions;
 
   return {
-    ...fetchOptions,
+    ...rest,
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     query: {
       ...fetchOptions.query,
-      _debug: true
-    }
+      ...(debugEnabled ? { _debug: true } : {}),
+    },
   };
 }
 
 const cache = new LRU<string, any>({ max: 100, maxAge: 1000 * 60 * 60 });
 
-export function _clearCache() {
+export function clearCache() {
   cache.reset();
 }
 
+export type CallApi = typeof callApi;
+
 export async function callApi<T = void>(
-  fetchOptions: KFetchOptions,
-  options?: KFetchKibanaOptions
+  http: HttpSetup,
+  fetchOptions: FetchOptions
 ): Promise<T> {
   const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);
@@ -45,8 +45,18 @@ export async function callApi<T = void>(
     return cacheResponse;
   }
 
-  const combinedFetchOptions = fetchOptionsWithDebug(fetchOptions);
-  const res = await kfetch(combinedFetchOptions, options);
+  const { pathname, method = 'get', ...options } = fetchOptionsWithDebug(
+    fetchOptions
+  );
+
+  const lowercaseMethod = method.toLowerCase() as
+    | 'get'
+    | 'post'
+    | 'put'
+    | 'delete'
+    | 'patch';
+
+  const res = await http[lowercaseMethod](pathname, options);
 
   if (isCachable(fetchOptions)) {
     cache.set(cacheKey, res);
@@ -57,7 +67,11 @@ export async function callApi<T = void>(
 
 // only cache items that has a time range with `start` and `end` params,
 // and where `end` is not a timestamp in the future
-function isCachable(fetchOptions: KFetchOptions) {
+function isCachable(fetchOptions: FetchOptions) {
+  if (fetchOptions.isCachable !== undefined) {
+    return fetchOptions.isCachable;
+  }
+
   if (
     !(fetchOptions.query && fetchOptions.query.start && fetchOptions.query.end)
   ) {

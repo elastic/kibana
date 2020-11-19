@@ -1,0 +1,525 @@
+{
+  "farequote-*": {
+    "aggs": [
+      {
+        "id": "count",
+        "title": "Count",
+        "kibanaName": "count",
+        "dslName": "count",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        }
+      },
+      {
+        "id": "high_count",
+        "title": "High count",
+        "kibanaName": "count",
+        "dslName": "count",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        }
+      },
+      {
+        "id": "low_count",
+        "title": "Low count",
+        "kibanaName": "count",
+        "dslName": "count",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        }
+      },
+      {
+        "id": "mean",
+        "title": "Mean",
+        "kibanaName": "avg",
+        "dslName": "avg",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "avg",
+          "min": "avg"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "high_mean",
+        "title": "High mean",
+        "kibanaName": "avg",
+        "dslName": "avg",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "avg",
+          "min": "avg"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "low_mean",
+        "title": "Low mean",
+        "kibanaName": "avg",
+        "dslName": "avg",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "avg",
+          "min": "avg"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "sum",
+        "title": "Sum",
+        "kibanaName": "sum",
+        "dslName": "sum",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "sum",
+          "min": "sum"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "high_sum",
+        "title": "High sum",
+        "kibanaName": "sum",
+        "dslName": "sum",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "sum",
+          "min": "sum"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "low_sum",
+        "title": "Low sum",
+        "kibanaName": "sum",
+        "dslName": "sum",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "sum",
+          "min": "sum"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "median",
+        "title": "Median",
+        "kibanaName": "median",
+        "dslName": "percentiles",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "high_median",
+        "title": "High median",
+        "kibanaName": "median",
+        "dslName": "percentiles",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "low_median",
+        "title": "Low median",
+        "kibanaName": "median",
+        "dslName": "percentiles",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "min",
+        "title": "Min",
+        "kibanaName": "min",
+        "dslName": "min",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "min",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "max",
+        "title": "Max",
+        "kibanaName": "max",
+        "dslName": "max",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "max"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "distinct_count",
+        "title": "Distinct count",
+        "kibanaName": "cardinality",
+        "dslName": "cardinality",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "airline",
+          "responsetime"
+        ]
+      },
+      {
+        "id": "non_zero_count",
+        "title": "Non zero count",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        }
+      },
+      {
+        "id": "high_non_zero_count",
+        "title": "High non zero count",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        }
+      },
+      {
+        "id": "low_non_zero_count",
+        "title": "Low non zero count",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        }
+      },
+      {
+        "id": "high_distinct_count",
+        "title": "High distinct count",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "airline",
+          "responsetime"
+        ]
+      },
+      {
+        "id": "low_distinct_count",
+        "title": "Low distinct count",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "airline",
+          "responsetime"
+        ]
+      },
+      {
+        "id": "metric",
+        "title": "Metric",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "varp",
+        "title": "varp",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "high_varp",
+        "title": "High varp",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "low_varp",
+        "title": "Low varp",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "non_null_sum",
+        "title": "Non null sum",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "high_non_null_sum",
+        "title": "High non null sum",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "low_non_null_sum",
+        "title": "Low non null sum",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "responsetime"
+        ]
+      },
+      {
+        "id": "rare",
+        "title": "Rare",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        }
+      },
+      {
+        "id": "freq_rare",
+        "title": "Freq rare",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        }
+      },
+      {
+        "id": "info_content",
+        "title": "Info content",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "airline",
+          "responsetime"
+        ]
+      },
+      {
+        "id": "high_info_content",
+        "title": "High info content",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "airline",
+          "responsetime"
+        ]
+      },
+      {
+        "id": "low_info_content",
+        "title": "Low info content",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": [
+          "airline",
+          "responsetime"
+        ]
+      },
+      {
+        "id": "time_of_day",
+        "title": "Time of day",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        }
+      },
+      {
+        "id": "time_of_week",
+        "title": "Time of week",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        }
+      },
+      {
+        "id": "lat_long",
+        "title": "Lat long",
+        "kibanaName": null,
+        "dslName": null,
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "min"
+        },
+        "fieldIds": []
+      }
+    ],
+    "fields": [
+      {
+        "id": "@timestamp",
+        "name": "@timestamp",
+        "type": "date",
+        "aggregatable": true,
+        "aggIds": []
+      },
+      {
+        "id": "airline",
+        "name": "airline",
+        "type": "keyword",
+        "aggregatable": true,
+        "aggIds": [
+          "distinct_count",
+          "high_distinct_count",
+          "low_distinct_count",
+          "info_content",
+          "high_info_content",
+          "low_info_content"
+        ]
+      },
+      {
+        "id": "responsetime",
+        "name": "responsetime",
+        "type": "float",
+        "aggregatable": true,
+        "aggIds": [
+          "mean",
+          "high_mean",
+          "low_mean",
+          "sum",
+          "high_sum",
+          "low_sum",
+          "median",
+          "high_median",
+          "low_median",
+          "min",
+          "max",
+          "distinct_count",
+          "high_distinct_count",
+          "low_distinct_count",
+          "metric",
+          "varp",
+          "high_varp",
+          "low_varp",
+          "non_null_sum",
+          "high_non_null_sum",
+          "low_non_null_sum",
+          "info_content",
+          "high_info_content",
+          "low_info_content"
+        ]
+      }
+    ]
+  }
+}

@@ -17,84 +17,63 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
-import {
-  distinctUntilChanged,
-  endWith,
-  map,
-  pairwise,
-  startWith,
-  takeUntil,
-  tap,
-} from 'rxjs/operators';
+import { HttpSetup, HttpStart } from './types';
+import { InjectedMetadataSetup } from '../injected_metadata';
+import { FatalErrorsSetup } from '../fatal_errors';
+import { BasePath } from './base_path';
+import { AnonymousPathsService } from './anonymous_paths_service';
+import { LoadingCountService } from './loading_count_service';
+import { Fetch } from './fetch';
+import { CoreService } from '../../types';
 
-import { Deps } from './types';
-import { setup } from './fetch';
-
-/** @internal */
-export class HttpService {
-  private readonly loadingCount$ = new Rx.BehaviorSubject(0);
-  private readonly stop$ = new Rx.Subject();
-
-  public setup(deps: Deps) {
-    const { fetch, shorthand } = setup(deps);
-
-    return {
-      fetch,
-      delete: shorthand('DELETE'),
-      get: shorthand('GET'),
-      head: shorthand('HEAD'),
-      options: shorthand('OPTIONS'),
-      patch: shorthand('PATCH'),
-      post: shorthand('POST'),
-      put: shorthand('PUT'),
-      addLoadingCount: (count$: Rx.Observable<number>) => {
-        count$
-          .pipe(
-            distinctUntilChanged(),
-
-            tap(count => {
-              if (count < 0) {
-                throw new Error(
-                  'Observables passed to loadingCount.add() must only emit positive numbers'
-                );
-              }
-            }),
-
-            // use takeUntil() so that we can finish each stream on stop() the same way we do when they complete,
-            // by removing the previous count from the total
-            takeUntil(this.stop$),
-            endWith(0),
-            startWith(0),
-            pairwise(),
-            map(([prev, next]) => next - prev)
-          )
-          .subscribe({
-            next: delta => {
-              this.loadingCount$.next(this.loadingCount$.getValue() + delta);
-            },
-            error: error => {
-              deps.fatalErrors.add(error);
-            },
-          });
-      },
-
-      getLoadingCount$: () => {
-        return this.loadingCount$.pipe(distinctUntilChanged());
-      },
-    };
-  }
-
-  // eslint-disable-next-line no-unused-params
-  public start() {}
-
-  public stop() {
-    this.stop$.next();
-    this.loadingCount$.complete();
-  }
+interface HttpDeps {
+  injectedMetadata: InjectedMetadataSetup;
+  fatalErrors: FatalErrorsSetup;
 }
 
-/** @public */
-export type HttpSetup = ReturnType<HttpService['setup']>;
-/** @public */
-export type HttpStart = ReturnType<HttpService['start']>;
+/** @internal */
+export class HttpService implements CoreService<HttpSetup, HttpStart> {
+  private readonly anonymousPaths = new AnonymousPathsService();
+  private readonly loadingCount = new LoadingCountService();
+  private service?: HttpSetup;
+
+  public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
+    const kibanaVersion = injectedMetadata.getKibanaVersion();
+    const basePath = new BasePath(
+      injectedMetadata.getBasePath(),
+      injectedMetadata.getServerBasePath()
+    );
+    const fetchService = new Fetch({ basePath, kibanaVersion });
+    const loadingCount = this.loadingCount.setup({ fatalErrors });
+    loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
+
+    this.service = {
+      basePath,
+      anonymousPaths: this.anonymousPaths.setup({ basePath }),
+      intercept: fetchService.intercept.bind(fetchService),
+      fetch: fetchService.fetch.bind(fetchService),
+      delete: fetchService.delete.bind(fetchService),
+      get: fetchService.get.bind(fetchService),
+      head: fetchService.head.bind(fetchService),
+      options: fetchService.options.bind(fetchService),
+      patch: fetchService.patch.bind(fetchService),
+      post: fetchService.post.bind(fetchService),
+      put: fetchService.put.bind(fetchService),
+      ...loadingCount,
+    };
+
+    return this.service;
+  }
+
+  public start() {
+    if (!this.service) {
+      throw new Error(`HttpService#setup() must be called first!`);
+    }
+
+    return this.service;
+  }
+
+  public stop() {
+    this.loadingCount.stop();
+  }
+}

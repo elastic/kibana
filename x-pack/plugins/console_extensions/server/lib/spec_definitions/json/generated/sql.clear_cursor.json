@@ -1,0 +1,11 @@
+{
+  "sql.clear_cursor": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_sql/close"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-pagination.html"
+  }
+}

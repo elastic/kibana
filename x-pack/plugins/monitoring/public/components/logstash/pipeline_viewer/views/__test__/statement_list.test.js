@@ -21,20 +21,20 @@ describe('StatementList', () => {
           id: 'mutateIf',
           parentId: null,
           depth: 0,
-          statement: { },
+          statement: {},
         },
         {
           id: 'mutate',
           parentId: 'mutateIf',
           depth: 1,
-          statement: { },
+          statement: {},
         },
       ],
       onShowVertexDetails,
     };
   });
 
-  const render = props => shallow(<StatementList {...props} />);
+  const render = (props) => shallow(<StatementList {...props} />);
 
   it('renders nested elements as expected', () => {
     const wrapper = render(props);

@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const horizontalBarChart: ElementFactory = () => ({
   name: 'horizontalBarChart',
-  displayName: 'Horizontal bar chart',
-  tags: ['chart'],
+  displayName: 'Bar horizontal',
+  type: 'chart',
   help: 'A customizable horizontal bar chart',
-  image: header,
+  icon: 'visBarHorizontal',
   expression: `filters
 | demodata
 | pointseries x="size(cost)" y="project" color="project"

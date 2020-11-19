@@ -3,8 +3,12 @@
 exports[`timeseriesFetcher should call client with correct query 1`] = `
 Array [
   Array [
-    "search",
     Object {
+      "apm": Object {
+        "events": Array [
+          "transaction",
+        ],
+      },
       "body": Object {
         "aggs": Object {
           "overall_avg_duration": Object {
@@ -22,6 +26,9 @@ Array [
               "pct": Object {
                 "percentiles": Object {
                   "field": "transaction.duration.us",
+                  "hdr": Object {
+                    "number_of_significant_value_digits": 2,
+                  },
                   "percents": Array [
                     95,
                     99,
@@ -35,20 +42,27 @@ Array [
                 "min": 1528113600000,
               },
               "field": "@timestamp",
-              "interval": "10800s",
+              "fixed_interval": "10800s",
               "min_doc_count": 0,
             },
           },
           "transaction_results": Object {
             "aggs": Object {
               "timeseries": Object {
+                "aggs": Object {
+                  "count": Object {
+                    "value_count": Object {
+                      "field": "transaction.duration.us",
+                    },
+                  },
+                },
                 "date_histogram": Object {
                   "extended_bounds": Object {
                     "max": 1528977600000,
                     "min": 1528113600000,
                   },
                   "field": "@timestamp",
-                  "interval": "10800s",
+                  "fixed_interval": "10800s",
                   "min_doc_count": 0,
                 },
               },
@@ -62,11 +76,6 @@ Array [
         "query": Object {
           "bool": Object {
             "filter": Array [
-              Object {
-                "term": Object {
-                  "processor.event": "transaction",
-                },
-              },
               Object {
                 "term": Object {
                   "service.name": "myServiceName",
@@ -83,6 +92,11 @@ Array [
               },
               Object {
                 "term": Object {
+                  "service.environment": "test",
+                },
+              },
+              Object {
+                "term": Object {
                   "transaction.type": "myTransactionType",
                 },
               },
@@ -91,7 +105,6 @@ Array [
         },
         "size": 0,
       },
-      "index": "myIndex",
     },
   ],
 ]

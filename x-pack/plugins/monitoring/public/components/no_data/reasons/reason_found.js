@@ -6,29 +6,36 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiText,
-  EuiCode,
-} from '@elastic/eui';
+import { EuiText, EuiCode } from '@elastic/eui';
 import {
   ExplainCollectionEnabled,
   ExplainCollectionInterval,
   ExplainExporters,
-  ExplainPluginEnabled
+  ExplainExportersCloud,
+  ExplainPluginEnabled,
 } from '../explanations';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-const ExplainWhyNoData = ({ reason, ...props }) => {
+const ExplainWhyNoData = (props) => {
+  const { reason } = props;
   const { property, data, context } = reason;
   switch (property) {
     case 'xpack.monitoring.collection.enabled':
-      return <ExplainCollectionEnabled {...reason} {...props} />;
+      return <ExplainCollectionEnabled {...props} />;
     case 'xpack.monitoring.collection.interval':
-      return <ExplainCollectionInterval {...reason} {...props} />;
+      return <ExplainCollectionInterval {...props} />;
     case 'xpack.monitoring.exporters':
-      return <ExplainExporters {...reason} {...props} />;
+      return <ExplainExporters {...props} />;
+    case 'xpack.monitoring.exporters.cloud_enabled':
+      return <ExplainExportersCloud />;
     case 'xpack.monitoring.enabled':
-      return <ExplainPluginEnabled {...reason} {...props} />;
+      return <ExplainPluginEnabled {...props} />;
+    case 'custom':
+      return (
+        <EuiText>
+          <p>{reason.message}</p>
+        </EuiText>
+      );
     default:
       return (
         <EuiText>
@@ -37,9 +44,9 @@ const ExplainWhyNoData = ({ reason, ...props }) => {
               id="xpack.monitoring.noData.reasons.explainWhyNoDataDescription"
               defaultMessage="There is a {context} setting that has {property} set to {data}."
               values={{
-                context: (<EuiCode>{context}</EuiCode>),
-                property: (<EuiCode>{property}</EuiCode>),
-                data: (<EuiCode>{data}</EuiCode>)
+                context: <EuiCode>{context}</EuiCode>,
+                property: <EuiCode>{property}</EuiCode>,
+                data: <EuiCode>{data}</EuiCode>,
               }}
             />
           </p>
@@ -58,5 +65,5 @@ export function ReasonFound(props) {
 
 ReasonFound.propTypes = {
   enabler: PropTypes.object.isRequired,
-  reason: PropTypes.object.isRequired
+  reason: PropTypes.object.isRequired,
 };

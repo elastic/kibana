@@ -4,49 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as SECTION_LABELS from '../sectionLabels';
+import {
+  Section,
+  ERROR,
+  LABELS,
+  HTTP,
+  HOST,
+  CONTAINER,
+  SERVICE,
+  PROCESS,
+  AGENT,
+  URL,
+  USER,
+  CUSTOM_ERROR,
+  TRACE,
+  TRANSACTION,
+} from '../sections';
 
-export const ERROR_METADATA_SECTIONS = [
-  {
-    key: 'labels',
-    label: SECTION_LABELS.LABELS,
-    required: true
-  },
-  {
-    key: 'http',
-    label: SECTION_LABELS.HTTP
-  },
-  {
-    key: 'host',
-    label: SECTION_LABELS.HOST
-  },
-  {
-    key: 'container',
-    label: SECTION_LABELS.CONTAINER
-  },
-  {
-    key: 'service',
-    label: SECTION_LABELS.SERVICE
-  },
-  {
-    key: 'process',
-    label: SECTION_LABELS.PROCESS
-  },
-  {
-    key: 'agent',
-    label: SECTION_LABELS.AGENT
-  },
-  {
-    key: 'url',
-    label: SECTION_LABELS.URL
-  },
-  {
-    key: 'user',
-    label: SECTION_LABELS.USER,
-    required: true
-  },
-  {
-    key: 'error.custom',
-    label: SECTION_LABELS.CUSTOM
-  }
+export const ERROR_METADATA_SECTIONS: Section[] = [
+  { ...LABELS, required: true },
+  TRACE,
+  TRANSACTION,
+  ERROR,
+  HTTP,
+  HOST,
+  CONTAINER,
+  SERVICE,
+  PROCESS,
+  AGENT,
+  URL,
+  { ...USER, required: true },
+  CUSTOM_ERROR,
 ];

@@ -16,7 +16,7 @@ export function AceEditorProvider({ getService }) {
   const CMD_KEY = '\uE03D';
   const BKSP_KEY = '\uE003';
 
-  return new class AceEditorService {
+  return new (class AceEditorService {
     async setValue(testSubjectSelector, value) {
       await retry.try(async () => {
         const container = await testSubjects.find(testSubjectSelector);
@@ -34,9 +34,17 @@ export function AceEditorProvider({ getService }) {
       return await retry.try(async () => {
         const editor = await testSubjects.find(testSubjectSelector);
         const lines = await editor.findAllByClassName('ace_line');
-        const linesText = await mapAsync(lines, line => line.getVisibleText());
+        const linesText = await mapAsync(lines, (line) => line.getVisibleText());
         return linesText.join('\n');
       });
     }
-  };
+
+    async hasParseErrors(testSubjectSelector) {
+      return await retry.try(async () => {
+        const editor = await testSubjects.find(testSubjectSelector);
+        const errors = await editor.findAllByClassName('ace_error');
+        return errors.length !== 0;
+      });
+    }
+  })();
 }

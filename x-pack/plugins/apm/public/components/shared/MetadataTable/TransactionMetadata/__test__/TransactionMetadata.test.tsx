@@ -4,15 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { render } from '@testing-library/react';
+import React, { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { TransactionMetadata } from '..';
-import { render, cleanup } from 'react-testing-library';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
-import 'jest-dom/extend-expect';
+import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
+
+function Wrapper({ children }: { children?: ReactNode }) {
+  return (
+    <MemoryRouter>
+      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    </MemoryRouter>
+  );
+}
+
+const renderOptions = {
+  wrapper: Wrapper,
+};
 
 function getTransaction() {
   return ({
@@ -27,20 +40,26 @@ function getTransaction() {
     user: { someKey: 'user value' },
     notIncluded: 'not included value',
     transaction: {
+      id: '7efbc7056b746fcb',
       notIncluded: 'transaction not included value',
       custom: {
-        someKey: 'custom value'
-      }
-    }
+        someKey: 'custom value',
+      },
+      message: {
+        age: { ms: 1577958057123 },
+        queue: { name: 'queue name' },
+      },
+    },
   } as unknown) as Transaction;
 }
 
 describe('TransactionMetadata', () => {
-  afterEach(cleanup);
-
   it('should render a transaction with all sections', () => {
     const transaction = getTransaction();
-    const output = render(<TransactionMetadata transaction={transaction} />);
+    const output = render(
+      <TransactionMetadata transaction={transaction} />,
+      renderOptions
+    );
 
     // sections
     expectTextsInDocument(output, [
@@ -53,13 +72,17 @@ describe('TransactionMetadata', () => {
       'Agent',
       'URL',
       'User',
-      'Custom'
+      'Custom',
+      'Message',
     ]);
   });
 
   it('should render a transaction with all included dot notation keys', () => {
     const transaction = getTransaction();
-    const output = render(<TransactionMetadata transaction={transaction} />);
+    const output = render(
+      <TransactionMetadata transaction={transaction} />,
+      renderOptions
+    );
 
     // included keys
     expectTextsInDocument(output, [
@@ -72,19 +95,24 @@ describe('TransactionMetadata', () => {
       'agent.someKey',
       'url.someKey',
       'user.someKey',
-      'transaction.custom.someKey'
+      'transaction.custom.someKey',
+      'transaction.message.age.ms',
+      'transaction.message.queue.name',
     ]);
 
     // excluded keys
     expectTextsNotInDocument(output, [
       'notIncluded',
-      'transaction.notIncluded'
+      'transaction.notIncluded',
     ]);
   });
 
   it('should render a transaction with all included values', () => {
     const transaction = getTransaction();
-    const output = render(<TransactionMetadata transaction={transaction} />);
+    const output = render(
+      <TransactionMetadata transaction={transaction} />,
+      renderOptions
+    );
 
     // included values
     expectTextsInDocument(output, [
@@ -97,19 +125,24 @@ describe('TransactionMetadata', () => {
       'agent value',
       'url value',
       'user value',
-      'custom value'
+      'custom value',
+      '1577958057123',
+      'queue name',
     ]);
 
     // excluded values
     expectTextsNotInDocument(output, [
       'not included value',
-      'transaction not included value'
+      'transaction not included value',
     ]);
   });
 
   it('should render a transaction with only the required sections', () => {
     const transaction = {} as Transaction;
-    const output = render(<TransactionMetadata transaction={transaction} />);
+    const output = render(
+      <TransactionMetadata transaction={transaction} />,
+      renderOptions
+    );
 
     // required sections should be found
     expectTextsInDocument(output, ['Labels', 'User']);
@@ -123,7 +156,8 @@ describe('TransactionMetadata', () => {
       'Process',
       'Agent',
       'URL',
-      'Custom'
+      'Custom',
+      'Message',
     ]);
   });
 });

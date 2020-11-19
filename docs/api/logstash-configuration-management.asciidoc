@@ -1,22 +1,22 @@
 [role="xpack"]
 [[logstash-configuration-management-api]]
-== Logstash Configuration Management API
+== Logstash configuration management APIs
 
-The Logstash configuration management API allows users to programmatically integrate with the
-Logstash configuration management feature.
+Programmatically integrate with Logstash configuration management.
 
-Traditionally users would perform this integration by accessing the the `.logstash` index
-directly. *Do not do this!* The structure of this index is subject to change, which could
-cause your integration to break. Instead, use the following API.
+WARNING: Do not directly access the `.logstash` index. The structure of the `.logstash` index is subject to change, which could cause your integration to break. Instead, use the Logstash configuration management APIs.
 
-NOTE: You cannot access these endpoints via the Console in Kibana.
+The following Logstash configuration management APIs are available:
 
-* <<logstash-configuration-management-api-create>>
-* <<logstash-configuration-management-api-retrieve>>
-* <<logstash-configuration-management-api-delete>>
-* <<logstash-configuration-management-api-list>>
+* <<logstash-configuration-management-api-delete, Delete Logstash pipeline API>> to delete a centrally-managed Logstash pipeline
 
-include::logstash-configuration-management/create.asciidoc[]
-include::logstash-configuration-management/retrieve.asciidoc[]
-include::logstash-configuration-management/delete.asciidoc[]
-include::logstash-configuration-management/list.asciidoc[]
+* <<logstash-configuration-management-api-list, List Logstash pipeline API>> to list all centrally-managed Logstash pipelines
+
+* <<logstash-configuration-management-api-create, Create Logstash pipeline API>> to create a centrally-managed Logstash pipeline, or update an existing pipeline
+
+* <<logstash-configuration-management-api-retrieve, Retrieve pipeline API>> to retrieve a centrally-managed Logstash pipeline
+
+include::logstash-configuration-management/delete-pipeline.asciidoc[]
+include::logstash-configuration-management/list-pipeline.asciidoc[]
+include::logstash-configuration-management/create-logstash.asciidoc[]
+include::logstash-configuration-management/retrieve-pipeline.asciidoc[]

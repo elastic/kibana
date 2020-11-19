@@ -1,0 +1,3 @@
+.react-monaco-editor-container .monaco-editor .inputarea:focus {
+  animation: none !important; // Removes textarea EUI blue underline animation from EUI
+}

@@ -6,16 +6,21 @@
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { compose, withState, getContext, withHandlers } from 'recompose';
+import { compose, withState, getContext, withHandlers, withProps } from 'recompose';
+import moment from 'moment';
 import * as workpadService from '../../lib/workpad_service';
-import { notify } from '../../lib/notify';
 import { canUserWrite } from '../../state/selectors/app';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
 import { downloadWorkpad } from '../../lib/download_workpad';
+import { ComponentStrings, ErrorStrings } from '../../../i18n';
+import { withServices } from '../../services';
 import { WorkpadLoader as Component } from './workpad_loader';
 
-const mapStateToProps = state => ({
+const { WorkpadLoader: strings } = ComponentStrings;
+const { WorkpadLoader: errors } = ErrorStrings;
+
+const mapStateToProps = (state) => ({
   workpadId: getWorkpad(state).id,
   canUserWrite: canUserWrite(state),
 });
@@ -26,16 +31,22 @@ export const WorkpadLoader = compose(
   }),
   connect(mapStateToProps),
   withState('workpads', 'setWorkpads', null),
-  withHandlers({
+  withServices,
+  withProps(({ services }) => ({
+    notify: services.notify,
+  })),
+  withHandlers(({ services }) => ({
     // Workpad creation via navigation
-    createWorkpad: props => async workpad => {
+    createWorkpad: (props) => async (workpad) => {
       // workpad data uploaded, create and load it
       if (workpad != null) {
         try {
           await workpadService.create(workpad);
           props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
         } catch (err) {
-          notify.error(err, { title: `Couldn't upload workpad` });
+          services.notify.error(err, {
+            title: errors.getUploadFailureErrorMessage(),
+          });
         }
         return;
       }
@@ -44,49 +55,49 @@ export const WorkpadLoader = compose(
     },
 
     // Workpad search
-    findWorkpads: ({ setWorkpads }) => async text => {
+    findWorkpads: ({ setWorkpads }) => async (text) => {
       try {
         const workpads = await workpadService.find(text);
         setWorkpads(workpads);
       } catch (err) {
-        notify.error(err, { title: `Couldn't find workpads` });
+        services.notify.error(err, { title: errors.getFindFailureErrorMessage() });
       }
     },
 
     // Workpad import/export methods
-    downloadWorkpad: () => workpadId => downloadWorkpad(workpadId),
+    downloadWorkpad: () => (workpadId) => downloadWorkpad(workpadId),
 
     // Clone workpad given an id
-    cloneWorkpad: props => async workpadId => {
+    cloneWorkpad: (props) => async (workpadId) => {
       try {
         const workpad = await workpadService.get(workpadId);
-        workpad.name += ' - Copy';
+        workpad.name = strings.getClonedWorkpadName(workpad.name);
         workpad.id = getId('workpad');
         await workpadService.create(workpad);
         props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
       } catch (err) {
-        notify.error(err, { title: `Couldn't clone workpad` });
+        services.notify.error(err, { title: errors.getCloneFailureErrorMessage() });
       }
     },
 
     // Remove workpad given an array of id
-    removeWorkpads: props => async workpadIds => {
+    removeWorkpads: (props) => async (workpadIds) => {
       const { setWorkpads, workpads, workpadId: loadedWorkpad } = props;
 
-      const removeWorkpads = workpadIds.map(id =>
+      const removeWorkpads = workpadIds.map((id) =>
         workpadService
           .remove(id)
           .then(() => ({ id, err: null }))
-          .catch(err => ({
+          .catch((err) => ({
             id,
             err,
           }))
       );
 
-      return Promise.all(removeWorkpads).then(results => {
+      return Promise.all(removeWorkpads).then((results) => {
         let redirectHome = false;
 
-        const [passes, errors] = results.reduce(
+        const [passes, errored] = results.reduce(
           ([passes, errors], result) => {
             if (result.id === loadedWorkpad && !result.err) {
               redirectHome = true;
@@ -110,8 +121,8 @@ export const WorkpadLoader = compose(
           workpads: remainingWorkpads,
         };
 
-        if (errors.length > 0) {
-          notify.error("Couldn't delete all workpads");
+        if (errored.length > 0) {
+          services.notify.error(errors.getDeleteFailureErrorMessage());
         }
 
         setWorkpads(workpadState);
@@ -120,8 +131,14 @@ export const WorkpadLoader = compose(
           props.router.navigateTo('home');
         }
 
-        return errors.map(({ id }) => id);
+        return errored.map(({ id }) => id);
       });
     },
-  })
+  })),
+  withProps((props) => ({
+    formatDate: (date) => {
+      const dateFormat = props.services.platform.getUISetting('dateFormat');
+      return date && moment(date).format(dateFormat);
+    },
+  }))
 )(Component);

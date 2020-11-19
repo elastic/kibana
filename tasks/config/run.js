@@ -17,63 +17,27 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
-
 const { version } = require('../../package.json');
-const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
+const KIBANA_INSTALL_DIR =
+  process.env.KIBANA_INSTALL_DIR ||
+  `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
-module.exports = function (grunt) {
-
-  function createKbnServerTask({ runBuild, flags = [] }) {
-    return {
-      options: {
-        wait: false,
-        ready: /Server running/,
-        quiet: false,
-        failOnError: false
-      },
-      cmd: runBuild
-        ? `./build/${runBuild}/bin/kibana`
-        : process.execPath,
-      args: [
-        ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
-
-        '--logging.json=false',
-
-        ...flags,
-
-        // allow the user to override/inject flags by defining cli args starting with `--kbnServer.`
-        ...grunt.option.flags().reduce(function (flags, flag) {
-          if (flag.startsWith('--kbnServer.')) {
-            flags.push(`--${flag.slice(12)}`);
-          }
-
-          return flags;
-        }, [])
-      ]
-    };
-  }
-
-  const browserTestServerFlags = [
-    '--env.name=development',
-    '--plugins.initialize=false',
-    '--optimize.bundleFilter=tests',
-    '--server.port=5610',
-  ];
-
+module.exports = function () {
   const NODE = 'node';
-  const scriptWithGithubChecks = ({ title, options, cmd, args }) => (
-    process.env.CHECKS_REPORTER_ACTIVE === 'true' ? {
-      options,
-      cmd: 'yarn',
-      args: ['run', 'github-checks-reporter', title, cmd, ...args],
-    } : { options, cmd, args });
+  const YARN = 'yarn';
+  const scriptWithGithubChecks = ({ title, options, cmd, args }) =>
+    process.env.CHECKS_REPORTER_ACTIVE === 'true'
+      ? {
+          options,
+          cmd: YARN,
+          args: ['run', 'github-checks-reporter', title, cmd, ...args],
+        }
+      : { options, cmd, args };
   const gruntTaskWithGithubChecks = (title, task) =>
     scriptWithGithubChecks({
       title,
-      cmd: 'yarn',
-      args: ['run', 'grunt', task]
+      cmd: YARN,
+      args: ['run', 'grunt', task],
     });
 
   return {
@@ -82,18 +46,13 @@ module.exports = function (grunt) {
     eslint: scriptWithGithubChecks({
       title: 'eslint',
       cmd: NODE,
-      args: [
-        'scripts/eslint',
-        '--no-cache'
-      ]
+      args: ['scripts/eslint', '--no-cache'],
     }),
 
     sasslint: scriptWithGithubChecks({
       title: 'sasslint',
       cmd: NODE,
-      args: [
-        'scripts/sasslint'
-      ]
+      args: ['scripts/sasslint'],
     }),
 
     // used by the test tasks
@@ -103,18 +62,16 @@ module.exports = function (grunt) {
       cmd: NODE,
       args: [
         'scripts/check_file_casing',
-        '--quiet' // only log errors, not warnings
-      ]
+        '--quiet', // only log errors, not warnings
+      ],
     }),
 
     // used by the test tasks
-    //    runs the check_core_api_changes script to ensure API changes are explictily accepted
-    checkCoreApiChanges: scriptWithGithubChecks({
+    //    runs the check_published_api_changes script to ensure API changes are explictily accepted
+    checkDocApiChanges: scriptWithGithubChecks({
       title: 'Check core API changes',
       cmd: NODE,
-      args: [
-        'scripts/check_core_api_changes'
-      ]
+      args: ['scripts/check_published_api_changes'],
     }),
 
     // used by the test and jenkins:unit tasks
@@ -122,9 +79,7 @@ module.exports = function (grunt) {
     typeCheck: scriptWithGithubChecks({
       title: 'Type check',
       cmd: NODE,
-      args: [
-        'scripts/type_check'
-      ]
+      args: ['scripts/type_check'],
     }),
 
     // used by the test and jenkins:unit tasks
@@ -132,9 +87,7 @@ module.exports = function (grunt) {
     checkTsProjects: scriptWithGithubChecks({
       title: 'TypeScript - all files belong to a TypeScript project',
       cmd: NODE,
-      args: [
-        'scripts/check_ts_projects'
-      ]
+      args: ['scripts/check_ts_projects'],
     }),
 
     // used by the test and jenkins:unit tasks
@@ -142,59 +95,35 @@ module.exports = function (grunt) {
     i18nCheck: scriptWithGithubChecks({
       title: 'Internationalization check',
       cmd: NODE,
-      args: [
-        'scripts/i18n_check',
-        '--ignore-missing',
-      ]
+      args: ['scripts/i18n_check', '--ignore-missing'],
     }),
 
-    // used by the test:server task
+    telemetryCheck: scriptWithGithubChecks({
+      title: 'Telemetry Schema check',
+      cmd: NODE,
+      args: ['scripts/telemetry_check'],
+    }),
+
+    // used by the test:quick task
     //    runs all node.js/server mocha tests
     mocha: scriptWithGithubChecks({
       title: 'Mocha tests',
       cmd: NODE,
+      args: ['scripts/mocha'],
+    }),
+
+    // used by the test:mochaCoverage task
+    mochaCoverage: scriptWithGithubChecks({
+      title: 'Mocha tests coverage',
+      cmd: YARN,
       args: [
-        'scripts/mocha'
-      ]
-    }),
-
-    // used by the test:browser task
-    //    runs the kibana server to serve the browser test bundle
-    browserTestServer: createKbnServerTask({
-      flags: [
-        ...browserTestServerFlags,
-      ]
-    }),
-    browserSCSS: createKbnServerTask({
-      flags: [
-        ...browserTestServerFlags,
-        '--optimize',
-        '--optimize.enabled=false'
-      ]
-    }),
-
-    // used by the test:coverage task
-    //    runs the kibana server to serve the instrumented version of the browser test bundle
-    browserTestCoverageServer: createKbnServerTask({
-      flags: [
-        ...browserTestServerFlags,
-        '--tests_bundle.instrument=true',
-      ]
-    }),
-
-    // used by the test:dev task
-    //    runs the kibana server to serve the browser test bundle, but listens for changes
-    //    to the public/browser code and rebuilds the test bundle on changes
-    devBrowserTestServer: createKbnServerTask({
-      flags: [
-        ...browserTestServerFlags,
-        '--dev',
-        '--no-watch',
-        '--no-base-path',
-        '--optimize.watchPort=5611',
-        '--optimize.watchPrebuild=true',
-        '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testdev'),
-      ]
+        'nyc',
+        '--reporter=html',
+        '--reporter=json-summary',
+        '--report-dir=./target/kibana-coverage/mocha',
+        NODE,
+        'scripts/mocha',
+      ],
     }),
 
     verifyNotice: scriptWithGithubChecks({
@@ -203,10 +132,13 @@ module.exports = function (grunt) {
         wait: true,
       },
       cmd: NODE,
-      args: [
-        'scripts/notice',
-        '--validate'
-      ]
+      args: ['scripts/notice', '--validate'],
+    }),
+
+    test_hardening: scriptWithGithubChecks({
+      title: 'Node.js hardening tests',
+      cmd: NODE,
+      args: ['scripts/test_hardening.js'],
     }),
 
     apiIntegrationTests: scriptWithGithubChecks({
@@ -214,7 +146,8 @@ module.exports = function (grunt) {
       cmd: NODE,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/api_integration/config.js',
+        '--config',
+        'test/api_integration/config.js',
         '--bail',
         '--debug',
       ],
@@ -225,11 +158,20 @@ module.exports = function (grunt) {
       cmd: NODE,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/server_integration/http/ssl/config.js',
-        '--config', 'test/server_integration/http/ssl_redirect/config.js',
+        '--config',
+        'test/server_integration/http/ssl/config.js',
+        '--config',
+        'test/server_integration/http/ssl_redirect/config.js',
+        '--config',
+        'test/server_integration/http/platform/config.ts',
+        '--config',
+        'test/server_integration/http/ssl_with_p12/config.js',
+        '--config',
+        'test/server_integration/http/ssl_with_p12_intermediate/config.js',
         '--bail',
         '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+        '--kibana-install-dir',
+        KIBANA_INSTALL_DIR,
       ],
     }),
 
@@ -238,10 +180,12 @@ module.exports = function (grunt) {
       cmd: NODE,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/interpreter_functional/config.js',
+        '--config',
+        'test/interpreter_functional/config.ts',
         '--bail',
         '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+        '--kibana-install-dir',
+        KIBANA_INSTALL_DIR,
       ],
     }),
 
@@ -250,10 +194,22 @@ module.exports = function (grunt) {
       cmd: NODE,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/plugin_functional/config.js',
+        '--config',
+        'test/plugin_functional/config.ts',
         '--bail',
         '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+      ],
+    }),
+
+    exampleFunctionalTestsRelease: scriptWithGithubChecks({
+      title: 'Example functional tests',
+      cmd: NODE,
+      args: [
+        'scripts/functional_tests',
+        '--config',
+        'test/examples/config.js',
+        '--bail',
+        '--debug',
       ],
     }),
 
@@ -262,26 +218,24 @@ module.exports = function (grunt) {
       cmd: NODE,
       args: [
         'scripts/functional_tests',
-        '--config', 'test/functional/config.js',
+        '--config',
+        'test/functional/config.js',
         '--bail',
         '--debug',
       ],
     }),
 
-    licenses: gruntTaskWithGithubChecks('Licenses', 'licenses'),
-    verifyDependencyVersions:
-      gruntTaskWithGithubChecks('Verify dependency versions', 'verifyDependencyVersions'),
-    test_server:
-      gruntTaskWithGithubChecks('Server tests', 'test:server'),
-    test_jest: gruntTaskWithGithubChecks('Jest tests', 'test:jest'),
-    test_jest_integration:
-      gruntTaskWithGithubChecks('Jest integration tests', 'test:jest_integration'),
-    test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
-    test_browser_ci:
-      gruntTaskWithGithubChecks('Browser tests', 'test:browser-ci'),
+    licenses: scriptWithGithubChecks({
+      title: 'Check licenses',
+      cmd: NODE,
+      args: ['scripts/check_licenses', '--dev'],
+    }),
 
-    ...getFunctionalTestGroupRunConfigs({
-      kibanaInstallDir: KIBANA_INSTALL_DIR
-    })
+    test_jest: gruntTaskWithGithubChecks('Jest tests', 'test:jest'),
+    test_jest_integration: gruntTaskWithGithubChecks(
+      'Jest integration tests',
+      'test:jest_integration'
+    ),
+    test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
   };
 };

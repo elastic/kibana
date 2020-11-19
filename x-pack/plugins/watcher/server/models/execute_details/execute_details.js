@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit, isUndefined } from 'lodash';
+import { omitBy, isUndefined } from 'lodash';
 
 export class ExecuteDetails {
   constructor(props) {
@@ -18,18 +18,18 @@ export class ExecuteDetails {
   get upstreamJson() {
     const triggerData = {
       triggered_time: this.triggerData.triggeredTime,
-      scheduled_time: this.triggerData.scheduledTime
+      scheduled_time: this.triggerData.scheduledTime,
     };
 
     const result = {
-      trigger_data: omit(triggerData, isUndefined),
+      trigger_data: omitBy(triggerData, isUndefined),
       ignore_condition: this.ignoreCondition,
       alternative_input: this.alternativeInput,
       action_modes: this.actionModes,
-      record_execution: this.recordExecution
+      record_execution: this.recordExecution,
     };
 
-    return omit(result, isUndefined);
+    return omitBy(result, isUndefined);
   }
 
   // generate ExecuteDetails object from kibana response
@@ -37,4 +37,3 @@ export class ExecuteDetails {
     return new ExecuteDetails(downstreamJson);
   }
 }
-

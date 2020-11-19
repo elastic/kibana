@@ -5,47 +5,57 @@
  */
 
 import * as sinon from 'sinon';
-import { KbnServer } from '../../types';
+import { ReportingConfig, ReportingCore } from '../../server';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockLevelLogger,
+  createMockReportingCore,
+} from '../test_helpers';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 // @ts-ignore
-import { ClientMock } from './esqueue/__tests__/fixtures/elasticsearch';
+import { ClientMock } from './esqueue/__tests__/fixtures/legacy_elasticsearch';
+import { ExportTypesRegistry } from './export_types_registry';
 
-const configGetStub = sinon.stub();
-configGetStub.withArgs('xpack.reporting.queue').returns({
-  pollInterval: 3300,
-  pollIntervalErrorMultiplier: 10,
-});
-configGetStub.withArgs('server.name').returns('test-server-123');
-configGetStub.withArgs('server.uuid').returns('g9ymiujthvy6v8yrh7567g6fwzgzftzfr');
+const logger = createMockLevelLogger();
+const reportingConfig = {
+  queue: { pollInterval: 3300, pollIntervalErrorMultiplier: 10 },
+  server: { name: 'test-server-123', uuid: 'g9ymiujthvy6v8yrh7567g6fwzgzftzfr' },
+};
 
 const executeJobFactoryStub = sinon.stub();
 
-const getMockServer = (
-  exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
-): Partial<KbnServer> => ({
-  log: sinon.stub(),
-  expose: sinon.stub(),
-  config: () => ({ get: configGetStub }),
-  plugins: { reporting: { exportTypesRegistry: { getAll: () => exportTypes } } },
-});
+const getMockExportTypesRegistry = (
+  exportTypes: any[] = [{ runTaskFnFactory: executeJobFactoryStub }]
+) =>
+  ({
+    getAll: () => exportTypes,
+  } as ExportTypesRegistry);
 
 describe('Create Worker', () => {
+  let mockReporting: ReportingCore;
+  let mockConfig: ReportingConfig;
   let queue: Esqueue;
   let client: ClientMock;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    const mockSchema = createMockConfigSchema(reportingConfig);
+    mockConfig = createMockConfig(mockSchema);
+    mockReporting = await createMockReportingCore(mockConfig);
+    mockReporting.getExportTypesRegistry = () => getMockExportTypesRegistry();
+
     client = new ClientMock();
     queue = new Esqueue('reporting-queue', { client });
     executeJobFactoryStub.reset();
   });
 
   test('Creates a single Esqueue worker for Reporting', async () => {
-    const createWorker = createWorkerFactory(getMockServer());
+    const createWorker = createWorkerFactory(mockReporting, logger);
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
-    createWorker(queue);
+    await createWorker(queue);
 
     sinon.assert.callCount(executeJobFactoryStub, 1);
     sinon.assert.callCount(registerWorkerSpy, 1);
@@ -66,18 +76,18 @@ Object {
   });
 
   test('Creates a single Esqueue worker for Reporting, even if there are multiple export types', async () => {
-    const createWorker = createWorkerFactory(
-      getMockServer([
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-        { executeJobFactory: executeJobFactoryStub },
-      ])
-    );
+    const exportTypesRegistry = getMockExportTypesRegistry([
+      { runTaskFnFactory: executeJobFactoryStub },
+      { runTaskFnFactory: executeJobFactoryStub },
+      { runTaskFnFactory: executeJobFactoryStub },
+      { runTaskFnFactory: executeJobFactoryStub },
+      { runTaskFnFactory: executeJobFactoryStub },
+    ]);
+    mockReporting.getExportTypesRegistry = () => exportTypesRegistry;
+    const createWorker = createWorkerFactory(mockReporting, logger);
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
-    createWorker(queue);
+    await createWorker(queue);
 
     sinon.assert.callCount(executeJobFactoryStub, 5);
     sinon.assert.callCount(registerWorkerSpy, 1);

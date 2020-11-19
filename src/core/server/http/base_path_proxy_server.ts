@@ -17,31 +17,38 @@
  * under the License.
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
-import { Server } from 'hapi';
+import Url from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
-import { sample } from 'lodash';
+
+import apm from 'elastic-apm-node';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { Server, Request } from '@hapi/hapi';
+import HapiProxy from '@hapi/h2o2';
+import { sampleSize } from 'lodash';
+import * as Rx from 'rxjs';
+import { take } from 'rxjs/operators';
+
 import { DevConfig } from '../dev';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getServerOptions } from './http_tools';
+import { createServer, getListenerOptions, getServerOptions } from './http_tools';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
 export interface BasePathProxyServerOptions {
   shouldRedirectFromOldBasePath: (path: string) => boolean;
-  blockUntil: () => Promise<void>;
+  delayUntil: () => Rx.Observable<void>;
 }
 
 export class BasePathProxyServer {
   private server?: Server;
   private httpsAgent?: HttpsAgent;
 
-  get basePath() {
+  public get basePath() {
     return this.httpConfig.basePath;
   }
 
-  get targetPort() {
+  public get targetPort() {
     return this.devConfig.basePathProxyTargetPort;
   }
 
@@ -54,7 +61,7 @@ export class BasePathProxyServer {
     httpConfig.maxPayload = new ByteSizeValue(ONE_GIGABYTE);
 
     if (!httpConfig.basePath) {
-      httpConfig.basePath = `/${sample(alphabet, 3).join('')}`;
+      httpConfig.basePath = `/${sampleSize(alphabet, 3).join('')}`;
     }
   }
 
@@ -62,11 +69,12 @@ export class BasePathProxyServer {
     this.log.debug('starting basepath proxy server');
 
     const serverOptions = getServerOptions(this.httpConfig);
-    this.server = createServer(serverOptions);
+    const listenerOptions = getListenerOptions(this.httpConfig);
+    this.server = createServer(serverOptions, listenerOptions);
 
     // Register hapi plugin that adds proxying functionality. It can be configured
     // through the route configuration object (see { handler: { proxy: ... } }).
-    await this.server.register({ plugin: require('h2o2') });
+    await this.server.register([HapiProxy]);
 
     if (this.httpConfig.ssl.enabled) {
       const tlsOptions = serverOptions.tls as TlsOptions;
@@ -104,7 +112,7 @@ export class BasePathProxyServer {
   }
 
   private setupRoutes({
-    blockUntil,
+    delayUntil,
     shouldRedirectFromOldBasePath,
   }: Readonly<BasePathProxyServerOptions>) {
     if (this.server === undefined) {
@@ -127,7 +135,8 @@ export class BasePathProxyServer {
           host: this.server.info.host,
           passThrough: true,
           port: this.devConfig.basePathProxyTargetPort,
-          protocol: this.server.info.protocol,
+          // typings mismatch. h2o2 doesn't support "socket"
+          protocol: this.server.info.protocol as HapiProxy.ProxyHandlerOptions['protocol'],
           xforward: true,
         },
       },
@@ -137,12 +146,47 @@ export class BasePathProxyServer {
           // Before we proxy request to a target port we may want to wait until some
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
-            await blockUntil();
+            apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
+            await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },
         ],
+        validate: { payload: true },
       },
       path: `${this.httpConfig.basePath}/{kbnPath*}`,
+    });
+
+    this.server.route({
+      handler: {
+        proxy: {
+          agent: this.httpsAgent,
+          passThrough: true,
+          xforward: true,
+          mapUri: async (request: Request) => ({
+            uri: Url.format({
+              hostname: request.server.info.host,
+              port: this.devConfig.basePathProxyTargetPort,
+              protocol: request.server.info.protocol,
+              pathname: `${this.httpConfig.basePath}/${request.params.kbnPath}`,
+              query: request.query,
+            }),
+            headers: request.headers,
+          }),
+        },
+      },
+      method: '*',
+      options: {
+        pre: [
+          // Before we proxy request to a target port we may want to wait until some
+          // condition is met (e.g. until target listener is ready).
+          async (request, responseToolkit) => {
+            await delayUntil().pipe(take(1)).toPromise();
+            return responseToolkit.continue;
+          },
+        ],
+        validate: { payload: true },
+      },
+      path: `/__UNSAFE_bypassBasePath/{kbnPath*}`,
     });
 
     // It may happen that basepath has changed, but user still uses the old one,

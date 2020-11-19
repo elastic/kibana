@@ -72,7 +72,7 @@ class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
           onValid={this.enableButton}
           onInvalid={this.disableButton}
         >
-          {this.props.schema.configs.map(schema => {
+          {this.props.schema.configs.map((schema) => {
             switch (schema.ui.type) {
               case 'input':
                 return (

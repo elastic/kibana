@@ -8,25 +8,28 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { Snapshot } from './snapshot';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export const RecoveryIndex = (props) => {
   const { name, shard, relocationType } = props;
 
   return (
     <div>
-      <EuiLink href={`#/elasticsearch/indices/${name}`}>{name}</EuiLink><br />
+      <EuiLink href={getSafeForExternalLink(`#/elasticsearch/indices/${name}`)}>{name}</EuiLink>
+      <br />
       <FormattedMessage
         id="xpack.monitoring.elasticsearch.shardActivity.recoveryIndex.shardDescription"
         defaultMessage="Shard: {shard}"
         values={{
-          shard
+          shard,
         }}
-      /><br />
+      />
+      <br />
       <FormattedMessage
         id="xpack.monitoring.elasticsearch.shardActivity.recoveryIndex.recoveryTypeDescription"
         defaultMessage="Recovery type: {relocationType}"
         values={{
-          relocationType
+          relocationType,
         }}
       />
       <div>

@@ -12,21 +12,21 @@ Elasticsearch will run with a basic license. To run with a trial license, includ
 
 Example: `yarn es snapshot --license trial --password changeme`
 
-By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana` user which `elasticsearch.username` defaults to in development. If you wish to specific a password for a given native realm account, you can do that like so: `--password.kibana=notsecure`
+By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana_system` user which `elasticsearch.username` defaults to in development. If you wish to specify a password for a given native realm account, you can do that like so: `--password.kibana_system=notsecure`
 
 # Testing
 ## Running specific tests
 | Test runner  | Test location                                                                       | Runner command (working directory is kibana/x-pack)                                     |
 | ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | Jest         | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                      | `cd x-pack && node scripts/jest -t regexp [test path]`                                     |
-| Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
+| Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`<br>`x-pack/test/accessibility/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
 
 Examples:
   - Run the jest test case whose description matches 'filtering should skip values of null':
-    `cd x-pack && yarn test:jest -t 'filtering should skip values of null' plugins/ml/public/explorer/explorer_charts/explorer_charts_container_service.test.js`
+    `cd x-pack && yarn test:jest -t 'filtering should skip values of null' plugins/ml/public/application/explorer/explorer_charts/explorer_charts_container_service.test.js`
   - Run the x-pack api integration test case whose description matches the given string:
-    `node scripts/functional_tests_server --config x-pack/test/api_integration/config.js`
-    `node scripts/functional_test_runner --config x-pack/test/api_integration/config.js --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
+    `node scripts/functional_tests_server --config x-pack/test/api_integration/config.ts`
+    `node scripts/functional_test_runner --config x-pack/test/api_integration/config.ts --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
 
 In addition to to providing a regular expression argument, specific tests can also be run by appeding `.only` to an `it` or `describe` function block. E.g. `describe(` to `describe.only(`.
 
@@ -44,24 +44,18 @@ If you want to run tests only for a specific plugin (to save some time), you can
 yarn test --plugins <plugin>[,<plugin>]*    # where <plugin> is "reporting", etc.
 ```
 
-#### Debugging browser tests
-```
-yarn test:browser:dev
-```
-Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
-
-Run single tests by appending `grep` parameter to the end of the URL. For example `http://localhost:9876/debug.html?grep=ML%20-%20Explorer%20Controller` will only run tests with 'ML - Explorer Controller' in the describe block.
-
 #### Running server unit tests
-You can run server-side unit tests by running:
+You can run mocha unit tests by running:
 
 ```
-yarn test:server
+yarn test:mocha
 ```
 
 #### Running functional tests
 
-The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.js)), and *SAML API integration tests* ([specified by this config](test/saml_api_integration/config.js)).
+For more info, see [the Elastic functional test development guide](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html).
+
+The functional UI tests, the API integration tests, and the SAML API integration tests are all run against a live browser, Kibana, and Elasticsearch install. Each set of tests is specified with a unique config that describes how to start the Elasticsearch server, the Kibana server, and what tests to run against them. The sets of tests that exist today are *functional UI tests* ([specified by this config](test/functional/config.js)), *API integration tests* ([specified by this config](test/api_integration/config.ts)), and *SAML API integration tests* ([specified by this config](test/security_api_integration/saml.config.ts)).
 
 The script runs all sets of tests sequentially like so:
 * builds Elasticsearch and X-Pack
@@ -77,15 +71,25 @@ To do all of this in a single command run:
 node scripts/functional_tests
 ```
 
-#### Running UI tests
+#### Developing functional UI tests
 
-To run _only_ the functional UI tests:
+If you are **developing functional tests** then you probably don't want to rebuild Elasticsearch and wait for all that setup on every test run, so instead use this command to build and start just the Elasticsearch and Kibana servers:
 
 ```sh
-node scripts/functional_tests --config test/functional/config
+node scripts/functional_tests_server
 ```
 
-It does the same as the previous command, except that it only does setup/test/teardown for the UI tests.
+After the servers are started, open a new terminal and run this command to run just the tests (without tearing down Elasticsearch or Kibana):
+
+```sh
+node scripts/functional_test_runner
+```
+
+For both of the above commands, it's crucial that you pass in `--config` to specify the same config file to both commands. This makes sure that the right tests will run against the right servers. Typically a set of tests and server configuration go together.
+
+Read more about how the scripts work [here](../scripts/README.md).
+
+For a deeper dive, read more about the way functional tests and servers work [here](../packages/kbn-test/README.md).
 
 #### Running API integration tests
 
@@ -104,10 +108,10 @@ node scripts/functional_tests --config test/api_integration/config
 We also have SAML API integration tests which set up Elasticsearch and Kibana with SAML support. Run _only_ API integration tests with SAML enabled like so:
 
 ```sh
-node scripts/functional_tests --config test/saml_api_integration/config
+node scripts/functional_tests --config test/security_api_integration/saml.config
 ```
 
-#### Running and building Jest integration tests
+#### Running Jest integration tests
 
 Jest integration tests can be used to test behavior with Elasticsearch and the Kibana server.
 
@@ -120,27 +124,3 @@ An example test exists at [test_utils/jest/integration_tests/example_integration
 #### Running Reporting functional tests
 
 See [here](test/reporting/README.md) for more information on running reporting tests.
-
-#### Developing functional tests
-
-If you are **developing functional tests** then you probably don't want to rebuild Elasticsearch and wait for all that setup on every test run, so instead use this command to build and start just the Elasticsearch and Kibana servers:
-
-```sh
-node scripts/functional_tests_server
-```
-
-After the servers are started, open a new terminal and run this command to run just the tests (without tearing down Elasticsearch or Kibana):
-
-```sh
-# Make sure you are in the x-pack directory
-cd x-pack
-
-# Invoke the functional_test_runner from Kibana. Try sending --help to learn more
-node ../scripts/functional_test_runner
-```
-
-For both of the above commands, it's crucial that you pass in `--config` to specify the same config file to both commands. This makes sure that the right tests will run against the right servers. Typically a set of tests and server configuration go together.
-
-Read more about how the scripts work [here](scripts/README.md).
-
-For a deeper dive, read more about the way functional tests and servers work [here](packages/kbn-test/README.md).

@@ -29,7 +29,7 @@ import {
 import { extractI18nCallMessages } from './i18n_call';
 import { createParserErrorMessage, isI18nTranslateFunction, traverseNodes } from '../utils';
 import { extractIntlMessages, extractFormattedMessages } from './react';
-import { createFailError, isFailError } from '../../run';
+import { createFailError, isFailError } from '@kbn/dev-utils';
 
 /**
  * Detect Intl.formatMessage() function call (React).
@@ -67,7 +67,19 @@ export function* extractCodeMessages(buffer, reporter) {
   try {
     ast = parse(buffer.toString(), {
       sourceType: 'module',
-      plugins: ['jsx', 'typescript', 'objectRestSpread', 'classProperties', 'asyncGenerators'],
+      plugins: [
+        'jsx',
+        'typescript',
+        'objectRestSpread',
+        'classProperties',
+        'classPrivateProperties',
+        'classPrivateMethods',
+        'asyncGenerators',
+        'dynamicImport',
+        'nullishCoalescingOperator',
+        'optionalChaining',
+        'exportNamespaceFrom',
+      ],
     });
   } catch (error) {
     if (error instanceof SyntaxError) {

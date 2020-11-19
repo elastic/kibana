@@ -1,0 +1,16 @@
+.insInspectorPanel__flyoutBody {
+  .euiFlyoutBody__overflowContent {
+    height: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+
+    >div {
+      flex-grow: 0;
+    }
+
+    .insRequestCodeViewer {
+      flex-grow: 1;
+    }
+  }
+}

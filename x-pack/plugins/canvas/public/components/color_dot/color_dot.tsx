@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { FC, ReactNode } from 'react';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent, ReactNode } from 'react';
 import tinycolor from 'tinycolor2';
 
-export interface Props {
-  /** Any valid CSS color. If not a valid CSS string, the dot will be transparent and checkered */
-  value?: string;
+interface Props {
   /** Nodes to display within the dot.  Should fit within the constraints. */
   children?: ReactNode;
+  /** Any valid CSS color. If not a valid CSS string, the dot will be transparent and checkered */
+  value?: string;
 }
 
-export const ColorDot: FunctionComponent<Props> = ({ value, children }) => {
+export const ColorDot: FC<Props> = ({ value, children }) => {
   const tc = tinycolor(value);
   let style = {};
 
@@ -34,6 +34,6 @@ export const ColorDot: FunctionComponent<Props> = ({ value, children }) => {
 };
 
 ColorDot.propTypes = {
-  value: PropTypes.string,
   children: PropTypes.node,
+  value: PropTypes.string,
 };

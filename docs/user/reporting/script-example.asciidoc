@@ -1,0 +1,50 @@
+To automatically generate reports from a script, you'll make a request to the `POST` URL.
+The response from this request will be JSON, and will contain a `path` property with a
+URL to use to download the generated report. Use the `GET` method in the HTTP request to
+download the report.
+
+The request method must be `POST` and it must include a `kbn-version` header for Kibana
+to allow the request.
+
+The following example queues CSV report generation using the `POST` URL with cURL:
+
+["source","sh",subs="attributes"]
+---------------------------------------------------------
+curl \
+-XPOST \ <1>
+-u elastic \ <2>
+-H 'kbn-version: {version}' \ <3>
+'http://0.0.0.0:5601/api/reporting/generate/csv?jobParams=...' <4>
+---------------------------------------------------------
+// CONSOLE
+
+<1> `POST` method is required.
+<2> Provide user credentials for a user with permission to access Kibana and
+{report-features}.
+<3> The `kbn-version` header is required for all `POST` requests to Kibana.
+**The value must match the dotted-numeral version of the Kibana instance.**
+<4> The POST URL. You can copy and paste the URL for any report from the Kibana UI.
+
+Here is an example response for a successfully queued report:
+
+[source,json]
+---------------------------------------------------------
+{
+  "path": "/api/reporting/jobs/download/jxzaofkc0ykpf4062305t068", <1>
+  "job": {
+    "id": "jxzaofkc0ykpf4062305t068",
+    "index": ".reporting-2018.11.11",
+    "jobtype": "csv",
+    "created_by": "elastic",
+    "payload": ..., <2>
+    "timeout": 120000,
+    "max_attempts": 3,
+    "priority": 10
+  }
+}
+---------------------------------------------------------
+// CONSOLE
+
+<1> The relative path on the Kibana host for downloading the report.
+<2> (Not included in the example) Internal representation of the reporting job, as
+found in the `.reporting-*` index.

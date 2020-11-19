@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import Joi, { Schema } from 'joi';
 export const dateValidation = Joi.alternatives()
   .try(Joi.date().iso(), Joi.number())
   .required();
 
-export const withDefaultValidators = (validators = {}) => {
+export const withDefaultValidators = (
+  validators: { [key: string]: Schema } = {}
+) => {
   return Joi.object().keys({
     _debug: Joi.bool(),
     start: dateValidation,
     end: dateValidation,
-    esFilterQuery: Joi.string().allow(''),
-    ...validators
+    uiFilters: Joi.string(),
+    ...validators,
   });
 };

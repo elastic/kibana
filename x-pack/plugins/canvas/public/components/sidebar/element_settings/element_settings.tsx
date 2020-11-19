@@ -3,52 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
-import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
-// @ts-ignore unconverted component
-import { Datasource } from '../../datasource';
-// @ts-ignore unconverted component
-import { FunctionFormList } from '../../function_form_list';
-import { PositionedElement } from '../../../lib/positioned_element';
+import React from 'react';
+import { connect } from 'react-redux';
+import { getElementById, getSelectedPage } from '../../../state/selectors/workpad';
+import { ElementSettings as Component } from './element_settings.component';
+import { State, PositionedElement } from '../../../../types';
 
 interface Props {
-  /**
-   * a Canvas element used to populate config forms
-   */
-  element: PositionedElement;
+  selectedElementId: string;
 }
 
-export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
-  const tabs = [
-    {
-      id: 'edit',
-      name: 'Display',
-      content: (
-        <div className="canvasSidebar__pop">
-          <EuiSpacer size="s" />
-          <div className="canvasSidebar--args">
-            <FunctionFormList element={element} />
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'data',
-      name: 'Data',
-      content: (
-        <div className="canvasSidebar__pop">
-          <EuiSpacer size="s" />
-          <Datasource />
-        </div>
-      ),
-    },
-  ];
+const mapStateToProps = (state: State, { selectedElementId }: Props): StateProps => ({
+  element: getElementById(state, selectedElementId, getSelectedPage(state)),
+});
 
-  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />;
+interface StateProps {
+  element: PositionedElement | undefined;
+}
+
+const renderIfElement: React.FunctionComponent<StateProps> = (props) => {
+  if (props.element) {
+    return <Component element={props.element} />;
+  }
+
+  return null;
 };
 
-ElementSettings.propTypes = {
-  element: PropTypes.object,
-};
+export const ElementSettings = connect<StateProps, {}, Props, State>(mapStateToProps)(
+  renderIfElement
+);

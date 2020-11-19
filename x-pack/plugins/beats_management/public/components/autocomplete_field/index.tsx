@@ -13,8 +13,7 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
-// @ts-ignore
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
 
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
@@ -26,7 +25,7 @@ interface AutocompleteFieldProps {
   onSubmit?: (value: string) => void;
   onChange?: (value: string) => void;
   placeholder?: string;
-  suggestions: AutocompleteSuggestion[];
+  suggestions: QuerySuggestion[];
   value: string;
 }
 
@@ -266,7 +265,7 @@ const withSuggestionsHidden = (state: AutocompleteFieldState) => ({
   selectedIndex: null,
 });
 
-const FixedEuiFieldSearch: React.SFC<
+const FixedEuiFieldSearch: React.FC<
   React.InputHTMLAttributes<HTMLInputElement> &
     EuiFieldSearchProps & {
       inputRef?: (element: HTMLInputElement | null) => void;
@@ -278,10 +277,10 @@ const AutocompleteContainer = styled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = styled(EuiPanel).attrs({
+const SuggestionsPanel = styled(EuiPanel).attrs(() => ({
   paddingSize: 'none',
   hasShadow: true,
-})`
+}))`
   position: absolute;
   width: 100%;
   margin-top: 2px;

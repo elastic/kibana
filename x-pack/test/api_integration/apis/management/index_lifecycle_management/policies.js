@@ -17,10 +17,7 @@ export default function ({ getService }) {
 
   const es = getService('es');
 
-  const {
-    createIndex,
-    cleanUp: cleanUpEsResources
-  } = initElasticsearchHelpers(es);
+  const { createIndex, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
 
   const {
     loadPolicies,
@@ -37,7 +34,7 @@ export default function ({ getService }) {
     describe('list', () => {
       it('should have a default policy to manage the Watcher history indices', async () => {
         const { body } = await loadPolicies().expect(200);
-        const [policy = {}] = body;
+        const policy = body.find((policy) => policy.name === DEFAULT_POLICY_NAME);
 
         // We manually set the date for deterministic test
         const modifiedDate = '2019-04-30T14:30:00.000Z';
@@ -51,18 +48,20 @@ export default function ({ getService }) {
               delete: {
                 min_age: '7d',
                 actions: {
-                  delete: {}
-                }
-              }
-            }
+                  delete: {
+                    delete_searchable_snapshot: true,
+                  },
+                },
+              },
+            },
           },
-          name: DEFAULT_POLICY_NAME
+          name: DEFAULT_POLICY_NAME,
         });
       });
 
       it('should add the indices linked to the policies', async () => {
         // Create a policy
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('link-test-policy');
         const { name: policyName } = policy;
         await createPolicy(policy);
 
@@ -72,14 +71,14 @@ export default function ({ getService }) {
         await addPolicyToIndex(policyName, indexName);
 
         const { body } = await loadPolicies(true);
-        const fetchedPolicy = body.find(p => p.name === policyName);
+        const fetchedPolicy = body.find((p) => p.name === policyName);
         expect(fetchedPolicy.linkedIndices).to.eql([indexName]);
       });
     });
 
     describe('create', () => {
       it('should create a lifecycle policy', async () => {
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('create-test-policy');
         const { name } = policy;
 
         // Load current policies
@@ -97,7 +96,7 @@ export default function ({ getService }) {
 
     describe('delete', () => {
       it('should delete the policy created', async () => {
-        const policy = getPolicyPayload();
+        const policy = getPolicyPayload('delete-test-policy');
         const { name } = policy;
 
         // Create new policy

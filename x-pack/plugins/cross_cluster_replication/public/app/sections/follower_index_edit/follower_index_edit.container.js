@@ -36,7 +36,7 @@ const mapStateToProps = (state) => ({
   followerIndex: getSelectedFollowerIndex('edit')(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   getFollowerIndex: (id) => dispatch(getFollowerIndex(id)),
   selectFollowerIndex: (id) => dispatch(selectEditFollowerIndex(id)),
   saveFollowerIndex: (id, followerIndex) => dispatch(saveFollowerIndex(id, followerIndex, true)),

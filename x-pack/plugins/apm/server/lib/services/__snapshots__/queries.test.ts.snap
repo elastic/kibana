@@ -1,0 +1,444 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`services queries fetches the agent status 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+      "metric",
+      "sourcemap",
+      "transaction",
+    ],
+  },
+  "body": Object {
+    "size": 0,
+  },
+  "terminateAfter": 1,
+}
+`;
+
+exports[`services queries fetches the legacy data status 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "observer.version_major": Object {
+                "lt": 7,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "terminateAfter": 1,
+}
+`;
+
+exports[`services queries fetches the service agent name 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+      "transaction",
+      "metric",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "agents": Object {
+        "terms": Object {
+          "field": "agent.name",
+          "size": 1,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "terminateAfter": 1,
+}
+`;
+
+exports[`services queries fetches the service items 1`] = `
+Array [
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "average": Object {
+              "avg": Object {
+                "field": "transaction.duration.us",
+              },
+            },
+            "timeseries": Object {
+              "aggs": Object {
+                "average": Object {
+                  "avg": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+        "metric",
+        "error",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "agent_name": Object {
+              "top_hits": Object {
+                "_source": Array [
+                  "agent.name",
+                ],
+                "size": 1,
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "count": Object {
+              "value_count": Object {
+                "field": "transaction.duration.us",
+              },
+            },
+            "timeseries": Object {
+              "aggs": Object {
+                "count": Object {
+                  "value_count": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "outcomes": Object {
+              "aggs": Object {
+                "count": Object {
+                  "value_count": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
+              "terms": Object {
+                "field": "event.outcome",
+              },
+            },
+            "timeseries": Object {
+              "aggs": Object {
+                "outcomes": Object {
+                  "aggs": Object {
+                    "count": Object {
+                      "value_count": Object {
+                        "field": "transaction.duration.us",
+                      },
+                    },
+                  },
+                  "terms": Object {
+                    "field": "event.outcome",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+            Object {
+              "terms": Object {
+                "event.outcome": Array [
+                  "failure",
+                  "success",
+                ],
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+        "metric",
+        "error",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "environments": Object {
+              "terms": Object {
+                "field": "service.environment",
+                "size": 100,
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+]
+`;
+
+exports[`services queries fetches the service transaction types 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "types": Object {
+        "terms": Object {
+          "field": "transaction.type",
+          "size": 100,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;

@@ -13,13 +13,13 @@ const defaultIndex = '_all';
 
 export const ESIndexSelect = ({ value, loading, indices, onChange, onFocus, onBlur }) => {
   const selectedOption = value !== defaultIndex ? [{ label: value }] : [];
-  const options = indices.map(index => ({ label: index }));
+  const options = indices.map((index) => ({ label: index }));
 
   return (
     <EuiComboBox
       selectedOptions={selectedOption}
-      onChange={([index]) => onChange(get(index, 'label', defaultIndex).toLowerCase())}
-      onSearchChange={searchValue => {
+      onChange={([index]) => onChange(get(index, 'label', defaultIndex))}
+      onSearchChange={(searchValue) => {
         // resets input when user starts typing
         if (searchValue) {
           onChange(defaultIndex);
@@ -31,7 +31,8 @@ export const ESIndexSelect = ({ value, loading, indices, onChange, onFocus, onBl
       options={options}
       singleSelection={{ asPlainText: true }}
       isClearable={false}
-      onCreateOption={input => onChange(input || defaultIndex)}
+      onCreateOption={(input) => onChange(input || defaultIndex)}
+      compressed
     />
   );
 };

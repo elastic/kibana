@@ -1,0 +1,134 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/datasource/DatasourceComponent datasource with expression arguments 1`] = `
+<div
+  className="canvasDataSource__section"
+>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonContent__icon"
+        data-euiicon-type="arrowRight"
+        size="m"
+      />
+      <span
+        className="euiButtonEmpty__text"
+      >
+        <span
+          className="canvasDataSource__triggerButtonIcon"
+          data-euiicon-type="training"
+        />
+        Test Datasource
+      </span>
+    </span>
+  </button>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
+  <div
+    className="euiCallOut euiCallOut--warning"
+  >
+    <div
+      className="euiText euiText--small"
+    >
+      <p>
+        The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/datasource/DatasourceComponent simple datasource 1`] = `
+<div
+  className="canvasDataSource__section"
+>
+  <button
+    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+    >
+      <span
+        className="euiButtonContent__icon"
+        data-euiicon-type="arrowRight"
+        size="m"
+      />
+      <span
+        className="euiButtonEmpty__text"
+      >
+        <span
+          className="canvasDataSource__triggerButtonIcon"
+          data-euiicon-type="training"
+        />
+        Test Datasource
+      </span>
+    </span>
+  </button>
+  <div
+    className="euiSpacer euiSpacer--s"
+  />
+  <div
+    className="render_to_dom"
+  />
+  <hr
+    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+  />
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+        onClick={[Function]}
+        type="button"
+      >
+        <span
+          className="euiButtonContent euiButtonEmpty__content"
+        >
+          <span
+            className="euiButtonEmpty__text"
+          >
+            Preview data
+          </span>
+        </span>
+      </button>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+        disabled={false}
+        onClick={[Function]}
+        style={
+          Object {
+            "minWidth": undefined,
+          }
+        }
+        type="button"
+      >
+        <span
+          className="euiButtonContent euiButton__content"
+        >
+          <span
+            className="euiButton__text"
+          >
+            Save
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;

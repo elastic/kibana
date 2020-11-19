@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -62,15 +60,19 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('shows apm navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
+        expect(navLinks.map((link) => link.text)).to.eql([
+          'Overview',
           'APM',
-          'Management',
+          'User Experience',
+          'Stack Management',
         ]);
       });
 
       it('can navigate to APM app', async () => {
         await PageObjects.common.navigateToApp('apm');
-        await testSubjects.existOrFail('apmMainContainer', 10000);
+        await testSubjects.existOrFail('apmMainContainer', {
+          timeout: 10000,
+        });
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -111,15 +113,15 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows apm navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['APM', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'APM', 'User Experience', 'Stack Management']);
       });
 
       it('can navigate to APM app', async () => {
         await PageObjects.common.navigateToApp('apm');
-        await testSubjects.existOrFail('apmMainContainer', 10000);
+        await testSubjects.existOrFail('apmMainContainer', {
+          timeout: 10000,
+        });
       });
 
       it(`shows read-only badge`, async () => {
@@ -164,18 +166,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`doesn't show APM navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('APM');
       });
 
-      it(`renders not found page`, async () => {
+      it(`renders no permission page`, async () => {
         await PageObjects.common.navigateToUrl('apm', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

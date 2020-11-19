@@ -52,7 +52,7 @@ describe('deepCloneWithBuffers()', () => {
   });
 
   it('copies buffers but keeps them buffers', () => {
-    const input = new Buffer('i am a teapot', 'utf8');
+    const input = Buffer.from('i am a teapot', 'utf8');
     const output = deepCloneWithBuffers(input);
 
     expect(Buffer.isBuffer(input)).toBe(true);
@@ -65,7 +65,7 @@ describe('deepCloneWithBuffers()', () => {
     const input = {
       a: {
         b: {
-          c: new Buffer('i am a teapot', 'utf8'),
+          c: Buffer.from('i am a teapot', 'utf8'),
         },
       },
     };

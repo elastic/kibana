@@ -9,20 +9,6 @@
     "totalShards": 10,
     "status": "green"
   },
-  "logs": {
-    "enabled": false,
-    "limit": 10,
-    "reason": {
-      "clusterExists": false,
-      "indexPatternExists": false,
-      "indexPatternInTimeRangeExists": false,
-      "typeExistsAtAnyTime": false,
-      "nodeExists": null,
-      "indexExists": false,
-      "typeExists": false
-    },
-    "logs": []
-  },
   "metrics": {
     "index_search_request_rate": [
       {
@@ -915,103 +901,6 @@
         },
         "metric": {
           "app": "elasticsearch",
-          "field": "index_stats.primaries.segments.count",
-          "metricAgg": "max",
-          "label": "Primaries",
-          "title": "Segment Count",
-          "description": "Number of segments for primary shards.",
-          "units": "",
-          "format": "0,0.[00]",
-          "hasCalculation": false,
-          "isDerivative": false
-        },
-        "data": [
-          [
-            1507235520000,
-            30
-          ],
-          [
-            1507235530000,
-            30
-          ],
-          [
-            1507235540000,
-            30
-          ],
-          [
-            1507235550000,
-            30
-          ],
-          [
-            1507235560000,
-            30
-          ],
-          [
-            1507235570000,
-            30
-          ],
-          [
-            1507235580000,
-            30
-          ],
-          [
-            1507235590000,
-            30
-          ],
-          [
-            1507235600000,
-            30
-          ],
-          [
-            1507235610000,
-            30
-          ],
-          [
-            1507235620000,
-            30
-          ],
-          [
-            1507235630000,
-            30
-          ],
-          [
-            1507235640000,
-            30
-          ],
-          [
-            1507235650000,
-            30
-          ],
-          [
-            1507235660000,
-            30
-          ],
-          [
-            1507235670000,
-            30
-          ],
-          [
-            1507235680000,
-            30
-          ],
-          [
-            1507235690000,
-            30
-          ],
-          [
-            1507235700000,
-            30
-          ]
-        ]
-      },
-      {
-        "bucket_size": "10 seconds",
-        "timeRange": {
-          "min": 1507235508000,
-          "max": 1507235712000
-        },
-        "metric": {
-          "app": "elasticsearch",
           "field": "index_stats.total.segments.count",
           "metricAgg": "max",
           "label": "Total",
@@ -1100,96 +989,208 @@
             60
           ]
         ]
+      },
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1507235508000,
+          "max": 1507235712000
+        },
+        "metric": {
+          "app": "elasticsearch",
+          "field": "index_stats.primaries.segments.count",
+          "metricAgg": "max",
+          "label": "Primaries",
+          "title": "Segment Count",
+          "description": "Number of segments for primary shards.",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [
+            1507235520000,
+            30
+          ],
+          [
+            1507235530000,
+            30
+          ],
+          [
+            1507235540000,
+            30
+          ],
+          [
+            1507235550000,
+            30
+          ],
+          [
+            1507235560000,
+            30
+          ],
+          [
+            1507235570000,
+            30
+          ],
+          [
+            1507235580000,
+            30
+          ],
+          [
+            1507235590000,
+            30
+          ],
+          [
+            1507235600000,
+            30
+          ],
+          [
+            1507235610000,
+            30
+          ],
+          [
+            1507235620000,
+            30
+          ],
+          [
+            1507235630000,
+            30
+          ],
+          [
+            1507235640000,
+            30
+          ],
+          [
+            1507235650000,
+            30
+          ],
+          [
+            1507235660000,
+            30
+          ],
+          [
+            1507235670000,
+            30
+          ],
+          [
+            1507235680000,
+            30
+          ],
+          [
+            1507235690000,
+            30
+          ],
+          [
+            1507235700000,
+            30
+          ]
+        ]
       }
     ]
   },
+  "logs": {
+    "enabled": false,
+    "logs": [],
+    "reason": {
+      "indexPatternExists": false,
+      "indexPatternInTimeRangeExists": false,
+      "typeExistsAtAnyTime": false,
+      "typeExists": false,
+      "usingStructuredLogs": false,
+      "clusterExists": false,
+      "nodeExists": null,
+      "indexExists": false
+    },
+    "limit": 10
+  },
   "shards": [
     {
-      "state": "STARTED",
-      "primary": false,
+      "index": "avocado-tweets-2017.10.02",
       "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": false,
       "relocating_node": null,
       "shard": 4,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": true,
+      "index": "avocado-tweets-2017.10.02",
       "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
       "relocating_node": null,
       "shard": 4,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": true,
+      "index": "avocado-tweets-2017.10.02",
       "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": true,
       "relocating_node": null,
       "shard": 1,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": false,
+      "index": "avocado-tweets-2017.10.02",
       "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": false,
       "relocating_node": null,
       "shard": 1,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": true,
+      "index": "avocado-tweets-2017.10.02",
       "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": true,
       "relocating_node": null,
       "shard": 2,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": false,
+      "index": "avocado-tweets-2017.10.02",
       "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": false,
       "relocating_node": null,
       "shard": 2,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": false,
+      "index": "avocado-tweets-2017.10.02",
       "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": false,
       "relocating_node": null,
       "shard": 3,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": true,
+      "index": "avocado-tweets-2017.10.02",
       "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
       "relocating_node": null,
       "shard": 3,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": false,
+      "index": "avocado-tweets-2017.10.02",
       "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": false,
       "relocating_node": null,
       "shard": 0,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": true,
+      "index": "avocado-tweets-2017.10.02",
       "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
       "relocating_node": null,
       "shard": 0,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     }
   ],
   "shardStats": {
     "nodes": {
       "jUT5KdxfRbORSCWkb5zjmA": {
-        "shardCount": 38,
-        "indexCount": 20,
+        "shardCount": 5,
+        "indexCount": 1,
         "name": "whatever-01",
         "node_ids": [
           "jUT5KdxfRbORSCWkb5zjmA"
@@ -1197,20 +1198,11 @@
         "type": "master"
       },
       "xcP6ue7eRCieNNitFTT0EA": {
-        "shardCount": 36,
-        "indexCount": 19,
+        "shardCount": 5,
+        "indexCount": 1,
         "name": "whatever-02",
         "node_ids": [
           "xcP6ue7eRCieNNitFTT0EA"
-        ],
-        "type": "node"
-      },
-      "bwQWH-7IQY-mFPpfoaoFXQ": {
-        "shardCount": 4,
-        "indexCount": 4,
-        "name": "whatever-03",
-        "node_ids": [
-          "bwQWH-7IQY-mFPpfoaoFXQ"
         ],
         "type": "node"
       }
@@ -1218,8 +1210,8 @@
   },
   "nodes": {
     "jUT5KdxfRbORSCWkb5zjmA": {
-      "shardCount": 38,
-      "indexCount": 20,
+      "shardCount": 5,
+      "indexCount": 1,
       "name": "whatever-01",
       "node_ids": [
         "jUT5KdxfRbORSCWkb5zjmA"
@@ -1227,20 +1219,11 @@
       "type": "master"
     },
     "xcP6ue7eRCieNNitFTT0EA": {
-      "shardCount": 36,
-      "indexCount": 19,
+      "shardCount": 5,
+      "indexCount": 1,
       "name": "whatever-02",
       "node_ids": [
         "xcP6ue7eRCieNNitFTT0EA"
-      ],
-      "type": "node"
-    },
-    "bwQWH-7IQY-mFPpfoaoFXQ": {
-      "shardCount": 4,
-      "indexCount": 4,
-      "name": "whatever-03",
-      "node_ids": [
-        "bwQWH-7IQY-mFPpfoaoFXQ"
       ],
       "type": "node"
     }

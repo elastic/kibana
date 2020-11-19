@@ -21,6 +21,7 @@ import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
 import { withProcRunner } from '@kbn/dev-utils';
+import dedent from 'dedent';
 
 import {
   runElasticsearch,
@@ -31,16 +32,29 @@ import {
   KIBANA_FTR_SCRIPT,
 } from './lib';
 
-import { readConfigFile } from '../../../../src/functional_test_runner/lib';
+import { readConfigFile } from '../functional_test_runner/lib';
 
-const SUCCESS_MESSAGE = `
+const makeSuccessMessage = (options) => {
+  const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
+  const configPaths = Array.isArray(options.config) ? options.config : [options.config];
+  const pathsMessage = options.useDefaultConfig
+    ? ''
+    : configPaths
+        .map((path) => relative(process.cwd(), path))
+        .map((path) => ` --config ${path}`)
+        .join('');
 
-Elasticsearch and Kibana are ready for functional testing. Start the functional tests
-in another terminal session by running this command from this directory:
+  return (
+    '\n\n' +
+    dedent`
+      Elasticsearch and Kibana are ready for functional testing. Start the functional tests
+      in another terminal session by running this command from this directory:
 
-    node ${relative(process.cwd(), KIBANA_FTR_SCRIPT)}
-
-`;
+          node ${relative(process.cwd(), KIBANA_FTR_SCRIPT)}${installDirFlag}${pathsMessage}
+    ` +
+    '\n\n'
+  );
+};
 
 /**
  * Run servers and tests for each config
@@ -52,6 +66,19 @@ in another terminal session by running this command from this directory:
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function runTests(options) {
+  if (!process.env.KBN_NP_PLUGINS_BUILT) {
+    const log = options.createLogger();
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning(
+      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
+    );
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+  }
+
   for (const configPath of options.configs) {
     const log = options.createLogger();
     const opts = {
@@ -72,15 +99,23 @@ export async function runTests(options) {
       continue;
     }
 
-    await withProcRunner(log, async procs => {
+    await withProcRunner(log, async (procs) => {
       const config = await readConfigFile(log, configPath);
 
-      const es = await runElasticsearch({ config, options: opts });
-      await runKibanaServer({ procs, config, options: opts });
-      await runFtr({ configPath, options: opts });
-
-      await procs.stop('kibana');
-      await es.cleanup();
+      let es;
+      try {
+        es = await runElasticsearch({ config, options: opts });
+        await runKibanaServer({ procs, config, options: opts });
+        await runFtr({ configPath, options: opts });
+      } finally {
+        try {
+          await procs.stop('kibana');
+        } finally {
+          if (es) {
+            await es.cleanup();
+          }
+        }
+      }
     });
   }
 }
@@ -100,7 +135,7 @@ export async function startServers(options) {
     log,
   };
 
-  await withProcRunner(log, async procs => {
+  await withProcRunner(log, async (procs) => {
     const config = await readConfigFile(log, options.config);
 
     const es = await runElasticsearch({ config, options: opts });
@@ -109,21 +144,24 @@ export async function startServers(options) {
       config,
       options: {
         ...opts,
-        extraKbnOpts: [...options.extraKbnOpts, ...(options.installDir ? [] : ['--dev'])],
+        extraKbnOpts: [
+          ...options.extraKbnOpts,
+          ...(options.installDir ? [] : ['--dev', '--no-dev-config']),
+        ],
       },
     });
 
     // wait for 5 seconds of silence before logging the
     // success message so that it doesn't get buried
-    await silence(5000, { log });
-    log.info(SUCCESS_MESSAGE);
+    await silence(log, 5000);
+    log.success(makeSuccessMessage(options));
 
     await procs.waitForAllToStop();
     await es.cleanup();
   });
 }
 
-async function silence(milliseconds, { log }) {
+async function silence(log, milliseconds) {
   await log
     .getWritten$()
     .pipe(

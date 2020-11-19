@@ -7,7 +7,7 @@
 import React, { Component, KeyboardEvent } from 'react';
 
 import isEqual from 'react-fast-compare';
-// @ts-ignore no @types definition
+// @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import { isTextInput } from '../../lib/is_text_input';
 
@@ -56,6 +56,38 @@ export interface Props {
    * ungroups selected group
    */
   ungroupNodes: () => void;
+  /**
+   * shifts selected elements 10px up
+   */
+  shiftUp: () => void;
+  /**
+   * shifts selected elements 10px down
+   */
+  shiftDown: () => void;
+  /**
+   * shifts selected elements 10px left
+   */
+  shiftLeft: () => void;
+  /**
+   * shifts selected elements 10px right
+   */
+  shiftRight: () => void;
+  /**
+   * nudges selected elements 1px up
+   */
+  nudgeUp: () => void;
+  /**
+   * nudges selected elements 1px down
+   */
+  nudgeDown: () => void;
+  /**
+   * nudges selected elements 1px left
+   */
+  nudgeLeft: () => void;
+  /**
+   * nudges selected elements 1px right
+   */
+  nudgeRight: () => void;
 }
 
 export class WorkpadShortcuts extends Component<Props> {
@@ -71,6 +103,14 @@ export class WorkpadShortcuts extends Component<Props> {
     SEND_TO_BACK: this.props.sendToBack,
     GROUP: this.props.groupNodes,
     UNGROUP: this.props.ungroupNodes,
+    SHIFT_UP: this.props.shiftUp,
+    SHIFT_DOWN: this.props.shiftDown,
+    SHIFT_LEFT: this.props.shiftLeft,
+    SHIFT_RIGHT: this.props.shiftRight,
+    NUDGE_UP: this.props.nudgeUp,
+    NUDGE_DOWN: this.props.nudgeDown,
+    NUDGE_LEFT: this.props.nudgeLeft,
+    NUDGE_RIGHT: this.props.nudgeRight,
   };
 
   public render() {
@@ -78,7 +118,10 @@ export class WorkpadShortcuts extends Component<Props> {
       <Shortcuts
         name="ELEMENT"
         handler={(action: string, event: KeyboardEvent) => {
-          if (!isTextInput(event.target as HTMLInputElement)) {
+          if (
+            !isTextInput(event.target as HTMLInputElement) &&
+            typeof this._keyMap[action] === 'function'
+          ) {
             event.preventDefault();
             this._keyMap[action]();
           }

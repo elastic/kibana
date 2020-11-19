@@ -7,10 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const getDisplayName = Comp => Comp.displayName || Comp.name || 'UnnamedComponent';
+const getDisplayName = (Comp) => Comp.displayName || Comp.name || 'UnnamedComponent';
 
 export function createStatefulPropHoc(fieldname, updater = 'updateValue') {
-  return Comp => {
+  return (Comp) => {
     class WrappedControlledInput extends React.PureComponent {
       constructor(props) {
         super(props);
@@ -20,11 +20,11 @@ export function createStatefulPropHoc(fieldname, updater = 'updateValue') {
         };
       }
 
-      componentWillReceiveProps(nextProps) {
+      UNSAFE_componentWillReceiveProps(nextProps) {
         this.setState({ value: nextProps[fieldname] });
       }
 
-      handleChange = ev => {
+      handleChange = (ev) => {
         if (ev.target) {
           this.setState({ value: ev.target.value });
         } else {

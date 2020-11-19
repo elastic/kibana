@@ -21,11 +21,8 @@ import expect from '@kbn/expect';
 
 const dashboardName = 'Dashboard Test Time';
 
-const fromTime = '2015-09-19 06:31:44.000';
-const toTime = '2015-09-23 18:31:44.000';
-
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker']);
   const browser = getService('browser');
 
   describe('dashboard time', () => {
@@ -35,42 +32,47 @@ export default function ({ getPageObjects, getService }) {
     });
 
     after(async function () {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.common.navigateToApp('dashboard');
     });
 
     describe('dashboard without stored timed', () => {
       it('is saved', async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.addVisualizations([PageObjects.dashboard.getTestVisualizationNames()[0]]);
+        await PageObjects.dashboard.addVisualizations([
+          PageObjects.dashboard.getTestVisualizationNames()[0],
+        ]);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
       });
 
       it('Does not set the time picker on open', async () => {
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.equal('Sep 19, 2015 @ 06:31:44.000');
-        expect(time.end).to.equal('Sep 23, 2015 @ 18:31:44.000');
+        expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);
       });
     });
 
-    describe('dashboard with stored timed', async function () {
+    describe('dashboard with stored timed', function () {
       it('is saved with time', async function () {
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
       });
 
       it('sets time on open', async function () {
-        await PageObjects.timePicker.setAbsoluteRange('2019-01-01 00:00:00.000', '2019-01-02 00:00:00.000');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Jan 1, 2019 @ 00:00:00.000',
+          'Jan 2, 2019 @ 00:00:00.000'
+        );
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.equal('Sep 19, 2015 @ 06:31:44.000');
-        expect(time.end).to.equal('Sep 23, 2015 @ 18:31:44.000');
+        expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);
       });
 
       // If time is stored with a dashboard, it's supposed to override the current time settings when opened.
@@ -83,11 +85,25 @@ export default function ({ getPageObjects, getService }) {
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
 
-        const urlWithGlobalTime = `${kibanaBaseUrl}#/dashboard/${id}?_g=(time:(from:now-1h,to:now))`;
+        const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(time:(from:now-1h,to:now))`;
         await browser.get(urlWithGlobalTime, false);
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.equal('~ an hour ago');
         expect(time.end).to.equal('now');
+      });
+
+      it('should use saved time, if time is missing in global state, but _g is present in the url', async function () {
+        const currentUrl = await browser.getCurrentUrl();
+        const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+        const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+
+        const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(filters:!())`;
+        await browser.get(urlWithGlobalTime, false);
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);
       });
     });
 
@@ -99,7 +115,10 @@ export default function ({ getPageObjects, getService }) {
       it('preserved during navigation', async function () {
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
-        await PageObjects.timePicker.setAbsoluteRange('2019-01-01 00:00:00.000', '2019-01-02 00:00:00.000');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Jan 1, 2019 @ 00:00:00.000',
+          'Jan 2, 2019 @ 00:00:00.000'
+        );
         await PageObjects.header.clickVisualize();
         await PageObjects.header.clickDashboard();
 

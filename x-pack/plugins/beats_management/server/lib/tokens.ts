@@ -58,7 +58,7 @@ export class CMTokensDomain {
     let expired = false;
 
     if (decode) {
-      const enrollmentTokenSecret = this.framework.getSetting('encryptionKey');
+      const enrollmentTokenSecret = this.framework.getConfig().encryptionKey;
 
       try {
         verifyToken(recivedToken, enrollmentTokenSecret);
@@ -98,7 +98,7 @@ export class CMTokensDomain {
   }
 
   public generateAccessToken() {
-    const enrollmentTokenSecret = this.framework.getSetting('encryptionKey');
+    const enrollmentTokenSecret = this.framework.getConfig().encryptionKey;
 
     const tokenData = {
       created: moment().toJSON(),
@@ -113,12 +113,12 @@ export class CMTokensDomain {
     numTokens: number = 1
   ): Promise<string[]> {
     const tokens = [];
-    const enrollmentTokensTtlInSeconds = this.framework.getSetting('enrollmentTokensTtlInSeconds');
+    const enrollmentTokensTtlInSeconds = this.framework.getConfig().enrollmentTokensTtlInSeconds;
 
     const enrollmentTokenExpiration = moment()
       .add(enrollmentTokensTtlInSeconds, 'seconds')
       .toJSON();
-    const enrollmentTokenSecret = this.framework.getSetting('encryptionKey');
+    const enrollmentTokenSecret = this.framework.getConfig().encryptionKey;
 
     while (tokens.length < numTokens) {
       const tokenData = {
@@ -134,9 +134,9 @@ export class CMTokensDomain {
     }
 
     await Promise.all(
-      chunk(tokens, 100).map(tokenChunk => this.adapter.insertTokens(user, tokenChunk))
+      chunk(tokens, 100).map((tokenChunk) => this.adapter.insertTokens(user, tokenChunk))
     );
 
-    return tokens.map(token => token.token);
+    return tokens.map((token) => token.token);
   }
 }

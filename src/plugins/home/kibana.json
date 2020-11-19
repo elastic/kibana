@@ -1,0 +1,11 @@
+{
+  "id": "home",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "urlForwarding"],
+  "optionalPlugins": ["usageCollection", "telemetry"],
+  "requiredBundles": [
+    "kibanaReact"
+  ]
+}

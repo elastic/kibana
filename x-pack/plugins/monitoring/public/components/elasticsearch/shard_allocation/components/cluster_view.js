@@ -4,22 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React from 'react';
 import { TableHead } from './table_head';
 import { TableBody } from './table_body';
 import { i18n } from '@kbn/i18n';
 
 export class ClusterView extends React.Component {
-  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.clusterViewDisplayName', {
-    defaultMessage: 'ClusterView',
-  });
+  static displayName = i18n.translate(
+    'xpack.monitoring.elasticsearch.shardAllocation.clusterViewDisplayName',
+    {
+      defaultMessage: 'ClusterView',
+    }
+  );
 
   constructor(props) {
     super(props);
-    const scope = props.scope;
-    const kbnChangePath = props.kbnUrl.changePath;
 
     this.state = {
       labels: props.scope.labels || [],
@@ -27,9 +26,6 @@ export class ClusterView extends React.Component {
       shardStats: props.scope.pageData.shardStats,
       showSystemIndices: props.showSystemIndices,
       toggleShowSystemIndices: props.toggleShowSystemIndices,
-      angularChangeUrl: (url) => {
-        scope.$evalAsync(() => kbnChangePath(url));
-      }
     };
   }
 
@@ -43,15 +39,17 @@ export class ClusterView extends React.Component {
     this.setState({ shardStats: stats });
   };
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.scope.$watch('showing', this.setShowing);
     this.props.scope.$watch(() => this.props.scope.pageData.shardStats, this.setShardStats);
   }
 
   hasUnassigned = () => {
-    return this.state.showing.length &&
+    return (
+      this.state.showing.length &&
       this.state.showing[0].unassigned &&
-      this.state.showing[0].unassigned.length;
+      this.state.showing[0].unassigned.length
+    );
   };
 
   render() {
@@ -68,7 +66,6 @@ export class ClusterView extends React.Component {
           rows={this.state.showing}
           cols={this.state.labels.length}
           shardStats={this.state.shardStats}
-          changeUrl={this.state.angularChangeUrl}
         />
       </table>
     );

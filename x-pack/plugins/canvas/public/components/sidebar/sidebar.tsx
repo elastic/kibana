@@ -5,11 +5,17 @@
  */
 
 import React, { FunctionComponent } from 'react';
-// @ts-ignore unconverted component
+// @ts-expect-error unconverted component
 import { SidebarContent } from './sidebar_content';
 
-export const Sidebar: FunctionComponent = () => (
-  <div className="canvasSidebar">
-    <SidebarContent />
-  </div>
-);
+interface Props {
+  commit: Function;
+}
+
+export const Sidebar: FunctionComponent<Props> = ({ commit }) => {
+  return (
+    <div className="canvasSidebar">
+      <SidebarContent commit={commit} />
+    </div>
+  );
+};

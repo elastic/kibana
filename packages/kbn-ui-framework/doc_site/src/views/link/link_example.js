@@ -19,27 +19,22 @@
 
 import React from 'react';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes } from '../../components';
 
-const linkHtml = require('./link.html');
+import linkHtml from './link.html';
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Link"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: linkHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: linkHtml,
+        },
+      ]}
     >
-      <GuideDemo
-        html={linkHtml}
-      />
+      <GuideDemo html={linkHtml} />
     </GuideSection>
   </GuidePage>
 );

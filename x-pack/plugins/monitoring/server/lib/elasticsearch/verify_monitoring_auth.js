@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { INDEX_PATTERN } from '../../../common/constants';
 
 /*
@@ -19,10 +19,10 @@ export async function verifyMonitoringAuth(req) {
   const xpackInfo = get(req.server.plugins.monitoring, 'info');
 
   if (xpackInfo) {
-    const security = xpackInfo.feature('security');
+    const security = xpackInfo.getSecurityFeature();
 
     // we only need to verify permissions if we're using X-Pack Security
-    if (security.isAvailable() && security.isEnabled()) {
+    if (security.isAvailable && security.isEnabled) {
       await verifyHasPrivileges(req);
     }
   }
@@ -38,19 +38,29 @@ export async function verifyMonitoringAuth(req) {
 async function verifyHasPrivileges(req) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
-  const response = await callWithRequest(req, 'transport.request', {
-    method: 'POST',
-    path: '/_security/user/_has_privileges',
-    body: {
-      index: [
-        {
-          names: [ INDEX_PATTERN ], // uses wildcard
-          privileges: [ 'read' ]
-        }
-      ]
-    },
-    ignoreUnavailable: true // we allow 404 incase the user shutdown security in-between the check and now
-  });
+  let response;
+  try {
+    response = await callWithRequest(req, 'transport.request', {
+      method: 'POST',
+      path: '/_security/user/_has_privileges',
+      body: {
+        index: [
+          {
+            names: [INDEX_PATTERN], // uses wildcard
+            privileges: ['read'],
+          },
+        ],
+      },
+      ignoreUnavailable: true, // we allow 404 incase the user shutdown security in-between the check and now
+    });
+  } catch (err) {
+    if (
+      err.message === 'no handler found for uri [/_security/user/_has_privileges] and method [POST]'
+    ) {
+      return;
+    }
+    throw err;
+  }
 
   // we assume true because, if the response 404ed, then it will not exist but we should try to continue
   const hasAllRequestedPrivileges = get(response, 'has_all_requested', true);

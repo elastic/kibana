@@ -21,7 +21,6 @@ import { mockMakeDirAsync, mockWriteFileAsync } from './integrate_locale_files.t
 
 import path from 'path';
 import { integrateLocaleFiles, verifyMessages } from './integrate_locale_files';
-// @ts-ignore
 import { normalizePath } from './utils';
 
 const localePath = path.resolve(__dirname, '__fixtures__', 'integrate_locale_files', 'fr.json');
@@ -36,12 +35,13 @@ const defaultIntegrateOptions = {
   sourceFileName: localePath,
   dryRun: false,
   ignoreIncompatible: false,
+  ignoreMalformed: false,
   ignoreMissing: false,
   ignoreUnused: false,
   config: {
     paths: {
-      'plugin-1': 'src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1',
-      'plugin-2': 'src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2',
+      'plugin-1': ['src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1'],
+      'plugin-2': ['src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2'],
     },
     exclude: [],
     translations: [],

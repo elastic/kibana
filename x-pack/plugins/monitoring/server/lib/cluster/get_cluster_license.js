@@ -18,18 +18,17 @@ export function getClusterLicense(req, esIndexPattern, clusterUuid) {
     ignoreUnavailable: true,
     filterPath: 'hits.hits._source.license',
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: 'cluster_stats',
         clusterUuid,
-        metric: ElasticsearchMetric.getMetricFields()
-      })
-    }
+        metric: ElasticsearchMetric.getMetricFields(),
+      }),
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(response => {
-      return get(response, 'hits.hits[0]._source.license', {});
-    });
+  return callWithRequest(req, 'search', params).then((response) => {
+    return get(response, 'hits.hits[0]._source.license', {});
+  });
 }

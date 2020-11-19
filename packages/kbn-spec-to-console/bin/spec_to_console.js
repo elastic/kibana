@@ -17,11 +17,11 @@
  * under the License.
  */
 
-
 const fs = require('fs');
 const path = require('path');
 const program = require('commander');
 const glob = require('glob');
+const chalk = require('chalk');
 
 const packageJSON = require('../package.json');
 const convert = require('../lib/convert');
@@ -38,15 +38,42 @@ if (!program.glob) {
 }
 
 const files = glob.sync(program.glob);
-console.log(files.length, files);
-files.forEach(file => {
+const totalFilesCount = files.length;
+let convertedFilesCount = 0;
+
+console.log(chalk.bold(`Detected files (count: ${totalFilesCount}):`));
+console.log();
+console.log(files);
+console.log();
+
+files.forEach((file) => {
   const spec = JSON.parse(fs.readFileSync(file));
-  const output = JSON.stringify(convert(spec), null, 2);
+  const convertedSpec = convert(spec);
+  if (!Object.keys(convertedSpec).length) {
+    console.log(
+      // prettier-ignore
+      `${chalk.yellow('Detected')} ${chalk.grey(file)} but no endpoints were converted; ${chalk.yellow('skipping')}...`
+    );
+    return;
+  }
+  const output = JSON.stringify(convertedSpec, null, 2);
+  ++convertedFilesCount;
   if (program.directory) {
     const outputName = path.basename(file);
     const outputPath = path.resolve(program.directory, outputName);
-    fs.writeFileSync(outputPath, output + '\n');
+    try {
+      fs.mkdirSync(program.directory, { recursive: true });
+      fs.writeFileSync(outputPath, output + '\n');
+    } catch (e) {
+      console.log('Cannot write file ', e);
+    }
   } else {
     console.log(output);
   }
 });
+
+console.log();
+// prettier-ignore
+console.log(`${chalk.grey('Converted')} ${chalk.bold(`${convertedFilesCount}/${totalFilesCount}`)} ${chalk.grey('files')}`);
+console.log(`Check your ${chalk.bold('git status')}.`);
+console.log();

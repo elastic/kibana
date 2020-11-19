@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -52,7 +53,7 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
     };
   }
 
-  public async componentWillMount() {
+  public async UNSAFE_componentWillMount() {
     const tags = await this.props.libs.tags.getTagsWithIds(this.props.beat.tags);
     const blocksResult = await this.props.libs.configBlocks.getForTags(
       this.props.beat.tags,
@@ -77,28 +78,28 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
     }
     const configurationBlocks = !this.state.configuration_blocks
       ? []
-      : this.state.configuration_blocks.map(configuration => ({
+      : this.state.configuration_blocks.map((configuration) => ({
           // @ts-ignore one of the types on ConfigurationBlock doesn't define a "module" property
           module: configuration.config.type || null,
           tagId: configuration.tag,
           tagColor:
-            ((this.state.tags || []).find(tag => tag.id === configuration.tag) || ({} as BeatTag))
+            ((this.state.tags || []).find((tag) => tag.id === configuration.tag) || ({} as BeatTag))
               .color || 'grey',
           tagName:
-            ((this.state.tags || []).find(tag => tag.id === configuration.tag) || ({} as BeatTag))
+            ((this.state.tags || []).find((tag) => tag.id === configuration.tag) || ({} as BeatTag))
               .name || configuration.tag,
           ...beat,
           ...configuration,
           displayValue: get(
             translateConfigSchema(configBlockSchemas).find(
-              config => config.id === configuration.type
+              (config) => config.id === configuration.type
             ),
             'text',
             null
           ),
         }));
 
-    const columns = [
+    const columns: Array<EuiBasicTableColumn<ConfigurationBlock>> = [
       {
         field: 'displayValue',
         name: intl.formatMessage({

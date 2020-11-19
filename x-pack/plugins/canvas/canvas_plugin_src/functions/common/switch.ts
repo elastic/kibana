@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Function, Case } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Case } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   case: Array<() => Promise<Case>>;
   default: () => any;
 }
 
-export function switchFn(): Function<'switch', Arguments, any> {
+export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Arguments, unknown> {
   const { help, args: argHelp } = getFunctionHelp().switch;
 
   return {
@@ -24,6 +25,7 @@ export function switchFn(): Function<'switch', Arguments, any> {
         aliases: ['_'],
         resolve: false,
         multi: true,
+        required: true,
         help: argHelp.case,
       },
       default: {
@@ -32,7 +34,7 @@ export function switchFn(): Function<'switch', Arguments, any> {
         help: argHelp.default,
       },
     },
-    fn: async (context, args) => {
+    fn: async (input, args) => {
       const cases = args.case || [];
 
       for (let i = 0; i < cases.length; i++) {
@@ -47,7 +49,7 @@ export function switchFn(): Function<'switch', Arguments, any> {
         return await args.default();
       }
 
-      return context;
+      return input;
     },
   };
 }

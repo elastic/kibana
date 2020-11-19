@@ -1,0 +1,61 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      // Allows for importing from `kibana` package for the exported types.
+      "kibana": ["./kibana"],
+      "kibana/public": ["src/core/public"],
+      "kibana/server": ["src/core/server"],
+      "plugins/*": ["src/legacy/core_plugins/*/public/"],
+      "test_utils/*": [
+        "src/test_utils/public/*"
+      ],
+      "fixtures/*": ["src/fixtures/*"]
+    },
+    // Support .tsx files and transform JSX into calls to React.createElement
+    "jsx": "react",
+    // Enables all strict type checking options.
+    "strict": true,
+    // save information about the project graph on disk
+    "incremental": true,
+    // enables "core language features"
+    "lib": [
+      "esnext",
+      // includes support for browser APIs
+      "dom"
+    ],
+    // Node 8 should support everything output by esnext, we override this
+    // in webpack with loader-level compiler options
+    "target": "esnext",
+    // Use commonjs for node, overridden in webpack to keep import statements
+    // to maintain support for things like `await import()`
+    "module": "commonjs",
+    // Allows default imports from modules with no default export. This does not affect code emit, just type checking.
+    // We have to enable this option explicitly since `esModuleInterop` doesn't enable it automatically when ES2015 or
+    // ESNext module format is used.
+    "allowSyntheticDefaultImports": true,
+    // Emits __importStar and __importDefault helpers for runtime babel ecosystem compatibility.
+    "esModuleInterop": true,
+    // Resolve modules in the same way as Node.js. Aka make `require` works the
+    // same in TypeScript as it does in Node.js.
+    "moduleResolution": "node",
+    // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
+    "resolveJsonModule": true,
+    // Disallow inconsistently-cased references to the same file.
+    "forceConsistentCasingInFileNames": true,
+    // Forbid unused local variables as the rule was deprecated by ts-lint
+    "noUnusedLocals": true,
+    // Provide full support for iterables in for..of, spread and destructuring when targeting ES5 or ES3.
+    "downlevelIteration": true,
+    // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
+    "importHelpers": true,
+    // adding global typings
+    "types": [
+      "node",
+      "jest",
+      "flot",
+      "jest-styled-components",
+      "@testing-library/jest-dom"
+    ]
+  }
+}

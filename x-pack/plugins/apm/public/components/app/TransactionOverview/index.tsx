@@ -5,71 +5,113 @@
  */
 
 import {
-  EuiFormRow,
+  EuiCallOut,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPage,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
 import { first } from 'lodash';
-import React from 'react';
-import { useTransactionList } from '../../../hooks/useTransactionList';
-import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
+import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useTrackPageview } from '../../../../../observability/public';
+import { Projection } from '../../../../common/projections';
+import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
+import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
+import { useTransactionList } from '../../../hooks/useTransactionList';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
-import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
-import { TransactionList } from './List';
+import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
+import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
+import { SearchBar } from '../../shared/search_bar';
+import { Correlations } from '../Correlations';
+import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { getHasMLJob } from '../../../services/rest/ml';
-import { history } from '../../../utils/history';
-import { useLocation } from '../../../hooks/useLocation';
-
-interface Props {
-  urlParams: IUrlParams;
-  serviceTransactionTypes: string[];
-}
+import { UserExperienceCallout } from './user_experience_callout';
 
 function getRedirectLocation({
   urlParams,
   location,
-  serviceTransactionTypes
+  serviceTransactionTypes,
 }: {
   location: Location;
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
-}) {
-  const { serviceName, transactionType } = urlParams;
+}): Location | undefined {
+  const { transactionType } = urlParams;
   const firstTransactionType = first(serviceTransactionTypes);
+
   if (!transactionType && firstTransactionType) {
     return {
       ...location,
-      pathname: `/${serviceName}/transactions/${firstTransactionType}`
+      search: fromQuery({
+        ...toQuery(location.search),
+        transactionType: firstTransactionType,
+      }),
     };
   }
 }
 
-export function TransactionOverview({
-  urlParams,
-  serviceTransactionTypes
-}: Props) {
+interface TransactionOverviewProps {
+  serviceName: string;
+}
+
+export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   const location = useLocation();
-  const { serviceName, transactionType } = urlParams;
+  const { urlParams } = useUrlParams();
+  const { transactionType } = urlParams;
+
+  // TODO: fetching of transaction types should perhaps be lifted since it is needed in several places. Context?
+  const serviceTransactionTypes = useServiceTransactionTypes(urlParams);
 
   // redirect to first transaction type
   useRedirect(
-    history,
     getRedirectLocation({
       urlParams,
       location,
-      serviceTransactionTypes
+      serviceTransactionTypes,
     })
   );
 
-  const { data: transactionOverviewCharts } = useTransactionOverviewCharts(
-    urlParams
+  const {
+    data: transactionCharts,
+    status: transactionChartsStatus,
+  } = useTransactionCharts();
+
+  useTrackPageview({ app: 'apm', path: 'transaction_overview' });
+  useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
+  const {
+    data: transactionListData,
+    status: transactionListStatus,
+  } = useTransactionList(urlParams);
+
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
+    () => ({
+      filterNames: [
+        'transactionResult',
+        'host',
+        'containerId',
+        'podName',
+        'serviceVersion',
+      ],
+      params: {
+        serviceName,
+        transactionType,
+      },
+      projection: Projection.transactionGroups,
+    }),
+    [serviceName, transactionType]
   );
 
   // TODO: improve urlParams typings.
@@ -78,60 +120,86 @@ export function TransactionOverview({
     return null;
   }
 
-  const { data: transactionListData } = useTransactionList(urlParams);
-  const { data: hasMLJob = false } = useFetcher(
-    () => getHasMLJob({ serviceName, transactionType }),
-    [serviceName, transactionType]
-  );
-
   return (
-    <React.Fragment>
-      {serviceTransactionTypes.length > 1 ? (
-        <EuiFormRow
-          id="transaction-type-select-row"
-          label={i18n.translate(
-            'xpack.apm.transactionsTable.filterByTypeLabel',
-            {
-              defaultMessage: 'Filter by type'
-            }
-          )}
-        >
-          <EuiSelect
-            options={serviceTransactionTypes.map(type => ({
-              text: `${type}`,
-              value: type
-            }))}
-            value={transactionType}
-            onChange={event => {
-              const type = legacyEncodeURIComponent(event.target.value);
-              history.push({
-                ...location,
-                pathname: `/${urlParams.serviceName}/transactions/${type}`
-              });
-            }}
-          />
-        </EuiFormRow>
-      ) : null}
+    <>
+      <SearchBar />
+      <Correlations />
+      <EuiPage>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localFiltersConfig}>
+              <TransactionTypeFilter
+                transactionTypes={serviceTransactionTypes}
+              />
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+            </LocalUIFilters>
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            {transactionType === TRANSACTION_PAGE_LOAD && (
+              <>
+                <UserExperienceCallout />
+                <EuiSpacer size="s" />
+              </>
+            )}
+            <TransactionCharts
+              fetchStatus={transactionChartsStatus}
+              charts={transactionCharts}
+              urlParams={urlParams}
+            />
+            <EuiSpacer size="s" />
+            <EuiPanel>
+              <EuiTitle size="xs">
+                <h3>Transactions</h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {!transactionListData.isAggregationAccurate && (
+                <EuiCallOut
+                  title={i18n.translate(
+                    'xpack.apm.transactionCardinalityWarning.title',
+                    {
+                      defaultMessage:
+                        'This view shows a subset of reported transactions.',
+                    }
+                  )}
+                  color="danger"
+                  iconType="alert"
+                >
+                  <p>
+                    <FormattedMessage
+                      id="xpack.apm.transactionCardinalityWarning.body"
+                      defaultMessage="The number of unique transaction names exceeds the configured value of {bucketSize}. Try reconfiguring your agents to group similar transactions or increase the value of {codeBlock}"
+                      values={{
+                        bucketSize: transactionListData.bucketSize,
+                        codeBlock: (
+                          <EuiCode>
+                            xpack.apm.ui.transactionGroupBucketSize
+                          </EuiCode>
+                        ),
+                      }}
+                    />
 
-      <TransactionCharts
-        hasMLJob={hasMLJob}
-        charts={transactionOverviewCharts}
-        location={location}
-        urlParams={urlParams}
-      />
-
-      <EuiSpacer size="s" />
-
-      <EuiPanel>
-        <EuiTitle size="xs">
-          <h3>Transactions</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <TransactionList
-          items={transactionListData}
-          serviceName={serviceName}
-        />
-      </EuiPanel>
-    </React.Fragment>
+                    <ElasticDocsLink
+                      section="/kibana"
+                      path="/troubleshooting.html#troubleshooting-too-many-transactions"
+                    >
+                      {i18n.translate(
+                        'xpack.apm.transactionCardinalityWarning.docsLink',
+                        { defaultMessage: 'Learn more in the docs' }
+                      )}
+                    </ElasticDocsLink>
+                  </p>
+                </EuiCallOut>
+              )}
+              <EuiSpacer size="s" />
+              <TransactionList
+                isLoading={transactionListStatus === 'loading'}
+                items={transactionListData.items || []}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
+    </>
   );
 }

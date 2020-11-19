@@ -1,11 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CcrShard that is renders an exception properly 1`] = `
-<EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="m"
->
+<EuiPanel>
   <EuiTitle
     color="danger"
     size="s"
@@ -49,23 +45,21 @@ exports[`CcrShard that is renders an exception properly 1`] = `
     }
     noItemsMessage="No items found"
     responsive={true}
+    tableLayout="fixed"
   />
 </EuiPanel>
 `;
 
 exports[`CcrShard that it renders normally 1`] = `
 <EuiPage
-  restrictWidth={false}
   style={
     Object {
       "backgroundColor": "white",
     }
   }
 >
-  <EuiPageBody
-    restrictWidth={false}
-  >
-    <InjectIntl(StatusUI)
+  <EuiPageBody>
+    <Status
       formattedLeader="leader on remote"
       oldestStat={
         Object {
@@ -115,12 +109,8 @@ exports[`CcrShard that it renders normally 1`] = `
           }
         }
       >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="m"
-        >
-          <InjectIntl(MonitoringTimeseriesContainerUI) />
+        <EuiPanel>
+          <MonitoringTimeseriesContainer />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
@@ -131,17 +121,14 @@ exports[`CcrShard that it renders normally 1`] = `
           }
         }
       >
-        <EuiPanel
-          grow={true}
-          hasShadow={false}
-          paddingSize="m"
-        >
-          <InjectIntl(MonitoringTimeseriesContainerUI) />
+        <EuiPanel>
+          <MonitoringTimeseriesContainer />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiHorizontalRule />
     <EuiAccordion
+      arrowDisplay="left"
       buttonContent={
         <EuiTitle>
           <h2>
@@ -155,14 +142,16 @@ exports[`CcrShard that it renders normally 1`] = `
       }
       id="ccrLatestStat"
       initialIsOpen={false}
+      isLoading={false}
+      isLoadingMessage={false}
       paddingSize="l"
     >
       <EuiTitle
         size="s"
       >
-        <h4>
-          September 27, 2018 9:32:09 AM
-        </h4>
+        <h2>
+          September 27, 2018 1:32:09 PM
+        </h2>
       </EuiTitle>
       <EuiHorizontalRule />
       <EuiCodeBlock

@@ -5,23 +5,18 @@
  */
 
 import React from 'react';
-
-import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
-import { LogFlyout } from '../../containers/logs/log_flyout';
-import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
-import { Source } from '../../containers/source';
+import { HttpStart } from 'src/core/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
+import { LogSourceProvider } from '../../containers/logs/log_source';
 import { useSourceId } from '../../containers/source_id';
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const [sourceId] = useSourceId();
-
+  const { services } = useKibana<{ http: HttpStart }>();
   return (
-    <Source.Provider sourceId={sourceId}>
-      <SourceConfigurationFlyoutState.Provider>
-        <LogViewConfiguration.Provider>
-          <LogFlyout.Provider>{children}</LogFlyout.Provider>
-        </LogViewConfiguration.Provider>
-      </SourceConfigurationFlyoutState.Provider>
-    </Source.Provider>
+    <LogSourceProvider sourceId={sourceId} fetch={services.http.fetch}>
+      <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
+    </LogSourceProvider>
   );
 };

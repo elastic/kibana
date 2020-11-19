@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore untyped Elastic library
-import { getType } from '@kbn/interpreter/common';
-import { ContextFunction, Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable, ExpressionFunctionDefinition, getType } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   name: string;
   expression: (datatable: Datatable) => Promise<boolean | number | string | null>;
 }
 
-export function mapColumn(): ContextFunction<
+export function mapColumn(): ExpressionFunctionDefinition<
   'mapColumn',
   Datatable,
   Arguments,
@@ -26,10 +24,8 @@ export function mapColumn(): ContextFunction<
     name: 'mapColumn',
     aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       name: {
         types: ['string'],
@@ -40,29 +36,30 @@ export function mapColumn(): ContextFunction<
       expression: {
         types: ['boolean', 'number', 'string', 'null'],
         resolve: false,
-        aliases: ['exp', 'fn'],
+        aliases: ['exp', 'fn', 'function'],
         help: argHelp.expression,
+        required: true,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const expression = args.expression || (() => Promise.resolve(null));
 
-      const columns = [...context.columns];
-      const rowPromises = context.rows.map(row => {
+      const columns = [...input.columns];
+      const rowPromises = input.rows.map((row) => {
         return expression({
           type: 'datatable',
           columns,
           rows: [row],
-        }).then(val => ({
+        }).then((val) => ({
           ...row,
           [args.name]: val,
         }));
       });
 
-      return Promise.all(rowPromises).then(rows => {
+      return Promise.all(rowPromises).then((rows) => {
         const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
         const type = rows.length ? getType(rows[0][args.name]) : 'null';
-        const newColumn = { name: args.name, type };
+        const newColumn = { id: args.name, name: args.name, meta: { type } };
 
         if (existingColumnIndex === -1) {
           columns.push(newColumn);

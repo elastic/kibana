@@ -4,222 +4,74 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AUTHENTICATION } from '../../common/lib/authentication';
-import { TestInvoker } from '../../common/lib/types';
-import { getTestSuiteFactory } from '../../common/suites/get';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
+import { TestUser } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import {
+  getTestSuiteFactory,
+  TEST_CASES as CASES,
+  GetTestDefinition,
+} from '../../common/suites/get';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+const { fail404 } = testCaseFailures;
+
+const createTestCases = () => {
+  // for each permitted (non-403) outcome, if failure !== undefined then we expect
+  // to receive an error; otherwise, we expect to receive a success result
+  const normalTypes = [
+    CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+    { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404() },
+    { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404() },
+    CASES.MULTI_NAMESPACE_ALL_SPACES,
+    CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404() },
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404() },
+    CASES.NAMESPACE_AGNOSTIC,
+    { ...CASES.DOES_NOT_EXIST, ...fail404() },
+  ];
+  const hiddenType = [{ ...CASES.HIDDEN, ...fail404() }];
+  const allTypes = normalTypes.concat(hiddenType);
+  return { normalTypes, hiddenType, allTypes };
+};
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const {
-    createExpectDoesntExistNotFound,
-    createExpectSpaceAwareResults,
-    createExpectNotSpaceAwareResults,
-    expectSpaceAwareRbacForbidden,
-    expectNotSpaceAwareRbacForbidden,
-    expectDoesntExistRbacForbidden,
-    getTest,
-  } = getTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = getTestSuiteFactory(esArchiver, supertest);
+  const createTests = () => {
+    const { normalTypes, hiddenType, allTypes } = createTestCases();
+    return {
+      unauthorized: createTestDefinitions(allTypes, true),
+      authorized: [
+        createTestDefinitions(normalTypes, false),
+        createTestDefinitions(hiddenType, true),
+      ].flat(),
+      superuser: createTestDefinitions(allTypes, false),
+    };
+  };
 
-  describe('get', () => {
-    getTest(`user with no access`, {
-      user: AUTHENTICATION.NOT_A_KIBANA_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 403,
-          response: expectSpaceAwareRbacForbidden,
-        },
-        notSpaceAware: {
-          statusCode: 403,
-          response: expectNotSpaceAwareRbacForbidden,
-        },
-        doesntExist: {
-          statusCode: 403,
-          response: expectDoesntExistRbacForbidden,
-        },
-      },
-    });
+  describe('_get', () => {
+    getTestScenarios().security.forEach(({ users }) => {
+      const { unauthorized, authorized, superuser } = createTests();
+      const _addTests = (user: TestUser, tests: GetTestDefinition[]) => {
+        addTests(user.description, { user, tests });
+      };
 
-    getTest(`superuser`, {
-      user: AUTHENTICATION.SUPERUSER,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: createExpectSpaceAwareResults(),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(),
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(),
-        },
-      },
-    });
-
-    getTest(`legacy user`, {
-      user: AUTHENTICATION.KIBANA_LEGACY_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 403,
-          response: expectSpaceAwareRbacForbidden,
-        },
-        notSpaceAware: {
-          statusCode: 403,
-          response: expectNotSpaceAwareRbacForbidden,
-        },
-        doesntExist: {
-          statusCode: 403,
-          response: expectDoesntExistRbacForbidden,
-        },
-      },
-    });
-
-    getTest(`dual-privileges user`, {
-      user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: createExpectSpaceAwareResults(),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(),
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(),
-        },
-      },
-    });
-
-    getTest(`dual-privileges readonly user`, {
-      user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: createExpectSpaceAwareResults(),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(),
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(),
-        },
-      },
-    });
-
-    getTest(`rbac user with all globally`, {
-      user: AUTHENTICATION.KIBANA_RBAC_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: createExpectSpaceAwareResults(),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(),
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(),
-        },
-      },
-    });
-
-    getTest(`rbac user with read globally`, {
-      user: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: createExpectSpaceAwareResults(),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(),
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(),
-        },
-      },
-    });
-
-    getTest(`rbac user with all at default space`, {
-      user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 403,
-          response: expectSpaceAwareRbacForbidden,
-        },
-        notSpaceAware: {
-          statusCode: 403,
-          response: expectNotSpaceAwareRbacForbidden,
-        },
-        doesntExist: {
-          statusCode: 403,
-          response: expectDoesntExistRbacForbidden,
-        },
-      },
-    });
-
-    getTest(`rbac user with read at default space`, {
-      user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 403,
-          response: expectSpaceAwareRbacForbidden,
-        },
-        notSpaceAware: {
-          statusCode: 403,
-          response: expectNotSpaceAwareRbacForbidden,
-        },
-        doesntExist: {
-          statusCode: 403,
-          response: expectDoesntExistRbacForbidden,
-        },
-      },
-    });
-
-    getTest(`rbac user with all at space_1`, {
-      user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 403,
-          response: expectSpaceAwareRbacForbidden,
-        },
-        notSpaceAware: {
-          statusCode: 403,
-          response: expectNotSpaceAwareRbacForbidden,
-        },
-        doesntExist: {
-          statusCode: 403,
-          response: expectDoesntExistRbacForbidden,
-        },
-      },
-    });
-
-    getTest(`rbac user with read at space_1`, {
-      user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-      tests: {
-        spaceAware: {
-          statusCode: 403,
-          response: expectSpaceAwareRbacForbidden,
-        },
-        notSpaceAware: {
-          statusCode: 403,
-          response: expectNotSpaceAwareRbacForbidden,
-        },
-        doesntExist: {
-          statusCode: 403,
-          response: expectDoesntExistRbacForbidden,
-        },
-      },
+      [
+        users.noAccess,
+        users.legacyAll,
+        users.allAtDefaultSpace,
+        users.readAtDefaultSpace,
+        users.allAtSpace1,
+        users.readAtSpace1,
+      ].forEach((user) => {
+        _addTests(user, unauthorized);
+      });
+      [users.dualAll, users.dualRead, users.allGlobally, users.readGlobally].forEach((user) => {
+        _addTests(user, authorized);
+      });
+      _addTests(users.superuser, superuser);
     });
   });
 }

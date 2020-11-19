@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   KuiTable,
@@ -30,9 +28,7 @@ import {
   KuiTableBody,
 } from '../../../../components';
 
-import {
-  SortableProperties,
-} from '../../../../src/services';
+import { SortableProperties } from '../../../../src/services';
 
 export class FluidTable extends Component {
   constructor(props) {
@@ -42,46 +38,52 @@ export class FluidTable extends Component {
       sortedColumn: 'title',
     };
 
-    this.items = [{
-      title: 'Cryogenics',
-      description: 'AC turned to 11',
-    }, {
-      title: 'Propellant',
-      description: 'Go fast',
-    }, {
-      title: 'Rockets',
-      description: 'Hot and burny',
-    }];
+    this.items = [
+      {
+        title: 'Cryogenics',
+        description: 'AC turned to 11',
+      },
+      {
+        title: 'Propellant',
+        description: 'Go fast',
+      },
+      {
+        title: 'Rockets',
+        description: 'Hot and burny',
+      },
+    ];
 
-    this.sortableProperties = new SortableProperties([{
-      name: 'title',
-      getValue: item => item.title.toLowerCase(),
-      isAscending: true,
-    }, {
-      name: 'description',
-      getValue: item => item.description.toLowerCase(),
-      isAscending: true,
-    }], this.state.sortedColumn);
+    this.sortableProperties = new SortableProperties(
+      [
+        {
+          name: 'title',
+          getValue: (item) => item.title.toLowerCase(),
+          isAscending: true,
+        },
+        {
+          name: 'description',
+          getValue: (item) => item.description.toLowerCase(),
+          isAscending: true,
+        },
+      ],
+      this.state.sortedColumn
+    );
   }
 
-  onSort = prop => {
+  onSort = (prop) => {
     this.sortableProperties.sortOn(prop);
 
     this.setState({
       sortedColumn: prop,
     });
-  }
+  };
 
   renderRows() {
-    return this.items.map(item => (
+    return this.items.map((item) => (
       <KuiTableRow key={item.title}>
-        <KuiTableRowCell>
-          {item.title}
-        </KuiTableRowCell>
+        <KuiTableRowCell>{item.title}</KuiTableRowCell>
 
-        <KuiTableRowCell>
-          {item.description}
-        </KuiTableRowCell>
+        <KuiTableRowCell>{item.description}</KuiTableRowCell>
 
         <KuiTableRowCell>
           <select className="kuiSelect" defaultValue="on">
@@ -114,14 +116,10 @@ export class FluidTable extends Component {
             Description
           </KuiTableHeaderCell>
 
-          <KuiTableHeaderCell>
-            Action
-          </KuiTableHeaderCell>
+          <KuiTableHeaderCell>Action</KuiTableHeaderCell>
         </KuiTableHeader>
 
-        <KuiTableBody>
-          {this.renderRows()}
-        </KuiTableBody>
+        <KuiTableBody>{this.renderRows()}</KuiTableBody>
       </KuiTable>
     );
   }

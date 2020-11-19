@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 export function handleResponse(resp, min, max, shardStats) {
   // map the hits
   const hits = get(resp, 'hits.hits', []);
-  return hits.map(hit => {
+  return hits.map((hit) => {
     const stats = get(hit, '_source.index_stats');
     const earliestStats = get(hit, 'inner_hits.earliest.hits.hits[0]._source.index_stats');
 
@@ -23,21 +23,21 @@ export function handleResponse(resp, min, max, shardStats) {
       hitTimestamp: get(hit, '_source.timestamp'),
       earliestHitTimestamp: get(hit, 'inner_hits.earliest.hits.hits[0]._source.timestamp'),
       timeWindowMin: min,
-      timeWindowMax: max
+      timeWindowMax: max,
     };
 
     const earliestIndexingHit = get(earliestStats, 'primaries.indexing');
     const { rate: indexRate } = calculateRate({
       latestTotal: get(stats, 'primaries.indexing.index_total'),
       earliestTotal: get(earliestIndexingHit, 'index_total'),
-      ...rateOptions
+      ...rateOptions,
     });
 
     const earliestSearchHit = get(earliestStats, 'total.search');
     const { rate: searchRate } = calculateRate({
       latestTotal: get(stats, 'total.search.query_total'),
       earliestTotal: get(earliestSearchHit, 'query_total'),
-      ...rateOptions
+      ...rateOptions,
     });
 
     const shardStatsForIndex = get(shardStats, ['indices', stats.index]);
@@ -59,7 +59,8 @@ export function handleResponse(resp, min, max, shardStats) {
       }
     } else {
       status = i18n.translate('xpack.monitoring.es.indices.deletedClosedStatusLabel', {
-        defaultMessage: 'Deleted / Closed' });
+        defaultMessage: 'Deleted / Closed',
+      });
       statusSort = 0;
     }
 
@@ -71,36 +72,32 @@ export function handleResponse(resp, min, max, shardStats) {
       index_rate: indexRate,
       search_rate: searchRate,
       unassigned_shards: unassignedShards,
-      status_sort: statusSort
+      status_sort: statusSort,
     };
   });
 }
 
-export function getIndices(req, esIndexPattern, showSystemIndices = false, shardStats) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndices');
-
-  const { min, max } = req.payload.timeRange;
-
+export function buildGetIndicesQuery(
+  esIndexPattern,
+  clusterUuid,
+  { start, end, size, showSystemIndices = false }
+) {
   const filters = [];
   if (!showSystemIndices) {
     filters.push({
       bool: {
-        must_not: [
-          { prefix: { 'index_stats.index': '.' } }
-        ]
-      }
+        must_not: [{ prefix: { 'index_stats.index': '.' } }],
+      },
     });
   }
-
-  const clusterUuid = req.params.clusterUuid;
   const metricFields = ElasticsearchMetric.getMetricFields();
-  const config = req.server.config();
-  const params = {
+
+  return {
     index: esIndexPattern,
-    // TODO: composite aggregation
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size,
     ignoreUnavailable: true,
-    filterPath: [ // only filter path can filter for inner_hits
+    filterPath: [
+      // only filter path can filter for inner_hits
       'hits.hits._source.index_stats.index',
       'hits.hits._source.index_stats.primaries.docs.count',
       'hits.hits._source.index_stats.total.store.size_in_bytes',
@@ -118,25 +115,41 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
     body: {
       query: createQuery({
         type: 'index_stats',
-        start: min,
-        end: max,
+        start,
+        end,
         clusterUuid,
         metric: metricFields,
-        filters
+        filters,
       }),
       collapse: {
         field: 'index_stats.index',
         inner_hits: {
           name: 'earliest',
           size: 1,
-          sort: [ { timestamp: 'asc' } ]
-        }
+          sort: [{ timestamp: { order: 'asc', unmapped_type: 'long' } }],
+        },
       },
-      sort: [ { timestamp: { order: 'desc' } } ]
-    }
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+    },
   };
+}
+
+export function getIndices(req, esIndexPattern, showSystemIndices = false, shardStats) {
+  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndices');
+
+  const { min: start, max: end } = req.payload.timeRange;
+
+  const clusterUuid = req.params.clusterUuid;
+  const config = req.server.config();
+  const params = buildGetIndicesQuery(esIndexPattern, clusterUuid, {
+    start,
+    end,
+    showSystemIndices,
+    size: config.get('monitoring.ui.max_bucket_size'),
+  });
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params)
-    .then(resp => handleResponse(resp, min, max, shardStats));
+  return callWithRequest(req, 'search', params).then((resp) =>
+    handleResponse(resp, start, end, shardStats)
+  );
 }

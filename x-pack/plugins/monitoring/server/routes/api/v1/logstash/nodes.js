@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getNodes } from '../../../../lib/logstash/get_nodes';
 import { handleError } from '../../../../lib/errors';
@@ -30,17 +30,17 @@ export function logstashNodesRoute(server) {
     path: '/api/monitoring/v1/clusters/{clusterUuid}/logstash/nodes',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required()
+        params: schema.object({
+          clusterUuid: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -49,7 +49,7 @@ export function logstashNodesRoute(server) {
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       try {
-        const [ clusterStatus, nodes ] = await Promise.all([
+        const [clusterStatus, nodes] = await Promise.all([
           getClusterStatus(req, lsIndexPattern, { clusterUuid }),
           getNodes(req, lsIndexPattern, { clusterUuid }),
         ]);
@@ -58,11 +58,9 @@ export function logstashNodesRoute(server) {
           clusterStatus,
           nodes,
         };
-      }
-      catch (err) {
+      } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
-
 }

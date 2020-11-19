@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiLink } from '@elastic/eui';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import { EuiIcon, EuiLink } from '@elastic/eui';
 import tinycolor from 'tinycolor2';
 import { readableColor } from '../../lib/readable_color';
 import { ColorDot } from '../color_dot';
 import { ItemGrid } from '../item_grid';
 
-export interface Props {
+interface Props {
   /**
    * An array of hexadecimal color values. Non-hex will be ignored.
    * @default []
@@ -32,7 +32,7 @@ export interface Props {
   value?: string;
 }
 
-export const ColorPalette: FunctionComponent<Props> = ({
+export const ColorPalette: FC<Props> = ({
   colors = [],
   colorsPerRow = 6,
   onChange,
@@ -42,14 +42,14 @@ export const ColorPalette: FunctionComponent<Props> = ({
     return null;
   }
 
-  colors = colors.filter(color => {
+  colors = colors.filter((color) => {
     return tinycolor(color).isValid();
   });
 
   return (
     <div className="canvasColorPalette">
       <ItemGrid items={colors} itemsPerRow={colorsPerRow}>
-        {color => {
+        {(color) => {
           const match = tinycolor.equals(color, value);
           const icon = match ? (
             <EuiIcon type="check" className="selected-color" color={readableColor(value)} />
@@ -61,6 +61,7 @@ export const ColorPalette: FunctionComponent<Props> = ({
               key={color}
               onClick={() => !match && onChange(color)}
               className="canvasColorPalette__dot"
+              aria-label={tinycolor(color).toName() || color}
             >
               <ColorDot value={color}>{icon}</ColorDot>
             </EuiLink>

@@ -2,24 +2,42 @@
 [[vector-layer]]
 == Vector layer
 
-The vector layer displays points, lines, and polygons.
+Vector layers display points, lines, and polygons.
 
 [role="screenshot"]
 image::maps/images/vector_layer.png[]
 
-You can create a vector layer from the following sources:
+To add a vector layer to your map, click *Add layer*, then select one of the following:
 
-*Custom vector shapes*:: Vector shapes from static files configured in kibana.yml.
-See map.regionmap.* in <<settings>> for details.
+*Choropleth*:: Shaded areas to compare statistics across boundaries.
 
-*Documents*:: Geospatial data from a Kibana index pattern.
+*Clusters and grids*:: Geospatial data grouped in grids with metrics for each gridded cell.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
-*Grid aggregation*:: Geospatial data grouped in grids with metrics for each gridded cell.
-Set *Show as* to *grid rectangles* or *points*.
-The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
+*Documents*:: Points, lines, and polyons from Elasticsearch.
+The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
++
+Results are limited to the `index.max_result_window` index setting, which defaults to 10000.
+Select the appropriate *Scaling* option for your use case.
++
+* *Limit results to 10000.* The layer displays features from the first `index.max_result_window` documents.
+Results exceeding `index.max_result_window` are not displayed.
 
-*Vector shapes*:: Vector shapes of administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
+* *Show top hits per entity.* The layer displays the <<maps-top-hits-aggregation, most relevant documents per entity>>.
 
-include::terms-join.asciidoc[]
+* *Show clusters when results exceed 10000.* When results exceed `index.max_result_window`, the layer uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] to group your documents into clusters and displays metrics for each cluster. When results are less then `index.max_result_window`, the layer displays features from individual documents.
+
+* *Use vector tiles.* Vector tiles partition your map into 6 to 8 tiles.
+Each tile request is limited to the `index.max_result_window` index setting.
+Tiles exceeding `index.max_result_window` have a visual indicator when there are too many features to display.
+
+*EMS Boundaries*:: Administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
+
+*Point to point*:: Aggregated data paths between the source and destination.
+The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.
+
+*Upload Geojson*:: Index GeoJSON data in Elasticsearch.
+
 include::vector-style.asciidoc[]
+include::vector-style-properties.asciidoc[]
+include::vector-tooltips.asciidoc[]

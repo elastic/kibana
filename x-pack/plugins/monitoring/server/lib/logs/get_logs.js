@@ -4,26 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createTimeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
+import { formatUTCTimestampForTimezone } from '../format_timezone';
+import { getTimezone } from '../get_timezone';
+import { detectReasonFromException } from './detect_reason_from_exception';
 
 async function handleResponse(response, req, filebeatIndexPattern, opts) {
   const result = {
     enabled: false,
-    logs: []
+    logs: [],
   };
 
+  const timezone = await getTimezone(req);
   const hits = get(response, 'hits.hits', []);
   if (hits.length) {
     result.enabled = true;
-    result.logs = hits.map(hit => {
+    result.logs = hits.map((hit) => {
       const source = hit._source;
       const type = get(source, 'event.dataset').split('.')[1];
+      const utcTimestamp = moment(get(source, '@timestamp')).valueOf();
 
       return {
-        timestamp: get(source, '@timestamp'),
+        timestamp: formatUTCTimestampForTimezone(utcTimestamp, timezone),
         component: get(source, 'elasticsearch.component'),
         node: get(source, 'elasticsearch.node.name'),
         index: get(source, 'elasticsearch.index.name'),
@@ -32,21 +38,25 @@ async function handleResponse(response, req, filebeatIndexPattern, opts) {
         message: get(source, 'message'),
       };
     });
-  }
-  else {
+  } else {
     result.reason = await detectReason(req, filebeatIndexPattern, opts);
   }
 
   return result;
 }
 
-export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end }) {
+export async function getLogs(
+  config,
+  req,
+  filebeatIndexPattern,
+  { clusterUuid, nodeUuid, indexUuid, start, end }
+) {
   checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
 
   const metric = { timestampField: '@timestamp' };
   const filter = [
     { term: { 'service.type': 'elasticsearch' } },
-    createTimeFilter({ start, end, metric })
+    createTimeFilter({ start, end, metric }),
   ];
   if (clusterUuid) {
     filter.push({ term: { 'elasticsearch.cluster.uuid': clusterUuid } });
@@ -60,7 +70,7 @@ export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, 
 
   const params = {
     index: filebeatIndexPattern,
-    size: Math.min(50, config.get('xpack.monitoring.elasticsearch.logFetchCount')),
+    size: Math.min(50, config.get('monitoring.ui.elasticsearch.logFetchCount')),
     filterPath: [
       'hits.hits._source.message',
       'hits.hits._source.log.level',
@@ -72,18 +82,31 @@ export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, 
     ],
     ignoreUnavailable: true,
     body: {
-      sort: { '@timestamp': { order: 'desc' } },
+      sort: { '@timestamp': { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
           filter,
-        }
-      }
-    }
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const response = await callWithRequest(req, 'search', params);
-  const result = await handleResponse(response, req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end });
+
+  let result = {};
+  try {
+    const response = await callWithRequest(req, 'search', params);
+    result = await handleResponse(response, req, filebeatIndexPattern, {
+      clusterUuid,
+      nodeUuid,
+      indexUuid,
+      start,
+      end,
+    });
+  } catch (err) {
+    result.reason = detectReasonFromException(err);
+  }
+
   return {
     ...result,
     limit: params.size,

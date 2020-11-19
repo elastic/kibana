@@ -21,9 +21,12 @@ import { readFile, stat } from 'fs';
 import { resolve } from 'path';
 import { coerce } from 'semver';
 import { promisify } from 'util';
+import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '../../config';
-import { PluginManifest } from '../plugin';
+import { Logger } from '../../logging';
+import { PluginManifest } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
+import { isCamelCase } from './is_camel_case';
 
 const fsReadFileAsync = promisify(readFile);
 const fsStatAsync = promisify(stat);
@@ -54,6 +57,8 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     optionalPlugins: true,
     ui: true,
     server: true,
+    extraPublicDirs: true,
+    requiredBundles: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -67,7 +72,11 @@ const KNOWN_MANIFEST_FIELDS = (() => {
  * @param packageInfo Kibana package info.
  * @internal
  */
-export async function parseManifest(pluginPath: string, packageInfo: PackageInfo) {
+export async function parseManifest(
+  pluginPath: string,
+  packageInfo: PackageInfo,
+  log: Logger
+): Promise<PluginManifest> {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
 
   let manifestContent;
@@ -107,6 +116,10 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
+  if (!packageInfo.dist && !isCamelCase(manifest.id)) {
+    log.warn(`Expect plugin "id" in camelCase, but found: ${manifest.id}`);
+  }
+
   if (!manifest.version || typeof manifest.version !== 'string') {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
@@ -118,9 +131,20 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
-        `The "configPath" in plugin manifest for "${
-          manifest.id
-        }" should either be a string or an array of strings.`
+        `The "configPath" in plugin manifest for "${manifest.id}" should either be a string or an array of strings.`
+      )
+    );
+  }
+
+  if (
+    manifest.extraPublicDirs &&
+    (!Array.isArray(manifest.extraPublicDirs) ||
+      !manifest.extraPublicDirs.every((dir) => typeof dir === 'string'))
+  ) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `The "extraPublicDirs" in plugin manifest for "${manifest.id}" should be an array of strings.`
       )
     );
   }
@@ -133,11 +157,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     throw PluginDiscoveryError.incompatibleVersion(
       manifestPath,
       new Error(
-        `Plugin "${
-          manifest.id
-        }" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${
-          packageInfo.version
-        }".`
+        `Plugin "${manifest.id}" is only compatible with Kibana version "${expectedKibanaVersion}", but used Kibana version is "${packageInfo.version}".`
       )
     );
   }
@@ -148,21 +168,19 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
-        `Both "server" and "ui" are missing or set to "false" in plugin manifest for "${
-          manifest.id
-        }", but at least one of these must be set to "true".`
+        `Both "server" and "ui" are missing or set to "false" in plugin manifest for "${manifest.id}", but at least one of these must be set to "true".`
       )
     );
   }
 
-  const unknownManifestKeys = Object.keys(manifest).filter(key => !KNOWN_MANIFEST_FIELDS.has(key));
+  const unknownManifestKeys = Object.keys(manifest).filter(
+    (key) => !KNOWN_MANIFEST_FIELDS.has(key)
+  );
   if (unknownManifestKeys.length > 0) {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
-        `Manifest for plugin "${
-          manifest.id
-        }" contains the following unrecognized properties: ${unknownManifestKeys}.`
+        `Manifest for plugin "${manifest.id}" contains the following unrecognized properties: ${unknownManifestKeys}.`
       )
     );
   }
@@ -171,11 +189,13 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     id: manifest.id,
     version: manifest.version,
     kibanaVersion: expectedKibanaVersion,
-    configPath: manifest.configPath || manifest.id,
+    configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
+    requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
     ui: includesUiPlugin,
     server: includesServerPlugin,
+    extraPublicDirs: manifest.extraPublicDirs,
   };
 }
 

@@ -4,55 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-
-import { CoreSetup } from 'src/core/server';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getTopTraces } from '../lib/traces/get_top_traces';
 import { getTrace } from '../lib/traces/get_trace';
+import { getTransactionGroupList } from '../lib/transaction_groups';
+import { createRoute } from './create_route';
+import { rangeRt, uiFiltersRt } from './default_api_types';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 
-const ROOT = '/api/apm/traces';
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
+export const tracesRoute = createRoute({
+  endpoint: 'GET /api/apm/traces',
+  params: t.type({
+    query: t.intersection([rangeRt, uiFiltersRt]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+    return getTransactionGroupList(
+      { type: 'top_traces', searchAggregatedTransactions },
+      setup
+    );
+  },
+});
 
-export function initTracesApi(core: CoreSetup) {
-  const { server } = core.http;
-
-  // Get trace list
-  server.route({
-    method: 'GET',
-    path: ROOT,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-
-      return getTopTraces(setup).catch(defaultErrorHandler);
-    }
-  });
-
-  // Get individual trace
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/{traceId}`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const { traceId } = req.params;
-      const setup = setupRequest(req);
-      return getTrace(traceId, setup).catch(defaultErrorHandler);
-    }
-  });
-}
+export const tracesByIdRoute = createRoute({
+  endpoint: 'GET /api/apm/traces/{traceId}',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+    }),
+    query: rangeRt,
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    return getTrace(context.params.path.traceId, setup);
+  },
+});

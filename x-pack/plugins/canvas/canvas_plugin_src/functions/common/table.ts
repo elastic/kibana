@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunction, Datatable, Render, Style } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Datatable, Render, Style } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   font: Style;
@@ -14,17 +15,22 @@ interface Arguments {
   showHeader: boolean;
 }
 
-export function table(): ContextFunction<'table', Datatable, Arguments, Render<Arguments>> {
+export type Return = { datatable: Datatable } & Arguments;
+
+export function table(): ExpressionFunctionDefinition<
+  'table',
+  Datatable,
+  Arguments,
+  Render<Return>
+> {
   const { help, args: argHelp } = getFunctionHelp().table;
 
   return {
     name: 'table',
     aliases: [],
     type: 'render',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       font: {
         types: ['style'],
@@ -49,12 +55,12 @@ export function table(): ContextFunction<'table', Datatable, Arguments, Render<A
         options: [true, false],
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
         type: 'render',
         as: 'table',
         value: {
-          datatable: context,
+          datatable: input,
           ...args,
         },
       };

@@ -6,19 +6,23 @@
 
 import PropTypes from 'prop-types';
 import { compose, withHandlers } from 'recompose';
-import { notify } from '../../../lib/notify';
 import { uploadWorkpad } from '../upload_workpad';
+import { ErrorStrings } from '../../../../i18n';
 import { WorkpadDropzone as Component } from './workpad_dropzone';
 
+const { WorkpadFileUpload: errors } = ErrorStrings;
+
 export const WorkpadDropzone = compose(
-  withHandlers({
+  withHandlers(({ notify }) => ({
     onDropAccepted: ({ onUpload }) => ([file]) => uploadWorkpad(file, onUpload),
     onDropRejected: () => ([file]) => {
-      notify.warning('Only JSON files are accepted', {
-        title: `Couldn't upload '${file.name || 'file'}'`,
+      notify.warning(errors.getAcceptJSONOnlyErrorMessage(), {
+        title: file.name
+          ? errors.getFileUploadFailureWithFileNameErrorMessage(file.name)
+          : errors.getFileUploadFailureWithoutFileNameErrorMessage(),
       });
     },
-  })
+  }))
 )(Component);
 
 WorkpadDropzone.propTypes = {

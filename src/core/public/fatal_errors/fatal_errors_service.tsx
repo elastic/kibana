@@ -22,13 +22,13 @@ import { render } from 'react-dom';
 import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
-import { I18nSetup } from '../i18n';
-import { InjectedMetadataSetup } from '../';
+import { I18nStart } from '../i18n';
+import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 
 interface Deps {
-  i18n: I18nSetup;
+  i18n: I18nStart;
   injectedMetadata: InjectedMetadataSetup;
 }
 
@@ -54,9 +54,18 @@ export interface FatalErrorsSetup {
   get$: () => Rx.Observable<FatalErrorInfo>;
 }
 
+/**
+ * FatalErrors stop the Kibana Public Core and displays a fatal error screen
+ * with details about the Kibana build and the error.
+ *
+ * @public
+ */
+export type FatalErrorsStart = FatalErrorsSetup;
+
 /** @interal */
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();
+  private fatalErrors?: FatalErrorsSetup;
 
   /**
    *
@@ -76,13 +85,13 @@ export class FatalErrorsService {
         })
       )
       .subscribe({
-        error: error => {
+        error: (error) => {
           // eslint-disable-next-line no-console
           console.error('Uncaught error in fatal error service internals', error);
         },
       });
 
-    const fatalErrorsSetup: FatalErrorsSetup = {
+    this.fatalErrors = {
       add: (error, source?) => {
         const errorInfo = getErrorInfo(error, source);
 
@@ -101,10 +110,20 @@ export class FatalErrorsService {
       },
     };
 
-    return fatalErrorsSetup;
+    this.setupGlobalErrorHandlers(this.fatalErrors!);
+
+    return this.fatalErrors!;
   }
 
-  private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nSetup) {
+  public start() {
+    const { fatalErrors } = this;
+    if (!fatalErrors) {
+      throw new Error('FatalErrorsService#setup() must be invoked before start.');
+    }
+    return fatalErrors;
+  }
+
+  private renderError(injectedMetadata: InjectedMetadataSetup, i18n: I18nStart) {
     // delete all content in the rootDomElement
     this.rootDomElement.textContent = '';
 
@@ -122,5 +141,13 @@ export class FatalErrorsService {
       </i18n.Context>,
       container
     );
+  }
+
+  private setupGlobalErrorHandlers(fatalErrorsSetup: FatalErrorsSetup) {
+    if (window.addEventListener) {
+      window.addEventListener('unhandledrejection', function (e) {
+        console.log(`Detected an unhandled Promise rejection.\n${e.reason}`); // eslint-disable-line no-console
+      });
+    }
   }
 }

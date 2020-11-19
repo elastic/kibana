@@ -9,9 +9,12 @@ import { get } from 'lodash';
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { getSelectedPageIndex, getPages } from '../../state/selectors/workpad';
 import { stylePage, setPageTransition } from '../../state/actions/pages';
+import { ComponentStrings } from '../../../i18n';
 import { PageConfig as Component } from './page_config';
 
-const mapStateToProps = state => {
+const { PageConfig: strings } = ComponentStrings;
+
+const mapStateToProps = (state) => {
   const pageIndex = getSelectedPageIndex(state);
   const page = getPages(state)[pageIndex];
   return { page, pageIndex };
@@ -22,26 +25,22 @@ const mapDispatchToProps = { stylePage, setPageTransition };
 const mergeProps = (stateProps, dispatchProps) => {
   return {
     pageIndex: stateProps.pageIndex,
-    setBackground: background => {
+    setBackground: (background) => {
       const itsTheNewStyle = { ...stateProps.page.style, background };
       dispatchProps.stylePage(stateProps.page.id, itsTheNewStyle);
     },
     background: get(stateProps, 'page.style.background'),
     transition: transitionsRegistry.get(get(stateProps, 'page.transition.name')),
-    transitions: [{ value: '', text: 'None' }].concat(
+    transitions: [{ value: '', text: strings.getNoTransitionDropDownOptionLabel() }].concat(
       transitionsRegistry.toArray().map(({ name, displayName }) => ({
         value: name,
         text: displayName,
       }))
     ),
-    setTransition: name => {
+    setTransition: (name) => {
       dispatchProps.setPageTransition(stateProps.page.id, { name });
     },
   };
 };
 
-export const PageConfig = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(Component);
+export const PageConfig = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);

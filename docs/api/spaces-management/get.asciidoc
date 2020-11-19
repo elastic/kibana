@@ -1,76 +1,28 @@
 [[spaces-api-get]]
-=== Get Space
+=== Get a space API
+++++
+<titleabbrev>Get space</titleabbrev>
+++++
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+experimental[] Retrieve a specified {kib} space.
 
-Retrieves all {kib} spaces, or a specific space.
+[[spaces-api-get-request]]
+==== Request
 
-Note: You cannot access this endpoint via the Console in Kibana.
+`GET <kibana host>:<port>/api/spaces/space/marketing`
 
-==== Get all {kib} spaces
+[[spaces-api-get-response-codes]]
+==== Response code
 
-===== Request
+`200`::
+  Indicates a successful call.
 
-To retrieve all spaces, issue a GET request to the
-/api/spaces/space endpoint.
+[[spaces-api-get-example]]
+==== Example
 
-[source,js]
---------------------------------------------------
-GET /api/spaces/space
---------------------------------------------------
-// KIBANA
+The API returns the following:
 
-===== Response
-
-A successful call returns a response code of `200` and a response body containing a JSON 
-representation of the spaces.
-
-[source,js]
---------------------------------------------------
-[
-  {
-    "id": "default",
-    "name": "Default",
-    "description" : "This is the Default Space",
-    "disabledFeatures": [],
-    "_reserved": true
-  },
-  {
-    "id": "marketing",
-    "name": "Marketing",
-    "description" : "This is the Marketing Space",
-    "color": "#aabbcc",
-    "disabledFeatures": ["apm"],
-    "initials": "MK"
-  },
-  {
-    "id": "sales",
-    "name": "Sales",
-    "initials": "MK",
-    "disabledFeatures": ["discover", "timelion"],
-  },
-]
---------------------------------------------------
-
-==== Get a specific space
-
-===== Request
-
-To retrieve a specific space, issue a GET request to
-the `/api/spaces/space/<space_id>` endpoint:
-
-[source,js]
---------------------------------------------------
-GET /api/spaces/space/marketing
---------------------------------------------------
-// KIBANA
-
-===== Response
-
-A successful call returns a response code of `200` and a response body containing a JSON 
-representation of the space.
-
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "marketing",
@@ -78,6 +30,7 @@ representation of the space.
   "description" : "This is the Marketing Space",
   "color": "#aabbcc",
   "initials": "MK",
-  "disabledFeatures": []
+  "disabledFeatures": [],
+  "imageUrl": ""
 }
 --------------------------------------------------

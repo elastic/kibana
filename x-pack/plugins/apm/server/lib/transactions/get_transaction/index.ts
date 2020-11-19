@@ -4,49 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
-import { idx } from '@kbn/elastic-idx';
 import {
-  PROCESSOR_EVENT,
   TRACE_ID,
-  TRANSACTION_ID
+  TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../typings/common';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { rangeFilter } from '../../helpers/range_filter';
-import { Setup } from '../../helpers/setup_request';
+import { rangeFilter } from '../../../../common/utils/range_filter';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { ProcessorEvent } from '../../../../common/processor_event';
 
-export type TransactionAPIResponse = PromiseReturnType<typeof getTransaction>;
-export async function getTransaction(
-  transactionId: string,
-  traceId: string,
-  setup: Setup
-) {
-  const { start, end, esFilterQuery, client, config } = setup;
+export async function getTransaction({
+  transactionId,
+  traceId,
+  setup,
+}: {
+  transactionId: string;
+  traceId: string;
+  setup: Setup & SetupTimeRange;
+}) {
+  const { start, end, apmEventClient } = setup;
 
-  const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    { term: { [TRANSACTION_ID]: transactionId } },
-    { term: { [TRACE_ID]: traceId } },
-    { range: rangeFilter(start, end) }
-  ];
-
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
-  }
-
-  const params = {
-    index: config.get<string>('apm_oss.transactionIndices'),
+  const resp = await apmEventClient.search({
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       size: 1,
       query: {
         bool: {
-          filter
-        }
-      }
-    }
-  };
+          filter: [
+            { term: { [TRANSACTION_ID]: transactionId } },
+            { term: { [TRACE_ID]: traceId } },
+            { range: rangeFilter(start, end) },
+          ],
+        },
+      },
+    },
+  });
 
-  const resp = await client<Transaction>('search', params);
-  return idx(resp, _ => _.hits.hits[0]._source);
+  return resp.hits.hits[0]?._source;
 }

@@ -17,11 +17,11 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async get(id: string) {
-    return this.beatsDB.find(beat => beat.id === id) || null;
+    return this.beatsDB.find((beat) => beat.id === id) || null;
   }
 
   public async update(id: string, beatData: Partial<CMBeat>): Promise<boolean> {
-    const index = this.beatsDB.findIndex(beat => beat.id === id);
+    const index = this.beatsDB.findIndex((beat) => beat.id === id);
 
     if (index === -1) {
       return false;
@@ -32,58 +32,58 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async getAll() {
-    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
+    return this.beatsDB.map((beat: any) => omit(beat, ['access_token'])) as CMBeat[];
   }
   public async getBeatsWithTag(tagId: string): Promise<CMBeat[]> {
-    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
+    return this.beatsDB.map((beat: any) => omit(beat, ['access_token'])) as CMBeat[];
   }
 
   public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
-    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']))[0];
+    return this.beatsDB.map((beat: any) => omit(beat, ['access_token']))[0] as CMBeat | null;
   }
   public async removeTagsFromBeats(
     removals: BeatsTagAssignment[]
   ): Promise<ReturnTypeBulkAction['results']> {
-    const beatIds = removals.map(r => r.beatId);
+    const beatIds = removals.map((r) => r.beatId);
 
     const response = this.beatsDB
-      .filter(beat => beatIds.includes(beat.id))
-      .map(beat => {
-        const tagData = removals.find(r => r.beatId === beat.id);
+      .filter((beat) => beatIds.includes(beat.id))
+      .map((beat) => {
+        const tagData = removals.find((r) => r.beatId === beat.id);
         if (tagData) {
           if (beat.tags) {
-            beat.tags = beat.tags.filter(tag => tag !== tagData.tag);
+            beat.tags = beat.tags.filter((tag) => tag !== tagData.tag);
           }
         }
-        const removalsForBeat = removals.filter(r => r.beatId === beat.id);
+        const removalsForBeat = removals.filter((r) => r.beatId === beat.id);
         if (removalsForBeat.length) {
           removalsForBeat.forEach((assignment: BeatsTagAssignment) => {
             if (beat.tags) {
-              beat.tags = beat.tags.filter(tag => tag !== assignment.tag);
+              beat.tags = beat.tags.filter((tag) => tag !== assignment.tag);
             }
           });
         }
         return beat;
       });
 
-    return response.map<any>((item: CMBeat, resultIdx: number) => ({
+    return response.map((item: CMBeat, resultIdx: number) => ({
       idxInRequest: removals[resultIdx].idxInRequest,
       result: 'updated',
       status: 200,
-    }));
+    })) as any;
   }
 
   public async assignTagsToBeats(
     assignments: BeatsTagAssignment[]
   ): Promise<ReturnTypeBulkAction['results']> {
-    const beatIds = assignments.map(r => r.beatId);
+    const beatIds = assignments.map((r) => r.beatId);
 
     this.beatsDB
-      .filter(beat => beatIds.includes(beat.id))
-      .map(beat => {
+      .filter((beat) => beatIds.includes(beat.id))
+      .map((beat) => {
         // get tags that need to be assigned to this beat
         const tags = assignments
-          .filter(a => a.beatId === beat.id)
+          .filter((a) => a.beatId === beat.id)
           .map((t: BeatsTagAssignment) => t.tag);
 
         if (tags.length > 0) {

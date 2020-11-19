@@ -32,7 +32,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
     };
   }
 
-  public async componentWillMount() {
+  public async UNSAFE_componentWillMount() {
     if (this.state.loading === true) {
       try {
         await this.props.beatsContainer.reload();
@@ -62,7 +62,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
           {/* License check (UI displays when license exists but is expired) */}
           {get(this.props.libs.framework.info, 'license.expired', true) && (
             <Route
-              render={props =>
+              render={(props) =>
                 !props.location.pathname.includes('/error') ? (
                   <Redirect to="/error/invalid_license" />
                 ) : null
@@ -73,7 +73,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
           {/* Ensure security is eanabled for elastic and kibana */}
           {!get(this.props.libs.framework.info, 'security.enabled', true) && (
             <Route
-              render={props =>
+              render={(props) =>
                 !props.location.pathname.includes('/error') ? (
                   <Redirect to="/error/enforce_security" />
                 ) : null
@@ -86,7 +86,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
             ['beats_admin'].concat(this.props.libs.framework.info.settings.defaultUserRoles)
           ) && (
             <Route
-              render={props =>
+              render={(props) =>
                 !props.location.pathname.includes('/error') ? (
                   <Redirect to="/error/no_access" />
                 ) : null
@@ -97,7 +97,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
           {/* If there are no beats or tags yet, redirect to the walkthrough */}
           {countOfEverything === 0 && (
             <Route
-              render={props =>
+              render={(props) =>
                 !props.location.pathname.includes('/walkthrough') ? (
                   <Redirect to="/walkthrough/initial" />
                 ) : null

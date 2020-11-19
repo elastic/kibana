@@ -7,7 +7,7 @@
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 
-import euiStyled from '../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
 
 interface NoDataProps {
   titleText: string;
@@ -17,7 +17,7 @@ interface NoDataProps {
   testString?: string;
 }
 
-export const NoData: React.SFC<NoDataProps> = ({
+export const NoData: React.FC<NoDataProps> = ({
   titleText,
   bodyText,
   refetchText,

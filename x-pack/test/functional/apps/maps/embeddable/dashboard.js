@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
@@ -13,12 +14,14 @@ export default function ({ getPageObjects, getService }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('embed in dashboard', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'c698b940-e149-11e8-a35a-370a8516603a',
-        'courier:ignoreFilterIfFieldNotInIndex': true
+        defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
+        [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
@@ -26,28 +29,33 @@ export default function ({ getPageObjects, getService }) {
 
     after(async () => {
       await kibanaServer.uiSettings.replace({
-        'courier:ignoreFilterIfFieldNotInIndex': false
+        [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: false,
       });
     });
 
     async function getRequestTimestamp() {
       await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
+      const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
+        requestStats,
+        'Request timestamp'
+      );
       await inspector.close();
       return requestTimestamp;
     }
 
     it('should pass index patterns to container', async () => {
       const indexPatterns = await filterBar.getIndexPatterns();
-      expect(indexPatterns).to.equal('geo_shapes*,meta_for_geo_shapes*,logstash-*');
+      expect(indexPatterns).to.equal('meta_for_geo_shapes*,logstash-*');
     });
 
     it('should populate inspector with requests for map embeddable', async () => {
       await dashboardPanelActions.openInspectorByTitle('join example');
-      const joinExampleRequestNames = await inspector.getRequestNames();
+      await retry.try(async () => {
+        const joinExampleRequestNames = await inspector.getRequestNames();
+        expect(joinExampleRequestNames).to.equal('geo_shapes*,meta_for_geo_shapes*.shape_name');
+      });
       await inspector.close();
-      expect(joinExampleRequestNames).to.equal('geo_shapes*,meta_for_geo_shapes*.shape_name');
 
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const gridExampleRequestNames = await inspector.getRequestNames();
@@ -58,7 +66,7 @@ export default function ({ getPageObjects, getService }) {
     it('should apply container state (time, query, filters) to embeddable when loaded', async () => {
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const requestStats = await inspector.getTableData();
-      const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+      const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
       await inspector.close();
       expect(totalHits).to.equal('6');
     });
@@ -71,7 +79,10 @@ export default function ({ getPageObjects, getService }) {
 
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const geoGridRequestStats = await inspector.getTableData();
-      const geoGridTotalHits =  PageObjects.maps.getInspectorStatRowHit(geoGridRequestStats, 'Hits (total)');
+      const geoGridTotalHits = PageObjects.maps.getInspectorStatRowHit(
+        geoGridRequestStats,
+        'Hits (total)'
+      );
       await inspector.close();
       expect(geoGridTotalHits).to.equal('1');
 
@@ -79,7 +90,10 @@ export default function ({ getPageObjects, getService }) {
       await testSubjects.click('inspectorRequestChooser');
       await testSubjects.click('inspectorRequestChoosermeta_for_geo_shapes*.shape_name');
       const joinRequestStats = await inspector.getTableData();
-      const joinTotalHits =  PageObjects.maps.getInspectorStatRowHit(joinRequestStats, 'Hits (total)');
+      const joinTotalHits = PageObjects.maps.getInspectorStatRowHit(
+        joinRequestStats,
+        'Hits (total)'
+      );
       await inspector.close();
       expect(joinTotalHits).to.equal('3');
     });
@@ -101,6 +115,16 @@ export default function ({ getPageObjects, getService }) {
       await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
       const afterRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
+    });
+
+    // see https://github.com/elastic/kibana/issues/61596 on why it is specific to maps
+    it("dashboard's back button should navigate to previous page", async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
+      await PageObjects.dashboard.waitForRenderComplete();
+      await browser.goBack();
+      expect(await PageObjects.dashboard.onDashboardLandingPage()).to.be(true);
     });
   });
 }

@@ -6,6 +6,7 @@
 
 import { metrics } from '../../../metrics';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../../common/constants';
+import { convertMetricNames } from '../../convert_metric_names';
 
 /*
  * Create the DSL for date histogram aggregations based on an array of metric names
@@ -16,10 +17,10 @@ import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../../common/constants';
  * @param {Number} bucketSize: Bucket size in seconds for date histogram interval
  * @return {Object} Aggregation DSL
  */
-export function getMetricAggs(listingMetrics, bucketSize) {
-  const aggItems = {};
+export function getMetricAggs(listingMetrics) {
+  let aggItems = {};
 
-  listingMetrics.forEach(metricName => {
+  listingMetrics.forEach((metricName) => {
     const metric = metrics[metricName];
     let metricAgg = null;
 
@@ -27,29 +28,27 @@ export function getMetricAggs(listingMetrics, bucketSize) {
       return;
     }
 
-    if (!metric.aggs) { // if metric does not have custom agg defined
+    if (!metric.aggs) {
+      // if metric does not have custom agg defined
       metricAgg = {
         metric: {
-          [metric.metricAgg]: { // max, sum, etc
-            field: metric.field
-          }
+          [metric.metricAgg]: {
+            // max, sum, etc
+            field: metric.field,
+          },
         },
         metric_deriv: {
           derivative: {
             buckets_path: 'metric',
-            unit: NORMALIZED_DERIVATIVE_UNIT
-          }
-        }
+            unit: NORMALIZED_DERIVATIVE_UNIT,
+          },
+        },
       };
     }
 
-    aggItems[metricName] = {
-      date_histogram: {
-        field: 'timestamp',
-        min_doc_count: 1,
-        interval: bucketSize + 's'
-      },
-      aggs: metric.aggs || metricAgg
+    aggItems = {
+      ...aggItems,
+      ...convertMetricNames(metricName, metric.aggs || metricAgg),
     };
   });
 

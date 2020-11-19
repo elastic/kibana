@@ -6,160 +6,113 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
-import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+import { SPACES } from '../lib/spaces';
+import {
+  createRequest,
+  expectResponses,
+  getUrlPrefix,
+  getTestTitle,
+} from '../lib/saved_object_test_utils';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
-interface BulkGetTest {
-  statusCode: number;
-  response: (resp: { [key: string]: any }) => void;
+export interface BulkGetTestDefinition extends TestDefinition {
+  request: Array<{ type: string; id: string }>;
+}
+export type BulkGetTestSuite = TestSuite<BulkGetTestDefinition>;
+export interface BulkGetTestCase extends TestCase {
+  failure?: 400 | 404; // only used for permitted response case
 }
 
-interface BulkGetTests {
-  default: BulkGetTest;
-}
-
-interface BulkGetTestDefinition {
-  user?: TestDefinitionAuthentication;
-  spaceId?: string;
-  otherSpaceId?: string;
-  tests: BulkGetTests;
-}
-
-const createBulkRequests = (spaceId: string) => [
-  {
-    type: 'visualization',
-    id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-  },
-  {
-    type: 'dashboard',
-    id: `${getIdPrefix(spaceId)}does not exist`,
-  },
-  {
-    type: 'globaltype',
-    id: '8121a00-8efd-21e7-1cb3-34ab966434445',
-  },
-];
+const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
+export const TEST_CASES: Record<string, BulkGetTestCase> = Object.freeze({
+  ...CASES,
+  DOES_NOT_EXIST,
+});
 
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectNotFoundResults = (spaceId: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      saved_objects: [
-        {
-          id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-          type: 'visualization',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
-        },
-        {
-          id: `${getIdPrefix(spaceId)}does not exist`,
-          type: 'dashboard',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
-        },
-        {
-          id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-          type: 'globaltype',
-          updated_at: '2017-09-21T18:59:16.270Z',
-          version: resp.body.saved_objects[2].version,
-          attributes: {
-            name: 'My favorite global object',
-          },
-          references: [],
-        },
-      ],
-    });
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
+  const expectResponseBody = (
+    testCases: BulkGetTestCase | BulkGetTestCase[],
+    statusCode: 200 | 403
+  ): ExpectResponseBody => async (response: Record<string, any>) => {
+    const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
+    if (statusCode === 403) {
+      const types = testCaseArray.map((x) => x.type);
+      await expectSavedObjectForbidden(types)(response);
+    } else {
+      // permitted
+      const savedObjects = response.body.saved_objects;
+      expect(savedObjects).length(testCaseArray.length);
+      for (let i = 0; i < savedObjects.length; i++) {
+        const object = savedObjects[i];
+        const testCase = testCaseArray[i];
+        await expectResponses.permitted(object, testCase);
+      }
+    }
+  };
+  const createTestDefinitions = (
+    testCases: BulkGetTestCase | BulkGetTestCase[],
+    forbidden: boolean,
+    options?: {
+      singleRequest?: boolean;
+      responseBodyOverride?: ExpectResponseBody;
+    }
+  ): BulkGetTestDefinition[] => {
+    const cases = Array.isArray(testCases) ? testCases : [testCases];
+    const responseStatusCode = forbidden ? 403 : 200;
+    if (!options?.singleRequest) {
+      // if we are testing cases that should result in a forbidden response, we can do each case individually
+      // this ensures that multiple test cases of a single type will each result in a forbidden error
+      return cases.map((x) => ({
+        title: getTestTitle(x, responseStatusCode),
+        request: [createRequest(x)],
+        responseStatusCode,
+        responseBody: options?.responseBodyOverride || expectResponseBody(x, responseStatusCode),
+      }));
+    }
+    // batch into a single request to save time during test execution
+    return [
+      {
+        title: getTestTitle(cases, responseStatusCode),
+        request: cases.map((x) => createRequest(x)),
+        responseStatusCode,
+        responseBody:
+          options?.responseBodyOverride || expectResponseBody(cases, responseStatusCode),
+      },
+    ];
   };
 
-  const expectRbacForbidden = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_get dashboard,globaltype,visualization`,
-    });
-  };
-
-  const createExpectResults = (spaceId = DEFAULT_SPACE_ID) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      saved_objects: [
-        {
-          id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-          type: 'visualization',
-          migrationVersion: resp.body.saved_objects[0].migrationVersion,
-          updated_at: '2017-09-21T18:51:23.794Z',
-          version: resp.body.saved_objects[0].version,
-          attributes: {
-            title: 'Count of requests',
-            description: '',
-            version: 1,
-            // cheat for some of the more complex attributes
-            visState: resp.body.saved_objects[0].attributes.visState,
-            uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
-            kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
-          },
-          references: [
-            {
-              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-              type: 'index-pattern',
-              id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
-            },
-          ],
-        },
-        {
-          id: `${getIdPrefix(spaceId)}does not exist`,
-          type: 'dashboard',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
-        },
-        {
-          id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-          type: 'globaltype',
-          updated_at: '2017-09-21T18:59:16.270Z',
-          version: resp.body.saved_objects[2].version,
-          attributes: {
-            name: 'My favorite global object',
-          },
-          references: [],
-        },
-      ],
-    });
-  };
-
-  const makeBulkGetTest = (describeFn: DescribeFn) => (
+  const makeBulkGetTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
-    definition: BulkGetTestDefinition
+    definition: BulkGetTestSuite
   ) => {
-    const { user = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
+    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.default.statusCode}`, async () => {
-        await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
-          .auth(user.username, user.password)
-          .send(createBulkRequests(otherSpaceId || spaceId))
-          .expect(tests.default.statusCode)
-          .then(tests.default.response);
-      });
+      for (const test of tests) {
+        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
+            .auth(user?.username, user?.password)
+            .send(test.request)
+            .expect(test.responseStatusCode)
+            .then(test.responseBody);
+        });
+      }
     });
   };
 
-  const bulkGetTest = makeBulkGetTest(describe);
+  const addTests = makeBulkGetTest(describe);
   // @ts-ignore
-  bulkGetTest.only = makeBulkGetTest(describe.only);
+  addTests.only = makeBulkGetTest(describe.only);
 
   return {
-    bulkGetTest,
-    createExpectNotFoundResults,
-    createExpectResults,
-    expectRbacForbidden,
+    addTests,
+    createTestDefinitions,
+    expectSavedObjectForbidden,
   };
 }

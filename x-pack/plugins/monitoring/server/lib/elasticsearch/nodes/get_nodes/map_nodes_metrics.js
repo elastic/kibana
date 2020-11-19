@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, pluck, min, max, last } from 'lodash';
+import { get, map, min, max, last } from 'lodash';
 import { filterPartialBuckets } from '../../../filter_partial_buckets';
 import { metrics } from '../../../metrics';
 
@@ -32,7 +32,7 @@ const mapBuckets = (bucket, metric) => {
   if (metric.calculation) {
     return {
       x: bucket.key,
-      y: metric.calculation(bucket)
+      y: metric.calculation(bucket),
     };
   }
 
@@ -60,11 +60,13 @@ const mapBuckets = (bucket, metric) => {
 };
 
 function reduceMetric(metricName, metricBuckets, { min: startTime, max: endTime, bucketSize }) {
-  if (startTime === undefined || endTime === undefined || (startTime >= endTime)) {
+  if (startTime === undefined || endTime === undefined || startTime >= endTime) {
     return null;
   }
 
-  const partialBucketFilter = filterPartialBuckets(startTime, endTime, bucketSize, { ignoreEarly: true });
+  const partialBucketFilter = filterPartialBuckets(startTime, endTime, bucketSize, {
+    ignoreEarly: true,
+  });
   const metric = metrics[metricName];
   const mappedData = metricBuckets
     .filter(partialBucketFilter) // buckets with whole start/end time range
@@ -74,26 +76,26 @@ function reduceMetric(metricName, metricBuckets, { min: startTime, max: endTime,
   /* it's possible that no data exists for the type of metric. For example,
    * node_cgroup_throttled data could be completely null if there is no cgroup
    * throttling. */
-  const allValues = pluck(mappedData, 'y');
+  const allValues = map(mappedData, 'y');
   if (allValues.join(',') === '') {
     return; // no data exists for this type of metric
   }
 
-  const minVal = min(pluck(mappedData, 'y'));
-  const maxVal = max(pluck(mappedData, 'y'));
-  const lastVal = last(pluck(mappedData, 'y'));
+  const minVal = min(map(mappedData, 'y'));
+  const maxVal = max(map(mappedData, 'y'));
+  const lastVal = last(map(mappedData, 'y'));
   const slope = calcSlope(mappedData) > 0 ? 1 : -1; // no need for the entire precision, it's just an up/down arrow
 
   return {
     metric: metric.serialize(),
-    summary: { minVal, maxVal, lastVal, slope }
+    summary: { minVal, maxVal, lastVal, slope },
   };
 }
 
 function reduceAllMetrics(metricSet, timeOptions) {
   const metrics = {};
   Object.keys(metricSet).forEach((metricName) => {
-    const metricBuckets = get(metricSet, [ metricName, 'buckets']);
+    const metricBuckets = get(metricSet, [metricName, 'buckets']);
     metrics[metricName] = reduceMetric(metricName, metricBuckets, timeOptions); // append summarized metric data
   });
 

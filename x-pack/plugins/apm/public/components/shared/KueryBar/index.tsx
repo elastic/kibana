@@ -4,85 +4,84 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
-import { uniqueId, startsWith } from 'lodash';
-import { EuiCallOut } from '@elastic/eui';
-import chrome from 'ui/chrome';
-import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { startsWith, uniqueId } from 'lodash';
+import React, { useState } from 'react';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
+import styled from 'styled-components';
 import {
-  fromQuery,
-  toQuery,
-  legacyEncodeURIComponent
-} from '../Links/url_helpers';
-import { KibanaLink } from '../Links/KibanaLink';
-// @ts-ignore
-import { Typeahead } from './Typeahead';
-import {
-  convertKueryToEsQuery,
-  getSuggestions,
-  getAPMIndexPatternForKuery
-} from '../../../services/kuery';
-// @ts-ignore
-import { getBoolFilter } from './get_bool_filter';
-import { useLocation } from '../../../hooks/useLocation';
+  esKuery,
+  IIndexPattern,
+  QuerySuggestion,
+} from '../../../../../../../src/plugins/data/public';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { history } from '../../../utils/history';
+import { fromQuery, toQuery } from '../Links/url_helpers';
+import { getBoolFilter } from './get_bool_filter';
+// @ts-expect-error
+import { Typeahead } from './Typeahead';
+import { useProcessorEvent } from './use_processor_event';
 
 const Container = styled.div`
   margin-bottom: 10px;
 `;
 
 interface State {
-  indexPattern: StaticIndexPattern | null;
-  suggestions: AutocompleteSuggestion[];
-  isLoadingIndexPattern: boolean;
+  suggestions: QuerySuggestion[];
   isLoadingSuggestions: boolean;
 }
 
+function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
+  const ast = esKuery.fromKueryExpression(kuery);
+  return esKuery.toElasticsearchQuery(ast, indexPattern);
+}
+
 export function KueryBar() {
+  const { groupId, serviceName } = useParams<{
+    groupId?: string;
+    serviceName?: string;
+  }>();
+  const history = useHistory();
   const [state, setState] = useState<State>({
-    indexPattern: null,
     suggestions: [],
-    isLoadingIndexPattern: true,
-    isLoadingSuggestions: false
+    isLoadingSuggestions: false,
   });
   const { urlParams } = useUrlParams();
   const location = useLocation();
-  const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
-  const indexPatternMissing =
-    !state.isLoadingIndexPattern && !state.indexPattern;
+  const { data } = useApmPluginContext().plugins;
+
   let currentRequestCheck;
 
-  useEffect(() => {
-    let didCancel = false;
+  const processorEvent = useProcessorEvent();
 
-    async function loadIndexPattern() {
-      setState({ ...state, isLoadingIndexPattern: true });
-      const indexPattern = await getAPMIndexPatternForKuery();
-      if (didCancel) {
-        return;
-      }
-      if (!indexPattern) {
-        setState({ ...state, isLoadingIndexPattern: false });
-      } else {
-        setState({ ...state, indexPattern, isLoadingIndexPattern: false });
-      }
-    }
-    loadIndexPattern();
+  const examples = {
+    transaction: 'transaction.duration.us > 300000',
+    error: 'http.response.status_code >= 400',
+    metric: 'process.pid = "1234"',
+    defaults:
+      'transaction.duration.us > 300000 AND http.response.status_code >= 400',
+  };
 
-    return () => {
-      didCancel = true;
-    };
-  }, []);
+  const example = examples[processorEvent || 'defaults'];
+
+  const { indexPattern } = useDynamicIndexPattern(processorEvent);
+
+  const placeholder = i18n.translate('xpack.apm.kueryBar.placeholder', {
+    defaultMessage: `Search {event, select,
+            transaction {transactions}
+            metric {metrics}
+            error {errors}
+            other {transactions, errors and metrics}
+          } (E.g. {queryExample})`,
+    values: {
+      queryExample: example,
+      event: processorEvent,
+    },
+  });
 
   async function onChange(inputValue: string, selectionStart: number) {
-    const { indexPattern } = state;
-
-    if (indexPattern === null) {
+    if (indexPattern == null) {
       return;
     }
 
@@ -91,15 +90,24 @@ export function KueryBar() {
     const currentRequest = uniqueId();
     currentRequestCheck = currentRequest;
 
-    const boolFilter = getBoolFilter(urlParams);
     try {
-      const suggestions = (await getSuggestions(
-        inputValue,
-        selectionStart,
-        indexPattern,
-        boolFilter
-      ))
-        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
+      const suggestions = (
+        (await data.autocomplete.getQuerySuggestions({
+          language: 'kuery',
+          indexPatterns: [indexPattern],
+          boolFilter: getBoolFilter({
+            groupId,
+            processorEvent,
+            serviceName,
+            urlParams,
+          }),
+          query: inputValue,
+          selectionStart,
+          selectionEnd: selectionStart,
+          useTimeRange: true,
+        })) || []
+      )
+        .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {
@@ -108,15 +116,12 @@ export function KueryBar() {
 
       setState({ ...state, suggestions, isLoadingSuggestions: false });
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.error('Error while fetching suggestions', e);
     }
   }
 
   function onSubmit(inputValue: string) {
-    const { indexPattern } = state;
-
-    if (indexPattern === null) {
+    if (indexPattern == null) {
       return;
     }
 
@@ -126,12 +131,12 @@ export function KueryBar() {
         return;
       }
 
-      history.replace({
+      history.push({
         ...location,
         search: fromQuery({
           ...toQuery(location.search),
-          kuery: legacyEncodeURIComponent(inputValue.trim())
-        })
+          kuery: encodeURIComponent(inputValue.trim()),
+        }),
       });
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
@@ -141,41 +146,13 @@ export function KueryBar() {
   return (
     <Container>
       <Typeahead
-        disabled={indexPatternMissing}
         isLoading={state.isLoadingSuggestions}
         initialValue={urlParams.kuery}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions}
+        placeholder={placeholder}
       />
-
-      {indexPatternMissing && (
-        <EuiCallOut
-          style={{ display: 'inline-block', marginTop: '10px' }}
-          title={
-            <div>
-              <FormattedMessage
-                id="xpack.apm.kueryBar.indexPatternMissingWarningMessage"
-                defaultMessage="There's no APM index pattern with the title {apmIndexPatternTitle} available. To use the Query bar, please choose to import the APM index pattern via the {setupInstructionsLink}."
-                values={{
-                  apmIndexPatternTitle: `"${apmIndexPatternTitle}"`,
-                  setupInstructionsLink: (
-                    <KibanaLink path={`/home/tutorial/apm`}>
-                      {i18n.translate(
-                        'xpack.apm.kueryBar.setupInstructionsLinkLabel',
-                        { defaultMessage: 'Setup Instructions' }
-                      )}
-                    </KibanaLink>
-                  )
-                }}
-              />
-            </div>
-          }
-          color="warning"
-          iconType="alert"
-          size="s"
-        />
-      )}
     </Container>
   );
 }

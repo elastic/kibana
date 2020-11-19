@@ -1,0 +1,78 @@
+[role="xpack"]
+[[configuring-reporting]]
+== Reporting configuration
+
+You can configure settings in `kibana.yml` to control how the {report-features}
+communicate with the {kib} server, manages background jobs, and captures
+screenshots. See <<reporting-settings-kb, Reporting Settings>> for the complete
+list of settings.
+
+[float]
+[[encryption-keys]]
+=== Encryption keys for multiple {kib} instances
+
+By default, a new encryption key is generated for the {report-features} each
+time you start {kib}. This means if a static encryption key is not persisted in
+the {kib} configuration, any pending reports will fail when you restart {kib}.
+
+If you are load balancing across multiple {kib} instances, they need to have
+the same reporting encryption key. Otherwise, report generation will fail if a
+report is queued through one instance and another instance picks up the job
+from the report queue. The other instance will not be able to decrypt the
+reporting job metadata.
+
+To set a static encryption key for reporting, set the
+`xpack.reporting.encryptionKey` property in the `kibana.yml`
+configuration file. You can use any alphanumeric, at least 32 characters long text string as the encryption key.
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.reporting.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
+
+[float]
+[[report-indices]]
+=== Report indices for multiple {kib} workspaces
+
+If you divide workspaces in an Elastic cluster using multiple {kib} instances
+with a different `kibana.index` setting per instance, you must set a unique `xpack.reporting.index`
+setting per `kibana.index`. Otherwise, report generation will periodically fail
+if a report is queued through an instance with one `kibana.index` setting, and
+an instance with a different `kibana.index` attempts to claim the job.
+
+Kibana instance A:
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana.index: ".kibana-a"
+xpack.reporting.index: ".reporting-a"
+xpack.reporting.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
+
+Kibana instance B:
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana.index: ".kibana-b"
+xpack.reporting.index: ".reporting-b"
+xpack.reporting.encryptionKey: "something_secret"
+--------------------------------------------------------------------------------
+
+NOTE: If security is enabled, the `xpack.reporting.index` setting should begin
+with `.reporting-` in order for the `kibana_system` role to have the necessary
+privileges over the index.
+
+[float]
+[[using-reverse-proxies]]
+=== Use reverse proxies
+
+If your {kib} instance requires a reverse proxy (NGINX, Apache, etc.) for
+access, because of rewrite rules or special headers being added by the proxy,
+then you need to configure the `xpack.reporting.kibanaServer` settings to make
+the headless browser process connect to the proxy in <<reporting-kibana-server-settings, Kibana server settings>>.
+
+NOTE: A headless browser runs on the Kibana server to open a Kibana page for
+capturing screenshots. Configuring the `xpack.reporting.kibanaServer` settings
+to point to a proxy host requires that the Kibana server has network access to
+the proxy.
+
+include::{kib-repo-dir}/user/security/reporting.asciidoc[]
+include::network-policy.asciidoc[]

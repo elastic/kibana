@@ -5,13 +5,14 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { set, del } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
 import { flushContext, flushContextAfterIndex } from '../actions/elements';
 import { setWorkpad } from '../actions/workpad';
 
+const { set, del } = immutable;
 /*
   Resolved args are a way to handle async values. They track the status, value, and error
   state thgouh the lifecycle of the request, and are an object that looks like this:
@@ -101,11 +102,11 @@ export const resolvedArgsReducer = handleActions(
       }, transientState);
     },
 
-    [actions.inFlightActive]: transientState => {
+    [actions.inFlightActive]: (transientState) => {
       return set(transientState, 'inFlight', true);
     },
 
-    [actions.inFlightComplete]: transientState => {
+    [actions.inFlightComplete]: (transientState) => {
       return set(transientState, 'inFlight', false);
     },
 

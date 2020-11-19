@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import stringify from 'json-stable-stringify';
-
-import { InfraLogMessageSegment } from '../../../graphql/types';
+import { LogMessagePart } from '../../../../common/http_api/log_entries';
+import { JsonArray, JsonValue } from '../../../../common/typed_json';
 import {
   LogMessageFormattingCondition,
+  LogMessageFormattingFieldValueConditionValue,
   LogMessageFormattingInstruction,
   LogMessageFormattingRule,
 } from './rule_types';
@@ -30,10 +30,10 @@ export function compileFormattingRules(
         )
       )
     ),
-    format(fields): InfraLogMessageSegment[] {
+    format(fields, highlights): LogMessagePart[] {
       for (const compiledRule of compiledRules) {
         if (compiledRule.fulfillsCondition(fields)) {
-          return compiledRule.format(fields);
+          return compiledRule.format(fields, highlights);
         }
       }
 
@@ -59,14 +59,32 @@ const compileRule = (rule: LogMessageFormattingRule): CompiledLogMessageFormatti
 const compileCondition = (
   condition: LogMessageFormattingCondition
 ): CompiledLogMessageFormattingCondition =>
-  [compileExistsCondition, compileFieldValueCondition].reduce(
-    (compiledCondition, compile) => compile(condition) || compiledCondition,
-    catchAllCondition
-  );
+  [
+    compileAllCondition,
+    compileExistsCondition,
+    compileExistsPrefixCondition,
+    compileFieldValueCondition,
+  ].reduce((compiledCondition, compile) => compile(condition) || compiledCondition, falseCondition);
 
-const catchAllCondition: CompiledLogMessageFormattingCondition = {
+const falseCondition: CompiledLogMessageFormattingCondition = {
   conditionFields: [] as string[],
-  fulfillsCondition: (fields: Fields) => false,
+  fulfillsCondition: () => false,
+};
+
+const compileAllCondition = (
+  condition: LogMessageFormattingCondition
+): CompiledLogMessageFormattingCondition | null => {
+  if (!('all' in condition)) {
+    return null;
+  }
+
+  const compiledConditions = condition.all.map(compileCondition);
+
+  return {
+    conditionFields: compiledConditions.flatMap(({ conditionFields }) => conditionFields),
+    fulfillsCondition: (fields: Fields) =>
+      compiledConditions.every(({ fulfillsCondition }) => fulfillsCondition(fields)),
+  };
 };
 
 const compileExistsCondition = (condition: LogMessageFormattingCondition) =>
@@ -74,7 +92,18 @@ const compileExistsCondition = (condition: LogMessageFormattingCondition) =>
     ? {
         conditionFields: condition.exists,
         fulfillsCondition: (fields: Fields) =>
-          condition.exists.every(fieldName => fieldName in fields),
+          condition.exists.every((fieldName) => fieldName in fields),
+      }
+    : null;
+
+const compileExistsPrefixCondition = (condition: LogMessageFormattingCondition) =>
+  'existsPrefix' in condition
+    ? {
+        conditionFields: condition.existsPrefix.map((prefix) => `${prefix}.*`),
+        fulfillsCondition: (fields: Fields) =>
+          condition.existsPrefix.every((fieldNamePrefix) =>
+            Object.keys(fields).some((field) => field.startsWith(`${fieldNamePrefix}.`))
+          ),
       }
     : null;
 
@@ -83,8 +112,8 @@ const compileFieldValueCondition = (condition: LogMessageFormattingCondition) =>
     ? {
         conditionFields: Object.keys(condition.values),
         fulfillsCondition: (fields: Fields) =>
-          Object.entries(condition.values).every(
-            ([fieldName, expectedValue]) => fields[fieldName] === expectedValue
+          Object.entries(condition.values).every(([fieldName, expectedValue]) =>
+            equalsOrContains(fields[fieldName] ?? [], expectedValue)
           ),
       }
     : null;
@@ -101,22 +130,26 @@ const compileFormattingInstructions = (
           ...combinedFormattingInstructions.formattingFields,
           ...compiledFormattingInstruction.formattingFields,
         ],
-        format: (fields: Fields) => [
-          ...combinedFormattingInstructions.format(fields),
-          ...compiledFormattingInstruction.format(fields),
+        format: (fields: Fields, highlights: Highlights) => [
+          ...combinedFormattingInstructions.format(fields, highlights),
+          ...compiledFormattingInstruction.format(fields, highlights),
         ],
       };
     },
     {
       formattingFields: [],
-      format: (fields: Fields) => [],
+      format: () => [],
     } as CompiledLogMessageFormattingInstruction
   );
 
 const compileFormattingInstruction = (
   formattingInstruction: LogMessageFormattingInstruction
 ): CompiledLogMessageFormattingInstruction =>
-  [compileFieldReferenceFormattingInstruction, compileConstantFormattingInstruction].reduce(
+  [
+    compileFieldReferenceFormattingInstruction,
+    compileFieldsPrefixReferenceFormattingInstruction,
+    compileConstantFormattingInstruction,
+  ].reduce(
     (compiledFormattingInstruction, compile) =>
       compile(formattingInstruction) || compiledFormattingInstruction,
     catchAllFormattingInstruction
@@ -124,7 +157,7 @@ const compileFormattingInstruction = (
 
 const catchAllFormattingInstruction: CompiledLogMessageFormattingInstruction = {
   formattingFields: [],
-  format: (fields: Fields) => [
+  format: () => [
     {
       constant: 'invalid format',
     },
@@ -137,15 +170,41 @@ const compileFieldReferenceFormattingInstruction = (
   'field' in formattingInstruction
     ? {
         formattingFields: [formattingInstruction.field],
-        format: (fields: Fields) => {
-          const value = fields[formattingInstruction.field];
+        format: (fields, highlights) => {
+          const value = fields[formattingInstruction.field] ?? [];
+          const highlightedValues = highlights[formattingInstruction.field] ?? [];
           return [
             {
               field: formattingInstruction.field,
-              value: typeof value === 'object' ? stringify(value) : `${value}`,
-              highlights: [],
+              value,
+              highlights: highlightedValues,
             },
           ];
+        },
+      }
+    : null;
+
+const compileFieldsPrefixReferenceFormattingInstruction = (
+  formattingInstruction: LogMessageFormattingInstruction
+): CompiledLogMessageFormattingInstruction | null =>
+  'fieldsPrefix' in formattingInstruction
+    ? {
+        formattingFields: [`${formattingInstruction.fieldsPrefix}.*`],
+        format: (fields, highlights) => {
+          const matchingFields = Object.keys(fields).filter((field) =>
+            field.startsWith(`${formattingInstruction.fieldsPrefix}.`)
+          );
+          return matchingFields.flatMap((field) => {
+            const value = fields[field] ?? [];
+            const highlightedValues = highlights[field] ?? [];
+            return [
+              {
+                field,
+                value,
+                highlights: highlightedValues,
+              },
+            ];
+          });
         },
       }
     : null;
@@ -156,7 +215,7 @@ const compileConstantFormattingInstruction = (
   'constant' in formattingInstruction
     ? {
         formattingFields: [] as string[],
-        format: (fields: Fields) => [
+        format: () => [
           {
             constant: formattingInstruction.constant,
           },
@@ -164,14 +223,31 @@ const compileConstantFormattingInstruction = (
       }
     : null;
 
-interface Fields {
-  [fieldName: string]: string | number | object | boolean | null;
+const equalsOrContains = (
+  operand: JsonValue,
+  value: LogMessageFormattingFieldValueConditionValue
+): boolean => {
+  if (Array.isArray(operand)) {
+    return operand.includes(value);
+  } else if (typeof operand === 'object' && operand !== null) {
+    return Object.values(operand).includes(value);
+  } else {
+    return operand === value;
+  }
+};
+
+export interface Fields {
+  [fieldName: string]: JsonArray;
+}
+
+export interface Highlights {
+  [fieldName: string]: string[];
 }
 
 export interface CompiledLogMessageFormattingRule {
   requiredFields: string[];
   fulfillsCondition(fields: Fields): boolean;
-  format(fields: Fields): InfraLogMessageSegment[];
+  format(fields: Fields, highlights: Highlights): LogMessagePart[];
 }
 
 export interface CompiledLogMessageFormattingCondition {
@@ -181,5 +257,5 @@ export interface CompiledLogMessageFormattingCondition {
 
 export interface CompiledLogMessageFormattingInstruction {
   formattingFields: string[];
-  format(fields: Fields): InfraLogMessageSegment[];
+  format(fields: Fields, highlights: Highlights): LogMessagePart[];
 }

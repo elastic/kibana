@@ -4,36 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { ROUTES } from '../../../common/constants';
-import { Pipeline } from 'plugins/logstash/models/pipeline';
+import { Pipeline } from '../../models/pipeline';
 
 export class PipelineService {
-  constructor($http, pipelinesService) {
-    this.$http = $http;
+  constructor(http, pipelinesService) {
+    this.http = http;
     this.pipelinesService = pipelinesService;
-    this.basePath = chrome.addBasePath(ROUTES.API_ROOT);
   }
 
   loadPipeline(id) {
-    return this.$http.get(`${this.basePath}/pipeline/${id}`)
-      .then(response => {
-        return Pipeline.fromUpstreamJSON(response.data);
-      });
+    return this.http.get(`${ROUTES.API_ROOT}/pipeline/${id}`).then((response) => {
+      return Pipeline.fromUpstreamJSON(response);
+    });
   }
 
   savePipeline(pipelineModel) {
-    return this.$http.put(`${this.basePath}/pipeline/${pipelineModel.id}`, pipelineModel.upstreamJSON)
-      .catch(e => {
-        throw e.data.message;
+    return this.http
+      .put(`${ROUTES.API_ROOT}/pipeline/${pipelineModel.id}`, {
+        body: JSON.stringify(pipelineModel.upstreamJSON),
+      })
+      .catch((e) => {
+        throw e.message;
       });
   }
 
   deletePipeline(id) {
-    return this.$http.delete(`${this.basePath}/pipeline/${id}`)
+    return this.http
+      .delete(`${ROUTES.API_ROOT}/pipeline/${id}`)
       .then(() => this.pipelinesService.addToRecentlyDeleted(id))
-      .catch(e => {
-        throw e.data.message;
+      .catch((e) => {
+        throw e.message;
       });
   }
 }

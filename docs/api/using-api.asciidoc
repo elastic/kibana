@@ -1,0 +1,86 @@
+[[using-api]]
+== Using the APIs
+
+Interact with the {kib} APIs through the `curl` command and HTTP and HTTPs protocols.
+
+It is recommended that you use HTTPs on port 5601 because it is more secure.
+
+NOTE: The {kib} Console supports only Elasticsearch APIs. You are unable to interact with the {kib} APIs with the Console and must use `curl` or another HTTP tool instead. For more information, refer to <<console-kibana,Console>>.
+
+[float]
+[[api-authentication]]
+=== Authentication
+The {kib} APIs support key- and token-based authentication. 
+
+[float]
+[[token-api-authentication]]
+==== Token-based authentication
+
+To use token-based authentication, you use the same username and password that you use to log into Elastic.  
+In a given HTTP tool, and when available, you can select to use its 'Basic Authentication' option, 
+which is where the username and password are stored in order to be passed as part of the call. 
+
+[float]
+[[key-authentication]]
+==== Key-based authentication
+
+To use key-based authentication, you create an API key using the Elastic Console, then specify the key in the header of your API calls.
+
+For information about API keys, refer to <<api-keys,API keys>>.
+
+[float]
+[[api-calls]]
+=== API calls
+API calls are stateless. Each request that you make happens in isolation from other calls and must include all of the necessary information for {kib} to fulfill the request. API requests return JSON output, which is a format that is machine-readable and works well for automation.
+
+Calls to the API endpoints require different operations. To interact with the {kib} APIs, use the following operations:
+
+* *GET* - Fetches the information.
+
+* *POST* - Adds new information.
+
+* *PUT* - Updates the existing information.
+
+* *DELETE* - Removes the information.
+
+For example, the following `curl` command exports a dashboard:
+
+[source,sh]
+--
+curl -X POST api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c
+--
+// KIBANA
+
+[float]
+[[api-request-headers]]
+=== Request headers
+
+For all APIs, you must use a request header. The {kib} APIs support the `kbn-xsrf` and `Content-Type` headers.
+
+`kbn-xsrf: true`::
+  By default, you must use `kbn-xsrf` for all API calls, except in the following scenarios:
+
+* The API endpoint uses the `GET` or `HEAD` operations
+* The path is whitelisted using the <<settings-xsrf-whitelist, `server.xsrf.whitelist`>> setting
+* XSRF protections are disabled using the <<settings-xsrf-disableProtection, `server.xsrf.disableProtection`>> setting
+
+`Content-Type: application/json`::
+  Applicable only when you send a payload in the API request. {kib} API requests and responses use JSON. 
+  Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header.
+
+Request header example:
+
+[source,sh]
+--
+curl -X POST \
+  http://localhost:5601/api/spaces/space \
+  -H 'Content-Type: application/json' \
+  -H 'kbn-xsrf: true' \
+  -d '{
+	"id": "sales",
+	"name": "Sales",
+	"description": "This is your Sales Space!",
+	"disabledFeatures": []
+}
+'
+--

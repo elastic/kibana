@@ -16,10 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { UiSettingsService, UiSettingsSetup } from './ui_settings_service';
+import * as Rx from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { UiSettingsService } from './';
+import { IUiSettingsClient } from './types';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<PublicMethodsOf<UiSettingsSetup>> = {
+  const setupContract: jest.Mocked<IUiSettingsClient> = {
     getAll: jest.fn(),
     get: jest.fn(),
     get$: jest.fn(),
@@ -33,16 +36,21 @@ const createSetupContractMock = () => {
     getUpdate$: jest.fn(),
     getSaved$: jest.fn(),
     getUpdateErrors$: jest.fn(),
-    stop: jest.fn(),
   };
-  // we have to suppress type errors until decide how to mock es6 class
-  return (setupContract as unknown) as UiSettingsSetup;
+  setupContract.get$.mockReturnValue(new Rx.Subject<any>());
+  setupContract.getUpdate$.mockReturnValue(new Rx.Subject<any>());
+  setupContract.getSaved$.mockReturnValue(new Rx.Subject<any>());
+  setupContract.getUpdateErrors$.mockReturnValue(new Rx.Subject<any>());
+  setupContract.getAll.mockReturnValue({});
+
+  return setupContract;
 };
 
 type UiSettingsServiceContract = PublicMethodsOf<UiSettingsService>;
 const createMock = () => {
   const mocked: jest.Mocked<UiSettingsServiceContract> = {
     setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
 
@@ -53,4 +61,5 @@ const createMock = () => {
 export const uiSettingsServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createSetupContractMock,
 };

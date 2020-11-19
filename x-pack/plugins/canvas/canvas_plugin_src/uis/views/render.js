@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
+import { CSS } from '../../../i18n/constants';
+import { ViewStrings } from '../../../i18n';
+
+const { Render: strings } = ViewStrings;
+
 export const render = () => ({
   name: 'render',
-  displayName: 'Element style',
-  help: 'Setting for the container around your element',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   modelArgs: [],
   requiresContext: false,
   args: [
@@ -17,14 +23,12 @@ export const render = () => ({
     },
     {
       name: 'css',
-      displayName: 'CSS',
-      help: 'A CSS stylesheet scoped to your element',
+      displayName: CSS,
+      help: strings.getCssHelp(),
       argType: 'textarea',
-      default: `".canvasRenderEl {
-
-}"`,
+      default: `"${DEFAULT_ELEMENT_CSS}"`,
       options: {
-        confirm: 'Apply stylesheet',
+        confirm: strings.getCssApply(),
       },
     },
   ],

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './cluster_service.factory';
+export { ClusterService } from './cluster_service';

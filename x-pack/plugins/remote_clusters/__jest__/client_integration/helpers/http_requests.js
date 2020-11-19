@@ -7,32 +7,23 @@
 import sinon from 'sinon';
 
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = server => {
-  const mockResponse = (defaultResponse, response) => ([
+const registerHttpRequestMockHelpers = (server) => {
+  const mockResponse = (response) => [
     200,
     { 'Content-Type': 'application/json' },
-    JSON.stringify({ ...defaultResponse, ...response }),
-  ]);
+    JSON.stringify(response),
+  ];
 
   const setLoadRemoteClustersResponse = (response) => {
-    const defaultResponse = [];
-
     server.respondWith('GET', '/api/remote_clusters', [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(response ? response : defaultResponse),
+      JSON.stringify(response),
     ]);
   };
 
   const setDeleteRemoteClusterResponse = (response) => {
-    const defaultResponse = {
-      itemsDeleted: [],
-      errors: [],
-    };
-
-    server.respondWith('DELETE', /api\/remote_clusters/,
-      mockResponse(defaultResponse, response)
-    );
+    server.respondWith('DELETE', /api\/remote_clusters/, mockResponse(response));
   };
 
   return {
@@ -51,6 +42,6 @@ export const init = () => {
 
   return {
     server,
-    httpRequestsMockHelpers: registerHttpRequestMockHelpers(server)
+    httpRequestsMockHelpers: registerHttpRequestMockHelpers(server),
   };
 };

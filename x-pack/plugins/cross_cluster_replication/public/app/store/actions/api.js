@@ -12,14 +12,20 @@ export const apiRequestStart = ({ label, scope, status = API_STATUS.LOADING }) =
   payload: { label, scope, status },
 });
 
-export const apiRequestEnd = ({ label, scope }) => ({ type: t.API_REQUEST_END, payload: { label, scope } });
+export const apiRequestEnd = ({ label, scope }) => ({
+  type: t.API_REQUEST_END,
+  payload: { label, scope },
+});
 
 export const setApiError = ({ error, scope }) => ({
   type: t.API_ERROR_SET,
   payload: { error, scope },
 });
 
-export const clearApiError = scope => ({ type: t.API_ERROR_SET, payload: { error: null, scope } });
+export const clearApiError = (scope) => ({
+  type: t.API_ERROR_SET,
+  payload: { error: null, scope },
+});
 
 export const sendApiRequest = ({
   label,
@@ -29,7 +35,6 @@ export const sendApiRequest = ({
   onSuccess = () => undefined,
   onError = () => undefined,
 }) => async (dispatch, getState) => {
-
   dispatch(clearApiError(scope));
   dispatch(apiRequestStart({ label, scope, status }));
 
@@ -40,7 +45,6 @@ export const sendApiRequest = ({
     dispatch({ type: `${label}_SUCCESS`, payload: response });
 
     onSuccess(response, dispatch, getState);
-
   } catch (error) {
     dispatch(apiRequestEnd({ label, scope }));
     dispatch(setApiError({ error, scope }));

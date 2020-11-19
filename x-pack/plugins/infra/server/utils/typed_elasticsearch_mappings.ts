@@ -8,6 +8,8 @@ export type ElasticsearchMappingOf<Type> = Type extends string
   ? ElasticsearchStringFieldMapping
   : Type extends number
   ? ElasticsearchNumberFieldMapping
+  : Type extends boolean
+  ? ElasticsearchBooleanFieldMapping
   : Type extends object[]
   ? ElasticsearchNestedFieldMapping<Type>
   : Type extends {}
@@ -16,6 +18,10 @@ export type ElasticsearchMappingOf<Type> = Type extends string
 
 export interface ElasticsearchStringFieldMapping {
   type: 'keyword' | 'text';
+}
+
+export interface ElasticsearchBooleanFieldMapping {
+  type: 'boolean';
 }
 
 export interface ElasticsearchNumberFieldMapping {

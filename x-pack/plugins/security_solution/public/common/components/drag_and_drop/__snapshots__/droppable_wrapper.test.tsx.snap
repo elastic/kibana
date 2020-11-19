@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DroppableWrapper rendering it renders against the snapshot 1`] = `
+<DroppableWrapper
+  droppableId="testing"
+>
+  draggable wrapper content
+</DroppableWrapper>
+`;

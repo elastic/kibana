@@ -10,38 +10,37 @@ import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../../c
 import moment from 'moment';
 
 describe('watch_status', () => {
-
   describe('WatchStatus', () => {
-
     describe('fromUpstreamJson factory method', () => {
-
       let upstreamJson;
       beforeEach(() => {
         upstreamJson = {
           id: 'my-watch',
           watchStatusJson: {
             state: {
-              active: true
+              active: true,
             },
             last_checked: '2017-03-02T14:25:31.139Z',
             last_met_condition: '2017-07-05T14:25:31.139Z',
             actions: {
               foo: {},
-              bar: {}
-            }
-          }
+              bar: {},
+            },
+          },
         };
       });
 
       it(`throws an error if no 'id' property in json`, () => {
         delete upstreamJson.id;
-        expect(WatchStatus.fromUpstreamJson).withArgs(upstreamJson)
+        expect(WatchStatus.fromUpstreamJson)
+          .withArgs(upstreamJson)
           .to.throwError(/must contain an id property/i);
       });
 
       it(`throws an error if no 'watchStatusJson' property in json`, () => {
         delete upstreamJson.watchStatusJson;
-        expect(WatchStatus.fromUpstreamJson).withArgs(upstreamJson)
+        expect(WatchStatus.fromUpstreamJson)
+          .withArgs(upstreamJson)
           .to.throwError(/must contain a watchStatusJson property/i);
       });
 
@@ -52,17 +51,17 @@ describe('watch_status', () => {
         expect(watchStatus.watchStatusJson).to.eql(upstreamJson.watchStatusJson);
         expect(watchStatus.isActive).to.eql(true);
         expect(watchStatus.lastChecked).to.eql(moment(upstreamJson.watchStatusJson.last_checked));
-        expect(watchStatus.lastMetCondition).to.eql(moment(upstreamJson.watchStatusJson.last_met_condition));
+        expect(watchStatus.lastMetCondition).to.eql(
+          moment(upstreamJson.watchStatusJson.last_met_condition)
+        );
         expect(watchStatus.actionStatuses.length).to.be(2);
 
         expect(watchStatus.actionStatuses[0].constructor.name).to.be('ActionStatus');
         expect(watchStatus.actionStatuses[1].constructor.name).to.be('ActionStatus');
       });
-
     });
 
     describe('lastFired getter method', () => {
-
       let upstreamJson;
       beforeEach(() => {
         upstreamJson = {
@@ -71,39 +70,38 @@ describe('watch_status', () => {
             actions: {
               foo: {
                 last_execution: {
-                  timestamp: '2017-07-05T00:00:00.000Z'
-                }
+                  timestamp: '2017-07-05T00:00:00.000Z',
+                },
               },
               bar: {
                 last_execution: {
-                  timestamp: '2025-07-05T00:00:00.000Z'
-                }
+                  timestamp: '2025-07-05T00:00:00.000Z',
+                },
               },
-              baz: {}
-            }
-          }
+              baz: {},
+            },
+          },
         };
       });
 
       it(`returns the latest lastExecution from it's actions`, () => {
         const watchStatus = WatchStatus.fromUpstreamJson(upstreamJson);
-        expect(watchStatus.lastFired).to
-          .eql(moment(upstreamJson.watchStatusJson.actions.bar.last_execution.timestamp));
+        expect(watchStatus.lastFired).to.eql(
+          moment(upstreamJson.watchStatusJson.actions.bar.last_execution.timestamp)
+        );
       });
-
     });
 
     describe('comment getter method', () => {
-
       let upstreamJson;
       beforeEach(() => {
         upstreamJson = {
           id: 'my-watch',
           watchStatusJson: {
             state: {
-              active: true
-            }
-          }
+              active: true,
+            },
+          },
         };
       });
 
@@ -119,7 +117,7 @@ describe('watch_status', () => {
         watchStatus.actionStatuses = [
           { state: ACTION_STATES.THROTTLED },
           { state: ACTION_STATES.FIRING },
-          { state: ACTION_STATES.OK }
+          { state: ACTION_STATES.OK },
         ];
 
         expect(watchStatus.comment).to.be(WATCH_STATE_COMMENTS.PARTIALLY_THROTTLED);
@@ -131,7 +129,7 @@ describe('watch_status', () => {
         watchStatus.actionStatuses = [
           { state: ACTION_STATES.THROTTLED },
           { state: ACTION_STATES.THROTTLED },
-          { state: ACTION_STATES.THROTTLED }
+          { state: ACTION_STATES.THROTTLED },
         ];
 
         expect(watchStatus.comment).to.be(WATCH_STATE_COMMENTS.THROTTLED);
@@ -144,7 +142,7 @@ describe('watch_status', () => {
           { state: ACTION_STATES.ACKNOWLEDGED },
           { state: ACTION_STATES.OK },
           { state: ACTION_STATES.THROTTLED },
-          { state: ACTION_STATES.FIRING }
+          { state: ACTION_STATES.FIRING },
         ];
 
         expect(watchStatus.comment).to.be(WATCH_STATE_COMMENTS.PARTIALLY_ACKNOWLEDGED);
@@ -156,7 +154,7 @@ describe('watch_status', () => {
         watchStatus.actionStatuses = [
           { state: ACTION_STATES.ACKNOWLEDGED },
           { state: ACTION_STATES.ACKNOWLEDGED },
-          { state: ACTION_STATES.ACKNOWLEDGED }
+          { state: ACTION_STATES.ACKNOWLEDGED },
         ];
 
         expect(watchStatus.comment).to.be(WATCH_STATE_COMMENTS.ACKNOWLEDGED);
@@ -170,7 +168,7 @@ describe('watch_status', () => {
           { state: ACTION_STATES.ACKNOWLEDGED },
           { state: ACTION_STATES.THROTTLED },
           { state: ACTION_STATES.FIRING },
-          { state: ACTION_STATES.ERROR }
+          { state: ACTION_STATES.ERROR },
         ];
 
         expect(watchStatus.comment).to.be(WATCH_STATE_COMMENTS.FAILING);
@@ -185,25 +183,23 @@ describe('watch_status', () => {
           { state: ACTION_STATES.ACKNOWLEDGED },
           { state: ACTION_STATES.THROTTLED },
           { state: ACTION_STATES.FIRING },
-          { state: ACTION_STATES.ERROR }
+          { state: ACTION_STATES.ERROR },
         ];
 
         expect(watchStatus.comment).to.be(WATCH_STATE_COMMENTS.OK);
       });
-
     });
 
     describe('state getter method', () => {
-
       let upstreamJson;
       beforeEach(() => {
         upstreamJson = {
           id: 'my-watch',
           watchStatusJson: {
             state: {
-              active: true
-            }
-          }
+              active: true,
+            },
+          },
         };
       });
 
@@ -216,16 +212,13 @@ describe('watch_status', () => {
       it(`correctly calculates WATCH_STATES.FIRING`, () => {
         const watchStatus = WatchStatus.fromUpstreamJson(upstreamJson);
 
-        watchStatus.actionStatuses = [
-          { state: ACTION_STATES.OK },
-          { state: ACTION_STATES.FIRING }
-        ];
+        watchStatus.actionStatuses = [{ state: ACTION_STATES.OK }, { state: ACTION_STATES.FIRING }];
         expect(watchStatus.state).to.be(WATCH_STATES.FIRING);
 
         watchStatus.actionStatuses = [
           { state: ACTION_STATES.OK },
           { state: ACTION_STATES.FIRING },
-          { state: ACTION_STATES.THROTTLED }
+          { state: ACTION_STATES.THROTTLED },
         ];
         expect(watchStatus.state).to.be(WATCH_STATES.FIRING);
 
@@ -233,7 +226,7 @@ describe('watch_status', () => {
           { state: ACTION_STATES.OK },
           { state: ACTION_STATES.FIRING },
           { state: ACTION_STATES.THROTTLED },
-          { state: ACTION_STATES.ACKNOWLEDGED }
+          { state: ACTION_STATES.ACKNOWLEDGED },
         ];
         expect(watchStatus.state).to.be(WATCH_STATES.FIRING);
       });
@@ -246,7 +239,7 @@ describe('watch_status', () => {
           { state: ACTION_STATES.FIRING },
           { state: ACTION_STATES.THROTTLED },
           { state: ACTION_STATES.ACKNOWLEDGED },
-          { state: ACTION_STATES.ERROR }
+          { state: ACTION_STATES.ERROR },
         ];
 
         expect(watchStatus.state).to.be(WATCH_STATES.ERROR);
@@ -257,7 +250,7 @@ describe('watch_status', () => {
 
         watchStatus.actionStatuses = [
           { state: ACTION_STATES.OK },
-          { state: ACTION_STATES.CONFIG_ERROR }
+          { state: ACTION_STATES.CONFIG_ERROR },
         ];
 
         expect(watchStatus.state).to.be(WATCH_STATES.CONFIG_ERROR);
@@ -272,31 +265,29 @@ describe('watch_status', () => {
           { state: ACTION_STATES.FIRING },
           { state: ACTION_STATES.THROTTLED },
           { state: ACTION_STATES.ACKNOWLEDGED },
-          { state: ACTION_STATES.ERROR }
+          { state: ACTION_STATES.ERROR },
         ];
 
         expect(watchStatus.state).to.be(WATCH_STATES.DISABLED);
       });
-
     });
 
     describe('downstreamJson getter method', () => {
-
       let upstreamJson;
       beforeEach(() => {
         upstreamJson = {
           id: 'my-watch',
           watchStatusJson: {
             state: {
-              active: true
+              active: true,
             },
             last_checked: '2017-03-02T14:25:31.139Z',
             last_met_condition: '2017-07-05T14:25:31.139Z',
             actions: {
               foo: {},
-              bar: {}
-            }
-          }
+              bar: {},
+            },
+          },
         };
       });
 
@@ -304,7 +295,7 @@ describe('watch_status', () => {
         const watchStatus = WatchStatus.fromUpstreamJson(upstreamJson);
         watchStatus.actionStatuses = [
           { id: 'foo', state: ACTION_STATES.OK },
-          { id: 'bar', state: ACTION_STATES.OK }
+          { id: 'bar', state: ACTION_STATES.OK },
         ];
 
         const actual = watchStatus.downstreamJson;
@@ -318,9 +309,6 @@ describe('watch_status', () => {
         expect(actual.lastFired).to.be(watchStatus.lastFired);
         expect(actual.actionStatuses.length).to.be(2);
       });
-
     });
-
   });
-
 });

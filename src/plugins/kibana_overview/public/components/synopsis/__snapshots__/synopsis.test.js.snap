@@ -1,0 +1,72 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`props iconType 1`] = `
+<EuiCard
+  betaBadgeLabel={null}
+  className="homSynopsis__card homSynopsis__card--noPanel"
+  data-test-subj="homeSynopsisLinktutorial"
+  description="this is a great tutorial about..."
+  href="link_to_item"
+  icon={
+    <EuiIcon
+      color="text"
+      size="l"
+      title=""
+      type="logoApache"
+    />
+  }
+  layout="horizontal"
+  title="Great tutorial"
+  titleElement="h3"
+  titleSize="xs"
+/>
+`;
+
+exports[`props iconUrl 1`] = `
+<EuiCard
+  betaBadgeLabel={null}
+  className="homSynopsis__card homSynopsis__card--noPanel"
+  data-test-subj="homeSynopsisLinktutorial"
+  description="this is a great tutorial about..."
+  href="link_to_item"
+  icon={
+    <img
+      alt=""
+      className="synopsisIcon"
+      src="icon_url"
+    />
+  }
+  layout="horizontal"
+  title="Great tutorial"
+  titleElement="h3"
+  titleSize="xs"
+/>
+`;
+
+exports[`props isBeta 1`] = `
+<EuiCard
+  betaBadgeLabel="Beta"
+  className="homSynopsis__card homSynopsis__card--noPanel"
+  data-test-subj="homeSynopsisLinktutorial"
+  description="this is a great tutorial about..."
+  href="link_to_item"
+  layout="horizontal"
+  title="Great tutorial"
+  titleElement="h3"
+  titleSize="xs"
+/>
+`;
+
+exports[`render 1`] = `
+<EuiCard
+  betaBadgeLabel={null}
+  className="homSynopsis__card homSynopsis__card--noPanel"
+  data-test-subj="homeSynopsisLinktutorial"
+  description="this is a great tutorial about..."
+  href="link_to_item"
+  layout="horizontal"
+  title="Great tutorial"
+  titleElement="h3"
+  titleSize="xs"
+/>
+`;

@@ -26,22 +26,14 @@ Array [
   >
     <p>
       We checked the cluster settings and found that 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           xpack.monitoring.collection.interval
         </code>
       </span>
        is set to 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           -1
         </code>
       </span>
@@ -69,7 +61,7 @@ Array [
         type="button"
       >
         <span
-          class="euiButton__content"
+          class="euiButtonContent euiButton__content"
         >
           <span
             class="euiButton__text"
@@ -109,65 +101,41 @@ Array [
   >
     <p>
       We checked the 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           node001foo
         </code>
       </span>
        settings for 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           xpack.monitoring.exporters
         </code>
       </span>
       , and found the reason: 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           myMonitoringClusterExporter1
         </code>
       </span>
       .
     </p>
     <p>
-      Using monitoring exporters ship the monitoring data to a remote monitoring cluster is highly recommended as it keeps the integrity of the monitoring data safe no matter what the state of the production cluster. However, as this instance of Kibana could not find any monitoring data, there seems to be a problem with the 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      Using monitoring exporters to ship the monitoring data to a remote monitoring cluster is highly recommended as it keeps the integrity of the monitoring data safe no matter what the state of the production cluster. However, as this instance of Kibana could not find any monitoring data, there seems to be a problem with the 
+      <span>
+        <code>
           xpack.monitoring.exporters
         </code>
       </span>
        configuration, or the 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           xpack.monitoring.elasticsearch
         </code>
       </span>
        settings in 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           kibana.yml
         </code>
       </span>
@@ -175,26 +143,89 @@ Array [
     </p>
     <p>
       Check that the intended exporters are enabled for sending statistics to the monitoring cluster, and that the monitoring cluster host matches the 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           xpack.monitoring.elasticsearch
         </code>
       </span>
        setting in 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           kibana.yml
         </code>
       </span>
        to see monitoring data in this instance of Kibana.
+    </p>
+  </div>,
+]
+`;
+
+exports[`ReasonFound should load ExplainExportersCloud component 1`] = `
+Array [
+  <h2
+    class="euiTitle euiTitle--large"
+  >
+    Your monitoring data is not available here.
+  </h2>,
+  <span
+    class="euiTextColor euiTextColor--subdued"
+  >
+    <div
+      class="euiSpacer euiSpacer--l"
+    />
+    <div
+      class="euiText euiText--medium"
+    >
+      <p>
+        Please return to your 
+        <a
+          class="euiLink euiLink--primary"
+          href="https://cloud.elastic.co/deployments"
+          rel="noopener"
+          target="_blank"
+        >
+          cloud dashboard.
+          <span
+            aria-label="External link"
+            class="euiLink__externalIcon"
+            data-euiicon-type="popout"
+          />
+          <span
+            class="euiScreenReaderOnly"
+          >
+            (opens in a new tab or window)
+          </span>
+        </a>
+         For more information on Monitoring in Elastic Cloud, please see 
+        <a
+          class="euiLink euiLink--primary"
+          href="https://www.elastic.co/guide/en/cloud/current/ec-enable-monitoring.html"
+          rel="noopener"
+          target="_blank"
+        >
+          the documentation.
+          <span
+            aria-label="External link"
+            class="euiLink__externalIcon"
+            data-euiicon-type="popout"
+          />
+          <span
+            class="euiScreenReaderOnly"
+          >
+            (opens in a new tab or window)
+          </span>
+        </a>
+      </p>
+    </div>
+  </span>,
+  <hr
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+  />,
+  <div
+    class="euiText euiText--medium eui-textLeft"
+  >
+    <p>
+      In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster.
     </p>
   </div>,
 ]
@@ -226,32 +257,20 @@ Array [
   >
     <p>
       We checked the node001foo settings and found that 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           xpack.monitoring.enabled
         </code>
       </span>
        is set to 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           false
         </code>
       </span>
        set, which disables monitoring. Removing the 
-      <span
-        class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-      >
-        <code
-          class="euiCodeBlock__code"
-        >
+      <span>
+        <code>
           xpack.monitoring.enabled: false
         </code>
       </span>

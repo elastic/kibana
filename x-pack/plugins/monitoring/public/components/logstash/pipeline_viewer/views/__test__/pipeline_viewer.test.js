@@ -6,7 +6,11 @@
 
 import React from 'react';
 import { PipelineViewer } from '../pipeline_viewer';
-import { shallowWithIntl } from '../../../../../../../../test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
+
+jest.mock('../../../../sparkline', () => ({
+  Sparkline: () => 'Sparkline',
+}));
 
 describe('PipelineViewer component', () => {
   let pipeline;
@@ -43,20 +47,22 @@ describe('PipelineViewer component', () => {
       },
     };
 
-    component = <PipelineViewer.WrappedComponent pipeline={pipeline} setDetailVertexId={jest.fn()} />;
+    component = <PipelineViewer pipeline={pipeline} setDetailVertexId={jest.fn()} />;
   });
 
   it('passes expected props', () => {
-    const renderedComponent = shallowWithIntl(component);
+    const renderedComponent = shallow(component);
 
     expect(renderedComponent).toMatchSnapshot();
   });
 
   it('renders DetailDrawer when selected vertex is not null', () => {
     const vertex = { id: 'stdin' };
-    component = <PipelineViewer.WrappedComponent pipeline={pipeline} setDetailVertexId={jest.fn()} detailVertex={vertex} />;
+    component = (
+      <PipelineViewer pipeline={pipeline} setDetailVertexId={jest.fn()} detailVertex={vertex} />
+    );
 
-    const renderedComponent = shallowWithIntl(component);
+    const renderedComponent = shallow(component);
 
     expect(renderedComponent).toMatchSnapshot();
   });

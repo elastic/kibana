@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import clone from 'lodash.clone';
+import { clone } from 'lodash';
 
 export class Registry {
   constructor(prop = 'name') {
@@ -31,9 +31,7 @@ export class Registry {
   }
 
   register(fn) {
-    if (typeof fn !== 'function') throw new Error(`Register requires an function`);
-
-    const obj = fn();
+    const obj = typeof fn === 'function' ? fn() : fn;
 
     if (typeof obj !== 'object' || !obj[this._prop]) {
       throw new Error(`Registered functions must return an object with a ${this._prop} property`);
@@ -50,7 +48,7 @@ export class Registry {
   }
 
   toArray() {
-    return Object.keys(this._indexed).map(key => this.get(key));
+    return Object.keys(this._indexed).map((key) => this.get(key));
   }
 
   get(name) {

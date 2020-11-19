@@ -1,29 +1,22 @@
-// Import the EUI global scope so we can use EUI constants
-@import 'src/legacy/ui/public/styles/_styling_constants';
-
-// Temporary hacks
-@import 'hacks';
-
 // Watcher plugin styles
 
 // Prefix all styles with "watcher" to avoid conflicts.
 // Examples
-//   watcher__
+//   watcherChart
+//   watcherChart__legend
+//   watcherChart__legend--small
+//   watcherChart__legend-isLoading
 
-@import 'components/action_type_select/index';
-@import 'components/chart_tooltip/index';
-@import 'components/duration_select/index';
-@import 'components/expression_builder/index';
-@import 'components/flot_chart/index';
-@import 'components/index_select/index';
-@import 'components/json_editor/index';
-@import 'components/panel_pager/index';
-@import 'components/threshold_preview_chart/index';
-@import 'components/threshold_watch_expression/index';
-@import 'components/watch_actions/index';
-@import 'components/watch_history_item_detail/index';
-@import 'sections/watch_edit/components/threshold_watch_edit/index';
-@import 'sections/watch_edit/components/watch_edit_detail/index';
-@import 'sections/watch_edit/components/watch_edit_execute_detail/index';
-@import 'sections/watch_edit/components/watch_edit_title_panel/index';
-@import 'sections/watch_list/components/watch_list/index';
+.watcherThresholdWatchActionDropdownContainer {
+  justify-content: flex-end;
+  flex-direction: row;
+}
+
+.watcherThresholdWatchActionContextMenuItem,
+.watcherThresholdWatchInBetweenComparatorText {
+  align-self: center;
+}
+
+.watcherThresholdAlertAggFieldContainer {
+  width: 300px;
+}

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Container } from 'unstated';
-import { CMBeat } from './../../common/domain_types';
-import { BeatsTagAssignment } from './../../server/lib/adapters/beats/adapter_types';
+import { CMBeat } from '../../common/domain_types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { BeatsTagAssignment } from '../../server/lib/adapters/beats/adapter_types';
 import { FrontendLibs } from './../lib/types';
 
 interface ContainerState {
@@ -59,7 +60,7 @@ export class BeatsContainer extends Container<ContainerState> {
   };
 
   public toggleTagAssignment = async (tagId: string, beats: CMBeat[]) => {
-    if (beats.some(beat => beat.tags !== undefined && beat.tags.some(id => id === tagId))) {
+    if (beats.some((beat) => beat.tags !== undefined && beat.tags.some((id) => id === tagId))) {
       await this.removeTagsFromBeats(beats, tagId);
       return 'removed';
     }
@@ -94,7 +95,7 @@ export class BeatsContainer extends Container<ContainerState> {
 
 function createBeatTagAssignments(beats: CMBeat[] | string[], tagId: string): BeatsTagAssignment[] {
   if (typeof beats[0] === 'string') {
-    return (beats as string[]).map(id => ({ beatId: id, tag: tagId }));
+    return (beats as string[]).map((id) => ({ beatId: id, tag: tagId }));
   } else {
     return (beats as CMBeat[]).map(({ id }) => ({ beatId: id, tag: tagId }));
   }

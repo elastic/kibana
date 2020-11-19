@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/beats';
     const timeRange = {
       min: '2017-12-19T18:11:32.000Z',
-      max: '2017-12-19T18:14:38.000Z'
+      max: '2017-12-19T18:14:38.000Z',
     };
 
     before('load archive', () => {

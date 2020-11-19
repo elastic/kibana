@@ -4,43 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import Joi from 'joi';
-import { CoreSetup } from 'src/core/server';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_data_by_agent';
+import { createRoute } from './create_route';
+import { uiFiltersRt, rangeRt } from './default_api_types';
 
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
-
-export function initMetricsApi(core: CoreSetup) {
-  const { server } = core.http;
-
-  server.route({
-    method: 'GET',
-    path: `/api/apm/services/{serviceName}/metrics/charts`,
-    options: {
-      validate: {
-        query: withDefaultValidators({
-          agentName: Joi.string().required()
-        })
-      },
-      tags: ['access:apm']
-    },
-    handler: async req => {
-      const setup = setupRequest(req);
-      const { serviceName } = req.params;
-      // casting approach recommended here: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/25605
-      const { agentName } = req.query as { agentName: string };
-      return await getMetricsChartDataByAgent({
-        setup,
-        serviceName,
-        agentName
-      }).catch(defaultErrorHandler);
-    }
-  });
-}
+export const metricsChartsRoute = createRoute({
+  endpoint: `GET /api/apm/services/{serviceName}/metrics/charts`,
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.type({
+        agentName: t.string,
+      }),
+      t.partial({
+        serviceNodeName: t.string,
+      }),
+      uiFiltersRt,
+      rangeRt,
+    ]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { params } = context;
+    const { serviceName } = params.path;
+    const { agentName, serviceNodeName } = params.query;
+    return await getMetricsChartDataByAgent({
+      setup,
+      serviceName,
+      agentName,
+      serviceNodeName,
+    });
+  },
+});

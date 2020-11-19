@@ -19,6 +19,15 @@
 
 export const mockHttpServer = jest.fn();
 
-jest.mock('./http_server', () => ({
-  HttpServer: mockHttpServer,
+jest.mock('./http_server', () => {
+  const realHttpServer = jest.requireActual('./http_server');
+
+  return {
+    ...realHttpServer,
+    HttpServer: mockHttpServer,
+  };
+});
+
+jest.mock('./lifecycle_handlers', () => ({
+  registerCoreHandlers: jest.fn(),
 }));

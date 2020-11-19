@@ -6,18 +6,21 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiForm, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
+import { ArgumentStrings } from '../../../../../i18n';
+
+const { ImageUpload: strings } = ArgumentStrings;
 
 export const LinkForm = ({ url, inputRef, onSubmit }) => (
-  <EuiForm onSubmit={onSubmit} className="eui-textRight">
+  <EuiFormRow display="rowCompressed" onSubmit={onSubmit} className="eui-textRight">
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem>
         <EuiFieldText
           compressed
           defaultValue={url}
           inputRef={inputRef}
-          placeholder="Image URL"
-          aria-label="Image URL"
+          placeholder={strings.getUrlFieldPlaceholder()}
+          aria-label={strings.getUrlFieldPlaceholder()}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -26,7 +29,7 @@ export const LinkForm = ({ url, inputRef, onSubmit }) => (
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </EuiForm>
+  </EuiFormRow>
 );
 
 LinkForm.propTypes = {

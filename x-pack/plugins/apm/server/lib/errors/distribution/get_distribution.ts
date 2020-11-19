@@ -4,39 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../typings/common';
-import { Setup } from '../../helpers/setup_request';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 import { getBuckets } from './get_buckets';
 
-function getBucketSize({ start, end, config }: Setup) {
-  const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
-  return Math.floor((end - start) / bucketTargetCount);
+function getBucketSize({ start, end }: SetupTimeRange) {
+  return Math.floor((end - start) / BUCKET_TARGET_COUNT);
 }
 
 export type ErrorDistributionAPIResponse = PromiseReturnType<
-  typeof getDistribution
+  typeof getErrorDistribution
 >;
 
-export async function getDistribution({
+export async function getErrorDistribution({
   serviceName,
   groupId,
-  setup
+  setup,
 }: {
   serviceName: string;
   groupId?: string;
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
 }) {
-  const bucketSize = getBucketSize(setup);
-  const { buckets, totalHits } = await getBuckets({
+  const bucketSize = getBucketSize({ start: setup.start, end: setup.end });
+  const { buckets, noHits } = await getBuckets({
     serviceName,
     groupId,
     bucketSize,
-    setup
+    setup,
   });
 
   return {
-    totalHits,
+    noHits,
     buckets,
-    bucketSize
+    bucketSize,
   };
 }

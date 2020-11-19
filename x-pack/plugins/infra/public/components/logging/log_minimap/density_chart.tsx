@@ -6,21 +6,21 @@
 
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { area, curveMonotoneY } from 'd3-shape';
-import max from 'lodash/fp/max';
+import { max } from 'lodash';
 import * as React from 'react';
 
-import euiStyled from '../../../../../../common/eui_styled_components';
-import { SummaryBucket } from './types';
+import { euiStyled } from '../../../../../observability/public';
+import { LogEntriesSummaryBucket } from '../../../../common/http_api';
 
 interface DensityChartProps {
-  buckets: SummaryBucket[];
+  buckets: LogEntriesSummaryBucket[];
   end: number;
   start: number;
   width: number;
   height: number;
 }
 
-export const DensityChart: React.SFC<DensityChartProps> = ({
+export const DensityChart: React.FC<DensityChartProps> = ({
   buckets,
   start,
   end,
@@ -31,40 +31,49 @@ export const DensityChart: React.SFC<DensityChartProps> = ({
     return null;
   }
 
-  const yScale = scaleTime()
-    .domain([start, end])
-    .range([0, height]);
+  const yScale = scaleTime().domain([start, end]).range([0, height]);
 
-  const xMax = max(buckets.map(bucket => bucket.entriesCount)) || 0;
-  const xScale = scaleLinear()
-    .domain([0, xMax])
-    .range([0, width / 2]);
+  const xMax = max(buckets.map((bucket) => bucket.entriesCount)) || 0;
+  const xScale = scaleLinear().domain([0, xMax]).range([0, width]);
 
-  const path = area<SummaryBucket>()
+  const path = area<LogEntriesSummaryBucket>()
     .x0(xScale(0))
-    .x1(bucket => xScale(bucket.entriesCount))
-    .y(bucket => yScale((bucket.start + bucket.end) / 2))
+    .x1((bucket) => xScale(bucket.entriesCount))
+    .y0((bucket) => yScale(bucket.start))
+    .y1((bucket) => yScale(bucket.end))
     .curve(curveMonotoneY);
-  const pathData = path(buckets);
+
+  const firstBucket = buckets[0];
+  const lastBucket = buckets[buckets.length - 1];
+  const pathBuckets = [
+    // Make sure the graph starts at the count of the first point
+    { start, end: start, entriesCount: firstBucket.entriesCount },
+    ...buckets,
+    // Make sure the line ends at the height of the last point
+    { start: lastBucket.end, end: lastBucket.end, entriesCount: lastBucket.entriesCount },
+    // If the last point is not at the end of the minimap, make sure it doesn't extend indefinitely and goes to 0
+    { start: end, end, entriesCount: 0 },
+  ];
+  const pathData = path(pathBuckets);
 
   return (
-    <g transform={`translate(${width / 2}, 0)`}>
+    <g>
+      <DensityChartPositiveBackground width={width} height={height} />
       <PositiveAreaPath d={pathData || ''} />
-      <NegativeAreaPath transform="scale(-1, 1)" d={pathData || ''} />
     </g>
   );
 };
 
-const PositiveAreaPath = euiStyled.path`
-  fill: ${props =>
-    props.theme.darkMode
-      ? props.theme.eui.euiColorMediumShade
-      : props.theme.eui.euiColorLightShade};
-`;
-
-const NegativeAreaPath = euiStyled.path`
-  fill: ${props =>
+const DensityChartPositiveBackground = euiStyled.rect`
+  fill: ${(props) =>
     props.theme.darkMode
       ? props.theme.eui.euiColorLightShade
       : props.theme.eui.euiColorLightestShade};
+`;
+
+const PositiveAreaPath = euiStyled.path`
+  fill: ${(props) =>
+    props.theme.darkMode
+      ? props.theme.eui.euiColorMediumShade
+      : props.theme.eui.euiColorLightShade};
 `;

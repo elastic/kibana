@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const areaChart: ElementFactory = () => ({
   name: 'areaChart',
-  displayName: 'Area chart',
+  displayName: 'Area',
   help: 'A line chart with a filled body',
-  tags: ['chart'],
-  image: header,
+  type: 'chart',
+  icon: 'visArea',
   expression: `filters
   | demodata
   | pointseries x="time" y="mean(price)"

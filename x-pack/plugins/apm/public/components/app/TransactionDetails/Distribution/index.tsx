@@ -4,23 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  Axis,
+  Chart,
+  ElementClickListener,
+  GeometryValue,
+  HistogramBarSeries,
+  Position,
+  RectAnnotation,
+  ScaleType,
+  Settings,
+  SettingsSpec,
+  TooltipValue,
+  XYChartSeriesIdentifier,
+} from '@elastic/charts';
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import { Location } from 'history';
-import React, { Component } from 'react';
-import { ITransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
-import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { isEmpty } from 'lodash';
+import React, { useCallback } from 'react';
+import { ValuesType } from 'utility-types';
+import { useTheme } from '../../../../../../observability/public';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
-// @ts-ignore
-import Histogram from '../../../shared/charts/Histogram';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { unit } from '../../../../style/variables';
+import { ChartContainer } from '../../../shared/charts/chart_container';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
-import { history } from '../../../../utils/history';
 
 interface IChartPoint {
-  sample?: IBucket['sample'];
   x0: number;
   x: number;
   y: number;
@@ -29,209 +45,232 @@ interface IChartPoint {
   };
 }
 
-export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
-  if (!buckets) {
+export function getFormattedBuckets(
+  buckets?: DistributionBucket[],
+  bucketSize?: number
+) {
+  if (!buckets || !bucketSize) {
     return [];
   }
 
   return buckets.map(
-    ({ sample, count, key }): IChartPoint => {
+    ({ samples, count, key }): IChartPoint => {
       return {
-        sample,
         x0: key,
         x: key + bucketSize,
         y: count,
-        style: { cursor: count > 0 && sample ? 'pointer' : 'default' }
+        style: {
+          cursor: isEmpty(samples) ? 'default' : 'pointer',
+        },
       };
     }
   );
 }
 
+const getFormatYShort = (transactionType: string | undefined) => (
+  t: number
+) => {
+  return i18n.translate(
+    'xpack.apm.transactionDetails.transactionsDurationDistributionChart.unitShortLabel',
+    {
+      defaultMessage:
+        '{transCount} {transType, select, request {req.} other {trans.}}',
+      values: {
+        transCount: t,
+        transType: transactionType,
+      },
+    }
+  );
+};
+
+const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
+  return transactionType === 'request'
+    ? i18n.translate(
+        'xpack.apm.transactionDetails.transactionsDurationDistributionChart.requestTypeUnitLongLabel',
+        {
+          defaultMessage:
+            '{transCount, plural, =0 {request} one {request} other {requests}}',
+          values: {
+            transCount: t,
+          },
+        }
+      )
+    : i18n.translate(
+        'xpack.apm.transactionDetails.transactionsDurationDistributionChart.transactionTypeUnitLongLabel',
+        {
+          defaultMessage:
+            '{transCount, plural, =0 {transaction} one {transaction} other {transactions}}',
+          values: {
+            transCount: t,
+          },
+        }
+      );
+};
+
 interface Props {
-  location: Location;
-  distribution?: ITransactionDistributionAPIResponse;
+  distribution?: TransactionDistributionAPIResponse;
   urlParams: IUrlParams;
+  fetchStatus: FETCH_STATUS;
+  bucketIndex: number;
+  onBucketClick: (
+    bucket: ValuesType<TransactionDistributionAPIResponse['buckets']>
+  ) => void;
 }
 
-export class TransactionDistribution extends Component<Props> {
-  public formatYShort = (t: number) => {
-    return i18n.translate(
-      'xpack.apm.transactionDetails.transactionsDurationDistributionChart.unitShortLabel',
-      {
-        defaultMessage:
-          '{transCount} {transType, select, request {req.} other {trans.}}',
-        values: {
-          transCount: t,
-          transType: this.props.urlParams.transactionType
-        }
-      }
-    );
-  };
+export function TransactionDistribution({
+  distribution,
+  urlParams: { transactionType },
+  fetchStatus,
+  bucketIndex,
+  onBucketClick,
+}: Props) {
+  const theme = useTheme();
 
-  public formatYLong = (t: number) => {
-    return this.props.urlParams.transactionType === 'request'
-      ? i18n.translate(
-          'xpack.apm.transactionDetails.transactionsDurationDistributionChart.requestTypeUnitLongLabel',
-          {
-            defaultMessage:
-              '{transCount, plural, =0 {# request} one {# request} other {# requests}}',
-            values: {
-              transCount: t
-            }
-          }
-        )
-      : i18n.translate(
-          'xpack.apm.transactionDetails.transactionsDurationDistributionChart.transactionTypeUnitLongLabel',
-          {
-            defaultMessage:
-              '{transCount, plural, =0 {# transaction} one {# transaction} other {# transactions}}',
-            values: {
-              transCount: t
-            }
-          }
-        );
-  };
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const formatYShort = useCallback(getFormatYShort(transactionType), [
+    transactionType,
+  ]);
 
-  public redirectToTransactionType() {
-    const { urlParams, location, distribution } = this.props;
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const formatYLong = useCallback(getFormatYLong(transactionType), [
+    transactionType,
+  ]);
 
-    if (
-      !distribution ||
-      !distribution.defaultSample ||
-      urlParams.traceId ||
-      urlParams.transactionId
-    ) {
-      return;
-    }
-
-    const { traceId, transactionId } = distribution.defaultSample;
-
-    history.replace({
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        traceId,
-        transactionId
-      })
-    });
-  }
-
-  public componentDidMount() {
-    this.redirectToTransactionType();
-  }
-
-  public componentDidUpdate() {
-    this.redirectToTransactionType();
-  }
-
-  public render() {
-    const { location, distribution, urlParams } = this.props;
-
-    if (!distribution || !urlParams.traceId || !urlParams.transactionId) {
-      return null;
-    }
-
-    const buckets = getFormattedBuckets(
-      distribution.buckets,
-      distribution.bucketSize
-    );
-
-    const isEmpty = distribution.totalHits === 0;
-    const xMax = d3.max(buckets, d => d.x) || 0;
-    const timeFormatter = getTimeFormatter(xMax);
-    const unit = timeUnit(xMax);
-
-    if (isEmpty) {
-      return (
-        <EmptyMessage
-          heading={i18n.translate(
-            'xpack.apm.transactionDetails.notFoundLabel',
-            {
-              defaultMessage: 'No transactions were found.'
-            }
-          )}
-        />
-      );
-    }
-
-    const bucketIndex = buckets.findIndex(
-      bucket =>
-        bucket.sample != null &&
-        bucket.sample.transactionId === urlParams.transactionId &&
-        bucket.sample.traceId === urlParams.traceId
-    );
-
+  // no data in response
+  if (
+    (!distribution || distribution.noHits) &&
+    fetchStatus !== FETCH_STATUS.LOADING
+  ) {
     return (
-      <div>
-        <EuiTitle size="xs">
-          <h5>
-            {i18n.translate(
-              'xpack.apm.transactionDetails.transactionsDurationDistributionChartTitle',
-              {
-                defaultMessage: 'Transactions duration distribution'
-              }
-            )}{' '}
-            <EuiIconTip
-              title={i18n.translate(
-                'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingLabel',
-                {
-                  defaultMessage: 'Sampling'
-                }
-              )}
-              content={i18n.translate(
-                'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingDescription',
-                {
-                  defaultMessage:
-                    "Each bucket will show a sample transaction. If there's no sample available, it's most likely because of the sampling limit set in the agent configuration."
-                }
-              )}
-              position="top"
-            />
-          </h5>
-        </EuiTitle>
-
-        <Histogram
-          buckets={buckets}
-          bucketSize={distribution.bucketSize}
-          bucketIndex={bucketIndex}
-          onClick={(bucket: IChartPoint) => {
-            if (bucket.sample && bucket.y > 0) {
-              history.push({
-                ...location,
-                search: fromQuery({
-                  ...toQuery(location.search),
-                  transactionId: bucket.sample.transactionId,
-                  traceId: bucket.sample.traceId
-                })
-              });
-            }
-          }}
-          formatX={timeFormatter}
-          formatYShort={this.formatYShort}
-          formatYLong={this.formatYLong}
-          verticalLineHover={(bucket: IChartPoint) =>
-            bucket.y > 0 && !bucket.sample
-          }
-          backgroundHover={(bucket: IChartPoint) =>
-            bucket.y > 0 && bucket.sample
-          }
-          tooltipHeader={(bucket: IChartPoint) =>
-            `${timeFormatter(bucket.x0, { withUnit: false })} - ${timeFormatter(
-              bucket.x,
-              { withUnit: false }
-            )} ${unit}`
-          }
-          tooltipFooter={(bucket: IChartPoint) =>
-            !bucket.sample &&
-            i18n.translate(
-              'xpack.apm.transactionDetails.transactionsDurationDistributionChart.noSampleTooltip',
-              {
-                defaultMessage: 'No sample available for this bucket'
-              }
-            )
-          }
-        />
-      </div>
+      <EmptyMessage
+        heading={i18n.translate('xpack.apm.transactionDetails.notFoundLabel', {
+          defaultMessage: 'No transactions were found.',
+        })}
+      />
     );
   }
+
+  const buckets = getFormattedBuckets(
+    distribution?.buckets,
+    distribution?.bucketSize
+  );
+
+  const xMin = d3.min(buckets, (d) => d.x0) || 0;
+  const xMax = d3.max(buckets, (d) => d.x0) || 0;
+  const timeFormatter = getDurationFormatter(xMax);
+
+  const tooltipProps: SettingsSpec['tooltip'] = {
+    headerFormatter: (tooltip: TooltipValue) => {
+      const serie = buckets.find((bucket) => bucket.x0 === tooltip.value);
+      if (serie) {
+        const xFormatted = timeFormatter(serie.x);
+        const x0Formatted = timeFormatter(serie.x0);
+        return `${x0Formatted.value} - ${xFormatted.value} ${xFormatted.unit}`;
+      }
+      return `${timeFormatter(tooltip.value)}`;
+    },
+  };
+
+  const onBarClick: ElementClickListener = (elements) => {
+    const chartPoint = elements[0][0] as GeometryValue;
+    const clickedBucket = distribution?.buckets.find((bucket) => {
+      return bucket.key === chartPoint.x;
+    });
+    if (clickedBucket) {
+      onBucketClick(clickedBucket);
+    }
+  };
+
+  const selectedBucket = buckets[bucketIndex];
+
+  return (
+    <div>
+      <EuiTitle size="xs">
+        <h5>
+          {i18n.translate(
+            'xpack.apm.transactionDetails.transactionsDurationDistributionChartTitle',
+            {
+              defaultMessage: 'Transactions duration distribution',
+            }
+          )}{' '}
+          <EuiIconTip
+            title={i18n.translate(
+              'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingLabel',
+              {
+                defaultMessage: 'Sampling',
+              }
+            )}
+            content={i18n.translate(
+              'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingDescription',
+              {
+                defaultMessage:
+                  "Each bucket will show a sample transaction. If there's no sample available, it's most likely because of the sampling limit set in the agent configuration.",
+              }
+            )}
+            position="top"
+          />
+        </h5>
+      </EuiTitle>
+      <ChartContainer
+        height={unit * 10}
+        hasData={!!(distribution && !distribution.noHits)}
+        status={fetchStatus}
+      >
+        <Chart>
+          <Settings
+            xDomain={{ min: xMin, max: xMax }}
+            tooltip={tooltipProps}
+            onElementClick={onBarClick}
+          />
+          {selectedBucket && (
+            <RectAnnotation
+              id="highlighted_bucket"
+              dataValues={[
+                {
+                  coordinates: { x0: selectedBucket.x0, x1: selectedBucket.x },
+                },
+              ]}
+              style={{
+                fill: 'transparent',
+                strokeWidth: 1,
+                stroke: theme.eui.euiColorVis1,
+                opacity: 1,
+              }}
+            />
+          )}
+          <Axis
+            id="x-axis"
+            position={Position.Bottom}
+            showOverlappingTicks
+            tickFormat={(time: number) => timeFormatter(time).formatted}
+          />
+          <Axis
+            id="y-axis"
+            position={Position.Left}
+            ticks={3}
+            showGridLines
+            tickFormat={(value: number) => formatYShort(value)}
+          />
+          <HistogramBarSeries
+            tickFormat={(value: string) => value}
+            minBarHeight={2}
+            id="transactionDurationDistribution"
+            name={(series: XYChartSeriesIdentifier) => {
+              const bucketCount = series.splitAccessors.get(
+                series.yAccessor
+              ) as number;
+              return formatYLong(bucketCount);
+            }}
+            splitSeriesAccessors={['y']}
+            xScaleType={ScaleType.Linear}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x0"
+            yAccessors={['y']}
+            data={buckets}
+            color={theme.eui.euiColorVis1}
+          />
+        </Chart>
+      </ChartContainer>
+    </div>
+  );
 }

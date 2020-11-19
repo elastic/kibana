@@ -21,12 +21,20 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['dashboard', 'discover']);
+  const retry = getService('retry');
+  const PageObjects = getPageObjects(['common', 'dashboard', 'discover']);
 
-  describe('dashboard query bar', async () => {
+  describe('dashboard query bar', () => {
     before(async () => {
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
     });
 
@@ -34,10 +42,11 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.unload('dashboard/current/data');
 
       await queryBar.clickQuerySubmitButton();
-      const headers = await PageObjects.discover.getColumnHeaders();
-      expect(headers.length).to.be(0);
-
-      await pieChart.expectPieSliceCount(0);
+      await retry.tryForTime(5000, async () => {
+        const headers = await PageObjects.discover.getColumnHeaders();
+        expect(headers.length).to.be(0);
+        await pieChart.expectPieSliceCount(0);
+      });
     });
   });
 }

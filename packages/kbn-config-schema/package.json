@@ -6,15 +6,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build"
-  },
-  "devDependencies": {
-    "typescript": "^3.3.3333"
-  },
-  "peerDependencies": {
-    "joi": "^13.5.2",
-    "moment": "^2.20.1",
-    "type-detect": "^4.0.8"
   }
 }

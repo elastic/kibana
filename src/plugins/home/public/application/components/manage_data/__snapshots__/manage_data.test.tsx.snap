@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ManageData render 1`] = `
+<Fragment>
+  <EuiHorizontalRule
+    aria-hidden="true"
+    margin="xl"
+  />
+  <section
+    aria-labelledby="homDataManage__title"
+    className="homDataManage"
+    data-test-subj="homDataManage"
+  >
+    <EuiTitle
+      size="s"
+    >
+      <h2
+        id="homDataManage__title"
+      >
+        <FormattedMessage
+          defaultMessage="Manage your data"
+          id="home.manageData.sectionTitle"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup
+      className="homDataManage__content"
+    >
+      <EuiFlexItem
+        key="security"
+      >
+        <Synopsis
+          description="Control who has access and what tasks they can perform."
+          iconType="securityApp"
+          id="security"
+          isBeta={false}
+          onClick={[Function]}
+          title="Protect your data"
+          url="path-to-security-roles"
+          wrapInPanel={true}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        key="monitoring"
+      >
+        <Synopsis
+          description="Track the real-time health and performance of your deployment."
+          iconType="monitoringApp"
+          id="monitoring"
+          isBeta={false}
+          onClick={[Function]}
+          title="Monitor the stack"
+          url="path-to-monitoring"
+          wrapInPanel={true}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        key="snapshot_restore"
+      >
+        <Synopsis
+          description="Save snapshots to a backup repository, and restore to recover index and cluster state."
+          iconType="storage"
+          id="snapshot_restore"
+          isBeta={false}
+          onClick={[Function]}
+          title="Store & recover backups"
+          url="path-to-snapshot-restore"
+          wrapInPanel={true}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        key="index_lifecycle_management"
+      >
+        <Synopsis
+          description="Define lifecycle policies to automatically perform operations as an index ages."
+          iconType="indexSettings"
+          id="index_lifecycle_management"
+          isBeta={false}
+          onClick={[Function]}
+          title="Manage index lifecycles"
+          url="path-to-index-lifecycle-management"
+          wrapInPanel={true}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </section>
+</Fragment>
+`;
+
+exports[`ManageData render empty without any features 1`] = `<Fragment />`;

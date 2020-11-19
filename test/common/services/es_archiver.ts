@@ -18,15 +18,15 @@
  */
 
 import { format as formatUrl } from 'url';
+import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-import { EsArchiver } from '../../../src/es_archiver';
 // @ts-ignore not TS yet
 import * as KibanaServer from './kibana_server';
 
 export function EsArchiverProvider({ getService, hasService }: FtrProviderContext): EsArchiver {
   const config = getService('config');
-  const client = getService('es');
+  const client = getService('legacyEs');
   const log = getService('log');
 
   if (!config.get('esArchiver')) {
@@ -46,6 +46,7 @@ export function EsArchiverProvider({ getService, hasService }: FtrProviderContex
     KibanaServer.extendEsArchiver({
       esArchiver,
       kibanaServer: getService('kibanaServer'),
+      retry: getService('retry'),
       defaults: config.get('uiSettings.defaults'),
     });
   }

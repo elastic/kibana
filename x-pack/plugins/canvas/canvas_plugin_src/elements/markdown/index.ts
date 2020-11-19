@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import header from './header.png';
-
-import { ElementFactory } from '../types';
+import { ElementFactory } from '../../../types';
 export const markdown: ElementFactory = () => ({
   name: 'markdown',
-  displayName: 'Markdown',
-  tags: ['text'],
-  help: 'Markup from Markdown',
-  image: header,
+  displayName: 'Text',
+  type: 'text',
+  help: 'Add text using Markdown',
+  icon: 'visText',
   expression: `filters
 | demodata
 | markdown "### Welcome to the Markdown element
@@ -26,7 +24,7 @@ The data table contains
  **{{name}}**
 {{/each}}
 
-You can use standard Markdown in here, but you can also access your piped-in data using Handlebars. If you want to know more, check out the [Handlebars documentation](http://handlebarsjs.com/expressions.html).
+You can use standard Markdown in here, but you can also access your piped-in data using Handlebars. If you want to know more, check out the [Handlebars documentation](https://ela.st/handlebars-docs).
 
 #### Enjoy!" | render`,
 });

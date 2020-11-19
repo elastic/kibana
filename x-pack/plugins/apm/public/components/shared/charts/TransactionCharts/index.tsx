@@ -8,225 +8,160 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiPanel,
-  EuiText,
-  EuiTitle
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
-import React, { Component } from 'react';
-import { isEmpty } from 'lodash';
-import styled from 'styled-components';
+import React from 'react';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import {
+  TRANSACTION_PAGE_LOAD,
+  TRANSACTION_REQUEST,
+  TRANSACTION_ROUTE_CHANGE,
+} from '../../../../../common/transaction_types';
+import { asDecimal, tpmUnit } from '../../../../../common/utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
-import { ITransactionChartData } from '../../../../selectors/chartSelectors';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
-import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
-// @ts-ignore
-import CustomPlot from '../CustomPlot';
-import { SyncChartGroup } from '../SyncChartGroup';
+import { ChartsSyncContextProvider } from '../../../../context/charts_sync_context';
 import { LicenseContext } from '../../../../context/LicenseContext';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { ITransactionChartData } from '../../../../selectors/chartSelectors';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import { TransactionBreakdown } from '../../TransactionBreakdown';
+import { LineChart } from '../line_chart';
+import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
+import { getResponseTimeTickFormatter } from './helper';
+import { MLHeader } from './ml_header';
+import { useFormatter } from './use_formatter';
 
 interface TransactionChartProps {
-  hasMLJob: boolean;
   charts: ITransactionChartData;
-  location: Location;
   urlParams: IUrlParams;
+  fetchStatus: FETCH_STATUS;
 }
 
-const ShiftedIconWrapper = styled.span`
-  padding-right: 5px;
-  position: relative;
-  top: -1px;
-  display: inline-block;
-`;
-
-const ShiftedEuiText = styled(EuiText)`
-  position: relative;
-  top: 5px;
-`;
-
-const msTimeUnitLabel = i18n.translate(
-  'xpack.apm.metrics.transactionChart.msTimeUnitLabel',
-  {
-    defaultMessage: 'ms'
-  }
-);
-
-export class TransactionCharts extends Component<TransactionChartProps> {
-  public getResponseTimeTickFormatter = (t: number) => {
-    return this.props.charts.noHits ? `- ${msTimeUnitLabel}` : asMillis(t);
+export function TransactionCharts({
+  charts,
+  urlParams,
+  fetchStatus,
+}: TransactionChartProps) {
+  const getTPMFormatter = (t: number) => {
+    return `${asDecimal(t)} ${tpmUnit(urlParams.transactionType)}`;
   };
 
-  public getResponseTimeTooltipFormatter = (p: Coordinate) => {
-    return this.props.charts.noHits || !p
-      ? `- ${msTimeUnitLabel}`
-      : asMillis(p.y);
+  const getTPMTooltipFormatter = (y: Coordinate['y']) => {
+    return isValidCoordinateValue(y) ? getTPMFormatter(y) : NOT_AVAILABLE_LABEL;
   };
 
-  public getTPMFormatter = (t: number | null) => {
-    const { urlParams, charts } = this.props;
-    const unit = tpmUnit(urlParams.transactionType);
-    return charts.noHits || t === null
-      ? `- ${unit}`
-      : `${asInteger(t)} ${unit}`;
-  };
+  const { transactionType } = urlParams;
 
-  public getTPMTooltipFormatter = (p: Coordinate) => {
-    return this.getTPMFormatter(p.y);
-  };
+  const { responseTimeSeries, tpmSeries } = charts;
 
-  public renderMLHeader(hasValidMlLicense: boolean) {
-    const { hasMLJob } = this.props;
-    if (!hasValidMlLicense || !hasMLJob) {
-      return null;
-    }
+  const { formatter, toggleSerie } = useFormatter(responseTimeSeries);
 
-    const { serviceName, transactionType, kuery } = this.props.urlParams;
-    if (!serviceName) {
-      return null;
-    }
-
-    const hasKuery = !isEmpty(kuery);
-    const icon = hasKuery ? (
-      <EuiIconTip
-        aria-label="Warning"
-        type="alert"
-        color="warning"
-        content="The Machine learning results are hidden when the search bar is used for filtering"
-      />
-    ) : (
-      <EuiIconTip
-        content={i18n.translate(
-          'xpack.apm.metrics.transactionChart.machineLearningTooltip',
-          {
-            defaultMessage:
-              'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores >= 75.'
-          }
-        )}
-      />
-    );
-
-    return (
-      <EuiFlexItem grow={false}>
-        <ShiftedEuiText size="xs">
-          <ShiftedIconWrapper>{icon}</ShiftedIconWrapper>
-          <span>
-            {i18n.translate(
-              'xpack.apm.metrics.transactionChart.machineLearningLabel',
-              {
-                defaultMessage: 'Machine learning:'
-              }
-            )}{' '}
-          </span>
-          <MLJobLink
-            serviceName={serviceName}
-            transactionType={transactionType}
-          >
-            View Job
-          </MLJobLink>
-        </ShiftedEuiText>
-      </EuiFlexItem>
-    );
-  }
-
-  public render() {
-    const { charts, urlParams } = this.props;
-    const { noHits, responseTimeSeries, tpmSeries } = charts;
-    const { transactionType } = urlParams;
-
-    return (
-      <SyncChartGroup
-        render={hoverXHandlers => (
-          <EuiFlexGrid columns={2} gutterSize="s">
-            <EuiFlexItem>
-              <EuiPanel>
-                <React.Fragment>
-                  <EuiFlexGroup justifyContent="spaceBetween">
-                    <EuiFlexItem>
-                      <EuiTitle size="xs">
-                        <span>{responseTimeLabel(transactionType)}</span>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <LicenseContext.Consumer>
-                      {license =>
-                        this.renderMLHeader(license.features.ml.is_available)
-                      }
-                    </LicenseContext.Consumer>
-                  </EuiFlexGroup>
-                  <CustomPlot
-                    noHits={noHits}
-                    series={responseTimeSeries}
-                    {...hoverXHandlers}
-                    tickFormatY={this.getResponseTimeTickFormatter}
-                    formatTooltipValue={this.getResponseTimeTooltipFormatter}
-                  />
-                </React.Fragment>
-              </EuiPanel>
-            </EuiFlexItem>
-
-            <EuiFlexItem style={{ flexShrink: 1 }}>
-              <EuiPanel>
-                <React.Fragment>
+  return (
+    <>
+      <ChartsSyncContextProvider>
+        <EuiFlexGrid columns={2} gutterSize="s">
+          <EuiFlexItem data-cy={`transaction-duration-charts`}>
+            <EuiPanel>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
                   <EuiTitle size="xs">
-                    <span>{tpmLabel(transactionType)}</span>
+                    <span>{responseTimeLabel(transactionType)}</span>
                   </EuiTitle>
-                  <CustomPlot
-                    noHits={noHits}
-                    series={tpmSeries}
-                    {...hoverXHandlers}
-                    tickFormatY={this.getTPMFormatter}
-                    formatTooltipValue={this.getTPMTooltipFormatter}
-                    truncateLegends
-                  />
-                </React.Fragment>
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGrid>
-        )}
-      />
-    );
-  }
+                </EuiFlexItem>
+                <LicenseContext.Consumer>
+                  {(license) => (
+                    <MLHeader
+                      hasValidMlLicense={license?.getFeature('ml').isAvailable}
+                      mlJobId={charts.mlJobId}
+                    />
+                  )}
+                </LicenseContext.Consumer>
+              </EuiFlexGroup>
+              <LineChart
+                fetchStatus={fetchStatus}
+                id="transactionDuration"
+                timeseries={responseTimeSeries || []}
+                yLabelFormat={getResponseTimeTickFormatter(formatter)}
+                onToggleLegend={(serie) => {
+                  if (serie) {
+                    toggleSerie(serie);
+                  }
+                }}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem style={{ flexShrink: 1 }}>
+            <EuiPanel>
+              <EuiTitle size="xs">
+                <span>{tpmLabel(transactionType)}</span>
+              </EuiTitle>
+              <LineChart
+                fetchStatus={fetchStatus}
+                id="requestPerMinutes"
+                timeseries={tpmSeries || []}
+                yLabelFormat={getTPMTooltipFormatter}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGrid>
+
+        <EuiSpacer size="s" />
+
+        <EuiFlexGrid columns={2} gutterSize="s">
+          <EuiFlexItem>
+            <TransactionErrorRateChart />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TransactionBreakdown />
+          </EuiFlexItem>
+        </EuiFlexGrid>
+      </ChartsSyncContextProvider>
+    </>
+  );
 }
 
 function tpmLabel(type?: string) {
-  return type === 'request'
+  return type === TRANSACTION_REQUEST
     ? i18n.translate(
         'xpack.apm.metrics.transactionChart.requestsPerMinuteLabel',
         {
-          defaultMessage: 'Requests per minute'
+          defaultMessage: 'Requests per minute',
         }
       )
     : i18n.translate(
         'xpack.apm.metrics.transactionChart.transactionsPerMinuteLabel',
         {
-          defaultMessage: 'Transactions per minute'
+          defaultMessage: 'Transactions per minute',
         }
       );
 }
 
 function responseTimeLabel(type?: string) {
   switch (type) {
-    case 'page-load':
+    case TRANSACTION_PAGE_LOAD:
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.pageLoadTimesLabel',
         {
-          defaultMessage: 'Page load times'
+          defaultMessage: 'Page load times',
         }
       );
-    case 'route-change':
+    case TRANSACTION_ROUTE_CHANGE:
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.routeChangeTimesLabel',
         {
-          defaultMessage: 'Route change times'
+          defaultMessage: 'Route change times',
         }
       );
     default:
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.transactionDurationLabel',
         {
-          defaultMessage: 'Transaction duration'
+          defaultMessage: 'Transaction duration',
         }
       );
   }

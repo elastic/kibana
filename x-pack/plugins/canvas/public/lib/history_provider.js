@@ -6,7 +6,7 @@
 
 import lzString from 'lz-string';
 import { createMemoryHistory, parsePath, createPath } from 'history';
-import createHashStateHistory from 'history-extra';
+import createHashStateHistory from 'history-extra/dist/createHashStateHistory';
 import { getWindow } from './get_window';
 
 function wrapHistoryInstance(history) {
@@ -19,6 +19,7 @@ function wrapHistoryInstance(history) {
   const locationFormat = (location, action, parser) => ({
     pathname: location.pathname,
     hash: location.hash,
+    search: location.search,
     state: parser(location.state),
     action: action.toLowerCase(),
   });
@@ -124,7 +125,7 @@ function wrapHistoryInstance(history) {
     const prevLocationObj = locationFormat(prevLocation, action, wrappedHistory.parse);
 
     // execute all listeners
-    historyState.onChange.forEach(fn => fn.call(null, locationObj, prevLocationObj));
+    historyState.onChange.forEach((fn) => fn.call(null, locationObj, prevLocationObj));
 
     // track the updated location
     historyState.prevLocation = wrappedHistory.getLocation();
@@ -135,12 +136,21 @@ function wrapHistoryInstance(history) {
 
 const instances = new WeakMap();
 
-const getHistoryInstance = win => {
+const getHistoryInstance = (win) => {
   // if no window object, use memory module
   if (typeof win === 'undefined' || !win.history) {
     return createMemoryHistory();
   }
   return createHashStateHistory();
+};
+
+export const createHistory = (win = getWindow()) => {
+  // create and cache wrapped history instance
+  const historyInstance = getHistoryInstance(win);
+  const wrappedInstance = wrapHistoryInstance(historyInstance);
+  instances.set(win, wrappedInstance);
+
+  return wrappedInstance;
 };
 
 export const historyProvider = (win = getWindow()) => {
@@ -150,10 +160,13 @@ export const historyProvider = (win = getWindow()) => {
     return instance;
   }
 
-  // create and cache wrapped history instance
-  const historyInstance = getHistoryInstance(win);
-  const wrappedInstance = wrapHistoryInstance(historyInstance);
-  instances.set(win, wrappedInstance);
+  return createHistory(win);
+};
 
-  return wrappedInstance;
+export const destroyHistory = (win = getWindow()) => {
+  const instance = instances.get(win);
+
+  if (instance) {
+    instance.resetOnChange();
+  }
 };

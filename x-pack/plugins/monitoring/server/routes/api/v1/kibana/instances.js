@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getKibanas } from '../../../../lib/kibana/get_kibanas';
@@ -20,17 +20,17 @@ export function kibanaInstancesRoute(server) {
     path: '/api/monitoring/v1/clusters/{clusterUuid}/kibana/instances',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required()
+        params: schema.object({
+          clusterUuid: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -39,7 +39,7 @@ export function kibanaInstancesRoute(server) {
       const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
-        const [ clusterStatus, kibanas ] = await Promise.all([
+        const [clusterStatus, kibanas] = await Promise.all([
           getKibanaClusterStatus(req, kbnIndexPattern, { clusterUuid }),
           getKibanas(req, kbnIndexPattern, { clusterUuid }),
         ]);
@@ -48,9 +48,9 @@ export function kibanaInstancesRoute(server) {
           clusterStatus,
           kibanas,
         };
-      } catch(err) {
+      } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
 }

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import Logger from '../cli_plugin/lib/logger';
-import { confirm, question } from '../legacy/server/utils';
-import { createPromiseFromStreams, createConcatStream } from '../legacy/utils';
+import { Logger } from '../cli_plugin/lib/logger';
+import { confirm, question } from './utils';
+import { createPromiseFromStreams, createConcatStream } from '../core/server/utils';
 
 /**
  * @param {Keystore} keystore
@@ -35,7 +35,7 @@ export async function add(keystore, key, options = {}) {
   let value;
 
   if (!keystore.exists()) {
-    return logger.error('ERROR: Kibana keystore not found. Use \'create\' command to create one.');
+    return logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");
   }
 
   if (!options.force && keystore.has(key)) {
@@ -53,13 +53,21 @@ export async function add(keystore, key, options = {}) {
   if (options.stdin) {
     value = await createPromiseFromStreams([
       options.stdinStream || process.stdin,
-      createConcatStream('')
+      createConcatStream(''),
     ]);
   } else {
     value = await question(`Enter value for ${key}`, { mask: '*' });
   }
 
-  keystore.add(key, value.trim());
+  const parsedValue = value.trim();
+  let parsedJsonValue;
+  try {
+    parsedJsonValue = JSON.parse(parsedValue);
+  } catch {
+    // noop, only treat value as json if it parses as JSON
+  }
+
+  keystore.add(key, parsedJsonValue ?? parsedValue);
   keystore.save();
 }
 

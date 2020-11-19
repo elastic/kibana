@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
-  describe('feature controls', () => {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('feature controls', function () {
+    this.tags(['skipFirefox']);
     loadTestFile(require.resolve('./dashboard_security'));
     loadTestFile(require.resolve('./dashboard_spaces'));
   });

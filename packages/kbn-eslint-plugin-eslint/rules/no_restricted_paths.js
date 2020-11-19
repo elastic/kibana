@@ -77,6 +77,7 @@ module.exports = {
                   anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
                 },
                 allowSameFolder: { type: 'boolean' },
+                errorMessage: { type: 'string' },
               },
               additionalProperties: false,
             },
@@ -97,15 +98,16 @@ module.exports = {
     }
 
     function checkForRestrictedImportPath(importPath, node) {
-      const absoluteImportPath = resolve(importPath, context);
-      if (!absoluteImportPath) return;
+      const absoluteImportPath = importPath[0] === '.' ? resolve(importPath, context) : undefined;
 
       const currentFilename = context.getFilename();
-      for (const { target, from, allowSameFolder } of zones) {
+      for (const { target, from, allowSameFolder, errorMessage = '' } of zones) {
         const srcFilePath = resolve(currentFilename, context);
 
         const relativeSrcFile = path.relative(basePath, srcFilePath);
-        const relativeImportFile = path.relative(basePath, absoluteImportPath);
+        const relativeImportFile = absoluteImportPath
+          ? path.relative(basePath, absoluteImportPath)
+          : importPath;
 
         if (
           !mm([relativeSrcFile], target).length ||
@@ -116,12 +118,18 @@ module.exports = {
 
         context.report({
           node,
-          message: `Unexpected path "${importPath}" imported in restricted zone.`,
+          message: `Unexpected path "${importPath}" imported in restricted zone.${
+            errorMessage ? ' ' + errorMessage : ''
+          }`,
         });
       }
     }
 
     return {
+      ExportNamedDeclaration(node) {
+        if (!node.source) return;
+        checkForRestrictedImportPath(node.source.value, node.source);
+      },
       ImportDeclaration(node) {
         checkForRestrictedImportPath(node.source.value, node.source);
       },

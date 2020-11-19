@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
 import { FrameworkAdapter, FrameworkInfo, FrameworkUser } from './adapter_types';
 
 export class TestingFrameworkAdapter implements FrameworkAdapter {
@@ -40,30 +39,7 @@ export class TestingFrameworkAdapter implements FrameworkAdapter {
     return;
   }
 
-  public renderUIAtPath(
-    path: string,
-    component: React.ReactElement<any>,
-    toController: 'management' | 'self' = 'self'
-  ) {
-    throw new Error('not yet implamented');
-  }
-
-  public registerManagementSection(settings: {
-    id?: string;
-    name: string;
-    iconName: string;
-    order?: number;
-  }) {
-    throw new Error('not yet implamented');
-  }
-
-  public registerManagementUI(settings: {
-    sectionId?: string;
-    name: string;
-    basePath: string;
-    visable?: boolean;
-    order?: number;
-  }) {
+  public registerManagementUI(settings: { sectionId?: string; name: string; order?: number }) {
     throw new Error('not yet implamented');
   }
 }

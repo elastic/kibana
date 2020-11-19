@@ -1,42 +1,55 @@
 [[saved-objects-api-update]]
-=== Update Object
+=== Update object API
+++++
+<titleabbrev>Update object</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Update the attributes for existing {kib} saved objects.
 
-The update saved object API enables you to update the attributes for an
-existing Kibana saved object.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-update-request]]
 ==== Request
 
-`PUT /api/saved_objects/<type>/<id>`
+`PUT <kibana host>:<port>/api/saved_objects/<type>/<id>`
 
-==== Path Parameters
+`PUT <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+[[saved-objects-api-update-path-params]]
+==== Path parameters
 
-`id` (required)::
-  (string) ID of object to update
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
-==== Request Body
+`id`::
+  (Required, string) The object ID to update.
 
-`attributes` (required)::
-  (object) The data to persist
+[[saved-objects-api-update-request-body]]
+==== Request body
 
-`references` (optional)::
-  (array) An array of objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. The `name` can be used in the attributes to refer to the other saved object, but never the `id`, which may be updated automatically in the future during migrations or import/export.
+`attributes`::
+  (Required, object) The data to persist.
++
+WARNING: When you update, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API and break {kib}. Make sure any data that you send to the API is properly formed.
 
-==== Examples
+`references`::
+  (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. To refer to the other saved object, use `name` in the attributes, but never the `id`, which automatically updates during migrations or import/export.
 
-The following example updates an existing index pattern object identified as
-`my-pattern` with a different index pattern title.
+[[saved-objects-api-update-errors-codes]]
+==== Response code
 
-[source,js]
+`200`::
+    Indicates a successful call.
+
+[[saved-objects-api-update-example]]
+==== Example
+
+Update an existing index pattern object,`my-pattern`, with a different title:
+
+[source,sh]
 --------------------------------------------------
-PUT api/saved_objects/index-pattern/my-pattern
+$ curl -X PUT api/saved_objects/index-pattern/my-pattern
 {
   "attributes": {
     "title": "some-other-pattern-*"
@@ -45,10 +58,9 @@ PUT api/saved_objects/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "my-pattern",
@@ -59,9 +71,3 @@ containing a JSON structure similar to the following example:
   }
 }
 --------------------------------------------------
-
-==== Known issues
-
-1. *Attributes are not validated at update time*. This means you can pass
-arbitrary and ill-formed data into this API that can break Kibana. Make sure
-any data you send to this API is properly formed.

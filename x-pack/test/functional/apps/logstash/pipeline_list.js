@@ -22,6 +22,9 @@ export default function ({ getService, getPageObjects }) {
       originalWindowSize = await browser.getWindowSize();
       await browser.setWindowSize(1600, 1000);
       await esArchiver.load('logstash/example_pipelines');
+    });
+
+    beforeEach(async () => {
       await PageObjects.logstash.gotoPipelineList();
     });
 
@@ -32,25 +35,15 @@ export default function ({ getService, getPageObjects }) {
 
     it('shows example pipelines', async () => {
       const rows = await pipelineList.readRows();
-      const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
+      const rowsWithoutTime = rows.map((row) => omit(row, 'lastModified'));
 
-      for (const time of rows.map(row => row.lastModified)) {
+      for (const time of rows.map((row) => row.lastModified)) {
         // last modified is a relative time string. Check for 'ago' suffix
-        expect(time)
-          .to.be.a('string')
-          .match(/ ago$/);
+        expect(time).to.be.a('string').match(/ ago$/);
       }
 
-      const expectedRows = [
-        {
-          selected: false,
-          id: 'tweets_and_beats',
-          description: 'ingest tweets and beats',
-          username: 'elastic',
-        },
-      ];
-
-      for (let emptyPipelineId = 1; emptyPipelineId <= 19; ++emptyPipelineId) {
+      let expectedRows = [];
+      for (let emptyPipelineId = 1; emptyPipelineId <= 21; ++emptyPipelineId) {
         expectedRows.push({
           selected: false,
           id: `empty_pipeline_${emptyPipelineId}`,
@@ -58,6 +51,10 @@ export default function ({ getService, getPageObjects }) {
           username: 'elastic',
         });
       }
+      expectedRows = expectedRows.sort((a, b) => {
+        return a.id.localeCompare(b.id);
+      });
+      expectedRows.pop();
 
       expect(rowsWithoutTime).to.eql(expectedRows);
     });
@@ -85,10 +82,6 @@ export default function ({ getService, getPageObjects }) {
         await pipelineList.clickAdd();
         await pipelineEditor.assertExists();
         await pipelineEditor.assertDefaultInputs();
-      });
-
-      after(async () => {
-        await PageObjects.logstash.gotoPipelineList();
       });
     });
 
@@ -122,14 +115,11 @@ export default function ({ getService, getPageObjects }) {
 
     describe('row links', () => {
       it('opens the selected row in the editor', async () => {
+        await PageObjects.logstash.gotoPipelineList();
         await pipelineList.setFilter('tweets_and_beats');
         await pipelineList.clickFirstRowId();
         await pipelineEditor.assertExists();
         await pipelineEditor.assertEditorId('tweets_and_beats');
-      });
-
-      after(async () => {
-        await PageObjects.logstash.gotoPipelineList();
       });
     });
 
@@ -141,26 +131,24 @@ export default function ({ getService, getPageObjects }) {
       it('takes user to the second page', async () => {
         await pipelineList.clickNextPage();
         const rows = await pipelineList.readRows();
-        const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
+        const rowsWithoutTime = rows.map((row) => omit(row, 'lastModified'));
 
-        for (const time of rows.map(row => row.lastModified)) {
+        for (const time of rows.map((row) => row.lastModified)) {
           // last modified is a relative time string. Check for 'ago' suffix
-          expect(time)
-            .to.be.a('string')
-            .match(/ ago$/);
+          expect(time).to.be.a('string').match(/ ago$/);
         }
 
         expect(rowsWithoutTime).to.eql([
           {
             selected: false,
-            id: 'empty_pipeline_20',
+            id: 'empty_pipeline_9',
             description: 'an empty pipeline',
             username: 'elastic',
           },
           {
             selected: false,
-            id: 'empty_pipeline_21',
-            description: 'an empty pipeline',
+            id: 'tweets_and_beats',
+            description: 'ingest tweets and beats',
             username: 'elastic',
           },
         ]);
@@ -224,10 +212,6 @@ export default function ({ getService, getPageObjects }) {
           queueMaxBytesUnits,
           queueCheckpointWrites,
         });
-      });
-
-      after(async () => {
-        await PageObjects.logstash.gotoPipelineList();
       });
     });
   });

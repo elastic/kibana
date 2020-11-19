@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { dirname, extname, join, relative, resolve, sep } from 'path';
-
-import { REPO_ROOT } from './constants';
+import { dirname, extname, join, relative, resolve, sep, basename } from 'path';
 
 export class File {
   private path: string;
@@ -28,7 +26,7 @@ export class File {
 
   constructor(path: string) {
     this.path = resolve(path);
-    this.relativePath = relative(REPO_ROOT, this.path);
+    this.relativePath = relative(process.cwd(), this.path);
     this.ext = extname(this.path);
   }
 
@@ -38,6 +36,12 @@ export class File {
 
   public getRelativePath() {
     return this.relativePath;
+  }
+
+  public getWithoutExtension() {
+    const directory = dirname(this.path);
+    const stem = basename(this.path, this.ext);
+    return new File(resolve(directory, stem));
   }
 
   public isJs() {
@@ -57,7 +61,9 @@ export class File {
   }
 
   public isFixture() {
-    return this.relativePath.split(sep).includes('__fixtures__');
+    return (
+      this.relativePath.split(sep).includes('__fixtures__') || this.path.endsWith('.test-d.ts')
+    );
   }
 
   public getRelativeParentDirs() {

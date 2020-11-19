@@ -1,0 +1,162 @@
+[role="xpack"]
+[[secure-reporting]]
+=== Reporting and security
+
+Reporting operates by creating and updating documents in {es} in response to
+user actions in {kib}.
+
+To use {report-features} with {security-features} enabled, you need to
+<<using-kibana-with-security,configure security in {kib}>>.
+If you are automatically generating reports with
+{ref}/xpack-alerting.html[{watcher}], you also need to configure {watcher}
+to trust the {kib} server's certificate.
+////
+For more information, see
+<<securing-reporting>>.
+////
+
+[[reporting-app-users]]
+To enable users to generate reports, you must assign them the built-in `reporting_user`
+role.  Users will also need the appropriate <<kibana-privileges, {kib} privileges>> to access the objects
+to report on and the {es} indices.
+
+[float]
+[[reporting-roles-management-ui]]
+=== If you are using the `native` realm
+
+To assign roles, use the *Roles* UI or <<reporting-roles-user-api, user API>>.
+This example shows how to use *Roles* page to create a user who has a custom role and the
+`reporting_user` role.
+
+. Open the main menu, then click *Stack Management > Roles*.
+
+. Click *Create role*, then give the role a name, for example, `custom_reporting_user`.
+
+. Specify the indices and privileges.
++
+Access to data is an index-level privilege, so in *Create role*,
+add a line for each index that contains the data for the report and give each
+index `read` and `view_index_metadata` privileges.
+For more information, see {ref}/security-privileges.html[Security privileges].
++
+[role="screenshot"]
+image::user/security/images/reporting-privileges-example.png["Reporting privileges"]
+
+. Add space privileges.
++
+Reporting users typically save searches, create
+visualizations, and build dashboards. They require a space
+that provides read and write privileges in
+*Discover* and *Dashboard*.
+
+. Save your new role.
+
+. Open the main menu, then click *Stack Management > Users*, add a new user, and assign the user the built-in
+`reporting_user` role and your new custom role, `custom_reporting_user`.
+
+[float]
+==== With a custom index
+
+If you are using Reporting with a custom index,
+the `xpack.reporting.index` setting should begin 
+with `.reporting-*`. The default {kib} system user has
+`all` privileges against the `.reporting-*` pattern of indices.
+
+[source,js]
+xpack.reporting.index: '.reporting-custom-index'
+
+If you use a different pattern for the `xpack.reporting.index` setting,
+you must create a custom role with appropriate access to the index, similar
+to the following:
+
+. Open the main menu, then click *Stack Management > Roles*.
+. Click *Create role*, then name the role `custom-reporting-user`.
+. Specify the custom index and assign it the `all` index privilege.
+. Open the main menu, then click *Stack Management > Users* and create a new user with
+the `kibana_system` role and the `custom-reporting-user` role.
+. Configure {kib} to use the new account:
+[source,js]
+elasticsearch.username: 'custom_kibana_system'
+
+[float]
+[[reporting-roles-user-api]]
+==== With the user API
+This example uses the {ref}/security-api-put-user.html[user API] to create a user who has the
+`reporting_user` role and the `kibana_admin` role:
+
+[source, sh]
+---------------------------------------------------------------
+POST /_security/user/reporter
+{
+  "password" : "x-pack-test-password",
+  "roles" : ["kibana_admin", "reporting_user"],
+  "full_name" : "Reporting User"
+}
+---------------------------------------------------------------
+
+[float]
+=== If you are using an external identity provider
+
+If you are using an external identity provider, such as
+LDAP or Active Directory, you can either assign
+roles on a per user basis, or assign roles to groups of users. By default, role
+mappings are configured in
+{ref}/mapping-roles.html[`config/shield/role_mapping.yml`].
+For example, the following snippet assigns the user named Bill Murray the
+`kibana_admin` and `reporting_user` roles:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+kibana_admin:
+  - "cn=Bill Murray,dc=example,dc=com"
+reporting_user:
+  - "cn=Bill Murray,dc=example,dc=com"
+--------------------------------------------------------------------------------
+
+[role="xpack"]
+[[securing-reporting]]
+=== Secure the reporting endpoints
+
+In a production environment, you should restrict access to
+the reporting endpoints to authorized users. This requires that you:
+
+. Enable {stack-security-features} on your {es} cluster. For more information,
+see {ref}/security-getting-started.html[Getting started with security].
+. Configure TLS/SSL encryption for the {kib} server. For more information, see
+<<configuring-tls>>.
+. Specify the {kib} server's CA certificate chain in `elasticsearch.yml`:
++
+--
+If you are using your own CA to sign the {kib} server certificate, then you need
+to specify the CA certificate chain in {es} to properly establish trust in TLS
+connections between {watcher} and {kib}. If your CA certificate chain is
+contained in a PKCS #12 trust store, specify it like so:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.http.ssl.truststore.path: "/path/to/your/truststore.p12"
+xpack.http.ssl.truststore.type: "PKCS12"
+xpack.http.ssl.truststore.password: "optional decryption password"
+--------------------------------------------------------------------------------
+
+Otherwise, if your CA certificate chain is in PEM format, specify it like so:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.http.ssl.certificate_authorities: ["/path/to/your/cacert1.pem", "/path/to/your/cacert2.pem"]
+--------------------------------------------------------------------------------
+
+For more information, see {ref}/notification-settings.html#ssl-notification-settings[the {watcher} HTTP TLS/SSL Settings].
+--
+
+. Add one or more users who have the permissions
+necessary to use {kib} and {report-features}. For more information, see
+<<secure-reporting>>.
+
+Once you've enabled SSL for {kib}, all requests to the reporting endpoints
+must include valid credentials. For example, see the following page which
+includes a watch that submits requests as the built-in `elastic` user:
+<<automating-report-generation>>.
+
+For more information about configuring watches, see
+{ref}/how-watcher-works.html[How {watcher} works].

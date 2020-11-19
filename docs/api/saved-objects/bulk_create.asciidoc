@@ -1,65 +1,76 @@
 [[saved-objects-api-bulk-create]]
-=== Bulk Create Objects
+=== Bulk create saved objects API
+++++
+<titleabbrev>Bulk create saved objects</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Create multiple {kib} saved objects.
 
-The bulk-create saved object API enables you to persist multiple Kibana saved
-objects.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-bulk-create-request]]
 ==== Request
 
-`POST /api/saved_objects/_bulk_create`
+`POST <kibana host>:<port>/api/saved_objects/_bulk_create`
+
+`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_bulk_create`
 
 
-==== Query Parameters
+[[saved-objects-api-bulk-create-path-params]]
+==== Path parameters
 
-`overwrite` (optional)::
-  (boolean) If true, will overwrite the document with the same ID.
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL the default space is used.
 
+[[saved-objects-api-bulk-create-query-params]]
+==== Query parameters
 
-==== Request Body
+`overwrite`::
+  (Optional, boolean) When `true`, overwrites the document with the same ID.
 
-The request body must be a JSON array containing objects, each of which
-contains the following properties:
+[[saved-objects-api-bulk-create-request-body]]
+==== Request body
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
-`id` (optional)::
-  (string) Enables specifying an ID to use, as opposed to one being randomly generated
+`id`::
+  (Optional, string) Specifies an ID instead of using a randomly generated ID.
 
-`attributes` (required)::
-  (object) The data to persist
+`attributes`::
+  (Required, object) The data that you want to create.
 
-`references` (optional)::
-  (array) An array of objects with `name`, `id`, and `type` properties that describe the other saved objects this object references. The `name` can be used in the attributes to refer to the other saved object, but never the `id`, which may be updated automatically in the future during migrations or import/export.
+`references`::
+  (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects in the referenced object. To refer to the other saved object, use `name` in the attributes. Never use `id` to refer to the other saved object. `id` can be automatically updated during migrations, import, or export.
 
-`version` (optional)::
-  (number) Enables specifying a version
+`initialNamespaces`::
+  (Optional, string array) Identifiers for the <<xpack-spaces,spaces>> in which this object is created. If this is provided, the
+  object is created only in the explicitly defined spaces. If this is not provided, the object is created in the current space
+  (default behavior).
 
+`version`::
+  (Optional, number) Specifies the version.
 
+[[saved-objects-api-bulk-create-response-body]]
 ==== Response body
 
-The response body will have a top level `saved_objects` property that contains
-an array of objects, which represent the response for each of the requested
-objects. The order of the objects in the response is identical to the order of
-the objects in the request.
+`saved_objects`::
+  (array) Top-level property the contains objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
 
-For any saved object that could not be persisted, an error object will exist in its
-place.
+Saved objects that are unable to persist are replaced with an error object.
 
+[[saved-objects-api-bulk-create-codes]]
+==== Response code
 
-==== Examples
+`200`::
+  Indicates a successful call.
 
-The following example attempts to persist an index pattern with id
-`my-pattern` and a dashboard with id `my-dashboard`, but only the index pattern
-could be persisted because there was an id collision with `my-dashboard` as a saved object with that id alread exists.
+[[saved-objects-api-bulk-create-example]]
+==== Example
 
-[source,js]
+Create an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
+
+[source,sh]
 --------------------------------------------------
-POST api/saved_objects/_bulk_create
+$ curl -X POST api/saved_objects/_bulk_create
 [
   {
     "type": "index-pattern",
@@ -70,7 +81,7 @@ POST api/saved_objects/_bulk_create
   },
   {
     "type": "dashboard",
-    "id": "my-dashboard",
+    "id": "be3733a0-9efe-11e7-acb3-3dab96693fab",
     "attributes": {
       "title": "Look at my dashboard"
     }
@@ -79,10 +90,9 @@ POST api/saved_objects/_bulk_create
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "saved_objects": [
@@ -95,13 +105,15 @@ containing a JSON structure similar to the following example:
       }
     },
     {
-      "id": "my-dashboard",
+      "id": "be3733a0-9efe-11e7-acb3-3dab96693fab",
       "type": "dashboard",
       "error": {
         "statusCode": 409,
-        "message": "version conflict, document already exists"
+        "message": "Saved object [dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab] conflict"
       }
     }
   ]
 }
 --------------------------------------------------
+
+There is already a saved object with the `my-dashboard` ID, so only the index pattern is created.

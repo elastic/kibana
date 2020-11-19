@@ -1,0 +1,28 @@
+{
+  "id": "infra",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [
+    "features",
+    "usageCollection",
+    "spaces",
+    
+    "data",
+    "dataEnhanced",
+    "visTypeTimeseries",
+    "alerts",
+    "triggersActionsUi"
+  ],
+  "optionalPlugins": ["ml", "observability", "home"],
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "infra"],
+  "requiredBundles": [
+    "observability",
+    "licenseManagement",
+    "kibanaUtils",
+    "kibanaReact",
+    "apm",
+    "home"
+  ]
+}

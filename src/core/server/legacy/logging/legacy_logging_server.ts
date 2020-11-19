@@ -17,14 +17,31 @@
  * under the License.
  */
 
-import { ServerExtType } from 'hapi';
-import Podium from 'podium';
-// @ts-ignore: implicit any for JS file
-import { Config, transformDeprecations } from '../../../../legacy/server/config';
-// @ts-ignore: implicit any for JS file
+import { ServerExtType } from '@hapi/hapi';
+import Podium from '@hapi/podium';
+// @ts-expect-error: implicit any for JS file
+import { Config } from '../../../../legacy/server/config';
+// @ts-expect-error: implicit any for JS file
 import { setupLogging } from '../../../../legacy/server/logging';
-import { LogLevel } from '../../logging/log_level';
-import { LogRecord } from '../../logging/log_record';
+import { LogLevel, LogRecord } from '../../logging';
+import { LegacyVars } from '../../types';
+
+export const metadataSymbol = Symbol('log message with metadata');
+export function attachMetaData(message: string, metadata: LegacyVars = {}) {
+  return {
+    [metadataSymbol]: {
+      message,
+      metadata,
+    },
+  };
+}
+const isEmptyObject = (obj: object) => Object.keys(obj).length === 0;
+
+function getDataToLog(error: Error | undefined, metadata: object, message: string) {
+  if (error) return error;
+  if (!isEmptyObject(metadata)) return attachMetaData(message, metadata);
+  return message;
+}
 
 interface PluginRegisterParams {
   plugin: {
@@ -33,7 +50,7 @@ interface PluginRegisterParams {
       options: PluginRegisterParams['options']
     ) => Promise<void>;
   };
-  options: Record<string, any>;
+  options: LegacyVars;
 }
 
 /**
@@ -67,7 +84,7 @@ export class LegacyLoggingServer {
 
   private onPostStopCallback?: () => void;
 
-  constructor(legacyLoggingConfig: Readonly<Record<string, any>>) {
+  constructor(legacyLoggingConfig: Readonly<LegacyVars>) {
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" Kibana.
@@ -82,7 +99,7 @@ export class LegacyLoggingServer {
       ops: { interval: 2147483647 },
     };
 
-    setupLogging(this, Config.withDefaultSchema(transformDeprecations(config)));
+    setupLogging(this, Config.withDefaultSchema(config));
   }
 
   public register({ plugin: { register }, options }: PluginRegisterParams): Promise<void> {
@@ -90,9 +107,11 @@ export class LegacyLoggingServer {
   }
 
   public log({ level, context, message, error, timestamp, meta = {} }: LogRecord) {
+    const { tags = [], ...metadata } = meta;
+
     this.events.emit('log', {
-      data: error || message,
-      tags: [getLegacyLogLevel(level), ...context.split('.'), ...(meta.tags || [])],
+      data: getDataToLog(error, metadata, message),
+      tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
       timestamp: timestamp.getTime(),
     });
   }

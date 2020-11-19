@@ -7,7 +7,7 @@
 export function flattenPipelineSection(pipelineSection, depth = 0, parentId = null) {
   const list = [];
 
-  pipelineSection.forEach(statement => {
+  pipelineSection.forEach((statement) => {
     list.push(...statement.toList(depth, parentId));
   });
 

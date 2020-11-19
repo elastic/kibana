@@ -4,55 +4,103 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { toastNotifications } from 'ui/notify';
-import { MarkdownSimple } from 'ui/markdown';
-import { PLUGIN } from '../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export class LogstashLicenseService {
-  constructor(xpackInfoService, kbnUrlService, $timeout) {
-    this.xpackInfoService = xpackInfoService;
-    this.kbnUrlService = kbnUrlService;
-    this.$timeout = $timeout;
+  constructor(license, navigateToApp, toasts) {
+    this.license = license;
+    this.navigateToApp = navigateToApp;
+    this.toasts = toasts;
   }
 
   get enableLinks() {
-    return Boolean(this.xpackInfoService.get(`features.${PLUGIN.ID}.enableLinks`));
+    return this.calculated.enableLinks;
   }
 
   get isAvailable() {
-    return Boolean(this.xpackInfoService.get(`features.${PLUGIN.ID}.isAvailable`));
+    return this.calculated.isAvailable;
   }
 
   get isReadOnly() {
-    return Boolean(this.xpackInfoService.get(`features.${PLUGIN.ID}.isReadOnly`));
+    return this.calculated.isReadOnly;
   }
 
   get message() {
-    return this.xpackInfoService.get(`features.${PLUGIN.ID}.message`);
+    return this.calculated.message;
   }
 
-  notifyAndRedirect() {
-    toastNotifications.addDanger({
-      title: <MarkdownSimple>{this.xpackInfoService.get(`features.${PLUGIN.ID}.message`)}</MarkdownSimple>,
-    });
-    this.kbnUrlService.redirect('/management');
+  get isSecurityEnabled() {
+    return this.license.getFeature(`security`).isEnabled;
   }
 
   /**
    * Checks if the license is valid or the license can perform downgraded UI tasks.
-   * Otherwise, notifies and redirects.
+   * Rejects if the plugin is not available due to license.
    */
   checkValidity() {
     return new Promise((resolve, reject) => {
-      this.$timeout(() => {
-        if (this.isAvailable) {
-          return resolve();
-        }
+      if (this.isAvailable) {
+        return resolve();
+      }
 
-        this.notifyAndRedirect();
-        return reject();
-      }, 10); // To allow latest XHR call to update license info
+      return reject();
     });
+  }
+
+  get calculated() {
+    if (!this.license) {
+      throw new Error(`No license available!`);
+    }
+
+    if (!this.isSecurityEnabled) {
+      return {
+        isAvailable: false,
+        enableLinks: false,
+        isReadOnly: false,
+        message: i18n.translate('xpack.logstash.managementSection.enableSecurityDescription', {
+          defaultMessage:
+            'Security must be enabled in order to use Logstash pipeline management features.' +
+            ' Please set xpack.security.enabled: true in your elasticsearch.yml.',
+        }),
+      };
+    }
+
+    if (!this.license.hasAtLeast('standard')) {
+      return {
+        isAvailable: false,
+        enableLinks: false,
+        isReadOnly: false,
+        message: i18n.translate(
+          'xpack.logstash.managementSection.licenseDoesNotSupportDescription',
+          {
+            defaultMessage:
+              'Your {licenseType} license does not support Logstash pipeline management features. Please upgrade your license.',
+            values: { licenseType: this.license.type },
+          }
+        ),
+      };
+    }
+
+    if (!this.license.isActive) {
+      return {
+        isAvailable: true,
+        enableLinks: true,
+        isReadonly: true,
+        message: i18n.translate(
+          'xpack.logstash.managementSection.pipelineCrudOperationsNotAllowedDescription',
+          {
+            defaultMessage:
+              'You cannot edit, create, or delete your Logstash pipelines because your {licenseType} license has expired.',
+            values: { licenseType: this.license.type },
+          }
+        ),
+      };
+    }
+
+    return {
+      isAvailable: true,
+      enableLinks: true,
+      isReadOnly: false,
+    };
   }
 }

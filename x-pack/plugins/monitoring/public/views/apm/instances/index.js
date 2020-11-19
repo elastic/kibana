@@ -5,70 +5,100 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import uiRoutes from'ui/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { ApmServerInstances } from '../../../components/apm/instances';
 import { MonitoringViewBaseEuiTableController } from '../..';
-import { I18nContext } from 'ui/i18n';
+import { SetupModeRenderer } from '../../../components/renderers';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import {
+  APM_SYSTEM_ID,
+  CODE_PATH_APM,
+  ALERT_MISSING_MONITORING_DATA,
+} from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_APM] });
     },
   },
   controller: class extends MonitoringViewBaseEuiTableController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, {
-        cluster_uuid: globalState.cluster_uuid
+        cluster_uuid: globalState.cluster_uuid,
       });
 
       super({
-        title: i18n('xpack.monitoring.apm.instances.routeTitle', {
+        title: i18n.translate('xpack.monitoring.apm.instances.routeTitle', {
           defaultMessage: '{apm} - Instances',
           values: {
-            apm: 'APM'
-          }
+            apm: 'APM server',
+          },
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.apm.instances.pageTitle', {
+          defaultMessage: 'APM server instances',
         }),
         storageKey: 'apm.instances',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/instances`,
         defaultData: {},
         reactNodeId: 'apmInstancesReact',
         $scope,
-        $injector
+        $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
+            filters: [
+              {
+                stackProduct: APM_SYSTEM_ID,
+              },
+            ],
+          },
+        },
       });
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(data);
-      });
-    }
+      this.scope = $scope;
+      this.injector = $injector;
 
-    renderReact(data) {
-      const {
-        pagination,
-        sorting,
-        onTableChange,
-      } = this;
+      $scope.$watch(
+        () => this.data,
+        (data) => {
+          const { pagination, sorting, onTableChange } = this;
 
-      const component = (
-        <I18nContext>
-          <ApmServerInstances
-            apms={{
-              pagination,
-              sorting,
-              onTableChange,
-              data,
-            }}
-          />
-        </I18nContext>
+          const component = (
+            <SetupModeRenderer
+              scope={this.scope}
+              injector={this.injector}
+              productName={APM_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <ApmServerInstances
+                    setupMode={setupMode}
+                    alerts={this.alerts}
+                    apms={{
+                      pagination,
+                      sorting,
+                      onTableChange,
+                      data,
+                    }}
+                  />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
+            />
+          );
+          this.renderReact(component);
+        }
       );
-      super.renderReact(component);
     }
-  }
+  },
 });

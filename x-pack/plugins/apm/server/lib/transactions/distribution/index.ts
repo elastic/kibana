@@ -4,43 +4,69 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../typings/common';
-import { Setup } from '../../helpers/setup_request';
-import { calculateBucketSize } from './calculate_bucket_size';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
+import { getDistributionMax } from './get_distribution_max';
+import { roundToNearestFiveOrTen } from '../../helpers/round_to_nearest_five_or_ten';
+import { MINIMUM_BUCKET_SIZE, BUCKET_TARGET_COUNT } from '../constants';
 
-export type ITransactionDistributionAPIResponse = PromiseReturnType<
-  typeof getDistribution
+function getBucketSize(max: number) {
+  const bucketSize = max / BUCKET_TARGET_COUNT;
+  return roundToNearestFiveOrTen(
+    bucketSize > MINIMUM_BUCKET_SIZE ? bucketSize : MINIMUM_BUCKET_SIZE
+  );
+}
+
+export type TransactionDistributionAPIResponse = PromiseReturnType<
+  typeof getTransactionDistribution
 >;
-export async function getDistribution(
-  serviceName: string,
-  transactionName: string,
-  transactionType: string,
-  transactionId: string,
-  traceId: string,
-  setup: Setup
-) {
-  const bucketSize = await calculateBucketSize(
+export async function getTransactionDistribution({
+  serviceName,
+  transactionName,
+  transactionType,
+  transactionId,
+  traceId,
+  setup,
+  searchAggregatedTransactions,
+}: {
+  serviceName: string;
+  transactionName: string;
+  transactionType: string;
+  transactionId: string;
+  traceId: string;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+}) {
+  const distributionMax = await getDistributionMax({
     serviceName,
     transactionName,
     transactionType,
-    setup
-  );
+    setup,
+    searchAggregatedTransactions,
+  });
 
-  const { defaultSample, buckets, totalHits } = await getBuckets(
+  if (distributionMax == null) {
+    return { noHits: true, buckets: [], bucketSize: 0 };
+  }
+
+  const bucketSize = getBucketSize(distributionMax);
+
+  const { buckets, noHits } = await getBuckets({
     serviceName,
     transactionName,
     transactionType,
     transactionId,
     traceId,
+    distributionMax,
     bucketSize,
-    setup
-  );
+    setup,
+    searchAggregatedTransactions,
+  });
 
   return {
-    totalHits,
+    noHits,
     buckets,
     bucketSize,
-    defaultSample
   };
 }

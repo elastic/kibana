@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
 
-interface TagBadgeProps {
-  iconType?: any;
-  onClick?: () => void;
-  onClickAriaLabel?: string;
+type TagBadgeProps = EuiBadgeProps & {
   maxIdRenderSize?: number;
   tag: { name: string; color: string; disabled?: boolean; id: string };
-}
+};
 
 export const TagBadge = (props: TagBadgeProps) => {
   const { iconType, onClick, onClickAriaLabel, tag } = props;
@@ -23,14 +20,28 @@ export const TagBadge = (props: TagBadgeProps) => {
     tag.name.length > maxIdRenderSize ? '...' : ''
   }`;
 
-  return (
-    <EuiBadge
-      color={tag.disabled ? 'default' : tag.color || 'primary'}
-      iconType={tag.disabled ? 'cross' : iconType}
-      onClick={tag.disabled ? undefined : onClick}
-      onClickAriaLabel={tag.disabled ? undefined : onClickAriaLabel}
-    >
-      {idToRender}
-    </EuiBadge>
-  );
+  if (tag.disabled) {
+    return (
+      <EuiBadge color="default" iconType="cross">
+        {idToRender}
+      </EuiBadge>
+    );
+  } else if (onClick && onClickAriaLabel) {
+    return (
+      <EuiBadge
+        color={tag.color || 'primary'}
+        iconType={iconType}
+        onClick={onClick as React.MouseEventHandler<HTMLButtonElement>}
+        onClickAriaLabel={onClickAriaLabel}
+      >
+        {idToRender}
+      </EuiBadge>
+    );
+  } else {
+    return (
+      <EuiBadge color={tag.color || 'primary'} iconType={iconType}>
+        {idToRender}
+      </EuiBadge>
+    );
+  }
 };

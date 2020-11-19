@@ -6,7 +6,8 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -27,36 +28,33 @@ class JobActionMenuUi extends Component {
     startJobs: PropTypes.func.isRequired,
     stopJobs: PropTypes.func.isRequired,
     deleteJobs: PropTypes.func.isRequired,
+    cloneJob: PropTypes.func.isRequired,
     isUpdating: PropTypes.bool.isRequired,
     iconSide: PropTypes.string,
     anchorPosition: PropTypes.string,
     label: PropTypes.node,
     iconType: PropTypes.string,
     jobs: PropTypes.array,
-  }
+  };
 
   static defaultProps = {
     iconSide: 'right',
     anchorPosition: 'rightUp',
     iconType: 'arrowDown',
     jobs: [],
-  }
+  };
 
   constructor(props) {
     super(props);
 
     this.state = {
       isPopoverOpen: false,
-      showDeleteConfirmation: false
+      showDeleteConfirmation: false,
     };
   }
 
   panels() {
-    const {
-      startJobs,
-      stopJobs,
-      intl,
-    } = this.props;
+    const { startJobs, stopJobs, cloneJob } = this.props;
 
     const isSingleSelection = this.isSingleSelection() ? 1 : 0;
 
@@ -64,11 +62,9 @@ class JobActionMenuUi extends Component {
 
     if (this.canStartJobs()) {
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.rollupJobs.jobActionMenu.startJobLabel',
+        name: i18n.translate('xpack.rollupJobs.jobActionMenu.startJobLabel', {
           defaultMessage: 'Start {isSingleSelection, plural, one {job} other {jobs}}',
-        }, {
-          isSingleSelection,
+          values: { isSingleSelection },
         }),
         icon: <EuiIcon type="play" />,
         onClick: () => {
@@ -80,11 +76,9 @@ class JobActionMenuUi extends Component {
 
     if (this.canStopJobs()) {
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.rollupJobs.jobActionMenu.stopJobLabel',
+        name: i18n.translate('xpack.rollupJobs.jobActionMenu.stopJobLabel', {
           defaultMessage: 'Stop {isSingleSelection, plural, one {job} other {jobs}}',
-        }, {
-          isSingleSelection,
+          values: { isSingleSelection },
         }),
         icon: <EuiIcon type="stop" />,
         onClick: () => {
@@ -94,13 +88,27 @@ class JobActionMenuUi extends Component {
       });
     }
 
+    if (this.canCloneJob()) {
+      items.push({
+        name: i18n.translate('xpack.rollupJobs.jobActionMenu.cloneJobLabel', {
+          defaultMessage: 'Clone job',
+        }),
+        icon: <EuiIcon data-test-subj="jobCloneActionContextMenu" type="copy" />,
+        onClick: () => {
+          this.closePopover();
+          const { jobs } = this.props;
+          cloneJob(jobs[0]);
+        },
+      });
+    }
+
     if (this.canDeleteJobs()) {
       items.push({
-        name: intl.formatMessage({
-          id: 'xpack.rollupJobs.jobActionMenu.deleteJobLabel',
+        name: i18n.translate('xpack.rollupJobs.jobActionMenu.deleteJobLabel', {
           defaultMessage: 'Delete {isSingleSelection, plural, one {job} other {jobs}}',
-        }, {
-          isSingleSelection,
+          values: {
+            isSingleSelection,
+          },
         }),
         icon: <EuiIcon type="trash" />,
         onClick: () => {
@@ -112,8 +120,7 @@ class JobActionMenuUi extends Component {
 
     const panelTree = {
       id: 0,
-      title: intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.panelTitle',
+      title: i18n.translate('xpack.rollupJobs.jobActionMenu.panelTitle', {
         defaultMessage: 'Job options',
       }),
       items,
@@ -123,14 +130,14 @@ class JobActionMenuUi extends Component {
   }
 
   onButtonClick = () => {
-    this.setState(prevState => ({
-      isPopoverOpen: !prevState.isPopoverOpen
+    this.setState((prevState) => ({
+      isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
 
   closePopover = () => {
     this.setState({
-      isPopoverOpen: false
+      isPopoverOpen: false,
     });
   };
 
@@ -144,17 +151,22 @@ class JobActionMenuUi extends Component {
 
   canStartJobs() {
     const { jobs } = this.props;
-    return jobs.some(job => job.status === 'stopped');
+    return jobs.some((job) => job.status === 'stopped');
   }
 
   canStopJobs() {
     const { jobs } = this.props;
-    return jobs.some(job => job.status === 'started');
+    return jobs.some((job) => job.status === 'started');
+  }
+
+  canCloneJob() {
+    const { jobs } = this.props;
+    return Boolean(jobs && jobs.length === 1);
   }
 
   canDeleteJobs() {
     const { jobs } = this.props;
-    const areAllJobsStopped = jobs.findIndex(job => job.status === 'started') === -1;
+    const areAllJobsStopped = jobs.findIndex((job) => job.status === 'started') === -1;
     return areAllJobsStopped;
   }
 
@@ -165,10 +177,7 @@ class JobActionMenuUi extends Component {
       return null;
     }
 
-    const {
-      deleteJobs,
-      jobs,
-    } = this.props;
+    const { deleteJobs, jobs } = this.props;
 
     const onConfirmDelete = () => {
       this.closePopover();
@@ -192,13 +201,13 @@ class JobActionMenuUi extends Component {
   };
 
   render() {
-    const { intl, isUpdating } = this.props;
+    const { isUpdating } = this.props;
 
     if (isUpdating) {
       return (
         <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l"/>
+            <EuiLoadingSpinner size="l" />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -219,18 +228,20 @@ class JobActionMenuUi extends Component {
       iconSide,
       anchorPosition,
       iconType,
-      label = intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.buttonLabel',
+      label = i18n.translate('xpack.rollupJobs.jobActionMenu.buttonLabel', {
         defaultMessage: 'Manage {jobCount, plural, one {job} other {jobs}}',
-      }, { jobCount }),
+        values: { jobCount },
+      }),
     } = this.props;
 
     const panels = this.panels();
 
-    const actionsAriaLabel = intl.formatMessage({
-      id: 'xpack.rollupJobs.jobActionMenu.jobActionMenuButtonAriaLabel',
-      defaultMessage: 'Job options',
-    });
+    const actionsAriaLabel = i18n.translate(
+      'xpack.rollupJobs.jobActionMenu.jobActionMenuButtonAriaLabel',
+      {
+        defaultMessage: 'Job options',
+      }
+    );
 
     const button = (
       <EuiButton
@@ -253,7 +264,6 @@ class JobActionMenuUi extends Component {
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}
           panelPaddingSize="none"
-          withTitle
           anchorPosition={anchorPosition}
           repositionOnScroll
         >
@@ -268,4 +278,4 @@ class JobActionMenuUi extends Component {
   }
 }
 
-export const JobActionMenu = injectI18n(JobActionMenuUi);
+export const JobActionMenu = JobActionMenuUi;

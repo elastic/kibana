@@ -19,26 +19,26 @@
 
 import expect from '@kbn/expect';
 
-
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const globalNav = getService('globalNav');
-  const PageObjects = getPageObjects(['common', 'home']);
+  const PageObjects = getPageObjects(['common', 'header', 'home']);
 
   describe('Kibana takes you home', function describeIndexTests() {
+    this.tags('includeFirefox');
 
-    it('clicking on kibana logo should take you to home page', async ()=> {
+    it('clicking on kibana logo should take you to home page', async () => {
       await PageObjects.common.navigateToApp('settings');
       await globalNav.clickLogo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const url = await browser.getCurrentUrl();
-      expect(url.includes('/app/kibana#/home')).to.be(true);
+      expect(url.includes('/app/home')).to.be(true);
     });
 
-    it('clicking on console on homepage should take you to console app', async ()=> {
+    it('clicking on console on homepage should take you to console app', async () => {
       await PageObjects.home.clickSynopsis('console');
       const url = await browser.getCurrentUrl();
-      expect(url.includes('/app/kibana#/dev_tools/console')).to.be(true);
+      expect(url.includes('/app/dev_tools#/console')).to.be(true);
     });
-
   });
 }

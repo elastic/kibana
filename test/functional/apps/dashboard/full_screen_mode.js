@@ -21,12 +21,20 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'common']);
+  const filterBar = getService('filterBar');
 
-  describe('full screen mode', async () => {
+  describe('full screen mode', () => {
     before(async () => {
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
 
@@ -43,14 +51,14 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('hides the chrome', async () => {
-      let isChromeVisible = await PageObjects.common.isChromeVisible();
+      const isChromeVisible = await PageObjects.common.isChromeVisible();
       expect(isChromeVisible).to.be(true);
 
       await PageObjects.dashboard.clickFullScreenMode();
 
       await retry.try(async () => {
-        isChromeVisible = await PageObjects.common.isChromeVisible();
-        expect(isChromeVisible).to.be(false);
+        const isChromeHidden = await PageObjects.common.isChromeHidden();
+        expect(isChromeHidden).to.be(true);
       });
     });
 
@@ -68,14 +76,28 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('exits when the text button is clicked on', async () => {
-      const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
-      await browser.moveMouseTo(logoButton);
-      await PageObjects.dashboard.clickExitFullScreenTextButton();
-
+      await PageObjects.dashboard.exitFullScreenMode();
       await retry.try(async () => {
         const isChromeVisible = await PageObjects.common.isChromeVisible();
         expect(isChromeVisible).to.be(true);
       });
+    });
+
+    it('shows filter bar in fullscreen mode', async () => {
+      await filterBar.addFilter('bytes', 'is', '12345678');
+      await PageObjects.dashboard.waitForRenderComplete();
+      await PageObjects.dashboard.clickFullScreenMode();
+      await retry.try(async () => {
+        const isChromeHidden = await PageObjects.common.isChromeHidden();
+        expect(isChromeHidden).to.be(true);
+      });
+      expect(await filterBar.getFilterCount()).to.be(1);
+      await PageObjects.dashboard.clickExitFullScreenLogoButton();
+      await retry.try(async () => {
+        const isChromeVisible = await PageObjects.common.isChromeVisible();
+        expect(isChromeVisible).to.be(true);
+      });
+      await filterBar.removeFilter('bytes');
     });
   });
 }

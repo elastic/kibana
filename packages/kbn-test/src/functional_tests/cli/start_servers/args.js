@@ -45,8 +45,8 @@ const options = {
 
 export function displayHelp() {
   const helpOptions = Object.keys(options)
-    .filter(name => name !== '_')
-    .map(name => {
+    .filter((name) => name !== '_')
+    .map((name) => {
       const option = options[name];
       return {
         ...option,
@@ -54,7 +54,7 @@ export function displayHelp() {
         default: option.defaultHelp || '',
       };
     })
-    .map(option => {
+    .map((option) => {
       return `--${option.usage.padEnd(30)} ${option.desc} ${option.default}`;
     })
     .join(`\n      `);
@@ -75,7 +75,8 @@ export function displayHelp() {
 export function processOptions(userOptions, defaultConfigPath) {
   validateOptions(userOptions);
 
-  const config = userOptions.config || defaultConfigPath;
+  const useDefaultConfig = !userOptions.config;
+  const config = useDefaultConfig ? defaultConfigPath : userOptions.config;
 
   if (!config) {
     throw new Error(`functional_tests_server: config is required`);
@@ -100,6 +101,7 @@ export function processOptions(userOptions, defaultConfigPath) {
   return {
     ...userOptions,
     config: resolve(config),
+    useDefaultConfig,
     createLogger,
     extraKbnOpts: userOptions._,
   };

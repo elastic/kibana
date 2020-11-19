@@ -6,20 +6,23 @@
 
 import { openSans } from '../../../common/lib/fonts';
 import { shapes } from '../../renderers/progress/shapes';
+import { ViewStrings } from '../../../i18n';
+
+const { Progress: strings } = ViewStrings;
 
 export const progress = () => ({
   name: 'progress',
-  displayName: 'Progress',
+  displayName: strings.getDisplayName(),
   modelArgs: [['_', { label: 'Value' }]],
   requiresContext: false,
   args: [
     {
       name: 'shape',
-      displayName: 'Shape',
-      help: 'Shape of the progress indicator',
+      displayName: strings.getShapeDisplayName(),
+      help: strings.getShapeHelp(),
       argType: 'select',
       options: {
-        choices: Object.keys(shapes).map(key => ({
+        choices: Object.keys(shapes).map((key) => ({
           value: key,
           //turns camel into title case
           name: key[0].toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
@@ -28,50 +31,50 @@ export const progress = () => ({
     },
     {
       name: 'max',
-      displayName: 'Maximum value',
-      help: 'Maximum value of the progress element',
+      displayName: strings.getMaxDisplayName(),
+      help: strings.getMaxHelp(),
       argType: 'number',
       default: '1',
     },
     {
       name: 'valueColor',
-      displayName: 'Progress color',
-      help: 'Accepts HEX, RGB or HTML Color names',
+      displayName: strings.getValueColorDisplayName(),
+      help: strings.getValueColorHelp(),
       argType: 'color',
       default: `#1785b0`,
     },
     {
       name: 'valueWeight',
-      displayName: 'Progress weight',
-      help: 'Thickness of the progress bar',
+      displayName: strings.getValueWeightDisplayName(),
+      help: strings.getValueWeightHelp(),
       argType: 'number',
       default: '20',
     },
     {
       name: 'barColor',
-      displayName: 'Background color',
-      help: 'Accepts HEX, RGB or HTML Color names',
+      displayName: strings.getBarColorDisplayName(),
+      help: strings.getBarColorHelp(),
       argType: 'color',
       default: `#f0f0f0`,
     },
     {
       name: 'barWeight',
-      displayName: 'Background weight',
-      help: 'Thickness of the background bar',
+      displayName: strings.getBarWeightDisplayName(),
+      help: strings.getBarWeightHelp(),
       argType: 'number',
       default: '20',
     },
     {
       name: 'label',
-      displayName: 'Label',
-      help: `Set true/false to show/hide label or provide a string to display as the label`,
+      displayName: strings.getLabelDisplayName(),
+      help: strings.getLabelHelp(),
       argType: 'toggle',
       default: 'true',
     },
     {
       name: 'font',
-      displayName: 'Label settings',
-      help: 'Font settings for the label. Technically, you can add other styles as well',
+      displayName: strings.getFontDisplayName(),
+      help: strings.getFontHelp(),
       argType: 'font',
       default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,
     },

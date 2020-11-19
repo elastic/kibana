@@ -10,11 +10,11 @@ import { get } from 'lodash';
  * Return true if the settings property is enabled or is using its default state of enabled
  * Note: this assumes that a 0 corresponds to disabled
  */
-const isEnabledOrDefault = property => {
+const isEnabledOrDefault = (property) => {
   return property === undefined || (Boolean(property) && property !== 'false');
 };
 
-export function findReason(settingsSource, context) {
+export function findReason(settingsSource, context, isCloudEnabled) {
   const iterateReasons = () => {
     // PluginEnabled: check for `monitoring.enabled: false`
     const monitoringEnabled = get(settingsSource, 'enabled');
@@ -23,8 +23,8 @@ export function findReason(settingsSource, context) {
         found: true,
         reason: {
           property: 'xpack.monitoring.enabled', // NOTE: field cannot be called `key` for reasons that are internal to React
-          data: String(monitoringEnabled) // data property must always be string, per propTypes
-        }
+          data: String(monitoringEnabled), // data property must always be string, per propTypes
+        },
       };
     }
 
@@ -37,8 +37,8 @@ export function findReason(settingsSource, context) {
           found: true,
           reason: {
             property: 'xpack.monitoring.collection.enabled',
-            data: String(collectionEnabled)
-          }
+            data: String(collectionEnabled),
+          },
         };
       }
     }
@@ -47,13 +47,14 @@ export function findReason(settingsSource, context) {
     const collectionIntervalRaw = get(settingsSource, 'collection.interval');
     if (collectionIntervalRaw !== undefined) {
       const collectionInterval = parseInt(collectionIntervalRaw, 10);
-      if (!Boolean(collectionIntervalRaw) || collectionInterval <= 0) { // parseInt on null == NaN
+      if (!Boolean(collectionIntervalRaw) || collectionInterval <= 0) {
+        // parseInt on null == NaN
         return {
           found: true,
           reason: {
             property: 'xpack.monitoring.collection.interval',
-            data: String(collectionIntervalRaw)
-          }
+            data: String(collectionIntervalRaw),
+          },
         };
       }
     }
@@ -66,7 +67,7 @@ export function findReason(settingsSource, context) {
         /*
          * find if all exporters are disabled or if all enabled exporters are remote
          */
-        const allEnabled = exporterKeys.filter(key => {
+        const allEnabled = exporterKeys.filter((key) => {
           return isEnabledOrDefault(exportersFromPacked[key].enabled);
         });
 
@@ -75,29 +76,42 @@ export function findReason(settingsSource, context) {
             found: true,
             reason: {
               property: 'xpack.monitoring.exporters',
-              data: 'Exporters are disabled: ' + exporterKeys.join(', ')
-            }
+              data: 'Exporters are disabled: ' + exporterKeys.join(', '),
+            },
           };
         }
 
-        const allEnabledLocal = exporterKeys.filter(key => {
+        const allEnabledLocal = exporterKeys.filter((key) => {
           const exporter = exportersFromPacked[key];
           return exporter.type === 'local' && isEnabledOrDefault(exporter.enabled);
         });
 
-        const allEnabledRemote = exporterKeys.filter(key => {
+        const allEnabledRemote = exporterKeys.filter((key) => {
           const exporter = exportersFromPacked[key];
           return exporter.type !== 'local' && isEnabledOrDefault(exporter.enabled);
         });
-
         if (allEnabledRemote.length > 0 && allEnabledLocal.length === 0) {
-          return {
-            found: true,
-            reason: {
-              property: 'xpack.monitoring.exporters',
-              data: 'Remote exporters indicate a possible misconfiguration: ' + allEnabledRemote.join(', ')
-            }
-          };
+          let ret = {};
+          if (isCloudEnabled) {
+            ret = {
+              found: true,
+              reason: {
+                property: 'xpack.monitoring.exporters.cloud_enabled',
+                data: 'Cloud detected',
+              },
+            };
+          } else {
+            ret = {
+              found: true,
+              reason: {
+                property: 'xpack.monitoring.exporters',
+                data:
+                  'Remote exporters indicate a possible misconfiguration: ' +
+                  allEnabledRemote.join(', '),
+              },
+            };
+          }
+          return ret;
         }
       }
     }
@@ -112,8 +126,8 @@ export function findReason(settingsSource, context) {
       found,
       reason: {
         ...foundReason,
-        ...context // merge context and reason for UI formatting
-      }
+        ...context, // merge context and reason for UI formatting
+      },
     };
   }
 

@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Http2ServerResponse } from 'http2';
 import { camelCase } from 'lodash';
-// @ts-ignore unconverted local file
 import { getClipboardData, setClipboardData } from './clipboard';
-// @ts-ignore unconverted local file
 import { cloneSubgraphs } from './clone_subgraphs';
-// @ts-ignore unconverted local file
-import { notify } from './notify';
+import { notifyService } from '../services';
 import * as customElementService from './custom_element_service';
 import { getId } from './get_id';
-import { PositionedElement } from './positioned_element';
+import { PositionedElement } from '../../types';
+import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
 
 const extractId = (node: { id: string }): string => node.id;
 
@@ -38,7 +35,7 @@ export interface Props {
   /**
    * selects elements on the page
    */
-  selectToplevelNodes: (elements: PositionedElement) => void;
+  selectToplevelNodes: (elements: PositionedElement[]) => void;
   /**
    * deletes elements from the page
    */
@@ -47,9 +44,13 @@ export interface Props {
    * commits events to layout engine
    */
   commit: (eventType: string, config: { event: string }) => void;
+  /**
+   * sets new position for multiple elements
+   */
+  setMultiplePositions: (elements: PositionedElement[]) => void;
 }
 
-// handlers for clone and delete
+// handlers for clone, delete, and saving custom elements
 export const basicHandlerCreators = {
   cloneNodes: ({ insertNodes, pageId, selectToplevelNodes, selectedNodes }: Props) => (): void => {
     const clonedNodes = selectedNodes && cloneSubgraphs(selectedNodes);
@@ -81,19 +82,44 @@ export const basicHandlerCreators = {
       customElementService
         .create(customElement)
         .then(() =>
-          notify.success(
-            `Custom element '${customElement.displayName || customElement.id}' was saved`
-          )
+          notifyService
+            .getService()
+            .success(
+              `Custom element '${customElement.displayName || customElement.id}' was saved`,
+              {
+                'data-test-subj': 'canvasCustomElementCreate-success',
+              }
+            )
         )
-        .catch((result: Http2ServerResponse) =>
-          notify.warning(result, {
-            title: `Custom element '${customElement.displayName ||
-              customElement.id}' was not saved`,
+        .catch((error: Error) =>
+          notifyService.getService().warning(error, {
+            title: `Custom element '${
+              customElement.displayName || customElement.id
+            }' was not saved`,
           })
         );
     }
   },
 };
+
+// handlers for alignment and distribution
+export const alignmentDistributionHandlerCreators = Object.assign(
+  {},
+  ...[
+    'alignLeft',
+    'alignCenter',
+    'alignRight',
+    'alignTop',
+    'alignMiddle',
+    'alignBottom',
+    'distributeHorizontally',
+    'distributeVertically',
+  ].map((event: string) => ({
+    [event]: ({ commit }: Props) => (): void => {
+      commit('actionEvent', { event });
+    },
+  }))
+);
 
 // handlers for group and ungroup
 export const groupHandlerCreators = {
@@ -111,13 +137,13 @@ export const clipboardHandlerCreators = {
     if (selectedNodes.length) {
       setClipboardData({ selectedNodes });
       removeNodes(selectedNodes.map(extractId), pageId);
-      notify.success('Cut element to clipboard');
+      notifyService.getService().success('Cut element to clipboard');
     }
   },
   copyNodes: ({ selectedNodes }: Props) => (): void => {
     if (selectedNodes.length) {
       setClipboardData({ selectedNodes });
-      notify.success('Copied element to clipboard');
+      notifyService.getService().success('Copied element to clipboard');
     }
   },
   pasteNodes: ({ insertNodes, pageId, selectToplevelNodes }: Props) => (): void => {
@@ -152,5 +178,73 @@ export const layerHandlerCreators = {
     if (selectedNodes.length === 1) {
       elementLayer(pageId, selectedNodes[0].id, -Infinity);
     }
+  },
+};
+
+// handlers for shifting elements up, down, left, and right
+export const positionHandlerCreators = {
+  shiftUp: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map((element) => {
+        element.position.top -= ELEMENT_SHIFT_OFFSET;
+        return element;
+      })
+    );
+  },
+  shiftDown: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map((element) => {
+        element.position.top += ELEMENT_SHIFT_OFFSET;
+        return element;
+      })
+    );
+  },
+  shiftLeft: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map((element) => {
+        element.position.left -= ELEMENT_SHIFT_OFFSET;
+        return element;
+      })
+    );
+  },
+  shiftRight: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map((element) => {
+        element.position.left += ELEMENT_SHIFT_OFFSET;
+        return element;
+      })
+    );
+  },
+  nudgeUp: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map((element) => {
+        element.position.top -= ELEMENT_NUDGE_OFFSET;
+        return element;
+      })
+    );
+  },
+  nudgeDown: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map((element) => {
+        element.position.top += ELEMENT_NUDGE_OFFSET;
+        return element;
+      })
+    );
+  },
+  nudgeLeft: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map((element) => {
+        element.position.left -= ELEMENT_NUDGE_OFFSET;
+        return element;
+      })
+    );
+  },
+  nudgeRight: ({ selectedNodes, setMultiplePositions }: Props) => (): void => {
+    setMultiplePositions(
+      selectedNodes.map((element) => {
+        element.position.left += ELEMENT_NUDGE_OFFSET;
+        return element;
+      })
+    );
   },
 };

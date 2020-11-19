@@ -1,0 +1,19 @@
+{
+  "id": "timelion",
+  "version": "kibana",
+  "ui": true,
+  "server": true,
+  "requiredBundles": [
+    "kibanaLegacy",
+    "kibanaUtils",
+    "visTypeTimelion"
+  ],
+  "requiredPlugins": [
+    "visualizations",
+    "data",
+    "navigation",
+    "visTypeTimelion",
+    "savedObjects",
+    "kibanaLegacy"
+  ]
+}

@@ -10,3 +10,4 @@ export { logstashOverviewRoute } from './overview';
 export { logstashPipelineRoute } from './pipeline';
 export { logstashNodePipelinesRoute } from './pipelines/node_pipelines';
 export { logstashClusterPipelinesRoute } from './pipelines/cluster_pipelines';
+export { logstashClusterPipelineIdsRoute } from './pipelines/cluster_pipeline_ids';

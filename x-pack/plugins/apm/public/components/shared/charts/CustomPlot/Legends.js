@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import Legend from '../Legend';
+import { Legend } from '../Legend';
+import { useTheme } from '../../../../hooks/useTheme';
 import {
   unit,
   units,
   fontSizes,
   px,
-  truncate
+  truncate,
 } from '../../../../style/variables';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
+import { EuiIcon } from '@elastic/eui';
 
 const Container = styled.div`
   display: flex;
@@ -34,7 +36,7 @@ const Container = styled.div`
 
 const LegendContent = styled.span`
   white-space: nowrap;
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
   display: flex;
 `;
 
@@ -45,13 +47,13 @@ const TruncatedLabel = styled.span`
 
 const SeriesValue = styled.span`
   margin-left: ${px(units.quarter)};
-  color: ${theme.euiColorFullShade};
+  color: ${({ theme }) => theme.eui.euiColorFullShade};
   display: inline-block;
 `;
 
 const MoreSeriesContainer = styled.div`
   font-size: ${fontSizes.small};
-  color: ${theme.euiColorMediumShade};
+  color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
 function MoreSeries({ hiddenSeriesCount }) {
@@ -73,9 +75,14 @@ export default function Legends({
   noHits,
   series,
   seriesEnabledState,
-  truncateLegends
+  truncateLegends,
+  hasAnnotations,
+  showAnnotations,
+  onAnnotationsToggle,
 }) {
-  if (noHits) {
+  const theme = useTheme();
+
+  if (noHits && !hasAnnotations) {
     return null;
   }
 
@@ -85,6 +92,7 @@ export default function Legends({
         if (serie.hideLegend) {
           return null;
         }
+
         const text = (
           <LegendContent>
             {truncateLegends ? (
@@ -100,13 +108,39 @@ export default function Legends({
         return (
           <Legend
             key={i}
-            onClick={() => clickLegend(i)}
+            onClick={
+              serie.legendClickDisabled ? undefined : () => clickLegend(i)
+            }
             disabled={seriesEnabledState[i]}
             text={text}
             color={serie.color}
           />
         );
       })}
+      {hasAnnotations && (
+        <Legend
+          key="annotations"
+          onClick={() => {
+            if (onAnnotationsToggle) {
+              onAnnotationsToggle();
+            }
+          }}
+          text={
+            <LegendContent>
+              {i18n.translate('xpack.apm.serviceVersion', {
+                defaultMessage: 'Service version',
+              })}
+            </LegendContent>
+          }
+          indicator={() => (
+            <div style={{ marginRight: px(units.quarter) }}>
+              <EuiIcon type="annotation" color={theme.eui.euiColorSecondary} />
+            </div>
+          )}
+          disabled={!showAnnotations}
+          color={theme.eui.euiColorSecondary}
+        />
+      )}
       <MoreSeries hiddenSeriesCount={hiddenSeriesCount} />
     </Container>
   );
@@ -118,5 +152,8 @@ Legends.propTypes = {
   noHits: PropTypes.bool.isRequired,
   series: PropTypes.array.isRequired,
   seriesEnabledState: PropTypes.array.isRequired,
-  truncateLegends: PropTypes.bool.isRequired
+  truncateLegends: PropTypes.bool.isRequired,
+  hasAnnotations: PropTypes.bool,
+  showAnnotations: PropTypes.bool,
+  onAnnotationsToggle: PropTypes.func,
 };

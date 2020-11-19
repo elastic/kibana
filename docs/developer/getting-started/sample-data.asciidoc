@@ -1,0 +1,31 @@
+[[sample-data]]
+== Installing sample data
+
+There are a couple ways to easily get data ingested into {es}.
+
+[discrete]
+=== Sample data packages available for one click installation
+
+The easiest is to install one or more of our vailable sample data packages. If you have no data, you should be 
+prompted to install when running {kib} for the first time. You can also access and install the sample data packages
+by going to the home page and clicking "add sample data".
+
+[discrete]
+=== makelogs script
+
+The provided `makelogs` script will generate sample data.
+
+[source,bash]
+----
+node scripts/makelogs --auth <username>:<password>
+----
+
+The default username and password combination are `elastic:changeme`
+
+Make sure to execute `node scripts/makelogs` *after* {es} is up and running!
+
+[discrete]
+=== CSV upload
+
+If running with a platinum or trial license, you can also use the CSV uploader provided inside the Machine learning app.
+Navigate to the Data visualizer to upload your data from a file.

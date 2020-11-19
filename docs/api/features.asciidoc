@@ -1,13 +1,209 @@
 [role="xpack"]
-[[features-api]]
-== Features API
+[[features-api-get]]
+== Get features API
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieves all {kib} features. Features are used by spaces and security to refine and secure access to {kib}.
 
-The features API allows you to view information about available features in {kib}. Features are used by spaces and security to refine and secure access to {kib}.
+[float]
+[[features-api-get-request]]
+=== Request
 
-NOTE: You cannot access these endpoints via the Console in {kib}.
+`GET <kibana host>:<port>/api/features`
 
-* <<features-api-get>>
+[float]
+[[features-api-get-codes]]
+=== Response code
 
-include::features/get.asciidoc[]
+`200`::
+  Indicates a successful call.
+
+[float]
+[[features-api-get-example]]
+=== Example
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+  {
+    "id": "discover",
+    "name": "Discover",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "discover"
+    ],
+    "privileges": {
+      "all": {
+        "savedObject": {
+          "all": [
+            "search",
+            "url"
+          ],
+          "read": [
+            "config",
+            "index-pattern"
+          ]
+        },
+        "ui": [
+          "show",
+          "createShortUrl",
+          "save"
+        ]
+      },
+      "read": {
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "url"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    }
+  },
+  {
+    "id": "visualize",
+    "name": "Visualize",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "visualize"
+    ],
+    "privileges": {
+      "all": {
+        "savedObject": {
+          "all": [
+            "visualization",
+            "url"
+          ],
+          "read": [
+            "config",
+            "index-pattern",
+            "search"
+          ]
+        },
+        "ui": [
+          "show",
+          "createShortUrl",
+          "delete",
+          "save"
+        ]
+      },
+      "read": {
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "visualization"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    }
+  },
+  {
+    "id": "dashboard",
+    "name": "Dashboard",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "dashboard"
+    ],
+    "privileges": {
+      "all": {
+        "savedObject": {
+          "all": [
+            "dashboard",
+            "url"
+          ],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "visualization",
+            "timelion-sheet",
+            "canvas-workpad"
+          ]
+        },
+        "ui": [
+          "createNew",
+          "show",
+          "showWriteControls"
+        ]
+      },
+      "read": {
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config",
+            "index-pattern",
+            "search",
+            "visualization",
+            "timelion-sheet",
+            "canvas-workpad",
+            "dashboard"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    }
+  },
+  {
+    "id": "dev_tools",
+    "name": "Dev Tools",
+    "app": [
+      "kibana"
+    ],
+    "catalogue": [
+      "console",
+      "searchprofiler",
+      "grokdebugger"
+    ],
+    "privileges": {
+      "all": {
+        "api": [
+          "console"
+        ],
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      },
+      "read": {
+        "api": [
+          "console"
+        ],
+        "savedObject": {
+          "all": [],
+          "read": [
+            "config"
+          ]
+        },
+        "ui": [
+          "show"
+        ]
+      }
+    },
+    "privilegesTooltip": "User should also be granted the appropriate Elasticsearch cluster and index privileges"
+  },
+--------------------------------------------------

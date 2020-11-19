@@ -22,9 +22,9 @@ const rule = require('../require_license_header');
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
-  parser: 'babel-eslint',
+  parser: require.resolve('babel-eslint'),
   parserOptions: {
-    ecmaVersion: 2015,
+    ecmaVersion: 2018,
   },
 });
 

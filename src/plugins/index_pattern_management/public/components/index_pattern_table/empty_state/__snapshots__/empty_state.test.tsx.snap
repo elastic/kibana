@@ -1,0 +1,216 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyState should render normally 1`] = `
+<Fragment>
+  <EuiPageContent
+    className="inpEmptyState"
+    data-test-subj="indexPatternEmptyState"
+    grow={false}
+    horizontalPosition="center"
+  >
+    <EuiPageContentHeader>
+      <EuiPageContentHeaderSection>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              defaultMessage="Ready to try Kibana? First, you need data."
+              id="indexPatternManagement.createIndexPattern.emptyState.noDataTitle"
+              values={Object {}}
+            />
+          </h2>
+        </EuiTitle>
+      </EuiPageContentHeaderSection>
+    </EuiPageContentHeader>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiPageContentBody>
+      <EuiFlexGrid
+        className="inpEmptyState__cardGrid"
+        columns={3}
+        responsive={true}
+      >
+        <EuiFlexItem>
+          <EuiCard
+            className="inpEmptyState__card"
+            description={
+              <FormattedMessage
+                defaultMessage="Add data from a variety of sources."
+                id="indexPatternManagement.createIndexPattern.emptyState.integrationCardDescription"
+                values={Object {}}
+              />
+            }
+            icon={
+              <EuiIcon
+                color="subdued"
+                size="xl"
+                type="database"
+              />
+            }
+            onClick={[Function]}
+            title={
+              <FormattedMessage
+                defaultMessage="Add integration"
+                id="indexPatternManagement.createIndexPattern.emptyState.integrationCardTitle"
+                values={Object {}}
+              />
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            betaBadgeTooltipContent="This feature requires a Basic license."
+            className="inpEmptyState__card"
+            description={
+              <FormattedMessage
+                defaultMessage="Import a CSV, NDJSON, or log file."
+                id="indexPatternManagement.createIndexPattern.emptyState.uploadCardDescription"
+                values={Object {}}
+              />
+            }
+            icon={
+              <EuiIcon
+                color="subdued"
+                size="xl"
+                type="document"
+              />
+            }
+            isDisabled={false}
+            onClick={[Function]}
+            title={
+              <FormattedMessage
+                defaultMessage="Upload a file"
+                id="indexPatternManagement.createIndexPattern.emptyState.uploadCardTitle"
+                values={Object {}}
+              />
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            className="inpEmptyState__card"
+            description={
+              <FormattedMessage
+                defaultMessage="Load a data set and a Kibana dashboard."
+                id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardDescription"
+                values={Object {}}
+              />
+            }
+            icon={
+              <EuiIcon
+                color="subdued"
+                size="xl"
+                type="heatmap"
+              />
+            }
+            onClick={[Function]}
+            title={
+              <FormattedMessage
+                defaultMessage="Add sample data"
+                id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardTitle"
+                values={Object {}}
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer
+        size="xxl"
+      />
+      <div
+        className="inpEmptyState__footer"
+      >
+        <EuiFlexGrid
+          columns={3}
+        >
+          <EuiFlexItem
+            className="inpEmptyState__footerFlexItem"
+          >
+            <EuiDescriptionList
+              listItems={
+                Array [
+                  Object {
+                    "description": <EuiLink
+                      external={true}
+                      href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/connect-to-elasticsearch.html"
+                      target="_blank"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Read documentation"
+                        id="indexPatternManagement.createIndexPattern.emptyState.readDocs"
+                        values={Object {}}
+                      />
+                    </EuiLink>,
+                    "title": <FormattedMessage
+                      defaultMessage="Want to learn more?"
+                      id="indexPatternManagement.createIndexPattern.emptyState.learnMore"
+                      values={Object {}}
+                    />,
+                  },
+                ]
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="inpEmptyState__footerFlexItem"
+          >
+            <EuiDescriptionList
+              listItems={
+                Array [
+                  Object {
+                    "description": <EuiLink
+                      data-test-subj="refreshIndicesButton"
+                      onClick={[Function]}
+                    >
+                      <FormattedMessage
+                        defaultMessage="Check for new data"
+                        id="indexPatternManagement.createIndexPattern.emptyState.checkDataButton"
+                        values={Object {}}
+                      />
+                       
+                      <EuiIcon
+                        size="s"
+                        type="refresh"
+                      />
+                    </EuiLink>,
+                    "title": <FormattedMessage
+                      defaultMessage="Think you already have data?"
+                      id="indexPatternManagement.createIndexPattern.emptyState.haveData"
+                      values={Object {}}
+                    />,
+                  },
+                ]
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGrid>
+      </div>
+    </EuiPageContentBody>
+  </EuiPageContent>
+  <EuiSpacer />
+  <EuiText
+    color="subdued"
+    size="xs"
+    textAlign="center"
+  >
+    <FormattedMessage
+      defaultMessage="Some indices may be hidden. Try to {link} anyway."
+      id="indexPatternManagement.createIndexPattern.emptyState.createAnyway"
+      values={
+        Object {
+          "link": <EuiLink
+            data-test-subj="createAnyway"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="create an index pattern"
+              id="indexPatternManagement.createIndexPattern.emptyState.createAnywayLink"
+              values={Object {}}
+            />
+          </EuiLink>,
+        }
+      }
+    />
+  </EuiText>
+</Fragment>
+`;

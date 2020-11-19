@@ -8,16 +8,12 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { KibanaLink } from './KibanaLink';
-import chrome from 'ui/chrome';
 
-jest
-  .spyOn(chrome, 'addBasePath')
-  .mockImplementation(path => `/basepath${path}`);
-
-test('KibanaLink produces the correct URL', async () => {
-  const href = await getRenderedHref(() => <KibanaLink path="/some/path" />, {
-    search: '?rangeFrom=now-5h&rangeTo=now-2h'
-  } as Location);
-
-  expect(href).toMatchInlineSnapshot(`"/basepath/app/kibana#/some/path"`);
+describe('KibanaLink', () => {
+  it('produces the correct URL', async () => {
+    const href = await getRenderedHref(() => <KibanaLink path="/some/path" />, {
+      search: '?rangeFrom=now-5h&rangeTo=now-2h',
+    } as Location);
+    expect(href).toMatchInlineSnapshot(`"/basepath/app/kibana#/some/path"`);
+  });
 });

@@ -4,24 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { cloneDeep, each, remove, sortBy, get } from 'lodash';
 
-
-import _ from 'lodash';
+import { mlLog } from '../../lib/log';
 
 import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
 import { polledDataCheckerFactory } from './polled_data_checker';
 
-import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
-import { isSecurityDisabled } from '../../lib/security_utils';
-
-export function estimateBucketSpanFactory(callWithRequest, server) {
-  const callWithInternalUser = callWithInternalUserFactory(server);
-  const PolledDataChecker = polledDataCheckerFactory(callWithRequest);
-  const SingleSeriesChecker = singleSeriesCheckerFactory(callWithRequest);
+export function estimateBucketSpanFactory(client) {
+  const { asCurrentUser, asInternalUser } = client;
+  const PolledDataChecker = polledDataCheckerFactory(client);
+  const SingleSeriesChecker = singleSeriesCheckerFactory(client);
 
   class BucketSpanEstimator {
-    constructor({ index, timeField, aggTypes, fields, duration, query, splitField }, splitFieldValues, maxBuckets) {
+    constructor(
+      { index, timeField, aggTypes, fields, duration, query, splitField },
+      splitFieldValues,
+      maxBuckets
+    ) {
       this.index = index;
       this.timeField = timeField;
       this.aggTypes = aggTypes;
@@ -33,7 +34,7 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
       this.checkers = [];
 
       this.thresholds = {
-        minimumBucketSpanMS: 0
+        minimumBucketSpanMS: 0,
       };
 
       // determine durations for bucket span estimation
@@ -45,8 +46,8 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
       const ONE_HOUR_MS = 3600000;
       // only run the tests over the last 250 hours of data at max
       const HOUR_MULTIPLIER = Math.min(250, Math.floor((maxBuckets * ONE_MINUTE_MS) / ONE_HOUR_MS));
-      const timePickerDurationLength = (this.duration.end - this.duration.start);
-      const multiplierDurationLength = (ONE_HOUR_MS * HOUR_MULTIPLIER);
+      const timePickerDurationLength = this.duration.end - this.duration.start;
+      const multiplierDurationLength = ONE_HOUR_MS * HOUR_MULTIPLIER;
 
       if (timePickerDurationLength > multiplierDurationLength) {
         // move time range to the end of the data
@@ -58,20 +59,21 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
           [this.timeField]: {
             gte: this.duration.start,
             lte: this.duration.end,
-            format: 'epoch_millis'
-          }
-        }
+            format: 'epoch_millis',
+          },
+        },
       });
 
       this.polledDataChecker = new PolledDataChecker(
         this.index,
         this.timeField,
         this.duration,
-        this.query);
+        this.query
+      );
 
-      if(this.aggTypes.length === this.fields.length) {
+      if (this.aggTypes.length === this.fields.length) {
         // loop over detectors
-        for(let i = 0; i < this.aggTypes.length; i++) {
+        for (let i = 0; i < this.aggTypes.length; i++) {
           if (this.splitField === undefined) {
             // either a single metric job or no data split
             this.checkers.push({
@@ -82,18 +84,19 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
                 this.fields[i],
                 this.duration,
                 this.query,
-                this.thresholds),
-              result: null
+                this.thresholds
+              ),
+              result: null,
             });
           } else {
             // loop over partition values
-            for(let j = 0; j < this.splitFieldValues.length; j++) {
-              const queryCopy = _.cloneDeep(this.query);
+            for (let j = 0; j < this.splitFieldValues.length; j++) {
+              const queryCopy = cloneDeep(this.query);
               // add a term to the query to filter on the partition value
               queryCopy.bool.must.push({
                 term: {
-                  [this.splitField]: this.splitFieldValues[j]
-                }
+                  [this.splitField]: this.splitFieldValues[j],
+                },
               });
               this.checkers.push({
                 check: new SingleSeriesChecker(
@@ -103,8 +106,9 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
                   this.fields[i],
                   this.duration,
                   queryCopy,
-                  this.thresholds),
-                result: null
+                  this.thresholds
+                ),
+                result: null,
               });
             }
           }
@@ -115,14 +119,15 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
     run() {
       return new Promise((resolve, reject) => {
         if (this.checkers.length === 0) {
-          console.log('BucketSpanEstimator: run has stopped because no checks were created');
+          mlLog.warn('BucketSpanEstimator: run has stopped because no checks were created');
           reject('BucketSpanEstimator: run has stopped because no checks were created');
         }
 
-        this.polledDataChecker.run()
+        this.polledDataChecker
+          .run()
           .then((result) => {
-          // if the data is polled, set a minimum threshold
-          // of bucket span
+            // if the data is polled, set a minimum threshold
+            // of bucket span
             if (result.isPolled) {
               this.thresholds.minimumBucketSpanMS = result.minimumBucketSpan;
             }
@@ -135,15 +140,20 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
                 if (median !== null) {
                   resolve(median);
                 } else {
-                // no results found
-                  console.log('BucketSpanEstimator: run has stopped because no checks returned a valid interval');
-                  reject('BucketSpanEstimator: run has stopped because no checks returned a valid interval');
+                  // no results found
+                  mlLog.warn(
+                    'BucketSpanEstimator: run has stopped because no checks returned a valid interval'
+                  );
+                  reject(
+                    'BucketSpanEstimator: run has stopped because no checks returned a valid interval'
+                  );
                 }
               }
             };
 
-            _.each(this.checkers, (check) => {
-              check.check.run()
+            each(this.checkers, (check) => {
+              check.check
+                .run()
                 .then((interval) => {
                   check.result = interval;
                   runComplete();
@@ -164,19 +174,19 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
     }
 
     processResults() {
-      const allResults = _.map(this.checkers, 'result');
+      const allResults = this.checkers.map((c) => c.result);
 
       let reducedResults = [];
       const numberOfSplitFields = this.splitFieldValues.length || 1;
       // find the median results per detector
       // if the data has been split, the may be ten results per detector,
       // so we need to find the median of those first.
-      for(let i = 0; i < this.aggTypes.length; i++) {
-        const pos = (i * numberOfSplitFields);
+      for (let i = 0; i < this.aggTypes.length; i++) {
+        const pos = i * numberOfSplitFields;
         let resultsSubset = allResults.slice(pos, pos + numberOfSplitFields);
         // remove results of tests which have failed
-        resultsSubset = _.remove(resultsSubset, res => res !== null);
-        resultsSubset = _.sortBy(resultsSubset, r => r.ms);
+        resultsSubset = remove(resultsSubset, (res) => res !== null);
+        resultsSubset = sortBy(resultsSubset, (r) => r.ms);
 
         const tempMedian = this.findMedian(resultsSubset);
         if (tempMedian !== null) {
@@ -184,7 +194,7 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
         }
       }
 
-      reducedResults = _.sortBy(reducedResults, r => r.ms);
+      reducedResults = sortBy(reducedResults, (r) => r.ms);
 
       return this.findMedian(reducedResults);
     }
@@ -195,7 +205,7 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
       if (results.length) {
         if (results.length % 2 === 0) {
           // even number of results
-          const medIndex = (((results.length) / 2) - 1);
+          const medIndex = results.length / 2 - 1;
           // find the two middle values
           const med1 = results[medIndex];
           const med2 = results[medIndex + 1];
@@ -206,16 +216,16 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
           } else {
             let interval = null;
             // find the average ms value between the two middle intervals
-            const avgMs = ((med2.ms - med1.ms) / 2) + med1.ms;
+            const avgMs = (med2.ms - med1.ms) / 2 + med1.ms;
             // loop over the allowed bucket spans to find closest one
-            for(let i = 1; i < INTERVALS.length; i++) {
-              if(avgMs < INTERVALS[i].ms) {
+            for (let i = 1; i < INTERVALS.length; i++) {
+              if (avgMs < INTERVALS[i].ms) {
                 // see if it's closer to this interval or the one before
                 const int1 = INTERVALS[i - 1];
                 const int2 = INTERVALS[i];
                 const diff = int2.ms - int1.ms;
                 const d = avgMs - int1.ms;
-                interval = ((d / diff) < 0.5) ? int1 : int2;
+                interval = d / diff < 0.5 ? int1 : int2;
                 break;
               }
             }
@@ -232,21 +242,22 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
 
   const getFieldCardinality = function (index, field) {
     return new Promise((resolve, reject) => {
-      callWithRequest('search', {
-        index,
-        size: 0,
-        body: {
-          aggs: {
-            field_count: {
-              cardinality: {
-                field,
-              }
-            }
-          }
-        }
-      })
-        .then((resp) => {
-          const value = _.get(resp, ['aggregations', 'field_count', 'value'], 0);
+      asCurrentUser
+        .search({
+          index,
+          size: 0,
+          body: {
+            aggs: {
+              field_count: {
+                cardinality: {
+                  field,
+                },
+              },
+            },
+          },
+        })
+        .then(({ body }) => {
+          const value = get(body, ['aggregations', 'field_count', 'value'], 0);
           resolve(value);
         })
         .catch((resp) => {
@@ -263,29 +274,31 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
       // load ten fields, to test that there are at least 10.
       getFieldCardinality(index, field)
         .then((value) => {
-          const numPartitions = (Math.floor(value / NUM_PARTITIONS)) || 1;
-          callWithRequest('search', {
-            index,
-            size: 0,
-            body: {
-              query,
-              aggs: {
-                fields_bucket_counts: {
-                  terms: {
-                    field,
-                    include: {
-                      partition: 0,
-                      num_partitions: numPartitions
-                    }
-                  }
-                }
-              }
-            }
-          })
-            .then((partitionResp) => {
-              if (_.has(partitionResp, 'aggregations.fields_bucket_counts.buckets')) {
-                const buckets = partitionResp.aggregations.fields_bucket_counts.buckets;
-                fieldValues = _.map(buckets, b => b.key);
+          const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
+          asCurrentUser
+            .search({
+              index,
+              size: 0,
+              body: {
+                query,
+                aggs: {
+                  fields_bucket_counts: {
+                    terms: {
+                      field,
+                      include: {
+                        partition: 0,
+                        num_partitions: numPartitions,
+                      },
+                    },
+                  },
+                },
+              },
+            })
+            .then(({ body }) => {
+              // eslint-disable-next-line camelcase
+              if (body.aggregations?.fields_bucket_counts?.buckets !== undefined) {
+                const buckets = body.aggregations.fields_bucket_counts.buckets;
+                fieldValues = buckets.map((b) => b.key);
               }
               resolve(fieldValues);
             })
@@ -321,88 +334,65 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
     }
 
     return new Promise((resolve, reject) => {
-      function getBucketSpanEstimation() {
-        // fetch the `search.max_buckets` cluster setting so we're able to
-        // adjust aggregations to not exceed that limit.
-        callWithInternalUser('cluster.getSettings', {
-          flatSettings: true,
-          includeDefaults: true,
-          filterPath: '*.*max_buckets'
+      // fetch the `search.max_buckets` cluster setting so we're able to
+      // adjust aggregations to not exceed that limit.
+      asInternalUser.cluster
+        .getSettings({
+          flat_settings: true,
+          include_defaults: true,
+          filter_path: '*.*max_buckets',
         })
-          .then((settings) => {
-            if (typeof settings !== 'object' || typeof settings.defaults !== 'object') {
-              reject('Unable to retrieve cluster setting search.max_buckets');
-            }
+        .then(({ body }) => {
+          if (typeof body !== 'object') {
+            reject('Unable to retrieve cluster settings');
+          }
 
-            const maxBuckets = parseInt(settings.defaults['search.max_buckets']);
+          // search.max_buckets could exist in default, persistent or transient cluster settings
+          const maxBucketsSetting = (body.defaults || body.persistent || body.transient || {})[
+            'search.max_buckets'
+          ];
 
-            const runEstimator = (splitFieldValues = []) => {
-              const bucketSpanEstimator = new BucketSpanEstimator(
-                formConfig,
-                splitFieldValues,
-                maxBuckets
-              );
+          if (maxBucketsSetting === undefined) {
+            reject('Unable to retrieve cluster setting search.max_buckets');
+          }
 
-              bucketSpanEstimator.run()
-                .then((resp) => {
-                  resolve(resp);
-                })
-                .catch((resp) => {
-                  reject(resp);
-                });
-            };
+          const maxBuckets = parseInt(maxBucketsSetting);
 
-            // a partition has been selected, so we need to load some field values to use in the
-            // bucket span tests.
-            if (formConfig.splitField !== undefined) {
-              getRandomFieldValues(formConfig.index, formConfig.splitField, formConfig.query)
-                .then((splitFieldValues) => {
-                  runEstimator(splitFieldValues);
-                })
-                .catch((resp) => {
-                  reject(resp);
-                });
-            } else {
-              // no partition field selected or we're in the single metric config
-              runEstimator();
-            }
-          })
-          .catch((resp) => {
-            reject(resp);
-          });
-      }
+          const runEstimator = (splitFieldValues = []) => {
+            const bucketSpanEstimator = new BucketSpanEstimator(
+              formConfig,
+              splitFieldValues,
+              maxBuckets
+            );
 
-      if (isSecurityDisabled(server)) {
-        getBucketSpanEstimation();
-      } else {
-        // if security is enabled, check that the user has permission to
-        // view jobs before calling getBucketSpanEstimation.
-        // getBucketSpanEstimation calls the 'cluster.getSettings' endpoint as the internal user
-        // and so could give the user access to more information than
-        // they are entitled to.
-        const body = {
-          cluster: [
-            'cluster:monitor/xpack/ml/job/get',
-            'cluster:monitor/xpack/ml/job/stats/get',
-            'cluster:monitor/xpack/ml/datafeeds/get',
-            'cluster:monitor/xpack/ml/datafeeds/stats/get'
-          ]
-        };
-        callWithRequest('ml.privilegeCheck', { body })
-          .then((resp) => {
-            if (resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
-              resp.cluster['cluster:monitor/xpack/ml/job/stats/get'] &&
-              resp.cluster['cluster:monitor/xpack/ml/datafeeds/get'] &&
-              resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']) {
-              getBucketSpanEstimation();
-            } else {
-              reject('Insufficient permissions to call bucket span estimation.');
-            }
-          })
-          .catch(reject);
-      }
+            bucketSpanEstimator
+              .run()
+              .then((resp) => {
+                resolve(resp);
+              })
+              .catch((resp) => {
+                reject(resp);
+              });
+          };
 
-
+          // a partition has been selected, so we need to load some field values to use in the
+          // bucket span tests.
+          if (formConfig.splitField !== undefined) {
+            getRandomFieldValues(formConfig.index, formConfig.splitField, formConfig.query)
+              .then((splitFieldValues) => {
+                runEstimator(splitFieldValues);
+              })
+              .catch((resp) => {
+                reject(resp);
+              });
+          } else {
+            // no partition field selected or we're in the single metric config
+            runEstimator();
+          }
+        })
+        .catch((resp) => {
+          reject(resp);
+        });
     });
   };
 }

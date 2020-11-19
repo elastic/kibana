@@ -1,22 +1,45 @@
 [role="xpack"]
 [[apm-getting-started]]
-== Getting Started
+== Get started with the APM app
 
-If you have not already installed and configured Elastic APM,
-the *Setup Instructions* will get you started.
+++++
+<titleabbrev>Get started</titleabbrev>
+++++
 
-[role="screenshot"]
-image::apm/images/apm-setup.png[Installation instructions on the APM page in Kibana]
+Elastic APM captures different types of information from within instrumented applications:
 
+* *Spans* contain information about the execution of a specific code path.
+They measure from the start to end of an activity,
+and they can have a parent/child relationship with other spans.
+* *Transactions* are a special kind of span;
+they are the first span for a particular service and have extra metadata associated with them.
+As an example, a transaction could be a request to your server, a batch job, or a custom transaction type.
+*Traces* link together related transactions to show an end-to-end performance of how a request was served and which services were part of it.
+* *Errors* contain information about the original exception that occurred or about a log created when the exception occurred.
 
-Index patterns tell Kibana which Elasticsearch indices you want to explore.
-An APM index pattern is necessary for certain features in the APM UI, like the query bar. 
-To set up the correct index pattern,
-simply click *Load Kibana objects* at the bottom of the Setup Instructions.
+Curated charts and tables display the different types of APM data, which allows you to compare and debug your applications easily.
 
-After you install an Elastic APM agent library in your application,
-the application automatically appears in the APM UI in {kib}.
-No further configuration is required.
+* <<services>>
+* <<traces>>
+* <<transactions>>
+* <<spans>>
+* <<errors>>
+* <<metrics>>
+* <<service-maps>>
 
-[role="screenshot"]
-image::apm/images/apm-index-pattern.png[Setup index pattern for APM in Kibana]
+TIP: Want to learn more about the Elastic APM ecosystem?
+See the {apm-get-started-ref}/overview.html[APM Overview].
+
+include::services.asciidoc[]
+
+include::traces.asciidoc[]
+
+include::transactions.asciidoc[]
+
+include::spans.asciidoc[]
+
+include::errors.asciidoc[]
+
+include::metrics.asciidoc[]
+
+include::service-maps.asciidoc[]

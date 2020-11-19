@@ -23,10 +23,10 @@ import { promisify } from 'util';
 
 import { CliError } from './errors';
 import { Project } from './project';
-import { workspacePackagePaths } from './workspaces';
 
 const glob = promisify(globSync);
 
+/** a Map of project names to Project instances */
 export type ProjectMap = Map<string, Project>;
 export type ProjectGraph = Map<string, Project[]>;
 export interface IProjectsOptions {
@@ -41,8 +41,6 @@ export async function getProjects(
 ) {
   const projects: ProjectMap = new Map();
 
-  const workspaceProjectsPaths = await workspacePackagePaths(rootPath);
-
   for (const pattern of projectsPathsPatterns) {
     const pathsToProcess = await packagesFromGlobPattern({ pattern, rootPath });
 
@@ -50,10 +48,6 @@ export async function getProjects(
       const projectConfigPath = normalize(filePath);
       const projectDir = path.dirname(projectConfigPath);
       const project = await Project.fromPath(projectDir);
-
-      if (workspaceProjectsPaths.indexOf(filePath) >= 0) {
-        project.isWorkspaceProject = true;
-      }
 
       const excludeProject =
         exclude.includes(project.name) || (include.length > 0 && !include.includes(project.name));
@@ -111,10 +105,7 @@ export function buildProjectGraph(projects: ProjectMap) {
     for (const depName of Object.keys(dependencies)) {
       if (projects.has(depName)) {
         const dep = projects.get(depName)!;
-
-        const dependentProjectIsInWorkspace =
-          project.isWorkspaceProject || project.json.name === 'kibana';
-        project.ensureValidProjectDependency(dep, dependentProjectIsInWorkspace);
+        project.ensureValidProjectDependency(dep);
 
         projectDeps.push(dep);
       }
@@ -128,37 +119,11 @@ export function buildProjectGraph(projects: ProjectMap) {
 
 export function topologicallyBatchProjects(
   projectsToBatch: ProjectMap,
-  projectGraph: ProjectGraph,
-  { batchByWorkspace = false } = {}
+  projectGraph: ProjectGraph
 ) {
   // We're going to be chopping stuff out of this list, so copy it.
   const projectsLeftToBatch = new Set(projectsToBatch.keys());
   const batches = [];
-
-  if (batchByWorkspace) {
-    const workspaceRootProject = Array.from(projectsToBatch.values()).find(p => p.isWorkspaceRoot);
-
-    if (!workspaceRootProject) {
-      throw new CliError(`There was no yarn workspace root found.`);
-    }
-
-    // Push in the workspace root first.
-    batches.push([workspaceRootProject]);
-    projectsLeftToBatch.delete(workspaceRootProject.name);
-
-    // In the next batch, push in all workspace projects.
-    const workspaceBatch = [];
-    for (const projectName of projectsLeftToBatch) {
-      const project = projectsToBatch.get(projectName)!;
-
-      if (project.isWorkspaceProject) {
-        workspaceBatch.push(project);
-        projectsLeftToBatch.delete(projectName);
-      }
-    }
-
-    batches.push(workspaceBatch);
-  }
 
   while (projectsLeftToBatch.size > 0) {
     // Get all projects that have no remaining dependencies within the repo
@@ -166,7 +131,7 @@ export function topologicallyBatchProjects(
     const batch = [];
     for (const projectName of projectsLeftToBatch) {
       const projectDeps = projectGraph.get(projectName)!;
-      const needsDependenciesBatched = projectDeps.some(dep => projectsLeftToBatch.has(dep.name));
+      const needsDependenciesBatched = projectDeps.some((dep) => projectsLeftToBatch.has(dep.name));
 
       if (!needsDependenciesBatched) {
         batch.push(projectsToBatch.get(projectName)!);
@@ -187,7 +152,7 @@ export function topologicallyBatchProjects(
 
     batches.push(batch);
 
-    batch.forEach(project => projectsLeftToBatch.delete(project.name));
+    batch.forEach((project) => projectsLeftToBatch.delete(project.name));
   }
 
   return batches;
@@ -198,7 +163,7 @@ export function includeTransitiveProjects(
   allProjects: ProjectMap,
   { onlyProductionDependencies = false } = {}
 ) {
-  const dependentProjects: ProjectMap = new Map();
+  const projectsWithDependents: ProjectMap = new Map();
 
   // the current list of packages we are expanding using breadth-first-search
   const toProcess = [...subsetOfProjects];
@@ -210,14 +175,14 @@ export function includeTransitiveProjects(
       ? project.productionDependencies
       : project.allDependencies;
 
-    Object.keys(dependencies).forEach(dep => {
+    Object.keys(dependencies).forEach((dep) => {
       if (allProjects.has(dep)) {
         toProcess.push(allProjects.get(dep)!);
       }
     });
 
-    dependentProjects.set(project.name, project);
+    projectsWithDependents.set(project.name, project);
   }
 
-  return dependentProjects;
+  return projectsWithDependents;
 }

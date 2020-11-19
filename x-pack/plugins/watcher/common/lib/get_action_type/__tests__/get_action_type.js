@@ -6,17 +6,15 @@
 
 import expect from '@kbn/expect';
 import { getActionType } from '../get_action_type';
-import { ACTION_TYPES } from '../../../../common/constants';
+import { ACTION_TYPES } from '../../../constants';
 
 describe('get_action_type', () => {
-
   describe('getActionType', () => {
-
     it(`correctly calculates ACTION_TYPES.EMAIL`, () => {
       const actionJson = {
         email: {
-          'foo': 'bar'
-        }
+          foo: 'bar',
+        },
       };
       const type = getActionType(actionJson);
 
@@ -26,8 +24,8 @@ describe('get_action_type', () => {
     it(`correctly calculates ACTION_TYPES.WEBHOOK`, () => {
       const actionJson = {
         webhook: {
-          'foo': 'bar'
-        }
+          foo: 'bar',
+        },
       };
       const type = getActionType(actionJson);
 
@@ -37,8 +35,8 @@ describe('get_action_type', () => {
     it(`correctly calculates ACTION_TYPES.INDEX`, () => {
       const actionJson = {
         index: {
-          'foo': 'bar'
-        }
+          foo: 'bar',
+        },
       };
       const type = getActionType(actionJson);
 
@@ -48,30 +46,19 @@ describe('get_action_type', () => {
     it(`correctly calculates ACTION_TYPES.LOGGING`, () => {
       const actionJson = {
         logging: {
-          'foo': 'bar'
-        }
+          foo: 'bar',
+        },
       };
       const type = getActionType(actionJson);
 
       expect(type).to.be(ACTION_TYPES.LOGGING);
     });
 
-    it(`correctly calculates ACTION_TYPES.HIPCHAT`, () => {
-      const actionJson = {
-        hipchat: {
-          'foo': 'bar'
-        }
-      };
-      const type = getActionType(actionJson);
-
-      expect(type).to.be(ACTION_TYPES.HIPCHAT);
-    });
-
     it(`correctly calculates ACTION_TYPES.SLACK`, () => {
       const actionJson = {
         slack: {
-          'foo': 'bar'
-        }
+          foo: 'bar',
+        },
       };
       const type = getActionType(actionJson);
 
@@ -81,8 +68,8 @@ describe('get_action_type', () => {
     it(`correctly calculates ACTION_TYPES.PAGERDUTY`, () => {
       const actionJson = {
         pagerduty: {
-          'foo': 'bar'
-        }
+          foo: 'bar',
+        },
       };
       const type = getActionType(actionJson);
 
@@ -92,14 +79,12 @@ describe('get_action_type', () => {
     it(`correctly calculates ACTION_TYPES.UNKNOWN`, () => {
       const actionJson = {
         this_is_not_a_valid_action_type: {
-          'foo': 'bar'
-        }
+          foo: 'bar',
+        },
       };
       const type = getActionType(actionJson);
 
       expect(type).to.be(ACTION_TYPES.UNKNOWN);
     });
-
   });
-
 });

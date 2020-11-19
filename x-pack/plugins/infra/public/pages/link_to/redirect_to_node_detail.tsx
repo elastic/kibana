@@ -7,13 +7,14 @@
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { replaceMetricTimeInQueryString } from '../../containers/metrics/with_metrics_time';
-import { InfraNodeType } from '../../graphql/types';
+import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
 import { getFromFromLocation, getToFromLocation } from './query_params';
+import { InventoryItemType } from '../../../common/inventory_models/types';
+import { LinkDescriptor } from '../../hooks/use_link_props';
 
 type RedirectToNodeDetailProps = RouteComponentProps<{
   nodeId: string;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
 }>;
 
 export const RedirectToNodeDetail = ({
@@ -27,7 +28,7 @@ export const RedirectToNodeDetail = ({
     getToFromLocation(location)
   )('');
 
-  return <Redirect to={`/metrics/${nodeType}/${nodeId}?${searchString}`} />;
+  return <Redirect to={`/detail/${nodeType}/${nodeId}?${searchString}`} />;
 };
 
 export const getNodeDetailUrl = ({
@@ -36,11 +37,20 @@ export const getNodeDetailUrl = ({
   to,
   from,
 }: {
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   nodeId: string;
   to?: number;
   from?: number;
-}) => {
-  const args = to && from ? `?to=${to}&from=${from}` : '';
-  return `#/link-to/${nodeType}-detail/${nodeId}${args}`;
+}): LinkDescriptor => {
+  return {
+    app: 'metrics',
+    pathname: `link-to/${nodeType}-detail/${nodeId}`,
+    search:
+      to && from
+        ? {
+            to: `${to}`,
+            from: `${from}`,
+          }
+        : undefined,
+  };
 };

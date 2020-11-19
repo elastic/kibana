@@ -7,12 +7,12 @@
 import { handleResponse } from '../get_clusters_state';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 
 const clusters = [
   {
-    cluster_uuid: 'abc123'
-  }
+    cluster_uuid: 'abc123',
+  },
 ];
 const clusterTimestamp = moment().format();
 const response = {
@@ -30,14 +30,14 @@ const response = {
             nodes: {
               nodeUuid0123: {
                 name: 'node01',
-                uuid: 'nodeUuid0123'
-              }
-            }
-          }
-        }
-      }
-    ]
-  }
+                uuid: 'nodeUuid0123',
+              },
+            },
+          },
+        },
+      },
+    ],
+  },
 };
 
 describe('get_clusters_state', () => {
@@ -49,7 +49,9 @@ describe('get_clusters_state', () => {
     expect(result[0].cluster_state.master_node).to.be('uuid1123');
     expect(result[0].cluster_state.status).to.be('green');
     expect(result[0].cluster_state.state_uuid).to.be('uuid1123');
-    expect(result[0].cluster_state.nodes).to.eql({ nodeUuid0123: { name: 'node01', uuid: 'nodeUuid0123' } });
+    expect(result[0].cluster_state.nodes).to.eql({
+      nodeUuid0123: { name: 'node01', uuid: 'nodeUuid0123' },
+    });
   });
 
   it('does not filter out an unavailable cluster', () => {

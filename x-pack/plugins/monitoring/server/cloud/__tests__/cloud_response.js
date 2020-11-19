@@ -16,7 +16,13 @@ describe('CloudServiceResponse', () => {
   const zone = 'my-house-master-bedroom';
   const metadata = { availabilityZone: 'my-house-1' };
 
-  const confirmed = new CloudServiceResponse(cloudName, true, { id, vmType, region, zone, metadata });
+  const confirmed = new CloudServiceResponse(cloudName, true, {
+    id,
+    vmType,
+    region,
+    zone,
+    metadata,
+  });
   const unconfirmed = CloudServiceResponse.unconfirmed(cloudName);
 
   it('getName() matches constructor value', () => {
@@ -36,7 +42,7 @@ describe('CloudServiceResponse', () => {
       vm_type: vmType,
       region,
       zone,
-      metadata
+      metadata,
     });
   });
 

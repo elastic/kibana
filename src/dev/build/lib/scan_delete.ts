@@ -27,13 +27,14 @@ import { count, map, mergeAll, mergeMap } from 'rxjs/operators';
 // @ts-ignore
 import { assertAbsolute } from './fs';
 
-const getStat$ = Rx.bindNodeCallback(Fs.stat);
-const getReadDir$ = Rx.bindNodeCallback(Fs.readdir);
+const getStat$ = Rx.bindNodeCallback<Fs.PathLike, Fs.Stats>(Fs.stat);
+const getReadDir$ = Rx.bindNodeCallback<string, string[]>(Fs.readdir);
 
 interface Options {
   directory: string;
   regularExpressions: RegExp[];
   concurrency?: 20;
+  excludePaths?: string[];
 }
 
 /**
@@ -45,9 +46,10 @@ interface Options {
  * @param options.concurrency optional concurrency to run deletes, defaults to 20
  */
 export async function scanDelete(options: Options) {
-  const { directory, regularExpressions, concurrency = 20 } = options;
+  const { directory, regularExpressions, concurrency = 20, excludePaths } = options;
 
   assertAbsolute(directory);
+  (excludePaths || []).forEach((excluded) => assertAbsolute(excluded));
 
   // get an observable of absolute paths within a directory
   const getChildPath$ = (path: string) =>
@@ -60,12 +62,16 @@ export async function scanDelete(options: Options) {
   // and recursively iterating through all children, unless a child matches
   // one of the supplied regular expressions
   const getPathsToDelete$ = (path: string): Rx.Observable<string> => {
-    if (regularExpressions.some(re => re.test(path))) {
+    if (excludePaths && excludePaths.includes(path)) {
+      return Rx.EMPTY;
+    }
+
+    if (regularExpressions.some((re) => re.test(path))) {
       return Rx.of(path);
     }
 
     return getStat$(path).pipe(
-      mergeMap(stat => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
+      mergeMap((stat) => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
       mergeMap(getPathsToDelete$)
     );
   };
@@ -73,7 +79,7 @@ export async function scanDelete(options: Options) {
   return await Rx.of(directory)
     .pipe(
       mergeMap(getPathsToDelete$),
-      mergeMap(async path => await del(path), concurrency),
+      mergeMap(async (path) => await del(path), concurrency),
       count()
     )
     .toPromise();

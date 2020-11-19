@@ -4,28 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
-import { PromiseReturnType } from '../../../../typings/common';
-import { Setup } from '../../helpers/setup_request';
-import { getAgentStatus } from './get_agent_status';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
+import { hasHistoricalAgentData } from './has_historical_agent_data';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
-export async function getServices(setup: Setup) {
-  const items = await getServicesItems(setup);
-  const hasLegacyData = await getLegacyDataStatus(setup);
 
-  // conditionally check for historical data if no services were found in the current time range
+export async function getServices({
+  setup,
+  searchAggregatedTransactions,
+  logger,
+}: {
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+  logger: Logger;
+}) {
+  const [items, hasLegacyData] = await Promise.all([
+    getServicesItems({
+      setup,
+      searchAggregatedTransactions,
+      logger,
+    }),
+    getLegacyDataStatus(setup),
+  ]);
+
   const noDataInCurrentTimeRange = isEmpty(items);
-  let hasHistorialAgentData = true;
-  if (noDataInCurrentTimeRange) {
-    hasHistorialAgentData = await getAgentStatus(setup);
-  }
+  const hasHistoricalData = noDataInCurrentTimeRange
+    ? await hasHistoricalAgentData(setup)
+    : true;
 
   return {
     items,
-    hasHistoricalData: hasHistorialAgentData,
-    hasLegacyData
+    hasHistoricalData,
+    hasLegacyData,
   };
 }

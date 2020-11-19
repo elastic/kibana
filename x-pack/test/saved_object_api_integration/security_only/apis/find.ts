@@ -4,419 +4,88 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SPACES } from '../../common/lib/spaces';
 import { AUTHENTICATION } from '../../common/lib/authentication';
-import { TestInvoker } from '../../common/lib/types';
-import { findTestSuiteFactory } from '../../common/suites/find';
+import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
+import { TestUser } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { findTestSuiteFactory, getTestCases } from '../../common/suites/find';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+
+const createTestCases = (crossSpaceSearch?: string[]) => {
+  const cases = getTestCases({ crossSpaceSearch });
+
+  const normalTypes = [
+    cases.singleNamespaceType,
+    cases.multiNamespaceType,
+    cases.namespaceAgnosticType,
+    cases.eachType,
+    cases.pageBeyondTotal,
+    cases.unknownSearchField,
+    cases.filterWithNamespaceAgnosticType,
+    cases.filterWithDisallowedType,
+  ];
+  const hiddenAndUnknownTypes = [
+    cases.hiddenType,
+    cases.unknownType,
+    cases.filterWithHiddenType,
+    cases.filterWithUnknownType,
+  ];
+  const allTypes = normalTypes.concat(hiddenAndUnknownTypes);
+  return { normalTypes, hiddenAndUnknownTypes, allTypes };
+};
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  describe('find', () => {
-    const {
-      createExpectEmpty,
-      createExpectRbacForbidden,
-      createExpectVisualizationResults,
-      expectNotSpaceAwareResults,
-      expectTypeRequired,
-      findTest,
-    } = findTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = findTestSuiteFactory(esArchiver, supertest);
+  const createTests = (user: TestUser) => {
+    const defaultCases = createTestCases();
+    const crossSpaceCases = createTestCases([DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID]);
 
-    findTest(`user with no access`, {
-      user: AUTHENTICATION.NOT_A_KIBANA_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'forbidden login and find visualization message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        notSpaceAwareType: {
-          description: 'forbidden login and find globaltype message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'forbidden login and find visualization message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        unknownSearchField: {
-          description: 'forbidden login and unknown search field',
-          statusCode: 403,
-          response: createExpectRbacForbidden('url'),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
-    });
+    if (user.username === AUTHENTICATION.SUPERUSER.username) {
+      return {
+        defaultCases: createTestDefinitions(defaultCases.allTypes, false, { user }),
+        crossSpace: createTestDefinitions(
+          crossSpaceCases.allTypes,
+          { statusCode: 400, reason: 'cross_namespace_not_permitted' },
+          { user }
+        ),
+      };
+    }
 
-    findTest(`superuser`, {
-      user: AUTHENTICATION.SUPERUSER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
-    });
+    const isAuthorizedGlobally = user.authorizedAtSpaces.includes('*');
 
-    findTest(`legacy user`, {
-      user: AUTHENTICATION.KIBANA_LEGACY_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'forbidden login and find visualization message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        notSpaceAwareType: {
-          description: 'forbidden login and find globaltype message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'forbidden login and find visualization message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        unknownSearchField: {
-          description: 'forbidden login and unknown search field',
-          statusCode: 403,
-          response: createExpectRbacForbidden('url'),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
-    });
+    return {
+      defaultCases: isAuthorizedGlobally
+        ? [
+            createTestDefinitions(defaultCases.normalTypes, false, { user }),
+            createTestDefinitions(defaultCases.hiddenAndUnknownTypes, {
+              statusCode: 200,
+              reason: 'unauthorized',
+            }),
+          ].flat()
+        : createTestDefinitions(defaultCases.allTypes, { statusCode: 200, reason: 'unauthorized' }),
+      crossSpace: createTestDefinitions(
+        crossSpaceCases.allTypes,
+        { statusCode: 400, reason: 'cross_namespace_not_permitted' },
+        { user }
+      ),
+    };
+  };
 
-    findTest(`dual-privileges user`, {
-      user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
-    });
-
-    findTest(`dual-privileges readonly user`, {
-      user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
-    });
-
-    findTest(`rbac user with all globally`, {
-      user: AUTHENTICATION.KIBANA_RBAC_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
-    });
-
-    findTest(`rbac user with read globally`, {
-      user: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 200,
-          response: expectNotSpaceAwareResults,
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(100, 100, 1),
-        },
-        unknownSearchField: {
-          description: 'empty result',
-          statusCode: 200,
-          response: createExpectEmpty(1, 20, 0),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
-    });
-
-    findTest(`rbac user with all at default space`, {
-      user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        unknownSearchField: {
-          description: 'forbidden login and unknown search field',
-          statusCode: 403,
-          response: createExpectRbacForbidden('url'),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
-    });
-
-    findTest(`rbac user with read at default space`, {
-      user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        unknownSearchField: {
-          description: 'forbidden login and unknown search field',
-          statusCode: 403,
-          response: createExpectRbacForbidden('url'),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
-    });
-
-    findTest(`rbac user with all at space_1`, {
-      user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        unknownSearchField: {
-          description: 'forbidden login and unknown search field',
-          statusCode: 403,
-          response: createExpectRbacForbidden('url'),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
-    });
-
-    findTest(`rbac user with read at space_1`, {
-      user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        notSpaceAwareType: {
-          description: 'only the globaltype',
-          statusCode: 403,
-          response: createExpectRbacForbidden('globaltype'),
-        },
-        unknownType: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
-        },
-        pageBeyondTotal: {
-          description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('visualization'),
-        },
-        unknownSearchField: {
-          description: 'forbidden login and unknown search field',
-          statusCode: 403,
-          response: createExpectRbacForbidden('url'),
-        },
-        noType: {
-          description: 'bad request, type is required',
-          statusCode: 400,
-          response: expectTypeRequired,
-        },
-      },
+  describe('_find', () => {
+    getTestScenarios().security.forEach(({ users }) => {
+      Object.values(users).forEach((user) => {
+        const { defaultCases, crossSpace } = createTests(user);
+        addTests(`${user.description}`, { user, tests: [...defaultCases, ...crossSpace] });
+      });
     });
   });
 }

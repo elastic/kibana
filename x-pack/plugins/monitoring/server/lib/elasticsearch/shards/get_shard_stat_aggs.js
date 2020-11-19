@@ -8,40 +8,39 @@
  * @param {Object} config - Kibana config service
  * @param {Boolean} includeNodes - whether to add the aggs for node shards
  */
-export function getShardAggs(config, includeNodes) {
-  const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
+export function getShardAggs(config, includeNodes, includeIndices) {
+  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
   const aggSize = 10;
   const indicesAgg = {
     terms: {
       field: 'shard.index',
-      size: maxBucketSize
+      size: maxBucketSize,
     },
     aggs: {
       states: {
         terms: { field: 'shard.state', size: aggSize },
-        aggs: { primary: { terms: { field: 'shard.primary', size: 2 } } } // size = 2 since this is a boolean field
-      }
-    }
+        aggs: { primary: { terms: { field: 'shard.primary', size: 2 } } }, // size = 2 since this is a boolean field
+      },
+    },
   };
   const nodesAgg = {
     terms: {
       field: 'shard.node',
-      size: maxBucketSize
+      size: maxBucketSize,
     },
     aggs: {
       index_count: { cardinality: { field: 'shard.index' } },
       node_names: {
-        terms: { field: 'source_node.name', size: aggSize }
+        terms: { field: 'source_node.name', size: aggSize },
       },
       node_ids: {
-        terms: { field: 'source_node.uuid', size: 1 } // node can only have 1 id
-      }
-    }
+        terms: { field: 'source_node.uuid', size: 1 }, // node can only have 1 id
+      },
+    },
   };
 
   return {
-    ...{ indices: indicesAgg },
-    ...{ nodes: includeNodes ? nodesAgg : undefined }
+    ...{ indices: includeIndices ? indicesAgg : undefined },
+    ...{ nodes: includeNodes ? nodesAgg : undefined },
   };
 }
-

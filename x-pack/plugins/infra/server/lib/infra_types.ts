@@ -4,28 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceConfiguration } from '../../public/graphql/types';
-import { InfraConfigurationAdapter } from './adapters/configuration';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from './adapters/framework';
+import { InfraSourceConfiguration } from '../../common/graphql/types';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
-import { InfraMetadataDomain } from './domains/metadata_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
-import { InfraSnapshot } from './snapshot';
-import { InfraSourceStatus } from './source_status';
 import { InfraSources } from './sources';
+import { InfraSourceStatus } from './source_status';
+import { InfraConfig } from '../plugin';
+import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
+
+// NP_TODO: We shouldn't need this context anymore but I am
+// not sure how the graphql stuff uses it, so we can't remove it yet
+export interface InfraContext {
+  req: any;
+  rawReq?: any;
+}
 
 export interface InfraDomainLibs {
-  metadata: InfraMetadataDomain;
   fields: InfraFieldsDomain;
   logEntries: InfraLogEntriesDomain;
   metrics: InfraMetricsDomain;
 }
 
 export interface InfraBackendLibs extends InfraDomainLibs {
-  configuration: InfraConfigurationAdapter;
-  framework: InfraBackendFrameworkAdapter;
-  snapshot: InfraSnapshot;
+  configuration: InfraConfig;
+  framework: KibanaFramework;
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
 }
@@ -39,8 +42,4 @@ export interface InfraConfiguration {
   sources: {
     default: InfraSourceConfiguration;
   };
-}
-
-export interface InfraContext {
-  req: InfraFrameworkRequest;
 }

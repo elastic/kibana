@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 /*
  * A class for determining whether a data set is polled.
  * returns a flag identifying whether the data is polled
  * And a minimum bucket span
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 
-export function polledDataCheckerFactory(callWithRequest) {
+export function polledDataCheckerFactory({ asCurrentUser }) {
   class PolledDataChecker {
     constructor(index, timeField, duration, query) {
       this.index = index;
@@ -29,26 +26,25 @@ export function polledDataCheckerFactory(callWithRequest) {
 
     run() {
       return new Promise((resolve, reject) => {
-        const interval = { name: '1m',  ms: 60000 };
+        const interval = { name: '1m', ms: 60000 };
         this.performSearch(interval.ms)
           .then((resp) => {
-            const fullBuckets = _.get(resp, 'aggregations.non_empty_buckets.buckets', []);
+            const fullBuckets = get(resp, 'aggregations.non_empty_buckets.buckets', []);
             const result = this.isPolledData(fullBuckets, interval);
             if (result.pass) {
-            // data is polled, return a flag and the minimumBucketSpan which should be
-            // used as a minimum bucket span for all subsequent tests.
+              // data is polled, return a flag and the minimumBucketSpan which should be
+              // used as a minimum bucket span for all subsequent tests.
               this.isPolled = true;
               this.minimumBucketSpan = result.meanTimeDiff;
             }
             resolve({
               isPolled: this.isPolled,
-              minimumBucketSpan: this.minimumBucketSpan
+              minimumBucketSpan: this.minimumBucketSpan,
             });
           })
           .catch((resp) => {
             reject(resp);
           });
-
       });
     }
 
@@ -60,23 +56,24 @@ export function polledDataCheckerFactory(callWithRequest) {
             date_histogram: {
               min_doc_count: 1,
               field: this.timeField,
-              interval: `${intervalMs}ms`
-            }
-          }
-        }
+              fixed_interval: `${intervalMs}ms`,
+            },
+          },
+        },
       };
 
       return search;
     }
 
-    performSearch(intervalMs) {
-      const body = this.createSearch(intervalMs);
+    async performSearch(intervalMs) {
+      const searchBody = this.createSearch(intervalMs);
 
-      return callWithRequest('search', {
+      const { body } = await asCurrentUser.search({
         index: this.index,
         size: 0,
-        body
+        body: searchBody,
       });
+      return body;
     }
 
     // test that the coefficient of variation of time difference between non-empty buckets is small
@@ -86,7 +83,7 @@ export function polledDataCheckerFactory(callWithRequest) {
       const timeDiffs = [];
       let sumOfTimeDiffs = 0;
       for (let i = 1; i < fullBuckets.length; i++) {
-        const diff = (fullBuckets[i].key - fullBuckets[i - 1].key);
+        const diff = fullBuckets[i].key - fullBuckets[i - 1].key;
         sumOfTimeDiffs += diff;
         timeDiffs.push(diff);
       }
@@ -102,18 +99,16 @@ export function polledDataCheckerFactory(callWithRequest) {
 
       const cov = Math.sqrt(vari) / meanTimeDiff;
 
-      if ((cov < 0.1) && (intervalMs < meanTimeDiff)) {
+      if (cov < 0.1 && intervalMs < meanTimeDiff) {
         pass = false;
       } else {
         pass = true;
       }
       return {
         pass,
-        meanTimeDiff
+        meanTimeDiff,
       };
     }
-
-
   }
 
   return PolledDataChecker;

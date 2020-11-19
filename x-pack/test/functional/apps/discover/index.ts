@@ -3,13 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
-  describe('discover', function() {
-    this.tags('ciGroup3');
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('discover', function () {
+    this.tags('ciGroup8');
 
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./preserve_url'));
+    loadTestFile(require.resolve('./async_scripted_fields'));
+    loadTestFile(require.resolve('./reporting'));
+    loadTestFile(require.resolve('./error_handling'));
+    loadTestFile(require.resolve('./visualize_field'));
+    loadTestFile(require.resolve('./value_suggestions'));
+    loadTestFile(require.resolve('./async_search'));
   });
 }

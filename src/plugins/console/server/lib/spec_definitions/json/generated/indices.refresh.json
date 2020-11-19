@@ -1,0 +1,24 @@
+{
+  "indices.refresh": {
+    "url_params": {
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ]
+    },
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "_refresh",
+      "{indices}/_refresh"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-refresh.html"
+  }
+}

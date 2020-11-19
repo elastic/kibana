@@ -6,13 +6,13 @@
 
 import { Pager } from '@elastic/eui';
 
-import { registerTestBed } from '../../../../../../../test_utils';
-import { getJobs } from '../../../../../fixtures';
+import { registerTestBed } from '@kbn/test/jest';
+import { getJobs, jobCount } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
 
-jest.mock('../../../services', () => {
-  const services = require.requireActual('../../../services');
+jest.mock('../../../../kibana_services', () => {
+  const services = jest.requireActual('../../../../kibana_services');
   return {
     ...services,
     trackUiMetric: jest.fn(),
@@ -37,7 +37,7 @@ const initTestBed = registerTestBed(JobTable, { defaultProps, store: rollupJobsS
 
 describe('<JobTable />', () => {
   describe('table rows', () => {
-    const totalJobs = 5;
+    const totalJobs = jobCount;
     const jobs = getJobs(totalJobs);
     const openDetailPanel = jest.fn();
     const { find } = initTestBed({ jobs, openDetailPanel });
@@ -56,17 +56,22 @@ describe('<JobTable />', () => {
         'rollupDelay',
         'dateHistogramInterval',
         'groups',
-        'metrics'
+        'metrics',
       ];
 
-      const tableColumns = expectedColumns.reduce((tableColumns, columnId) => (
-        find(`jobTableHeaderCell-${columnId}`).length
-          ? tableColumns.concat(columnId)
-          : tableColumns
-      ), []);
+      const tableColumns = expectedColumns.reduce(
+        (tableColumns, columnId) =>
+          find(`jobTableHeaderCell-${columnId}`).length
+            ? tableColumns.concat(columnId)
+            : tableColumns,
+        []
+      );
 
       expect(tableColumns).toEqual(expectedColumns);
     });
+
+    const getRowTextGetter = (row) => (field) =>
+      row.find(`[data-test-subj="jobTableCell-${field}"]`).hostNodes().text();
 
     it('should set the correct job value in each row cell', () => {
       const unformattedFields = [
@@ -78,7 +83,7 @@ describe('<JobTable />', () => {
       ];
       const row = tableRows.first();
       const job = jobs[0];
-      const getCellText = (field) => row.find(`[data-test-subj="jobTableCell-${field}"]`).hostNodes().text();
+      const getCellText = getRowTextGetter(row);
 
       unformattedFields.forEach((field) => {
         const cellText = getCellText(field);
@@ -95,9 +100,10 @@ describe('<JobTable />', () => {
       expect(cellGroupsText).toEqual('Histogram, terms');
 
       // Metrics
-      const expectedJobMetrics = job.metrics.reduce((text, { name }) => (
-        text ? `${text}, ${name}` : name
-      ), '');
+      const expectedJobMetrics = job.metrics.reduce(
+        (text, { name }) => (text ? `${text}, ${name}` : name),
+        ''
+      );
       const cellMetricsText = getCellText('metrics');
       expect(cellMetricsText).toEqual(expectedJobMetrics);
     });
@@ -111,6 +117,13 @@ describe('<JobTable />', () => {
 
       expect(openDetailPanel.mock.calls.length).toBe(1);
       expect(openDetailPanel.mock.calls[0][0]).toBe(job.id);
+    });
+
+    it('should still render despite unknown job statuses', () => {
+      const row = tableRows.last();
+      const getCellText = getRowTextGetter(row);
+      // In job fixtures, the last job has unknown status
+      expect('Unknown').toEqual(getCellText('status'));
     });
   });
 
@@ -155,8 +168,12 @@ describe('<JobTable />', () => {
       expect(contextMenu.length).toBeTruthy();
 
       const contextMenuButtons = contextMenu.find('button');
-      const buttonsLabel = contextMenuButtons.map(btn => btn.text());
-      expect(buttonsLabel).toEqual(['Start job', 'Delete job']);
+      const buttonsLabel = contextMenuButtons.map((btn) => btn.text());
+      const hasExpectedLabels = ['Start job', 'Delete job'].every((expectedLabel) =>
+        buttonsLabel.includes(expectedLabel)
+      );
+
+      expect(hasExpectedLabels).toBe(true);
     });
 
     it('should only have a "stop" action when the job is started', () => {
@@ -168,8 +185,9 @@ describe('<JobTable />', () => {
       find('jobActionMenuButton').simulate('click');
 
       const contextMenuButtons = find('jobActionContextMenu').find('button');
-      const buttonsLabel = contextMenuButtons.map(btn => btn.text());
-      expect(buttonsLabel).toEqual(['Stop job']);
+      const buttonsLabel = contextMenuButtons.map((btn) => btn.text());
+      const hasExpectedLabels = buttonsLabel.includes('Stop job');
+      expect(hasExpectedLabels).toBe(true);
     });
 
     it('should offer both "start" and "stop" actions when selecting job with different a status', () => {
@@ -183,8 +201,12 @@ describe('<JobTable />', () => {
       find('jobActionMenuButton').simulate('click');
 
       const contextMenuButtons = find('jobActionContextMenu').find('button');
-      const buttonsLabel = contextMenuButtons.map(btn => btn.text());
-      expect(buttonsLabel).toEqual(['Start jobs', 'Stop jobs']);
+      const buttonsLabel = contextMenuButtons.map((btn) => btn.text());
+      const hasExpectedLabels = ['Start jobs', 'Stop jobs'].every((expectedLabel) =>
+        buttonsLabel.includes(expectedLabel)
+      );
+
+      expect(hasExpectedLabels).toBe(true);
     });
   });
 });

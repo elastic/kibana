@@ -5,11 +5,11 @@
  */
 
 export { createSpaces } from './create_spaces';
+export { createMockSavedObjectsRepository } from './create_mock_so_repository';
+export { createMockSavedObjectsService } from './create_mock_so_service';
+export { mockRouteContext, mockRouteContextWithInvalidLicense } from './route_contexts';
 export {
-  createTestHandler,
-  TestConfig,
-  TestOptions,
-  TeardownFn,
-  RequestRunner,
-  RequestRunnerResult,
-} from './create_test_handler';
+  createExportSavedObjectsToStreamMock,
+  createImportSavedObjectsFromStreamMock,
+  createResolveSavedObjectsImportErrorsMock,
+} from './create_copy_to_space_mocks';

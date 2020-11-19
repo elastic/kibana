@@ -22,8 +22,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 
 export default function (Private) {
   const indexPatterns = Private(FixturesStubbedLogstashIndexPatternProvider);
-  const getIndexPatternStub = sinon.stub()
-    .resolves(indexPatterns);
+  const getIndexPatternStub = sinon.stub().resolves(indexPatterns);
 
   return {
     get: getIndexPatternStub,

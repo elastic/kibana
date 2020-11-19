@@ -5,12 +5,13 @@
  */
 
 import { uniq } from 'lodash';
-import { ContextFunction, Datatable, Render } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable, Render, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   filterColumn: string;
   valueColumn: string;
+  filterGroup: string;
 }
 
 interface Return {
@@ -18,7 +19,7 @@ interface Return {
   choices: any;
 }
 
-export function dropdownControl(): ContextFunction<
+export function dropdownControl(): ExpressionFunctionDefinition<
   'dropdownControl',
   Datatable,
   Arguments,
@@ -30,25 +31,33 @@ export function dropdownControl(): ContextFunction<
     name: 'dropdownControl',
     aliases: [],
     type: 'render',
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['datatable'],
     help,
     args: {
       filterColumn: {
         types: ['string'],
+        required: true,
         help: argHelp.filterColumn,
       },
       valueColumn: {
         types: ['string'],
+        required: true,
         help: argHelp.valueColumn,
       },
+      filterGroup: {
+        types: ['string'],
+        help: argHelp.filterGroup,
+      },
     },
-    fn: (context, { valueColumn, filterColumn }) => {
+    fn: (input, { valueColumn, filterColumn, filterGroup }) => {
       let choices = [];
 
-      if (context.rows[0][valueColumn]) {
-        choices = uniq(context.rows.map(row => row[valueColumn])).sort();
+      const filteredRows = input.rows.filter(
+        (row) => row[valueColumn] !== null && row[valueColumn] !== undefined
+      );
+
+      if (filteredRows.length > 0) {
+        choices = uniq(filteredRows.map((row) => row[valueColumn])).sort();
       }
 
       const column = filterColumn || valueColumn;
@@ -59,6 +68,7 @@ export function dropdownControl(): ContextFunction<
         value: {
           column,
           choices,
+          filterGroup,
         },
       };
     },

@@ -5,18 +5,25 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '../../../../../../../../test_utils/enzyme_helpers';
-import { ExplainExporters } from '../exporters';
+import { renderWithIntl } from '@kbn/test/jest';
+import { ExplainExporters, ExplainExportersCloud } from '../exporters';
 
 describe('ExplainExporters', () => {
   test('should explain about xpack.monitoring.exporters setting', () => {
-    const component = renderWithIntl(
-      <ExplainExporters
-        property="xpack.monitoring.exporters"
-        data={'myMonitoringClusterExporter1'}
-        context="esProd001"
-      />
-    );
+    const reason = {
+      property: 'xpack.monitoring.exporters',
+      data: 'myMonitoringClusterExporter1',
+      context: 'esProd001',
+    };
+
+    const component = renderWithIntl(<ExplainExporters {...{ reason }} />);
+    expect(component).toMatchSnapshot();
+  });
+});
+
+describe('ExplainExportersCloud', () => {
+  test('should explain about xpack.monitoring.exporters setting in a cloud environment', () => {
+    const component = renderWithIntl(<ExplainExportersCloud />);
     expect(component).toMatchSnapshot();
   });
 });

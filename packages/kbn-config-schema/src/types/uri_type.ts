@@ -36,9 +36,9 @@ export class URIType extends Type<string> {
       case 'string.base':
         return `expected value of type [string] but got [${typeDetect(value)}].`;
       case 'string.uriCustomScheme':
-        return `expected URI with scheme [${scheme}] but but got [${value}].`;
+        return `expected URI with scheme [${scheme}].`;
       case 'string.uri':
-        return `value is [${value}] but it must be a valid URI (see RFC 3986).`;
+        return `value must be a valid URI (see RFC 3986).`;
     }
   }
 }

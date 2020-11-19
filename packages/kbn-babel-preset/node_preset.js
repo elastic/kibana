@@ -17,7 +17,7 @@
  * under the License.
  */
 
-module.exports = () => {
+module.exports = (_, options = {}) => {
   return {
     presets: [
       [
@@ -32,22 +32,22 @@ module.exports = () => {
             node: 'current',
           },
 
-          // replaces `import "@babel/polyfill"` with a list of require statements
+          // replaces `import "core-js/stable"` with a list of require statements
           // for just the polyfills that the target versions don't already supply
           // on their own
           useBuiltIns: 'entry',
-          modules: 'cjs'
+          modules: 'cjs',
+          // right now when using `corejs: 3` babel does not use the latest available
+          // core-js version due to a bug: https://github.com/babel/babel/issues/10816
+          // Because of that we should use for that value the same version we install
+          // in the package.json in order to have the same polyfills between the environment
+          // and the tests
+          corejs: '3.2.1',
+
+          ...(options['@babel/preset-env'] || {}),
         },
       ],
       require('./common_preset'),
     ],
-    plugins: [
-      [
-        require.resolve('babel-plugin-transform-define'),
-        {
-          'global.__BUILT_WITH_BABEL__': 'true'
-        }
-      ]
-    ]
   };
 };

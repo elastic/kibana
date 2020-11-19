@@ -11,7 +11,7 @@ import { registerHelpers } from './rollup.test_helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     createIndexWithMappings,
@@ -31,9 +31,7 @@ export default function ({ getService }) {
       it('should return an empty object when there are no rollup indices', async () => {
         const uri = `${API_BASE_PATH}/indices`;
 
-        const { body } = await supertest
-          .get(uri)
-          .expect(200);
+        const { body } = await supertest.get(uri).expect(200);
 
         expect(body).to.eql({});
       });
@@ -45,25 +43,29 @@ export default function ({ getService }) {
 
         const uri = `${API_BASE_PATH}/index_pattern_validity/${indexName}`;
 
-        const { body } = await supertest
-          .get(uri)
-          .expect(200);
+        const { body } = await supertest.get(uri).expect(200);
 
-        expect(body).to.eql({
-          dateFields: ['testCreatedField'],
-          keywordFields: ['testTagField'],
-          numericFields: ['testTotalField'],
-          doesMatchIndices: true,
-          doesMatchRollupIndices: false,
-        });
+        expect(Object.keys(body)).to.eql([
+          'doesMatchIndices',
+          'doesMatchRollupIndices',
+          'dateFields',
+          'numericFields',
+          'keywordFields',
+        ]);
+
+        expect(body.doesMatchIndices).to.be(true);
+        expect(body.doesMatchRollupIndices).to.be(false);
+        expect(body.dateFields).to.eql(['testCreatedField']);
+        expect(body.keywordFields).to.eql(['testTagField']);
+
+        // Allowing the test to account for future addition of doc_count
+        expect(body.numericFields.indexOf('testTotalField')).to.be.greaterThan(-1);
       });
 
-      it('should not return any fields when the index pattern doesn\'t match any indices', async () => {
+      it("should not return any fields when the index pattern doesn't match any indices", async () => {
         const uri = `${API_BASE_PATH}/index_pattern_validity/index-does-not-exist`;
 
-        const { body } = await supertest
-          .get(uri)
-          .expect(200);
+        const { body } = await supertest.get(uri).expect(200);
 
         expect(body).to.eql({
           dateFields: [],
@@ -116,8 +118,10 @@ export default function ({ getService }) {
           const payload = getJobPayload(indexName);
           await createJob(payload);
 
-          const { body: { jobs } } = await loadJobs();
-          const job = jobs.find(job => job.config.id === payload.job.id);
+          const {
+            body: { jobs },
+          } = await loadJobs();
+          const job = jobs.find((job) => job.config.id === payload.job.id);
 
           expect(job).not.be(undefined);
           expect(job.config.index_pattern).to.eql(payload.job.index_pattern);
@@ -132,56 +136,56 @@ export default function ({ getService }) {
           expect(body[ROLLUP_INDEX_NAME]).to.not.be(undefined);
 
           expect(body).to.eql({
-            'rollup_index': {
-              'aggs': {
-                'date_histogram': {
-                  'testCreatedField': {
-                    'agg': 'date_histogram',
-                    'delay': '1d',
+            rollup_index: {
+              aggs: {
+                date_histogram: {
+                  testCreatedField: {
+                    agg: 'date_histogram',
+                    delay: '1d',
                     // TODO: Note that we created the job with `interval`, but ES has coerced this to
                     // `fixed_interval` based on the value we provided. Once we update the UI and
                     // tests to no longer use the deprecated `interval` property, we can remove
                     // this comment.
-                    'fixed_interval': '24h',
-                    'time_zone': 'UTC'
-                  }
-                },
-                'max': {
-                  'testCreatedField': {
-                    'agg': 'max'
-                  }
-                },
-                'min': {
-                  'testCreatedField': {
-                    'agg': 'min'
-                  }
-                },
-                'terms': {
-                  'testTagField': {
-                    'agg': 'terms'
+                    fixed_interval: '24h',
+                    time_zone: 'UTC',
                   },
-                  'testTotalField': {
-                    'agg': 'terms'
-                  }
                 },
-                'histogram': {
-                  'testTotalField': {
-                    'agg': 'histogram',
-                    'interval': 7
-                  }
+                max: {
+                  testCreatedField: {
+                    agg: 'max',
+                  },
                 },
-                'avg': {
-                  'testTotalField': {
-                    'agg': 'avg'
-                  }
+                min: {
+                  testCreatedField: {
+                    agg: 'min',
+                  },
                 },
-                'value_count': {
-                  'testTotalField': {
-                    'agg': 'value_count'
-                  }
-                }
-              }
-            }
+                terms: {
+                  testTagField: {
+                    agg: 'terms',
+                  },
+                  testTotalField: {
+                    agg: 'terms',
+                  },
+                },
+                histogram: {
+                  testTotalField: {
+                    agg: 'histogram',
+                    interval: 7,
+                  },
+                },
+                avg: {
+                  testTotalField: {
+                    agg: 'avg',
+                  },
+                },
+                value_count: {
+                  testTotalField: {
+                    agg: 'value_count',
+                  },
+                },
+              },
+            },
           });
         });
       });
@@ -219,8 +223,10 @@ export default function ({ getService }) {
           const payload = getJobPayload(indexName);
           await createJob(payload);
 
-          const { body: { jobs } } = await loadJobs();
-          job = jobs.find(job => job.config.id === payload.job.id);
+          const {
+            body: { jobs },
+          } = await loadJobs();
+          job = jobs.find((job) => job.config.id === payload.job.id);
         });
 
         it('should start the job', async () => {
@@ -232,36 +238,50 @@ export default function ({ getService }) {
 
           // Fetch the job to make sure it has been started
           const jobId = job.config.id;
-          const { body: { jobs } } = await loadJobs();
-          job = jobs.find(job => job.config.id === jobId);
+          const {
+            body: { jobs },
+          } = await loadJobs();
+          job = jobs.find((job) => job.config.id === jobId);
           expect(job.status.job_state).to.eql('started');
         });
 
-        it('should throw a 400 Bad request if the job is already started', async () => {
+        it('should return 200 if the job is already started', async () => {
           await startJob(job.config.id); // Start the job
-
-          const { body } = await startJob(job.config.id).expect(400);
-          expect(body.error).to.eql('Bad Request');
-          expect(body.message).to.contain('Cannot start task for Rollup Job');
+          await startJob(job.config.id).expect(200);
         });
       });
 
       describe('stop', () => {
-        it('should stop the job', async () => {
+        let job;
+
+        beforeEach(async () => {
           const indexName = await createIndexWithMappings();
           const payload = getJobPayload(indexName);
-          const { id: jobId } = payload.job;
-
           await createJob(payload);
-          await startJob(jobId);
-          const { body } = await stopJob(jobId).expect(200);
+
+          const {
+            body: { jobs },
+          } = await loadJobs();
+          job = jobs.find((job) => job.config.id === payload.job.id);
+        });
+
+        it('should stop the job', async () => {
+          await startJob(job.config.id);
+          const { body } = await stopJob(job.config.id).expect(200);
 
           expect(body).to.eql({ success: true });
 
           // Fetch the job to make sure it has been stopped
-          const { body: { jobs } } = await loadJobs();
-          const job = jobs.find(job => job.config.id === jobId);
+          const jobId = job.config.id;
+          const {
+            body: { jobs },
+          } = await loadJobs();
+          job = jobs.find((job) => job.config.id === jobId);
           expect(job.status.job_state).to.eql('stopped');
+        });
+
+        it('should return 200 if the job is already stopped', async () => {
+          await stopJob(job.config.id).expect(200);
         });
       });
     });

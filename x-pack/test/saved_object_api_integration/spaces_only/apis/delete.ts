@@ -5,75 +5,58 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
-import { deleteTestSuiteFactory } from '../../common/suites/delete';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { deleteTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/delete';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+const { fail400, fail404 } = testCaseFailures;
+
+const createTestCases = (spaceId: string) => [
+  // for each outcome, if failure !== undefined then we expect to receive
+  // an error; otherwise, we expect to receive a success result
+  { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
+  { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
+  { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+  { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail400() },
+  // try to delete this object again, this time using the `force` option
+  { ...CASES.MULTI_NAMESPACE_ALL_SPACES, force: true },
+  {
+    ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+    ...fail400(spaceId === DEFAULT_SPACE_ID || spaceId === SPACE_1_ID),
+    ...fail404(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
+  },
+  // try to delete this object again, this time using the `force` option
+  {
+    ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+    force: true,
+    ...fail404(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
+  },
+  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
+  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+  CASES.NAMESPACE_AGNOSTIC,
+  { ...CASES.HIDDEN, ...fail404() },
+  { ...CASES.DOES_NOT_EXIST, ...fail404() },
+];
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('delete', () => {
-    const {
-      createExpectSpaceAwareNotFound,
-      createExpectUnknownDocNotFound,
-      deleteTest,
-      expectEmpty,
-    } = deleteTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = deleteTestSuiteFactory(esArchiver, supertest);
+  const createTests = (spaceId: string) => {
+    const testCases = createTestCases(spaceId);
+    return createTestDefinitions(testCases, false, { spaceId });
+  };
 
-    deleteTest(`in the default space`, {
-      ...SPACES.DEFAULT,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        invalidId: {
-          statusCode: 404,
-          response: createExpectUnknownDocNotFound(SPACES.DEFAULT.spaceId),
-        },
-      },
-    });
-
-    deleteTest(`in the current space (space_1)`, {
-      ...SPACES.SPACE_1,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        invalidId: {
-          statusCode: 404,
-          response: createExpectUnknownDocNotFound(SPACES.SPACE_1.spaceId),
-        },
-      },
-    });
-
-    deleteTest(`in another space (space_2)`, {
-      spaceId: SPACES.SPACE_1.spaceId,
-      otherSpaceId: SPACES.SPACE_2.spaceId,
-      tests: {
-        spaceAware: {
-          statusCode: 404,
-          response: createExpectSpaceAwareNotFound(SPACES.SPACE_2.spaceId),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        invalidId: {
-          statusCode: 404,
-          response: createExpectUnknownDocNotFound(SPACES.SPACE_2.spaceId),
-        },
-      },
+  describe('_delete', () => {
+    getTestScenarios().spaces.forEach(({ spaceId }) => {
+      const tests = createTests(spaceId);
+      addTests(`within the ${spaceId} space`, { spaceId, tests });
     });
   });
 }

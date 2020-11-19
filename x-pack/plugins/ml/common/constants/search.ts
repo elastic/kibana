@@ -6,3 +6,13 @@
 
 export const ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE = 500;
 export const ANOMALIES_TABLE_DEFAULT_QUERY_SIZE = 500;
+
+export enum SEARCH_QUERY_LANGUAGE {
+  KUERY = 'kuery',
+  LUCENE = 'lucene',
+}
+
+export interface ErrorMessage {
+  query: string;
+  message: string;
+}

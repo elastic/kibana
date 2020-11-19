@@ -16,103 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { deepFreeze } from '@kbn/std';
 
-import { deepFreeze, RecursiveReadonly } from '../../utils/deep_freeze';
-import { MixedApp } from '../application_service';
-import { mergeCapabilities } from './merge_capabilities';
-import { InjectedMetadataStart } from '../../injected_metadata';
-import { BasePathStart } from '../../base_path';
+import { Capabilities } from '../../../types/capabilities';
+import { HttpStart } from '../../http';
 
 interface StartDeps {
-  apps: ReadonlyArray<MixedApp>;
-  basePath: BasePathStart;
-  injectedMetadata: InjectedMetadataStart;
-}
-
-/**
- * The read-only set of capabilities available for the current UI session.
- * Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,
- * and the boolean is a flag indicating if the capability is enabled or disabled.
- *
- * @public
- */
-export interface Capabilities {
-  /** Navigation link capabilities. */
-  navLinks: Record<string, boolean>;
-
-  /** Management section capabilities. */
-  management: {
-    [sectionId: string]: Record<string, boolean>;
-  };
-
-  /** Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options. */
-  catalogue: Record<string, boolean>;
-
-  /** Custom capabilities, registered by plugins. */
-  [key: string]: Record<string, boolean | Record<string, boolean>>;
-}
-
-/**
- * Capabilities Setup.
- * @public
- */
-export interface CapabilitiesStart {
-  /**
-   * Gets the read-only capabilities.
-   */
-  capabilities: RecursiveReadonly<Capabilities>;
-
-  /**
-   * Apps available based on the current capabilities. Should be used
-   * to show navigation links and make routing decisions.
-   */
-  availableApps: ReadonlyArray<MixedApp>;
+  appIds: string[];
+  http: HttpStart;
 }
 
 /** @internal */
+export interface CapabilitiesStart {
+  capabilities: RecursiveReadonly<Capabilities>;
+}
 
 /**
  * Service that is responsible for UI Capabilities.
+ * @internal
  */
 export class CapabilitiesService {
-  public async start({ apps, basePath, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
-    const mergedCapabilities = mergeCapabilities(
-      // Custom capabilites for new platform apps
-      ...apps.filter(app => app.capabilities).map(app => app.capabilities!),
-      // Generate navLink capabilities for all apps
-      ...apps.map(app => ({ navLinks: { [app.id]: true } }))
-    );
-
-    // NOTE: should replace `fetch` with browser HTTP service once it exists
-    const res = await fetch(basePath.addToPath('/api/capabilities'), {
-      method: 'POST',
-      body: JSON.stringify({ capabilities: mergedCapabilities }),
-      headers: {
-        'kbn-xsrf': 'xxx',
-      },
-      credentials: 'same-origin',
+  public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
+    const capabilities = await http.post<Capabilities>('/api/core/capabilities', {
+      body: JSON.stringify({ applications: appIds }),
     });
 
-    if (res.status === 401) {
-      return {
-        availableApps: [],
-        capabilities: deepFreeze({
-          navLinks: {},
-          management: {},
-          catalogue: {},
-        }),
-      };
-    } else if (res.status !== 200) {
-      throw new Error(`Capabilities check failed.`);
-    }
-
-    const body = await res.json();
-    const capabilities = deepFreeze(body.capabilities as Capabilities);
-    const availableApps = apps.filter(app => capabilities.navLinks[app.id]);
-
     return {
-      availableApps,
-      capabilities,
+      capabilities: deepFreeze(capabilities),
     };
   }
 }

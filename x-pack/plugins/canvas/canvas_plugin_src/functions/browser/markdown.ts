@@ -4,24 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore untyped local
-import { Handlebars } from '../../../common/lib/handlebars';
-import { ContextFunction, Datatable, Render, Style } from '../types';
-import { getFunctionHelp } from '../../strings';
+import {
+  Datatable,
+  Render,
+  Style,
+  ExpressionFunctionDefinition,
+} from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
 type Context = Datatable | null;
 
 interface Arguments {
-  expression: string[];
+  content: string[];
   font: Style;
+  openLinksInNewTab: boolean;
 }
 
-interface Return {
+export interface Return {
   content: string;
   font: Style;
+  openLinksInNewTab: boolean;
 }
 
-export function markdown(): ContextFunction<'markdown', Context, Arguments, Render<Return>> {
+export function markdown(): ExpressionFunctionDefinition<
+  'markdown',
+  Context,
+  Arguments,
+  Promise<Render<Return>>
+> {
   const { help, args: argHelp } = getFunctionHelp().markdown;
 
   return {
@@ -29,14 +39,12 @@ export function markdown(): ContextFunction<'markdown', Context, Arguments, Rend
     aliases: [],
     type: 'render',
     help,
-    context: {
-      types: ['datatable', 'null'],
-    },
+    inputTypes: ['datatable', 'null'],
     args: {
-      expression: {
-        aliases: ['_'],
+      content: {
+        aliases: ['_', 'expression'],
         types: ['string'],
-        help: argHelp.expression,
+        help: argHelp.content,
         default: '""',
         multi: true,
       },
@@ -45,24 +53,32 @@ export function markdown(): ContextFunction<'markdown', Context, Arguments, Rend
         help: argHelp.font,
         default: '{font}',
       },
+      openLinksInNewTab: {
+        types: ['boolean'],
+        help: argHelp.openLinksInNewTab,
+        default: false,
+      },
     },
-    fn: (context, args) => {
-      const compileFunctions = args.expression.map(str =>
+    fn: async (input, args) => {
+      // @ts-expect-error untyped local
+      const { Handlebars } = await import('../../../common/lib/handlebars');
+      const compileFunctions = args.content.map((str) =>
         Handlebars.compile(String(str), { knownHelpersOnly: true })
       );
       const ctx = {
         columns: [],
         rows: [],
         type: null,
-        ...context,
+        ...input,
       };
 
       return {
         type: 'render',
         as: 'markdown',
         value: {
-          content: compileFunctions.map(fn => fn(ctx)).join(''),
+          content: compileFunctions.map((fn) => fn(ctx)).join(''),
           font: args.font,
+          openLinksInNewTab: args.openLinksInNewTab,
         },
       };
     },

@@ -7,54 +7,47 @@
 import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function ClusterStatusUi({ stats, intl }) {
+export function ClusterStatus({ stats, alerts }) {
   const {
     node_count: nodeCount,
     avg_memory_used: avgMemoryUsed,
     avg_memory: avgMemory,
     events_in_total: eventsInTotal,
-    events_out_total: eventsOutTotal
+    events_out_total: eventsOutTotal,
   } = stats;
 
   const metrics = [
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.clusterStatus.nodesLabel', defaultMessage: 'Nodes'
+      label: i18n.translate('xpack.monitoring.logstash.clusterStatus.nodesLabel', {
+        defaultMessage: 'Nodes',
       }),
       value: nodeCount,
-      'data-test-subj': 'node_count'
+      'data-test-subj': 'node_count',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.clusterStatus.memoryLabel', defaultMessage: 'Memory'
+      label: i18n.translate('xpack.monitoring.logstash.clusterStatus.memoryLabel', {
+        defaultMessage: 'Memory',
       }),
       value: formatMetric(avgMemoryUsed, 'byte') + ' / ' + formatMetric(avgMemory, 'byte'),
-      'data-test-subj': 'memory_used'
+      'data-test-subj': 'memory_used',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.clusterStatus.eventsReceivedLabel', defaultMessage: 'Events Received'
+      label: i18n.translate('xpack.monitoring.logstash.clusterStatus.eventsReceivedLabel', {
+        defaultMessage: 'Events Received',
       }),
       value: formatMetric(eventsInTotal, '0.[0]a'),
-      'data-test-subj': 'events_in_total'
+      'data-test-subj': 'events_in_total',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.clusterStatus.eventsEmittedLabel', defaultMessage: 'Events Emitted'
+      label: i18n.translate('xpack.monitoring.logstash.clusterStatus.eventsEmittedLabel', {
+        defaultMessage: 'Events Emitted',
       }),
       value: formatMetric(eventsOutTotal, '0.[0]a'),
-      'data-test-subj': 'events_out_total'
-    }
+      'data-test-subj': 'events_out_total',
+    },
   ];
 
-  return (
-    <SummaryStatus
-      metrics={metrics}
-      data-test-subj="logstashClusterStatus"
-    />
-  );
+  return <SummaryStatus metrics={metrics} alerts={alerts} data-test-subj="logstashClusterStatus" />;
 }
-
-export const ClusterStatus = injectI18n(ClusterStatusUi);

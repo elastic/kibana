@@ -24,8 +24,9 @@ import getopts from 'getopts';
 
 import { execInProjects } from './exec_in_projects';
 import { filterProjectsByFlag } from './projects';
+import { buildAllRefs } from './build_refs';
 
-export function runTypeCheckCli() {
+export async function runTypeCheckCli() {
   const extraFlags: string[] = [];
   const opts = getopts(process.argv.slice(2), {
     boolean: ['skip-lib-check', 'help'],
@@ -79,13 +80,27 @@ export function runTypeCheckCli() {
     process.exit();
   }
 
-  const tscArgs = ['--noEmit', '--pretty', ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : [])];
-  const projects = filterProjectsByFlag(opts.project);
+  await buildAllRefs(log);
+
+  const tscArgs = [
+    // composite project cannot be used with --noEmit
+    ...['--composite', 'false'],
+    ...['--emitDeclarationOnly', 'false'],
+    '--noEmit',
+    '--pretty',
+    ...(opts['skip-lib-check'] ? ['--skipLibCheck'] : []),
+  ];
+  const projects = filterProjectsByFlag(opts.project).filter((p) => !p.disableTypeCheck);
 
   if (!projects.length) {
     log.error(`Unable to find project at ${opts.project}`);
     process.exit(1);
   }
 
-  execInProjects(log, projects, 'tsc', project => ['--project', project.tsConfigPath, ...tscArgs]);
+  execInProjects(log, projects, process.execPath, (project) => [
+    '--max-old-space-size=5120',
+    require.resolve('typescript/bin/tsc'),
+    ...['--project', project.tsConfigPath],
+    ...tscArgs,
+  ]);
 }

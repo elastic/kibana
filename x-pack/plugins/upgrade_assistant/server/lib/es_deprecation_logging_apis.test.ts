@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import {
   getDeprecationLoggingStatus,
   isDeprecationLoggingEnabled,
@@ -12,30 +12,30 @@ import {
 
 describe('getDeprecationLoggingStatus', () => {
   it('calls cluster.getSettings', async () => {
-    const callWithRequest = jest.fn();
-    await getDeprecationLoggingStatus(callWithRequest, {} as any);
-    expect(callWithRequest).toHaveBeenCalledWith({}, 'cluster.getSettings', {
+    const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+    await getDeprecationLoggingStatus(dataClient);
+    expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.getSettings', {
       includeDefaults: true,
     });
   });
 });
 
 describe('setDeprecationLogging', () => {
-  describe('isEnabled = true', async () => {
+  describe('isEnabled = true', () => {
     it('calls cluster.putSettings with logger.deprecation = WARN', async () => {
-      const callWithRequest = jest.fn();
-      await setDeprecationLogging(callWithRequest, {} as any, true);
-      expect(callWithRequest).toHaveBeenCalledWith({}, 'cluster.putSettings', {
+      const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      await setDeprecationLogging(dataClient, true);
+      expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.putSettings', {
         body: { transient: { 'logger.deprecation': 'WARN' } },
       });
     });
   });
 
-  describe('isEnabled = false', async () => {
+  describe('isEnabled = false', () => {
     it('calls cluster.putSettings with logger.deprecation = ERROR', async () => {
-      const callWithRequest = jest.fn();
-      await setDeprecationLogging(callWithRequest, {} as any, false);
-      expect(callWithRequest).toHaveBeenCalledWith({}, 'cluster.putSettings', {
+      const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
+      await setDeprecationLogging(dataClient, false);
+      expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.putSettings', {
         body: { transient: { 'logger.deprecation': 'ERROR' } },
       });
     });
@@ -43,8 +43,8 @@ describe('setDeprecationLogging', () => {
 });
 
 describe('isDeprecationLoggingEnabled', () => {
-  ['default', 'persistent', 'transient'].forEach(tier => {
-    ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ALL'].forEach(level => {
+  ['default', 'persistent', 'transient'].forEach((tier) => {
+    ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN', 'ALL'].forEach((level) => {
       it(`returns true when ${tier} is set to ${level}`, () => {
         expect(isDeprecationLoggingEnabled({ [tier]: { logger: { deprecation: level } } })).toBe(
           true
@@ -53,8 +53,8 @@ describe('isDeprecationLoggingEnabled', () => {
     });
   });
 
-  ['default', 'persistent', 'transient'].forEach(tier => {
-    ['ERROR', 'FATAL'].forEach(level => {
+  ['default', 'persistent', 'transient'].forEach((tier) => {
+    ['ERROR', 'FATAL'].forEach((level) => {
       it(`returns false when ${tier} is set to ${level}`, () => {
         expect(isDeprecationLoggingEnabled({ [tier]: { logger: { deprecation: level } } })).toBe(
           false

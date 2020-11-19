@@ -7,9 +7,9 @@
 import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function DetailStatusUi({ stats, intl }) {
+export function DetailStatus({ stats }) {
   const {
     http_address: httpAddress,
     events,
@@ -17,90 +17,83 @@ function DetailStatusUi({ stats, intl }) {
     pipeline,
     queue_type: queueType,
     version,
-    uptime
+    uptime,
   } = stats;
 
   const firstMetrics = [
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.detailStatus.transportAddressLabel', defaultMessage: 'Transport Address'
+      label: i18n.translate('xpack.monitoring.logstash.detailStatus.transportAddressLabel', {
+        defaultMessage: 'Transport Address',
       }),
       value: httpAddress,
-      'data-test-subj': 'httpAddress'
+      'data-test-subj': 'httpAddress',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.detailStatus.eventsReceivedLabel', defaultMessage: 'Events Received'
+      label: i18n.translate('xpack.monitoring.logstash.detailStatus.eventsReceivedLabel', {
+        defaultMessage: 'Events Received',
       }),
       value: formatMetric(events.in, '0.[0]a'),
-      'data-test-subj': 'eventsIn'
+      'data-test-subj': 'eventsIn',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.detailStatus.eventsEmittedLabel', defaultMessage: 'Events Emitted'
+      label: i18n.translate('xpack.monitoring.logstash.detailStatus.eventsEmittedLabel', {
+        defaultMessage: 'Events Emitted',
       }),
       value: formatMetric(events.out, '0.[0]a'),
-      'data-test-subj': 'eventsOut'
+      'data-test-subj': 'eventsOut',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.detailStatus.configReloadsLabel', defaultMessage: 'Config Reloads'
+      label: i18n.translate('xpack.monitoring.logstash.detailStatus.configReloadsLabel', {
+        defaultMessage: 'Config Reloads',
       }),
       value: reloads.successes,
-      'data-test-subj': 'numReloads'
+      'data-test-subj': 'numReloads',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.detailStatus.pipelineWorkersLabel', defaultMessage: 'Pipeline Workers'
+      label: i18n.translate('xpack.monitoring.logstash.detailStatus.pipelineWorkersLabel', {
+        defaultMessage: 'Pipeline Workers',
       }),
       value: pipeline.workers,
-      'data-test-subj': 'pipelineWorkers'
+      'data-test-subj': 'pipelineWorkers',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.detailStatus.batchSizeLabel', defaultMessage: 'Batch Size'
+      label: i18n.translate('xpack.monitoring.logstash.detailStatus.batchSizeLabel', {
+        defaultMessage: 'Batch Size',
       }),
       value: pipeline.batch_size,
-      'data-test-subj': 'pipelineBatchSize'
-    }
+      'data-test-subj': 'pipelineBatchSize',
+    },
   ];
 
   const lastMetrics = [
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.detailStatus.versionLabel', defaultMessage: 'Version'
+      label: i18n.translate('xpack.monitoring.logstash.detailStatus.versionLabel', {
+        defaultMessage: 'Version',
       }),
       value: version,
-      'data-test-subj': 'version'
+      'data-test-subj': 'version',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.detailStatus.uptimeLabel', defaultMessage: 'Uptime'
+      label: i18n.translate('xpack.monitoring.logstash.detailStatus.uptimeLabel', {
+        defaultMessage: 'Uptime',
       }),
       value: formatMetric(uptime, 'time_since'),
-      'data-test-subj': 'uptime'
-    }
+      'data-test-subj': 'uptime',
+    },
   ];
 
   // make queueType conditional
   const metrics = [...firstMetrics];
   if (queueType) {
     metrics.push({
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.logstash.detailStatus.queueTypeLabel', defaultMessage: 'Queue Type'
+      label: i18n.translate('xpack.monitoring.logstash.detailStatus.queueTypeLabel', {
+        defaultMessage: 'Queue Type',
       }),
       value: queueType,
-      'data-test-subj': 'queueType'
+      'data-test-subj': 'queueType',
     });
   }
   metrics.push(...lastMetrics);
 
-  return (
-    <SummaryStatus
-      metrics={metrics}
-      data-test-subj="logstashDetailStatus"
-    />
-  );
+  return <SummaryStatus metrics={metrics} data-test-subj="logstashDetailStatus" />;
 }
-
-export const DetailStatus = injectI18n(DetailStatusUi);

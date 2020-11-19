@@ -6,115 +6,94 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { get, noop } from 'lodash';
-import { exposeClient, hasMonitoringCluster } from '../instantiate_client';
+import { instantiateClient, hasMonitoringCluster } from '../instantiate_client';
 
-function getMockServerFromConnectionUrl(monitoringClusterUrl) {
-  const server = {
-    xpack: {
-      monitoring: {
-        elasticsearch: {
-          hosts: monitoringClusterUrl ? [monitoringClusterUrl] : [],
-          username: 'monitoring-user-internal-test',
-          password: 'monitoring-p@ssw0rd!-internal-test',
-          ssl: {},
-          customHeaders: {
-            'x-custom-headers-test': 'connection-monitoring'
-          }
-        }
-      }
-    },
-  };
-
-  const config = () => {
-    return {
-      get: (path) => { return get(server, path); },
-      set: noop
-    };
-  };
-
-  return {
-    config,
-    plugins: {
+const server = {
+  monitoring: {
+    ui: {
       elasticsearch: {
-        getCluster: sinon.stub().withArgs('admin').returns({
-          config: sinon.stub().returns(server.elasticsearch)
-        }),
-        createCluster: sinon.stub(),
-      }
+        hosts: [],
+        username: 'monitoring-user-internal-test',
+        password: 'monitoring-p@ssw0rd!-internal-test',
+        ssl: {},
+        customHeaders: {
+          'x-custom-headers-test': 'connection-monitoring',
+        },
+      },
     },
-    events: {
-      on: noop,
+  },
+};
+const serverWithUrl = {
+  monitoring: {
+    ui: {
+      elasticsearch: {
+        hosts: ['http://monitoring-cluster.test:9200'],
+        username: 'monitoring-user-internal-test',
+        password: 'monitoring-p@ssw0rd!-internal-test',
+        ssl: {},
+        customHeaders: {
+          'x-custom-headers-test': 'connection-monitoring',
+        },
+      },
     },
-    expose: sinon.stub(),
-    log: sinon.stub()
-  };
-}
+  },
+};
+
+const createClient = sinon.stub();
+const log = { info: sinon.stub() };
 
 describe('Instantiate Client', () => {
+  afterEach(() => {
+    createClient.resetHistory();
+    log.info.resetHistory();
+  });
+
   describe('Logging', () => {
     it('logs that the config was sourced from the production options', () => {
-      const server = getMockServerFromConnectionUrl(null); // pass null for URL to create the client using prod config
+      instantiateClient(server.monitoring.ui.elasticsearch, log, createClient);
 
-      exposeClient(server);
-
-      expect(server.log.getCall(0).args).to.eql([
-        [ 'monitoring', 'es-client' ],
-        'config sourced from: production cluster'
-      ]);
+      expect(log.info.getCall(0).args).to.eql(['config sourced from: production cluster']);
     });
 
     it('logs that the config was sourced from the monitoring options', () => {
-      const server = getMockServerFromConnectionUrl('monitoring-cluster.test:9200');
-      exposeClient(server);
+      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
 
-      expect(server.log.getCall(0).args).to.eql([
-        [ 'monitoring', 'es-client' ],
-        'config sourced from: monitoring cluster'
-      ]);
+      expect(log.info.getCall(0).args).to.eql(['config sourced from: monitoring cluster']);
     });
   });
 
   describe('Custom Headers Configuration', () => {
     it('Does not add xpack.monitoring.elasticsearch.customHeaders if connected to production cluster', () => {
-      const server = getMockServerFromConnectionUrl(null); // pass null for URL to create the client using prod config
+      instantiateClient(server.monitoring.ui.elasticsearch, log, createClient);
 
-      exposeClient(server);
+      const createClusterCall = createClient.getCall(0);
 
-      const createCluster = server.plugins.elasticsearch.createCluster;
-      const createClusterCall = createCluster.getCall(0);
-
-      sinon.assert.calledOnce(createCluster);
+      sinon.assert.calledOnce(createClient);
       expect(createClusterCall.args[0]).to.be('monitoring');
       expect(createClusterCall.args[1].customHeaders).to.eql(undefined);
     });
 
     it('Adds xpack.monitoring.elasticsearch.customHeaders if connected to monitoring cluster', () => {
-      const server = getMockServerFromConnectionUrl('http://monitoring-cluster.test:9200'); // pass null for URL to create the client using prod config
+      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
 
-      exposeClient(server);
+      const createClusterCall = createClient.getCall(0);
 
-      const createCluster = server.plugins.elasticsearch.createCluster;
-      const createClusterCall = createCluster.getCall(0);
-
-      sinon.assert.calledOnce(createCluster);
+      sinon.assert.calledOnce(createClient);
       expect(createClusterCall.args[0]).to.be('monitoring');
-      expect(createClusterCall.args[1].customHeaders).to.eql(
-        { 'x-custom-headers-test': 'connection-monitoring' }
-      );
+      expect(createClusterCall.args[1].customHeaders).to.eql({
+        'x-custom-headers-test': 'connection-monitoring',
+      });
     });
   });
 
   describe('Use a connection to production cluster', () => {
     it('exposes an authenticated client using production host settings', () => {
-      const server = getMockServerFromConnectionUrl(null); // pass null for URL to create the client using prod config
-      exposeClient(server);
+      instantiateClient(server.monitoring.ui.elasticsearch, log, createClient);
 
-      const createCluster = server.plugins.elasticsearch.createCluster;
-      const createClusterCall = createCluster.getCall(0);
+      const createClusterCall = createClient.getCall(0);
       const createClientOptions = createClusterCall.args[1];
 
-      sinon.assert.calledOnce(createCluster);
+      sinon.assert.calledOnce(createClient);
       expect(createClusterCall.args[0]).to.be('monitoring');
       expect(createClientOptions.hosts).to.eql(undefined);
     });
@@ -122,14 +101,11 @@ describe('Instantiate Client', () => {
 
   describe('Use a connection to monitoring cluster', () => {
     it('exposes an authenticated client using monitoring host settings', () => {
-      const server = getMockServerFromConnectionUrl('http://monitoring-cluster.test:9200');
-      exposeClient(server);
-
-      const createCluster = server.plugins.elasticsearch.createCluster;
-      const createClusterCall = createCluster.getCall(0);
+      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
+      const createClusterCall = createClient.getCall(0);
       const createClientOptions = createClusterCall.args[1];
 
-      sinon.assert.calledOnce(createCluster);
+      sinon.assert.calledOnce(createClient);
       expect(createClusterCall.args[0]).to.be('monitoring');
       expect(createClientOptions.hosts[0]).to.eql('http://monitoring-cluster.test:9200');
       expect(createClientOptions.username).to.eql('monitoring-user-internal-test');
@@ -139,13 +115,11 @@ describe('Instantiate Client', () => {
 
   describe('hasMonitoringCluster', () => {
     it('returns true if monitoring is configured', () => {
-      const server = getMockServerFromConnectionUrl('http://monitoring-cluster.test:9200'); // pass null for URL to create the client using prod config
-      expect(hasMonitoringCluster(server)).to.be(true);
+      expect(hasMonitoringCluster(serverWithUrl.monitoring.ui.elasticsearch)).to.be(true);
     });
 
     it('returns false if monitoring is not configured', () => {
-      const server = getMockServerFromConnectionUrl(null);
-      expect(hasMonitoringCluster(server)).to.be(false);
+      expect(hasMonitoringCluster(server.monitoring.ui.elasticsearch)).to.be(false);
     });
   });
 });

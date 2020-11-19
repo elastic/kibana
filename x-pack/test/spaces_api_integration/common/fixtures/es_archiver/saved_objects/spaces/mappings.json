@@ -24,6 +24,20 @@
             }
           }
         },
+        "references": {
+          "type": "nested",
+          "properties": {
+            "name": {
+              "type": "keyword"
+              },
+            "type": {
+              "type": "keyword"
+              },
+            "id": {
+              "type": "keyword"
+              }
+          }
+        },
         "dashboard": {
           "properties": {
             "description": {
@@ -78,6 +92,13 @@
             },
             "version": {
               "type": "integer"
+            }
+          }
+        },
+        "file-upload-telemetry": {
+          "properties": {
+            "filesUploadedTotalCount": {
+              "type": "long"
             }
           }
         },
@@ -136,6 +157,12 @@
           }
         },
         "namespace": {
+          "type": "keyword"
+        },
+        "namespaces": {
+          "type": "keyword"
+        },
+        "originId": {
           "type": "keyword"
         },
         "search": {
@@ -297,6 +324,19 @@
             },
             "visState": {
               "type": "text"
+            }
+          }
+        },
+        "sharedtype": {
+          "properties": {
+            "title": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 2048
+                }
+              }
             }
           }
         }

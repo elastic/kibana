@@ -1,0 +1,20 @@
+{
+  "name": "@kbn/analytics",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Kibana Analytics tool",
+  "main": "target/node/index.js",
+  "browser": "target/web/index.js",
+  "types": "target/types/index.d.ts",
+  "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "node scripts/build",
+    "kbn:bootstrap": "node scripts/build --source-maps",
+    "kbn:watch": "node scripts/build --source-maps --watch"
+  },
+  "devDependencies": {
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/babel-preset": "link:../kbn-babel-preset"
+  }
+}

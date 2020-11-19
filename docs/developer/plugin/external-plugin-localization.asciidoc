@@ -1,0 +1,167 @@
+[[external-plugin-localization]]
+== Localization for plugins outside the {kib} repo
+
+To introduce localization for your plugin, use our i18n tool to create IDs and default messages. You can then extract these IDs with respective default messages into localization JSON files for {kib} to use when running your plugin.
+
+[discrete]
+=== Adding localization to your plugin
+
+You must add a `translations` directory at the root of your plugin. This directory will contain the translation files that {kib} uses.
+
+["source","shell"]
+-----------
+.
+├── translations
+│   ├── en.json
+│   ├── ja-JP.json
+│   └── zh-CN.json
+└── .i18nrc.json
+-----------
+
+
+[discrete]
+=== Using {kib} i18n tooling
+To simplify the localization process, {kib} provides tools for the following functions:
+
+* Verify all translations have translatable strings and extract default messages from templates
+* Verify translation files and integrate them into {kib}
+
+To use {kib} i18n tooling, create a `.i18nrc.json` file with the following configs:
+
+* `paths`.  The directory from which the i18n translation IDs are extracted.
+* `exclude`. The list of files to exclude while parsing paths.
+* `translations`. The list of translations where JSON localizations are found.
+
+["source","json"]
+-----------
+{
+  "paths": {
+    "myPlugin": "src/ui",
+  },
+  "exclude": [
+  ],
+  "translations": [
+    "translations/zh-CN.json",
+    "translations/ja-JP.json"
+  ]
+}
+-----------
+
+An example {kib} `.i18nrc.json` is {blob}.i18nrc.json[here].
+
+Full documentation about i18n tooling is {blob}src/dev/i18n/README.md[here].
+
+[discrete]
+=== Extracting default messages
+To extract the default messages from your plugin, run the following command:
+
+["source","shell"]
+-----------
+node scripts/i18n_extract --output-dir ./translations --include-config ../kibana-extra/myPlugin/.i18nrc.json
+-----------
+
+This outputs a `en.json` file inside the `translations` directory. To localize other languages, clone the file and translate each string.
+
+[discrete]
+=== Checking i18n messages
+
+Checking i18n does the following:
+
+* Checks all existing labels for violations.
+* Takes translations from `.i18nrc.json` and compares them to the messages extracted and validated.
+** Checks for unused translations. If you remove a label that has a corresponding translation, you must also remove the label from the translations file.
+** Checks for incompatible translations.  If you add or remove a new parameter from an existing string, you must also remove the label from the translations file.
+
+To check your i18n translations, run the following command:
+
+["source","shell"]
+-----------
+node scripts/i18n_check --fix --include-config ../kibana-extra/myPlugin/.i18nrc.json
+-----------
+
+
+[discrete]
+=== Implementing i18n in the UI
+
+{kib} relies on several UI frameworks (ReactJS and AngularJS) and
+requires localization in different environments (browser and NodeJS).
+The internationalization engine is framework agnostic and consumable in
+all parts of {kib} (ReactJS, AngularJS and NodeJS).
+
+To simplify
+internationalization in UI frameworks, additional abstractions are
+built around the I18n engine: `react-intl` for React and custom
+components for AngularJS. https://github.com/yahoo/react-intl[React-intl]
+is built around https://github.com/yahoo/intl-messageformat[intl-messageformat],
+so both React and AngularJS frameworks use the same engine and the same
+message syntax.
+
+
+[discrete]
+==== i18n for vanilla JavaScript
+
+["source","js"]
+-----------
+import { i18n } from '@kbn/i18n';
+
+export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
+  defaultMessage: 'Greetings, planet Earth!',
+});
+-----------
+
+Full details are {kib-repo}tree/master/packages/kbn-i18n#vanilla-js[here].
+
+[discrete]
+==== i18n for React
+
+To localize strings in React, use either `FormattedMessage` or `i18n.translate`.
+
+
+["source","js"]
+-----------
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+export const Component = () => {
+  return (
+    <div>
+      {i18n.translate('xpack.someText', { defaultMessage: 'Some text' })}
+      <FormattedMessage id="xpack.someOtherText" defaultMessage="Some other text">
+      </FormattedMessage>
+    </div>
+  );
+};
+-----------
+
+Full details are {kib-repo}tree/master/packages/kbn-i18n#react[here].
+
+
+
+[discrete]
+==== i18n for Angular
+
+You are encouraged to use `i18n.translate()` by statically importing `i18n` from `@kbn/i18n` wherever possible in your Angular code. Angular wrappers use the translation `service` with the i18n engine under the hood.
+
+The translation directive has the following syntax:
+["source","js"]
+-----------
+<ANY
+  i18n-id="{string}"
+  i18n-default-message="{string}"
+  [i18n-values="{object}"]
+  [i18n-description="{string}"]
+></ANY>
+-----------
+
+Full details are {kib-repo}tree/master/packages/kbn-i18n#angularjs[here].
+
+
+[discrete]
+=== Resources
+
+To learn more about i18n tooling, see {blob}src/dev/i18n/README.md[i18n dev tooling].
+
+To learn more about implementing i18n in the UI, use the following links:
+
+* {blob}packages/kbn-i18n/README.md[i18n plugin]
+* {blob}packages/kbn-i18n/GUIDELINE.md[i18n guidelines]

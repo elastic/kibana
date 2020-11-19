@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './with_summary';
 export * from './log_summary';
+export * from './with_summary';

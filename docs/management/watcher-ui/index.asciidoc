@@ -1,8 +1,241 @@
 [role="xpack"]
 [[watcher-ui]]
-== Watcher UI
+== Watcher
 
-_Watcher UI_ enables you to monitor, manage, create and simulate 
-{stack-ov}/xpack-alerting.html[watches] for your Elasticsearch indices.
+Watcher is an {es} feature that you can use to create actions based on
+conditions, which are periodically evaluated using queries on your data.
+Watches are helpful for analyzing mission-critical and business-critical
+streaming data. For example, you might watch application logs for performance
+outages or audit access logs for security threats.
 
-include::getting-started.asciidoc[]
+To get started, open then main menu,
+then click *Stack Management > Watcher*.
+With this UI, you can:
+
+* <<watcher-create-threshold-alert, Create a simple threshold watch>>
+* <<watcher-getting-started, View your watch history and action status>>
+* <<watcher-deactivate, Deactivate and delete a watch>>
+* <<watcher-create-advanced-watch, Create an advanced watch using API syntax>>
+
+[role="screenshot"]
+image:management/watcher-ui/images/watches.png["Watcher list"]
+
+{ref}/xpack-alerting.html[Alerting on cluster and index events]
+is a good source for detailed
+information on how watches work. If you are using the UI to create a
+threshold watch, take a look at the different watcher actions. If you are
+creating an advanced watch, you should be familiar with the parts of a
+watch&#8212;input, schedule, condition, and actions.
+
+[float]
+[[watcher-security]]
+=== Watcher security
+
+If the {es} {security-features} are enabled, you must have the
+{ref}/security-privileges.html[`manage_watcher` or `monitor_watcher`]
+cluster privileges to use Watcher in {kib}.
+
+Alternately, you can have the built-in `kibana_admin` role
+and either of these watcher roles:
+
+* `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
+* `watcher_user`. You can view watches, but not create or edit them.
+
+To manage roles, open then main menu, then click *Stack Management > Roles*, or use the
+<<role-management-api, Kibana Role Management API>>. Watches are shared between
+all users with the same role.
+
+NOTE: If you are creating a threshold watch, you must also have the `view_index_metadata` index privilege. See
+{ref}/index-mgmt.html[Index management] for detailed information.
+
+[float]
+[[watcher-create-threshold-alert]]
+=== Create a threshold alert
+
+A threshold alert is one of the most common types of watches that you can create.
+This alert periodically checks when your data is above, below, equals,
+or is in between a certain threshold within a given time interval.
+
+The following example walks you through creating a threshold alert. The alert
+is triggered when the maximum total CPU usage on a machine goes above a
+certain percentage. The example uses https://www.elastic.co/products/beats/metricbeat[Metricbeat]
+to collect metrics from your systems and services.
+{metricbeat-ref}/metricbeat-installation-configuration.html[Learn more] on how to install
+and get started with Metricbeat.
+
+[float]
+==== Define the watch input and schedule
+
+. Click *Create* and then select *Create threshold alert*.
++
+You're navigated to a page where you're asked to define the watch name, the data that you want to evaluate, and
+how often you want to trigger the watch.
+
+. Enter a name that you want to call the alert, for example, `cpu_threshold_alert`.
+
+. In the *Indices to query* field, enter `metricbeat-*` and select `@timestamp`
+as the time field.
+
+. Use the default schedule to run the watch every 1 minute.
++
+[role="screenshot"]
+image:management/watcher-ui/images/threshold-alert/create-threshold-alert-created.png["Input and schedule for threshold alert"]
+
+[float]
+==== Add a condition
+
+You should now see a panel with default conditions and a visualization of the
+data based on those conditions. The condition evaluates the data you’ve loaded
+into the watch and determines if any action is required.
+
+. Click the `WHEN` expression and change the value to `max()`.
++
+The `OF` expression now appears.
+
+. Search for `system.process.cpu.total.norm.pct` and select it from the list.
+
+
+. Select the `IS ABOVE` expression and change the value to `.25` to trigger
+an alert whenever the CPU is above 25%.
++
+As you change the condition, the visualization is automatically updated. The black
+line represents the threshold (25%), while the green fluctuating line
+represents the change in CPU over the set time period.
++
+[role="screenshot"]
+image:management/watcher-ui/images/threshold-alert/threshold-alert-condition.png["Condition for threshold alert"]
+
+[float]
+==== Add an action
+
+Now that the condition is set, you must add an action. The action triggers
+when the watch condition is met. For a complete list of actions and how to configure them, see
+{ref}/action-conditions.html[Adding conditions to actions].
+
+In this example, you’ll configure an email action. You must have an {ref}/actions-email.html#configuring-email[email account configured]
+in {es} for this example to work.
+
+. Click *Add action* and select *Email*.
+
+. In the *To email address* field, enter one or more email addresses to whom
+you want to send the message when the condition is met.
+
+. Enter a subject and body for the email.
++
+[role="screenshot"]
+image:management/watcher-ui/images/threshold-alert/threshold-alert-action.png["Action for threshold alert"]
+
+. To test the action before saving the watch, click *Send test email*.
++
+A sample email is sent using the configuration you set up.
+
+. Click *Create alert*.
++
+The alert appears on the Watcher overview page, where you can drill down into
+the watch history and status.
+
+[float]
+==== Delete the alert
+
+In this example, you set the threshold to 25% so you can see the watch fire. In
+a  real-world scenario, this threshold is likely too low because the alerts are
+so frequent. Once you are done experimenting, you should delete the alert.
+Find the alert on the Watcher overview page and click the trash icon in the *Actions* column.
+
+[float]
+==== Edit the alert
+
+Alternatively, you can keep the alert and adjust the threshold value. To edit
+an alert, find the alert on the Watcher overview page and click the pencil icon
+in the *Actions* column.
+
+[float]
+[[watcher-getting-started]]
+=== View watch history and status
+The Watcher overview page lists your watches and includes details such as state,
+last fired, and last triggered.  A watch has one of four states:
+
+* *Firing.* The watch is triggered and actively performing the associated actions.
+* *Error.* The watch is not working properly.
+* *OK.* The watch is not actively firing but working properly.
+* *Disabled.* The watch will not fire under any circumstances.
+
+From this page you can drill down into a watch to investigate its history
+and status.
+
+[float]
+==== View watch history
+
+The *Execution history* tab shows each time the watch is triggered and the
+results of the query, whether the condition was met, and what actions were taken.
+
+[role="screenshot"]
+image:management/watcher-ui/images/execution-history.png["Execution history tab"]
+
+[float]
+==== Acknowledge action status
+
+The *Action statuses* tab lists all actions associated with the watch and
+the state of each action. If the action is firing, you can acknowledge the
+watch to prevent too many executions of the same action for the same watch.
+See {ref}/actions.html#actions-ack-throttle[Acknowledgement and throttling] for details.
+
+[role="screenshot"]
+image:management/watcher-ui/images/alerts-status.png["Action status tab"]
+
+[float]
+[[watcher-deactivate]]
+=== Deactivate and delete a watch
+
+Actions for deactivating and deleting a watch are on each watch detail page:
+
+* *Deactivate a watch* if you know a situation is planned that will
+cause a false alarm. You can reactivate the watch when the situation is resolved.
+* *Delete a watch* to permanently remove it from the system. You can delete
+the watch you are currently viewing, or go to the Watcher overview, and
+delete watches in bulk.
+
+[float]
+[[watcher-create-advanced-watch]]
+=== Create an advanced watch
+
+Advanced watches are for users who are more familiar with {es} query syntax and
+the Watcher framework. The UI is aligned with using the REST APIs.
+For more information, see {ref}/query-dsl.html[Query DSL].
+
+[float]
+==== Create the watch
+
+On the Watch overview page, click *Create* and choose *Create advanced watch*.
+An advanced watch requires a name and ID.  Name is a user-friendly way to
+identify the watch, and ID refers to the identifier used by {es}.  Refer to
+{ref}/how-watcher-works.html#watch-definition[Watch definition] for how
+to input the watch JSON.
+
+[role="screenshot"]
+image:management/watcher-ui/images/advanced-watch/advanced-watch-create.png["Create advanced watch"]
+
+[float]
+==== Simulate the watch
+
+The *Simulate* tab allows you to override parts of the watch, and then run a
+simulation. Be aware of these implementation details on overrides:
+
+* Trigger overrides use {ref}/common-options.html#date-math[date math].
+* Input overrides accepts a JSON blob.
+* Condition overrides indicates if you want to force the condition to always be `true`.
+* Action overrides support {ref}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode[multiple options].
+
+After starting the simulation, you’ll see a results screen. For more information
+on the fields in the response, see the {ref}/watcher-api-execute-watch.html[Execute watch API].
+
+[role="screenshot"]
+image:management/watcher-ui/images/advanced-watch/advanced-watch-simulate.png["Create advanced watch"]
+
+[float]
+==== Examples of advanced watches
+
+Refer to these examples for creating an advanced watch:
+
+* {ref}/watch-cluster-status.html[Watch the status of an {es} cluster]
+* {ref}/watching-meetup-data.html[Watch event data]

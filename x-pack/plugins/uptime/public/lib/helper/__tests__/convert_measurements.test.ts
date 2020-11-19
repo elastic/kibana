@@ -15,7 +15,7 @@ describe('convertMicrosecondsToMilliseconds', () => {
   it('returns null for null parameter', () => {
     expect(convertMicrosecondsToMilliseconds(null)).toBeNull();
   });
-  it('returns undefined for undefined parameter', () => {
-    expect(convertMicrosecondsToMilliseconds(undefined)).toBeUndefined();
+  it('properly converts us to ms', () => {
+    expect(convertMicrosecondsToMilliseconds(2300000)).toBe(2300);
   });
 });

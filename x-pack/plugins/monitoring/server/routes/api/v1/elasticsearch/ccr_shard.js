@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
@@ -37,7 +37,7 @@ async function getCcrStat(req, esIndexPattern, filters) {
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.failed_read_requests',
     ],
     body: {
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
       query: {
         bool: {
           must: [
@@ -48,21 +48,21 @@ async function getCcrStat(req, esIndexPattern, filters) {
                   format: 'epoch_millis',
                   gte: min,
                   lte: max,
-                }
-              }
-            }
-          ]
-        }
+                },
+              },
+            },
+          ],
+        },
       },
       collapse: {
         field: 'ccr_stats.follower_index',
         inner_hits: {
           name: 'oldest',
           size: 1,
-          sort: [{ timestamp: 'asc' }]
-        }
-      }
-    }
+          sort: [{ timestamp: { order: 'asc', unmapped_type: 'long' } }],
+        },
+      },
+    },
   };
 
   return await callWithRequest(req, 'search', params);
@@ -74,19 +74,19 @@ export function ccrShardRoute(server) {
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr/{index}/shard/{shardId}',
     config: {
       validate: {
-        params: Joi.object({
-          clusterUuid: Joi.string().required(),
-          index: Joi.string().required(),
-          shardId: Joi.string().required()
+        params: schema.object({
+          clusterUuid: schema.string(),
+          index: schema.string(),
+          shardId: schema.string(),
         }),
-        payload: Joi.object({
-          ccs: Joi.string().optional(),
-          timeRange: Joi.object({
-            min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required(),
-        })
-      }
+        payload: schema.object({
+          ccs: schema.maybe(schema.string()),
+          timeRange: schema.object({
+            min: schema.string(),
+            max: schema.string(),
+          }),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -99,41 +99,46 @@ export function ccrShardRoute(server) {
         {
           term: {
             type: {
-              value: 'ccr_stats'
-            }
-          }
+              value: 'ccr_stats',
+            },
+          },
         },
         {
           term: {
             'ccr_stats.follower_index': {
               value: index,
-            }
-          }
+            },
+          },
         },
         {
           term: {
             'ccr_stats.shard_id': {
               value: shardId,
-            }
-          }
-        }
+            },
+          },
+        },
       ];
 
       try {
-
-        const [
-          metrics,
-          ccrResponse
-        ] = await Promise.all([
-          getMetrics(req, esIndexPattern, [
-            { keys: ['ccr_sync_lag_time'], name: 'ccr_sync_lag_time' },
-            { keys: ['ccr_sync_lag_ops'], name: 'ccr_sync_lag_ops' },
-          ], filters),
-          getCcrStat(req, esIndexPattern, filters)
+        const [metrics, ccrResponse] = await Promise.all([
+          getMetrics(
+            req,
+            esIndexPattern,
+            [
+              { keys: ['ccr_sync_lag_time'], name: 'ccr_sync_lag_time' },
+              { keys: ['ccr_sync_lag_ops'], name: 'ccr_sync_lag_ops' },
+            ],
+            filters
+          ),
+          getCcrStat(req, esIndexPattern, filters),
         ]);
 
         const stat = get(ccrResponse, 'hits.hits[0]._source.ccr_stats', {});
-        const oldestStat = get(ccrResponse, 'hits.hits[0].inner_hits.oldest.hits.hits[0]._source.ccr_stats', {});
+        const oldestStat = get(
+          ccrResponse,
+          'hits.hits[0].inner_hits.oldest.hits.hits[0]._source.ccr_stats',
+          {}
+        );
 
         return {
           metrics,
@@ -142,9 +147,9 @@ export function ccrShardRoute(server) {
           timestamp: get(ccrResponse, 'hits.hits[0]._source.timestamp'),
           oldestStat,
         };
-      } catch(err) {
+      } catch (err) {
         return handleError(err, req);
       }
-    }
+    },
   });
 }

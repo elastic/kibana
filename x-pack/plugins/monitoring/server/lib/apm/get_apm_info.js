@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, capitalize } from 'lodash';
+import { get, upperFirst } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { getDiffCalculation } from '../beats/_beats_stats';
@@ -12,7 +12,10 @@ import { ApmMetric } from '../metrics';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 
 export function handleResponse(response, apmUuid) {
-  const firstStats = get(response, 'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats');
+  const firstStats = get(
+    response,
+    'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats'
+  );
   const stats = get(response, 'hits.hits[0]._source.beats_stats');
 
   const eventsTotalFirst = get(firstStats, 'metrics.libbeat.pipeline.events.total', null);
@@ -30,8 +33,8 @@ export function handleResponse(response, apmUuid) {
     transportAddress: get(stats, 'beat.host', null),
     version: get(stats, 'beat.version', null),
     name: get(stats, 'beat.name', null),
-    type: capitalize(get(stats, 'beat.type')) || null,
-    output: capitalize(get(stats, 'metrics.libbeat.output.type')) || null,
+    type: upperFirst(get(stats, 'beat.type')) || null,
+    output: upperFirst(get(stats, 'metrics.libbeat.output.type')) || null,
     configReloads: get(stats, 'metrics.libbeat.config.reloads', null),
     uptime: get(stats, 'metrics.beat.info.uptime.ms', null),
     eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),
@@ -46,7 +49,7 @@ export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, s
 
   const filters = [
     { term: { 'beats_stats.beat.uuid': apmUuid } },
-    { term: { 'beats_stats.beat.type': 'apm-server' } }
+    { term: { 'beats_stats.beat.type': 'apm-server' } },
   ];
   const params = {
     index: apmIndexPattern,
@@ -70,23 +73,23 @@ export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, s
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
     ],
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         start,
         end,
         clusterUuid,
         metric: ApmMetric.getMetricFields(),
-        filters
+        filters,
       }),
       collapse: {
         field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restart
         inner_hits: {
           name: 'first_hit',
           size: 1,
-          sort: { 'beats_stats.timestamp': 'asc' }
-        }
-      }
-    }
+          sort: { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
@@ -99,8 +102,8 @@ export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, s
       apmIndexPattern,
       start,
       end,
-      clusterUuid
-    })
+      clusterUuid,
+    }),
   ]);
 
   const formattedResponse = handleResponse(response, apmUuid);

@@ -12,9 +12,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
-
-import euiStyled from '../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../observability/public';
+import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 
@@ -25,9 +24,11 @@ interface AutocompleteFieldProps {
   onSubmit?: (value: string) => void;
   onChange?: (value: string) => void;
   placeholder?: string;
-  suggestions: AutocompleteSuggestion[];
+  suggestions: QuerySuggestion[];
   value: string;
+  disabled?: boolean;
   autoFocus?: boolean;
+  'aria-label'?: string;
 }
 
 interface AutocompleteFieldState {
@@ -49,7 +50,15 @@ export class AutocompleteField extends React.Component<
   private inputElement: HTMLInputElement | null = null;
 
   public render() {
-    const { suggestions, isLoadingSuggestions, isValid, placeholder, value } = this.props;
+    const {
+      suggestions,
+      isLoadingSuggestions,
+      isValid,
+      placeholder,
+      value,
+      disabled,
+      'aria-label': ariaLabel,
+    } = this.props;
     const { areSuggestionsVisible, selectedIndex } = this.state;
 
     return (
@@ -57,6 +66,7 @@ export class AutocompleteField extends React.Component<
         <AutocompleteContainer>
           <FixedEuiFieldSearch
             fullWidth
+            disabled={disabled}
             inputRef={this.handleChangeInputRef}
             isLoading={isLoadingSuggestions}
             isInvalid={!isValid}
@@ -67,6 +77,7 @@ export class AutocompleteField extends React.Component<
             onSearch={this.submit}
             placeholder={placeholder}
             value={value}
+            aria-label={ariaLabel}
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
             <SuggestionsPanel>
@@ -92,12 +103,16 @@ export class AutocompleteField extends React.Component<
     }
   }
 
-  public componentDidUpdate(prevProps: AutocompleteFieldProps, prevState: AutocompleteFieldState) {
+  public componentDidUpdate(prevProps: AutocompleteFieldProps) {
     const hasNewValue = prevProps.value !== this.props.value;
     const hasNewSuggestions = prevProps.suggestions !== this.props.suggestions;
 
     if (hasNewValue) {
       this.updateSuggestions();
+    }
+
+    if (hasNewValue && this.props.value === '') {
+      this.submit();
     }
 
     if (hasNewSuggestions && this.state.isFocused) {
@@ -289,7 +304,7 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-const FixedEuiFieldSearch: React.SFC<
+const FixedEuiFieldSearch: React.FC<
   React.InputHTMLAttributes<HTMLInputElement> &
     EuiFieldSearchProps & {
       inputRef?: (element: HTMLInputElement | null) => void;
@@ -301,14 +316,15 @@ const AutocompleteContainer = euiStyled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = euiStyled(EuiPanel).attrs({
+const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
   paddingSize: 'none',
   hasShadow: true,
-})`
+}))`
   position: absolute;
   width: 100%;
   margin-top: 2px;
-  overflow: hidden scroll;
-  z-index: ${props => props.theme.eui.euiZLevel1};
+  overflow-x: hidden;
+  overflow-y: scroll;
+  z-index: ${(props) => props.theme.eui.euiZLevel1};
   max-height: 322px;
 `;

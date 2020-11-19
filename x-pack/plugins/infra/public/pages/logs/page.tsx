@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-
-import { ColumnarPage } from '../../components/page';
+import { RouteComponentProps } from 'react-router-dom';
 import { LogsPageContent } from './page_content';
-import { LogsPageHeader } from './page_header';
 import { LogsPageProviders } from './page_providers';
 
-export const LogsPage = () => (
-  <LogsPageProviders>
-    <ColumnarPage data-test-subj="infraLogsPage">
-      <LogsPageHeader />
-      <LogsPageContent />
-    </ColumnarPage>
-  </LogsPageProviders>
-);
+export const LogsPage: React.FunctionComponent<RouteComponentProps> = () => {
+  return (
+    <EuiErrorBoundary>
+      <LogsPageProviders>
+        <LogsPageContent />
+      </LogsPageProviders>
+    </EuiErrorBoundary>
+  );
+};

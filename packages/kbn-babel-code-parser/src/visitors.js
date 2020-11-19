@@ -43,8 +43,8 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
           return matches({
             callee: {
               type: 'Identifier',
-              name: 'require'
-            }
+              name: 'require',
+            },
           })(node);
         };
 
@@ -55,13 +55,13 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
               type: 'MemberExpression',
               object: {
                 type: 'Identifier',
-                name: 'require'
+                name: 'require',
               },
               property: {
                 type: 'Identifier',
-                name: 'resolve'
-              }
-            }
+                name: 'resolve',
+              },
+            },
           })(node);
         };
 
@@ -88,8 +88,8 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
           return matches({
             type: 'ImportDeclaration',
             source: {
-              type: 'StringLiteral'
-            }
+              type: 'StringLiteral',
+            },
           })(node);
         };
 
@@ -107,8 +107,8 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
           return matches({
             type: 'ExportNamedDeclaration',
             source: {
-              type: 'StringLiteral'
-            }
+              type: 'StringLiteral',
+            },
           })(node);
         };
 
@@ -126,8 +126,8 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
           return matches({
             type: 'ExportAllDeclaration',
             source: {
-              type: 'StringLiteral'
-            }
+              type: 'StringLiteral',
+            },
           })(node);
         };
 
@@ -136,7 +136,7 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
           const exportAllFromSource = node.source;
           dependenciesAcc.push(exportAllFromSource.value);
         }
-      }
+      },
     };
   })();
 }

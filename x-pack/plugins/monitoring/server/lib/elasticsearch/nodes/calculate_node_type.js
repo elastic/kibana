@@ -24,11 +24,21 @@ export function calculateNodeType(node, masterNodeId) {
     return attr === 'false';
   }
 
-  if (node.uuid !== undefined && node.uuid === masterNodeId) { return 'master'; }
-  if (includes(node.node_ids, masterNodeId)) { return 'master'; }
-  if (isNot(attrs.data) && isNot(attrs.master)) { return 'client'; }
-  if (mightBe(attrs.master) && isNot(attrs.data)) { return 'master_only'; }
-  if (mightBe(attrs.data) && isNot(attrs.master)) { return 'data'; }
+  if (node.uuid !== undefined && node.uuid === masterNodeId) {
+    return 'master';
+  }
+  if (includes(node.node_ids, masterNodeId)) {
+    return 'master';
+  }
+  if (isNot(attrs.data) && isNot(attrs.master)) {
+    return 'client';
+  }
+  if (mightBe(attrs.master) && isNot(attrs.data)) {
+    return 'master_only';
+  }
+  if (mightBe(attrs.data) && isNot(attrs.master)) {
+    return 'data';
+  }
 
   return 'node';
 }

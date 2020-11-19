@@ -5,7 +5,7 @@
  */
 
 import { buildSchemaFromTypeDefinitions } from 'graphql-tools';
-
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { schemas as serverSchemas } from '../server/graphql';
 
 export const schemas = [...serverSchemas];

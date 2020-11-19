@@ -18,10 +18,6 @@
 # default to `true` starting in Kibana 7.0.
 #server.rewriteBasePath: false
 
-# Specifies the default route when opening Kibana. You can use this setting to modify
-# the landing page when opening Kibana.
-#server.defaultRoute: /app/kibana
-
 # The maximum payload size in bytes for incoming server requests.
 #server.maxPayloadBytes: 1048576
 
@@ -31,11 +27,6 @@
 # The URLs of the Elasticsearch instances to use for all your queries.
 #elasticsearch.hosts: ["http://localhost:9200"]
 
-# When this setting's value is true Kibana uses the hostname specified in the server.host
-# setting. When the value of this setting is false, Kibana uses the hostname of the host
-# that connects to this Kibana instance.
-#elasticsearch.preserveHost: true
-
 # Kibana uses an index in Elasticsearch to store saved searches, visualizations and
 # dashboards. Kibana creates a new index if the index doesn't already exist.
 #kibana.index: ".kibana"
@@ -44,7 +35,7 @@
 # the username and password that the Kibana server uses to perform maintenance on the Kibana
 # index at startup. Your Kibana users still need to authenticate with Elasticsearch, which
 # is proxied through the Kibana server.
-#elasticsearch.username: "user"
+#elasticsearch.username: "kibana_system"
 #elasticsearch.password: "pass"
 
 # Enables SSL and paths to the PEM-format SSL certificate and SSL key files, respectively.
@@ -54,7 +45,8 @@
 #server.ssl.key: /path/to/your/server.key
 
 # Optional settings that provide the paths to the PEM-format SSL certificate and key files.
-# These files validate that your Elasticsearch backend uses the same key files.
+# These files are used to verify the identity of Kibana to Elasticsearch and are required when
+# xpack.security.http.ssl.client_authentication in Elasticsearch is set to required.
 #elasticsearch.ssl.certificate: /path/to/your/client.crt
 #elasticsearch.ssl.key: /path/to/your/client.key
 
@@ -84,16 +76,13 @@
 # Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.
 #elasticsearch.shardTimeout: 30000
 
-# Time in milliseconds to wait for Elasticsearch at Kibana startup before retrying.
-#elasticsearch.startupTimeout: 5000
-
 # Logs queries sent to Elasticsearch. Requires logging.verbose set to true.
 #elasticsearch.logQueries: false
 
 # Specifies the path where Kibana creates the process ID file.
-#pid.file: /var/run/kibana.pid
+#pid.file: /run/kibana/kibana.pid
 
-# Enables you specify a file where Kibana stores log output.
+# Enables you to specify a file where Kibana stores log output.
 #logging.dest: stdout
 
 # Set the value of this setting to true to suppress all logging output.
@@ -111,4 +100,5 @@
 #ops.interval: 5000
 
 # Specifies locale to be used for all localizable strings, dates and number formats.
+# Supported languages are the following: English - en , by default , Chinese - zh-CN .
 #i18n.locale: "en"

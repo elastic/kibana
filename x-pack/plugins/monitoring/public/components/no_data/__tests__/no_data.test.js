@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '../../../../../../test_utils/enzyme_helpers';
+import { renderWithIntl } from '@kbn/test/jest';
 import { NoData } from '../';
 
 const enabler = {};
@@ -13,11 +13,7 @@ const enabler = {};
 describe('NoData', () => {
   test('should show text next to the spinner while checking a setting', () => {
     const component = renderWithIntl(
-      <NoData
-        isLoading={true}
-        checkMessage="checking something to test"
-        enabler={enabler}
-      />
+      <NoData isLoading={true} checkMessage="checking something to test" enabler={enabler} />
     );
     expect(component).toMatchSnapshot();
   });
@@ -29,7 +25,7 @@ describe('NoData', () => {
         reason={{
           property: 'xpack.monitoring.foo.bar',
           data: 'taco',
-          context: 'food'
+          context: 'food',
         }}
         enabler={enabler}
       />

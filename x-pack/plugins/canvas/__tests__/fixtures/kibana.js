@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, noop } from 'lodash';
+import { get, has } from 'lodash';
 import mockElasticsearch from './elasticsearch_plugin';
 
 const config = {
@@ -23,18 +23,11 @@ export class Plugin {
         [this.props.name]: {},
         elasticsearch: mockElasticsearch,
       },
-      injectUiAppVars: noop,
       config: () => ({
-        get: key => get(config, key),
-        has: key => has(config, key),
+        get: (key) => get(config, key),
+        has: (key) => has(config, key),
       }),
-      route: def => this.routes.push(def),
-      usage: {
-        collectorSet: {
-          makeUsageCollector: () => {},
-          register: () => {},
-        },
-      },
+      route: (def) => this.routes.push(def),
     };
 
     const { init } = this.props;

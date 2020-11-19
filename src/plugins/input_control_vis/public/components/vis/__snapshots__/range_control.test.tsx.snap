@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`disabled 1`] = `
+<FormRow
+  controlIndex={0}
+  disableMsg="control is disabled to test rendering when disabled"
+  id="mock-range-control"
+  label="range control"
+>
+  <ValidatedDualRange
+    allowEmptyRange={true}
+    compressed={false}
+    disabled={true}
+    fullWidth={false}
+    showInput={true}
+  />
+</FormRow>
+`;
+
+exports[`renders RangeControl 1`] = `
+<FormRow
+  controlIndex={0}
+  id="mock-range-control"
+  label="range control"
+>
+  <ValidatedDualRange
+    allowEmptyRange={true}
+    compressed={false}
+    fullWidth={false}
+    id="mock-range-control"
+    max={100}
+    min={0}
+    onChange={[Function]}
+    showInput={true}
+    showRange={true}
+    showTicks={true}
+    ticks={
+      Array [
+        Object {
+          "label": 0,
+          "value": 0,
+        },
+        Object {
+          "label": 100,
+          "value": 100,
+        },
+      ]
+    }
+    value={
+      Array [
+        "",
+        "",
+      ]
+    }
+  />
+</FormRow>
+`;

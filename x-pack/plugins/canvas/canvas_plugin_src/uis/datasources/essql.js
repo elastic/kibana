@@ -6,9 +6,12 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiTextArea, EuiLink, EuiText } from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { DataSourceStrings, SQL_URL } from '../../../i18n';
+
+const { Essql: strings } = DataSourceStrings;
 
 class EssqlDatasource extends PureComponent {
   componentDidMount() {
@@ -20,7 +23,7 @@ class EssqlDatasource extends PureComponent {
     }
   }
 
-  defaultQuery = 'SELECT * FROM "logstash*"';
+  defaultQuery = `SELECT * FROM "${this.props.defaultIndex}"`;
 
   getQuery = () => getSimpleArg(this.getArgName(), this.props.args)[0];
 
@@ -46,7 +49,7 @@ class EssqlDatasource extends PureComponent {
       });
   };
 
-  onChange = e => {
+  onChange = (e) => {
     const { value } = e.target;
     this.props.setInvalid(!value.trim());
     this.setArg(this.getArgName(), value);
@@ -54,14 +57,26 @@ class EssqlDatasource extends PureComponent {
 
   render() {
     const { isInvalid } = this.props;
+
     return (
-      <EuiFormRow isInvalid={isInvalid} label="Elasticsearch SQL query">
+      <EuiFormRow
+        isInvalid={isInvalid}
+        label={strings.getLabel()}
+        labelAppend={
+          <EuiText size="xs">
+            <EuiLink href={SQL_URL} target="_blank">
+              {strings.getLabelAppend()}
+            </EuiLink>
+          </EuiText>
+        }
+      >
         <EuiTextArea
           placeholder={this.defaultQuery}
           isInvalid={isInvalid}
-          className="canvasTextArea--code"
+          className="canvasTextArea__code"
           value={this.getQuery()}
           onChange={this.onChange}
+          rows={15}
         />
       </EuiFormRow>
     );
@@ -73,13 +88,13 @@ EssqlDatasource.propTypes = {
   updateArgs: PropTypes.func,
   isInvalid: PropTypes.bool,
   setInvalid: PropTypes.func,
+  defaultIndex: PropTypes.string,
 };
 
 export const essql = () => ({
   name: 'essql',
-  displayName: 'Elasticsearch SQL',
-  help: 'Use Elasticsearch SQL to get a data table',
-  // Replace this with a SQL logo when we have one in EUI
-  image: 'logoElasticsearch',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
+  image: 'database',
   template: templateFromReactComponent(EssqlDatasource),
 });

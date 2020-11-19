@@ -17,6 +17,5 @@
  * under the License.
  */
 
-
 const convert = require('./lib/convert');
 module.exports = convert;

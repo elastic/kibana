@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { LegacyAPICaller, Logger } from 'src/core/server';
+import { first } from 'rxjs/operators';
 
-import Boom from 'boom';
+import { LicensingPluginSetup } from '../../../../licensing/server';
 
-import { Server } from 'hapi';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { XPackInfo } from '../../../../xpack_main/server/lib/xpack_info';
 import {
   IndexGroup,
   ReindexSavedObject,
@@ -16,13 +15,19 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
+
+import { esIndicesStateCheck } from '../es_indices_state_check';
+
 import {
   generateNewIndexName,
   getReindexWarnings,
   sourceNameForIndex,
   transformFlatSettings,
 } from './index_settings';
+
 import { ReindexActions } from './reindex_actions';
+
+import { error } from './error';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
 const ML_INDICES = ['.ml-state', '.ml-anomalies', '.ml-config'];
@@ -51,8 +56,12 @@ export interface ReindexService {
   /**
    * Creates a new reindex operation for a given index.
    * @param indexName
+   * @param opts Additional options when creating a new reindex operation
    */
-  createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+  createReindexOperation(
+    indexName: string,
+    opts?: { enqueue?: boolean }
+  ): Promise<ReindexSavedObject>;
 
   /**
    * Retrieves all reindex operations that have the given status.
@@ -66,6 +75,12 @@ export interface ReindexService {
    * @param indexName
    */
   findReindexOperation(indexName: string): Promise<ReindexSavedObject | null>;
+
+  /**
+   * Delete reindex operations for completed indices with deprecations.
+   * @param indexNames
+   */
+  cleanupReindexOperations(indexNames: string[]): Promise<void> | null;
 
   /**
    * Process the reindex operation through one step of the state machine and resolves
@@ -83,8 +98,23 @@ export interface ReindexService {
   /**
    * Resumes the paused reindex operation for a given index.
    * @param indexName
+   * @param opts As with {@link createReindexOperation} we support this setting.
    */
-  resumeReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+  resumeReindexOperation(
+    indexName: string,
+    opts?: { enqueue?: boolean }
+  ): Promise<ReindexSavedObject>;
+
+  /**
+   * Update the update_at field on the reindex operation
+   *
+   * @remark
+   * Currently also sets a startedAt field on the SavedObject, not really used
+   * elsewhere, but is an indication that the object has started being processed.
+   *
+   * @param indexName
+   */
+  startQueuedReindexOperation(indexName: string): Promise<ReindexSavedObject>;
 
   /**
    * Cancel an in-progress reindex operation for a given index. Only allowed when the
@@ -97,10 +127,10 @@ export interface ReindexService {
 }
 
 export const reindexServiceFactory = (
-  callCluster: CallCluster,
-  xpackInfo: XPackInfo,
+  callAsUser: LegacyAPICaller,
   actions: ReindexActions,
-  log: Server['log']
+  log: Logger,
+  licensing: LicensingPluginSetup
 ): ReindexService => {
   // ------ Utility functions
 
@@ -111,10 +141,10 @@ export const reindexServiceFactory = (
    */
   const stopMlJobs = async () => {
     await actions.incrementIndexGroupReindexes(IndexGroup.ml);
-    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async mlDoc => {
+    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async (mlDoc) => {
       await validateNodesMinimumVersion(6, 7);
 
-      const res = await callCluster('transport.request', {
+      const res = await callAsUser('transport.request', {
         path: '/_ml/set_upgrade_mode?enabled=true',
         method: 'POST',
       });
@@ -132,9 +162,9 @@ export const reindexServiceFactory = (
    */
   const resumeMlJobs = async () => {
     await actions.decrementIndexGroupReindexes(IndexGroup.ml);
-    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async mlDoc => {
+    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async (mlDoc) => {
       if (mlDoc.attributes.runningReindexCount === 0) {
-        const res = await callCluster('transport.request', {
+        const res = await callAsUser('transport.request', {
           path: '/_ml/set_upgrade_mode?enabled=false',
           method: 'POST',
         });
@@ -153,8 +183,8 @@ export const reindexServiceFactory = (
    */
   const stopWatcher = async () => {
     await actions.incrementIndexGroupReindexes(IndexGroup.watcher);
-    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async watcherDoc => {
-      const { acknowledged } = await callCluster('transport.request', {
+    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async (watcherDoc) => {
+      const { acknowledged } = await callAsUser('transport.request', {
         path: '/_watcher/_stop',
         method: 'POST',
       });
@@ -172,9 +202,9 @@ export const reindexServiceFactory = (
    */
   const startWatcher = async () => {
     await actions.decrementIndexGroupReindexes(IndexGroup.watcher);
-    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async watcherDoc => {
+    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async (watcherDoc) => {
       if (watcherDoc.attributes.runningReindexCount === 0) {
-        const { acknowledged } = await callCluster('transport.request', {
+        const { acknowledged } = await callAsUser('transport.request', {
           path: '/_watcher/_start',
           method: 'POST',
         });
@@ -191,14 +221,14 @@ export const reindexServiceFactory = (
   const cleanupChanges = async (reindexOp: ReindexSavedObject) => {
     // Cancel reindex task if it was started but not completed
     if (reindexOp.attributes.lastCompletedStep === ReindexStep.reindexStarted) {
-      await callCluster('tasks.cancel', {
+      await callAsUser('tasks.cancel', {
         taskId: reindexOp.attributes.reindexTaskId,
-      }).catch(e => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
+      }).catch((e) => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
     }
 
     // Set index back to writable if we ever got past this point.
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
-      await callCluster('indices.putSettings', {
+      await callAsUser('indices.putSettings', {
         index: reindexOp.attributes.indexName,
         body: { 'index.blocks.write': false },
       });
@@ -208,7 +238,7 @@ export const reindexServiceFactory = (
       reindexOp.attributes.lastCompletedStep >= ReindexStep.newIndexCreated &&
       reindexOp.attributes.lastCompletedStep < ReindexStep.aliasCreated
     ) {
-      await callCluster('indices.delete', { index: reindexOp.attributes.newIndexName });
+      await callAsUser('indices.delete', { index: reindexOp.attributes.newIndexName });
     }
 
     // Resume consumers if we ever got past this point.
@@ -222,7 +252,7 @@ export const reindexServiceFactory = (
   // ------ Functions used to process the state machine
 
   const validateNodesMinimumVersion = async (minMajor: number, minMinor: number) => {
-    const nodesResponse = await callCluster('transport.request', {
+    const nodesResponse = await callAsUser('transport.request', {
       path: '/_nodes',
       method: 'GET',
     });
@@ -263,7 +293,7 @@ export const reindexServiceFactory = (
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
-    const putReadonly = await callCluster('indices.putSettings', {
+    const putReadonly = await callAsUser('indices.putSettings', {
       index: indexName,
       body: { 'index.blocks.write': true },
     });
@@ -284,12 +314,12 @@ export const reindexServiceFactory = (
 
     const flatSettings = await actions.getFlatSettings(indexName);
     if (!flatSettings) {
-      throw Boom.notFound(`Index ${indexName} does not exist.`);
+      throw error.indexNotFound(`Index ${indexName} does not exist.`);
     }
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
 
-    const createIndex = await callCluster('indices.create', {
+    const createIndex = await callAsUser('indices.create', {
       index: newIndexName,
       body: {
         settings,
@@ -298,7 +328,7 @@ export const reindexServiceFactory = (
     });
 
     if (!createIndex.acknowledged) {
-      throw Boom.badImplementation(`Index could not be created: ${newIndexName}`);
+      throw error.cannotCreateIndex(`Index could not be created: ${newIndexName}`);
     }
 
     return actions.updateReindexOp(reindexOp, {
@@ -311,9 +341,18 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
-    const { indexName } = reindexOp.attributes;
+    const { indexName, reindexOptions } = reindexOp.attributes;
 
-    const startReindex = (await callCluster('reindex', {
+    // Where possible, derive reindex options at the last moment before reindexing
+    // to prevent them from becoming stale as they wait in the queue.
+    const indicesState = await esIndicesStateCheck(callAsUser, [indexName]);
+    const shouldOpenAndClose = indicesState[indexName] === 'closed';
+    if (shouldOpenAndClose) {
+      log.debug(`Detected closed index ${indexName}, opening...`);
+      await callAsUser('indices.open', { index: indexName });
+    }
+
+    const startReindex = (await callAsUser('reindex', {
       refresh: true,
       waitForCompletion: false,
       body: {
@@ -326,6 +365,12 @@ export const reindexServiceFactory = (
       lastCompletedStep: ReindexStep.reindexStarted,
       reindexTaskId: startReindex.task,
       reindexTaskPercComplete: 0,
+      reindexOptions: {
+        ...(reindexOptions ?? {}),
+        // Indicate to downstream states whether we opened a closed index that should be
+        // closed again.
+        openAndClose: shouldOpenAndClose,
+      },
     });
   };
 
@@ -337,7 +382,7 @@ export const reindexServiceFactory = (
     const taskId = reindexOp.attributes.reindexTaskId;
 
     // Check reindexing task progress
-    const taskResponse = await callCluster('tasks.get', {
+    const taskResponse = await callAsUser('tasks.get', {
       taskId,
       waitForCompletion: false,
     });
@@ -358,12 +403,12 @@ export const reindexServiceFactory = (
       reindexOp = await cleanupChanges(reindexOp);
     } else {
       // Check that it reindexed all documents
-      const { count } = await callCluster('count', { index: reindexOp.attributes.indexName });
+      const { count } = await callAsUser('count', { index: reindexOp.attributes.indexName });
 
       if (taskResponse.task.status.created < count) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
-        throw Boom.badData(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
+        throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
       }
 
       // Update the status
@@ -374,14 +419,13 @@ export const reindexServiceFactory = (
     }
 
     // Delete the task from ES .tasks index
-    const deleteTaskResp = await callCluster('delete', {
+    const deleteTaskResp = await callAsUser('delete', {
       index: '.tasks',
-      type: 'task',
       id: taskId,
     });
 
     if (deleteTaskResp.result !== 'deleted') {
-      throw Boom.badImplementation(`Could not delete reindexing task ${taskId}`);
+      throw error.reindexTaskCannotBeDeleted(`Could not delete reindexing task ${taskId}`);
     }
 
     return reindexOp;
@@ -392,17 +436,19 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
-    const { indexName, newIndexName } = reindexOp.attributes;
+    const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
-    const existingAliases = (await callCluster('indices.getAlias', {
-      index: indexName,
-    }))[indexName].aliases;
+    const existingAliases = (
+      await callAsUser('indices.getAlias', {
+        index: indexName,
+      })
+    )[indexName].aliases;
 
-    const extraAlises = Object.keys(existingAliases).map(aliasName => ({
+    const extraAlises = Object.keys(existingAliases).map((aliasName) => ({
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
     }));
 
-    const aliasResponse = await callCluster('indices.updateAliases', {
+    const aliasResponse = await callAsUser('indices.updateAliases', {
       body: {
         actions: [
           { add: { index: newIndexName, alias: indexName } },
@@ -413,7 +459,11 @@ export const reindexServiceFactory = (
     });
 
     if (!aliasResponse.acknowledged) {
-      throw Boom.badImplementation(`Index aliases could not be created.`);
+      throw error.cannotCreateIndex(`Index aliases could not be created.`);
+    }
+
+    if (reindexOptions?.openAndClose === true) {
+      await callAsUser('indices.close', { index: indexName });
     }
 
     return actions.updateReindexOp(reindexOp, {
@@ -442,9 +492,18 @@ export const reindexServiceFactory = (
 
   return {
     async hasRequiredPrivileges(indexName: string) {
+      /**
+       * To avoid a circular dependency on Security we use a work around
+       * here to detect whether Security is available and enabled
+       * (i.e., via the licensing plugin). This enables Security to use
+       * functionality exposed through Upgrade Assistant.
+       */
+      const license = await licensing.license$.pipe(first()).toPromise();
+
+      const securityFeature = license.getFeature('security');
+
       // If security is disabled or unavailable, return true.
-      const security = xpackInfo.feature('security');
-      if (!security.isAvailable() || !security.isEnabled()) {
+      if (!securityFeature || !(securityFeature.isAvailable && securityFeature.isEnabled)) {
         return true;
       }
 
@@ -481,7 +540,7 @@ export const reindexServiceFactory = (
         body.cluster = [...body.cluster, 'manage_watcher'];
       }
 
-      const resp = await callCluster('transport.request', {
+      const resp = await callAsUser('transport.request', {
         path: '/_security/user/_has_privileges',
         method: 'POST',
         body,
@@ -507,10 +566,10 @@ export const reindexServiceFactory = (
       }
     },
 
-    async createReindexOperation(indexName: string) {
-      const indexExists = await callCluster('indices.exists', { index: indexName });
+    async createReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
+      const indexExists = await callAsUser('indices.exists', { index: indexName });
       if (!indexExists) {
-        throw Boom.notFound(`Index ${indexName} does not exist in this cluster.`);
+        throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
       }
 
       const existingReindexOps = await actions.findReindexOperations(indexName);
@@ -523,11 +582,16 @@ export const reindexServiceFactory = (
           // Delete the existing one if it failed or was cancelled to give a chance to retry.
           await actions.deleteReindexOp(existingOp);
         } else {
-          throw Boom.badImplementation(`A reindex operation already in-progress for ${indexName}`);
+          throw error.reindexAlreadyInProgress(
+            `A reindex operation already in-progress for ${indexName}`
+          );
         }
       }
 
-      return actions.createReindexOp(indexName);
+      return actions.createReindexOp(
+        indexName,
+        opts?.enqueue ? { queueSettings: { queuedAt: Date.now() } } : undefined
+      );
     },
 
     async findReindexOperation(indexName: string) {
@@ -537,16 +601,35 @@ export const reindexServiceFactory = (
       if (findResponse.total === 0) {
         return null;
       } else if (findResponse.total > 1) {
-        throw Boom.badImplementation(`More than one reindex operation found for ${indexName}`);
+        throw error.multipleReindexJobsFound(
+          `More than one reindex operation found for ${indexName}`
+        );
       }
 
       return findResponse.saved_objects[0];
     },
 
+    async cleanupReindexOperations(indexNames: string[]) {
+      const performCleanup = async (indexName: string) => {
+        const existingReindexOps = await actions.findReindexOperations(indexName);
+
+        if (existingReindexOps && existingReindexOps.total !== 0) {
+          const existingOp = existingReindexOps.saved_objects[0];
+          if (existingOp.attributes.status === ReindexStatus.completed) {
+            // Delete the existing one if its status is completed, but still contains deprecation warnings
+            // example scenario: index was upgraded, but then deleted and restored with an old snapshot
+            await actions.deleteReindexOp(existingOp);
+          }
+        }
+      };
+
+      await Promise.all(indexNames.map(performCleanup));
+    },
+
     findAllByStatus: actions.findAllByStatus,
 
     async processNextStep(reindexOp: ReindexSavedObject) {
-      return actions.runWhileLocked(reindexOp, async lockedReindexOp => {
+      return actions.runWhileLocked(reindexOp, async (lockedReindexOp) => {
         try {
           switch (lockedReindexOp.attributes.lastCompletedStep) {
             case ReindexStep.created:
@@ -578,10 +661,7 @@ export const reindexServiceFactory = (
               break;
           }
         } catch (e) {
-          log(
-            ['upgrade_assistant', 'error'],
-            `Reindexing step failed: ${e instanceof Error ? e.stack : e.toString()}`
-          );
+          log.error(`Reindexing step failed: ${e instanceof Error ? e.stack : e.toString()}`);
 
           // Trap the exception and add the message to the object so the UI can display it.
           lockedReindexOp = await actions.updateReindexOp(lockedReindexOp, {
@@ -590,7 +670,7 @@ export const reindexServiceFactory = (
           });
 
           // Cleanup any changes, ignoring any errors.
-          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch(err => lockedReindexOp);
+          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch((err) => lockedReindexOp);
         }
 
         return lockedReindexOp;
@@ -604,7 +684,7 @@ export const reindexServiceFactory = (
         throw new Error(`No reindex operation found for index ${indexName}`);
       }
 
-      return actions.runWhileLocked(reindexOp, async op => {
+      return actions.runWhileLocked(reindexOp, async (op) => {
         if (op.attributes.status === ReindexStatus.paused) {
           // Another node already paused the operation, don't do anything
           return reindexOp;
@@ -616,22 +696,46 @@ export const reindexServiceFactory = (
       });
     },
 
-    async resumeReindexOperation(indexName: string) {
+    async resumeReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
         throw new Error(`No reindex operation found for index ${indexName}`);
       }
 
-      return actions.runWhileLocked(reindexOp, async op => {
+      return actions.runWhileLocked(reindexOp, async (op) => {
         if (op.attributes.status === ReindexStatus.inProgress) {
           // Another node already resumed the operation, don't do anything
           return reindexOp;
         } else if (op.attributes.status !== ReindexStatus.paused) {
           throw new Error(`Reindex operation must be paused in order to be resumed.`);
         }
+        const queueSettings = opts?.enqueue ? { queuedAt: Date.now() } : undefined;
 
-        return actions.updateReindexOp(op, { status: ReindexStatus.inProgress });
+        return actions.updateReindexOp(op, {
+          status: ReindexStatus.inProgress,
+          reindexOptions: queueSettings ? { queueSettings } : undefined,
+        });
+      });
+    },
+
+    async startQueuedReindexOperation(indexName: string) {
+      const reindexOp = await this.findReindexOperation(indexName);
+
+      if (!reindexOp) {
+        throw error.indexNotFound(`No reindex operation found for index ${indexName}`);
+      }
+
+      if (!reindexOp.attributes.reindexOptions?.queueSettings) {
+        throw error.reindexIsNotInQueue(`Reindex operation ${indexName} is not in the queue.`);
+      }
+
+      return actions.runWhileLocked(reindexOp, async (lockedReindexOp) => {
+        const { reindexOptions } = lockedReindexOp.attributes;
+        reindexOptions!.queueSettings!.startedAt = Date.now();
+        return actions.updateReindexOp(lockedReindexOp, {
+          reindexOptions,
+        });
       });
     },
 
@@ -639,19 +743,21 @@ export const reindexServiceFactory = (
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
-        throw new Error(`No reindex operation found for index ${indexName}`);
+        throw error.indexNotFound(`No reindex operation found for index ${indexName}`);
       } else if (reindexOp.attributes.status !== ReindexStatus.inProgress) {
-        throw new Error(`Reindex operation is not in progress`);
+        throw error.reindexCannotBeCancelled(`Reindex operation is not in progress`);
       } else if (reindexOp.attributes.lastCompletedStep !== ReindexStep.reindexStarted) {
-        throw new Error(`Reindex operation is not current waiting for reindex task to complete`);
+        throw error.reindexCannotBeCancelled(
+          `Reindex operation is not currently waiting for reindex task to complete`
+        );
       }
 
-      const resp = await callCluster('tasks.cancel', {
+      const resp = await callAsUser('tasks.cancel', {
         taskId: reindexOp.attributes.reindexTaskId,
       });
 
       if (resp.node_failures && resp.node_failures.length > 0) {
-        throw new Error(`Could not cancel reindex.`);
+        throw error.reindexCannotBeCancelled(`Could not cancel reindex.`);
       }
 
       return reindexOp;

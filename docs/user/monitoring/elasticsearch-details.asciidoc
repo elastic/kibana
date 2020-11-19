@@ -1,0 +1,167 @@
+[role="xpack"]
+[[elasticsearch-metrics]]
+= {es} Monitoring Metrics
+[subs="attributes"]
+++++
+<titleabbrev>{es} Metrics</titleabbrev>
+++++
+
+You can drill down into the status of your {es} cluster in {kib} by clicking
+the <<cluster-overview-page, Overview>>, <<nodes-page, Nodes>>, 
+<<indices-overview-page, Indices>> and <<logs-monitor-page,Logs>> links on the
+*Stack Monitoring* page.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-elasticsearch.png["Monitoring clusters"]
+
+See also {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
+
+[float]
+[[cluster-overview-page]]
+== Cluster Overview
+
+To view the key metrics that indicate the overall health of an {es} cluster,
+click **Overview** in the {es} section. Anything that needs your attention is
+highlighted in yellow or red.
+
+TIP: Conditions that require your attention are listed at the top of the
+Clusters page. You can also set up watches to alert you when the status
+of your cluster changes. To learn how, see
+{ref}/watch-cluster-status.html[Watching the status of an {es} cluster].
+
+The panel at the top shows the current cluster statistics, the charts show the
+search and indexing performance over time, and the table at the bottom shows
+information about any shards that are being recovered. If you use {filebeat} to
+collect log data from this cluster, you can also see its recent logs.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-overview.png["Elasticsearch Cluster Overview"]
+
+TIP: Not sure what a chart is showing? Click the info button for a description
+of the metrics.
+
+From there, you can dive into detailed metrics for particular nodes and indices.
+
+[float]
+[[nodes-page]]
+== Nodes
+
+To view node metrics, click **Nodes**. The Nodes section shows the status
+of each node in your cluster.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-nodes.png["Elasticsearch Nodes"]
+
+[float]
+[[nodes-page-overview]]
+=== Node Overview
+
+Click the name of a node to view its node statistics over time. These represent
+high-level statistics collected from {es} that provide a good overview of
+health. If you use {filebeat} to collect log data from this node, you can also
+see its recent logs.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-node.png["Elasticsearch Node Overview"]
+
+[float]
+[[nodes-page-advanced]]
+=== Node Advanced
+
+To view advanced node metrics, click the **Advanced** tab for a node. The
+*Advanced* tab shows additional metrics, such as memory and garbage collection
+statistics reported by the selected {es} node.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-node-advanced.png["Elasticsearch Node Advanced"]
+
+You can use the advanced node view to diagnose issues that generally involve
+more advanced knowledge of {es}, such as poor garbage collection performance.
+
+
+[float]
+[[indices-overview-page]]
+== Indices
+
+To view index metrics, click **Indices**. The Indices section shows the same
+overall index and search metrics as the Overview and a table of your indices.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-indices.png["Elasticsearch Indices"]
+
+[float]
+[[indices-page-overview]]
+=== Index Overview
+
+From the Indices listing, you can view data for a particular index. To drill
+down into the data for a particular index, click its name in the Indices table.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-index.png["Elasticsearch Index Overview"]
+
+[float]
+[[indices-page-advanced]]
+=== Index Advanced
+
+To view advanced index metrics, click the **Advanced** tab for an index. The
+*Advanced*  tab shows additional metrics, such as memory statistics reported
+about the {es} index. If the index has more than one shard, then its shards
+might live on more than one node.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-index-advanced.png["Elasticsearch Index Advanced"]
+
+The Advanced index view can be used to diagnose issues that generally involve
+more advanced knowledge of {es}, such as wasteful index memory usage.
+
+[float]
+[[jobs-page]]
+== Jobs
+
+To view {ml} job metrics, click **Jobs**. For each job in your cluster, it shows
+information such as its status, the number of records processed, the size of the
+model, the number of forecasts, and the node that runs the job.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-jobs.png["Machine learning jobs",link="images/monitoring-jobs.png"]
+
+[float]
+[[ccr-overview-page]]
+== CCR
+
+To view {ccr} metrics, click **CCR**. For each follower index on the cluster, it 
+shows information such as the leader index, an indication of how much the
+follower index is lagging behind the leader index, the last fetch time, the
+number of operations synced, and error messages. If you select a follower index,
+you can view the same information for each shard. For example:
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-ccr.png["Cross-cluster replication",link="images/monitoring-ccr.png"]
+
+If you select a shard, you can see graphs for the fetch and operation delays. 
+You can also see advanced information, which contains the results from the 
+{ref}/ccr-get-follow-stats.html[get follower stats API]. For example:
+
+[role="screenshot"] 
+image::user/monitoring/images/monitoring-ccr-shard.png["Cross-cluster replication shard details",link="images/monitoring-ccr-shard.png"]
+
+For more information, see {ref}/xpack-ccr.html[{ccr-cap}].
+
+[float]
+[[logs-monitor-page]]
+== Logs
+
+If you use {filebeat} to collect log data from your cluster, you can see its
+recent logs in the *Stack Monitoring* application. The *Clusters* page lists the
+number of informational, debug, and warning messages in the server and
+deprecation logs. 
+
+If you click *Logs*, you can see the most recent logs for the cluster. For
+example:
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-elasticsearch-logs.png["Recent {es} logs"]
+
+TIP: By default, up to 10 log entries are shown. You can show up to 50 log
+entries by changing the
+<<monitoring-ui-settings,`monitoring.ui.elasticsearch.logFetchCount` setting>>.

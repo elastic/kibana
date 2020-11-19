@@ -5,26 +5,25 @@
  */
 
 import { groupBy, flatten, pick, map } from 'lodash';
-import { ContextFunction, Datatable, DatatableColumn } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   by: string[];
   expression: Array<(datatable: Datatable) => Promise<Datatable>>;
 }
 
-type Return = Datatable | Promise<Datatable>;
+type Output = Datatable | Promise<Datatable>;
 
-export function ply(): ContextFunction<'ply', Datatable, Arguments, Return> {
+export function ply(): ExpressionFunctionDefinition<'ply', Datatable, Arguments, Output> {
   const { help, args: argHelp } = getFunctionHelp().ply;
+  const errors = getFunctionErrors().ply;
 
   return {
     name: 'ply',
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       by: {
         types: ['string'],
@@ -35,46 +34,44 @@ export function ply(): ContextFunction<'ply', Datatable, Arguments, Return> {
         types: ['datatable'],
         resolve: false,
         multi: true,
-        aliases: ['fn', 'function'],
+        aliases: ['exp', 'fn', 'function'],
         help: argHelp.expression,
       },
-      // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
-      // The way the function below is written you can add as many arbitrary named args as you want.
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args) {
-        return context;
+        return input;
       }
 
       let byColumns: DatatableColumn[];
       let originalDatatables: Datatable[];
 
       if (args.by) {
-        byColumns = args.by.map(by => {
-          const column = context.columns.find(col => col.name === by);
+        byColumns = args.by.map((by) => {
+          const column = input.columns.find((col) => col.name === by);
 
           if (!column) {
-            throw new Error(`Column not found: '${by}'`);
+            throw errors.columnNotFound(by);
           }
 
           return column;
         });
 
-        const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
+        const keyedDatatables = groupBy(input.rows, (row) => JSON.stringify(pick(row, args.by)));
 
-        originalDatatables = Object.values(keyedDatatables).map(rows => ({
-          ...context,
+        originalDatatables = Object.values(keyedDatatables).map((rows) => ({
+          ...input,
           rows,
         }));
       } else {
-        originalDatatables = [context];
+        originalDatatables = [input];
       }
 
-      const datatablePromises = originalDatatables.map(originalDatatable => {
+      const datatablePromises = originalDatatables.map((originalDatatable) => {
         let expressionResultPromises = [];
 
         if (args.expression) {
-          expressionResultPromises = args.expression.map(expression =>
+          expressionResultPromises = args.expression.map((expression) =>
             expression(originalDatatable)
           );
         } else {
@@ -84,13 +81,13 @@ export function ply(): ContextFunction<'ply', Datatable, Arguments, Return> {
         return Promise.all(expressionResultPromises).then(combineAcross);
       });
 
-      return Promise.all(datatablePromises).then(newDatatables => {
+      return Promise.all(datatablePromises).then((newDatatables) => {
         // Here we're just merging each for the by splits, so it doesn't actually matter if the rows are the same length
         const columns = combineColumns([byColumns].concat(map(newDatatables, 'columns')));
         const rows = flatten(
           newDatatables.map((dt, i) => {
             const byColumnValues = pick(originalDatatables[i].rows[0], args.by);
-            return dt.rows.map(row => ({
+            return dt.rows.map((row) => ({
               ...byColumnValues,
               ...row,
             }));
@@ -110,8 +107,8 @@ export function ply(): ContextFunction<'ply', Datatable, Arguments, Return> {
 function combineColumns(arrayOfColumnsArrays: DatatableColumn[][]) {
   return arrayOfColumnsArrays.reduce((resultingColumns, columns) => {
     if (columns) {
-      columns.forEach(column => {
-        if (resultingColumns.find(resultingColumn => resultingColumn.name === column.name)) {
+      columns.forEach((column) => {
+        if (resultingColumns.find((resultingColumn) => resultingColumn.name === column.name)) {
           return;
         } else {
           resultingColumns.push(column);
@@ -126,13 +123,14 @@ function combineColumns(arrayOfColumnsArrays: DatatableColumn[][]) {
 // This handles merging the tables produced by multiple expressions run on a single member of the `by` split.
 // Thus all tables must be the same length, although their columns do not need to be the same, we will handle combining the columns
 function combineAcross(datatableArray: Datatable[]) {
+  const errors = getFunctionErrors().ply;
   const [referenceTable] = datatableArray;
   const targetRowLength = referenceTable.rows.length;
 
   // Sanity check
-  datatableArray.forEach(datatable => {
+  datatableArray.forEach((datatable) => {
     if (datatable.rows.length !== targetRowLength) {
-      throw new Error('All expressions must return the same number of rows');
+      throw errors.rowCountMismatch();
     }
   });
 

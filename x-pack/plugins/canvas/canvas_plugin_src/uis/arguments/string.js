@@ -11,6 +11,9 @@ import { EuiFlexItem, EuiFlexGroup, EuiFieldText, EuiButton } from '@elastic/eui
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../../i18n';
+
+const { String: strings } = ArgumentStrings;
 
 const StringArgInput = ({ updateValue, value, confirm, commit, argId }) => (
   <EuiFlexGroup gutterSize="s">
@@ -19,11 +22,11 @@ const StringArgInput = ({ updateValue, value, confirm, commit, argId }) => (
         compressed
         id={argId}
         value={value}
-        onChange={confirm ? updateValue : ev => commit(ev.target.value)}
+        onChange={confirm ? updateValue : (ev) => commit(ev.target.value)}
       />
     </EuiFlexItem>
     {confirm && (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
         <EuiButton size="s" onClick={() => commit(value)}>
           {confirm}
         </EuiButton>
@@ -57,7 +60,7 @@ EnhancedStringArgInput.propTypes = {
 
 export const string = () => ({
   name: 'string',
-  displayName: 'String',
-  help: 'Input short strings',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(EnhancedStringArgInput),
 });

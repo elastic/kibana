@@ -7,6 +7,8 @@
 import createRouter from '@scant/router';
 import { getWindow } from './get_window';
 import { historyProvider } from './history_provider';
+import { getCurrentAppState, assignAppState } from './app_state';
+import { modifyUrl } from './modify_url';
 
 // used to make this provider a singleton
 let router;
@@ -18,10 +20,12 @@ export function routerProvider(routes) {
 
   const baseRouter = createRouter(routes);
   const history = historyProvider(getWindow());
-  let componentListener = null;
+  const componentListeners = [];
 
-  const isPath = str => typeof str === 'string' && str.substr(0, 1) === '/';
+  // assume any string starting with a / is a path
+  const isPath = (str) => typeof str === 'string' && str.substr(0, 1) === '/';
 
+  // helper to get the current state in history
   const getState = (name, params, state) => {
     // given a path, assuming params is the state
     if (isPath(name)) {
@@ -30,15 +34,26 @@ export function routerProvider(routes) {
     return state || history.getLocation().state;
   };
 
+  // helper to append appState to a given url path
+  const appendAppState = (path, appState = getCurrentAppState()) => {
+    const newUrl = modifyUrl(path, (parts) => {
+      parts.query = assignAppState(parts.query, appState);
+    });
+
+    return newUrl;
+  };
+
+  // add or replace history with new url, either from path or derived path via name and params
   const updateLocation = (name, params, state, replace = false) => {
     const currentState = getState(name, params, state);
     const method = replace ? 'replace' : 'push';
 
     // given a path, go there directly
     if (isPath(name)) {
-      return history[method](currentState, name);
+      return history[method](currentState, appendAppState(name));
     }
-    history[method](currentState, baseRouter.create(name, params));
+
+    history[method](currentState, appendAppState(baseRouter.create(name, params)));
   };
 
   // our router is an extended version of the imported router
@@ -48,20 +63,22 @@ export function routerProvider(routes) {
     execute(path = history.getPath()) {
       return this.parse(path);
     },
-    getPath: history.getPath,
-    getFullPath: history.getFullPath,
+    getPath: () => history.getPath(),
+    getFullPath: () => history.getFullPath(),
     navigateTo(name, params, state) {
       updateLocation(name, params, state);
     },
     redirectTo(name, params, state) {
       updateLocation(name, params, state, true);
     },
+    updateAppState(appState, replace = true) {
+      const method = replace ? 'replace' : 'push';
+      const newPath = appendAppState(this.getPath(), appState);
+      const currentState = history.getLocation().state;
+      history[method](currentState, newPath);
+    },
     onPathChange(fn) {
-      if (componentListener != null) {
-        throw new Error('Only one route component listener is allowed');
-      }
-
-      const execOnMatch = location => {
+      const execOnMatch = (location) => {
         const { pathname } = location;
         const match = this.match(pathname);
 
@@ -75,16 +92,37 @@ export function routerProvider(routes) {
       };
 
       // on path changes, fire the path change handler
-      componentListener = history.onChange((locationObj, prevLocationObj) => {
-        if (locationObj.pathname !== prevLocationObj.pathname) {
+      const unlisten = history.onChange((locationObj, prevLocationObj) => {
+        if (
+          locationObj.pathname !== prevLocationObj.pathname ||
+          locationObj.search !== prevLocationObj.search
+        ) {
           execOnMatch(locationObj);
         }
       });
 
+      // keep track of all change handler removal functions, for cleanup
+      // TODO: clean up listeners when baseRounter.stop is called
+      componentListeners.push(unlisten);
+
       // initially fire the path change handler
       execOnMatch(history.getLocation());
+
+      return unlisten; // return function to remove change handler
+    },
+    stop: () => {
+      for (const listener of componentListeners) {
+        listener();
+      }
     },
   };
 
   return router;
 }
+
+export const stopRouter = () => {
+  if (router) {
+    router.stop();
+    router = undefined;
+  }
+};

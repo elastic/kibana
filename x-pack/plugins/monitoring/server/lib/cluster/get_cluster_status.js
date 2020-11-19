@@ -38,6 +38,6 @@ export function getClusterStatus(cluster, shardStats) {
     memUsed: get(clusterNodes, 'jvm.mem.heap_used_in_bytes', 0),
     memMax: get(clusterNodes, 'jvm.mem.heap_max_in_bytes', 0),
     unassignedShards: unassignedShardsTotal,
-    totalShards
+    totalShards,
   };
 }

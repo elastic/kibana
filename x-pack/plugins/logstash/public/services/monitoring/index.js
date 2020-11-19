@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './monitoring_service.factory';
+export { MonitoringService } from './monitoring_service';

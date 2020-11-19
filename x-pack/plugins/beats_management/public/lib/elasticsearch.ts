@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { QuerySuggestion } from '../../../../../src/plugins/data/public';
 import { ElasticsearchAdapter } from './adapters/elasticsearch/adapter_types';
 
 interface HiddenFields {
@@ -35,10 +35,10 @@ export class ElasticsearchLib {
     kuery: string,
     selectionStart: any,
     fieldPrefix?: string
-  ): Promise<AutocompleteSuggestion[]> {
+  ): Promise<QuerySuggestion[]> {
     const suggestions = await this.adapter.getSuggestions(kuery, selectionStart);
 
-    const filteredSuggestions = suggestions.filter(suggestion => {
+    const filteredSuggestions = suggestions.filter((suggestion) => {
       const hiddenFieldsCheck = this.hiddenFields;
 
       if (fieldPrefix) {
@@ -48,7 +48,7 @@ export class ElasticsearchLib {
         });
       }
 
-      return hiddenFieldsCheck.reduce((isvalid, field) => {
+      return hiddenFieldsCheck.reduce((isvalid: boolean, field) => {
         if (!isvalid) {
           return false;
         }

@@ -1,0 +1,317 @@
+[role="xpack"]
+[[kibana-authentication]]
+=== Authentication in {kib}
+++++
+<titleabbrev>Authentication</titleabbrev>
+++++
+
+{kib} supports the following authentication mechanisms:
+
+- <<basic-authentication>>
+- <<token-authentication>>
+- <<pki-authentication>>
+- <<saml>>
+- <<oidc>>
+- <<kerberos>>
+- <<http-authentication>>
+
+Enable multiple authentication mechanisms at the same time specifying a prioritized list of the authentication _providers_ (typically of various types) in the configuration. Providers are consulted in ascending order. Make sure each configured provider has a unique name (e.g. `basic1` or `saml1` in the configuration example) and `order` setting. In the event that two or more providers have the same name or `order`, {kib} will fail to start.
+
+When two or more providers are configured, you can choose the provider you want to use on the Login Selector UI. The order the providers appear is determined by the `order` setting. The appearance of the specific provider entry can be customized with the `description`, `hint`, and `icon` settings.
+
+TIP: To provide login instructions to users, use the `xpack.security.loginHelp` setting, which supports Markdown format. When you specify the `xpack.security.loginHelp` setting, the Login Selector UI displays a `Need help?` link that lets users access login help information.
+
+If you don't want a specific provider to show up at the Login Selector UI (e.g. to only support third-party initiated login) you can hide it with `showInSelector` setting set to `false`. However, in this case, the provider is presented in the provider chain and may be consulted during authentication based on its `order`. To disable the provider, use the `enabled` setting.
+
+TIP: The Login Selector UI can also be disabled or enabled with `xpack.security.authc.selector.enabled` setting. 
+
+Here is how your `kibana.yml` and Login Selector UI can look like if you deal with multiple authentication providers:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.loginHelp: "**Help** info with a [link](...)"
+xpack.security.authc.providers:
+  basic.basic1:
+    order: 0
+    icon: "logoElasticsearch"
+    hint: "Typically for administrators"
+  saml.saml1:
+    order: 1
+    realm: saml1
+    description: "Log in with SSO"
+    icon: "https://my-company.xyz/saml-logo.svg"
+  saml.saml2:
+    order: 2
+    realm: saml2
+    showInSelector: false
+  kerberos.kerberos1:
+    order: 3
+    enabled: false
+--------------------------------------------------------------------------------
+
+[role="screenshot"]
+image::user/security/images/kibana-login.png["Login Selector UI"]
+
+For more information, refer to <<authentication-security-settings, authentication security settings>>.
+
+[[basic-authentication]]
+==== Basic authentication
+
+To successfully log in to {kib}, basic authentication requires a username and password. Basic authentication is enabled by default, and is based on the Native, LDAP, or Active Directory security realm that is provided by {es}. The basic authentication provider uses a {kib} provided login form, and supports authentication using the `Authorization` request header `Basic` scheme.
+
+NOTE: You can configure only one Basic provider per {kib} instance.
+
+For more information about basic authentication and built-in users, see
+{ref}/setting-up-authentication.html[User authentication].
+
+[[token-authentication]]
+==== Token authentication
+
+Token authentication allows users to log in using the same {kib} provided login form as basic authentication, and is based on the Native security realm or LDAP security realm that is provided by {es}. The token authentication provider is built on {es} token APIs.
+
+Prior to configuring {kib}, ensure token support is enabled in {es}. See the {ref}/security-api-get-token.html[{es} token API] documentation for more information.
+
+To enable the token authentication provider in {kib}, set the following value in your `kibana.yml`:
+
+NOTE: You can configure only one Token provider per {kib} instance.
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.providers:
+  token.token1:
+    order: 0
+--------------------------------------------------------------------------------
+
+Switching to the token authentication provider from basic one will make {kib} to reject requests from applications like `curl` that usually use `Authorization` request header with the `Basic` scheme for authentication. If you still want to support such applications you'll have to either switch to using `Bearer` scheme with the tokens {ref}/security-api-get-token.html[created by {es} token API] or add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
+
+[[pki-authentication]]
+==== Public key infrastructure (PKI) authentication
+
+[IMPORTANT]
+============================================================================
+PKI authentication will not work if {kib} is hosted behind a TLS termination reverse proxy. In this configuration, {kib} does not have direct access to the client certificates and cannot authenticate the user.
+============================================================================
+
+PKI authentication allows users to log into {kib} using X.509 client certificates that must be presented while connecting to {kib}. The certificates must first be accepted for authentication on the {kib} TLS layer, and then they are further validated by an {es} PKI realm. The PKI authentication provider relies on the {es} {ref}/security-api-delegate-pki-authentication.html[Delegate PKI authentication API] to exchange X.509 client certificates to access tokens. All subsequent requests to {es} APIs on behalf of users will be authenticated using these access tokens.
+
+Prior to configuring {kib}, ensure that the PKI realm is enabled in {es} and configured to permit delegation. See {ref}/configuring-pki-realm.html[Configuring a PKI realm] for more information.
+
+To enable the PKI authentication provider in {kib}, you must first <<configuring-tls,configure {kib} to encrypt communications between the browser and {kib} server>>. You must also enable TLS client authentication and include the certificate authority (CA) used to sign client certificates into a list of CAs trusted by {kib} in your `kibana.yml`:
+
+NOTE: You can configure only one PKI provider per {kib} instance.
+
+[source,yaml]
+--------------------------------------------------------------------------------
+server.ssl.certificateAuthorities: /path/to/your/cacert.pem
+server.ssl.clientAuthentication: required
+xpack.security.authc.providers:
+  pki.pki1:
+    order: 0
+--------------------------------------------------------------------------------
+
+NOTE: Trusted CAs can also be specified in a PKCS #12 keystore bundled with your {kib} server certificate/key using
+`server.ssl.keystore.path` or in a separate trust store using `server.ssl.truststore.path`.
+
+You can also configure both PKI and basic authentication for the same {kib} instance:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+server.ssl.clientAuthentication: optional
+xpack.security.authc.providers:
+  pki.pki1:
+    order: 0
+  basic.basic1:
+    order: 1
+--------------------------------------------------------------------------------
+
+Note that with `server.ssl.clientAuthentication` set to `required`, users are asked to provide a valid client certificate, even if they want to authenticate with username and password. Depending on the security policies, it may or may not be desired. If not, `server.ssl.clientAuthentication` can be set to `optional`. In this case, {kib} still requests a client certificate, but the client won't be required to present one. The `optional` client authentication mode might also be needed in other cases, for example, when PKI authentication is used in conjunction with Reporting.
+
+[[saml]]
+==== SAML single sign-on
+
+SAML authentication allows users to log in to {kib} with an external Identity Provider, such as Okta or Auth0. Make sure that SAML is enabled and configured in {es} before setting it up in {kib}. See {ref}/saml-guide.html[Configuring SAML single sign-on on the Elastic Stack].
+
+Enable the SAML authentication specifying which SAML realm in {es} should be used:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.providers:
+  saml.saml1:
+    order: 0
+    realm: saml1
+--------------------------------------------------------------------------------
+
+You can log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. If you aren't authenticated, you are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session. If you log in to a different application using the same Identity Provider in the same browser, you are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force you to re-authenticate. This login scenario is called _Service Provider initiated login_.
+
+It's also possible to configure multiple SAML authentication providers at the same time. In this case, you will need to choose which provider to use for login at the Login Selector UI:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.providers:
+  saml.saml1:
+    order: 0
+    realm: saml1
+    description: "Log in with Elastic"
+  saml.saml2:
+    order: 1
+    realm: saml2
+    description: "Log in with Auth0"
+--------------------------------------------------------------------------------
+
+[float]
+===== SAML and basic authentication
+
+You can also configure both SAML and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.providers:
+  saml.saml1:
+    order: 0
+    realm: saml1
+    description: "Log in with Elastic"
+  basic.basic1:
+    order: 1
+--------------------------------------------------------------------------------
+
+Basic authentication is supported _only_ if the `basic` authentication provider is explicitly declared in `xpack.security.authc.providers` setting, in addition to `saml`.
+
+To support basic authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy), add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
+
+[[oidc]]
+==== OpenID Connect single sign-on
+
+Similar to SAML, authentication with OpenID Connect allows users to log in to {kib} using an OpenID Connect Provider such as Google, or Okta. OpenID Connect
+should also be configured in {es}. For more details, see {ref}/oidc-guide.html[Configuring single sign-on to the {stack} using OpenID Connect].
+
+Enable the OpenID Connect authentication specifying which OpenID Connect realm in {es} should be used:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.providers:
+  oidc.oidc1:
+    order: 0
+    realm: oidc1
+--------------------------------------------------------------------------------
+
+If you want to use Third Party initiated Single Sign-On, configure your OpenID Provider to use `/api/security/oidc/initiate_login` as `Initiate Login URI`.
+
+It's also possible to configure multiple OpenID Connect authentication providers at the same time. In this case, you need to choose which provider to use for login at the Login Selector UI:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.providers:
+  oidc.oidc1:
+    order: 0
+    realm: oidc1
+    description: "Log in with Elastic"
+  oidc.oidc2:
+    order: 1
+    realm: oidc2
+    description: "Log in with Auth0"
+--------------------------------------------------------------------------------
+
+[float]
+===== OpenID Connect and basic authentication
+
+You can also configure both OpenID Connect and basic authentication for the same {kib} instance. This might be the case for {kib} or {es} admins whose accounts aren't linked to the Single Sign-On users database:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.providers:
+  oidc.oidc1:
+    order: 0
+    realm: oidc1
+    description: "Log in with Elastic"
+  basic.basic1:
+    order: 1
+--------------------------------------------------------------------------------
+
+Basic authentication is supported _only_ if the `basic` authentication provider is explicitly declared in `xpack.security.authc.providers` setting, in addition to `oidc`.
+
+To support basic authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy), add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
+
+[float]
+==== Single sign-on provider details
+
+The following sections apply both to <<saml>> and <<oidc>>
+
+[float]
+===== Access and refresh tokens
+
+Once the user logs in to {kib} Single Sign-On, either using SAML or OpenID Connect, {es} issues access and refresh tokens
+that {kib} encrypts and stores as a part of its own session. This way, the user isn't redirected to the Identity Provider
+for every request that requires authentication. It also means that the {kib} session depends on the <<security-session-and-cookie-settings,
+`xpack.security.session.idleTimeout` and `xpack.security.session.lifespan`>> settings, and the user is automatically logged
+out if the session expires. An access token that is stored in the session can expire, in which case {kib} will
+automatically renew it with a one-time-use refresh token and store it in the same session.
+
+{kib} can only determine if an access token has expired if it receives a request that requires authentication. If both access
+and refresh tokens have already expired (for example, after 24 hours of inactivity), {kib} initiates a new "handshake" and
+redirects the user to the external authentication provider (SAML Identity Provider or OpenID Connect Provider)
+Depending on {es} and the external authentication provider configuration, the user might be asked to re-enter credentials.
+
+If {kib} can't redirect the user to the external authentication provider (for example, for AJAX/XHR requests), an error
+indicates that both access and refresh tokens are expired. Reloading the current {kib} page fixes the error.
+
+[float]
+===== Local and global logout
+
+During logout, both the {kib} session and {es} access/refresh token pair are invalidated. This is known as "local" logout.
+
+{kib} can also initiate a "global" logout or _Single Logout_ if it's supported by the external authentication provider and not
+explicitly disabled by {es}. In this case, the user is redirected to the external authentication provider for log out of
+all applications associated with the active provider session.
+
+[[kerberos]]
+==== Kerberos single sign-on
+
+As with the previous SSOs, make sure that you have configured {es} first accordingly. See {ref}/kerberos-realm.html[Kerberos authentication].
+
+Next, to enable Kerberos in {kib}, you will need to enable the Kerberos authentication provider in the `kibana.yml` configuration file, as follows:
+
+NOTE: You can configure only one Kerberos provider per {kib} instance.
+
+[source,yaml]
+-----------------------------------------------
+xpack.security.authc.providers:
+  kerberos.kerberos1:
+    order: 0
+-----------------------------------------------
+
+You may want to be able to authenticate with the basic authentication provider as a secondary mechanism or while you are setting up Kerberos for the stack:
+
+[source,yaml]
+-----------------------------------------------
+xpack.security.authc.providers:
+  kerberos.kerberos1:
+    order: 0
+    description: "Log in with Kerberos"
+  basic.basic1:
+    order: 1
+-----------------------------------------------
+
+Kibana uses SPNEGO, which wraps the Kerberos protocol for use with HTTP, extending it to web applications. At the end of the Kerberos handshake, Kibana will forward the service ticket to Elasticsearch. Elasticsearch will unpack it and it will respond with an access and refresh token which are then used for subsequent authentication.
+
+[[http-authentication]]
+==== HTTP authentication
+
+[IMPORTANT]
+============================================================================
+Be very careful when you modify HTTP authentication settings as it may indirectly affect other important {kib} features that implicitly rely on HTTP authentication (e.g. Reporting).
+============================================================================
+
+HTTP protocol provides a simple authentication framework that can be used by a client to provide authentication information. It uses a case-insensitive token as a means to identify the authentication scheme, followed by additional information necessary for achieving authentication via that scheme.
+
+This type of authentication is usually useful for machine-to-machine interaction that requires authentication and where human intervention is not desired or just infeasible. There are a number of use cases when HTTP authentication support comes in handy for {kib} users as well.
+
+By default {kib} supports <<api-keys, `ApiKey`>> authentication scheme _and_ any scheme supported by the currently enabled authentication provider. For example, `Basic` authentication scheme is automatically supported when basic authentication provider is enabled, or `Bearer` scheme when any of the token based authentication providers is enabled (Token, SAML, OpenID Connect, PKI or Kerberos). But it's also possible to add support for any other authentication scheme in the `kibana.yml` configuration file, as follows:
+
+NOTE: Don't forget to explicitly specify default `apikey` scheme when you just want to add a new one to the list.
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authc.http.schemes: [apikey, basic, something-custom]
+--------------------------------------------------------------------------------
+
+With this configuration, you can send requests to {kib} with the `Authorization` header using `ApiKey`, `Basic` or `Something-Custom` HTTP schemes (case insensitive). Under the hood, {kib} relays this header to {es}, then {es} authenticates the request using the credentials in the header.

@@ -12,6 +12,7 @@ $canvasLayoutFontSize: $euiFontSizeS;
   flex-direction: column;
   flex-grow: 1;
   max-height: 100vh;
+  max-width: 100%;
 }
 
 .canvasLayout__cols {
@@ -22,7 +23,7 @@ $canvasLayoutFontSize: $euiFontSizeS;
 
 .canvasLayout__stage {
   flex-grow: 1;
-  flex-basis: 0%;
+  flex-basis: auto;
   display: flex;
   flex-direction: column;
 }
@@ -30,13 +31,20 @@ $canvasLayoutFontSize: $euiFontSizeS;
 .canvasLayout__stageHeader {
   flex-grow: 0;
   flex-basis: auto;
-  padding: $euiSizeM $euiSize $euiSizeS $euiSize;
+  padding: 1px $euiSize 0;
   font-size: $canvasLayoutFontSize;
+  border-bottom: $euiBorderThin;
+  background: $euiColorLightestShade;
+  user-select: none;
+}
+
+.canvasLayout__stageHeaderInner {
+  height: ($euiSizeL * 2);
 }
 
 .canvasLayout__stageContent {
   flex-grow: 1;
-  flex-basis: 0%;
+  flex-basis: auto;
   position: relative;
 }
 
@@ -60,6 +68,7 @@ $canvasLayoutFontSize: $euiFontSizeS;
   background: $euiColorLightestShade;
   display: flex;
   position: relative;
+  border-left: $euiBorderThin;
 
   .euiPanel {
     margin-bottom: $euiSizeS;

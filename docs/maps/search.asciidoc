@@ -1,40 +1,79 @@
 [role="xpack"]
 [[maps-search]]
-== Searching your data
+== Search geographic data
 
-The **Maps** application embeds the query bar for real-time ad hoc search.
+Maps embeds the search bar for real-time search.
 Only layers requesting data from {es} are filtered when you submit a search request.
+Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
 
 You can create a layer that requests data from {es} from the following:
 
 * <<vector-layer>> with:
 
-** Documents source
+** Documents
 
-** Grid aggregation source
+** Clusters and grid
 
 ** <<terms-join>>
 
-* <<heatmap-layer>> with Grid aggregation source
+* <<heatmap-layer>>
 
 [role="screenshot"]
 image::maps/images/global_search_bar.png[]
 
+[role="xpack"]
+[[maps-create-filter-from-map]]
+=== Create filters from a map
+
+You can create two types of filters by interacting with your map:
+
+* <<maps-spatial-filters, Spatial filters>>
+* <<maps-phrase-filter, Phrase filters>>
+
+[role="screenshot"]
+image::maps/images/create_spatial_filter.png[]
+
+[float]
+[[maps-spatial-filters]]
+==== Spatial filters
+
+A spatial filter narrows search results to documents that either intersect with, are within, or do not intersect with the specified geometry.
+
+You can create spatial filters in two ways:
+
+* Click the tool icon image:maps/images/tools_icon.png[], and then draw a polygon or bounding box on the map to define the spatial filter.
+* Click *Filter by geometry* in a <<maps-vector-tooltip-locking, locked tooltip>>, and then use the feature's geometry for the spatial filter.
+
+Spatial filters have the following properties:
+
+* *Geometry label* enables you to provide a meaningful name for your spatial filter.
+* *Spatial field* specifies the geo_point or geo_shape field used to determine if a document matches the spatial relation with the specified geometry.
+* *Spatial relation* determines the {ref}/query-dsl-geo-shape-query.html#_spatial_relations[spatial relation operator] to use at search time. Only available when *Spatial field* is set to geo_shape.
+* *Action* specifies whether to apply the filter to the current view or to a drilldown action. Only available when the map is a panel in a {kibana-ref}/dashboard.html[dashboard] with {kibana-ref}/drilldowns.html[drilldowns].
+
+[float]
+[[maps-phrase-filter]]
+==== Phrase filters
+
+A phrase filter narrows search results to documents that contain the specified text.
+You can create a phrase filter by clicking the plus icon image:maps/images/gs_plus_icon.png[] in a <<maps-vector-tooltip-locking, locked tooltip>>.
+If the map is a dashboard panel with drilldowns, you can apply a phrase filter to a drilldown by selecting the drilldown action.
 
 [role="xpack"]
 [[maps-layer-based-filtering]]
-=== Filtering a single layer
+=== Filter a single layer
 
 You can apply a search request to individual layers by setting `Filters` in the layer details panel.
 Click the *Add filter* button to add a filter to a layer.
 
+NOTE: Layer filters are not applied to *term joins*. You can apply a search request to *term joins* by setting the *where* clause in the join definition.
 
 [role="screenshot"]
 image::maps/images/layer_search.png[]
 
 [role="xpack"]
 [[maps-search-across-multiple-indices]]
-=== Searching across multiple indices
+=== Search across multiple indices
 
 Your map might contain multiple {es} indices.
 This can occur when your map contains two or more layers with {es} sources from different indices.
@@ -42,6 +81,21 @@ This can also occur with a single layer with an {es} source and a <<terms-join>>
 
 Searching across multiple indices might sometimes result in empty layers.
 The most common cause for empty layers are searches for a field that exists in one index, but does not exist in other indices.
+
+[float]
+[[maps-disable-search-for-layer]]
+==== Disable search for a layer
+
+You can prevent the search bar from applying search context to a layer by configuring the following:
+
+* In *Filtering*, clear the *Apply global filter to layer data* checkbox to turn off the global search context for the layer source.
+
+* In *Term joins*, clear the *Apply global filter to join* checkbox to turn off the global search context for the <<terms-join, term join>>.
+
+[float]
+[[maps-add-index-search]]
+==== Use _index in a search
+
 Add {ref}/mapping-index-field.html[_index] to your search to include documents from indices that do not contain a search field.
 
 For example, suppose you have a vector layer showing the `kibana_sample_data_logs` documents

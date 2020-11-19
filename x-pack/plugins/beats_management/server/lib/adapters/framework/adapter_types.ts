@@ -6,67 +6,19 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
-import { LicenseType } from '../../../../common/constants/security';
+import { Headers, KibanaRequest } from 'src/core/server';
 
 export const internalAuthData = Symbol('internalAuthData');
 export const internalUser: FrameworkInternalUser = {
   kind: 'internal',
 };
 
-export interface XpackInfo {
-  license: {
-    getType: () => LicenseType;
-    /** Is the license expired */
-    isActive: () => boolean;
-    getExpiryDateInMillis: () => number;
-  };
-  feature: (pluginId: string) => any;
-  isAvailable: () => boolean;
-}
-
 export interface BackendFrameworkAdapter {
+  getUser(request: KibanaRequest): FrameworkUser<Headers>;
   internalUser: FrameworkInternalUser;
   info: null | FrameworkInfo;
   log(text: string): void;
-  on(event: 'xpack.status.green' | 'elasticsearch.status.green', cb: () => void): void;
-  getSetting(settingPath: string): any;
-  exposeStaticDir(urlPath: string, dir: string): void;
-  registerRoute<RouteRequest extends FrameworkRequest, RouteResponse extends FrameworkResponse>(
-    route: FrameworkRouteOptions<RouteRequest, RouteResponse>
-  ): void;
-}
-
-export interface KibanaLegacyServer {
-  plugins: {
-    xpack_main: {
-      status: {
-        on: (status: 'green' | 'yellow' | 'red', callback: () => void) => void;
-      };
-      info: XpackInfo;
-    };
-    kibana: {
-      status: {
-        plugin: {
-          version: string;
-        };
-      };
-    };
-    security: {
-      getUser: (request: KibanaServerRequest) => any;
-    };
-    elasticsearch: {
-      status: {
-        on: (status: 'green' | 'yellow' | 'red', callback: () => void) => void;
-      };
-      getCluster: () => any;
-    };
-    beats_management: {};
-  };
-  config: () => any;
-  route: (routeConfig: any) => void;
-  log: (message: string) => void;
 }
 
 export const RuntimeFrameworkInfo = t.interface(
@@ -75,9 +27,15 @@ export const RuntimeFrameworkInfo = t.interface(
       version: t.string,
     }),
     license: t.type({
-      type: t.union(
-        ['oss', 'trial', 'standard', 'basic', 'gold', 'platinum'].map(s => t.literal(s))
-      ),
+      type: t.keyof({
+        oss: null,
+        trial: null,
+        standard: null,
+        basic: null,
+        gold: null,
+        platinum: null,
+        enterprise: null,
+      }),
       expired: t.boolean,
       expiry_date_in_millis: t.number,
     }),
@@ -113,7 +71,7 @@ export interface KibanaServerRequest extends t.TypeOf<typeof RuntimeKibanaServer
 export const RuntimeKibanaUser = t.interface(
   {
     username: t.string,
-    roles: t.array(t.string),
+    roles: t.readonlyArray(t.string),
     full_name: t.union([t.null, t.string]),
     email: t.union([t.null, t.string]),
     enabled: t.boolean,
@@ -126,7 +84,7 @@ export interface FrameworkAuthenticatedUser<AuthDataType = any> {
   kind: 'authenticated';
   [internalAuthData]: AuthDataType;
   username: string;
-  roles: string[];
+  roles: readonly string[];
   full_name: string | null;
   email: string | null;
   enabled: boolean;
@@ -154,23 +112,3 @@ export interface FrameworkRequest<
   params: KibanaServerRequestGenaric['params'];
   query: KibanaServerRequestGenaric['query'];
 }
-
-export interface FrameworkRouteOptions<
-  RouteRequest extends FrameworkRequest = FrameworkRequest,
-  RouteResponse extends FrameworkResponse = any
-> {
-  path: string;
-  method: string | string[];
-  vhost?: string;
-  licenseRequired?: string[];
-  requiredRoles?: string[];
-  handler: FrameworkRouteHandler<RouteRequest, RouteResponse>;
-  config?: {};
-}
-
-export type FrameworkRouteHandler<
-  RouteRequest extends KibanaServerRequest,
-  RouteResponse extends FrameworkResponse
-> = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => Promise<RouteResponse>;
-
-export type FrameworkResponse = Lifecycle.ReturnValue;

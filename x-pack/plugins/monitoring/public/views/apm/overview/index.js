@@ -5,22 +5,25 @@
  */
 
 import React from 'react';
-import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import uiRoutes from'ui/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { uiRoutes } from '../../../angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmOverview } from '../../../components/apm/overview';
-import { timefilter } from 'ui/timefilter';
-import { I18nContext } from 'ui/i18n';
+import {
+  CODE_PATH_APM,
+  ALERT_MISSING_MONITORING_DATA,
+  APM_SYSTEM_ID,
+} from '../../../../common/constants';
 
 uiRoutes.when('/apm', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_APM] });
     },
   },
   controller: class extends MonitoringViewBaseController {
@@ -28,41 +31,47 @@ uiRoutes.when('/apm', {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, {
-        cluster_uuid: globalState.cluster_uuid
+        cluster_uuid: globalState.cluster_uuid,
       });
 
       super({
-        title: 'APM',
+        title: i18n.translate('xpack.monitoring.apm.overview.routeTitle', {
+          defaultMessage: 'APM server',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.apm.overview.pageTitle', {
+          defaultMessage: 'APM server overview',
+        }),
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm`,
         defaultData: {},
         reactNodeId: 'apmOverviewReact',
         $scope,
-        $injector
+        $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
+            filters: [
+              {
+                stackProduct: APM_SYSTEM_ID,
+              },
+            ],
+          },
+        },
       });
 
-      function onBrush({ xaxis }) {
-        timefilter.setTime({
-          from: moment(xaxis.from),
-          to: moment(xaxis.to),
-          mode: 'absolute',
-        });
-      }
-
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(data, onBrush);
-      });
-    }
-
-    renderReact(data, onBrush) {
-      const component = (
-        <I18nContext>
-          <ApmOverview
-            {...data}
-            onBrush={onBrush}
-          />
-        </I18nContext>
+      $scope.$watch(
+        () => this.data,
+        (data) => {
+          this.renderReact(
+            <ApmOverview
+              alerts={this.alerts}
+              {...data}
+              onBrush={this.onBrush}
+              zoomInfo={this.zoomInfo}
+            />
+          );
+        }
       );
-      super.renderReact(component);
     }
-  }
+  },
 });

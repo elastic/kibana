@@ -1,0 +1,185 @@
+[role="xpack"]
+[[canvas]]
+= Canvas
+
+[partintro]
+--
+
+Canvas is a data visualization and presentation tool that sits within {kib}. With Canvas, you can pull live data directly from {es}, and combine the data with colors, images, text, and your imagination to create dynamic, multi-page, pixel-perfect displays. If you are a little bit creative, a little bit technical, and a whole lot curious, then Canvas is for you.
+
+With Canvas, you can:
+
+* Create and personalize your work space with backgrounds, borders, colors, fonts, and more.
+
+* Customize your workpad with your own visualizations, such as images and text.
+
+* Pull your data directly from Elasticsearch, then show it off with charts, graphs, progress monitors, and more.
+
+* Focus the data you want to display with filters.
+
+To begin, open the main menu, then click *Canvas*.
+
+[role="screenshot"]
+image::images/canvas-gs-example.png[Getting started example]
+
+For a quick overview of Canvas, watch link:https://www.youtube.com/watch?v=ZqvF_5-1xjQ[Stand out with Canvas].
+
+[float]
+[[create-workpads]]
+== Create workpads
+
+A _workpad_ provides you with a space where you can build presentations of your live data. With Canvas, 
+you can create a workpad from scratch, start with a preconfigured workpad, import an existing workpad, or use a sample data workpad.
+
+[float]
+[[start-with-a-blank-workpad]]
+=== Start with a blank workpad
+
+To use the background colors, images, and data of your choice, start with a blank workpad.
+
+. On the *Canvas workpads* page, click *Create workpad*.
+
+. Specify the *Workpad settings*.
+
+.. Add a *Name* to your workpad.
+
+.. In the *Width* and *Height* fields, specify the size, or select one of default layouts. 
+
+.. Click the *Background* color picker, then select the color for your workpad.
++
+[role="screenshot"]
+image::images/canvas-background-color-picker.png[Canvas color picker]
+
+[float]
+[[create-workpads-from-templates]]
+=== Create workpads from templates
+
+If you're unsure about where to start, you can use one of the preconfigured templates that come with Canvas.
+
+. On the *Canvas workpads* page, select *Templates*.
+
+. Click the preconfigured template that you want to use.
+
+. Add your own *Name* to the workpad.
+
+[float]
+[[import-existing-workpads]]
+=== Import existing workpads
+
+When you want to use a workpad that someone else has already started, import the JSON file.
+
+To begin, drag the file to the *Import workpad JSON file* field on the *Canvas workpads* page. 
+
+[float]
+[[use-sample-data-workpads]]
+=== Use sample data workpads
+
+Each of the {kib} sample data sets comes with a workpad that you can use for your own workpad inspiration.
+
+. Add a {kibana-ref}/add-sample-data.html[sample data set].
+
+. On the *Add Data* page, click *View data*, then select *Canvas*.
+
+[float]
+[[add-canvas-elements]]
+== Add elements
+
+Create a story about your data by adding elements to your workpad that include images, text, charts, and more.
+
+[float]
+[[create-elements]]
+=== Create elements
+
+Choose the type of element you want to use, then use the preconfigured demo data to familiarize yourself with the element. When you're ready, connect the element to your own data. By default, most of the elements you create use 
+demo data until you change the data source. The demo data includes a small data set that you can use to experiment with your element.
+
+To begin, click *Add element*, then select the element you want to use.
+
+[role="screenshot"]
+image::images/canvas-element-select.gif[Canvas elements]
+
+When you're ready to connect the element to your data, select *Data*, then select one of the following data sources:
+
+* *{es} SQL* &mdash; Access your data in {es} using {ref}/sql-spec.html[SQL syntax].
+
+* *{es} documents* &mdash; Access your data in {es} without using aggregations. To use, select an index and fields, and optionally enter a query using the <<lucene-query,Lucene Query Syntax>>. Use the *{es} documents* data source when you have low volume datasets, to view raw documents, or to plot exact, non-aggregated values on a chart.
+
+* *Timelion* &mdash; Access your time series data using <<timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
+
+Each element can display a different data source, and pages and workpads often contain multiple data sources.
+
+When you're ready to save your element, select the element, then click *Edit > Save as new element*.
+
+[role="screenshot"]
+image::images/canvas_save_element.png[]
+
+To save a group of elements, press and hold Shift, select the elements you want to save, then click *Edit > Save as new element*.
+
+Elements are saved in *Add element > My elements*.
+
+[float]
+[[add-saved-objects]]
+=== Add saved objects
+
+Add <<managing-saved-objects,saved objects>> to your workpad, such as maps and visualizations.
+
+. Click *Add element > Add from {kib}*.
+
+. Select the saved object you want to add.
++
+[role="screenshot"]
+image::images/canvas-map-embed.gif[]
+
+. To use the customization options, click the panel menu, then select one of the following options:
+
+* *Edit map* &mdash; Opens <<maps,Maps>> or a visualization builder so that you can edit the original saved object.
+
+* *Edit panel title* &mdash; Adds a title to the saved object.
+
+* *Customize time range* &mdash; Exposes a time filter dedicated to the saved object.
+
+* *Inspect* &mdash; Allows you to drill down into the element data.
+
+[float]
+[[add-your-own-images]]
+=== Add your own images
+
+To personalize your workpad, add your own logos and graphics.
+
+. Click *Add element > Manage assets*.
+
+. On the *Manage workpad assets* window, drag and drop your images.
+
+. To add the image to the workpad, click the *Create image element* icon.
++
+[role="screenshot"]
+image::images/canvas-add-image.gif[Add image to Canvas]
+
+[float]
+[[add-more-pages]]
+== Add pages
+
+Organize and separate your ideas by adding more pages.
+
+. Click *Page 1*, then click *+*.
+
+. On the *Page* editor panel, select the page transition from the *Transition* dropdown.
++
+[role="screenshot"]
+image::images/canvas-add-pages.gif[Add pages]
+
+--
+
+include::{kib-repo-dir}/canvas/canvas-edit-workpads.asciidoc[]
+
+include::{kib-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
+
+include::{kib-repo-dir}/canvas/canvas-share-workpad.asciidoc[]
+
+include::{kib-repo-dir}/canvas/canvas-tutorial.asciidoc[]
+
+include::{kib-repo-dir}/canvas/canvas-expression-lifecycle.asciidoc[]
+
+include::{kib-repo-dir}/canvas/canvas-function-reference.asciidoc[]
+
+include::{kib-repo-dir}/canvas/canvas-tinymath-functions.asciidoc[]

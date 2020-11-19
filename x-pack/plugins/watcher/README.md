@@ -1,35 +1,22 @@
-# Conventions
+# Watcher
 
 This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
 
 ## Folder structure
 ```
+common/
+  constants/ // constants used across client and server
+  lib/ // helpers used across client and server
+  types/ // TS definitions
 public/
-  directives/ (This is the same as *A, but is for directives that are used cross-view)
-  services/
-    watch/
-      index.js (no code here; only `export from watch.js`)
-      watch.js
-    notifications/
-      index.js (no code here; only `export from notifications.js`)
-      notifications.js
-    ...
-  views/
-    edit/
-    ...
-    list/
-      directives/ (*A)
-        my_directive_name/
-          directives/ (Subcomponents of my_directive_name are defined here, and this follows the same structure as *A)
-          index.js (no code here; only `export from my_directive_name.js`)
-          my_directive_name.js
-          my_directive_name.html
-        index.js (imports the directives in this folder, i.e.,my_directive_name)
-      routes/
-        index.js (no code here; only imports routes.js)
-        routes.js
-      index.js
-
+  components/ // common React components
+  constants/ // constants used on the client
+  lib/ // helpers used on the client
+  models/ // client models
+  sections/ // Sections of the app with corresponding React components
+    watch_edit
+    watch_list
+    watch_status
 server/
   lib/
     screenshots/
@@ -42,90 +29,6 @@ server/
     say_hello/
       index.js
       say_hello.js
-```
-
-## Data Services
-
-api calls:
-- GET /watch/{id}
-- PUT /watch/{id}
-
-using the service
-
-```js
-import watch from './services/watch'
-
-watch.get(...)
-watch.put(...)
-```
-
-## Services / Lib
-- Shared code that requires state should be made into a service. For example, see `pageService`.
-- Shared code that doesn't require state (e.g. a simple helper function) should be made a lib. 
-For example, see `clamp`.
-
-## Controller classes
-- All functions in controller classes should be defined as arrow function constants. This is to ensure the `this` context is consistent, regardless of where it is being called.
-
-GOOD
-```
-  controller: class WatchListController {
-    onQueryChanged = (query) => {...};
-  }
-```
-
-BAD
-```
-  controller: class WatchListController {
-    onQueryChanged(query) {...};
-  }
-```
-
-```
-  controller: class WatchListController {
-    constructor() {
-      this.onQueryChanged = (query) => {...};
-    }
-  }
-```
-
-- Constructors should be used to initialize state and define $scope.$watch(es)
-
-GOOD
-```
-  controllerAs: 'watchList',
-  bindToController: true,
-  scope: { foo: '=' },
-  controller: class WatchListController {
-    constructor() {
-      this.foo = this.foo || 'default';
-
-      $scope.$watch('watchList.foo', () => {
-        console.log('foo changed, fool');
-      });
-    }
-  }
-```
-## Event handlers
-
-Event handler functions should be named with the following pattern:
-
-> `on<Verb>`, in present tense
-
-In case there is ambiguity about _what_ the verb is acting upon a noun should be included like so:
-
-> `on<Noun><Verb>`, in present tense
-
-GOOD
-```
-onDelete
-onWatchDelete
-```
-
-BAD
-```
-onDeleted
-onWatchDeleted
 ```
 
 ## Data Flow
@@ -159,7 +62,7 @@ data (as that is typically done by the server models already).
 
 They do, however, serve as a consistent place in the data path for translating wire representations of certain types of data into
 more suitable in-memory representations, for example: converting an [ISO8601-formatted timestamp](https://en.wikipedia.org/wiki/ISO_8601)
-into a [moment instance](http://momentjs.com/).
+into a [moment instance](https://momentjs.com/).
 
 They are also the right place for establishing relationships between models — for example, a watch contains many actions — and for
 encapsulating operations around such relationships — for example, updating the status of a watch's action.

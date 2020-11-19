@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TextFilter rendering renders correctly against snapshot 1`] = `
+<FieldText
+  data-test-subj="textFilter"
+  minwidth="100px"
+  onChange={[Function]}
+  placeholder="Filter"
+  value=""
+/>
+`;

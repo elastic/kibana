@@ -1,0 +1,199 @@
+[[troubleshooting]]
+== Troubleshoot common problems
+
+++++
+<titleabbrev>Troubleshooting</titleabbrev>
+++++
+
+If you have something to add to this section, please consider creating a pull request with
+your proposed changes at https://github.com/elastic/kibana.
+
+Also, check out the https://discuss.elastic.co/c/apm[APM discussion forum].
+
+* <<no-apm-data-found>>
+* <<troubleshooting-too-many-transactions>>
+* <<troubleshooting-unknown-route>>
+* <<troubleshooting-fields-unsearchable>>
+* <<service-map-rum-connections>>
+
+[float]
+[[no-apm-data-found]]
+=== No APM data found
+
+This section can help with any of the following:
+
+* Data isn't displaying in the APM app
+* You see a message like "No Services Found",
+* You see errors like "Fielddata is disabled on text fields by default..."
+
+There are a number of factors that could be at play here.
+One important thing to double-check first is your index template.
+
+*Index template*
+An APM index template must exist for the APM app to work correctly.
+By default, this index template is created by APM Server on startup.
+However, this only happens if `setup.template.enabled` is `true` in `apm-server.yml`.
+You can create the index template manually by running `apm-server setup`.
+Take note that index templates *cannot* be applied retroactively -- they are only applied at index creation time.
+More information is available in {apm-server-ref}/apm-server-configuration.html[Set up and configure].
+
+You can check for the existence of an APM index template using the
+{ref}/indices-get-template.html[Get index template API].
+If you're using the default index naming pattern, that request would be:
+
+[source,js]
+--------------------------------------------------
+GET /_template/apm-{version}
+--------------------------------------------------
+// CONSOLE
+
+*Using Logstash, Kafka, etc.*
+If you're not outputting data directly from APM Server to Elasticsearch (perhaps you're using Logstash or Kafka),
+then the index template will not be set up automatically. Instead, you'll need to
+{apm-server-ref}/apm-server-template.html[load the template manually].
+
+*Using a custom index names*
+This problem can also occur if you've customized the index name that you write APM data to.
+The default index name that APM writes events to can be found
+{apm-server-ref}/elasticsearch-output.html#index-option-es[here].
+If you change the default, you must also configure the `setup.template.name` and `setup.template.pattern` options.
+See {apm-server-ref}/configuration-template.html[Load the Elasticsearch index template].
+If the Elasticsearch index template has already been successfully loaded to the index,
+you can customize the indices that the APM app uses to display data.
+Navigate to *APM* > *Settings* > *Indices*, and change all `apm_oss.*Pattern` values to
+include the new index pattern. For example: `customIndexName-*`.
+
+[float]
+[[troubleshooting-too-many-transactions]]
+=== Too many unique transaction names
+
+Transaction names are defined in each APM Agent; when an Agent supports a framework,
+it includes logic for naming the transactions that the framework creates.
+In some cases though, like when using an Agent's API to create custom transactions,
+it is up to the user to define a pattern for transaction naming.
+When transactions are named incorrectly, each unique URL can be associated with a unique transaction group—causing
+an explosion in the number of transaction groups per service, and leading to inaccuracies in the APM app.
+
+To fix a large number of unique transaction names,
+you need to change how you are using the Agent API to name your transactions.
+To do this, ensure you are **not** naming based on parameters that can change.
+For example, user ids, product ids, order numbers, query parameters, etc.,
+should be stripped away, and commonality should be found between your unique URLs.
+
+Let's look at an example from the RUM Agent documentation. Here are a few URLs you might find on Elastic.co:
+
+[source,yml]
+----
+// Blog Posts
+https://www.elastic.co/blog/reflections-on-three-years-in-the-elastic-public-sector
+https://www.elastic.co/blog/say-heya-to-the-elastic-search-awards
+https://www.elastic.co/blog/and-the-winner-of-the-elasticon-2018-training-subscription-drawing-is
+
+// Documentation
+https://www.elastic.co/guide/en/elastic-stack/current/index.html
+https://www.elastic.co/guide/en/apm/get-started/current/index.html
+https://www.elastic.co/guide/en/infrastructure/guide/current/index.html
+----
+
+These URLs, like most, include unique names.
+If we named transactions based on each unique URL, we'd end up with the problem described above—a
+very large number of different transaction names.
+Instead, we should strip away the unique information and group our transactions based on common information.
+In this case, that means naming all blog transactions, `/blog`, and all documentation transactions, `/guide`.
+
+If you feel like you'd be losing valuable information by following this naming convention, don't fret!
+You can always add additional metadata to your transactions using {apm-overview-ref-v}/metadata.html#labels-fields[labels] (indexed) or
+{apm-overview-ref-v}/metadata.html#custom-fields[custom context] (non-indexed).
+
+After ensuring you've correctly named your transactions,
+you might still see an error in the APM app related to too many transaction names.
+If this is the case, you can increase the default number of transaction groups displayed in the APM app by configuring
+<<apm-settings-kb,`xpack.apm.ui.transactionGroupBucketSize`>>.
+
+**More information**
+
+While this can happen with any APM Agent, it typically occurs with the RUM Agent.
+For more information on how to correctly set `transaction.name` in the RUM Agent,
+see {apm-rum-ref}/custom-transaction-name.html[custom initial page load transaction names].
+
+The RUM Agent can also set the `transaction.name` when observing for transaction events.
+See {apm-rum-ref}/agent-api.html#observe[`apm.observe()`] for more information.
+
+If your problem is occurring in a different Agent, the tips above still apply.
+See the relevant {apm-agents-ref}[Agent API documentation] to adjust how you're naming your transactions.
+
+[float]
+[[troubleshooting-unknown-route]]
+=== Unknown route
+
+The {apm-app-ref}/transactions.html[transaction overview] will only display helpful information
+when the transactions in your services are named correctly.
+If you're seeing "GET unknown route" or "unknown route" in the APM app,
+it could be a sign that something isn't working as it should.
+
+Elastic APM Agents come with built-in support for popular frameworks out-of-the-box.
+This means, among other things, that the Agent will try to automatically name HTTP requests.
+As an example, the Node.js Agent uses the route that handled the request, while the Java Agent uses the Servlet name.
+
+"Unknown route" indicates that the Agent can't determine what to name the request,
+perhaps because the technology you're using isn't supported, the Agent has been installed incorrectly,
+or because something is happening to the request that the Agent doesn't understand.
+
+To resolve this, you'll need to head over to the relevant {apm-agents-ref}[Agent documentation].
+Specifically, view the Agent's supported technologies page.
+You can also use the Agent's public API to manually set a name for the transaction.
+
+[float]
+[[troubleshooting-fields-unsearchable]]
+=== Fields are not searchable
+
+In Elasticsearch, index templates are used to define settings and mappings that determine how fields should be analyzed.
+The recommended index template file for APM Server is installed by the APM Server packages.
+This template, by default, enables and disables indexing on certain fields.
+
+As an example, some agents store cookie values in `http.request.cookies`.
+Since `http.request` has disabled dynamic indexing, and `http.request.cookies` is not declared in a custom mapping,
+the values in `http.request.cookies` are not indexed and thus not searchable.
+
+*Ensure an index pattern exists*
+As a first step, you should ensure the correct index pattern exists.
+Open the main menu, then click *Stack Management > Index Patterns*.
+In the pattern list, you should see an apm index pattern; The default is `apm-*`.
+If you don't, the index pattern doesn't exist. See <<no-apm-data-found>> for information on how to fix this problem.
+
+Selecting the `apm-*` index pattern shows a listing of every field defined in the pattern.
+
+*Ensure a field is searchable*
+There are two things you can do to if you'd like to ensure a field is searchable:
+
+1. Index your additional data as {apm-overview-ref-v}/metadata.html[labels] instead.
+These are dynamic by default, which means they will be indexed and become searchable and aggregatable.
+
+2. Use the {apm-server-ref}/configuration-template.html[`append_fields`] feature. As an example,
+adding the following to `apm-server.yml` will enable dynamic indexing for `http.request.cookies`:
+
+[source,yml]
+----
+setup.template.enabled: true
+setup.template.overwrite: true
+setup.template.append_fields:
+  - name: http.request.cookies
+    type: object
+    dynamic: true
+----
+
+[float]
+[[service-map-rum-connections]]
+=== Service maps: no connection between client and server
+
+If the service map is not showing an expected connection between the client and server,
+it's likely because you haven't configured
+{apm-agent-rum}/configuration.html#distributed-tracing-origins[`distributedTracingOrigins`].
+
+
+This setting is necessary, for example, for cross-origin requests.
+If you have a basic web application that provides data via an API on `localhost:4000`,
+and serves HTML from `localhost:4001`, you'd need to set `distributedTracingOrigins: ['https://localhost:4000']`
+to ensure the origin is monitored as a part of distributed tracing.
+In other words, `distributedTracingOrigins` is consulted prior to the agent adding the
+distributed tracing `traceparent` header to each request.

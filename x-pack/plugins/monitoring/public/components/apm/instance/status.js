@@ -11,62 +11,56 @@ import { ApmStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function StatusUI({ stats, intl }) {
-  const {
-    name,
-    output,
-    version,
-    uptime,
-    timeOfLastEvent,
-  } = stats;
+export function Status({ alerts, stats }) {
+  const { name, output, version, uptime, timeOfLastEvent } = stats;
 
   const metrics = [
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instance.status.nameLabel',
+      label: i18n.translate('xpack.monitoring.apm.instance.status.nameLabel', {
         defaultMessage: 'Name',
       }),
       value: name,
-      'data-test-subj': 'name'
+      'data-test-subj': 'name',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instance.status.outputLabel',
+      label: i18n.translate('xpack.monitoring.apm.instance.status.outputLabel', {
         defaultMessage: 'Output',
       }),
       value: output,
-      'data-test-subj': 'output'
+      'data-test-subj': 'output',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instance.status.versionLabel',
+      label: i18n.translate('xpack.monitoring.apm.instance.status.versionLabel', {
         defaultMessage: 'Version',
       }),
       value: version,
-      'data-test-subj': 'version'
+      'data-test-subj': 'version',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instance.status.uptimeLabel',
+      label: i18n.translate('xpack.monitoring.apm.instance.status.uptimeLabel', {
         defaultMessage: 'Uptime',
       }),
       value: formatMetric(uptime, 'time_since'),
-      'data-test-subj': 'uptime'
+      'data-test-subj': 'uptime',
     },
     {
-      label: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instance.status.lastEventLabel',
+      label: i18n.translate('xpack.monitoring.apm.instance.status.lastEventLabel', {
         defaultMessage: 'Last Event',
       }),
-      value: intl.formatMessage({
-        id: 'xpack.monitoring.apm.instance.status.lastEventDescription',
-        defaultMessage: '{timeOfLastEvent} ago' }, {
-        timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
+      value: i18n.translate('xpack.monitoring.apm.instance.status.lastEventDescription', {
+        defaultMessage: '{timeOfLastEvent} ago',
+        values: {
+          timeOfLastEvent: formatTimestampToDuration(
+            +moment(timeOfLastEvent),
+            CALCULATE_DURATION_SINCE
+          ),
+        },
       }),
       'data-test-subj': 'timeOfLastEvent',
-    }
+    },
   ];
 
   const IconComponent = ({ status }) => (
@@ -75,9 +69,7 @@ function StatusUI({ stats, intl }) {
         id="xpack.monitoring.apm.instance.statusDescription"
         defaultMessage="Status: {apmStatusIcon}"
         values={{
-          apmStatusIcon: (
-            <ApmStatusIcon status={status} />
-          )
+          apmStatusIcon: <ApmStatusIcon status={status} />,
         }}
       />
     </Fragment>
@@ -86,10 +78,9 @@ function StatusUI({ stats, intl }) {
   return (
     <SummaryStatus
       metrics={metrics}
+      alerts={alerts}
       IconComponent={IconComponent}
       data-test-subj="apmDetailStatus"
     />
   );
 }
-
-export const Status = injectI18n(StatusUI);

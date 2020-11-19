@@ -17,9 +17,10 @@
  * under the License.
  */
 
-const mockKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH'
-  + 'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M'
-  + 'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
+const mockKeystoreData =
+  '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDyfGfJSy4mH' +
+  'BBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqhI4lzJ9M' +
+  'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
 jest.mock('fs', () => ({
   readFileSync: jest.fn().mockImplementation((path) => {
@@ -32,16 +33,16 @@ jest.mock('fs', () => ({
   existsSync: jest.fn().mockImplementation((path) => {
     return !path.includes('nonexistent');
   }),
-  writeFileSync: jest.fn()
+  writeFileSync: jest.fn(),
 }));
 
 import sinon from 'sinon';
 import { PassThrough } from 'stream';
 
-import { Keystore } from '../legacy/server/keystore';
+import { Keystore } from '../cli/keystore';
 import { add } from './add';
-import Logger from '../cli_plugin/lib/logger';
-import * as prompt from '../legacy/server/utils/prompt';
+import { Logger } from '../cli_plugin/lib/logger';
+import * as prompt from './utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('add', () => {
@@ -61,7 +62,7 @@ describe('Kibana keystore', () => {
 
     it('returns an error for a nonexistent keystore', async () => {
       const keystore = new Keystore('/data/nonexistent.keystore');
-      const message = 'ERROR: Kibana keystore not found. Use \'create\' command to create one.';
+      const message = "ERROR: Kibana keystore not found. Use 'create' command to create one.";
 
       await add(keystore, 'foo');
 
@@ -128,9 +129,19 @@ describe('Kibana keystore', () => {
       expect(keystore.data.foo).toEqual('bar');
     });
 
+    it('parses JSON values', async () => {
+      prompt.question.returns(Promise.resolve('["bar"]\n'));
+
+      const keystore = new Keystore('/data/test.keystore');
+      sandbox.stub(keystore, 'save');
+
+      await add(keystore, 'foo');
+
+      expect(keystore.data.foo).toEqual(['bar']);
+    });
+
     it('persists updated keystore', async () => {
       prompt.question.returns(Promise.resolve('bar\n'));
-
 
       const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');

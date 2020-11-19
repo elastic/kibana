@@ -4,41 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useParams } from 'react-router-dom';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricsChartsByAgentAPIResponse } from '../../server/lib/metrics/get_metrics_chart_data_by_agent';
-import { loadMetricsChartData } from '../services/rest/apm/metrics';
+import { useUiFilters } from '../context/UrlParamsContext';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
-  charts: []
+  charts: [],
 };
 
 export function useServiceMetricCharts(
   urlParams: IUrlParams,
-  agentName: string
+  agentName?: string
 ) {
-  const { serviceName, start, end, kuery } = urlParams;
-
-  const { data = INITIAL_DATA, error, status } = useFetcher<
-    MetricsChartsByAgentAPIResponse
-  >(
-    () => {
-      if (serviceName && start && end) {
-        return loadMetricsChartData({
-          serviceName,
-          agentName,
-          start,
-          end,
-          kuery
+  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { start, end } = urlParams;
+  const uiFilters = useUiFilters(urlParams);
+  const { data = INITIAL_DATA, error, status } = useFetcher(
+    (callApmApi) => {
+      if (serviceName && start && end && agentName) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/{serviceName}/metrics/charts',
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              agentName,
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
-    [serviceName, start, end, kuery]
+    [serviceName, start, end, agentName, uiFilters]
   );
 
   return {
     data,
     status,
-    error
+    error,
   };
 }

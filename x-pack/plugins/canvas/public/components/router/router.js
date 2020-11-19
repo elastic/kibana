@@ -5,16 +5,14 @@
  */
 
 import React from 'react';
-import { isClassComponent } from 'recompose';
 import PropTypes from 'prop-types';
 import { routerProvider } from '../../lib/router_provider';
+import { getAppState } from '../../lib/app_state';
+import { getTimeInterval } from '../../lib/time_interval';
 import { CanvasLoading } from './canvas_loading';
+import { RouterContext } from './';
 
 export class Router extends React.PureComponent {
-  static childContextTypes = {
-    router: PropTypes.object.isRequired,
-  };
-
   static propTypes = {
     showLoading: PropTypes.bool.isRequired,
     onLoad: PropTypes.func.isRequired,
@@ -22,6 +20,11 @@ export class Router extends React.PureComponent {
     routes: PropTypes.array.isRequired,
     loadingMessage: PropTypes.string,
     onRouteChange: PropTypes.func,
+    setFullscreen: PropTypes.func.isRequired,
+  };
+
+  static childContextTypes = {
+    router: PropTypes.object.isRequired,
   };
 
   state = {
@@ -34,14 +37,14 @@ export class Router extends React.PureComponent {
     return { router };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     // routerProvider is a singleton, and will only ever return one instance
     const { routes, onRouteChange, onLoad, onError } = this.props;
     const router = routerProvider(routes);
     let firstLoad = true;
 
     // when the component in the route changes, render it
-    router.onPathChange(route => {
+    router.onPathChange((route) => {
       const { pathname } = route.location;
       const { component } = route.meta;
 
@@ -57,10 +60,27 @@ export class Router extends React.PureComponent {
       // if this is the first load, execute the route
       if (firstLoad) {
         firstLoad = false;
+
+        // execute the route
         router
           .execute()
           .then(() => onLoad())
-          .catch(err => onError(err));
+          .catch((err) => onError(err));
+      }
+
+      const appState = getAppState();
+
+      if (appState.__fullscreen) {
+        this.props.setFullscreen(appState.__fullscreen);
+      }
+
+      if (appState.__refreshInterval) {
+        this.props.setRefreshInterval(getTimeInterval(appState.__refreshInterval));
+      }
+
+      if (!!appState.__autoplayInterval) {
+        this.props.enableAutoplay(true);
+        this.props.setAutoplayInterval(getTimeInterval(appState.__autoplayInterval));
       }
 
       // notify upstream handler of route change
@@ -78,9 +98,10 @@ export class Router extends React.PureComponent {
       return React.createElement(CanvasLoading, { msg: this.props.loadingMessage });
     }
 
-    // show the activeComponent
-    return isClassComponent(this.state.activeComponent)
-      ? React.createElement(this.state.activeComponent, {})
-      : this.state.activeComponent({});
+    return (
+      <RouterContext.Provider value={this.state.router}>
+        <this.state.activeComponent />
+      </RouterContext.Provider>
+    );
   }
 }

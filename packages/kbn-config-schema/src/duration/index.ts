@@ -25,10 +25,14 @@ const timeFormatRegex = /^(0|[1-9][0-9]*)(ms|s|m|h|d|w|M|Y)$/;
 function stringToDuration(text: string) {
   const result = timeFormatRegex.exec(text);
   if (!result) {
-    throw new Error(
-      `Failed to parse [${text}] as time value. ` +
-        `Format must be <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y')`
-    );
+    const number = Number(text);
+    if (typeof number !== 'number' || isNaN(number)) {
+      throw new Error(
+        `Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format ` +
+          `<count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer.`
+      );
+    }
+    return numberToDuration(number);
   }
 
   const count = parseInt(result[1], 0);
@@ -39,10 +43,7 @@ function stringToDuration(text: string) {
 
 function numberToDuration(numberMs: number) {
   if (!Number.isSafeInteger(numberMs) || numberMs < 0) {
-    throw new Error(
-      `Failed to parse [${numberMs}] as time value. ` +
-        `Value should be a safe positive integer number.`
-    );
+    throw new Error(`Value in milliseconds is expected to be a safe positive integer.`);
   }
 
   return momentDuration(numberMs);

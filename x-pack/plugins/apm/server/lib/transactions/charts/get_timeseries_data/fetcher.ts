@@ -4,102 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter, SearchParams } from 'elasticsearch';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
-  TRANSACTION_TYPE
+  TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../../typings/common';
+import { rangeFilter } from '../../../../../common/utils/range_filter';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../../../helpers/aggregated_transactions';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
-import { rangeFilter } from '../../../helpers/range_filter';
-import { Setup } from '../../../helpers/setup_request';
-
-interface ResponseTimeBucket {
-  key_as_string: string;
-  key: number;
-  doc_count: number;
-  avg: {
-    value: number | null;
-  };
-  pct: {
-    values: {
-      '95.0': number | 'NaN';
-      '99.0': number | 'NaN';
-    };
-  };
-}
-
-interface TransactionResultBucket {
-  /**
-   * transaction result eg. 2xx
-   */
-  key: string;
-  doc_count: number;
-  timeseries: {
-    buckets: Array<{
-      key_as_string: string;
-      /**
-       * timestamp in ms
-       */
-      key: number;
-      doc_count: number;
-    }>;
-  };
-}
-
-interface Aggs {
-  response_times: {
-    buckets: ResponseTimeBucket[];
-  };
-  transaction_results: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: TransactionResultBucket[];
-  };
-  overall_avg_duration: {
-    value: number;
-  };
-}
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
   serviceName,
   transactionType,
   transactionName,
-  setup
+  setup,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
-  transactionType?: string;
-  transactionName?: string;
-  setup: Setup;
+  transactionType: string | undefined;
+  transactionName: string | undefined;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, esFilterQuery, client, config } = setup;
-  const { intervalString } = getBucketSize(start, end, 'auto');
+  const { start, end, apmEventClient } = setup;
+  const { intervalString } = getBucketSize(start, end);
 
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) }
+    { range: rangeFilter(start, end) },
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      searchAggregatedTransactions
+    ),
+    ...setup.esFilter,
   ];
 
   if (transactionName) {
     filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
   }
 
+  // TODO reimplement these as uiFilters
   if (transactionType) {
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
   }
 
-  if (esFilterQuery) {
-    filter.push(esFilterQuery);
-  }
-
-  const params: SearchParams = {
-    index: config.get('apm_oss.transactionIndices'),
+  const params = {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
     body: {
       size: 0,
       query: { bool: { filter } },
@@ -107,34 +71,61 @@ export function timeseriesFetcher({
         response_times: {
           date_histogram: {
             field: '@timestamp',
-            interval: intervalString,
+            fixed_interval: intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end }
+            extended_bounds: { min: start, max: end },
           },
           aggs: {
-            avg: { avg: { field: TRANSACTION_DURATION } },
+            avg: {
+              avg: {
+                field: getTransactionDurationFieldForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
+              },
+            },
             pct: {
-              percentiles: { field: TRANSACTION_DURATION, percents: [95, 99] }
-            }
-          }
+              percentiles: {
+                field: getTransactionDurationFieldForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
+                percents: [95, 99],
+                hdr: { number_of_significant_value_digits: 2 },
+              },
+            },
+          },
         },
-        overall_avg_duration: { avg: { field: TRANSACTION_DURATION } },
+        overall_avg_duration: {
+          avg: {
+            field: getTransactionDurationFieldForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+          },
+        },
         transaction_results: {
           terms: { field: TRANSACTION_RESULT, missing: '' },
           aggs: {
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                interval: intervalString,
+                fixed_interval: intervalString,
                 min_doc_count: 0,
-                extended_bounds: { min: start, max: end }
-              }
-            }
-          }
-        }
-      }
-    }
+                extended_bounds: { min: start, max: end },
+              },
+              aggs: {
+                count: {
+                  value_count: {
+                    field: getTransactionDurationFieldForAggregatedTransactions(
+                      searchAggregatedTransactions
+                    ),
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
-  return client<void, Aggs>('search', params);
+  return apmEventClient.search(params);
 }

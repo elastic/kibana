@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Request, Server } from 'hapi';
-import { PLUGIN } from '../common/constants';
+import { Request, Server } from '@hapi/hapi';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
+import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
+import { umDynamicSettings } from './lib/saved_objects';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -22,37 +24,56 @@ export interface KibanaServer extends Server {
   route: (options: KibanaRouteOptions) => void;
 }
 
-export const initServerWithKibana = (server: KibanaServer) => {
+export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCorePlugins) => {
+  const { features } = plugins;
   const libs = compose(server);
-  initUptimeServer(libs);
 
-  const xpackMainPlugin = server.plugins.xpack_main;
-  xpackMainPlugin.registerFeature({
+  features.registerKibanaFeature({
     id: PLUGIN.ID,
-    name: i18n.translate('xpack.uptime.featureRegistry.uptimeFeatureName', {
-      defaultMessage: 'Uptime',
-    }),
-    navLinkId: PLUGIN.ID,
-    icon: 'uptimeApp',
+    name: PLUGIN.NAME,
+    order: 1000,
+    category: DEFAULT_APP_CATEGORIES.observability,
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
+    management: {
+      insightsAndAlerting: ['triggersActions'],
+    },
+    alerting: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
     privileges: {
       all: {
-        api: ['uptime'],
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
+        api: ['uptime-read', 'uptime-write', 'lists-all'],
         savedObject: {
-          all: [],
+          all: [umDynamicSettings.name, 'alert'],
           read: [],
         },
-        ui: ['save'],
+        alerting: {
+          all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+        },
+        management: {
+          insightsAndAlerting: ['triggersActions'],
+        },
+        ui: ['save', 'configureSettings', 'show', 'alerting:save'],
       },
       read: {
-        api: ['uptime'],
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
+        api: ['uptime-read', 'lists-read'],
         savedObject: {
-          all: [],
-          read: [],
+          all: ['alert'],
+          read: [umDynamicSettings.name],
         },
-        ui: [],
+        alerting: {
+          read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+        },
+        management: {
+          insightsAndAlerting: ['triggersActions'],
+        },
+        ui: ['show', 'alerting:save'],
       },
     },
   });
+
+  initUptimeServer(server, libs, plugins);
 };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ace from 'ace';
+import ace from 'brace';
 import { GrokHighlightRules } from './grok_highlight_rules';
 
 const TextMode = ace.acequire('ace/mode/text').Mode;

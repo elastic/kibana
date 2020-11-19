@@ -5,62 +5,66 @@
  */
 
 import { omit } from 'lodash';
-import { ContextFunction, Datatable, DatatableColumn, DatatableColumnType } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable } from 'src/plugins/expressions/common';
+import { DatatableColumn, DatatableColumnType, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   column: string;
   type: DatatableColumnType | null;
-  name: string | null;
+  name: string;
 }
 
-export function alterColumn(): ContextFunction<'alterColumn', Datatable, Arguments, Datatable> {
+export function alterColumn(): ExpressionFunctionDefinition<
+  'alterColumn',
+  Datatable,
+  Arguments,
+  Datatable
+> {
   const { help, args: argHelp } = getFunctionHelp().alterColumn;
+  const errors = getFunctionErrors().alterColumn;
 
   return {
     name: 'alterColumn',
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       column: {
         aliases: ['_'],
         types: ['string'],
+        required: true,
         help: argHelp.column,
+      },
+      name: {
+        types: ['string'],
+        help: argHelp.name,
       },
       type: {
         types: ['string'],
         help: argHelp.type,
-        default: null,
-        options: ['null', 'boolean', 'number', 'string'],
-      },
-      name: {
-        types: ['string', 'null'],
-        help: argHelp.name,
-        default: null,
+        options: ['null', 'boolean', 'number', 'string', 'date'],
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.column || (!args.type && !args.name)) {
-        return context;
+        return input;
       }
 
-      const column = context.columns.find(col => col.name === args.column);
+      const column = input.columns.find((col) => col.name === args.column);
       if (!column) {
-        throw new Error(`Column not found: '${args.column}'`);
+        throw errors.columnNotFound(args.column);
       }
 
       const name = args.name || column.name;
-      const type = args.type || column.type;
+      const type = args.type || column.meta.type;
 
-      const columns = context.columns.reduce((all: DatatableColumn[], col) => {
+      const columns = input.columns.reduce((all: DatatableColumn[], col) => {
         if (col.name !== args.name) {
           if (col.name !== column.name) {
             all.push(col);
           } else {
-            all.push({ name, type });
+            all.push({ id: name, name, meta: { type } });
           }
         }
         return all;
@@ -72,7 +76,7 @@ export function alterColumn(): ContextFunction<'alterColumn', Datatable, Argumen
         handler = (function getHandler() {
           switch (type) {
             case 'string':
-              if (column.type === 'date') {
+              if (column.meta.type === 'date') {
                 return (v: string) => new Date(v).toISOString();
               }
               return String;
@@ -85,12 +89,12 @@ export function alterColumn(): ContextFunction<'alterColumn', Datatable, Argumen
             case 'null':
               return () => null;
             default:
-              throw new Error(`Cannot convert to '${type}'`);
+              throw errors.cannotConvertType(type);
           }
         })();
       }
 
-      const rows = context.rows.map(row => ({
+      const rows = input.rows.map((row) => ({
         ...omit(row, column.name),
         [name]: handler(row[column.name]),
       }));

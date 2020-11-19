@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipeline calls toExpression on vis_type if it exists 1`] = `"kibana | kibana_context | test"`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles input_control_vis function 1`] = `"input_control_vis visConfig='{\\"some\\":\\"nested\\",\\"data\\":{\\"here\\":true}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metrics/tsvb function 1`] = `"tsvb params='{\\"foo\\":\\"bar\\"}'  uiState='{}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function with buckets 1`] = `"regionmap visConfig='{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"bucket\\":1}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function without buckets 1`] = `"regionmap visConfig='{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tile_map function 1`] = `"tilemap visConfig='{\\"metric\\":{},\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"geohash\\":1,\\"geocentroid\\":3}}' "`;

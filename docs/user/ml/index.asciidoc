@@ -1,0 +1,100 @@
+[role="xpack"]
+[[xpack-ml]]
+= {ml-cap}
+
+[partintro]
+--
+As data sets increase in size and complexity, the human effort required to
+inspect dashboards or maintain rules for spotting infrastructure problems,
+cyber attacks, or business issues becomes impractical. Elastic {ml-features}
+such as {anomaly-detect} and {oldetection} make it easier to notice suspicious
+activities with minimal human interference.
+
+{kib} includes a free *{data-viz}* to learn more about your data. In particular,
+if your data is stored in {es} and contains a time field, you can use the
+*{data-viz}* to identify possible fields for {anomaly-detect}:
+
+[role="screenshot"]
+image::user/ml/images/ml-data-visualizer-sample.jpg[{data-viz} for sample flight data]
+
+experimental[] You can also upload a CSV, NDJSON, or log file. The *{data-viz}*
+identifies the file format and field mappings. You can then optionally import
+that data into an {es} index. To change the default file size limit, see
+<<kibana-ml-settings,Machine learning advanced settings>>.
+
+If {stack-security-features} are enabled, users must have the necessary
+privileges to use {ml-features}. Refer to 
+{ml-docs}/setup.html#setup-privileges[Set up {ml-features}].
+
+--
+
+[[xpack-ml-anomalies]]
+== {anomaly-detect-cap}
+
+The Elastic {ml} {anomaly-detect} feature automatically models the normal
+behavior of your time series data — learning trends, periodicity, and more — in
+real time to identify anomalies, streamline root cause analysis, and reduce
+false positives. {anomaly-detect-cap} runs in and scales with {es}, and
+includes an intuitive UI on the {kib} *Machine Learning* page for creating
+{anomaly-jobs} and understanding results.
+
+If you have a license that includes the {ml-features}, you can 
+create {anomaly-jobs} and manage jobs and {dfeeds} from the *Job Management*
+pane: 
+
+[role="screenshot"]
+image::user/ml/images/ml-job-management.png[Job Management]
+
+You can use the *Settings* pane to create and edit 
+{ml-docs}/ml-calendars.html[calendars] and the filters that are used in 
+{ml-docs}/ml-rules.html[custom rules]:
+
+[role="screenshot"]
+image::user/ml/images/ml-settings.png[Calendar Management]
+
+The *Anomaly Explorer* and *Single Metric Viewer* display the results of your
+{anomaly-jobs}. For example:
+
+[role="screenshot"]
+image::user/ml/images/ml-single-metric-viewer.png[Single Metric Viewer]
+
+You can optionally add annotations by drag-selecting a period of time in
+the *Single Metric Viewer* and adding a description. For example, you can add an
+explanation for anomalies in that time period or provide notes about what is
+occurring in your operational environment at that time:
+
+[role="screenshot"]
+image::user/ml/images/ml-annotations-list.png[Single Metric Viewer with annotations]
+
+In some circumstances, annotations are also added automatically. For example, if
+the {anomaly-job} detects that there is missing data, it annotates the affected 
+time period. For more information, see 
+{ml-docs}/ml-delayed-data-detection.html[Handling delayed data]. The 
+*Job Management* pane shows the full list of annotations for each job.
+
+NOTE: The {kib} {ml-features} use pop-ups. You must configure your web 
+browser so that it does not block pop-up windows or create an exception for your 
+{kib} URL.
+
+For more information about the {anomaly-detect} feature, see
+https://www.elastic.co/what-is/elastic-stack-machine-learning[{ml-cap} in the {stack}]
+and {ml-docs}/xpack-ml.html[{ml-cap} {anomaly-detect}].
+
+[[xpack-ml-dfanalytics]]
+== {dfanalytics-cap}
+
+experimental[]
+
+The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
+{classification}, {oldetection}, and {regression} algorithms and generate new
+indices that contain the results alongside your source data. 
+
+If you have a license that includes the {ml-features}, you can create
+{dfanalytics-jobs} and view their results on the *Data Frame Analytics* page in
+{kib}. For example:
+
+[role="screenshot"]
+image::user/ml/images/outliers.png[{oldetection-cap} results in {kib}]
+
+For more information about the {dfanalytics} feature, see 
+{ml-docs}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].

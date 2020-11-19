@@ -1,44 +1,73 @@
 [[connect-to-elasticsearch]]
-== Connect Kibana with Elasticsearch
+== Add data
+++++
+<titleabbrev>Add data</titleabbrev>
+++++
 
-Before you can start using Kibana, you need to tell it which Elasticsearch indices you want to explore.
-The first time you access Kibana, you are prompted to define an _index pattern_ that matches the name of
-one or more of your indices. That's it. That's all you need to configure to start using Kibana. You can
-add index patterns at any time from the <<settings-create-pattern,Management tab>>.
+To start working with your data in {kib}, use one of the many ingest options,
+available from the home page.
+You can collect data from an app or service
+or upload a file that contains your data.  If you're not ready to use your own data,
+add a sample data set and give {kib} a test drive.
 
-TIP: By default, Kibana connects to the Elasticsearch instance running on `localhost`. To connect to a
-different Elasticsearch instance, modify the Elasticsearch URL in the `kibana.yml` configuration file and
-restart Kibana. For information about using Kibana with your production nodes, see <<production>>.
-
-To configure the Elasticsearch indices you want to access with Kibana:
-
-. Point your browser at port 5601 to access the Kibana UI. For example, `localhost:5601` or
-`http://YOURDOMAIN.com:5601`.
-+
-image:images/Start-Page.png[Kibana start page]
-+
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. The pattern
-can include an asterisk (*) to matches zero or more characters in an index's name. When filling out your
-index pattern, any matched indices will be displayed.
-. Click *Next Step* to select the index field that contains the timestamp you want to use to perform time-based
-comparisons. Kibana reads the index mapping to list all of the fields that contain a timestamp. If your
-index doesn't have time-based data, choose *I don't want to use the Time Filter* option.
-+
-. Click *Create index pattern* to add the index pattern. This first pattern is automatically configured as the default.
-When you have more than one index pattern, you can designate which one to use as the default by clicking
-on the star icon above the index pattern title from *Management > Index Patterns*.
-
-All done! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields
-configured for the matching index.
+[role="screenshot"]
+image::images/add-data-home.png[Built-in options for adding data to Kibana:  Add data, Add Elastic Agent, Upload a file]
 
 [float]
-[[explore]]
-=== Start Exploring your Data!
-You're ready to dive in to your data:
+[[add-data-tutorial-kibana]]
+===  Add data
 
-* Search and browse your data interactively from the <<discover, Discover>> page.
-* Chart and map your data from the <<visualize, Visualize>> page.
-* Create and view custom dashboards from the <<dashboard, Dashboard>> page.
+Want to ingest logs, metrics, security, or application data?
+Install and configure a Beats data shipper or other module to periodically collect the data
+and send it to {es}. You can then use the pre-built dashboards to explore and analyze the data.
 
-For a step-by-step introduction to these core Kibana concepts, see the <<getting-started,
-Getting Started>> tutorial.
+[role="screenshot"]
+image::images/add-data-tutorials.png[Add Data tutorials]
+
+[discrete]
+=== Add Elastic Agent
+
+beta[] *Elastic Agent* is a sneak peek at the next generation of
+data integration modules, offering
+a centralized way to set up your integrations.
+With *Fleet*, you can add
+and manage integrations for popular services and platforms, providing
+an easy way to collect your data. The integrations
+ship with dashboards and visualizations,
+so you can quickly get insights into your data.
+
+To get started, refer to
+{ingest-guide}/fleet-quick-start.html[Quick start: Get logs and metrics into the Elastic Stack].
+
+[role="screenshot"]
+image::images/add-data-fleet.png[Add data using Fleet]
+
+[discrete]
+[[upload-data-kibana]]
+=== Upload a file
+
+experimental[] If your data is in a CSV, JSON, or log file, you can upload it using the File
+Data Visualizer. You can upload a file up to 100 MB. This value is configurable up to 1 GB in
+<<kibana-ml-settings, Advanced Settings>>. To upload a file with geospatial data,
+refer to <<import-geospatial-data, Import geospatial data>>.
+
+[role="screenshot"]
+image::images/add-data-fv.png[File Data Visualizer]
+
+
+
+NOTE: This feature is not intended for use as part of a
+repeated production process, but rather for the initial exploration of your data.
+
+
+[discrete]
+=== Additional options for loading your data
+
+If the {kib} ingest options don't work for you, you can index your
+data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
+or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
+After you add your data, you're required to create an <<index-patterns,index pattern>> to tell
+{kib} where to find the data.
+
+* To add data for Elastic Observability, refer to {observability-guide}/add-observability-data.html[Send data to Elasticsearch].
+* To add data for Elastic Security, refer to https://www.elastic.co/guide/en/security/current/ingest-data.html[Ingest data to Elastic Security].

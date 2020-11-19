@@ -5,25 +5,22 @@
  */
 
 import React, { Fragment, FunctionComponent } from 'react';
-// @ts-ignore unconverted component
+// @ts-expect-error unconverted component
 import { ElementConfig } from '../element_config';
-// @ts-ignore unconverted component
+// @ts-expect-error unconverted component
 import { PageConfig } from '../page_config';
-// @ts-ignore unconverted component
 import { WorkpadConfig } from '../workpad_config';
-// @ts-ignore unconverted component
+// @ts-expect-error unconverted component
 import { SidebarSection } from './sidebar_section';
 
 export const GlobalConfig: FunctionComponent = () => (
   <Fragment>
     <SidebarSection>
       <WorkpadConfig />
+      <ElementConfig />
     </SidebarSection>
     <SidebarSection>
       <PageConfig />
-    </SidebarSection>
-    <SidebarSection>
-      <ElementConfig />
     </SidebarSection>
   </Fragment>
 );

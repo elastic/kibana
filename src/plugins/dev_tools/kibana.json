@@ -1,0 +1,7 @@
+{
+  "id": "devTools",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["urlForwarding"]
+}

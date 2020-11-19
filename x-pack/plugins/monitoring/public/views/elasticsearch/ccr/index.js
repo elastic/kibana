@@ -5,47 +5,49 @@
  */
 
 import React from 'react';
-import uiRoutes from 'ui/routes';
+import { i18n } from '@kbn/i18n';
+import { uiRoutes } from '../../../angular/helpers/routes';
 import { getPageData } from './get_page_data';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { I18nContext } from 'ui/i18n';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/ccr', {
   template,
   resolve: {
     clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
     pageData: getPageData,
   },
   controllerAs: 'elasticsearchCcr',
   controller: class ElasticsearchCcrController extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       super({
-        title: i18n('xpack.monitoring.elasticsearch.ccr.routeTitle', {
-          defaultMessage: 'Elasticsearch - Ccr'
+        title: i18n.translate('xpack.monitoring.elasticsearch.ccr.routeTitle', {
+          defaultMessage: 'Elasticsearch - Ccr',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.elasticsearch.ccr.pageTitle', {
+          defaultMessage: 'Elasticsearch Ccr',
         }),
         reactNodeId: 'elasticsearchCcrReact',
         getPageData,
         $scope,
-        $injector
+        $injector,
       });
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(data);
-      });
-
-      this.renderReact = ({ data }) => {
-        super.renderReact(
-          <I18nContext>
-            <Ccr data={data} />
-          </I18nContext>
-        );
-      };
+      $scope.$watch(
+        () => this.data,
+        (data) => {
+          if (!data) {
+            return;
+          }
+          this.renderReact(<Ccr data={data.data} />);
+        }
+      );
     }
-  }
+  },
 });

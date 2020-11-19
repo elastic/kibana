@@ -22,54 +22,52 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
+  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
-
-  const fromTime = '2015-09-19 06:31:44.000';
-  const toTime = '2015-09-23 18:31:44.000';
+  const PageObjects = getPageObjects(['visualize', 'timePicker', 'visEditor', 'visChart']);
 
   describe('data table', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable';
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');
       await PageObjects.visualize.clickDataTable();
       log.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      log.debug('Bucket = Split Rows');
-      await PageObjects.visualize.clickBucket('Split Rows');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      log.debug('Bucket = Split rows');
+      await PageObjects.visEditor.clickBucket('Split rows');
       log.debug('Aggregation = Histogram');
-      await PageObjects.visualize.selectAggregation('Histogram');
+      await PageObjects.visEditor.selectAggregation('Histogram');
       log.debug('Field = bytes');
-      await PageObjects.visualize.selectField('bytes');
+      await PageObjects.visEditor.selectField('bytes');
       log.debug('Interval = 2000');
-      await PageObjects.visualize.setNumericInterval('2000');
-      await PageObjects.visualize.clickGo();
+      await PageObjects.visEditor.setInterval('2000', { type: 'numeric' });
+      await PageObjects.visEditor.clickGo();
     });
 
     it('should allow applying changed params', async () => {
-      await PageObjects.visualize.setNumericInterval('1', { append: true });
-      const interval = await PageObjects.visualize.getNumericInterval();
+      await PageObjects.visEditor.setInterval('1', { type: 'numeric', append: true });
+      const interval = await PageObjects.visEditor.getNumericInterval();
       expect(interval).to.be('20001');
-      const isApplyButtonEnabled = await PageObjects.visualize.isApplyEnabled();
+      const isApplyButtonEnabled = await PageObjects.visEditor.isApplyEnabled();
       expect(isApplyButtonEnabled).to.be(true);
     });
 
     it('should allow reseting changed params', async () => {
-      await PageObjects.visualize.clickReset();
-      const interval = await PageObjects.visualize.getNumericInterval();
+      await PageObjects.visEditor.clickReset();
+      const interval = await PageObjects.visEditor.getNumericInterval();
       expect(interval).to.be('2000');
     });
 
     it('should be able to save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
+      await PageObjects.visChart.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {
@@ -78,16 +76,16 @@ export default function ({ getService, getPageObjects }) {
 
     it('should show correct data', function () {
       const expectedChartData = [
-        [ '0B', '2,088' ],
-        [ '1.953KB', '2,748' ],
-        [ '3.906KB', '2,707' ],
-        [ '5.859KB', '2,876' ],
-        [ '7.813KB', '2,863' ],
-        [ '9.766KB', '147' ],
-        [ '11.719KB', '148' ],
-        [ '13.672KB', '129' ],
-        [ '15.625KB', '161' ],
-        [ '17.578KB', '137' ]
+        ['0B', '2,088'],
+        ['1.953KB', '2,748'],
+        ['3.906KB', '2,707'],
+        ['5.859KB', '2,876'],
+        ['7.813KB', '2,863'],
+        ['9.766KB', '147'],
+        ['11.719KB', '148'],
+        ['13.672KB', '129'],
+        ['15.625KB', '161'],
+        ['17.578KB', '137'],
       ];
 
       return retry.try(async function () {
@@ -97,328 +95,403 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show correct data when using average pipeline aggregation', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+    it('should show percentage columns', async () => {
+      async function expectValidTableData() {
+        const data = await PageObjects.visChart.getTableVisData();
+        expect(data.trim().split('\n')).to.be.eql([
+          '≥ 0B and < 1,000B',
+          '1,351 64.703%',
+          '≥ 1,000B and < 1.953KB',
+          '737 35.297%',
+        ]);
+      }
+
+      // load a plain table
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickAddMetric();
-      await PageObjects.visualize.clickBucket('Metric', 'metric');
-      await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
-      await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
-      await PageObjects.visualize.selectField('geo.src', 'metrics', 'buckets');
-      await PageObjects.visualize.clickGo();
-      const data = await PageObjects.visualize.getTableVisData();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.visEditor.clickBucket('Split rows');
+      await PageObjects.visEditor.selectAggregation('Range');
+      await PageObjects.visEditor.selectField('bytes');
+      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickOptionsTab();
+      await PageObjects.visEditor.setSelectByOptionText(
+        'datatableVisualizationPercentageCol',
+        'Count'
+      );
+      await PageObjects.visEditor.clickGo();
+
+      await expectValidTableData();
+
+      // check that it works after a save and reload
+      const SAVE_NAME = 'viz w/ percents';
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(SAVE_NAME);
+
+      await PageObjects.visualize.loadSavedVisualization(SAVE_NAME);
+      await PageObjects.visChart.waitForVisualization();
+
+      await expectValidTableData();
+
+      // check that it works after selecting a column that's deleted
+      await PageObjects.visEditor.clickDataTab();
+      await PageObjects.visEditor.clickBucket('Metric', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Average', 'metrics');
+      await PageObjects.visEditor.selectField('bytes', 'metrics');
+      await PageObjects.visEditor.removeDimension(1);
+      await PageObjects.visEditor.clickGo();
+      await PageObjects.visEditor.clickOptionsTab();
+
+      const data = await PageObjects.visChart.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql([
+        '≥ 0B and < 1,000B',
+        '344.094B',
+        '≥ 1,000B and < 1.953KB',
+        '1.697KB',
+      ]);
+    });
+
+    it('should show correct data when using average pipeline aggregation', async () => {
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.visEditor.clickBucket('Metric', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
+      await PageObjects.visEditor.selectAggregation('Terms', 'metrics', 'buckets');
+      await PageObjects.visEditor.selectField('geo.src', 'metrics', 'buckets');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
       log.debug(data.split('\n'));
       expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
     });
 
     it('should show correct data for a data table with date histogram', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickBucket('Split Rows');
-      await PageObjects.visualize.selectAggregation('Date Histogram');
-      await PageObjects.visualize.selectField('@timestamp');
-      await PageObjects.visualize.setInterval('Daily');
-      await PageObjects.visualize.clickGo();
-      const data = await PageObjects.visualize.getTableVisData();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.visEditor.clickBucket('Split rows');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
+      await PageObjects.visEditor.selectField('@timestamp');
+      await PageObjects.visEditor.setInterval('Day');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
       log.debug(data.split('\n'));
       expect(data.trim().split('\n')).to.be.eql([
-        '2015-09-20', '4,757',
-        '2015-09-21', '4,614',
-        '2015-09-22', '4,633',
+        '2015-09-20',
+        '4,757',
+        '2015-09-21',
+        '4,614',
+        '2015-09-22',
+        '4,633',
       ]);
     });
 
     it('should show correct data for a data table with date histogram', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickBucket('Split Rows');
-      await PageObjects.visualize.selectAggregation('Date Histogram');
-      await PageObjects.visualize.selectField('@timestamp');
-      await PageObjects.visualize.setInterval('Daily');
-      await PageObjects.visualize.clickGo();
-      const data = await PageObjects.visualize.getTableVisData();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.visEditor.clickBucket('Split rows');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
+      await PageObjects.visEditor.selectField('@timestamp');
+      await PageObjects.visEditor.setInterval('Day');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
-        '2015-09-20', '4,757',
-        '2015-09-21', '4,614',
-        '2015-09-22', '4,633',
+        '2015-09-20',
+        '4,757',
+        '2015-09-21',
+        '4,614',
+        '2015-09-22',
+        '4,633',
       ]);
+    });
+
+    it('should show correct data when selecting a field by its custom name', async () => {
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.visEditor.clickBucket('Split rows');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
+      await PageObjects.visEditor.selectField('UTC time');
+      await PageObjects.visEditor.setInterval('Day');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql([
+        '2015-09-20',
+        '4,757',
+        '2015-09-21',
+        '4,614',
+        '2015-09-22',
+        '4,633',
+      ]);
+      const header = await PageObjects.visChart.getTableVisHeader();
+      expect(header).to.contain('UTC time');
     });
 
     it('should correctly filter for applied time filter on the main timefield', async () => {
       await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      const data = await PageObjects.visualize.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql([
-        '2015-09-20', '4,757',
-      ]);
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      const data = await PageObjects.visChart.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
     });
 
     it('should correctly filter for pinned filters', async () => {
       await filterBar.toggleFilterPinned('@timestamp');
-      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      const data = await PageObjects.visualize.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql([
-        '2015-09-20', '4,757',
-      ]);
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      const data = await PageObjects.visChart.getTableVisData();
+      expect(data.trim().split('\n')).to.be.eql(['2015-09-20', '4,757']);
     });
 
     it('should show correct data for a data table with top hits', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickMetricEditor();
-      await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
-      await PageObjects.visualize.selectField('agent.raw', 'metrics');
-      await PageObjects.visualize.clickGo();
-      const data = await PageObjects.visualize.getTableVisData();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.visEditor.clickMetricEditor();
+      await PageObjects.visEditor.selectAggregation('Top Hit', 'metrics');
+      await PageObjects.visEditor.selectField('agent.raw', 'metrics');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
       log.debug(data);
       expect(data.length).to.be.greaterThan(0);
     });
 
     it('should show correct data for a data table with range agg', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickBucket('Split Rows');
-      await PageObjects.visualize.selectAggregation('Range');
-      await PageObjects.visualize.selectField('bytes');
-      await PageObjects.visualize.clickGo();
-      const data = await PageObjects.visualize.getTableVisData();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.visEditor.clickBucket('Split rows');
+      await PageObjects.visEditor.selectAggregation('Range');
+      await PageObjects.visEditor.selectField('bytes');
+      await PageObjects.visEditor.clickGo();
+      const data = await PageObjects.visChart.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
-        '0 to 1000', '1,351',
-        '1000 to 2000', '737',
+        '≥ 0B and < 1,000B',
+        '1,351',
+        '≥ 1,000B and < 1.953KB',
+        '737',
       ]);
     });
 
-
     describe('otherBucket', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.clickBucket('Split Rows');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('extension.raw');
-        await PageObjects.visualize.setSize(2);
-        await PageObjects.visualize.clickGo();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.visEditor.clickBucket('Split rows');
+        await PageObjects.visEditor.selectAggregation('Terms');
+        await PageObjects.visEditor.selectField('extension.raw');
+        await PageObjects.visEditor.setSize(2);
+        await PageObjects.visEditor.clickGo();
 
-        await PageObjects.visualize.toggleOtherBucket();
-        await PageObjects.visualize.toggleMissingBucket();
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.toggleOtherBucket();
+        await PageObjects.visEditor.toggleMissingBucket();
+        await PageObjects.visEditor.clickGo();
       });
 
       it('should show correct data', async () => {
-        const data = await PageObjects.visualize.getTableVisContent();
+        const data = await PageObjects.visChart.getTableVisContent();
         expect(data).to.be.eql([
-          [ 'jpg', '9,109' ],
-          [ 'css', '2,159' ],
-          [ 'Other', '2,736' ]
+          ['jpg', '9,109'],
+          ['css', '2,159'],
+          ['Other', '2,736'],
         ]);
       });
 
       it('should apply correct filter', async () => {
-        await PageObjects.visualize.filterOnTableCell(1, 3);
-        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-        const data = await PageObjects.visualize.getTableVisContent();
+        await PageObjects.visChart.filterOnTableCell(1, 3);
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        const data = await PageObjects.visChart.getTableVisContent();
         expect(data).to.be.eql([
-          [ 'png', '1,373' ],
-          [ 'gif', '918' ],
-          [ 'Other', '445' ]
+          ['png', '1,373'],
+          ['gif', '918'],
+          ['Other', '445'],
         ]);
       });
     });
 
     describe('metricsOnAllLevels', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.clickBucket('Split Rows');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('extension.raw');
-        await PageObjects.visualize.setSize(2);
-        await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Rows');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('geo.dest');
-        await PageObjects.visualize.toggleOpenEditor(3, 'false');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.visEditor.clickBucket('Split rows');
+        await PageObjects.visEditor.selectAggregation('Terms');
+        await PageObjects.visEditor.selectField('extension.raw');
+        await PageObjects.visEditor.setSize(2);
+        await PageObjects.visEditor.toggleOpenEditor(2, 'false');
+        await PageObjects.visEditor.clickBucket('Split rows');
+        await PageObjects.visEditor.selectAggregation('Terms');
+        await PageObjects.visEditor.selectField('geo.dest');
+        await PageObjects.visEditor.toggleOpenEditor(3, 'false');
+        await PageObjects.visEditor.clickGo();
       });
 
       it('should show correct data without showMetricsAtAllLevels', async () => {
-        const data = await PageObjects.visualize.getTableVisContent();
+        const data = await PageObjects.visChart.getTableVisContent();
         expect(data).to.be.eql([
-          [ 'jpg', 'CN', '1,718' ],
-          [ 'jpg', 'IN', '1,511' ],
-          [ 'jpg', 'US', '770' ],
-          [ 'jpg', 'ID', '314' ],
-          [ 'jpg', 'PK', '244' ],
-          [ 'css', 'CN', '422' ],
-          [ 'css', 'IN', '346' ],
-          [ 'css', 'US', '189' ],
-          [ 'css', 'ID', '68' ],
-          [ 'css', 'BR', '58' ],
+          ['jpg', 'CN', '1,718'],
+          ['jpg', 'IN', '1,511'],
+          ['jpg', 'US', '770'],
+          ['jpg', 'ID', '314'],
+          ['jpg', 'PK', '244'],
+          ['css', 'CN', '422'],
+          ['css', 'IN', '346'],
+          ['css', 'US', '189'],
+          ['css', 'ID', '68'],
+          ['css', 'BR', '58'],
         ]);
       });
 
       it('should show correct data without showMetricsAtAllLevels even if showPartialRows is selected', async () => {
-        await PageObjects.visualize.clickOptionsTab();
-        await PageObjects.visualize.checkCheckbox('showPartialRows');
-        await PageObjects.visualize.clickGo();
-        const data = await PageObjects.visualize.getTableVisContent();
+        await PageObjects.visEditor.clickOptionsTab();
+        await testSubjects.setCheckbox('showPartialRows', 'check');
+        await PageObjects.visEditor.clickGo();
+        const data = await PageObjects.visChart.getTableVisContent();
         expect(data).to.be.eql([
-          [ 'jpg', 'CN', '1,718' ],
-          [ 'jpg', 'IN', '1,511' ],
-          [ 'jpg', 'US', '770' ],
-          [ 'jpg', 'ID', '314' ],
-          [ 'jpg', 'PK', '244' ],
-          [ 'css', 'CN', '422' ],
-          [ 'css', 'IN', '346' ],
-          [ 'css', 'US', '189' ],
-          [ 'css', 'ID', '68' ],
-          [ 'css', 'BR', '58' ],
+          ['jpg', 'CN', '1,718'],
+          ['jpg', 'IN', '1,511'],
+          ['jpg', 'US', '770'],
+          ['jpg', 'ID', '314'],
+          ['jpg', 'PK', '244'],
+          ['css', 'CN', '422'],
+          ['css', 'IN', '346'],
+          ['css', 'US', '189'],
+          ['css', 'ID', '68'],
+          ['css', 'BR', '58'],
         ]);
       });
 
       it('should show metrics on each level', async () => {
-        await PageObjects.visualize.clickOptionsTab();
-        await PageObjects.visualize.checkCheckbox('showMetricsAtAllLevels');
-        await PageObjects.visualize.clickGo();
-        const data = await PageObjects.visualize.getTableVisContent();
+        await PageObjects.visEditor.clickOptionsTab();
+        await testSubjects.setCheckbox('showMetricsAtAllLevels', 'check');
+        await PageObjects.visEditor.clickGo();
+        const data = await PageObjects.visChart.getTableVisContent();
         expect(data).to.be.eql([
-          [ 'jpg', '9,109', 'CN', '1,718' ],
-          [ 'jpg', '9,109', 'IN', '1,511' ],
-          [ 'jpg', '9,109', 'US', '770' ],
-          [ 'jpg', '9,109', 'ID', '314' ],
-          [ 'jpg', '9,109', 'PK', '244' ],
-          [ 'css', '2,159', 'CN', '422' ],
-          [ 'css', '2,159', 'IN', '346' ],
-          [ 'css', '2,159', 'US', '189' ],
-          [ 'css', '2,159', 'ID', '68' ],
-          [ 'css', '2,159', 'BR', '58' ],
+          ['jpg', '9,109', 'CN', '1,718'],
+          ['jpg', '9,109', 'IN', '1,511'],
+          ['jpg', '9,109', 'US', '770'],
+          ['jpg', '9,109', 'ID', '314'],
+          ['jpg', '9,109', 'PK', '244'],
+          ['css', '2,159', 'CN', '422'],
+          ['css', '2,159', 'IN', '346'],
+          ['css', '2,159', 'US', '189'],
+          ['css', '2,159', 'ID', '68'],
+          ['css', '2,159', 'BR', '58'],
         ]);
       });
 
       it('should show metrics other than count on each level', async () => {
-        await PageObjects.visualize.clickData();
-        await PageObjects.visualize.clickAddMetric();
-        await PageObjects.visualize.clickBucket('Metric', 'metric');
-        await PageObjects.visualize.selectAggregation('Average', 'metrics');
-        await PageObjects.visualize.selectField('bytes', 'metrics');
-        await PageObjects.visualize.clickGo();
-        const data = await PageObjects.visualize.getTableVisContent();
+        await PageObjects.visEditor.clickDataTab();
+        await PageObjects.visEditor.clickBucket('Metric', 'metrics');
+        await PageObjects.visEditor.selectAggregation('Average', 'metrics');
+        await PageObjects.visEditor.selectField('bytes', 'metrics');
+        await PageObjects.visEditor.clickGo();
+        const data = await PageObjects.visChart.getTableVisContent();
         expect(data).to.be.eql([
-          [ 'jpg', '9,109', '5.469KB', 'CN', '1,718', '5.477KB' ],
-          [ 'jpg', '9,109', '5.469KB', 'IN', '1,511', '5.456KB' ],
-          [ 'jpg', '9,109', '5.469KB', 'US', '770', '5.371KB' ],
-          [ 'jpg', '9,109', '5.469KB', 'ID', '314', '5.424KB' ],
-          [ 'jpg', '9,109', '5.469KB', 'PK', '244', '5.41KB' ],
-          [ 'css', '2,159', '5.566KB', 'CN', '422', '5.712KB' ],
-          [ 'css', '2,159', '5.566KB', 'IN', '346', '5.754KB' ],
-          [ 'css', '2,159', '5.566KB', 'US', '189', '5.333KB' ],
-          [ 'css', '2,159', '5.566KB', 'ID', '68', '4.82KB' ],
-          [ 'css', '2,159', '5.566KB', 'BR', '58', '5.915KB' ],
+          ['jpg', '9,109', '5.469KB', 'CN', '1,718', '5.477KB'],
+          ['jpg', '9,109', '5.469KB', 'IN', '1,511', '5.456KB'],
+          ['jpg', '9,109', '5.469KB', 'US', '770', '5.371KB'],
+          ['jpg', '9,109', '5.469KB', 'ID', '314', '5.424KB'],
+          ['jpg', '9,109', '5.469KB', 'PK', '244', '5.41KB'],
+          ['css', '2,159', '5.566KB', 'CN', '422', '5.712KB'],
+          ['css', '2,159', '5.566KB', 'IN', '346', '5.754KB'],
+          ['css', '2,159', '5.566KB', 'US', '189', '5.333KB'],
+          ['css', '2,159', '5.566KB', 'ID', '68', '4.82KB'],
+          ['css', '2,159', '5.566KB', 'BR', '58', '5.915KB'],
         ]);
       });
-
     });
 
     describe('split tables', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualize.clickBucket('Split Table');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('extension.raw');
-        await PageObjects.visualize.setSize(2);
-        await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Rows');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('geo.dest');
-        await PageObjects.visualize.setSize(3, 3);
-        await PageObjects.visualize.toggleOpenEditor(3, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Rows');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('geo.src');
-        await PageObjects.visualize.setSize(3, 4);
-        await PageObjects.visualize.toggleOpenEditor(4, 'false');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.visEditor.clickBucket('Split table');
+        await PageObjects.visEditor.selectAggregation('Terms');
+        await PageObjects.visEditor.selectField('extension.raw');
+        await PageObjects.visEditor.setSize(2);
+        await PageObjects.visEditor.toggleOpenEditor(2, 'false');
+        await PageObjects.visEditor.clickBucket('Split rows');
+        await PageObjects.visEditor.selectAggregation('Terms');
+        await PageObjects.visEditor.selectField('geo.dest');
+        await PageObjects.visEditor.setSize(3, 3);
+        await PageObjects.visEditor.toggleOpenEditor(3, 'false');
+        await PageObjects.visEditor.clickBucket('Split rows');
+        await PageObjects.visEditor.selectAggregation('Terms');
+        await PageObjects.visEditor.selectField('geo.src');
+        await PageObjects.visEditor.setSize(3, 4);
+        await PageObjects.visEditor.toggleOpenEditor(4, 'false');
+        await PageObjects.visEditor.clickGo();
       });
 
       it('should have a splitted table', async () => {
-        const data = await PageObjects.visualize.getTableVisContent();
+        const data = await PageObjects.visChart.getTableVisContent();
         expect(data).to.be.eql([
           [
-            [ 'CN', 'CN', '330' ],
-            [ 'CN', 'IN', '274' ],
-            [ 'CN', 'US', '140' ],
-            [ 'IN', 'CN', '286' ],
-            [ 'IN', 'IN', '281' ],
-            [ 'IN', 'US', '133' ],
-            [ 'US', 'CN', '135' ],
-            [ 'US', 'IN', '134' ],
-            [ 'US', 'US', '52' ],
+            ['CN', 'CN', '330'],
+            ['CN', 'IN', '274'],
+            ['CN', 'US', '140'],
+            ['IN', 'CN', '286'],
+            ['IN', 'IN', '281'],
+            ['IN', 'US', '133'],
+            ['US', 'CN', '135'],
+            ['US', 'IN', '134'],
+            ['US', 'US', '52'],
           ],
           [
-            [ 'CN', 'CN', '90' ],
-            [ 'CN', 'IN', '84' ],
-            [ 'CN', 'US', '27' ],
-            [ 'IN', 'CN', '69' ],
-            [ 'IN', 'IN', '58' ],
-            [ 'IN', 'US', '34' ],
-            [ 'US', 'IN', '36' ],
-            [ 'US', 'CN', '29' ],
-            [ 'US', 'US', '13' ],
-          ]
+            ['CN', 'CN', '90'],
+            ['CN', 'IN', '84'],
+            ['CN', 'US', '27'],
+            ['IN', 'CN', '69'],
+            ['IN', 'IN', '58'],
+            ['IN', 'US', '34'],
+            ['US', 'IN', '36'],
+            ['US', 'CN', '29'],
+            ['US', 'US', '13'],
+          ],
         ]);
       });
 
       it('should show metrics for split bucket when using showMetricsAtAllLevels', async () => {
-        await PageObjects.visualize.clickOptionsTab();
-        await PageObjects.visualize.checkCheckbox('showMetricsAtAllLevels');
-        await PageObjects.visualize.clickGo();
-        const data = await PageObjects.visualize.getTableVisContent();
+        await PageObjects.visEditor.clickOptionsTab();
+        await testSubjects.setCheckbox('showMetricsAtAllLevels', 'check');
+        await PageObjects.visEditor.clickGo();
+        const data = await PageObjects.visChart.getTableVisContent();
         expect(data).to.be.eql([
           [
-            [ 'CN', '1,718', 'CN', '330' ],
-            [ 'CN', '1,718', 'IN', '274' ],
-            [ 'CN', '1,718', 'US', '140' ],
-            [ 'IN', '1,511', 'CN', '286' ],
-            [ 'IN', '1,511', 'IN', '281' ],
-            [ 'IN', '1,511', 'US', '133' ],
-            [ 'US', '770', 'CN', '135' ],
-            [ 'US', '770', 'IN', '134' ],
-            [ 'US', '770', 'US', '52' ],
+            ['CN', '1,718', 'CN', '330'],
+            ['CN', '1,718', 'IN', '274'],
+            ['CN', '1,718', 'US', '140'],
+            ['IN', '1,511', 'CN', '286'],
+            ['IN', '1,511', 'IN', '281'],
+            ['IN', '1,511', 'US', '133'],
+            ['US', '770', 'CN', '135'],
+            ['US', '770', 'IN', '134'],
+            ['US', '770', 'US', '52'],
           ],
           [
-            [ 'CN', '422', 'CN', '90' ],
-            [ 'CN', '422', 'IN', '84' ],
-            [ 'CN', '422', 'US', '27' ],
-            [ 'IN', '346', 'CN', '69' ],
-            [ 'IN', '346', 'IN', '58' ],
-            [ 'IN', '346', 'US', '34' ],
-            [ 'US', '189', 'IN', '36' ],
-            [ 'US', '189', 'CN', '29' ],
-            [ 'US', '189', 'US', '13' ],
-          ]
+            ['CN', '422', 'CN', '90'],
+            ['CN', '422', 'IN', '84'],
+            ['CN', '422', 'US', '27'],
+            ['IN', '346', 'CN', '69'],
+            ['IN', '346', 'IN', '58'],
+            ['IN', '346', 'US', '34'],
+            ['US', '189', 'IN', '36'],
+            ['US', '189', 'CN', '29'],
+            ['US', '189', 'US', '13'],
+          ],
         ]);
       });
     });
-
   });
 }

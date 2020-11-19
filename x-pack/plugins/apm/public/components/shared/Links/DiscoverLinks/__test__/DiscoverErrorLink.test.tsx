@@ -5,9 +5,8 @@
  */
 
 import { shallow, ShallowWrapper } from 'enzyme';
-import 'jest-styled-components';
 import React from 'react';
-import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
+import { APMError } from '../../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 
 describe('DiscoverErrorLink without kuery', () => {
@@ -15,7 +14,7 @@ describe('DiscoverErrorLink without kuery', () => {
   beforeEach(() => {
     const error = {
       service: { name: 'myServiceName' },
-      error: { grouping_key: 'myGroupingKey' }
+      error: { grouping_key: 'myGroupingKey' },
     } as APMError;
 
     wrapper = shallow(<DiscoverErrorLink error={error} />);
@@ -38,7 +37,7 @@ describe('DiscoverErrorLink with kuery', () => {
   beforeEach(() => {
     const error = {
       service: { name: 'myServiceName' },
-      error: { grouping_key: 'myGroupingKey' }
+      error: { grouping_key: 'myGroupingKey' },
     } as APMError;
 
     const kuery = 'transaction.sampled: true';

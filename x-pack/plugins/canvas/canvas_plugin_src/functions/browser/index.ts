@@ -5,9 +5,9 @@
  */
 
 import { functions as commonFunctions } from '../common';
-import { browser } from './browser';
+import { functions as externalFunctions } from '../external';
 import { location } from './location';
 import { markdown } from './markdown';
 import { urlparam } from './urlparam';
 
-export const functions = [browser, location, markdown, urlparam, ...commonFunctions];
+export const functions = [location, markdown, urlparam, ...commonFunctions, ...externalFunctions];

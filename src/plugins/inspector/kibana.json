@@ -1,0 +1,8 @@
+{
+  "id": "inspector",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "extraPublicDirs": ["common", "common/adapters/request"],
+  "requiredBundles": ["kibanaReact"]
+}

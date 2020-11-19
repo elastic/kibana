@@ -5,34 +5,21 @@
  */
 
 import stringify from 'json-stable-stringify';
-import { isArray, isPlainObject } from 'lodash';
+import { LogEntriesItemField } from '../../../../common/http_api';
+import { JsonArray } from '../../../../common/typed_json';
 
-import { JsonObject } from '../../../../common/typed_json';
-import { InfraLogItemField } from '../../../graphql/types';
-
-const isJsonObject = (subject: any): subject is JsonObject => {
-  return isPlainObject(subject);
-};
-
-const serializeValue = (value: any): string => {
-  if (isArray(value) || isPlainObject(value)) {
-    return stringify(value);
-  }
-  return `${value}`;
-};
-
-export const convertDocumentSourceToLogItemFields = (
-  source: JsonObject,
-  path: string[] = [],
-  fields: InfraLogItemField[] = []
-): InfraLogItemField[] => {
-  return Object.keys(source).reduce((acc, key) => {
-    const value = source[key];
-    const nextPath = [...path, key];
-    if (isJsonObject(value)) {
-      return convertDocumentSourceToLogItemFields(value, nextPath, acc);
+const serializeValue = (value: JsonArray): string[] => {
+  return value.map((v) => {
+    if (typeof v === 'object' && v != null) {
+      return stringify(v);
+    } else {
+      return `${v}`;
     }
-    const field = { field: nextPath.join('.'), value: serializeValue(value) };
-    return [...acc, field];
-  }, fields);
+  });
+};
+
+export const convertESFieldsToLogItemFields = (fields: {
+  [field: string]: JsonArray;
+}): LogEntriesItemField[] => {
+  return Object.keys(fields).map((field) => ({ field, value: serializeValue(fields[field]) }));
 };

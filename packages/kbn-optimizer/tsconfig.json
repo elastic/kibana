@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-optimizer"
+  },
+  "include": [
+    "index.d.ts",
+    "src/**/*"
+  ]
+}

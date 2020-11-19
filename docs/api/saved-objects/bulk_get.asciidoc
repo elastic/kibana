@@ -1,50 +1,58 @@
 [[saved-objects-api-bulk-get]]
-=== Bulk Get Objects
+=== Bulk get objects API
+++++
+<titleabbrev>Bulk get objects</titleabbrev>
+++++
 
-experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
+experimental[] Retrieve multiple {kib} saved objects by ID.
 
-The bulk-get saved object API enables you to retrieve multiple Kibana saved
-objects by id.
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
+[[saved-objects-api-bulk-get-request]]
 ==== Request
 
-`POST /api/saved_objects/_bulk_get`
+`POST <kibana host>:<port>/api/saved_objects/_bulk_get`
 
+`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_bulk_get`
+
+[[saved-objects-api-bulk-get-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[saved-objects-api-bulk-get-request-body]]
 ==== Request Body
 
-The request body must be a JSON array containing objects, each of which
-contains the following properties:
+`type`::
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
 
-`type` (required)::
-  (string) Valid options, include: `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`
+`id`::
+  (Required, string) ID of the retrieved object. The ID includes the {kib} unique identifier or a custom identifier.
 
-`id` (required)::
-  (string) ID of object to retrieve
+`fields`::
+  (Optional, array) The fields to return in the `attributes` key of the object response.
 
-`fields` (optional)::
-  (array) The fields to return in the object's response
-
+[[saved-objects-api-bulk-get-response-body]]
 ==== Response body
 
-The response body will have a top level `saved_objects` property that contains
-an array of objects, which represent the response for each of the requested
-objects. The order of the objects in the response is identical to the order of
-the objects in the request.
+`saved_objects`::
+  (array) Top-level property containing objects that represent the response for each of the requested objects. The order of the objects in the response is identical to the order of the objects in the request.
 
-For any saved object that could not be found, an error object will exist in its
-place.
+Saved objects that are unable to persist are replaced with an error object.
 
-==== Examples
+[[saved-objects-api-bulk-get-body-codes]]
+==== Response code
 
-The following example attempts to retrieve an index pattern with id
-`my-pattern` and a dashboard with id `my-dashboard`, but only the index pattern
-exists.
+`200`::
+  Indicates a successful call.
 
-[source,js]
+[[saved-objects-api-bulk-get-body-example]]
+==== Example
+
+Retrieve an index pattern with the `my-pattern` ID, and a dashboard with the `my-dashboard` ID:
+
+[source,sh]
 --------------------------------------------------
-POST api/saved_objects/_bulk_get
+$ curl -X POST api/saved_objects/_bulk_get
 [
   {
     "type": "index-pattern",
@@ -52,16 +60,15 @@ POST api/saved_objects/_bulk_get
   },
   {
     "type": "dashboard",
-    "id": "my-dashboard"
+    "id": "be3733a0-9efe-11e7-acb3-3dab96693fab"
   }
 ]
 --------------------------------------------------
 // KIBANA
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "saved_objects": [
@@ -84,3 +91,5 @@ containing a JSON structure similar to the following example:
   ]
 }
 --------------------------------------------------
+
+Only the index pattern exists.

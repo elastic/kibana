@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { getElementStats } from '../../state/selectors/workpad';
 import { ElementConfig as Component } from './element_config';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   elementStats: getElementStats(state),
 });
 

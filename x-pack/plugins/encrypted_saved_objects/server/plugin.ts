@@ -4,91 +4,128 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import crypto from 'crypto';
-import { Legacy, Server } from 'kibana';
-import { SavedObjectsRepository } from 'src/legacy/server/saved_objects/service/lib';
-import {
-  BaseOptions,
-  SavedObject,
-  SavedObjectAttributes,
-} from 'src/legacy/server/saved_objects/service/saved_objects_client';
+import { first, map } from 'rxjs/operators';
+import nodeCrypto from '@elastic/node-crypto';
+import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
+import { TypeOf } from '@kbn/config-schema';
+import { SecurityPluginSetup } from '../../security/server';
+import { createConfig, ConfigSchema } from './config';
 import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
   EncryptionError,
-  EncryptedSavedObjectsAuditLogger,
-  EncryptedSavedObjectsClientWrapper,
-} from './lib';
+  EncryptionKeyRotationService,
+} from './crypto';
+import { EncryptedSavedObjectsAuditLogger } from './audit';
+import { setupSavedObjects, ClientInstanciator } from './saved_objects';
+import { getCreateMigration, CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
+import { defineRoutes } from './routes';
 
-export const PLUGIN_ID = 'encrypted_saved_objects';
-export const CONFIG_PREFIX = `xpack.${PLUGIN_ID}`;
-
-interface CoreSetup {
-  config: { encryptionKey?: string };
-  elasticsearch: Legacy.Plugins.elasticsearch.Plugin;
-  savedObjects: Legacy.SavedObjectsService;
+export interface PluginsSetup {
+  security?: SecurityPluginSetup;
 }
 
-interface PluginsSetup {
-  audit: unknown;
+export interface EncryptedSavedObjectsPluginSetup {
+  registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
+  usingEphemeralEncryptionKey: boolean;
+  createMigration: CreateEncryptedSavedObjectsMigrationFn;
 }
 
+export interface EncryptedSavedObjectsPluginStart {
+  isEncryptionError: (error: Error) => boolean;
+  getClient: ClientInstanciator;
+}
+
+/**
+ * Represents EncryptedSavedObjects Plugin instance that will be managed by the Kibana plugin system.
+ */
 export class Plugin {
-  constructor(private readonly log: Server.Logger) {}
+  private readonly logger: Logger;
+  private savedObjectsSetup!: ClientInstanciator;
 
-  public setup(core: CoreSetup, plugins: PluginsSetup) {
-    let encryptionKey = core.config.encryptionKey;
-    if (encryptionKey == null) {
-      this.log.warn(
-        `Generating a random key for ${CONFIG_PREFIX}.encryptionKey. To be able ` +
-          'to decrypt encrypted saved objects attributes after restart, please set ' +
-          `${CONFIG_PREFIX}.encryptionKey in kibana.yml`
-      );
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.logger = this.initializerContext.logger.get();
+  }
 
-      encryptionKey = crypto.randomBytes(16).toString('hex');
-    }
+  public async setup(
+    core: CoreSetup,
+    deps: PluginsSetup
+  ): Promise<EncryptedSavedObjectsPluginSetup> {
+    const config = await this.initializerContext.config
+      .create<TypeOf<typeof ConfigSchema>>()
+      .pipe(
+        map((rawConfig) => createConfig(rawConfig, this.initializerContext.logger.get('config')))
+      )
+      .pipe(first())
+      .toPromise();
+    const auditLogger = new EncryptedSavedObjectsAuditLogger(
+      deps.security?.audit.getLogger('encryptedSavedObjects')
+    );
+
+    const primaryCrypto = nodeCrypto({ encryptionKey: config.encryptionKey });
+    const decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
+      nodeCrypto({ encryptionKey: decryptionKey })
+    );
 
     const service = Object.freeze(
-      new EncryptedSavedObjectsService(
-        encryptionKey,
-        core.savedObjects.types,
-        this.log,
-        new EncryptedSavedObjectsAuditLogger(plugins.audit)
-      )
+      new EncryptedSavedObjectsService({
+        primaryCrypto,
+        decryptionOnlyCryptos,
+        logger: this.logger,
+        audit: auditLogger,
+      })
     );
 
-    // Register custom saved object client that will encrypt, decrypt and strip saved object
-    // attributes where appropriate for any saved object repository request. We choose max possible
-    // priority for this wrapper to allow all other wrappers to set proper `namespace` for the Saved
-    // Object (e.g. wrapper registered by the Spaces plugin) before we encrypt attributes since
-    // `namespace` is included into AAD.
-    core.savedObjects.addScopedSavedObjectsClientWrapperFactory(
-      Number.MAX_SAFE_INTEGER,
-      ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
-    );
+    this.savedObjectsSetup = setupSavedObjects({
+      service,
+      savedObjects: core.savedObjects,
+      security: deps.security,
+      getStartServices: core.getStartServices,
+    });
 
-    const internalRepository: SavedObjectsRepository = core.savedObjects.getSavedObjectsRepository(
-      core.elasticsearch.getCluster('admin').callWithInternalUser
-    );
+    defineRoutes({
+      router: core.http.createRouter(),
+      logger: this.initializerContext.logger.get('routes'),
+      encryptionKeyRotationService: Object.freeze(
+        new EncryptionKeyRotationService({
+          logger: this.logger.get('key-rotation-service'),
+          service,
+          getStartServices: core.getStartServices,
+          security: deps.security,
+        })
+      ),
+      config,
+    });
 
     return {
-      isEncryptionError: (error: Error) => error instanceof EncryptionError,
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
-      getDecryptedAsInternalUser: async <T extends SavedObjectAttributes = any>(
-        type: string,
-        id: string,
-        options?: BaseOptions
-      ): Promise<SavedObject<T>> => {
-        const savedObject = await internalRepository.get(type, id, options);
-        return {
-          ...savedObject,
-          attributes: await service.decryptAttributes(
-            { type, id, namespace: options && options.namespace },
-            savedObject.attributes
-          ),
-        };
-      },
+      usingEphemeralEncryptionKey: config.usingEphemeralEncryptionKey,
+      createMigration: getCreateMigration(
+        service,
+        (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
+          const serviceForMigration = new EncryptedSavedObjectsService({
+            primaryCrypto,
+            decryptionOnlyCryptos,
+            logger: this.logger,
+            audit: auditLogger,
+          });
+          serviceForMigration.registerType(typeRegistration);
+          return serviceForMigration;
+        }
+      ),
     };
+  }
+
+  public start() {
+    this.logger.debug('Starting plugin');
+    return {
+      isEncryptionError: (error: Error) => error instanceof EncryptionError,
+      getClient: (options = {}) => this.savedObjectsSetup(options),
+    };
+  }
+
+  public stop() {
+    this.logger.debug('Stopping plugin');
   }
 }

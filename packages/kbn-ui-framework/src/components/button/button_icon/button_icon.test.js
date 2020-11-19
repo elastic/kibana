@@ -18,31 +18,23 @@
  */
 
 import React from 'react';
-import {
-  render,
-} from 'enzyme';
+import { render } from 'enzyme';
 
-import {
-  ICON_TYPES,
-  KuiButtonIcon,
-} from './button_icon';
+import { ICON_TYPES, KuiButtonIcon } from './button_icon';
 
 describe('KuiButtonIcon', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
-      const $buttonIcon = render(
-        <KuiButtonIcon />
-      );
+      const $buttonIcon = render(<KuiButtonIcon />);
 
-      expect($buttonIcon)
-        .toMatchSnapshot();
+      expect($buttonIcon).toMatchSnapshot();
     });
   });
 
   describe('Props', () => {
     describe('type', () => {
-      ICON_TYPES.forEach(type => {
-        describe(type, () => {
+      ICON_TYPES.forEach((type) => {
+        describe(`${type}`, () => {
           test(`renders the ${type} class`, () => {
             const $buttonIcon = render(<KuiButtonIcon type={type} />);
             expect($buttonIcon).toMatchSnapshot();
@@ -53,12 +45,9 @@ describe('KuiButtonIcon', () => {
 
     describe('className', () => {
       test('renders the classes', () => {
-        const $buttonIcon = render(
-          <KuiButtonIcon className="testClass1 testClass2" />
-        );
+        const $buttonIcon = render(<KuiButtonIcon className="testClass1 testClass2" />);
 
-        expect($buttonIcon)
-          .toMatchSnapshot();
+        expect($buttonIcon).toMatchSnapshot();
       });
     });
   });

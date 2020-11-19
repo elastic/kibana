@@ -8,21 +8,18 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { InfraLink } from './InfraLink';
-import chrome from 'ui/chrome';
-
-jest
-  .spyOn(chrome, 'addBasePath')
-  .mockImplementation(path => `/basepath${path}`);
 
 test('InfraLink produces the correct URL', async () => {
   const href = await getRenderedHref(
-    () => <InfraLink path="/some/path" query={{ time: 1554687198 }} />,
+    () => (
+      <InfraLink app="metrics" path="/some/path" query={{ time: 1554687198 }} />
+    ),
     {
-      search: '?rangeFrom=now-5h&rangeTo=now-2h'
+      search: '?rangeFrom=now-5h&rangeTo=now-2h',
     } as Location
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"/basepath/app/infra#/some/path?time=1554687198"`
+    `"/basepath/app/metrics/some/path?time=1554687198"`
   );
 });

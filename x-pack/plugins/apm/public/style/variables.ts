@@ -16,7 +16,7 @@ export const units = {
   plus: unit * 1.5,
   double: unit * 2,
   triple: unit * 3,
-  quadruple: unit * 4
+  quadruple: unit * 4,
 };
 
 export function px(value: number): string {
@@ -28,12 +28,11 @@ export function pct(value: number): string {
 }
 
 // Styling
-export const borderRadius = '5px';
+export const borderRadius = '4px';
 
 // Fonts
-export const fontFamily = '"Open Sans", Helvetica, Arial, sans-serif';
 export const fontFamilyCode =
-  '"SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace';
+  '"Roboto Mono", Consolas, Menlo, Courier, monospace';
 
 // Font sizes
 export const fontSize = '14px';
@@ -43,7 +42,7 @@ export const fontSizes = {
   small: '12px',
   large: '16px',
   xlarge: '20px',
-  xxlarge: '30px'
+  xxlarge: '30px',
 };
 
 export function truncate(width: string) {
@@ -54,6 +53,3 @@ export function truncate(width: string) {
       text-overflow: ellipsis;
     `;
 }
-
-// height of specific elements
-export const topNavHeight = '29px';

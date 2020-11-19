@@ -4,20 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from 'plugins/interpreter/interpreter';
 import { createAction } from 'redux-actions';
-import { createThunk } from 'redux-thunks';
-import { set, del } from 'object-path-immutable';
+import immutable from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
-import { getPages, getNodeById, getNodes, getSelectedPageIndex } from '../selectors/workpad';
+import { createThunk } from '../../lib/create_thunk';
+import {
+  getPages,
+  getWorkpadVariablesAsObject,
+  getNodeById,
+  getNodes,
+  getSelectedPageIndex,
+} from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
-import { notify } from '../../lib/notify';
-import { runInterpreter } from '../../lib/run_interpreter';
+import { ErrorStrings } from '../../../i18n';
+import { runInterpreter, interpretAst } from '../../lib/run_interpreter';
 import { subMultitree } from '../../lib/aeroelastic/functional';
+import { services } from '../../services';
 import { selectToplevelNodes } from './transient';
 import * as args from './resolved_args';
+
+const { actionsElements: strings } = ErrorStrings;
+
+const { set, del } = immutable;
 
 export function getSiblingContext(state, elementId, checkIndex) {
   const prevContextPath = [elementId, 'expressionContext', checkIndex];
@@ -51,7 +61,7 @@ function getBareElement(el, includeId = false) {
 
 export const elementLayer = createAction('elementLayer');
 
-export const setMultiplePositions = createAction('setMultiplePosition', repositionedElements => ({
+export const setMultiplePositions = createAction('setMultiplePosition', (repositionedElements) => ({
   repositionedElements,
 }));
 
@@ -61,11 +71,11 @@ export const flushContextAfterIndex = createAction('flushContextAfterIndex');
 export const fetchContext = createThunk(
   'fetchContext',
   ({ dispatch, getState }, index, element, fullRefresh = false) => {
-    const chain = get(element, ['ast', 'chain']);
+    const chain = get(element, 'ast.chain');
     const invalidIndex = chain ? index >= chain.length : true;
 
     if (!element || !chain || invalidIndex) {
-      throw new Error(`Invalid argument index: ${index}`);
+      throw new Error(strings.getInvalidArgIndexErrorMessage(index));
     }
 
     // cache context as the previous index
@@ -92,14 +102,16 @@ export const fetchContext = createThunk(
       return i < index;
     });
 
+    const variables = getWorkpadVariablesAsObject(getState());
+
     // get context data from a partial AST
     return interpretAst(
       {
         ...element.ast,
         chain: astChain,
       },
-      prevContextValue
-    ).then(value => {
+      variables
+    ).then((value) => {
       dispatch(
         args.setValue({
           path: contextPath,
@@ -110,27 +122,28 @@ export const fetchContext = createThunk(
   }
 );
 
-const fetchRenderableWithContextFn = ({ dispatch }, element, ast, context) => {
+const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, context) => {
   const argumentPath = [element.id, 'expressionRenderable'];
-
   dispatch(
     args.setLoading({
       path: argumentPath,
     })
   );
 
-  const getAction = renderable =>
+  const getAction = (renderable) =>
     args.setValue({
       path: argumentPath,
       value: renderable,
     });
 
-  return runInterpreter(ast, context, { castToRender: true })
-    .then(renderable => {
+  const variables = getWorkpadVariablesAsObject(getState());
+
+  return runInterpreter(ast, context, variables, { castToRender: true })
+    .then((renderable) => {
       dispatch(getAction(renderable));
     })
-    .catch(err => {
-      notify.error(err);
+    .catch((err) => {
+      services.notify.getService().error(err);
       dispatch(getAction(err));
     });
 };
@@ -159,25 +172,27 @@ export const fetchAllRenderables = createThunk(
 
     function fetchElementsOnPages(pages) {
       const elements = [];
-      pages.forEach(page => {
-        page.elements.forEach(element => {
+      pages.forEach((page) => {
+        page.elements.forEach((element) => {
           elements.push(element);
         });
       });
 
-      const renderablePromises = elements.map(element => {
+      const renderablePromises = elements.map((element) => {
         const ast = element.ast || safeElementFromExpression(element.expression);
         const argumentPath = [element.id, 'expressionRenderable'];
 
-        return runInterpreter(ast, null, { castToRender: true })
-          .then(renderable => ({ path: argumentPath, value: renderable }))
-          .catch(err => {
-            notify.error(err);
+        const variables = getWorkpadVariablesAsObject(getState());
+
+        return runInterpreter(ast, null, variables, { castToRender: true })
+          .then((renderable) => ({ path: argumentPath, value: renderable }))
+          .catch((err) => {
+            services.notify.getService().error(err);
             return { path: argumentPath, value: err };
           });
       });
 
-      return Promise.all(renderablePromises).then(renderables => {
+      return Promise.all(renderablePromises).then((renderables) => {
         dispatch(args.setValues(renderables));
       });
     }
@@ -200,17 +215,17 @@ export const insertNodes = createThunk('insertNodes', ({ dispatch, type }, eleme
   const _insertNodes = createAction(type);
   const newElements = elements.map(cloneDeep);
   // move the root element so users can see that it was added
-  newElements.forEach(newElement => {
+  newElements.forEach((newElement) => {
     newElement.position.top = newElement.position.top + 10;
     newElement.position.left = newElement.position.left + 10;
   });
   dispatch(_insertNodes({ pageId, elements: newElements }));
 
   // refresh all elements just once per `insertNodes call` if there's a filter on any, otherwise just render the new element
-  if (elements.some(element => element.filter)) {
+  if (elements.some((element) => element.filter)) {
     dispatch(fetchAllRenderables());
   } else {
-    newElements.forEach(newElement => dispatch(fetchRenderable(newElement)));
+    newElements.forEach((newElement) => dispatch(fetchRenderable(newElement)));
   }
 });
 
@@ -221,12 +236,17 @@ export const removeElements = createThunk(
 
     // todo consider doing the group membership collation in aeroelastic, or the Redux reducer, when adding templates
     const allElements = getNodes(state, pageId);
-    const allRoots = rootElementIds.map(id => allElements.find(e => id === e.id)).filter(d => d);
-    const elementIds = subMultitree(e => e.id, e => e.position.parent, allElements, allRoots).map(
-      e => e.id
-    );
+    const allRoots = rootElementIds
+      .map((id) => allElements.find((e) => id === e.id))
+      .filter((d) => d);
+    const elementIds = subMultitree(
+      (e) => e.id,
+      (e) => e.position.parent,
+      allElements,
+      allRoots
+    ).map((e) => e.id);
 
-    const shouldRefresh = elementIds.some(elementId => {
+    const shouldRefresh = elementIds.some((elementId) => {
       const element = getNodeById(state, elementId, pageId);
       const filterIsApplied = element.filter && element.filter.length > 0;
       return filterIsApplied;
@@ -246,9 +266,9 @@ export const removeElements = createThunk(
 
 export const setFilter = createThunk(
   'setFilter',
-  ({ dispatch }, filter, elementId, pageId, doRender = true) => {
+  ({ dispatch }, filter, elementId, doRender = true) => {
     const _setFilter = createAction('setFilter');
-    dispatch(_setFilter({ filter, elementId, pageId }));
+    dispatch(_setFilter({ filter, elementId }));
 
     if (doRender === true) {
       dispatch(fetchAllRenderables());
@@ -269,11 +289,12 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
   // TODO: find a way to extract a list of filter renderers from the functions registry
   if (
     updatedElement.filter &&
-    !['dropdownControl', 'timefilterControl', 'exactly'].some(filter =>
+    !['dropdownControl', 'timefilterControl', 'exactly'].some((filter) =>
       updatedElement.expression.includes(filter)
     )
   ) {
-    dispatch(setFilter('', elementId, pageId, doRender));
+    const filter = '';
+    dispatch(setFilter(filter, elementId, pageId, doRender));
     // setFilter will trigger a re-render so we can skip the fetch here
   } else if (doRender === true) {
     dispatch(fetchRenderable(updatedElement));
@@ -285,7 +306,7 @@ const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRend
     const expression = toExpression(ast);
     dispatch(setExpression(expression, element.id, pageId, doRender));
   } catch (err) {
-    notify.error(err);
+    services.notify.getService().error(err);
 
     // TODO: remove this, may have been added just to cause a re-render, but why?
     dispatch(setExpression(element.expression, element.id, pageId, doRender));
@@ -300,7 +321,7 @@ export const setAstAtIndex = createThunk(
     // invalidate cached context for elements after this index
     dispatch(flushContextAfterIndex({ elementId: element.id, index }));
 
-    const newElement = set(element, ['ast', 'chain', index], ast);
+    const newElement = set(element, `ast.chain.${index}`, ast);
     const newAst = get(newElement, 'ast');
 
     // fetch renderable using existing context, if available (value is null if not cached)
@@ -339,9 +360,9 @@ export const setAstAtIndex = createThunk(
 // the entire argument from be set to the passed value
 export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch }, args) => {
   const { index, argName, value, valueIndex, element, pageId } = args;
-  const selector = ['ast', 'chain', index, 'arguments', argName];
+  let selector = `ast.chain.${index}.arguments.${argName}`;
   if (valueIndex != null) {
-    selector.push(valueIndex);
+    selector += '.' + valueIndex;
   }
 
   const newElement = set(element, selector, value);
@@ -379,9 +400,9 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
   const newElement =
     argIndex != null && curVal.length > 1
       ? // if more than one val, remove the specified val
-        del(element, ['ast', 'chain', index, 'arguments', argName, argIndex])
+        del(element, `ast.chain.${index}.arguments.${argName}.${argIndex}`)
       : // otherwise, remove the entire key
-        del(element, ['ast', 'chain', index, 'arguments', argName]);
+        del(element, `ast.chain.${index}.arguments.${argName}`);
 
   dispatch(setAstAtIndex(index, get(newElement, ['ast', 'chain', index]), element, pageId));
 });

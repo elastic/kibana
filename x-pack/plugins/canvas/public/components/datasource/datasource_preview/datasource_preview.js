@@ -15,36 +15,50 @@ import {
   EuiPanel,
   EuiText,
   EuiEmptyPrompt,
+  EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Datatable } from '../../datatable';
 import { Error } from '../../error';
+import { ComponentStrings } from '../../../../i18n';
+
+const { DatasourceDatasourcePreview: strings } = ComponentStrings;
+const { DatasourceDatasourceComponent: datasourceStrings } = ComponentStrings;
 
 export const DatasourcePreview = ({ done, datatable }) => (
   <EuiOverlayMask>
     <EuiModal onClose={done} maxWidth="1000px" className="canvasModal--fixedSize">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Datasource Preview</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{strings.getModalTitle()}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody className="canvasDatasourcePreview">
-        <EuiText size="s" color="subdued">
+        <EuiText size="s">
           <p>
-            Click <strong>Save</strong> in the sidebar to use this data.
+            <FormattedMessage
+              id="xpack.canvas.datasourceDatasourcePreview.modalDescription"
+              defaultMessage="The following data will be available to the selected element upon clicking {saveLabel} in the sidebar."
+              values={{
+                saveLabel: <strong>{datasourceStrings.getSaveButtonLabel()}</strong>,
+              }}
+            />
           </p>
         </EuiText>
+        <EuiSpacer />
         {datatable.type === 'error' ? (
           <Error payload={datatable} />
         ) : (
-          <EuiPanel className="canvasDatasourcePreview__panel">
+          <EuiPanel className="canvasDatasourcePreview__panel" paddingSize="none">
             {datatable.rows.length > 0 ? (
               <Datatable datatable={datatable} showHeader paginate />
             ) : (
               <EuiEmptyPrompt
-                title={<h2>No documents found</h2>}
+                title={<h2>{strings.getEmptyTitle()}</h2>}
                 titleSize="s"
                 body={
                   <p>
-                    We couldn't find any documents matching your search criteria.
-                    <br /> Check your datasource settings and try again.
+                    {strings.getEmptyFirstLineDescription()}
+                    <br />
+                    {strings.getEmptySecondLineDescription()}
                   </p>
                 }
               />

@@ -8,25 +8,19 @@ import expect from '@kbn/expect';
 import { parse } from 'url';
 
 export default function canvasSmokeTest({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
+  const esArchiver = getService('esArchiver');
 
-  describe('smoke test', async () => {
-    const workpadListSelector = 'canvasWorkpadLoaderTable canvasWorkpadLoaderWorkpad';
+  describe('smoke test', function () {
+    this.tags('includeFirefox');
+    const workpadListSelector = 'canvasWorkpadLoaderTable > canvasWorkpadLoaderWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
-      // init data
-      await Promise.all([
-        esArchiver.loadIfNeeded('logstash_functional'),
-        esArchiver.load('canvas/default'),
-      ]);
-
-      // load canvas
-      // see also navigateToUrl(app, hash)
+      await esArchiver.load('canvas/default');
       await PageObjects.common.navigateToApp('canvas');
     });
 
@@ -48,7 +42,10 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       // check that workpad loaded in url
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(parse(url).hash).to.equal(`#/workpad/${testWorkpadId}/page/1`);
+
+        // remove all the search params, just compare the route
+        const hashRoute = parse(url).hash.split('?')[0];
+        expect(hashRoute).to.equal(`#/workpad/${testWorkpadId}/page/1`);
       });
     });
 
@@ -56,7 +53,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       await retry.try(async () => {
         // check for elements on the page
         const elements = await testSubjects.findAll(
-          'canvasWorkpadPage canvasWorkpadPageElementContent'
+          'canvasWorkpadPage > canvasWorkpadPageElementContent'
         );
         expect(elements).to.have.length(4);
 

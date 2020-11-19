@@ -43,7 +43,13 @@ export function startRepl(kbnServer) {
     replServer.context.repl = {
       printDepth: PRINT_DEPTH,
       print(obj, depth = null) {
-        console.log(promisePrint(obj, () => replServer.displayPrompt(), () => depth));
+        console.log(
+          promisePrint(
+            obj,
+            () => replServer.displayPrompt(),
+            () => depth
+          )
+        );
         return '';
       },
     };

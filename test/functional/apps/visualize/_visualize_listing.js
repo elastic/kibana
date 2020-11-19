@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+export default function ({ getService, getPageObjects }) {
+  const PageObjects = getPageObjects(['visualize', 'visEditor']);
+  const listingTable = getService('listingTable');
 
-export default function ({ getPageObjects }) {
-  const PageObjects = getPageObjects(['visualize', 'header', 'common']);
-
-  describe('visualize listing page', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/40912
+  describe.skip('visualize listing page', function describeIndexTests() {
     const vizName = 'Visualize Listing Test';
 
-    describe('create and delete', async function () {
-
+    describe('create and delete', function () {
       before(async function () {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.deleteAllVisualizations();
@@ -35,10 +34,8 @@ export default function ({ getPageObjects }) {
       it('create new viz', async function () {
         // type markdown is used for simplicity
         await PageObjects.visualize.createSimpleMarkdownViz(vizName);
-
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        const visCount = await PageObjects.visualize.getCountOfItemsInListingTable();
-        expect(visCount).to.equal(1);
+        await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('delete all viz', async function () {
@@ -46,13 +43,10 @@ export default function ({ getPageObjects }) {
         await PageObjects.visualize.createSimpleMarkdownViz(vizName + '2');
         await PageObjects.visualize.gotoVisualizationLandingPage();
 
-        let visCount = await PageObjects.visualize.getCountOfItemsInListingTable();
-        expect(visCount).to.equal(3);
+        await listingTable.expectItemsCount('visualize', 3);
 
         await PageObjects.visualize.deleteAllVisualizations();
-        visCount = await PageObjects.visualize.getCountOfItemsInListingTable();
-        expect(visCount).to.equal(0);
-
+        await listingTable.expectItemsCount('visualize', 0);
       });
     });
 
@@ -62,48 +56,41 @@ export default function ({ getPageObjects }) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickMarkdownWidget();
-        await PageObjects.visualize.setMarkdownTxt('HELLO');
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.setMarkdownTxt('HELLO');
+        await PageObjects.visEditor.clickGo();
         await PageObjects.visualize.saveVisualization('Hello World');
         await PageObjects.visualize.gotoVisualizationLandingPage();
       });
 
       it('matches on the first word', async function () {
-        await PageObjects.visualize.searchForItemWithName('Hello');
-        const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
-        expect(itemCount).to.equal(1);
+        await listingTable.searchForItemWithName('Hello');
+        await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('matches the second word', async function () {
-        await PageObjects.visualize.searchForItemWithName('World');
-        const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
-        expect(itemCount).to.equal(1);
+        await listingTable.searchForItemWithName('World');
+        await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('matches the second word prefix', async function () {
-        await PageObjects.visualize.searchForItemWithName('Wor');
-        const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
-        expect(itemCount).to.equal(1);
+        await listingTable.searchForItemWithName('Wor');
+        await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('does not match mid word', async function () {
-        await PageObjects.visualize.searchForItemWithName('orld');
-        const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
-        expect(itemCount).to.equal(0);
+        await listingTable.searchForItemWithName('orld');
+        await listingTable.expectItemsCount('visualize', 0);
       });
 
       it('is case insensitive', async function () {
-        await PageObjects.visualize.searchForItemWithName('hello world');
-        const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
-        expect(itemCount).to.equal(1);
+        await listingTable.searchForItemWithName('hello world');
+        await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('is using AND operator', async function () {
-        await PageObjects.visualize.searchForItemWithName('hello banana');
-        const itemCount = await PageObjects.visualize.getCountOfItemsInListingTable();
-        expect(itemCount).to.equal(0);
+        await listingTable.searchForItemWithName('hello banana');
+        await listingTable.expectItemsCount('visualize', 0);
       });
     });
-
   });
 }

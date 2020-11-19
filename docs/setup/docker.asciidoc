@@ -1,22 +1,26 @@
 [[docker]]
-== Running Kibana on Docker
+=== Install {kib} with Docker
+++++
+<titleabbrev>Install with Docker </titleabbrev>
+++++
+
 Docker images for Kibana are available from the Elastic Docker registry. The
 base image is https://hub.docker.com/_/centos/[centos:7].
 
 A list of all published Docker images and tags is available at
 https://www.docker.elastic.co[www.docker.elastic.co]. The source code is in
-https://github.com/elastic/kibana-docker/tree/{branch}[GitHub].
+https://github.com/elastic/dockerfiles/tree/{branch}/kibana[GitHub].
 
-These images are free to use under the Elastic license. They contain open source 
-and free commercial features and access to paid commercial features.  
-{xpack-ref}/license-management.html[Start a 30-day trial] to try out all of the 
-paid commercial features. See the 
-https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+These images are free to use under the Elastic license. They contain open source
+and free commercial features and access to paid commercial features.
+<<managing-licenses,Start a 30-day trial>> to try out all of the
+paid commercial features. See the
+https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
 
 [float]
 [[pull-image]]
-=== Pulling the image
+=== Pull the image
 
 Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
 against the Elastic Docker registry.
@@ -35,12 +39,12 @@ ifeval::["{release-state}"!="unreleased"]
 docker pull {docker-repo}:{version}
 --------------------------------------------
 
-Alternatively, you can download other Docker images that contain only features 
-available under the Apache 2.0 license. To download the images, go to 
+Alternatively, you can download other Docker images that contain only features
+available under the Apache 2.0 license. To download the images, go to
 https://www.docker.elastic.co[www.docker.elastic.co].
 
 [float]
-=== Running Kibana on Docker for development
+=== Run Kibana on Docker for development
 Kibana can be quickly started and connected to a local Elasticsearch container for development
 or testing use with the following command:
 --------------------------------------------
@@ -50,7 +54,7 @@ endif::[]
 
 [float]
 [[configuring-kibana-docker]]
-=== Configuring Kibana on Docker
+=== Configure Kibana on Docker
 
 The Docker images provide several methods for configuring Kibana. The
 conventional approach is to provide a `kibana.yml` file as described in
@@ -78,14 +82,16 @@ services:
 [[environment-variable-config]]
 ==== Environment variable configuration
 
-Under Docker, Kibana can be configured via environment variables. When
+Under Docker, {kib} can be configured via environment variables. When
 the container starts, a helper process checks the environment for variables that
 can be mapped to Kibana command-line arguments.
 
 For compatibility with container orchestration systems, these
 environment variables are written in all capitals, with underscores as
 word separators. The helper translates these names to valid
-Kibana setting names.
+{kib} setting names.
+
+WARNING: All information that you include in environment variables is visible through the `ps` command, including sensitive information.
 
 Some example translations are shown here:
 
@@ -93,10 +99,10 @@ Some example translations are shown here:
 [horizontal]
 **Environment Variable**:: **Kibana Setting**
 `SERVER_NAME`:: `server.name`
-`KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
-`XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
+`SERVER_BASEPATH`:: `server.basePath`
+`MONITORING_ENABLED`:: `monitoring.enabled`
 
-In general, any setting listed in <<settings>> can be 
+In general, any setting listed in <<settings>> can be
 configured with this technique.
 
 These variables can be set with +docker-compose+ like this:
@@ -125,9 +131,9 @@ images:
 `server.name`:: `kibana`
 `server.host`:: `"0"`
 `elasticsearch.hosts`:: `http://elasticsearch:9200`
-`xpack.monitoring.ui.container.elasticsearch.enabled`:: `true`
+`monitoring.ui.container.elasticsearch.enabled`:: `true`
 
-NOTE: The setting `xpack.monitoring.ui.container.elasticsearch.enabled` is not
+NOTE: The setting `monitoring.ui.container.elasticsearch.enabled` is not
 defined in the `-oss` image.
 
 These settings are defined in the default `kibana.yml`. They can be overridden
@@ -135,5 +141,5 @@ with a <<bind-mount-config,custom `kibana.yml`>> or via
 <<environment-variable-config,environment variables>>.
 
 IMPORTANT: If replacing `kibana.yml` with a custom version, be sure to copy the
-above defaults to the custom file if you want to retain them. If not, they will
+defaults to the custom file if you want to retain them. If not, they will
 be "masked" by the new file.

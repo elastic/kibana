@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import Suggestions from './Suggestions';
 import ClickOutside from './ClickOutside';
 import { EuiFieldSearch, EuiProgress } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -18,7 +17,7 @@ const KEY_CODES = {
   DOWN: 40,
   ENTER: 13,
   ESC: 27,
-  TAB: 9
+  TAB: 9,
 };
 
 export class Typeahead extends Component {
@@ -26,20 +25,22 @@ export class Typeahead extends Component {
     isSuggestionsVisible: false,
     index: null,
     value: '',
-    inputIsPristine: true
+    initialValue: '',
   };
 
   static getDerivedStateFromProps(props, state) {
-    if (state.inputIsPristine && props.initialValue) {
+    const initialValue = props.initialValue ? props.initialValue : '';
+    if (initialValue !== state.initialValue) {
       return {
-        value: props.initialValue
+        value: initialValue,
+        initialValue,
       };
     }
 
     return null;
   }
 
-  incrementIndex = currentIndex => {
+  incrementIndex = (currentIndex) => {
     let nextIndex = currentIndex + 1;
     if (currentIndex === null || nextIndex >= this.props.suggestions.length) {
       nextIndex = 0;
@@ -47,7 +48,7 @@ export class Typeahead extends Component {
     this.setState({ index: nextIndex });
   };
 
-  decrementIndex = currentIndex => {
+  decrementIndex = (currentIndex) => {
     let previousIndex = currentIndex - 1;
     if (previousIndex < 0) {
       previousIndex = null;
@@ -55,7 +56,7 @@ export class Typeahead extends Component {
     this.setState({ index: previousIndex });
   };
 
-  onKeyUp = event => {
+  onKeyUp = (event) => {
     const { selectionStart } = event.target;
     const { value } = this.state;
     switch (event.keyCode) {
@@ -70,7 +71,7 @@ export class Typeahead extends Component {
     }
   };
 
-  onKeyDown = event => {
+  onKeyDown = (event) => {
     const { isSuggestionsVisible, index, value } = this.state;
     switch (event.keyCode) {
       case KEY_CODES.DOWN:
@@ -106,7 +107,7 @@ export class Typeahead extends Component {
     }
   };
 
-  selectSuggestion = suggestion => {
+  selectSuggestion = (suggestion) => {
     const nextInputValue =
       this.state.value.substr(0, suggestion.start) +
       suggestion.text +
@@ -120,14 +121,13 @@ export class Typeahead extends Component {
     this.setState({ isSuggestionsVisible: false });
   };
 
-  onChangeInputValue = event => {
+  onChangeInputValue = (event) => {
     const { value, selectionStart } = event.target;
     const hasValue = Boolean(value.trim());
     this.setState({
       value,
-      inputIsPristine: false,
       isSuggestionsVisible: hasValue,
-      index: null
+      index: null,
     });
 
     if (!hasValue) {
@@ -136,17 +136,17 @@ export class Typeahead extends Component {
     this.props.onChange(value, selectionStart);
   };
 
-  onClickInput = event => {
+  onClickInput = (event) => {
     const { selectionStart } = event.target;
     this.props.onChange(this.state.value, selectionStart);
   };
 
-  onClickSuggestion = suggestion => {
+  onClickSuggestion = (suggestion) => {
     this.selectSuggestion(suggestion);
     this.inputRef.focus();
   };
 
-  onMouseEnterSuggestion = index => {
+  onMouseEnterSuggestion = (index) => {
     this.setState({ index });
   };
 
@@ -156,6 +156,8 @@ export class Typeahead extends Component {
   };
 
   render() {
+    const { placeholder } = this.props;
+
     return (
       <ClickOutside
         onClickOutside={this.onClickOutside}
@@ -165,20 +167,10 @@ export class Typeahead extends Component {
           <EuiFieldSearch
             fullWidth
             style={{
-              backgroundImage: 'none'
+              backgroundImage: 'none',
             }}
-            placeholder={i18n.translate(
-              'xpack.apm.kueryBar.searchPlaceholder',
-              {
-                defaultMessage:
-                  'Search transactions and errors… (E.g. {queryExample})',
-                values: {
-                  queryExample:
-                    'transaction.duration.us > 300000 AND http.response.status_code >= 400'
-                }
-              }
-            )}
-            inputRef={node => {
+            placeholder={placeholder}
+            inputRef={(node) => {
               if (node) {
                 this.inputRef = node;
               }
@@ -200,7 +192,7 @@ export class Typeahead extends Component {
               position="absolute"
               style={{
                 bottom: 0,
-                top: 'initial'
+                top: 'initial',
               }}
             />
           )}
@@ -224,11 +216,12 @@ Typeahead.propTypes = {
   disabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  suggestions: PropTypes.array.isRequired
+  suggestions: PropTypes.array.isRequired,
+  placeholder: PropTypes.string.isRequired,
 };
 
 Typeahead.defaultProps = {
   isLoading: false,
   disabled: false,
-  suggestions: []
+  suggestions: [],
 };

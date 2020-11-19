@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import { noop, times } from 'lodash';
 import { constants } from '../constants';
-import { ClientMock } from './fixtures/elasticsearch';
+import { ClientMock } from './fixtures/legacy_elasticsearch';
 import { JobMock } from './fixtures/job';
 import { WorkerMock } from './fixtures/worker';
 
@@ -40,7 +40,7 @@ describe('Esqueue class', function () {
 
   describe('Queue construction', function () {
     it('should ping the ES server', function () {
-      const pingSpy = sinon.spy(client, 'callWithInternalUser').withArgs('ping');
+      const pingSpy = sinon.spy(client, 'callAsInternalUser').withArgs('ping');
       new Esqueue('esqueue', { client });
       sinon.assert.calledOnce(pingSpy);
     });
@@ -82,8 +82,8 @@ describe('Esqueue class', function () {
     it('should pass queue index settings', function () {
       const indexSettings = {
         index: {
-          number_of_shards: 1
-        }
+          number_of_shards: 1,
+        },
       };
 
       queue = new Esqueue(indexName, { client, indexSettings });
@@ -94,8 +94,8 @@ describe('Esqueue class', function () {
     it('should pass headers from options', function () {
       const options = {
         headers: {
-          authorization: 'Basic cXdlcnR5'
-        }
+          authorization: 'Basic cXdlcnR5',
+        },
       };
       const job = queue.addJob(jobType, payload, options);
       expect(job.getProp('options')).to.have.property('headers', options.headers);
@@ -144,7 +144,9 @@ describe('Esqueue class', function () {
   describe('Destroy', function () {
     it('should destroy workers', function () {
       const queue = new Esqueue('esqueue', { client });
-      const stubs = times(3, () => { return { destroy: sinon.stub() }; });
+      const stubs = times(3, () => {
+        return { destroy: sinon.stub() };
+      });
       stubs.forEach((stub) => queue._workers.push(stub));
       expect(queue.getWorkers()).to.have.length(3);
 
@@ -153,5 +155,4 @@ describe('Esqueue class', function () {
       expect(queue.getWorkers()).to.have.length(0);
     });
   });
-
 });

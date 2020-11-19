@@ -1,154 +1,45 @@
-[[upgrade-assistant-api-reindexing]]
-=== Reindex API
+[[start-resume-reindex]]
+=== Start or resume reindex API
+++++
+<titleabbrev>Start or resume reindex</titleabbrev>
+++++
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are currently experimental.]
+experimental[] Start a new reindex or resume a paused reindex.
 
-When checking the upgrade status, some indices will have the `reindex` paramaeter set to `true`. You can use this Reindexing API to reindex these indices.
+Start a new reindex or resume a paused reindex.
 
-==== Start or resume a reindex
+[[start-resume-reindex-request]]
+==== Request
 
-===== Request
+`POST <kibana host>:<port>/api/upgrade_assistant/reindex/myIndex`
 
-To start a new reindex or resume a paused reindex, submit a POST request to the `/api/upgrade_assistant/reindex/<indexName>` endpoint:
+[[start-resume-reindex-codes]]
+==== Response code
 
-Note: You cannot access this endpoint via the Console in Kibana.
+`200`::
+  Indicates a successful call.
 
-[source,js]
---------------------------------------------------
-POST /api/upgrade_assistant/reindex/myIndex
---------------------------------------------------
-// KIBANA
+[[start-resume-reindex-example]]
+==== Example
 
-===== Response
+The API returns the following:
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
-
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "indexName": ".ml-state",
-  "newIndexName": ".reindexed-v7-ml-state",
-  "status": 0,
-  "lastCompletedStep": 0,
-  "reindexTaskId": null,
-  "reindexTaskPercComplete": null,
-  "errorMessage": null
+  "newIndexName": ".reindexed-v7-ml-state", <1>
+  "status": 0, <2>
+  "lastCompletedStep": 0, <3>
+  "reindexTaskId": null, <4>
+  "reindexTaskPercComplete": null, <5>
+  "errorMessage": null <6>
 }
 --------------------------------------------------
 
-See the next section for an explanation of each field.
-
-==== Check the status of a reindex
-
-===== Request
-
-Once a reindex is started, you can check the status of the reindex operation by submitting a GET request to the `/api/upgrade_assistant/reindex/<indexName>` endpoint:
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
-[source,js]
---------------------------------------------------
-GET /api/upgrade_assistant/reindex/myIndex
---------------------------------------------------
-// KIBANA
-
-===== Response
-
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
-
-[source,js]
---------------------------------------------------
-{
-  "reindexOp": {
-    "indexName": ".ml-state",
-    "newIndexName": ".reindexed-v7-ml-state", <1>
-    "status": 0, <2>
-    "lastCompletedStep": 40, <3>
-    "reindexTaskId": "QprwvTMzRQ2MLWOW22oQ4Q:11819", <4>
-    "reindexTaskPercComplete": 0.3, <5>
-    "errorMessage": null <6>
-  },
-  "warnings": [], <7>
-  "hasRequiredPrivileges": true <8>
-}
---------------------------------------------------
-
-<1> Name of the new index that is being created.
-<2> Current status of the reindex. See the <<status-code,status code table>> for details.
-<3> Last successfully completed step of the reindex. See the <<step-code,step code table>> table for details.
-<4> Task ID of the reindex task in Elasticsearch. Only present if reindexing has started.
-<5> Percentage of how far the reindexing task in Elasticsearch has progressed, in decimal from from 0 to 1.
-<6> Error that caused the reindex to fail, if it failed.
-<7> An array of any warning codes explaining what changes are required for this reindex. See the <<warning-code,warning code table>> for details.
-<8> Whether or not the current user has required privileges to reindex this index. Returns `true` if Security is not available or disabled.
-
-[[status-code]]
-===== Status code
-
-The `status` field corresponds to these statuses:
-
-[horizontal]
-0:: in progress
-1:: completed
-2:: failed
-3:: paused
-4:: cancelled
-
-[[step-code]]
-===== Step code
-
-The `lastCompletedStep` field corresponds to these steps:
-
-[horizontal]
-0::  The reindex operation has been created in Kibana.
-10:: Index group services stopped. Only applies to some system indices.
-20:: index set to readonly
-30:: The new destination index has been created.
-40:: The reindex task in Elasticsearch has started.
-50:: The reindex task in Elasticsearch has completed.
-60:: Aliases have been created to point to the new index, and the old index has been deleted.
-70:: Index group services have been resumed. Only applies to some system indices.
-
-[[warning-code]]
-===== Warning code
-
-The `warnings` field corresponds to an array of integers for these warnings:
-
-[horizontal]
-0:: The `_all` meta field will be removed.
-1:: Any coerced boolean values will be converted in the source document (example: `yes`, `1`, `off`).
-2:: Documents will be converted to support Elastic Common Schema. Only applies to APM indices created in 6.x.
-
-===== Paused reindexes
-
-If the Kibana node that started the reindex is shutdown or restarted, the reindex will go into a paused state after some time.
-To resume the reindex, you must submit a new POST request to the `/api/upgrade_assistant/reindex/<indexName>` endpoint.
-
-==== Cancel a reindex
-
-===== Request
-
-You can cancel reindexes that are waiting for the Elasticsearch reindex task to complete (`lastCompletedStep` set to `40`).
-To cancel a reindex, submit a POST request to the `/api/upgrade_assistant/reindex/<indexName>/cancel` endpoint:
-
-Note: You cannot access this endpoint via the Console in Kibana.
-
-[source,js]
---------------------------------------------------
-POST /api/upgrade_assistant/reindex/myIndex/cancel
---------------------------------------------------
-// KIBANA
-
-===== Response
-
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
-
-[source,js]
---------------------------------------------------
-{
-  "acknowledged": true
-}
---------------------------------------------------
+<1> The name of the new index.
+<2> The reindex status. For more information, refer to <<status-code,Status codes>>.
+<3> The last successfully completed step of the reindex. For more information, refer to <<step-code,Step codes>>.
+<4> The task ID of the reindex task in {es}. Appears when the reindexing starts.
+<5> The progress of the reindexing task in {es}. Appears in decimal form, from 0 to 1.
+<6> The error that caused the reindex to fail, if it failed.

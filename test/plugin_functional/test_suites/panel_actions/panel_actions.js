@@ -31,21 +31,19 @@ export default function ({ getService, getPageObjects }) {
 
     it('allows to register links into the context menu', async () => {
       await dashboardPanelActions.openContextMenu();
-      const actionElement = await testSubjects.find('dashboardPanelAction-samplePanelLink');
+      const actionElement = await testSubjects.find('embeddablePanelAction-samplePanelLink');
       const actionElementTag = await actionElement.getTagName();
       expect(actionElementTag).to.be('a');
-      const actionElementLink = await actionElement.getProperty('href');
+      const actionElementLink = await actionElement.getAttribute('href');
       expect(actionElementLink).to.be('https://example.com/kibana/test');
     });
 
     it('Sample action appears in context menu in view mode', async () => {
-      await testSubjects.existOrFail(
-        'dashboardPanelAction-samplePanelAction'
-      );
+      await testSubjects.existOrFail('embeddablePanelAction-samplePanelAction');
     });
 
     it('Clicking sample action shows a flyout', async () => {
-      await testSubjects.click('dashboardPanelAction-samplePanelAction');
+      await testSubjects.click('embeddablePanelAction-samplePanelAction');
       await testSubjects.existOrFail('samplePanelActionFlyout');
     });
 

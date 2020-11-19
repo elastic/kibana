@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
@@ -17,24 +17,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  termsDetailsUrl,
-} from '../../../services';
+import { getTermsDetailsUrl } from '../../../services';
 
-import {
-  FieldList,
-} from '../../components';
+import { FieldList } from '../../components';
 
-import {
-  FieldChooser,
-} from './components';
+import { FieldChooser } from './components';
 
-export class StepTermsUi extends Component {
+export class StepTerms extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
     termsFields: PropTypes.array.isRequired,
-  }
+  };
 
   onSelectField = (field) => {
     const {
@@ -51,42 +45,40 @@ export class StepTermsUi extends Component {
       onFieldsChange,
     } = this.props;
 
-    onFieldsChange({ terms: terms.filter(term => term !== field) });
+    onFieldsChange({ terms: terms.filter((term) => term !== field) });
   };
 
   render() {
-    const {
-      fields,
-      termsFields,
-    } = this.props;
+    const { fields, termsFields } = this.props;
 
-    const {
-      terms,
-    } = fields;
+    const { terms } = fields;
 
-    const columns = [{
-      field: 'name',
-      name: 'Field',
-      sortable: true,
-    }, {
-      field: 'type',
-      name: 'Type',
-      truncateText: true,
-      sortable: true,
-      width: '180px',
-    }];
+    const columns = [
+      {
+        field: 'name',
+        name: 'Field',
+        sortable: true,
+      },
+      {
+        field: 'type',
+        name: 'Type',
+        truncateText: true,
+        sortable: true,
+        width: '180px',
+      },
+    ];
 
     return (
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="rollupJobCreateTermsTitle">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepTermsTitle"
                   defaultMessage="Terms (optional)"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />
@@ -107,7 +99,7 @@ export class StepTermsUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={termsDetailsUrl}
+              href={getTermsDetailsUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateTermsDocsButton"
@@ -127,26 +119,24 @@ export class StepTermsUi extends Component {
           fields={terms}
           onRemoveField={this.onRemoveField}
           emptyMessage={<p>No terms fields added</p>}
-          addButton={(
+          addButton={
             <FieldChooser
-              buttonLabel={(
+              buttonLabel={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepTerms.fieldsChooserLabel"
                   defaultMessage="Add terms fields"
                 />
-              )}
+              }
               columns={columns}
               fields={termsFields}
               selectedFields={terms}
               onSelectField={this.onSelectField}
               dataTestSubj="rollupJobTermsFieldChooser"
             />
-          )}
+          }
           dataTestSubj="rollupJobTermsFieldList"
         />
       </Fragment>
     );
   }
 }
-
-export const StepTerms = injectI18n(StepTermsUi);

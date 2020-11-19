@@ -10,26 +10,26 @@ import {
   EuiPanel,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiRange,
   EuiToolTip,
+  EuiLink,
+  EuiPortal,
 } from '@elastic/eui';
 import { Shortcuts } from 'react-shortcuts';
+import { ComponentStrings } from '../../../i18n';
 import { ExpressionInput } from '../expression_input';
+import { ToolTipShortcut } from '../tool_tip_shortcut';
+
+const { Expression: strings } = ComponentStrings;
 
 const { useRef } = React;
-
-const minFontSize = 12;
-const maxFontSize = 32;
 
 const shortcut = (ref, cmd, callback) => (
   <Shortcuts
     name="EXPRESSION"
-    handler={(command, event) => {
-      const isInputActive = ref.current && ref.current.ref === event.target;
+    handler={(command) => {
+      const isInputActive = ref.current && ref.current.editor && ref.current.editor.hasTextFocus();
       if (isInputActive && command === cmd) {
         callback();
       }
@@ -47,104 +47,101 @@ export const Expression = ({
   setExpression,
   done,
   error,
-  isAutocompleteEnabled,
-  toggleAutocompleteEnabled,
   fontSize,
-  setFontSize,
   isCompact,
   toggleCompactView,
 }) => {
   const refExpressionInput = useRef(null);
-  return (
+
+  const handleRun = () => {
+    setExpression(formState.expression);
+    // If fullScreen and you hit run, toggle back down so you can see your work
+    if (!isCompact && !error) {
+      toggleCompactView();
+    }
+  };
+
+  const expressionPanel = (
     <EuiPanel
-      className={`canvasTray__panel canvasExpression--${isCompact ? 'compactSize' : 'fullSize'}`}
+      className={`canvasTray__panel canvasTray__panel--holdingExpression canvasExpression--${
+        isCompact ? 'compactSize' : 'fullSize'
+      }`}
+      paddingSize="none"
     >
       {shortcut(refExpressionInput, 'RUN', () => {
         if (!error) {
           setExpression(formState.expression);
         }
       })}
+
+      {/* Error code below is to pass a non breaking space so the editor does not jump */}
+
       <ExpressionInput
         ref={refExpressionInput}
         fontSize={fontSize}
         isCompact={isCompact}
         functionDefinitions={functionDefinitions}
-        error={error}
+        error={error ? error : `\u00A0`}
         value={formState.expression}
         onChange={updateValue}
-        isAutocompleteEnabled={isAutocompleteEnabled}
       />
-      <div className="canvasExpression--controls">
-        <EuiToolTip content={isCompact ? 'Maximize' : 'Minimize'}>
-          <EuiButtonIcon
-            size="s"
-            onClick={toggleCompactView}
-            iconType="expand"
-            color="subdued"
-            aria-label="Toggle expression window height"
-          />
-        </EuiToolTip>
+      <div className="canvasExpression__settings">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    <span>
+                      {strings.getRunTooltip()}{' '}
+                      <ToolTipShortcut namespace="EXPRESSION" action="RUN" />
+                    </span>
+                  }
+                >
+                  <EuiButton fill disabled={!!error} onClick={handleRun} size="s">
+                    {strings.getRunButtonLabel()}
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  color={formState.dirty ? 'danger' : 'primary'}
+                  onClick={done}
+                >
+                  {formState.dirty ? strings.getCancelButtonLabel() : strings.getCloseButtonLabel()}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/kibana/current/canvas-function-reference.html"
+                  target="_blank"
+                >
+                  {strings.getLearnLinkText()}
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="fullScreen" onClick={toggleCompactView} size="xs">
+                  {isCompact ? strings.getMaximizeButtonLabel() : strings.getMinimizeButtonLabel()}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
-      <EuiFlexGroup
-        className="canvasExpression--settings"
-        justifyContent="spaceBetween"
-        alignItems="center"
-        gutterSize="l"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            id="autocompleteOptIn"
-            name="popswitch"
-            label="Enable autocomplete"
-            checked={isAutocompleteEnabled}
-            onChange={toggleAutocompleteEnabled}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem style={{ fontSize: `${minFontSize}px` }} grow={false}>
-              A
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiRange
-                value={fontSize}
-                min={minFontSize}
-                step={4}
-                max={maxFontSize}
-                onChange={e => setFontSize(e.target.value)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ fontSize: `${maxFontSize}px` }}>
-              A
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                color={formState.dirty ? 'danger' : 'primary'}
-                onClick={done}
-              >
-                {formState.dirty ? 'Cancel' : 'Close'}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                disabled={!!error}
-                onClick={() => setExpression(formState.expression)}
-                size="s"
-              >
-                Run
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </EuiPanel>
   );
+
+  if (isCompact) {
+    return expressionPanel;
+  } else {
+    // Portal is required to show above the navigation
+    return <EuiPortal>{expressionPanel}</EuiPortal>;
+  }
 };
 
 Expression.propTypes = {
@@ -154,6 +151,4 @@ Expression.propTypes = {
   setExpression: PropTypes.func,
   done: PropTypes.func,
   error: PropTypes.string,
-  isAutocompleteEnabled: PropTypes.bool,
-  toggleAutocompleteEnabled: PropTypes.func,
 };

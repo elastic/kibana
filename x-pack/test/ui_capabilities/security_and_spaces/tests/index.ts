@@ -4,24 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesService } from '../../../common/services';
-import { SecurityService } from '../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { FeaturesService } from '../../common/services';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function uiCapabilitiesTests({
-  loadTestFile,
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
-  const securityService: SecurityService = getService('security');
-  const spacesService: SpacesService = getService('spaces');
+export default function uiCapabilitiesTests({ loadTestFile, getService }: FtrProviderContext) {
+  const securityService = getService('security');
+  const spacesService = getService('spaces');
   const featuresService: FeaturesService = getService('features');
 
-  describe('ui capabilities', function() {
-    this.tags('ciGroup5');
+  describe('ui capabilities', function () {
+    this.tags('ciGroup9');
 
     before(async () => {
       const features = await featuresService.get();
@@ -40,7 +34,7 @@ export default function uiCapabilitiesTests({
         await securityService.user.create(user.username, {
           password: user.password,
           full_name: user.fullName,
-          roles: roles.map(role => role.name),
+          roles: roles.map((role) => role.name),
         });
 
         for (const role of roles) {
@@ -73,6 +67,5 @@ export default function uiCapabilitiesTests({
     loadTestFile(require.resolve('./catalogue'));
     loadTestFile(require.resolve('./foo'));
     loadTestFile(require.resolve('./nav_links'));
-    loadTestFile(require.resolve('./saved_objects_management'));
   });
 }

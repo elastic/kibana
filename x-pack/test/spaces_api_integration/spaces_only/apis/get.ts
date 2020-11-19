@@ -39,7 +39,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         currentSpaceId: SPACES.SPACE_1.spaceId,
         spaceId: SPACES.SPACE_1.spaceId,
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       getTest(`can access ${scenario.spaceId} from within the ${scenario.currentSpaceId} space`, {
         spaceId: scenario.spaceId,
         currentSpaceId: scenario.currentSpaceId,
@@ -58,7 +58,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
         currentSpaceId: SPACES.DEFAULT.spaceId,
         spaceId: nonExistantSpaceId,
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       getTest(`can't access ${scenario.spaceId} from within the ${scenario.currentSpaceId} space`, {
         spaceId: scenario.spaceId,
         currentSpaceId: scenario.currentSpaceId,

@@ -17,40 +17,39 @@
  * under the License.
  */
 
+/* eslint-disable import/no-duplicates */
+
 import React from 'react';
 import { renderToHtml } from '../../services';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-  GuideText,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes, GuideText } from '../../components';
 
 import { ToolBar } from './tool_bar';
-const toolBarSource = require('!!raw-loader!./tool_bar');
+import toolBarSource from '!!raw-loader!./tool_bar'; // eslint-disable-line import/default
 const toolBarHtml = renderToHtml(ToolBar);
 
 import { ToolBarFooter } from './tool_bar_footer';
-const toolBarFooterSource = require('!!raw-loader!./tool_bar_footer');
+import toolBarFooterSource from '!!raw-loader!./tool_bar_footer'; // eslint-disable-line import/default
 const toolBarFooterHtml = renderToHtml(ToolBarFooter);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="ToolBar"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: toolBarSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: toolBarHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: toolBarSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: toolBarHtml,
+        },
+      ]}
     >
       <GuideText>
-        Use the ToolBar to surface controls for manipulating and filtering content, e.g. in a
-        list, table, or menu.
+        Use the ToolBar to surface controls for manipulating and filtering content, e.g. in a list,
+        table, or menu.
       </GuideText>
 
       <GuideDemo>
@@ -60,17 +59,20 @@ export default props => (
 
     <GuideSection
       title="ToolBarFooter"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: toolBarFooterSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: toolBarFooterHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: toolBarFooterSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: toolBarFooterHtml,
+        },
+      ]}
     >
       <GuideText>
-        Use the ToolBarFooter in conjunction with the ToolBar. It can surface secondary
-        controls or a subset of the primary controls.
+        Use the ToolBarFooter in conjunction with the ToolBar. It can surface secondary controls or
+        a subset of the primary controls.
       </GuideText>
 
       <GuideDemo>

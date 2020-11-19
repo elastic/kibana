@@ -1,26 +1,34 @@
 [[saved-objects-api]]
-== Saved Objects API
+== Saved objects APIs
 
-The saved objects API allows people to manage Kibana saved objects, including
-but not limited to dashboards, visualizations, and index patterns.
+Manage {kib} saved objects, including dashboards, visualizations, index patterns, and more.
 
-Traditionally, developers would perform this level of integration by writing
-documents directly to the `.kibana` index. *Do not do this!* Writing directly
-to the `.kibana` index is not safe and it _will_ result in corrupted data that
-permanently breaks Kibana in a future version.
+WARNING: Do not write documents directly to the `.kibana` index. When you write directly
+to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
-NOTE: You cannot access these endpoints via the Console in Kibana.
+The following saved objects APIs are available: 
 
-* <<saved-objects-api-get>>
-* <<saved-objects-api-bulk-get>>
-* <<saved-objects-api-find>>
-* <<saved-objects-api-create>>
-* <<saved-objects-api-bulk-create>>
-* <<saved-objects-api-update>>
-* <<saved-objects-api-delete>>
-* <<saved-objects-api-export>>
-* <<saved-objects-api-import>>
-* <<saved-objects-api-resolve-import-errors>>
+* <<saved-objects-api-get, Get object API>> to retrieve a single {kib} saved object by ID
+
+* <<saved-objects-api-bulk-get, Bulk get objects API>> to retrieve multiple {kib} saved objects by ID
+
+* <<saved-objects-api-find, Find objects API>> to retrieve a paginated set of {kib} saved objects by various conditions
+
+* <<saved-objects-api-create, Create saved object API>> to create {kib} saved objects
+
+* <<saved-objects-api-bulk-create, Bulk create saved objects API>> to create multiple {kib} saved objects
+
+* <<saved-objects-api-update, Update object API>> to update the attributes for existing {kib} saved objects
+
+* <<saved-objects-api-delete, Delete object API>> to remove {kib} saved objects
+
+* <<saved-objects-api-export, Export objects API>> to retrieve sets of saved objects that you want to import into {kib}
+
+* <<saved-objects-api-import, Import objects API>> to create sets of {kib} saved objects from a file created by the export API
+
+* <<saved-objects-api-resolve-import-errors, Resolve import errors API>> to resolve errors from the import API
+
+* <<saved-objects-api-rotate-encryption-key, Rotate encryption key API>> to rotate the encryption key for encrypted saved objects
 
 include::saved-objects/get.asciidoc[]
 include::saved-objects/bulk_get.asciidoc[]
@@ -32,3 +40,4 @@ include::saved-objects/delete.asciidoc[]
 include::saved-objects/export.asciidoc[]
 include::saved-objects/import.asciidoc[]
 include::saved-objects/resolve_import_errors.asciidoc[]
+include::saved-objects/rotate_encryption_key.asciidoc[]

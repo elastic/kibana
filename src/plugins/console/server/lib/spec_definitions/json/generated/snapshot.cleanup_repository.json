@@ -1,0 +1,15 @@
+{
+  "snapshot.cleanup_repository": {
+    "url_params": {
+      "master_timeout": "",
+      "timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/_cleanup"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+  }
+}

@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
@@ -47,7 +46,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_index_patterns_all_user',
@@ -62,18 +61,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_index_patterns_all_role'),
           security.user.delete('global_index_patterns_all_user'),
-          PageObjects.security.logout(),
         ]);
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`index pattern listing shows create button`, async () => {
@@ -126,15 +123,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`index pattern listing doesn't show create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.existOrFail('indexPatternTable');
+        await testSubjects.existOrFail('emptyIndexPatternPrompt');
         await testSubjects.missingOrFail('createIndexPatternButton');
       });
 
@@ -179,25 +174,17 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await security.user.delete('no_index_patterns_privileges_user');
       });
 
-      it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Discover', 'Management']);
+      it('does not show Management navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Discover']);
       });
 
       it(`doesn't show Index Patterns in management side-nav`, async () => {
-        await PageObjects.settings.navigateTo();
-        await testSubjects.existOrFail('kibana');
-        await testSubjects.missingOrFail('index_patterns');
-      });
-
-      it(`does not allow navigation to Index Patterns; redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/index_patterns', {
+        await PageObjects.common.navigateToActualUrl('management', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('~appNotFoundPageContent');
       });
     });
   });

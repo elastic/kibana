@@ -19,83 +19,72 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiPanel,
-  EuiPageContent
+  EuiPageContent,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-function renderLatestActive(latestActive, latestTypes, latestVersions, intl) {
+function renderLatestActive(latestActive, latestTypes, latestVersions) {
   if (latestTypes && latestTypes.length > 0) {
     return (
       <EuiFlexGroup wrap>
         <EuiFlexItem>
-          <EuiPanel>
-            <EuiTitle size="s">
-              <h3>
-                <FormattedMessage
-                  id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
-                  defaultMessage="Active Beats in Last Day"
-                />
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s"/>
-            <LatestActive latestActive={latestActive} />
-          </EuiPanel>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
+                defaultMessage="Active Beats in last day"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <LatestActive latestActive={latestActive} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel>
-            <EuiTitle size="s">
-              <h3>
-                <FormattedMessage
-                  id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
-                  defaultMessage="Top 5 Beat Types in Last Day"
-                />
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s"/>
-            <LatestTypes latestTypes={latestTypes} />
-          </EuiPanel>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
+                defaultMessage="Top 5 Beat Types in last day"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <LatestTypes latestTypes={latestTypes} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel>
-            <EuiTitle size="s">
-              <h3>
-                <FormattedMessage
-                  id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
-                  defaultMessage="Top 5 Versions in Last Day"
-                />
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s"/>
-            <LatestVersions latestVersions={latestVersions} />
-          </EuiPanel>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
+                defaultMessage="Top 5 Versions in last day"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <LatestVersions latestVersions={latestVersions} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
-  const calloutMsg = intl.formatMessage({
-    id: 'xpack.monitoring.beats.overview.noActivityDescription',
-    // eslint-disable-next-line max-len
-    defaultMessage: `Hi there! This area is where your latest Beats activity would show up, but you don't seem to have any activity within the last day.`
+  const calloutMsg = i18n.translate('xpack.monitoring.beats.overview.noActivityDescription', {
+    defaultMessage:
+      'Hi there! This area is where your latest Beats activity would show up, ' +
+      `but you don't seem to have any activity within the last day.`,
   });
 
-
-  return (
-    <EuiCallOut
-      title={calloutMsg}
-      iconType="gear"
-      data-test-subj="noRecentActivityMessage"
-    />
-  );
+  return <EuiCallOut title={calloutMsg} iconType="gear" data-test-subj="noRecentActivityMessage" />;
 }
 
-export function BeatsOverviewUI({
+export function BeatsOverview({
   latestActive,
   latestTypes,
   latestVersions,
   stats,
   metrics,
-  intl,
+  alerts,
   ...props
 }) {
   const seriesToShow = [
@@ -108,10 +97,7 @@ export function BeatsOverviewUI({
   const charts = seriesToShow.map((data, index) => (
     <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
       <EuiPanel>
-        <MonitoringTimeseriesContainer
-          series={data}
-          {...props}
-        />
+        <MonitoringTimeseriesContainer series={data} {...props} />
       </EuiPanel>
     </EuiFlexItem>
   ));
@@ -119,17 +105,24 @@ export function BeatsOverviewUI({
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.beats.overview.heading"
+              defaultMessage="Beats Overview"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
+        <EuiPanel>
+          <Stats stats={stats} alerts={alerts} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <EuiPanel>{renderLatestActive(latestActive, latestTypes, latestVersions)}</EuiPanel>
+        <EuiSpacer size="m" />
         <EuiPageContent>
-          <Stats stats={stats} />
-          {renderLatestActive(latestActive, latestTypes, latestVersions, intl)}
-          <EuiSpacer size="s"/>
-          <EuiFlexGroup wrap>
-            {charts}
-          </EuiFlexGroup>
+          <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );
 }
-
-export const BeatsOverview = injectI18n(BeatsOverviewUI);

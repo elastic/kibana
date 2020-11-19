@@ -5,7 +5,8 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { getUrlPrefix } from '../lib/space_test_utils';
+import { getTestScenariosForSpace } from '../lib/space_test_utils';
+import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface DeleteTest {
@@ -39,6 +40,11 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       index: '.kibana',
       body: {
         size: 0,
+        query: {
+          terms: {
+            type: ['visualization', 'dashboard', 'space', 'config', 'index-pattern'],
+          },
+        },
         aggs: {
           count: {
             terms: {
@@ -66,11 +72,19 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 4,
+        doc_count: 9,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
+            {
+              key: 'visualization',
+              doc_count: 3,
+            },
+            {
+              key: 'dashboard',
+              doc_count: 2,
+            },
             {
               key: 'space',
               doc_count: 2,
@@ -80,25 +94,33 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
               doc_count: 1,
             },
             {
-              key: 'dashboard',
+              key: 'index-pattern',
               doc_count: 1,
             },
           ],
         },
       },
       {
-        doc_count: 2,
+        doc_count: 7,
         key: 'space_1',
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
             {
+              key: 'visualization',
+              doc_count: 3,
+            },
+            {
+              key: 'dashboard',
+              doc_count: 2,
+            },
+            {
               key: 'config',
               doc_count: 1,
             },
             {
-              key: 'dashboard',
+              key: 'index-pattern',
               doc_count: 1,
             },
           ],
@@ -107,6 +129,22 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     ];
 
     expect(buckets).to.eql(expectedBuckets);
+
+    // There were eleven multi-namespace objects.
+    // Since Space 2 was deleted, any multi-namespace objects that existed in that space
+    // are updated to remove it, and of those, any that don't exist in any space are deleted.
+    const multiNamespaceResponse = await es.search({
+      index: '.kibana',
+      body: { query: { terms: { type: ['sharedtype'] } } },
+    });
+    const docs: [Record<string, any>] = multiNamespaceResponse.hits.hits;
+    expect(docs).length(10); // just ten results, since spaces_2_only got deleted
+    docs.forEach((doc) => () => {
+      const containsSpace2 = doc?._source?.namespaces.includes('space_2');
+      expect(containsSpace2).to.eql(false);
+    });
+    const space2OnlyObjExists = docs.some((x) => x._id === CASES.SPACE_2_ONLY);
+    expect(space2OnlyObjExists).to.eql(false);
   };
 
   const expectNotFound = (resp: { [key: string]: any }) => {
@@ -138,49 +176,48 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     { user = {}, spaceId, tests }: DeleteTestDefinition
   ) => {
     describeFn(description, () => {
-      before(async () => {
+      beforeEach(async () => {
         await esArchiver.load('saved_objects/spaces');
 
         // since we want to verify that we only delete the right things
         // and can't include a config document with the correct id in the
         // archive we read the settings to trigger an automatic upgrade
         // in each space
-        await supertest
-          .get('/api/kibana/settings')
-          .auth(user.username, user.password)
-          .expect(200);
+        await supertest.get('/api/kibana/settings').auth(user.username, user.password).expect(200);
         await supertest
           .get('/s/space_1/api/kibana/settings')
           .auth(user.username, user.password)
           .expect(200);
       });
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      afterEach(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.exists.statusCode}`, async () => {
-        return supertest
-          .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/space_2`)
-          .auth(user.username, user.password)
-          .expect(tests.exists.statusCode)
-          .then(tests.exists.response);
-      });
-
-      describe(`when the space is reserved`, async () => {
-        it(`should return ${tests.reservedSpace.statusCode}`, async () => {
+      getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
+        it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
           return supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/default`)
+            .delete(`${urlPrefix}/api/spaces/space/space_2`)
             .auth(user.username, user.password)
-            .expect(tests.reservedSpace.statusCode)
-            .then(tests.reservedSpace.response);
+            .expect(tests.exists.statusCode)
+            .then(tests.exists.response);
         });
-      });
 
-      describe(`when the space doesn't exist`, () => {
-        it(`should return ${tests.doesntExist.statusCode}`, async () => {
-          return supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/space_3`)
-            .auth(user.username, user.password)
-            .expect(tests.doesntExist.statusCode)
-            .then(tests.doesntExist.response);
+        describe(`when the space is reserved`, () => {
+          it(`should return ${tests.reservedSpace.statusCode} ${scenario}`, async () => {
+            return supertest
+              .delete(`${urlPrefix}/api/spaces/space/default`)
+              .auth(user.username, user.password)
+              .expect(tests.reservedSpace.statusCode)
+              .then(tests.reservedSpace.response);
+          });
+        });
+
+        describe(`when the space doesn't exist`, () => {
+          it(`should return ${tests.doesntExist.statusCode} ${scenario}`, async () => {
+            return supertest
+              .delete(`${urlPrefix}/api/spaces/space/space_3`)
+              .auth(user.username, user.password)
+              .expect(tests.doesntExist.statusCode)
+              .then(tests.doesntExist.response);
+          });
         });
       });
     });

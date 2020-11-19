@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { get } from 'lodash';
 import { AssetPicker } from '../../../../public/components/asset_picker';
 import { elasticOutline } from '../../../lib/elastic_outline';
@@ -15,7 +15,10 @@ import { isValidHttpUrl } from '../../../../common/lib/httpurl';
 import { encode } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { VALID_IMAGE_TYPES } from '../../../../common/lib/constants';
+import { ArgumentStrings } from '../../../../i18n';
 import { FileForm, LinkForm } from './forms';
+
+const { ImageUpload: strings } = ArgumentStrings;
 
 class ImageUpload extends React.Component {
   static propTypes = {
@@ -55,7 +58,7 @@ class ImageUpload extends React.Component {
     this._isMounted = false;
   }
 
-  updateAST = assetId => {
+  updateAST = (assetId) => {
     this.props.onValueChange({
       type: 'expression',
       chain: [
@@ -70,7 +73,7 @@ class ImageUpload extends React.Component {
     });
   };
 
-  handleUpload = files => {
+  handleUpload = (files) => {
     const { onAssetAdd } = this.props;
     const [file] = files;
 
@@ -79,8 +82,8 @@ class ImageUpload extends React.Component {
       this.setState({ loading: true }); // start loading indicator
 
       encode(file)
-        .then(dataurl => onAssetAdd('dataurl', dataurl))
-        .then(assetId => {
+        .then((dataurl) => onAssetAdd('dataurl', dataurl))
+        .then((assetId) => {
           this.updateAST(assetId);
 
           // this component can go away when onValueChange is called, check for _isMounted
@@ -89,7 +92,7 @@ class ImageUpload extends React.Component {
     }
   };
 
-  changeUrlType = optionId => {
+  changeUrlType = (optionId) => {
     this.setState({ urlType: optionId });
   };
 
@@ -107,20 +110,30 @@ class ImageUpload extends React.Component {
 
     let selectedAsset = {};
 
-    const urlTypeOptions = [{ id: 'file', label: 'Import' }, { id: 'link', label: 'Link' }];
+    const urlTypeOptions = [
+      { id: 'file', label: strings.getFileUrlType() },
+      { id: 'link', label: strings.getLinkUrlType() },
+    ];
     if (assets.length) {
-      urlTypeOptions.unshift({ id: 'asset', label: 'Asset' });
+      urlTypeOptions.unshift({
+        id: 'asset',
+        label: strings.getAssetUrlType(),
+      });
       selectedAsset = assets.find(({ value }) => value === url) || {};
     }
 
     const selectUrlType = (
-      <EuiButtonGroup
-        buttonSize="s"
-        options={urlTypeOptions}
-        idSelected={urlType}
-        onChange={this.changeUrlType}
-        isFullWidth
-      />
+      <EuiFormRow display="rowCompressed">
+        <EuiButtonGroup
+          buttonSize="compressed"
+          options={urlTypeOptions}
+          idSelected={urlType}
+          onChange={this.changeUrlType}
+          isFullWidth
+          className="canvasSidebar__buttonGroup"
+          legend={strings.getUrlTypeChangeLegend()}
+        />
+      </EuiFormRow>
     );
 
     const forms = {
@@ -128,7 +141,7 @@ class ImageUpload extends React.Component {
       link: (
         <LinkForm
           url={url}
-          inputRef={ref => (this.inputRefs.srcUrlText = ref)}
+          inputRef={(ref) => (this.inputRefs.srcUrlText = ref)}
           onSubmit={this.setSrcUrl}
         />
       ),
@@ -154,8 +167,8 @@ class ImageUpload extends React.Component {
 
 export const imageUpload = () => ({
   name: 'imageUpload',
-  displayName: 'Image upload',
-  help: 'Select or upload an image',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   resolveArgValue: true,
   template: templateFromReactComponent(ImageUpload),
   resolve({ args }) {

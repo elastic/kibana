@@ -5,9 +5,9 @@
  */
 
 import * as t from 'io-ts';
+import { isRight } from 'fp-ts/lib/Either';
 
-export class DateFromStringType extends t.Type<Date, string, t.mixed> {
-  // eslint-disable-next-line
+class DateFromStringType extends t.Type<Date, string, t.mixed> {
   public readonly _tag: 'DateFromISOStringType' = 'DateFromISOStringType';
   constructor() {
     super(
@@ -15,15 +15,15 @@ export class DateFromStringType extends t.Type<Date, string, t.mixed> {
       (u): u is Date => u instanceof Date,
       (u, c) => {
         const validation = t.string.validate(u, c);
-        if (validation.isLeft()) {
+        if (!isRight(validation)) {
           return validation as any;
         } else {
-          const s = validation.value;
+          const s = validation.right;
           const d = new Date(s);
           return isNaN(d.getTime()) ? t.failure(s, c) : t.success(d);
         }
       },
-      a => a.toISOString()
+      (a) => a.toISOString()
     );
   }
 }

@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const debug: ElementFactory = () => ({
   name: 'debug',
-  displayName: 'Debug',
-  tags: ['text'],
+  displayName: 'Debug data',
   help: 'Just dumps the configuration of the element',
-  image: header,
+  icon: 'bug',
   expression: `demodata
 | render as=debug`,
 });

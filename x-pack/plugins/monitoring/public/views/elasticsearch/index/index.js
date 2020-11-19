@@ -8,33 +8,35 @@
  * Controller for single index detail
  */
 import React from 'react';
-import uiRoutes from 'ui/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
+import { i18n } from '@kbn/i18n';
+import { uiRoutes } from '../../../angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
+import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
 import template from './index.html';
-import { timefilter } from 'ui/timefilter';
-import { I18nContext } from 'ui/i18n';
+import { Legacy } from '../../../legacy_shims';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
 import { Index } from '../../../components/elasticsearch/index/index';
 import { MonitoringViewBaseController } from '../../base_controller';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
   const $route = $injector.get('$route');
   const globalState = $injector.get('globalState');
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/indices/${$route.current.params.index}`;
-  const timeBounds = timefilter.getBounds();
+  const timeBounds = Legacy.shims.timefilter.getBounds();
 
-  return $http.post(url, {
-    ccs: globalState.ccs,
-    timeRange: {
-      min: timeBounds.min.toISOString(),
-      max: timeBounds.max.toISOString()
-    },
-    is_advanced: false,
-  })
-    .then(response => response.data)
+  return $http
+    .post(url, {
+      ccs: globalState.ccs,
+      timeRange: {
+        min: timeBounds.min.toISOString(),
+        max: timeBounds.max.toISOString(),
+      },
+      is_advanced: false,
+    })
+    .then((response) => response.data)
     .catch((err) => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
@@ -47,63 +49,69 @@ uiRoutes.when('/elasticsearch/indices/:index', {
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
-    pageData: getPageData
+    pageData: getPageData,
   },
   controllerAs: 'monitoringElasticsearchIndexApp',
   controller: class extends MonitoringViewBaseController {
-    constructor($injector, $scope, i18n) {
+    constructor($injector, $scope) {
       const $route = $injector.get('$route');
-      const kbnUrl = $injector.get('kbnUrl');
       const indexName = $route.current.params.index;
 
       super({
-        title: i18n('xpack.monitoring.elasticsearch.indices.overview.routeTitle', {
+        title: i18n.translate('xpack.monitoring.elasticsearch.indices.overview.routeTitle', {
           defaultMessage: 'Elasticsearch - Indices - {indexName} - Overview',
           values: {
             indexName,
-          }
+          },
+        }),
+        telemetryPageViewTitle: 'elasticsearch_index',
+        pageTitle: i18n.translate('xpack.monitoring.elasticsearch.indices.overview.pageTitle', {
+          defaultMessage: 'Index: {indexName}',
+          values: {
+            indexName,
+          },
         }),
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchIndexApp',
         $scope,
-        $injector
+        $injector,
       });
 
       this.indexName = indexName;
       const transformer = indicesByNodes();
 
-      $scope.$watch(() => this.data, data => {
-        if (!data || !data.shards) {
-          return;
-        }
+      $scope.$watch(
+        () => this.data,
+        (data) => {
+          if (!data || !data.shards) {
+            return;
+          }
 
-        const shards = data.shards;
-        $scope.totalCount = shards.length;
-        $scope.showing = transformer(shards, data.nodes);
-        $scope.labels = labels.node;
-        if (shards.some((shard) => shard.state === 'UNASSIGNED')) {
-          $scope.labels = labels.indexWithUnassigned;
-        } else {
-          $scope.labels = labels.index;
-        }
+          const shards = data.shards;
+          $scope.totalCount = shards.length;
+          $scope.showing = transformer(shards, data.nodes);
+          $scope.labels = labels.node;
+          if (shards.some((shard) => shard.state === 'UNASSIGNED')) {
+            $scope.labels = labels.indexWithUnassigned;
+          } else {
+            $scope.labels = labels.index;
+          }
 
-
-        this.renderReact(
-          <I18nContext>
+          this.renderReact(
             <Index
               scope={$scope}
-              kbnUrl={kbnUrl}
               onBrush={this.onBrush}
               indexUuid={this.indexName}
               clusterUuid={$scope.cluster.cluster_uuid}
+              zoomInfo={this.zoomInfo}
               {...data}
             />
-          </I18nContext>
-        );
-      });
+          );
+        }
+      );
     }
-  }
+  },
 });

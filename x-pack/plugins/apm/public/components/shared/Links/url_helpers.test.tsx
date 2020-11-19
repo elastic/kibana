@@ -4,30 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { toJson } from '../testHelpers';
-import {
-  fromQuery,
-  legacyDecodeURIComponent,
-  legacyEncodeURIComponent,
-  toQuery
-} from './url_helpers';
+import { fromQuery, toQuery } from './url_helpers';
 
 describe('toQuery', () => {
   it('should parse string to object', () => {
     expect(toQuery('?foo=bar&name=john%20doe')).toEqual({
       foo: 'bar',
-      name: 'john doe'
+      name: 'john doe',
     });
   });
 });
 
 describe('fromQuery', () => {
+  it('should not encode the following characters', () => {
+    expect(
+      fromQuery({
+        a: true,
+        b: 5000,
+        c: ':',
+      })
+    ).toEqual('a=true&b=5000&c=:');
+  });
+
+  it('should encode the following characters', () => {
+    expect(
+      fromQuery({
+        a: '@',
+        b: '.',
+        c: ';',
+        d: ' ',
+      })
+    ).toEqual('a=%40&b=.&c=%3B&d=%20');
+  });
+
+  it('should handle null and undefined', () => {
+    expect(
+      fromQuery({
+        a: undefined,
+        b: null,
+      })
+    ).toEqual('a=&b=');
+  });
+
+  it('should handle arrays', () => {
+    expect(
+      fromQuery({
+        arr: ['a', 'b'],
+      })
+    ).toEqual('arr=a%2Cb');
+  });
+
   it('should parse object to string', () => {
     expect(
       fromQuery({
         traceId: 'bar',
-        transactionId: 'john doe'
+        transactionId: 'john doe',
       })
     ).toEqual('traceId=bar&transactionId=john%20doe');
   });
@@ -36,7 +67,7 @@ describe('fromQuery', () => {
     expect(
       fromQuery({
         rangeFrom: '2019-03-03T12:00:00.000Z',
-        rangeTo: '2019-03-05T12:00:00.000Z'
+        rangeTo: '2019-03-05T12:00:00.000Z',
       })
     ).toEqual(
       'rangeFrom=2019-03-03T12:00:00.000Z&rangeTo=2019-03-05T12:00:00.000Z'
@@ -48,7 +79,7 @@ describe('fromQuery', () => {
       fromQuery({
         flyoutDetailTab: undefined,
         refreshPaused: true,
-        refreshInterval: 5000
+        refreshInterval: 5000,
       })
     ).toEqual('flyoutDetailTab=&refreshPaused=true&refreshInterval=5000');
   });
@@ -59,70 +90,9 @@ describe('fromQuery and toQuery', () => {
     expect(
       fromQuery(
         toQuery(
-          '?name=john%20doe&rangeFrom=2019-03-03T12:00:00.000Z&path=a%2Fb'
+          '?name=john%20doe&path=a%2Fb&rangeFrom=2019-03-03T12:00:00.000Z'
         )
       )
-    ).toEqual('name=john%20doe&rangeFrom=2019-03-03T12:00:00.000Z&path=a%2Fb');
+    ).toEqual('name=john%20doe&path=a%2Fb&rangeFrom=2019-03-03T12:00:00.000Z');
   });
 });
-
-describe('legacyEncodeURIComponent', () => {
-  it('should encode a string with forward slashes', () => {
-    expect(legacyEncodeURIComponent('a/b/c')).toBe('a~2Fb~2Fc');
-  });
-
-  it('should encode a string with tilde', () => {
-    expect(legacyEncodeURIComponent('a~b~c')).toBe('a~7Eb~7Ec');
-  });
-
-  it('should encode a string with spaces', () => {
-    expect(legacyEncodeURIComponent('a b c')).toBe('a~20b~20c');
-  });
-});
-
-describe('legacyDecodeURIComponent', () => {
-  ['a/b/c', 'a~b~c', 'GET /', 'foo ~ bar /'].map(input => {
-    it(`should encode and decode ${input}`, () => {
-      const converted = legacyDecodeURIComponent(
-        legacyEncodeURIComponent(input)
-      );
-      expect(converted).toBe(input);
-    });
-  });
-
-  describe('when Angular decodes forward slashes in a url', () => {
-    it('should decode value correctly', () => {
-      const transactionName = 'GET a/b/c/';
-      const encodedTransactionName = legacyEncodeURIComponent(transactionName);
-      const parsedUrl = emulateAngular(
-        `/transaction/${encodedTransactionName}`
-      );
-      const decodedTransactionName = legacyDecodeURIComponent(
-        parsedUrl.split('/')[2]
-      );
-
-      expect(decodedTransactionName).toBe(transactionName);
-    });
-
-    it('should decode value incorrectly when using vanilla encodeURIComponent', () => {
-      const transactionName = 'GET a/b/c/';
-      const encodedTransactionName = encodeURIComponent(transactionName);
-      const parsedUrl = emulateAngular(
-        `/transaction/${encodedTransactionName}`
-      );
-      const decodedTransactionName = decodeURIComponent(
-        parsedUrl.split('/')[2]
-      );
-
-      expect(decodedTransactionName).not.toBe(transactionName);
-    });
-  });
-});
-
-// Angular decodes forward slashes in path params
-function emulateAngular(input: string) {
-  return input
-    .split('/')
-    .map(pathParam => pathParam.replace(/%2F/g, '/'))
-    .join('/');
-}

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { pick } from '../../../utils';
+import { pick } from '@kbn/std';
+import { AppCategory } from '../../';
 
 /**
  * @public
@@ -29,42 +30,14 @@ export interface ChromeNavLink {
   readonly id: string;
 
   /**
-   * Indicates whether or not this app is currently on the screen.
-   *
-   * NOTE: remove this when ApplicationService is implemented and managing apps.
-   */
-  readonly active?: boolean;
-
-  /**
-   * Disables a link from being clickable.
-   *
-   * NOTE: this is only used by the ML and Graph plugins currently. They use this field
-   * to disable the nav link when the license is expired.
-   */
-  readonly disabled?: boolean;
-
-  /**
-   * Hides a link from the navigation.
-   *
-   * NOTE: remove this when ApplicationService is implemented. Instead, plugins should only
-   * register an Application if needed.
-   */
-  readonly hidden?: boolean;
-
-  /**
-   * An ordinal used to sort nav links relative to one another for display.
-   */
-  readonly order: number;
-
-  /**
    * The title of the application.
    */
   readonly title: string;
 
   /**
-   * A tooltip shown when hovering over an app link.
+   * The category the app lives in
    */
-  readonly tooltip?: string;
+  readonly category?: AppCategory;
 
   /**
    * The base route used to open the root of an application.
@@ -72,8 +45,24 @@ export interface ChromeNavLink {
   readonly baseUrl: string;
 
   /**
+   * The route used to open the {@link AppBase.defaultPath | default path } of an application.
+   * If unset, `baseUrl` will be used instead.
+   */
+  readonly url?: string;
+
+  /**
+   * An ordinal used to sort nav links relative to one another for display.
+   */
+  readonly order?: number;
+
+  /**
+   * A tooltip shown when hovering over an app link.
+   */
+  readonly tooltip?: string;
+
+  /**
    * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
+   * takes precedence over the `icon` property.
    */
   readonly euiIconType?: string;
 
@@ -83,34 +72,29 @@ export interface ChromeNavLink {
    */
   readonly icon?: string;
 
-  /** LEGACY FIELDS */
+  /**
+   * Settled state between `url`, `baseUrl`, and `active`
+   */
+  readonly href: string;
 
   /**
-   * A url base that legacy apps can set to match deep URLs to an applcation.
+   * Disables a link from being clickable.
    *
-   * NOTE: this should be removed once legacy apps are gone.
+   * @internalRemarks
+   * This is only used by the ML and Graph plugins currently. They use this field
+   * to disable the nav link when the license is expired.
    */
-  readonly subUrlBase?: string;
+  readonly disabled?: boolean;
 
   /**
-   * Whether or not the subUrl feature should be enabled.
-   *
-   * NOTE: only read by legacy platform.
+   * Hides a link from the navigation.
    */
-  readonly linkToLastSubUrl?: boolean;
-
-  /**
-   * A url that legacy apps can set to deep link into their applications.
-   *
-   * NOTE: Currently used by the "lastSubUrl" feature legacy/ui/chrome. This should
-   * be removed once the ApplicationService is implemented and mounting apps. At that
-   * time, each app can handle opening to the previous location when they are mounted.
-   */
-  readonly url?: string;
+  readonly hidden?: boolean;
 }
 
-export type NavLinkUpdateableFields = Partial<
-  Pick<ChromeNavLink, 'active' | 'disabled' | 'hidden' | 'url' | 'subUrlBase'>
+/** @public */
+export type ChromeNavLinkUpdateableFields = Partial<
+  Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>
 >;
 
 export class NavLinkWrapper {
@@ -126,9 +110,9 @@ export class NavLinkWrapper {
     this.properties = Object.freeze(properties);
   }
 
-  public update(newProps: NavLinkUpdateableFields) {
+  public update(newProps: ChromeNavLinkUpdateableFields) {
     // Enforce limited properties at runtime for JS code
-    newProps = pick(newProps, ['active', 'disabled', 'hidden', 'url', 'subUrlBase']);
+    newProps = pick(newProps, ['disabled', 'hidden', 'url', 'href']);
     return new NavLinkWrapper({ ...this.properties, ...newProps });
   }
 }

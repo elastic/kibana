@@ -24,7 +24,6 @@ export function formatVisualizeData({ aggType, termField }, results) {
   }
 }
 
-
 // Count without terms
 // See ./data_samples/count.json
 function formatCount(aggType, results) {

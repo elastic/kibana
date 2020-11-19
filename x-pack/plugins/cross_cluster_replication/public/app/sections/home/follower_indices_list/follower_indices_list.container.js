@@ -14,9 +14,7 @@ import {
   getApiError,
   isApiAuthorized,
 } from '../../../store/selectors';
-import {
-  loadFollowerIndices, selectDetailFollowerIndex,
-} from '../../../store/actions';
+import { loadFollowerIndices, selectDetailFollowerIndex } from '../../../store/actions';
 import { FollowerIndicesList as FollowerIndicesListView } from './follower_indices_list';
 
 const scope = SECTIONS.FOLLOWER_INDEX;
@@ -29,7 +27,7 @@ const mapStateToProps = (state) => ({
   isAuthorized: isApiAuthorized(scope)(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   loadFollowerIndices: (inBackground) => dispatch(loadFollowerIndices(inBackground)),
   selectFollowerIndex: (id) => dispatch(selectDetailFollowerIndex(id)),
 });

@@ -21,11 +21,20 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
+  const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'common']);
 
   describe('expanding a panel', () => {
     before(async () => {
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
 
@@ -46,14 +55,25 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
-
       // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this
       // being a CSS update is causing the UI to change slower than grabbing the panels?
-      retry.try(async () => {
+      await retry.try(async () => {
+        const panelCountAfterMaxThenMinimize = await PageObjects.dashboard.getPanelCount();
+        expect(panelCountAfterMaxThenMinimize).to.be(panelCount);
+      });
+    });
+
+    it('minimizes using the browser back button', async () => {
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
+
+      await browser.goBack();
+      await retry.try(async () => {
         const panelCountAfterMaxThenMinimize = await PageObjects.dashboard.getPanelCount();
         expect(panelCountAfterMaxThenMinimize).to.be(panelCount);
       });
     });
   });
-
 }

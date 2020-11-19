@@ -4,25 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Opts {
+import { CaptureConfig } from '../../../../server/types';
+
+type ViewportConfig = CaptureConfig['viewport'];
+type BrowserConfig = CaptureConfig['browser']['chromium'];
+
+interface LaunchArgs {
   userDataDir: string;
-  viewport: { width: number; height: number };
-  disableSandbox: boolean;
-  proxyConfig: {
-    enabled: boolean;
-    server: string;
-    bypass?: string[];
-  };
-  verboseLogging: boolean;
+  viewport: ViewportConfig;
+  disableSandbox: BrowserConfig['disableSandbox'];
+  proxy: BrowserConfig['proxy'];
 }
 
-export const args = ({
-  userDataDir,
-  viewport,
-  disableSandbox,
-  proxyConfig,
-  verboseLogging,
-}: Opts) => {
+export const args = ({ userDataDir, viewport, disableSandbox, proxy: proxyConfig }: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
@@ -59,11 +53,6 @@ export const args = ({
 
   if (disableSandbox) {
     flags.push('--no-sandbox');
-  }
-
-  if (verboseLogging) {
-    flags.push('--enable-logging');
-    flags.push('--v=1');
   }
 
   if (process.platform === 'linux') {

@@ -89,7 +89,7 @@ function init(plot) {
 
   // add hook to determine if pie plugin in enabled, and then perform necessary operations
 
-  plot.hooks.processOptions.push(function(plot, options) {
+  plot.hooks.processOptions.push(function (plot, options) {
     if (options.series.pie.show) {
       options.grid.show = false;
 
@@ -123,7 +123,7 @@ function init(plot) {
     }
   });
 
-  plot.hooks.bindEvents.push(function(plot, eventHolder) {
+  plot.hooks.bindEvents.push(function (plot, eventHolder) {
     const options = plot.getOptions();
     if (options.series.pie.show) {
       if (options.grid.hoverable) {
@@ -136,21 +136,21 @@ function init(plot) {
     }
   });
 
-  plot.hooks.processDatapoints.push(function(plot, series, data, datapoints) {
+  plot.hooks.processDatapoints.push(function (plot, series, data, datapoints) {
     const options = plot.getOptions();
     if (options.series.pie.show) {
       processDatapoints(plot, series, data, datapoints);
     }
   });
 
-  plot.hooks.drawOverlay.push(function(plot, octx) {
+  plot.hooks.drawOverlay.push(function (plot, octx) {
     const options = plot.getOptions();
     if (options.series.pie.show) {
       drawOverlay(plot, octx);
     }
   });
 
-  plot.hooks.draw.push(function(plot, newCtx) {
+  plot.hooks.draw.push(function (plot, newCtx) {
     const options = plot.getOptions();
     if (options.series.pie.show) {
       draw(plot, newCtx);
@@ -263,12 +263,7 @@ function init(plot) {
 
     const canvasWidth = plot.getPlaceholder().width();
     const canvasHeight = plot.getPlaceholder().height();
-    const legendWidth =
-      target
-        .children()
-        .filter('.legend')
-        .children()
-        .width() || 0;
+    const legendWidth = target.children().filter('.legend').children().width() || 0;
 
     ctx = newCtx;
 
@@ -351,10 +346,7 @@ function init(plot) {
 
     function clear() {
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-      target
-        .children()
-        .filter('.pieLabel, .pieLabelBackground')
-        .remove();
+      target.children().filter('.pieLabel, .pieLabelBackground').remove();
     }
 
     function drawShadow() {
@@ -683,7 +675,14 @@ function init(plot) {
           const p4Y = radius * Math.sin(s.startAngle + s.angle / 1.5);
           const p5X = radius * Math.cos(s.startAngle + s.angle);
           const p5Y = radius * Math.sin(s.startAngle + s.angle);
-          const arrPoly = [[0, 0], [p1X, p1Y], [p2X, p2Y], [p3X, p3Y], [p4X, p4Y], [p5X, p5Y]];
+          const arrPoly = [
+            [0, 0],
+            [p1X, p1Y],
+            [p2X, p2Y],
+            [p3X, p3Y],
+            [p4X, p4Y],
+            [p5X, p5Y],
+          ];
           const arrPoint = [x, y];
 
           // TODO: perhaps do some mathmatical trickery here with the Y-coordinate to compensate for pie tilt?
@@ -860,7 +859,7 @@ const options = {
       },
       label: {
         show: 'auto',
-        formatter: function(label, slice) {
+        formatter: function (label, slice) {
           return (
             "<div style='font-size:x-small;text-align:center;padding:2px;color:" +
             slice.color +

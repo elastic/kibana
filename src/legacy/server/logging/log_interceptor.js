@@ -20,7 +20,11 @@
 import Stream from 'stream';
 import { get, isEqual } from 'lodash';
 
-const GET_CLIENT_HELLO = /GET_CLIENT_HELLO:http/;
+/**
+ * Matches error messages when clients connect via HTTP instead of HTTPS; see unit test for full message. Warning: this can change when Node
+ * and its bundled OpenSSL binary are upgraded.
+ */
+const OPENSSL_GET_RECORD_REGEX = /ssl3_get_record:http/;
 
 function doTagsMatch(event, tags) {
   return isEqual(get(event, 'tags'), tags);
@@ -38,7 +42,8 @@ function downgradeIfErrorType(errorType, event) {
   const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
   if (!isClientError) return null;
 
-  const matchesErrorType = get(event, 'error.code') === errorType || get(event, 'error.errno') === errorType;
+  const matchesErrorType =
+    get(event, 'error.code') === errorType || get(event, 'error.errno') === errorType;
   if (!matchesErrorType) return null;
 
   const errorTypeTag = errorType.toLowerCase();
@@ -48,14 +53,14 @@ function downgradeIfErrorType(errorType, event) {
     pid: event.pid,
     timestamp: event.timestamp,
     tags: ['debug', 'connection', errorTypeTag],
-    data: `${errorType}: Socket was closed by the client (probably the browser) before it could be read completely`
+    data: `${errorType}: Socket was closed by the client (probably the browser) before it could be read completely`,
   };
 }
 
 function downgradeIfErrorMessage(match, event) {
   const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
   const errorMessage = get(event, 'error.message');
-  const matchesErrorMessage = isClientError &&  doesMessageMatch(errorMessage, match);
+  const matchesErrorMessage = isClientError && doesMessageMatch(errorMessage, match);
 
   if (!matchesErrorMessage) return null;
 
@@ -64,7 +69,7 @@ function downgradeIfErrorMessage(match, event) {
     pid: event.pid,
     timestamp: event.timestamp,
     tags: ['debug', 'connection'],
-    data: errorMessage
+    data: errorMessage,
   };
 }
 
@@ -72,7 +77,7 @@ export class LogInterceptor extends Stream.Transform {
   constructor() {
     super({
       readableObjectMode: true,
-      writableObjectMode: true
+      writableObjectMode: true,
     });
   }
 
@@ -123,15 +128,16 @@ export class LogInterceptor extends Stream.Transform {
   }
 
   downgradeIfHTTPWhenHTTPS(event) {
-    return downgradeIfErrorMessage(GET_CLIENT_HELLO, event);
+    return downgradeIfErrorMessage(OPENSSL_GET_RECORD_REGEX, event);
   }
 
   _transform(event, enc, next) {
-    const downgraded = this.downgradeIfEconnreset(event)
-      || this.downgradeIfEpipe(event)
-      || this.downgradeIfEcanceled(event)
-      || this.downgradeIfHTTPSWhenHTTP(event)
-      || this.downgradeIfHTTPWhenHTTPS(event);
+    const downgraded =
+      this.downgradeIfEconnreset(event) ||
+      this.downgradeIfEpipe(event) ||
+      this.downgradeIfEcanceled(event) ||
+      this.downgradeIfHTTPSWhenHTTP(event) ||
+      this.downgradeIfHTTPWhenHTTPS(event);
 
     this.push(downgraded || event);
     next();

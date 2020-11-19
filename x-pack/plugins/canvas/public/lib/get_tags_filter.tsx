@@ -6,19 +6,24 @@
 
 import React from 'react';
 import { sortBy } from 'lodash';
+import { SearchFilterConfig } from '@elastic/eui';
 import { Tag } from '../components/tag';
 import { getId } from './get_id';
 import { tagsRegistry } from './tags_registry';
+import { ComponentStrings } from '../../i18n';
+
+const { WorkpadTemplates: strings } = ComponentStrings;
 
 // EUI helper function
 // generates the FieldValueSelectionFilter object for EuiSearchBar for tag filtering
-export const getTagsFilter = (type: 'health' | 'badge') => {
+export const getTagsFilter = (type: 'health' | 'badge'): SearchFilterConfig => {
   const uniqueTags = sortBy(Object.values(tagsRegistry.toJS()), 'name');
+  const filterType = 'field_value_selection';
 
   return {
-    type: 'field_value_selection',
+    type: filterType,
     field: 'tag',
-    name: 'Tags',
+    name: strings.getTableTagsColumnTitle(),
     multiSelect: true,
     options: uniqueTags.map(({ name, color }) => ({
       value: name,

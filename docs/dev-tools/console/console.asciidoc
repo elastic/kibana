@@ -1,25 +1,25 @@
 [[console-kibana]]
 == Console
 
-Console enables you to interact with the REST API of {es}. *Note:* You cannot 
-interact with {kib} API endpoints via Console.
+Console enables you to interact with the REST API of {es}. You can:
 
-Go to *Dev Tools > Console* to get started. 
+* Send requests to {es} and view the responses
+* View API documentation
+* Get your request history
 
-Console has two main areas: 
-
-* The *editor*, where you compose requests to send to {es}.
-* The *response* pane, which displays the responses to the request.
+To get started, open the main menu, click *Dev Tools*, then click *Console*.
 
 [role="screenshot"]
 image::dev-tools/console/images/console.png["Console"]
 
+NOTE: You are unable to interact with the REST API of {kib} with the Console.
+
 [float]
 [[console-api]]
-=== Writing requests
+=== Write requests
 
-Console understands commands in a cURL-like syntax. 
-For example, the following is a `GET` request to the {es} `_search` API. 
+Console understands commands in a cURL-like syntax.
+For example, the following is a `GET` request to the {es} `_search` API.
 
 [source,js]
 ----------------------------------
@@ -43,55 +43,94 @@ curl -XGET "http://localhost:9200/_search" -d'
 }'
 ----------------------------------
 
-If you paste the above command into Console, {kib} automatically converts it
-to Console syntax.  Alternatively, if you want to want to see Console syntax in cURL, 
-click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*. 
+When you paste the command into Console, {kib} automatically converts it
+to Console syntax.  Alternatively, if you want to see Console syntax in cURL, 
+click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*.
 
-For help with formatting requests, you can use Console's <<auto-formatting, auto formatting>> 
-feature.
+[float]
+[[console-autocomplete]]
+==== Autocomplete
+
+When you're typing a command, Console makes context-sensitive suggestions.
+These suggestions show you the parameters for each API and speed up your typing.
+To configure your preferences for autocomplete, go to
+<<configuring-console, Settings>>.
+
+[float]
+[[auto-formatting]]
+==== Auto-formatting
+The auto-formatting
+capability can help you format requests. Select one or more requests that you
+want to format, click the action icon (image:dev-tools/console/images/wrench.png[]),
+and then select *Auto indent*.
+
+For example, you might have a request formatted like this:
+
+[role="screenshot"]
+image::dev-tools/console/images/copy-curl.png["Console close-up"]
+
+Console adjusts the JSON body of the request to apply the indents.
+
+[role="screenshot"]
+image::dev-tools/console/images/request.png["Console close-up"]
+
+If you select *Auto indent* on a request that is already well formatted,
+Console collapses the request body to a single line per document.
+This is helpful when working with the {es} {ref}/docs-bulk.html[bulk APIs].
+
 
 
 [float]
 [[console-request]]
-=== Submitting requests 
+=== Submit requests
 
-Once you enter a command in the editor, click the 
-green triangle to submit the request to {es}.
+When you're ready to submit the request to {es}, click the
+green triangle.
 
 You can select multiple requests and submit them together.
-Console sends the requests to {es} one by one and shows the output 
-in the response pane. Submitting multiple request is helpful when you're debugging an issue or trying query 
+Console sends the requests to {es} one by one and shows the output
+in the response pane. Submitting multiple request is helpful when you're debugging an issue or trying query
 combinations in multiple scenarios.
 
-[float]
-[[console-autocomplete]]
-=== Using autocomplete
-
-When typing a command, Console makes context-sensitive suggestions.
-These suggestions can help you explore parameters for each API and speed up typing. 
-To configure your preferences for autocomplete, go to 
-<<configuring-console, Settings>>. 
 
 [float]
 [[console-view-api]]
-=== Viewing API docs
+=== View API docs
 
-You can view the documentation for an API endpoint by clicking
-the action icon (image:dev-tools/console/images/wrench.png[]) and selecting
+To view the documentation for an API endpoint, click
+the action icon (image:dev-tools/console/images/wrench.png[]) and select
 *Open documentation*.
 
 [float]
 [[console-history]]
-=== Getting your request history
+=== Get your request history
 
-Console maintains a list of the last 500 requests that {es} successfully executed. 
+Console maintains a list of the last 500 requests that {es} successfully executed.
 To view your most recent requests, click *History*. If you select a request
 and click *Apply*, {kib} adds it to the editor at the current cursor position.
 
+[float]
+[[configuring-console]]
+=== Configure Console settings
 
+You can configure the Console font size, JSON syntax,
+and autocomplete suggestions in *Settings*.
 
-include::auto-formatting.asciidoc[]
+[role="screenshot"]
+image::dev-tools/console/images/console-settings.png["Console Settings"]
 
-include::keyboard-shortcuts.asciidoc[]
+[float]
+[[keyboard-shortcuts]]
+=== Get keyboard shortcuts
 
-include::configuring-console.asciidoc[]
+For a list of available keyboard
+shortcuts, click *Help*.
+
+[float]
+[[console-settings]]
+=== Disable Console
+
+If you don’t want to use Console, you can disable it by setting `console.enabled`
+to `false` in your `kibana.yml` configuration file. Changing this setting
+causes the server to regenerate assets on the next startup,
+which might cause a delay before pages start being served.

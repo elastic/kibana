@@ -4,71 +4,89 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
 <div
   class="euiPage"
 >
-  <div
+  <h1
+    class="euiScreenReaderOnly"
+  >
+    No monitoring data found.
+  </h1>
+  <main
     class="euiPageBody euiPageBody--restrictWidth-custom"
     style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPageContent eui-textCenter euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
     >
-      <svg
-        class="euiIcon euiIcon--xxLarge euiIcon--app"
-        focusable="false"
-        height="32"
-        viewBox="0 0 32 32"
-        width="32"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M1.81 15.19A8.94 8.94 0 0 1 15.62 3.86l.38.42.38-.42a8.94 8.94 0 0 1 14.26 10.68l-1.7-1.07a6.94 6.94 0 0 0-11.07-8.28L16 7.29l-1.87-2.1A6.94 6.94 0 0 0 3.41 14l-1.6 1.19zM16 31.18l-7.74-8.51 1.48-1.34L16 28.21l6.26-6.88 1.48 1.34z"
-        />
-        <path
-          class="euiIcon__fillSecondary"
-          d="M16.16 23.29l-4.1-7.17L10.62 19H0v-2h9.38l2.56-5.12 3.9 6.83 4.13-10.32L23.66 17H32v2h-9.66l-2.31-5.39z"
-        />
-      </svg>
+      <span
+        data-euiicon-type="monitoringApp"
+      />
       <div
         class="euiSpacer euiSpacer--m"
+      />
+      <h2
+        class="euiTitle euiTitle--large"
+      >
+        No monitoring data found
+      </h2>
+      <hr
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
       />
       <div
         class="euiText euiText--medium"
       >
         <p>
-          There is a 
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
-              food
-            </code>
-          </span>
-           setting that has 
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
-              xpack.monitoring.foo.bar
-            </code>
-          </span>
-           set to 
-          <span
-            class="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-          >
-            <code
-              class="euiCodeBlock__code"
-            >
-              taco
-            </code>
-          </span>
-          .
+          Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
         </p>
       </div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButton euiButton--primary euiButton--fill"
+            data-test-subj="enableCollectionInterval"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Set up monitoring with Metricbeat
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <hr
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+      />
+      <button
+        class="euiButtonEmpty euiButtonEmpty--primary"
+        data-test-subj="useInternalCollection"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonEmpty__text"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued"
+            >
+              Or, set up with self monitoring
+            </span>
+          </span>
+        </span>
+      </button>
     </div>
-  </div>
+  </main>
 </div>
 `;
 
@@ -76,68 +94,88 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
 <div
   class="euiPage"
 >
-  <div
+  <h1
+    class="euiScreenReaderOnly"
+  >
+    No monitoring data found.
+  </h1>
+  <main
     class="euiPageBody euiPageBody--restrictWidth-custom"
     style="max-width:600px"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPageContent eui-textCenter euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
     >
-      <svg
-        class="euiIcon euiIcon--xxLarge euiIcon--app"
-        focusable="false"
-        height="32"
-        viewBox="0 0 32 32"
-        width="32"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M1.81 15.19A8.94 8.94 0 0 1 15.62 3.86l.38.42.38-.42a8.94 8.94 0 0 1 14.26 10.68l-1.7-1.07a6.94 6.94 0 0 0-11.07-8.28L16 7.29l-1.87-2.1A6.94 6.94 0 0 0 3.41 14l-1.6 1.19zM16 31.18l-7.74-8.51 1.48-1.34L16 28.21l6.26-6.88 1.48 1.34z"
-        />
-        <path
-          class="euiIcon__fillSecondary"
-          d="M16.16 23.29l-4.1-7.17L10.62 19H0v-2h9.38l2.56-5.12 3.9 6.83 4.13-10.32L23.66 17H32v2h-9.66l-2.31-5.39z"
-        />
-      </svg>
+      <span
+        data-euiicon-type="monitoringApp"
+      />
       <div
         class="euiSpacer euiSpacer--m"
       />
       <h2
         class="euiTitle euiTitle--large"
       >
-        We're looking for your monitoring data
+        No monitoring data found
       </h2>
-      <span
-        class="euiTextColor euiTextColor--subdued"
-      >
-        <div
-          class="euiText euiText--medium"
-        >
-          <p>
-            Monitoring provides insight to your hardware performance and load.
-          </p>
-        </div>
-      </span>
       <hr
         class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiText euiText--medium"
+      >
+        <p>
+          Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
+        </p>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <span
-            class="euiLoadingSpinner euiLoadingSpinner--medium"
-          />
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
-        >
-          checking something to test...
+          <button
+            class="euiButton euiButton--primary euiButton--fill"
+            data-test-subj="enableCollectionInterval"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButton__text"
+              >
+                Set up monitoring with Metricbeat
+              </span>
+            </span>
+          </button>
         </div>
       </div>
+      <hr
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+      />
+      <button
+        class="euiButtonEmpty euiButtonEmpty--primary"
+        data-test-subj="useInternalCollection"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonEmpty__text"
+          >
+            <span
+              class="euiTextColor euiTextColor--subdued"
+            >
+              Or, set up with self monitoring
+            </span>
+          </span>
+        </span>
+      </button>
     </div>
-  </div>
+  </main>
 </div>
 `;

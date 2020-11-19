@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { get, isEqual, filter } from 'lodash';
+import $ from 'jquery';
 import React from 'react';
-import $ from 'plugins/xpack_main/jquery_flot';
 import { eventBus } from './event_bus';
 import { getChartOptions } from './get_chart_options';
 
@@ -16,7 +16,9 @@ export class ChartTarget extends React.Component {
   }
 
   shutdownChart() {
-    if (!this.plot) { return; }
+    if (!this.plot) {
+      return;
+    }
 
     const { target } = this.refs;
     $(target).off('plothover');
@@ -35,24 +37,25 @@ export class ChartTarget extends React.Component {
   componentWillUnmount() {
     this.shutdownChart();
     window.removeEventListener('resize', this._handleResize);
+    this.componentUnmounted = true;
   }
 
   filterByShow(seriesToShow) {
     if (seriesToShow) {
       return (metric) => {
-        return seriesToShow.some(id => _.startsWith(id, metric.id));
+        return seriesToShow.some((id) => id.toLowerCase() === metric.id.toLowerCase());
       };
     }
-    return (_metric) => true;
+    return () => true;
   }
 
-  componentWillReceiveProps(newProps) {
-    if (this.plot && !_.isEqual(newProps, this.props)) {
+  UNSAFE_componentWillReceiveProps(newProps) {
+    if (this.plot && !isEqual(newProps, this.props)) {
       const { series, timeRange } = newProps;
 
       const xaxisOptions = this.plot.getAxes().xaxis.options;
-      xaxisOptions.min = _.get(timeRange, 'min');
-      xaxisOptions.max = _.get(timeRange, 'max');
+      xaxisOptions.min = get(timeRange, 'min');
+      xaxisOptions.max = get(timeRange, 'max');
 
       this.plot.setData(this.filterData(series, newProps.seriesToShow));
       this.plot.setupGrid();
@@ -62,7 +65,6 @@ export class ChartTarget extends React.Component {
 
   componentDidMount() {
     this.renderChart();
-    window.addEventListener('resize', this._handleResize, false);
   }
 
   componentDidUpdate() {
@@ -71,44 +73,49 @@ export class ChartTarget extends React.Component {
   }
 
   filterData(data, seriesToShow) {
-    return _(data)
-      .filter(this.filterByShow(seriesToShow))
-      .value();
+    return filter(data, this.filterByShow(seriesToShow));
   }
 
-  getOptions() {
-    const opts = getChartOptions({
+  async getOptions() {
+    const opts = await getChartOptions({
       yaxis: { tickFormatter: this.props.tickFormatter },
-      xaxis: this.props.timeRange
+      xaxis: this.props.timeRange,
     });
 
     return {
       ...opts,
-      ...this.props.options
+      ...this.props.options,
     };
   }
 
-  renderChart() {
+  async renderChart() {
     const { target } = this.refs;
     const { series } = this.props;
     const data = this.filterData(series, this.props.seriesToShow);
 
-    this.plot = $.plot(target, data, this.getOptions());
+    this.plot = $.plot(target, data, await this.getOptions());
+    if (this.componentUnmounted || !this.plot) {
+      return;
+    }
 
     this._handleResize = () => {
-      if (!this.plot) { return; }
+      if (!this.plot) {
+        return;
+      }
 
       try {
         this.plot.resize();
         this.plot.setupGrid();
         this.plot.draw();
-      }
-      catch (e) { // eslint-disable-line no-empty
+      } catch (e) {
+        // eslint-disable-line no-empty
         /* It is ok to silently swallow the error here. Resize events fire
          * continuously so the proper resize will happen in a later firing of
          * the event */
       }
     };
+
+    window.addEventListener('resize', this._handleResize, false);
 
     this.handleMouseLeave = () => {
       eventBus.trigger('thorPlotLeave', []);
@@ -121,7 +128,7 @@ export class ChartTarget extends React.Component {
     this.handleThorPlotHover = (_event, pos, item, originalPlot) => {
       if (this.plot !== originalPlot) {
         // the crosshair is set for the original chart already
-        this.plot.setCrosshair({ x: _.get(pos, 'x') });
+        this.plot.setCrosshair({ x: get(pos, 'x') });
       }
       this.props.updateLegend(pos, item);
     };
@@ -170,11 +177,9 @@ export class ChartTarget extends React.Component {
       position: 'relative',
       display: 'flex',
       rowDirection: 'column',
-      flex: '1 0 auto'
+      flex: '1 0 auto',
     };
 
-    return (
-      <div ref="target" style={style} />
-    );
+    return <div ref="target" style={style} />;
   }
 }

@@ -15,11 +15,11 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
   }
 
   public async getTagsWithIds(tagIds: string[]) {
-    return this.tagsDB.filter(tag => tagIds.includes(tag.id));
+    return this.tagsDB.filter((tag) => tagIds.includes(tag.id));
   }
 
   public async delete(tagIds: string[]) {
-    this.tagsDB = this.tagsDB.filter(tag => !tagIds.includes(tag.id));
+    this.tagsDB = this.tagsDB.filter((tag) => !tagIds.includes(tag.id));
     return true;
   }
 
@@ -28,7 +28,7 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
   }
 
   public async upsertTag(tag: BeatTag) {
-    const existingTagIndex = this.tagsDB.findIndex(t => t.id === tag.id);
+    const existingTagIndex = this.tagsDB.findIndex((t) => t.id === tag.id);
     if (existingTagIndex !== -1) {
       this.tagsDB[existingTagIndex] = tag;
     } else {

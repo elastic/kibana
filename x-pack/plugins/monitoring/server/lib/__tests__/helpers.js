@@ -16,13 +16,13 @@ export const response = {
               host: 'beat-listing.test',
               name: 'beat-listing.test-0101',
               type: 'filebeat',
-              version: '6.2.0'
+              version: '6.2.0',
             },
             metrics: {
               beat: {
                 memstats: {
-                  memory_alloc: 2340
-                }
+                  memory_alloc: 2340,
+                },
               },
               libbeat: {
                 output: {
@@ -33,16 +33,16 @@ export const response = {
                   },
                   read: {
                     errors: 3,
-                  }
+                  },
                 },
                 pipeline: {
                   events: {
-                    total: 23000
-                  }
-                }
-              }
-            }
-          }
+                    total: 23000,
+                  },
+                },
+              },
+            },
+          },
         },
         inner_hits: {
           earliest: {
@@ -61,25 +61,25 @@ export const response = {
                             },
                             read: {
                               errors: 1,
-                            }
+                            },
                           },
                           pipeline: {
                             events: {
-                              total: 2300
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        }
-      }
-    ]
-  }
+                              total: 2300,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    ],
+  },
 };
 
 export const defaultResponseSort = (handleResponse) => {

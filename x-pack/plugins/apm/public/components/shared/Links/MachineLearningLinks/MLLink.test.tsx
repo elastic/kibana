@@ -8,38 +8,17 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLLink } from './MLLink';
-import chrome from 'ui/chrome';
-import * as savedObjects from '../../../../services/rest/savedObjects';
-
-jest
-  .spyOn(chrome, 'addBasePath')
-  .mockImplementation(path => `/basepath${path}`);
-
-jest
-  .spyOn(savedObjects, 'getAPMIndexPattern')
-  .mockReturnValue(
-    Promise.resolve({ id: 'apm-index-pattern-id' } as savedObjects.ISavedObject)
-  );
-
-beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => null);
-});
-
-afterAll(() => {
-  jest.restoreAllMocks();
-});
 
 test('MLLink produces the correct URL', async () => {
   const href = await getRenderedHref(
-    () => (
-      <MLLink path="/some/path" query={{ ml: { jobIds: ['something'] } }} />
-    ),
+    () => <MLLink query={{ ml: { jobIds: ['something'] } }} />,
     {
-      search: '?rangeFrom=now-5h&rangeTo=now-2h'
+      search:
+        '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
     } as Location
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"/basepath/app/ml#/some/path?_g=(ml:(jobIds:!(something)),refreshInterval:(pause:true,value:'0'),time:(from:now-5h,to:now-2h))"`
+    `"/app/ml/jobs?_a=(jobs:(queryText:'id:(something)%20groups:(apm)'))&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-5h,to:now-2h))"`
   );
 });

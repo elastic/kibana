@@ -4,53 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+import { CancellationToken } from '../../common';
 import { PLUGIN_ID } from '../../common/constants';
-import {
-  ESQueueInstance,
-  ESQueueWorkerExecuteFn,
-  ExportType,
-  JobDoc,
-  JobSource,
-  KbnServer,
-} from '../../types';
+import { durationToNumber } from '../../common/schema_utils';
+import { ReportingCore } from '../../server';
+import { LevelLogger } from '../../server/lib';
+import { RunTaskFn } from '../../server/types';
+import { ESQueueInstance } from './create_queue';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
-// @ts-ignore untyped dependency
-import { LevelLogger } from './level_logger';
-// @ts-ignore untyped dependency
-import { oncePerServer } from './once_per_server';
+import { ReportDocument } from './store';
+import { ReportTaskParams } from './tasks';
 
-function createWorkerFn(server: KbnServer) {
-  const config = server.config();
-  const queueConfig = config.get('xpack.reporting.queue');
-  const kibanaName = config.get('server.name');
-  const kibanaId = config.get('server.uuid');
-  const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue', 'worker']);
+export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, logger: LevelLogger) {
+  const config = reporting.getConfig();
+  const queueConfig = config.get('queue');
+  const kibanaName = config.kbnConfig.get('server', 'name');
+  const kibanaId = config.kbnConfig.get('server', 'uuid');
 
   // Once more document types are added, this will need to be passed in
-  return function createWorker(queue: ESQueueInstance) {
+  return async function createWorker(queue: ESQueueInstance) {
     // export type / execute job map
-    const jobExectors: Map<string, ESQueueWorkerExecuteFn> = new Map();
+    const jobExecutors: Map<string, RunTaskFn> = new Map();
 
-    for (const exportType of exportTypesRegistry.getAll() as ExportType[]) {
-      const executeJob = exportType.executeJobFactory(server);
-      jobExectors.set(exportType.jobType, executeJob);
+    for (const exportType of reporting.getExportTypesRegistry().getAll()) {
+      const jobExecutor = exportType.runTaskFnFactory(reporting, logger);
+      jobExecutors.set(exportType.jobType, jobExecutor);
     }
 
-    const workerFn = (job: JobSource, jobdoc: JobDoc, cancellationToken: any) => {
-      // pass the work to the jobExecutor
-      const jobExecutor = jobExectors.get(job._source.jobtype);
-      if (!jobExecutor) {
-        throw new Error(`Unable to find a job executor for the claimed job: [${job._id}]`);
+    const workerFn = (
+      jobSource: ReportDocument,
+      payload: ReportTaskParams['payload'],
+      cancellationToken: CancellationToken
+    ) => {
+      const {
+        _id: jobId,
+        _source: { jobtype: jobType },
+      } = jobSource;
+
+      if (!jobId) {
+        throw new Error(`Claimed job is missing an ID!: ${JSON.stringify(jobSource)}`);
       }
-      return jobExecutor(jobdoc, cancellationToken);
+
+      const jobTypeExecutor = jobExecutors.get(jobType);
+      if (!jobTypeExecutor) {
+        throw new Error(`Unable to find a job executor for the claimed job: [${jobId}]`);
+      }
+
+      // pass the work to the jobExecutor
+      return jobTypeExecutor(jobId, payload, cancellationToken);
     };
+
     const workerOptions = {
       kibanaName,
       kibanaId,
-      interval: queueConfig.pollInterval,
+      interval: durationToNumber(queueConfig.pollInterval),
       intervalErrorMultiplier: queueConfig.pollIntervalErrorMultiplier,
     };
     const worker = queue.registerWorker(PLUGIN_ID, workerFn, workerOptions);
@@ -66,5 +74,3 @@ function createWorkerFn(server: KbnServer) {
     });
   };
 }
-
-export const createWorkerFactory = oncePerServer(createWorkerFn);

@@ -16,31 +16,26 @@ describe('StickyProperties', () => {
   it('should render entire component', () => {
     const stickyProperties = [
       {
-        label: 'Timestamp',
-        fieldName: '@timestamp',
-        val: 1536405447640
-      },
-      {
         fieldName: URL_FULL,
         label: 'URL',
         val: 'https://www.elastic.co/test',
-        truncated: true
+        truncated: true,
       },
       {
         label: 'Request method',
         fieldName: 'http.request.method',
-        val: 'GET'
+        val: 'GET',
       },
       {
         label: 'Handled',
         fieldName: 'error.exception.handled',
-        val: String(true)
+        val: String(true),
       },
       {
         label: 'User ID',
         fieldName: USER_ID,
-        val: 1337
-      }
+        val: 1337,
+      },
     ];
 
     const wrapper = shallow(
@@ -51,29 +46,13 @@ describe('StickyProperties', () => {
   });
 
   describe('values', () => {
-    it('should render timestamp when fieldName is `@timestamp`', () => {
-      const stickyProperties = [
-        {
-          label: 'My Timestamp',
-          fieldName: '@timestamp',
-          val: 1536405447640
-        }
-      ];
-
-      const wrapper = shallow(
-        <StickyProperties stickyProperties={stickyProperties} />
-      ).find('TimestampValue');
-
-      expect(wrapper).toMatchSnapshot();
-    });
-
     it('should render numbers', () => {
       const stickyProperties = [
         {
           label: 'My Number',
           fieldName: 'myNumber',
-          val: 1337
-        }
+          val: 1337,
+        },
       ];
 
       const wrapper = shallow(
@@ -91,8 +70,8 @@ describe('StickyProperties', () => {
         {
           label: 'My boolean',
           fieldName: 'myBoolean',
-          val: true
-        }
+          val: true,
+        },
       ];
 
       const wrapper = shallow(
@@ -110,8 +89,8 @@ describe('StickyProperties', () => {
         {
           label: 'My Component',
           fieldName: 'myComponent',
-          val: <h1>My header</h1>
-        }
+          val: <h1>My header</h1>,
+        },
       ];
 
       const wrapper = shallow(

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '../../../../../../test_utils/enzyme_helpers';
+import { renderWithIntl } from '@kbn/test/jest';
 import { PageLoading } from '../';
 
 describe('PageLoading', () => {
@@ -13,4 +13,3 @@ describe('PageLoading', () => {
     expect(renderWithIntl(<PageLoading />)).toMatchSnapshot();
   });
 });
-

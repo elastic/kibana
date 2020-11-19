@@ -1,0 +1,205 @@
+[role="xpack"]
+[[alerting-getting-started]]
+= Alerting and Actions
+
+beta[]
+
+--
+
+Alerting allows you to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>>, can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, actions>> and <<alert-types, alerts>> (known as stack alerts) for you to use.
+
+image::images/alerting-overview.png[Alerts and actions UI]
+
+[IMPORTANT]
+==============================================
+To make sure you can access alerting and actions, see the <<alerting-setup-prerequisites, setup and pre-requisites>> section.
+==============================================
+
+[float]
+== Concepts and terminology
+
+*Alerts* work by running checks on a schedule to detect conditions. When a condition is met, the alert tracks it as an *alert instance* and responds by triggering one or more *actions*. 
+Actions typically involve interaction with {kib} services or third party integrations. *Connectors* allow actions to talk to these services and integrations. 
+This section describes all of these elements and how they operate together. 
+
+[float]
+=== What is an alert?
+
+An alert specifies a background task that runs on the {kib} server to check for specific conditions. It consists of three main parts: 
+
+* *Conditions*: what needs to be detected?
+* *Schedule*: when/how often should detection checks run?
+* *Actions*: what happens when a condition is detected?
+
+For example, when monitoring a set of servers, an alert might check for average CPU usage > 0.9 on each server for the two minutes (condition), checked every minute (schedule), sending a warning email message via SMTP with subject `CPU on {{server}} is high` (action).
+
+image::images/what-is-an-alert.svg[Three components of an alert]
+
+The following sections each part of the alert is described in more detail.
+
+[float]
+[[alerting-concepts-conditions]]
+==== Conditions
+
+Under the hood, {kib} alerts detect conditions by running javascript function on the {kib} server, which gives it flexibility to support a wide range of detections, anything from the results of a simple {es} query to heavy computations involving data from multiple sources or external systems. 
+
+These detections are packaged and exposed as *alert types*. An alert type hides the underlying details of the detection, and exposes a set of parameters
+to control the details of the conditions to detect. 
+
+For example, an <<alert-types, index threshold alert type>> lets you specify the index to query, an aggregation field, and a time window, but the details of the underlying {es} query are hidden.
+
+See <<alert-types>> for the types of alerts provided by {kib} and how they express their conditions.
+
+[float]
+[[alerting-concepts-scheduling]]
+==== Schedule
+
+Alert schedules are defined as an interval between subsequent checks, and can range from a few seconds to months. 
+
+[IMPORTANT]
+==============================================
+The intervals of alert checks in {kib} are approximate, their timing of their execution is affected by factors such as the frequency at which tasks are claimed and the task load on the system. See <<alerting-scale-performance>> for more information. 
+==============================================
+
+[float]
+[[alerting-concepts-actions]]
+==== Actions
+
+Actions are invocations of {kib} services or integrations with third-party systems, that run as background tasks on the {kib} server when alert conditions are met. 
+
+When defining actions in an alert, you specify:
+
+* the *action type*: the type of service or integration to use
+* the connection for that type by referencing a  <<alerting-concepts-connectors, connector>>
+* a mapping of alert values to properties exposed for that type of action
+
+The result is a template: all the parameters needed to invoke a service are supplied except for specific values that are only known at the time the alert condition is detected. 
+
+In the server monitoring example, the `email` action type is used, and `server` is mapped to the body of the email, using the template string `CPU on {{server}} is high`.
+
+When the alert detects the condition, it creates an <<alerting-concepts-alert-instances, alert instance>> containing the details of the condition, renders the template with these details such as server name, and executes the action on the {kib} server by invoking the `email` action type. 
+
+image::images/what-is-an-action.svg[Actions are like templates that are rendered when an alert detects a condition]
+
+See <<action-types>> for details on the types of actions provided by {kib}. 
+
+[float]
+[[alerting-concepts-alert-instances]]
+=== Alert instances
+
+When checking for a condition, an alert might identify multiple occurrences of the condition. {kib} tracks each of these *alert instances* separately and takes action per instance. 
+
+Using the server monitoring example, each server with average CPU > 0.9 is tracked as an alert instance. This means a separate email is sent for each server that exceeds the threshold. 
+
+image::images/alert-instances.svg[{kib} tracks each detected condition as an alert instance and takes action on each instance]
+
+[float]
+[[alerting-concepts-suppressing-duplicate-notifications]]
+=== Suppressing duplicate notifications
+
+Since actions are taken per instance, alerts can end up generating a large number of actions. Take the following example where an alert is monitoring three servers every minute for CPU usage > 0.9: 
+
+* Minute 1: server X123 > 0.9. *One email* is sent for server X123. 
+* Minute 2: X123 and Y456 > 0.9. *Two emails* are sent, on for X123 and one for Y456.
+* Minute 3: X123, Y456, Z789 > 0.9. *Three emails* are sent, one for each of X123, Y456, Z789.
+
+In the above example, three emails are sent for server X123 in the span of 3 minutes for the same condition. Often it's desirable to suppress frequent re-notification. Operations like muting and re-notification throttling can be applied at the instance level. If we set the alert re-notify interval to 5 minutes, we reduce noise by only getting emails for new servers that exceed the threshold: 
+
+* Minute 1: server X123 > 0.9. *One email* is sent for server X123.
+* Minute 2: X123 and Y456 > 0.9. *One email* is sent for Y456 
+* Minute 3: X123, Y456, Z789 > 0.9. *One email* is sent for Z789. 
+
+[float]
+[[alerting-concepts-connectors]]
+=== Connectors
+
+Actions often involve connecting with services inside {kib} or integrations with third-party systems.
+Rather than repeatedly entering connection information and credentials for each action, {kib} simplifies action setup using *connectors*. 
+
+*Connectors* provide a central place to store connection information for services and integrations. For example if four alerts send email notifications via the same SMTP service, 
+they all reference the same SMTP connector. When the SMTP settings change they are updated once in the connector, instead of having to update four alerts. 
+
+image::images/alert-concepts-connectors.svg[Connectors provide a central place to store service connection settings]
+
+[float]
+=== Summary
+
+An _alert_ consists of conditions, _actions_, and a schedule. When conditions are met, _alert instances_ are created that render _actions_ and invoke them. To make action setup and update easier, actions refer to _connectors_ that centralize the information used to connect with {kib} services and third-party integrations.
+
+image::images/alert-concepts-summary.svg[Alerts, actions, alert instances and connectors work together to convert detection into action]
+
+* *Alert*: a specification of the conditions to be detected, the schedule for detection, and the response when detection occurs. 
+* *Action*: the response to a detected condition defined in the alert. Typically actions specify a service or third party integration along with alert details that will be sent to it. 
+* *Alert instance*: state tracked by {kib} for every occurrence of a detected condition. Actions as well as controls like muting and re-notification are controlled at the instance level. 
+* *Connector*: centralized configurations for services and third party integration that are referenced by actions. 
+
+[float]
+[[alerting-concepts-differences]]
+== Differences from Watcher
+
+{kib} alerting and <<watcher-ui, {es} alerting>> are both used to detect conditions and can trigger actions in response, but they are completely independent alerting systems.
+
+This section will clarify some of the important differences in the function and intent of the two systems. 
+
+Functionally, {kib} alerting differs in that: 
+
+* Scheduled checks are run on {kib} instead of {es}
+* {kib} <<alerting-concepts-conditions, alerts hide the details of detecting conditions>> through *alert types*, whereas watches provide low-level control over inputs, conditions, and transformations. 
+* {kib} alerts tracks and persists the state of each detected condition through *alert instances*. This makes it possible to mute and throttle individual instances, and detect changes in state such as resolution. 
+* Actions are linked to *alert instances* in {kib} alerting. Actions are fired for each occurrence of a detected condition, rather than for the entire alert. 
+
+At a higher level, {kib} alerts allow rich integrations across use cases like <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, and <<uptime-app,*Uptime*>>.
+Pre-packaged *alert types* simplify setup, hide the details complex domain-specific detections, while providing a consistent interface across {kib}.
+
+[float]
+[[alerting-setup-prerequisites]]
+== Setup and prerequisites
+
+If you are using an *on-premises* Elastic Stack deployment:
+
+* In the kibana.yml configuration file, add the <<alert-action-settings-kb,`xpack.encryptedSavedObjects.encryptionKey`>> setting.
+
+If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
+
+* You must enable Transport Layer Security (TLS) for communication <<configuring-tls-kib-es, between {es} and {kib}>>. {kib} alerting uses <<api-keys, API keys>> to secure background alert checks and actions, and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface]. A proxy will not suffice.
+
+[float]
+[[alerting-security]]
+== Security
+
+To access alerting in a space, a user must have access to one of the following features:
+
+* Alerting
+* <<xpack-apm,*APM*>>
+* <<logs-app,*Logs*>>
+* <<metrics-app,*Metrics*>>
+* <<xpack-siem,*Security*>>
+* <<uptime-app,*Uptime*>>
+
+See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to these features.
+Also note that a user will need +read+ privileges for the *Actions and Connectors* feature to attach actions to an alert or to edit an alert that has an action attached to it.
+
+[float]
+[[alerting-spaces]]
+=== Space isolation
+
+Alerts and connectors are isolated to the {kib} space in which they were created. An alert or connector created in one space will not be visible in another. 
+
+[float]
+[[alerting-authorization]]
+=== Authorization
+
+Alerts, including all background detection and the actions they generate are authorized using an <<api-keys, API key>> associated with the last user to edit the alert. Upon creating or modifying an alert, an API key is generated for that user, capturing a snapshot of their privileges at that moment in time. The API key is then used to run all background tasks associated with the alert including detection checks and executing actions. 
+
+[IMPORTANT]
+==============================================
+If an alert requires certain privileges to run such as index privileges, keep in mind that if a user without those privileges updates the alert, the alert will no longer function.  
+==============================================
+
+[float]
+[[alerting-restricting-actions]]
+=== Restricting actions
+
+For security reasons you may wish to limit the extent to which {kib} can connect to external services. <<action-settings>> allows you to disable certain <<action-types>> and whitelist the hostnames that {kib} can connect with. 
+
+--

@@ -4,138 +4,230 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import Joi from 'joi';
-import { CoreSetup } from 'src/core/server';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import * as t from 'io-ts';
+import Boom from '@hapi/boom';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getChartsData } from '../lib/transactions/charts';
-import { getDistribution } from '../lib/transactions/distribution';
-import { getTopTransactions } from '../lib/transactions/get_top_transactions';
+import { getTransactionCharts } from '../lib/transactions/charts';
+import { getTransactionDistribution } from '../lib/transactions/distribution';
+import { getTransactionBreakdown } from '../lib/transactions/breakdown';
+import { getTransactionGroupList } from '../lib/transaction_groups';
+import { createRoute } from './create_route';
+import { uiFiltersRt, rangeRt } from './default_api_types';
+import { getTransactionSampleForGroup } from '../lib/transaction_groups/get_transaction_sample_for_group';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
 
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
+export const transactionGroupsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/transaction_groups',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.type({
+        transactionType: t.string,
+      }),
+      uiFiltersRt,
+      rangeRt,
+    ]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionType } = context.params.query;
 
-export function initTransactionGroupsApi(core: CoreSetup) {
-  const { server } = core.http;
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
-  server.route({
-    method: 'GET',
-    path:
-      '/api/apm/services/{serviceName}/transaction_groups/{transactionType}',
-    options: {
-      validate: {
-        query: withDefaultValidators({
-          query: Joi.string()
-        })
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const { serviceName, transactionType } = req.params;
-      const setup = setupRequest(req);
-
-      return getTopTransactions({
+    return getTransactionGroupList(
+      {
+        type: 'top_transactions',
         serviceName,
         transactionType,
-        setup
-      }).catch(defaultErrorHandler);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `/api/apm/services/{serviceName}/transaction_groups/{transactionType}/charts`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
+        searchAggregatedTransactions,
       },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName, transactionType } = req.params;
+      setup
+    );
+  },
+});
 
-      return getChartsData({
-        serviceName,
-        transactionType,
-        setup
-      }).catch(defaultErrorHandler);
+export const transactionGroupsChartsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/transaction_groups/charts',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.partial({
+        transactionType: t.string,
+        transactionName: t.string,
+      }),
+      uiFiltersRt,
+      rangeRt,
+    ]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const logger = context.logger;
+    const { serviceName } = context.params.path;
+    const { transactionType, transactionName } = context.params.query;
+
+    if (!setup.uiFilters.environment) {
+      throw Boom.badRequest(
+        `environment is a required property of the ?uiFilters JSON for transaction_groups/charts.`
+      );
     }
-  });
 
-  server.route({
-    method: 'GET',
-    path: `/api/apm/services/{serviceName}/transaction_groups/charts`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName } = req.params;
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
-      return getChartsData({
+    const options = {
+      serviceName,
+      transactionType,
+      transactionName,
+      setup,
+      searchAggregatedTransactions,
+      logger,
+    };
+
+    return getTransactionCharts(options);
+  },
+});
+
+export const transactionGroupsDistributionRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/transaction_groups/distribution',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.type({
+        transactionType: t.string,
+        transactionName: t.string,
+      }),
+      t.partial({
+        transactionId: t.string,
+        traceId: t.string,
+      }),
+      uiFiltersRt,
+      rangeRt,
+    ]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const {
+      transactionType,
+      transactionName,
+      transactionId = '',
+      traceId = '',
+    } = context.params.query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getTransactionDistribution({
+      serviceName,
+      transactionType,
+      transactionName,
+      transactionId,
+      traceId,
+      setup,
+      searchAggregatedTransactions,
+    });
+  },
+});
+
+export const transactionGroupsBreakdownRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/transaction_groups/breakdown',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.type({
+        transactionType: t.string,
+      }),
+      t.partial({
+        transactionName: t.string,
+      }),
+      uiFiltersRt,
+      rangeRt,
+    ]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionName, transactionType } = context.params.query;
+
+    return getTransactionBreakdown({
+      serviceName,
+      transactionName,
+      transactionType,
+      setup,
+    });
+  },
+});
+
+export const transactionSampleForGroupRoute = createRoute({
+  endpoint: `GET /api/apm/transaction_sample`,
+  params: t.type({
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      t.type({ serviceName: t.string, transactionName: t.string }),
+    ]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const { transactionName, serviceName } = context.params.query;
+
+    return {
+      transaction: await getTransactionSampleForGroup({
+        setup,
         serviceName,
-        setup
-      }).catch(defaultErrorHandler);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `/api/apm/services/{serviceName}/transaction_groups/{transactionType}/{transactionName}/charts`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName, transactionType, transactionName } = req.params;
-
-      return getChartsData({
-        serviceName,
-        transactionType,
         transactionName,
-        setup
-      }).catch(defaultErrorHandler);
-    }
-  });
+      }),
+    };
+  },
+});
 
-  server.route({
-    method: 'GET',
-    path: `/api/apm/services/{serviceName}/transaction_groups/{transactionType}/{transactionName}/distribution`,
-    options: {
-      validate: {
-        query: withDefaultValidators({
-          transactionId: Joi.string().default(''),
-          traceId: Joi.string().default('')
-        })
-      },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName, transactionType, transactionName } = req.params;
-      const { transactionId, traceId } = req.query as {
-        transactionId: string;
-        traceId: string;
-      };
-      return getDistribution(
-        serviceName,
-        transactionName,
-        transactionType,
-        transactionId,
-        traceId,
-        setup
-      ).catch(defaultErrorHandler);
-    }
-  });
-}
+export const transactionGroupsErrorRateRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/transaction_groups/error_rate',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      t.partial({
+        transactionType: t.string,
+        transactionName: t.string,
+      }),
+    ]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { params } = context;
+    const { serviceName } = params.path;
+    const { transactionType, transactionName } = params.query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getErrorRate({
+      serviceName,
+      transactionType,
+      transactionName,
+      setup,
+      searchAggregatedTransactions,
+    });
+  },
+});

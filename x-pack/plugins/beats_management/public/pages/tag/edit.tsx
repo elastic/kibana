@@ -54,7 +54,7 @@ class TagEditPageComponent extends React.PureComponent<
     };
   }
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     this.loadTag();
     this.loadAttachedBeats();
     this.loadConfigBlocks();
@@ -84,15 +84,15 @@ class TagEditPageComponent extends React.PureComponent<
               await this.loadAttachedBeats();
             }}
             onTagChange={(field: string, value: string | number) =>
-              this.setState(oldState => ({
+              this.setState((oldState) => ({
                 tag: { ...oldState.tag, [field]: value },
               }))
             }
             attachedBeats={
-              (this.state.attachedBeats || []).map(beat => ({
+              (this.state.attachedBeats || []).map((beat) => ({
                 ...beat,
                 tags: flatten(
-                  beat.tags.map(tagId => this.state.beatsTags.filter(tag => tag.id === tagId))
+                  beat.tags.map((tagId) => this.state.beatsTags.filter((tag) => tag.id === tagId))
                 ),
               })) as any
             }
@@ -182,7 +182,7 @@ class TagEditPageComponent extends React.PureComponent<
   private loadAttachedBeats = async () => {
     const beats = await this.props.libs.beats.getBeatsWithTag(this.props.match.params.tagid);
     const beatsTags = await this.props.libs.tags.getTagsWithIds(
-      flatten(beats.map(beat => beat.tags))
+      flatten(beats.map((beat) => beat.tags))
     );
     this.setState({
       attachedBeats: beats,
@@ -195,7 +195,7 @@ class TagEditPageComponent extends React.PureComponent<
   };
   private getNumExclusiveConfigurationBlocks = () =>
     this.state.configuration_blocks.list
-      .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some(uniqueType => uniqueType === type))
+      .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some((uniqueType) => uniqueType === type))
       .reduce((acc, cur) => (cur ? acc + 1 : acc), 0);
 }
 

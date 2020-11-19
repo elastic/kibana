@@ -7,13 +7,12 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
-import euiStyled, { keyframes } from '../../../../../../common/eui_styled_components';
+import { euiStyled, keyframes } from '../../../../../observability/public';
 import { LogEntryTime } from '../../../../common/log_entry';
-import { SearchSummaryBucket } from '../../../../common/log_search_summary';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
-
+import { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api';
 interface SearchMarkerProps {
-  bucket: SearchSummaryBucket;
+  bucket: LogEntriesSummaryHighlightsBucket;
   height: number;
   width: number;
   jumpToTarget: (target: LogEntryTime) => void;
@@ -24,17 +23,17 @@ interface SearchMarkerState {
 }
 
 export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchMarkerState> {
-  public readonly state = {
+  public readonly state: SearchMarkerState = {
     hoveredPosition: null,
   };
 
-  public handleClick: React.MouseEventHandler<SVGGElement> = evt => {
+  public handleClick: React.MouseEventHandler<SVGGElement> = (evt) => {
     evt.stopPropagation();
 
-    this.props.jumpToTarget(this.props.bucket.representative.fields);
+    this.props.jumpToTarget(this.props.bucket.representativeKey);
   };
 
-  public handleMouseEnter: React.MouseEventHandler<SVGGElement> = evt => {
+  public handleMouseEnter: React.MouseEventHandler<SVGGElement> = (evt) => {
     this.setState({
       hoveredPosition: evt.currentTarget.getBoundingClientRect(),
     });
@@ -51,7 +50,7 @@ export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchM
     const { hoveredPosition } = this.state;
 
     const bulge =
-      bucket.count > 1 ? (
+      bucket.entriesCount > 1 ? (
         <SearchMarkerForegroundRect x="-2" y="-2" width="4" height={height + 2} rx="2" ry="2" />
       ) : (
         <>
@@ -73,9 +72,9 @@ export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchM
           <SearchMarkerTooltip markerPosition={hoveredPosition}>
             <FormattedMessage
               id="xpack.infra.logs.searchResultTooltip"
-              defaultMessage="{bucketCount, plural, one {# search result} other {# search results}}"
+              defaultMessage="{bucketCount, plural, one {# highlighted entry} other {# highlighted entries}}"
               values={{
-                bucketCount: bucket.count,
+                bucketCount: bucket.entriesCount,
               }}
             />
           </SearchMarkerTooltip>
@@ -103,19 +102,20 @@ const fadeInAnimation = keyframes`
 `;
 
 const SearchMarkerGroup = euiStyled.g`
-  animation: ${fadeInAnimation} ${props => props.theme.eui.euiAnimSpeedExtraSlow} ease-in both;
+  animation: ${fadeInAnimation} ${(props) => props.theme.eui.euiAnimSpeedExtraSlow} ease-in both;
 `;
 
 const SearchMarkerBackgroundRect = euiStyled.rect`
-  fill: ${props => props.theme.eui.euiColorSecondary};
+  fill: ${(props) => props.theme.eui.euiColorAccent};
   opacity: 0;
-  transition: opacity ${props => props.theme.eui.euiAnimSpeedNormal} ease-in;
+  transition: opacity ${(props) => props.theme.eui.euiAnimSpeedNormal} ease-in;
+  cursor: pointer;
 
   ${SearchMarkerGroup}:hover & {
-    opacity: 0.2;
+    opacity: 0.3;
   }
 `;
 
 const SearchMarkerForegroundRect = euiStyled.rect`
-  fill: ${props => props.theme.eui.euiColorSecondary};
+  fill: ${(props) => props.theme.eui.euiColorAccent};
 `;

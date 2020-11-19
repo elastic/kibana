@@ -9,55 +9,53 @@ import { find } from 'lodash';
 import { Fields } from '../fields';
 
 describe('fields', () => {
-
   describe('Fields', () => {
-
     let upstreamJson;
     beforeEach(() => {
       upstreamJson = {
-        'fields': {
+        fields: {
           'field-foo': {
-            'text': {
-              'type': 'text',
-              'searchable': true,
-              'aggregatable': false
-            }
+            text: {
+              type: 'text',
+              searchable: true,
+              aggregatable: false,
+            },
           },
           'field-bar': {
-            'boolean': {
-              'type': 'boolean',
-              'searchable': true,
-              'aggregatable': true
+            boolean: {
+              type: 'boolean',
+              searchable: true,
+              aggregatable: true,
             },
-            'integer': {
-              'type': 'integer',
-              'searchable': true,
-              'aggregatable': true
-            }
+            integer: {
+              type: 'integer',
+              searchable: true,
+              aggregatable: true,
+            },
           },
           'field-baz': {
-            '_footype': {
-              'type': '_footype',
-              'searchable': true,
-              'aggregatable': true
-            }
+            _footype: {
+              type: '_footype',
+              searchable: true,
+              aggregatable: true,
+            },
           },
           'field-bop': {
-            'integer': {
-              'type': 'integer',
-              'searchable': true,
-              'aggregatable': true
-            }
+            integer: {
+              type: 'integer',
+              searchable: true,
+              aggregatable: true,
+            },
           },
-        }
+        },
       };
     });
 
     describe('fromUpstreamJson factory method', () => {
-
       it(`throws an error if no 'fields' property in json`, () => {
         delete upstreamJson.fields;
-        expect(Fields.fromUpstreamJson).withArgs(upstreamJson)
+        expect(Fields.fromUpstreamJson)
+          .withArgs(upstreamJson)
           .to.throwError(/must contain a fields property/i);
       });
 
@@ -98,25 +96,20 @@ describe('fields', () => {
           type: 'text',
           normalizedType: 'text',
           searchable: true,
-          aggregatable: false
+          aggregatable: false,
         };
 
         expect(actual).to.eql(expected);
       });
-
     });
 
     describe('downstreamJson getter method', () => {
-
       it('returns correct JSON for client', () => {
         const fields = Fields.fromUpstreamJson(upstreamJson);
         const json = fields.downstreamJson;
 
         expect(json.fields).to.eql(fields.fields);
       });
-
     });
-
   });
-
 });

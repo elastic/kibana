@@ -1,0 +1,23 @@
+{
+  "id": "spaces",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "spaces"],
+  "requiredPlugins": ["features", "licensing"],
+  "optionalPlugins": [
+    "advancedSettings",
+    "home",
+    "management",
+    "security",
+    "usageCollection",
+    "savedObjectsManagement"
+  ],
+  "server": true,
+  "ui": true,
+  "extraPublicDirs": ["common"],
+  "requiredBundles": [
+    "kibanaReact",
+    "savedObjectsManagement",
+    "home"
+  ]
+}

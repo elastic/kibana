@@ -4,84 +4,93 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isNumber, round, sortBy } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
+import { isNumber, sortBy } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
-export interface ApmTimeSeriesResponse {
-  totalHits: number;
-  responseTimes: {
-    avg: Coordinate[];
-    p95: Coordinate[];
-    p99: Coordinate[];
-  };
-  tpmBuckets: Array<{
-    key: string;
-    dataPoints: Coordinate[];
-  }>;
-  overallAvgDuration?: number;
-}
+export type ApmTimeSeriesResponse = ReturnType<typeof timeseriesTransformer>;
 
 export function timeseriesTransformer({
   timeseriesResponse,
-  bucketSize
+  bucketSize,
+  durationAsMinutes,
 }: {
   timeseriesResponse: ESResponse;
   bucketSize: number;
-}): ApmTimeSeriesResponse {
+  durationAsMinutes: number;
+}) {
   const aggs = timeseriesResponse.aggregations;
-  const overallAvgDuration = idx(aggs, _ => _.overall_avg_duration.value);
-  const responseTimeBuckets = idx(aggs, _ => _.response_times.buckets);
+  const overallAvgDuration = aggs?.overall_avg_duration.value || null;
+  const responseTimeBuckets = aggs?.response_times.buckets || [];
   const { avg, p95, p99 } = getResponseTime(responseTimeBuckets);
-  const transactionResultBuckets = idx(
-    aggs,
-    _ => _.transaction_results.buckets
-  );
-  const tpmBuckets = getTpmBuckets(transactionResultBuckets, bucketSize);
+  const transactionResultBuckets = aggs?.transaction_results.buckets || [];
+  const tpmBuckets = getTpmBuckets({
+    transactionResultBuckets,
+    bucketSize,
+    durationAsMinutes,
+  });
 
   return {
-    totalHits: timeseriesResponse.hits.total,
     responseTimes: {
       avg,
       p95,
-      p99
+      p99,
     },
     tpmBuckets,
-    overallAvgDuration
+    overallAvgDuration,
   };
 }
 
-export function getTpmBuckets(
-  transactionResultBuckets: ESResponse['aggregations']['transaction_results']['buckets'] = [],
-  bucketSize: number
-) {
+type TransactionResultBuckets = Required<
+  ESResponse
+>['aggregations']['transaction_results']['buckets'];
+
+export function getTpmBuckets({
+  transactionResultBuckets = [],
+  bucketSize,
+  durationAsMinutes,
+}: {
+  transactionResultBuckets: TransactionResultBuckets;
+  bucketSize: number;
+  durationAsMinutes: number;
+}) {
   const buckets = transactionResultBuckets.map(
     ({ key: resultKey, timeseries }) => {
-      const dataPoints = timeseries.buckets.map(bucket => {
+      const dataPoints = timeseries.buckets.map((bucket) => {
         return {
           x: bucket.key,
-          y: round(bucket.doc_count * (60 / bucketSize), 1)
+          // divide by minutes
+          y: bucket.count.value / (bucketSize / 60),
         };
       });
 
       // Handle empty string result keys
-      const key = resultKey === '' ? NOT_AVAILABLE_LABEL : resultKey;
+      const key =
+        resultKey === '' ? NOT_AVAILABLE_LABEL : (resultKey as string);
 
-      return { key, dataPoints };
+      const docCountTotal = timeseries.buckets
+        .map((bucket) => bucket.count.value)
+        .reduce((a, b) => a + b, 0);
+
+      // calculate request/minute
+      const avg = docCountTotal / durationAsMinutes;
+
+      return { key, dataPoints, avg };
     }
   );
 
   return sortBy(
     buckets,
-    bucket => bucket.key.replace(/^HTTP (\d)xx$/, '00$1') // ensure that HTTP 3xx are sorted at the top
+    (bucket) => bucket.key.toString().replace(/^HTTP (\d)xx$/, '00$1') // ensure that HTTP 3xx are sorted at the top
   );
 }
 
-function getResponseTime(
-  responseTimeBuckets: ESResponse['aggregations']['response_times']['buckets'] = []
-) {
+type ResponseTimeBuckets = Required<
+  ESResponse
+>['aggregations']['response_times']['buckets'];
+
+function getResponseTime(responseTimeBuckets: ResponseTimeBuckets = []) {
   return responseTimeBuckets.reduce(
     (acc, bucket) => {
       const { '95.0': p95, '99.0': p99 } = bucket.pct.values;
@@ -94,7 +103,7 @@ function getResponseTime(
     {
       avg: [] as Coordinate[],
       p95: [] as Coordinate[],
-      p99: [] as Coordinate[]
+      p99: [] as Coordinate[],
     }
   );
 }

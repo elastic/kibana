@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
-  const PageObjects = getPageObjects(['common', 'console', 'security']);
+  const security = getService('security');
+  const PageObjects = getPageObjects(['common', 'console', 'security', 'error']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const grokDebugger = getService('grokDebugger');
@@ -65,10 +63,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('shows Dev Tools navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
-          'Dev Tools',
-          'Management',
-        ]);
+        expect(navLinks.map((link) => link.text)).to.eql(['Dev Tools']);
       });
 
       describe('console', () => {
@@ -91,7 +86,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
 
         it(`can navigate to search profiler`, async () => {
-          await testSubjects.existOrFail('searchProfiler');
+          await testSubjects.existOrFail('searchprofiler');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -148,10 +143,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`shows 'Dev Tools' navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Dev Tools', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Dev Tools']);
       });
 
       describe('console', () => {
@@ -174,7 +167,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
 
         it(`can navigate to search profiler`, async () => {
-          await testSubjects.existOrFail('searchProfiler');
+          await testSubjects.existOrFail('searchprofiler');
         });
 
         it(`shows read-only badge`, async () => {
@@ -235,25 +228,31 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(navLinks.map((navLink: any) => navLink.text)).to.not.contain(['Dev Tools']);
       });
 
-      it(`navigating to console redirect to homepage`, async () => {
+      it(`navigating to console shows 403`, async () => {
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`navigating to search profiler redirect to homepage`, async () => {
+      it(`navigating to search profiler shows 403`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`navigating to grok debugger redirect to homepage`, async () => {
+      it(`navigating to grok debugger shows 403`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        await PageObjects.error.expectForbidden();
       });
     });
   });

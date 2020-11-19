@@ -19,9 +19,7 @@
 
 var isRoot = require('./is_root');
 
-
 describe('isRoot', function () {
-
   test('0 is root', function () {
     expect(isRoot(0)).toBeTruthy();
   });

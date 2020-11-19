@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize, get } from 'lodash';
+import { upperFirst, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query.js';
 import { getDiffCalculation } from './_beats_stats';
 
 export function handleResponse(response, beatUuid) {
-  const firstStats = get(response, 'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats');
+  const firstStats = get(
+    response,
+    'hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats'
+  );
   const stats = get(response, 'hits.hits[0]._source.beats_stats');
 
   const eventsTotalFirst = get(firstStats, 'metrics.libbeat.pipeline.events.total', null);
@@ -30,8 +33,8 @@ export function handleResponse(response, beatUuid) {
     transportAddress: get(stats, 'beat.host', null),
     version: get(stats, 'beat.version', null),
     name: get(stats, 'beat.name', null),
-    type: capitalize(get(stats, 'beat.type')) || null,
-    output: capitalize(get(stats, 'metrics.libbeat.output.type')) || null,
+    type: upperFirst(get(stats, 'beat.type')) || null,
+    output: upperFirst(get(stats, 'metrics.libbeat.output.type')) || null,
     configReloads: get(stats, 'metrics.libbeat.config.reloads', null),
     uptime: get(stats, 'metrics.beat.info.uptime.ms', null),
     eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),
@@ -43,12 +46,14 @@ export function handleResponse(response, beatUuid) {
   };
 }
 
-export async function getBeatSummary(req, beatsIndexPattern, { clusterUuid, beatUuid, start, end }) {
+export async function getBeatSummary(
+  req,
+  beatsIndexPattern,
+  { clusterUuid, beatUuid, start, end }
+) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in beats/getBeatSummary');
 
-  const filters = [
-    { term: { 'beats_stats.beat.uuid': beatUuid } }
-  ];
+  const filters = [{ term: { 'beats_stats.beat.uuid': beatUuid } }];
   const params = {
     index: beatsIndexPattern,
     size: 1,
@@ -73,22 +78,22 @@ export async function getBeatSummary(req, beatsIndexPattern, { clusterUuid, beat
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
     ],
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createBeatsQuery({
         start,
         end,
         clusterUuid,
-        filters
+        filters,
       }),
       collapse: {
         field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restart
         inner_hits: {
           name: 'first_hit',
           size: 1,
-          sort: { 'beats_stats.timestamp': 'asc' }
-        }
-      }
-    }
+          sort: { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
+        },
+      },
+    },
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

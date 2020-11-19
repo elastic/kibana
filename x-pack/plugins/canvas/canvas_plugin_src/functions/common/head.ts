@@ -5,24 +5,22 @@
  */
 
 import { take } from 'lodash';
-import { ContextFunction, Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   count: number;
 }
 
-export function head(): ContextFunction<'head', Datatable, Arguments, Datatable> {
+export function head(): ExpressionFunctionDefinition<'head', Datatable, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().head;
 
   return {
     name: 'head',
     aliases: [],
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       count: {
         aliases: ['_'],
@@ -31,9 +29,9 @@ export function head(): ContextFunction<'head', Datatable, Arguments, Datatable>
         default: 1,
       },
     },
-    fn: (context, args) => ({
-      ...context,
-      rows: take(context.rows, args.count),
+    fn: (input, args) => ({
+      ...input,
+      rows: take(input.rows, args.count),
     }),
   };
 }

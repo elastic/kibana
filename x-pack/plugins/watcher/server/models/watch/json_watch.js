@@ -7,6 +7,7 @@
 import { isEmpty, cloneDeep, has, merge } from 'lodash';
 import { BaseWatch } from './base_watch';
 import { WATCH_TYPES } from '../../../common/constants';
+import { serializeJsonWatch } from '../../../common/lib/serialization';
 
 export class JsonWatch extends BaseWatch {
   // This constructor should not be used directly.
@@ -19,30 +20,14 @@ export class JsonWatch extends BaseWatch {
   }
 
   get watchJson() {
-    const result = merge(
-      {},
-      super.watchJson,
-      this.watch
-    );
-
-    return result;
-  }
-
-  // To Elasticsearch
-  get upstreamJson() {
-    const result = super.upstreamJson;
-    return result;
+    return serializeJsonWatch(this.name, this.watch);
   }
 
   // To Kibana
   get downstreamJson() {
-    const result = merge(
-      {},
-      super.downstreamJson,
-      {
-        watch: this.watch
-      }
-    );
+    const result = merge({}, super.downstreamJson, {
+      watch: this.watch,
+    });
 
     return result;
   }
@@ -63,30 +48,21 @@ export class JsonWatch extends BaseWatch {
       delete watch.metadata;
     }
 
-    const props = merge(
-      {},
-      baseProps,
-      {
-        type: WATCH_TYPES.JSON,
-        watch
-      }
-    );
+    const props = merge({}, baseProps, {
+      type: WATCH_TYPES.JSON,
+      watch,
+    });
 
     return new JsonWatch(props);
   }
 
   // From Kibana
   static fromDownstreamJson(json) {
-    const props = merge(
-      {},
-      super.getPropsFromDownstreamJson(json),
-      {
-        type: WATCH_TYPES.JSON,
-        watch: json.watch
-      }
-    );
+    const props = merge({}, super.getPropsFromDownstreamJson(json), {
+      type: WATCH_TYPES.JSON,
+      watch: json.watch,
+    });
 
     return new JsonWatch(props);
   }
-
 }

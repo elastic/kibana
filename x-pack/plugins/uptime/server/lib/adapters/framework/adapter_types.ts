@@ -4,48 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GraphQLOptions } from 'apollo-server-core';
-import { GraphQLSchema } from 'graphql';
-import { Lifecycle, ResponseToolkit } from 'hapi';
-import { RouteOptions } from 'hapi';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import {
+  IRouter,
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+  IScopedClusterClient,
+  ElasticsearchClient,
+} from 'src/core/server';
+import { UMKibanaRoute } from '../../../rest_api';
+import { PluginSetupContract } from '../../../../../features/server';
+import { DynamicSettings } from '../../../../common/runtime_types';
+import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 
-export interface UMFrameworkRequest {
-  user: string;
-  headers: Record<string, any>;
-  payload: Record<string, any>;
-  params: Record<string, any>;
-  query: Record<string, any>;
+export type UMElasticsearchQueryFn<P, R = any> = (
+  params: {
+    callES: ElasticsearchClient;
+    esClient?: IScopedClusterClient;
+    dynamicSettings: DynamicSettings;
+  } & P
+) => Promise<R>;
+
+export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
+  client: SavedObjectsClientContract | ISavedObjectsRepository,
+  params?: P
+) => Promise<T> | T;
+
+export interface UptimeCoreSetup {
+  router: IRouter;
 }
 
-export type UMFrameworkResponse = Lifecycle.ReturnValue;
-
-export interface UMFrameworkRouteOptions<
-  RouteRequest extends UMFrameworkRequest,
-  RouteResponse extends UMFrameworkResponse
-> {
-  path: string;
-  method: string;
-  handler: (req: Request, h: ResponseToolkit) => any;
-  config?: any;
-}
-
-export type UMFrameworkRouteHandler<RouteRequest extends UMFrameworkRequest> = (
-  request: UMFrameworkRequest,
-  h: ResponseToolkit
-) => void;
-
-export type HapiOptionsFunction = (req: Request) => GraphQLOptions | Promise<GraphQLOptions>;
-
-export interface UMHapiGraphQLPluginOptions {
-  path: string;
-  vhost?: string;
-  route?: RouteOptions;
-  graphQLOptions: GraphQLOptions | HapiOptionsFunction;
+export interface UptimeCorePlugins {
+  features: PluginSetupContract;
+  alerts: any;
+  elasticsearch: any;
+  usageCollection: UsageCollectionSetup;
+  ml: MlSetup;
 }
 
 export interface UMBackendFrameworkAdapter {
-  registerRoute<RouteRequest extends UMFrameworkRequest, RouteResponse extends UMFrameworkResponse>(
-    route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>
-  ): void;
-  registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
+  registerRoute(route: UMKibanaRoute): void;
 }

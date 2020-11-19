@@ -26,3 +26,22 @@ export const CapabilitiesServiceConstructor = jest
 jest.doMock('./capabilities', () => ({
   CapabilitiesService: CapabilitiesServiceConstructor,
 }));
+
+export const MockHistory = {
+  push: jest.fn(),
+  replace: jest.fn(),
+};
+export const createBrowserHistoryMock = jest.fn().mockReturnValue(MockHistory);
+jest.doMock('history', () => ({
+  createBrowserHistory: createBrowserHistoryMock,
+}));
+
+export const parseAppUrlMock = jest.fn();
+jest.doMock('./utils', () => {
+  const original = jest.requireActual('./utils');
+
+  return {
+    ...original,
+    parseAppUrl: parseAppUrlMock,
+  };
+});

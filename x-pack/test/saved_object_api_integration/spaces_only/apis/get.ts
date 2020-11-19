@@ -5,76 +5,49 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
-import { TestInvoker } from '../../common/lib/types';
-import { getTestSuiteFactory } from '../../common/suites/get';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { getTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/get';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: TestInvoker) {
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+const { fail404 } = testCaseFailures;
+
+const createTestCases = (spaceId: string) => [
+  // for each outcome, if failure !== undefined then we expect to receive
+  // an error; otherwise, we expect to receive a success result
+  { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
+  { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
+  { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+  CASES.MULTI_NAMESPACE_ALL_SPACES,
+  {
+    ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+    ...fail404(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
+  },
+  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
+  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+  CASES.NAMESPACE_AGNOSTIC,
+  { ...CASES.HIDDEN, ...fail404() },
+  { ...CASES.DOES_NOT_EXIST, ...fail404() },
+];
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const {
-    createExpectDoesntExistNotFound,
-    createExpectSpaceAwareNotFound,
-    createExpectSpaceAwareResults,
-    createExpectNotSpaceAwareResults,
-    getTest,
-  } = getTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = getTestSuiteFactory(esArchiver, supertest);
+  const createTests = (spaceId: string) => {
+    const testCases = createTestCases(spaceId);
+    return createTestDefinitions(testCases, false, { spaceId });
+  };
 
-  describe('get', () => {
-    getTest(`can access objects belonging to the current space (default)`, {
-      ...SPACES.DEFAULT,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: createExpectSpaceAwareResults(SPACES.DEFAULT.spaceId),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(SPACES.DEFAULT.spaceId),
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(SPACES.DEFAULT.spaceId),
-        },
-      },
-    });
-
-    getTest(`can access objects belonging to the current space (space_1)`, {
-      ...SPACES.SPACE_1,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: createExpectSpaceAwareResults(SPACES.SPACE_1.spaceId),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(SPACES.SPACE_1.spaceId),
-        },
-      },
-    });
-
-    getTest(`can't access space aware objects belonging to another space (space_1)`, {
-      spaceId: SPACES.DEFAULT.spaceId,
-      otherSpaceId: SPACES.SPACE_1.spaceId,
-      tests: {
-        spaceAware: {
-          statusCode: 404,
-          response: createExpectSpaceAwareNotFound(SPACES.SPACE_1.spaceId),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: createExpectNotSpaceAwareResults(SPACES.SPACE_1.spaceId),
-        },
-        doesntExist: {
-          statusCode: 404,
-          response: createExpectDoesntExistNotFound(SPACES.SPACE_1.spaceId),
-        },
-      },
+  describe('_get', () => {
+    getTestScenarios().spaces.forEach(({ spaceId }) => {
+      const tests = createTests(spaceId);
+      addTests(`within the ${spaceId} space`, { spaceId, tests });
     });
   });
 }

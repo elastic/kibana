@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElementFactory } from '../types';
-import header from './header.png';
+import { ElementFactory } from '../../../types';
 
 export const image: ElementFactory = () => ({
   name: 'image',
   displayName: 'Image',
-  tags: ['graphic'],
+  type: 'image',
   help: 'A static image',
-  image: header,
+  icon: 'image',
   expression: `image dataurl=null mode="contain"
 | render`,
 });

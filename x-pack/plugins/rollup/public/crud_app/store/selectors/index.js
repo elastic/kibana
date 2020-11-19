@@ -26,27 +26,22 @@ export const isSaving = (state) => state.createJob.isSaving;
 export const getCreateJobError = (state) => state.createJob.error;
 export const isUpdating = (state) => state.updateJob.isUpdating;
 
+export const getCloneJobConfig = (state) => state.cloneJob.job;
+
 export const getJobStatusByJobName = (state, jobName) => {
   const jobs = getJobs(state);
   const { status } = jobs[jobName] || {};
   return status;
 };
 
-const getFilteredJobs = createSelector(
-  getJobs,
-  getTableState,
-  (jobs, tableState) => {
-    const jobArray = Object.keys(jobs).map(jobName => jobs[jobName]);
-    return filterItems(['id', 'indexPattern', 'rollupIndex'], tableState.filter, jobArray);
-  }
-);
+const getFilteredJobs = createSelector(getJobs, getTableState, (jobs, tableState) => {
+  const jobArray = Object.keys(jobs).map((jobName) => jobs[jobName]);
+  return filterItems(['id', 'indexPattern', 'rollupIndex'], tableState.filter, jobArray);
+});
 
-export const getTotalItems = createSelector(
-  getFilteredJobs,
-  (filteredJobs) => {
-    return Object.keys(filteredJobs).length;
-  }
-);
+export const getTotalItems = createSelector(getFilteredJobs, (filteredJobs) => {
+  return Object.keys(filteredJobs).length;
+});
 
 export const getPager = createSelector(
   getTableState,
@@ -68,38 +63,23 @@ export const getPageOfJobs = createSelector(
   }
 );
 
-export const getHasNextPage = createSelector(
-  getPager,
-  (pager) => {
-    return pager.hasNextPage;
-  }
-);
+export const getHasNextPage = createSelector(getPager, (pager) => {
+  return pager.hasNextPage;
+});
 
-export const getHasPreviousPage = createSelector(
-  getPager,
-  (pager) => {
-    return pager.hasPreviousPage;
-  }
-);
+export const getHasPreviousPage = createSelector(getPager, (pager) => {
+  return pager.hasPreviousPage;
+});
 
-export const getCurrentPage = createSelector(
-  getPager,
-  (pager) => {
-    return pager.currentPage;
-  }
-);
+export const getCurrentPage = createSelector(getPager, (pager) => {
+  return pager.currentPage;
+});
 
-export const getFilter = createSelector(
-  getTableState,
-  ({ filter }) => filter
-);
+export const getFilter = createSelector(getTableState, ({ filter }) => filter);
 
 export const isSortAscending = createSelector(
   getTableState,
   ({ isSortAscending }) => isSortAscending
 );
 
-export const getSortField = createSelector(
-  getTableState,
-  ({ sortField }) => sortField
-);
+export const getSortField = createSelector(getTableState, ({ sortField }) => sortField);

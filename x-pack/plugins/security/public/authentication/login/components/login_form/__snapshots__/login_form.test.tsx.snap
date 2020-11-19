@@ -1,0 +1,202 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoginForm login selector properly switches to login form -> login help and back: Login Help 1`] = `
+<ReactMarkdown
+  astPlugins={Array []}
+  escapeHtml={true}
+  parserOptions={Object {}}
+  plugins={Array []}
+  rawSourcePos={false}
+  renderers={Object {}}
+  skipHtml={false}
+  sourcePos={false}
+  transformLinkUri={[Function]}
+>
+  <Root
+    key="root-1-1-0"
+  >
+    <p
+      key="paragraph-1-1-0"
+    >
+      <strong
+        key="strong-1-1-0"
+      >
+        <TextRenderer
+          key="text-1-3-0"
+          nodeKey="text-1-3-0"
+          value="some help"
+        >
+          some help
+        </TextRenderer>
+      </strong>
+    </p>
+  </Root>
+</ReactMarkdown>
+`;
+
+exports[`LoginForm login selector properly switches to login help: Login Help 1`] = `
+<ReactMarkdown
+  astPlugins={Array []}
+  escapeHtml={true}
+  parserOptions={Object {}}
+  plugins={Array []}
+  rawSourcePos={false}
+  renderers={Object {}}
+  skipHtml={false}
+  sourcePos={false}
+  transformLinkUri={[Function]}
+>
+  <Root
+    key="root-1-1-0"
+  >
+    <p
+      key="paragraph-1-1-0"
+    >
+      <strong
+        key="strong-1-1-0"
+      >
+        <TextRenderer
+          key="text-1-3-0"
+          nodeKey="text-1-3-0"
+          value="some help"
+        >
+          some help
+        </TextRenderer>
+      </strong>
+    </p>
+  </Root>
+</ReactMarkdown>
+`;
+
+exports[`LoginForm properly switches to login help: Login Help 1`] = `
+<ReactMarkdown
+  astPlugins={Array []}
+  escapeHtml={true}
+  parserOptions={Object {}}
+  plugins={Array []}
+  rawSourcePos={false}
+  renderers={Object {}}
+  skipHtml={false}
+  sourcePos={false}
+  transformLinkUri={[Function]}
+>
+  <Root
+    key="root-1-1-0"
+  >
+    <p
+      key="paragraph-1-1-0"
+    >
+      <strong
+        key="strong-1-1-0"
+      >
+        <TextRenderer
+          key="text-1-3-0"
+          nodeKey="text-1-3-0"
+          value="some help"
+        >
+          some help
+        </TextRenderer>
+      </strong>
+    </p>
+  </Root>
+</ReactMarkdown>
+`;
+
+exports[`LoginForm renders as expected 1`] = `
+<Fragment>
+  <EuiPanel
+    data-test-subj="loginForm"
+  >
+    <form
+      onSubmit={[Function]}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Username"
+            id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-required={true}
+          data-test-subj="loginUsername"
+          disabled={false}
+          id="username"
+          inputRef={[Function]}
+          isInvalid={false}
+          name="username"
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        isInvalid={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Password"
+            id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldPassword
+          aria-required={true}
+          autoComplete="off"
+          compressed={false}
+          data-test-subj="loginPassword"
+          disabled={false}
+          fullWidth={false}
+          id="password"
+          isInvalid={false}
+          isLoading={false}
+          name="password"
+          onChange={[Function]}
+          type="dual"
+          value=""
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButton
+            color="primary"
+            data-test-subj="loginSubmit"
+            fill={true}
+            isDisabled={false}
+            isLoading={false}
+            onClick={[Function]}
+            type="submit"
+          >
+            <FormattedMessage
+              defaultMessage="Log in"
+              id="xpack.security.login.basicLoginForm.logInButtonLabel"
+              values={Object {}}
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </form>
+  </EuiPanel>
+</Fragment>
+`;

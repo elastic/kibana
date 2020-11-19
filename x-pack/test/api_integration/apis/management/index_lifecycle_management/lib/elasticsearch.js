@@ -15,9 +15,7 @@ export const initElasticsearchHelpers = (es) => {
   let templatesCreated = [];
 
   // Indices
-  const getIndex = (index) => (
-    es.indices.get({ index })
-  );
+  const getIndex = (index) => es.indices.get({ index }).then(({ body }) => body);
 
   const createIndex = (index = getRandomString()) => {
     indicesCreated.push(index);
@@ -25,18 +23,15 @@ export const initElasticsearchHelpers = (es) => {
   };
 
   const deleteIndex = (index) => {
-    indicesCreated = indicesCreated.filter(i => i !== index);
+    indicesCreated = indicesCreated.filter((i) => i !== index);
     return es.indices.delete({ index });
   };
 
-  const deleteAllIndices = () => (
-    Promise.all(indicesCreated.map(deleteIndex)).then(() => indicesCreated = [])
-  );
+  const deleteAllIndices = () =>
+    Promise.all(indicesCreated.map(deleteIndex)).then(() => (indicesCreated = []));
 
   // Index templates
-  const getIndexTemplates = () => (
-    es.indices.getTemplate()
-  );
+  const getIndexTemplates = () => es.indices.getTemplate();
 
   // Create index template if it does not already exist
   const createIndexTemplate = (name, template) => {
@@ -45,27 +40,23 @@ export const initElasticsearchHelpers = (es) => {
   };
 
   const deleteIndexTemplate = (name) => {
-    templatesCreated = templatesCreated.filter(i => i !== name);
-    return es.indices.deleteTemplate({ name })
-      .catch((err) => {
-        // Silently fail templates not found
-        if (err.statusCode !== 404) {
-          throw err;
-        }
-      });
+    templatesCreated = templatesCreated.filter((i) => i !== name);
+    return es.indices.deleteTemplate({ name }).catch((err) => {
+      // Silently fail templates not found
+      if (err.statusCode !== 404) {
+        throw err;
+      }
+    });
   };
 
-  const deleteAllTemplates = () => (
-    Promise.all(templatesCreated.map(deleteIndexTemplate)).then(() => templatesCreated = [])
-  );
+  const deleteAllTemplates = () =>
+    Promise.all(templatesCreated.map(deleteIndexTemplate)).then(() => (templatesCreated = []));
 
-  const cleanUp = () => (
-    Promise.all([deleteAllIndices(), deleteAllTemplates()])
-  );
+  const cleanUp = () => Promise.all([deleteAllIndices(), deleteAllTemplates()]);
 
-  const getNodesStats = () => es.nodes.stats();
+  const getNodesStats = () => es.nodes.stats().then(({ body }) => body);
 
-  return ({
+  return {
     getIndex,
     createIndex,
     deleteIndex,
@@ -76,5 +67,5 @@ export const initElasticsearchHelpers = (es) => {
     deleteIndexTemplate,
     getNodesStats,
     cleanUp,
-  });
+  };
 };

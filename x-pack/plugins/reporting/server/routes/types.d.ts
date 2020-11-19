@@ -4,13 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, ResponseToolkit } from 'hapi';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'src/core/server';
+import { BaseParams, BasePayload, ReportingUser } from '../types';
 
 export type HandlerFunction = (
-  exportType: any,
-  jobParams: any,
-  request: Request,
-  h: ResponseToolkit
+  user: ReportingUser,
+  exportType: string,
+  jobParams: BaseParams,
+  context: RequestHandlerContext,
+  req: KibanaRequest,
+  res: KibanaResponseFactory
 ) => any;
 
-export type HandlerErrorFunction = (exportType: any, err: Error) => any;
+export type HandlerErrorFunction = (res: KibanaResponseFactory, err: Error) => any;
+
+export interface QueuedJobPayload {
+  error?: boolean;
+  source: {
+    job: {
+      payload: BasePayload;
+    };
+  };
+}

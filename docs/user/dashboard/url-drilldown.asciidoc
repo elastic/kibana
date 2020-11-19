@@ -1,0 +1,254 @@
+[[url_templating]]
+=== URL templating
+
+beta[]
+
+The URL template input uses https://ela.st/handlebars-docs#expressions[Handlebars] — a simple templating language. Handlebars templates look like regular text with embedded Handlebars expressions.
+
+[source, bash]
+----
+https://github.com/elastic/kibana/issues?q={{event.value}}
+----
+
+A Handlebars expression is a `{{`, some contents, followed by a `}}`. When the drilldown is executed, these expressions are replaced by values from the dashboard and interaction context.
+
+[[helpers]]
+In addition to  https://ela.st/handlebars-helpers[built-in] Handlebars helpers, you can use custom helpers.
+
+Refer to Handlebars https://ela.st/handlebars-docs#expressions[documentation] to learn about advanced use cases.
+
+|===
+|Custom helper |Use case
+
+|json
+a|Serialize variables in JSON format.
+
+Example:
+
+`{{json event}}` +
+`{{json event.key event.value}}` +
+`{{json filters=context.panel.filters}}`
+
+
+|rison
+a|Serialize variables in https://github.com/w33ble/rison-node[rison] format. Rison is a common format for {kib} apps for storing state in the URL.
+
+Example:
+
+`{{rison event}}` +
+`{{rison event.key event.value}}` +
+`{{rison filters=context.panel.filters}}`
+
+
+|date
+a|Format dates. Supports relative dates expressions (for example,  "now-15d"). Refer to the https://momentjs.com/docs/#/displaying/format/[moment] docs for different formatting options.
+
+Example:
+
+`{{date event.from “YYYY MM DD”}}` +
+`{{date “now-15”}}`
+
+|formatNumber
+a|Format numbers. Numbers can be formatted to look like currency, percentages, times or numbers with decimal places, thousands, and abbreviations.
+Refer to the http://numeraljs.com/#format[numeral.js] for different formatting options. 
+
+Example:
+
+`{{formatNumber event.value "0.0"}}`
+
+|lowercase
+a|Converts a string to lower case.
+
+Example:
+
+`{{lowercase event.value}}`
+
+|uppercase
+a|Converts a string to upper case.
+
+Example:
+
+`{{uppercase event.value}}`
+
+|trim
+a|Removes leading and trailing spaces from a string.
+
+Example:
+
+`{{trim event.value}}`
+
+|trimLeft
+a|Removes leading spaces from a string.
+
+Example:
+
+`{{trimLeft event.value}}`
+
+|trimRight
+a|Removes trailing spaces from a string.
+
+Example:
+
+`{{trimRight event.value}}`
+
+|mid
+a|Extracts a substring from a string by start position and number of characters to extract.
+
+Example:
+
+`{{mid event.value 3 5}}` - extracts five characters starting from a third character. 
+
+|left
+a|Extracts a number of characters from a string (starting from left).
+
+Example:
+
+`{{left event.value 3}}`
+
+|right
+a|Extracts a number of characters from a string (starting from right).
+
+Example:
+
+`{{right event.value 3}}`
+
+|concat
+a|Concatenates two or more strings.
+
+Example:
+
+`{{concat event.value "," event.key}}`
+
+|replace
+a|Replaces all substrings within a string.
+
+Example:
+
+`{{replace event.value "stringToReplace" "stringToReplaceWith"}}`
+
+|split
+a|Splits a string using a provided splitter.
+
+Example:
+
+`{{split event.value ","}}`
+
+|===
+
+
+[float]
+[[variables]]
+==== URL template variables
+
+The URL drilldown template has three sources for variables:
+
+* *Global* static variables that don’t change depending on the  place where the URL drilldown is used or which user interaction executed the drilldown. For example: `{{kibanaUrl}}`.
+* *Context* variables that change depending on where the drilldown is created and used. These variables are extracted from a context of a panel on a dashboard. For example, `{{context.panel.filters}}` gives access to filters that applied to the current panel.
+* *Event* variables that depend on the trigger context. These variables are dynamically extracted from the interaction context when the drilldown is executed.
+
+[[values-in-preview]]
+A subtle but important difference between *context* and *event* variables is that *context* variables use real values in previews when creating a URL drilldown. 
+For example, `{{context.panel.filters}}` are previewed with the current filters that applied to a panel. 
+*Event* variables are extracted during drilldown execution from a user interaction with a panel (for example, from a pie slice that the user clicked on).
+
+Because there is no user interaction with a panel in preview, there is no interaction context to use in a preview.
+To work around this, {kib} provides a sample interaction that relies on a trigger.
+So in a preview, you might notice that `{{event.value}}` is replaced with `{{event.value}}` instead of with a sample from your data.
+Such previews can help you make sure that the structure of your URL template is valid.
+However, to ensure that the configured URL drilldown works as expected with your data, you have to save the dashboard and test in the panel.
+
+You can access the full list of variables available for the current panel and selected trigger by clicking *Add variable* in the top-right corner of a URL template input.
+
+[float]
+[[variables-reference]]
+==== Variables reference
+
+
+|===
+|Source |Variable |Description
+
+|*Global*
+| kibanaUrl
+| {kib} base URL. Useful for creating URL drilldowns that navigate within {kib}.
+
+| *Context*
+| context.panel
+| Context provided by current dashboard panel.
+
+|
+| context.panel.id
+| ID of a panel.
+
+|
+| context.panel.title
+| Title of a panel.
+
+|
+| context.panel.filters
+| List of {kib} filters applied to a panel. +
+Tip: Use in combination with <<helpers, rison>> helper for
+internal {kib} navigations with carrying over current filters.
+
+|
+| context.panel.query.query
+| Current query string.
+
+|
+| context.panel.query.lang
+| Current query language.
+
+|
+| context.panel.timeRange.from +
+context.panel.timeRange.to
+| Current time picker values. +
+Tip: Use in combination with <<helpers, date>> helper to format date.
+
+|
+| context.panel.timeRange.indexPatternId +
+context.panel.timeRange.indexPatternIds
+|Index pattern ids used by a panel.
+
+|
+| context.panel.savedObjectId
+| ID of saved object behind a panel.
+
+| *Single click*
+
+| event.value
+| Value behind clicked data point.
+
+|
+| event.key
+| Field name behind clicked data point
+
+|
+| event.negate
+| Boolean, indicating whether clicked data point resulted in negative filter.
+
+|
+| event.points
+| Some visualizations have clickable points that emit more than one data point. Use list of data points in case a single value is insufficient. +
+
+Example:
+
+`{{json event.points}}` +
+`{{event.points.[0].key}}` +
+`{{event.points.[0].value}}`
+`{{#each event.points}}key=value&{{/each}}`
+
+Note:
+
+`{{event.value}}` is a shorthand for `{{event.points.[0].value}}` + 
+`{{event.key}}` is a shorthand for `{{event.points.[0].key}}`
+
+| *Range selection*
+| event.from +
+event.to
+| `from` and `to` values of selected range. Depending on your data, could be either a date or number. +
+Tip: Consider using <<helpers, date>> helper for date formatting.
+
+|
+| event.key
+| Aggregation field behind the selected range, if available.
+
+|===

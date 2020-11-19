@@ -7,7 +7,8 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import * as t from 'io-ts';
-import { LICENSES } from './../../../../common/constants/security';
+import { LICENSES } from '../../../../common/constants/security';
+import { RegisterManagementAppArgs } from '../../../../../../../src/plugins/management/public';
 
 export interface FrameworkAdapter {
   // Instance vars
@@ -16,30 +17,13 @@ export interface FrameworkAdapter {
   currentUser: FrameworkUser;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
-  renderUIAtPath(
-    path: string,
-    component: React.ReactElement<any>,
-    toController: 'management' | 'self'
-  ): void;
-  registerManagementSection(settings: {
-    id?: string;
-    name: string;
-    iconName: string;
-    order?: number;
-  }): void;
-  registerManagementUI(settings: {
-    sectionId?: string;
-    name: string;
-    basePath: string;
-    visable?: boolean;
-    order?: number;
-  }): void;
+  registerManagementUI(mount: RegisterManagementAppArgs['mount']): void;
 }
 
 export const RuntimeFrameworkInfo = t.type({
   basePath: t.string,
   license: t.type({
-    type: t.union(LICENSES.map(s => t.literal(s))),
+    type: t.keyof(Object.fromEntries(LICENSES.map((s) => [s, null])) as Record<string, null>),
     expired: t.boolean,
     expiry_date_in_millis: t.number,
   }),
@@ -56,27 +40,10 @@ export const RuntimeFrameworkInfo = t.type({
 
 export interface FrameworkInfo extends t.TypeOf<typeof RuntimeFrameworkInfo> {}
 
-interface ManagementSection {
-  register(
-    sectionId: string,
-    options: {
-      visible: boolean;
-      display: string;
-      order: number;
-      url: string;
-    }
-  ): void;
-}
-export interface ManagementAPI {
-  getSection(sectionId: string): ManagementSection;
-  hasItem(sectionId: string): boolean;
-  register(sectionId: string, options: { display: string; icon: string; order: number }): void;
-}
-
 export const RuntimeFrameworkUser = t.interface(
   {
     username: t.string,
-    roles: t.array(t.string),
+    roles: t.readonlyArray(t.string),
     full_name: t.union([t.null, t.string]),
     email: t.union([t.null, t.string]),
     enabled: t.boolean,

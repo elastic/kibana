@@ -17,8 +17,25 @@
  * under the License.
  */
 
-export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
+import { REPO_ROOT } from '@kbn/utils';
+import { resolve } from 'path';
+
+const loadJsonFile = jest.requireActual('load-json-file');
+const kibanaPackagePath = resolve(REPO_ROOT, 'package.json');
+
+export const mockPackage = {
+  raw: { __dirname: '/tmp', name: 'kibana' } as any,
+};
+
+jest.doMock('load-json-file', () => ({
+  ...loadJsonFile,
+  sync: (path: string) => {
+    if (path === kibanaPackagePath) {
+      return mockPackage.raw;
+    }
+    return loadJsonFile.sync(path);
+  },
+}));
 
 export const mockDiscover = jest.fn();
 jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));

@@ -5,78 +5,87 @@
  */
 
 import React from 'react';
-import uiRoutes from 'ui/routes';
-import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
+import { i18n } from '@kbn/i18n';
+import { uiRoutes } from '../../../angular/helpers/routes';
+import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
-import { I18nContext } from 'ui/i18n';
 import template from './index.html';
 import { Listing } from '../../../components/cluster/listing';
+import { CODE_PATH_ALL } from '../../../../common/constants';
 
-const getPageData = $injector => {
+const CODE_PATHS = [CODE_PATH_ALL];
+
+const getPageData = ($injector) => {
   const monitoringClusters = $injector.get('monitoringClusters');
-  return monitoringClusters();
+  return monitoringClusters(undefined, undefined, CODE_PATHS);
 };
 
-uiRoutes.when('/home', {
-  template,
-  resolve: {
-    clusters: (Private, kbnUrl) => {
-      const routeInit = Private(routeInitProvider);
-      return routeInit()
-        .then(clusters => {
+uiRoutes
+  .when('/home', {
+    template,
+    resolve: {
+      clusters: (Private) => {
+        const routeInit = Private(routeInitProvider);
+        return routeInit({
+          codePaths: CODE_PATHS,
+          fetchAllClusters: true,
+          unsetGlobalState: true,
+        }).then((clusters) => {
           if (!clusters || !clusters.length) {
-            kbnUrl.changePath('/no-data');
+            window.location.hash = '#/no-data';
             return Promise.reject();
           }
           if (clusters.length === 1) {
             // Bypass the cluster listing if there is just 1 cluster
-            kbnUrl.changePath('/overview');
+            window.history.replaceState(null, null, '#/overview');
             return Promise.reject();
           }
           return clusters;
         });
-    }
-  },
-  controllerAs: 'clusters',
-  controller: class ClustersList extends MonitoringViewBaseEuiTableController {
+      },
+    },
+    controllerAs: 'clusters',
+    controller: class ClustersList extends MonitoringViewBaseEuiTableController {
+      constructor($injector, $scope) {
+        super({
+          storageKey: 'clusters',
+          pageTitle: i18n.translate('xpack.monitoring.cluster.listing.pageTitle', {
+            defaultMessage: 'Cluster listing',
+          }),
+          getPageData,
+          $scope,
+          $injector,
+          reactNodeId: 'monitoringClusterListingApp',
+          telemetryPageViewTitle: 'cluster_listing',
+        });
 
-    constructor($injector, $scope) {
-      super({
-        storageKey: 'clusters',
-        getPageData,
-        $scope,
-        $injector,
-        reactNodeId: 'monitoringClusterListingApp'
-      });
+        const $route = $injector.get('$route');
+        const globalState = $injector.get('globalState');
+        const storage = $injector.get('localStorage');
+        const showLicenseExpiration = $injector.get('showLicenseExpiration');
 
-      const $route = $injector.get('$route');
-      const kbnUrl = $injector.get('kbnUrl');
-      const globalState = $injector.get('globalState');
-      const storage = $injector.get('localStorage');
-      const showLicenseExpiration = $injector.get('showLicenseExpiration');
-      this.data = $route.current.locals.clusters;
+        this.data = $route.current.locals.clusters;
 
-
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(
-          <I18nContext>
-            <Listing
-              clusters={data}
-              angular={{
-                scope: $scope,
-                globalState,
-                kbnUrl,
-                storage,
-                showLicenseExpiration
-              }}
-              sorting={this.sorting}
-              pagination={this.pagination}
-              onTableChange={this.onTableChange}
-            />
-          </I18nContext>
+        $scope.$watch(
+          () => this.data,
+          (data) => {
+            this.renderReact(
+              <Listing
+                clusters={data}
+                angular={{
+                  scope: $scope,
+                  globalState,
+                  storage,
+                  showLicenseExpiration,
+                }}
+                sorting={this.sorting}
+                pagination={this.pagination}
+                onTableChange={this.onTableChange}
+              />
+            );
+          }
         );
-      });
-    }
-  }
-})
-  .otherwise({ redirectTo: '/no-data' });
+      }
+    },
+  })
+  .otherwise({ redirectTo: '/loading' });

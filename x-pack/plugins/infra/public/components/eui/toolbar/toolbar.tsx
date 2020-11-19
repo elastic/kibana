@@ -6,16 +6,15 @@
 
 import { EuiPanel } from '@elastic/eui';
 
-import euiStyled from '../../../../../../common/eui_styled_components';
+import { euiStyled } from '../../../../../observability/public';
 
-export const Toolbar = euiStyled(EuiPanel).attrs({
+export const Toolbar = euiStyled(EuiPanel).attrs(() => ({
   grow: false,
   paddingSize: 'none',
-})`
+}))`
   border-top: none;
   border-right: none;
   border-left: none;
   border-radius: 0;
-  padding: ${props => props.theme.eui.euiSizeS} ${props => props.theme.eui.euiSizeL};
-  z-index: ${props => props.theme.eui.euiZLevel1};
+  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeL};
 `;

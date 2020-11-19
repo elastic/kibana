@@ -19,7 +19,7 @@
 
 import { mkdir, symlink } from 'fs';
 import { join, resolve } from 'path';
-import rmdir from 'rimraf';
+import del from 'del';
 import { promisify } from 'util';
 
 import { getProjectPaths } from '../config';
@@ -33,20 +33,20 @@ import {
   topologicallyBatchProjects,
 } from './projects';
 
-const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
+const rootPath = resolve(__dirname, '__fixtures__/kibana');
 const rootPlugins = join(rootPath, 'plugins');
 
 describe('#getProjects', () => {
   beforeAll(async () => {
     await promisify(mkdir)(rootPlugins);
 
-    return promisify(symlink)(
+    await promisify(symlink)(
       join(__dirname, '__fixtures__/symlinked-plugins/corge'),
       join(rootPlugins, 'corge')
     );
   });
 
-  afterAll(() => promisify(rmdir)(rootPlugins));
+  afterAll(async () => await del(rootPlugins));
 
   test('find all packages in the packages directory', async () => {
     const projects = await getProjects(rootPath, ['packages/*']);
@@ -80,7 +80,7 @@ describe('#getProjects', () => {
   });
 
   test('includes additional projects in package.json', async () => {
-    const projectPaths = getProjectPaths(rootPath, {});
+    const projectPaths = getProjectPaths({ rootPath });
     const projects = await getProjects(rootPath, projectPaths);
 
     const expectedProjects = [
@@ -100,7 +100,7 @@ describe('#getProjects', () => {
   describe('with exclude/include filters', () => {
     let projectPaths: string[];
     beforeEach(() => {
-      projectPaths = getProjectPaths(rootPath, {});
+      projectPaths = getProjectPaths({ rootPath });
     });
 
     test('excludes projects specified in `exclude` filter', async () => {
@@ -208,7 +208,7 @@ describe('#topologicallyBatchProjects', () => {
   test('batches projects topologically based on their project dependencies', async () => {
     const batches = topologicallyBatchProjects(projects, graph);
 
-    const expectedBatches = batches.map(batch => batch.map(project => project.name));
+    const expectedBatches = batches.map((batch) => batch.map((project) => project.name));
 
     expect(expectedBatches).toMatchSnapshot();
   });
@@ -219,19 +219,9 @@ describe('#topologicallyBatchProjects', () => {
 
     const batches = topologicallyBatchProjects(projects, graph);
 
-    const expectedBatches = batches.map(batch => batch.map(project => project.name));
+    const expectedBatches = batches.map((batch) => batch.map((project) => project.name));
 
     expect(expectedBatches).toMatchSnapshot();
-  });
-
-  describe('batchByWorkspace = true', async () => {
-    test('batches projects topologically based on their project dependencies and workspaces', async () => {
-      const batches = topologicallyBatchProjects(projects, graph, { batchByWorkspace: true });
-
-      const expectedBatches = batches.map(batch => batch.map(project => project.name));
-
-      expect(expectedBatches).toEqual([['kibana'], ['bar', 'foo'], ['baz', 'zorge'], ['quux']]);
-    });
   });
 });
 

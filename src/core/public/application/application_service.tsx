@@ -17,97 +17,78 @@
  * under the License.
  */
 
-import { Observable, BehaviorSubject } from 'rxjs';
-import { CapabilitiesStart, CapabilitiesService, Capabilities } from './capabilities';
-import { InjectedMetadataStart } from '../injected_metadata';
-import { BasePathStart } from '../base_path';
+import React from 'react';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
+import { createBrowserHistory, History } from 'history';
 
-interface BaseApp {
-  id: string;
+import { MountPoint } from '../types';
+import { HttpSetup, HttpStart } from '../http';
+import { OverlayStart } from '../overlays';
+import { ContextSetup, IContextContainer } from '../context';
+import { PluginOpaqueId } from '../plugins';
+import { AppRouter } from './ui';
+import { Capabilities, CapabilitiesService } from './capabilities';
+import {
+  App,
+  AppLeaveHandler,
+  AppMount,
+  AppMountDeprecated,
+  AppNavLinkStatus,
+  AppStatus,
+  AppUpdatableFields,
+  AppUpdater,
+  InternalApplicationSetup,
+  InternalApplicationStart,
+  Mounter,
+  NavigateToAppOptions,
+} from './types';
+import { getLeaveAction, isConfirmAction } from './application_leave';
+import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 
-  /**
-   * An ordinal used to sort nav links relative to one another for display.
-   */
-  order: number;
-
-  /**
-   * The title of the application.
-   */
-  title: string;
-
-  /**
-   * An observable for a tooltip shown when hovering over app link.
-   */
-  tooltip$?: Observable<string>;
-
-  /**
-   * A EUI iconType that will be used for the app's icon. This icon
-   * takes precendence over the `icon` property.
-   */
-  euiIconType?: string;
-
-  /**
-   * A URL to an image file used as an icon. Used as a fallback
-   * if `euiIconType` is not provided.
-   */
-  icon?: string;
-
-  /**
-   * Custom capabilities defined by the app.
-   */
-  capabilities?: Partial<Capabilities>;
-}
-
-/** @public */
-export interface App extends BaseApp {
-  /**
-   * The root route to mount this application at.
-   */
-  rootRoute: string;
-
-  /**
-   * A mount function called when the user navigates to this app's `rootRoute`.
-   * @param targetDomElement An HTMLElement to mount the application onto.
-   * @returns An unmounting function that will be called to unmount the application.
-   */
-  mount(targetDomElement: HTMLElement): () => void;
-}
-
-/** @internal */
-export interface LegacyApp extends BaseApp {
-  appUrl: string;
-  subUrlBase?: string;
-  linkToLastSubUrl?: boolean;
-}
-
-/** @internal */
-export type MixedApp = Partial<App> & Partial<LegacyApp> & BaseApp;
-
-/** @public */
-export interface ApplicationSetup {
-  /**
-   * Register an mountable application to the system. Apps will be mounted based on their `rootRoute`.
-   * @param app
-   */
-  registerApp(app: App): void;
-
-  /**
-   * Register metadata about legacy applications. Legacy apps will not be mounted when navigated to.
-   * @param app
-   * @internal
-   */
-  registerLegacyApp(app: LegacyApp): void;
-}
-
-export interface ApplicationStart {
-  mount: (mountHandler: Function) => void;
-  availableApps: CapabilitiesStart['availableApps'];
-  capabilities: CapabilitiesStart['capabilities'];
+interface SetupDeps {
+  context: ContextSetup;
+  http: HttpSetup;
+  history?: History<any>;
+  /** Used to redirect to external urls */
+  redirectTo?: (path: string) => void;
 }
 
 interface StartDeps {
-  basePath: BasePathStart;
-  injectedMetadata: InjectedMetadataStart;
+  http: HttpStart;
+  overlays: OverlayStart;
+}
+
+// Mount functions with two arguments are assumed to expect deprecated `context` object.
+const isAppMountDeprecated = (mount: (...args: any[]) => any): mount is AppMountDeprecated =>
+  mount.length === 2;
+function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
+  return new Map(
+    [...m].filter(
+      ([id]) => capabilities.navLinks[id] === undefined || capabilities.navLinks[id] === true
+    )
+  );
+}
+const findMounter = (mounters: Map<string, Mounter>, appRoute?: string) =>
+  [...mounters].find(([, mounter]) => mounter.appRoute === appRoute);
+
+const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string = '') => {
+  const appBasePath = mounters.get(appId)?.appRoute
+    ? `/${mounters.get(appId)!.appRoute}`
+    : `/app/${appId}`;
+  return appendAppPath(appBasePath, path);
+};
+
+const allApplicationsFilter = '__ALL__';
+
+interface AppUpdaterWrapper {
+  application: string;
+  updater: AppUpdater;
+}
+
+interface AppInternalState {
+  leaveHandler?: AppLeaveHandler;
+  actionMenu?: MountPoint;
 }
 
 /**
@@ -115,38 +96,303 @@ interface StartDeps {
  * @internal
  */
 export class ApplicationService {
-  private readonly apps$ = new BehaviorSubject<App[]>([]);
-  private readonly legacyApps$ = new BehaviorSubject<LegacyApp[]>([]);
+  private readonly apps = new Map<string, App<any>>();
+  private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
+  private readonly appInternalStates = new Map<string, AppInternalState>();
+  private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
+  private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
+  private readonly subscriptions: Subscription[] = [];
+  private stop$ = new Subject();
+  private registrationClosed = false;
+  private history?: History<any>;
+  private mountContext?: IContextContainer<AppMountDeprecated>;
+  private navigate?: (url: string, state: unknown, replace: boolean) => void;
+  private redirectTo?: (url: string) => void;
 
-  public setup(): ApplicationSetup {
+  public setup({
+    context,
+    http: { basePath },
+    redirectTo = (path: string) => {
+      window.location.assign(path);
+    },
+    history,
+  }: SetupDeps): InternalApplicationSetup {
+    const basename = basePath.get();
+    this.history = history || createBrowserHistory({ basename });
+
+    this.navigate = (url, state, replace) => {
+      // basePath not needed here because `history` is configured with basename
+      return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
+    };
+
+    this.redirectTo = redirectTo;
+    this.mountContext = context.createContextContainer();
+
+    const registerStatusUpdater = (application: string, updater$: Observable<AppUpdater>) => {
+      const updaterId = Symbol();
+      const subscription = updater$.subscribe((updater) => {
+        const nextValue = new Map(this.statusUpdaters$.getValue());
+        nextValue.set(updaterId, {
+          application,
+          updater,
+        });
+        this.statusUpdaters$.next(nextValue);
+      });
+      this.subscriptions.push(subscription);
+    };
+
+    const wrapMount = (plugin: PluginOpaqueId, app: App<any>): AppMount => {
+      let handler: AppMount;
+      if (isAppMountDeprecated(app.mount)) {
+        handler = this.mountContext!.createHandler(plugin, app.mount);
+        if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `App [${app.id}] is using deprecated mount context. Use core.getStartServices() instead.`
+          );
+        }
+      } else {
+        handler = app.mount;
+      }
+      return async (params) => {
+        this.currentAppId$.next(app.id);
+        return handler(params);
+      };
+    };
+
     return {
-      registerApp: (app: App) => {
-        this.apps$.next([...this.apps$.value, app]);
+      registerMountContext: this.mountContext!.registerContext,
+      register: (plugin, app: App<any>) => {
+        app = { appRoute: `/app/${app.id}`, ...app };
+
+        if (this.registrationClosed) {
+          throw new Error(`Applications cannot be registered after "setup"`);
+        } else if (this.apps.has(app.id)) {
+          throw new Error(`An application is already registered with the id "${app.id}"`);
+        } else if (findMounter(this.mounters, app.appRoute)) {
+          throw new Error(
+            `An application is already registered with the appRoute "${app.appRoute}"`
+          );
+        } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
+          throw new Error('Cannot register an application route that includes HTTP base path');
+        }
+
+        const { updater$, ...appProps } = app;
+        this.apps.set(app.id, {
+          ...appProps,
+          status: app.status ?? AppStatus.accessible,
+          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
+        });
+        if (updater$) {
+          registerStatusUpdater(app.id, updater$);
+        }
+        this.mounters.set(app.id, {
+          appRoute: app.appRoute!,
+          appBasePath: basePath.prepend(app.appRoute!),
+          exactRoute: app.exactRoute ?? false,
+          mount: wrapMount(plugin, app),
+          unmountBeforeMounting: false,
+        });
       },
-      registerLegacyApp: (app: LegacyApp) => {
-        this.legacyApps$.next([...this.legacyApps$.value, app]);
-      },
+      registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
+        registerStatusUpdater(allApplicationsFilter, appUpdater$),
     };
   }
 
-  public async start({ basePath, injectedMetadata }: StartDeps): Promise<ApplicationStart> {
-    this.apps$.complete();
-    this.legacyApps$.complete();
+  public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
+    if (!this.mountContext) {
+      throw new Error('ApplicationService#setup() must be invoked before start.');
+    }
 
-    const apps = [...this.apps$.value, ...this.legacyApps$.value];
-    const { capabilities, availableApps } = await this.capabilities.start({
-      apps,
-      basePath,
-      injectedMetadata,
+    const httpLoadingCount$ = new BehaviorSubject(0);
+    http.addLoadingCountSource(httpLoadingCount$);
+
+    this.registrationClosed = true;
+    window.addEventListener('beforeunload', this.onBeforeUnload);
+
+    const { capabilities } = await this.capabilities.start({
+      appIds: [...this.mounters.keys()],
+      http,
     });
+    const availableMounters = filterAvailable(this.mounters, capabilities);
+    const availableApps = filterAvailable(this.apps, capabilities);
+
+    const applications$ = new BehaviorSubject(availableApps);
+    this.statusUpdaters$
+      .pipe(
+        map((statusUpdaters) => {
+          return new Map(
+            [...availableApps].map(([id, app]) => [
+              id,
+              updateStatus(app, [...statusUpdaters.values()]),
+            ])
+          );
+        })
+      )
+      .subscribe((apps) => applications$.next(apps));
+
+    const applicationStatuses$ = applications$.pipe(
+      map((apps) => new Map([...apps.entries()].map(([id, app]) => [id, app.status!]))),
+      shareReplay(1)
+    );
+
+    const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
+      appId,
+      { path, state, replace = false }: NavigateToAppOptions = {}
+    ) => {
+      const currentAppId = this.currentAppId$.value;
+      const navigatingToSameApp = currentAppId === appId;
+      const shouldNavigate = navigatingToSameApp ? true : await this.shouldNavigate(overlays);
+
+      if (shouldNavigate) {
+        if (path === undefined) {
+          path = applications$.value.get(appId)?.defaultPath;
+        }
+        if (!navigatingToSameApp) {
+          this.appInternalStates.delete(this.currentAppId$.value!);
+        }
+        this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
+        this.currentAppId$.next(appId);
+      }
+    };
+
+    this.currentAppId$.subscribe(() => this.refreshCurrentActionMenu());
 
     return {
-      mount() {},
+      applications$: applications$.pipe(
+        map((apps) => new Map([...apps.entries()].map(([id, app]) => [id, getAppInfo(app)]))),
+        shareReplay(1)
+      ),
       capabilities,
-      availableApps,
+      currentAppId$: this.currentAppId$.pipe(
+        filter((appId) => appId !== undefined),
+        distinctUntilChanged(),
+        takeUntil(this.stop$)
+      ),
+      currentActionMenu$: this.currentActionMenu$.pipe(
+        distinctUntilChanged(),
+        takeUntil(this.stop$)
+      ),
+      history: this.history!,
+      registerMountContext: this.mountContext.registerContext,
+      getUrlForApp: (
+        appId,
+        { path, absolute = false }: { path?: string; absolute?: boolean } = {}
+      ) => {
+        const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path));
+        return absolute ? relativeToAbsolute(relUrl) : relUrl;
+      },
+      navigateToApp,
+      navigateToUrl: async (url) => {
+        const appInfo = parseAppUrl(url, http.basePath, this.apps);
+        if (appInfo) {
+          return navigateToApp(appInfo.app, { path: appInfo.path });
+        } else {
+          return this.redirectTo!(url);
+        }
+      },
+      getComponent: () => {
+        if (!this.history) {
+          return null;
+        }
+        return (
+          <AppRouter
+            history={this.history}
+            mounters={availableMounters}
+            appStatuses$={applicationStatuses$}
+            setAppLeaveHandler={this.setAppLeaveHandler}
+            setAppActionMenu={this.setAppActionMenu}
+            setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
+          />
+        );
+      },
     };
   }
 
-  public stop() {}
+  private setAppLeaveHandler = (appId: string, handler: AppLeaveHandler) => {
+    this.appInternalStates.set(appId, {
+      ...(this.appInternalStates.get(appId) ?? {}),
+      leaveHandler: handler,
+    });
+  };
+
+  private setAppActionMenu = (appId: string, mount: MountPoint | undefined) => {
+    this.appInternalStates.set(appId, {
+      ...(this.appInternalStates.get(appId) ?? {}),
+      actionMenu: mount,
+    });
+    this.refreshCurrentActionMenu();
+  };
+
+  private refreshCurrentActionMenu = () => {
+    const appId = this.currentAppId$.getValue();
+    const currentActionMenu = appId ? this.appInternalStates.get(appId)?.actionMenu : undefined;
+    this.currentActionMenu$.next(currentActionMenu);
+  };
+
+  private async shouldNavigate(overlays: OverlayStart): Promise<boolean> {
+    const currentAppId = this.currentAppId$.value;
+    if (currentAppId === undefined) {
+      return true;
+    }
+    const action = getLeaveAction(this.appInternalStates.get(currentAppId)?.leaveHandler);
+    if (isConfirmAction(action)) {
+      const confirmed = await overlays.openConfirm(action.text, {
+        title: action.title,
+        'data-test-subj': 'appLeaveConfirmModal',
+      });
+      if (!confirmed) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private onBeforeUnload = (event: Event) => {
+    const currentAppId = this.currentAppId$.value;
+    if (currentAppId === undefined) {
+      return;
+    }
+    const action = getLeaveAction(this.appInternalStates.get(currentAppId)?.leaveHandler);
+    if (isConfirmAction(action)) {
+      event.preventDefault();
+      // some browsers accept a string return value being the message displayed
+      event.returnValue = action.text as any;
+    }
+  };
+
+  public stop() {
+    this.stop$.next();
+    this.currentAppId$.complete();
+    this.currentActionMenu$.complete();
+    this.statusUpdaters$.complete();
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    window.removeEventListener('beforeunload', this.onBeforeUnload);
+  }
 }
+
+const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
+  let changes: Partial<AppUpdatableFields> = {};
+  statusUpdaters.forEach((wrapper) => {
+    if (wrapper.application !== allApplicationsFilter && wrapper.application !== app.id) {
+      return;
+    }
+    const fields = wrapper.updater(app);
+    if (fields) {
+      changes = {
+        ...changes,
+        ...fields,
+        // status and navLinkStatus enums are ordered by reversed priority
+        // if multiple updaters wants to change these fields, we will always follow the priority order.
+        status: Math.max(changes.status ?? 0, fields.status ?? 0),
+        navLinkStatus: Math.max(changes.navLinkStatus ?? 0, fields.navLinkStatus ?? 0),
+      };
+    }
+  });
+  return {
+    ...app,
+    ...changes,
+  };
+};

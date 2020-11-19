@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraFrameworkRequest } from './adapters/framework';
+import { RequestHandlerContext } from 'src/core/server';
 import { InfraSources } from './sources';
 
 export class InfraSourceStatus {
@@ -14,66 +14,98 @@ export class InfraSourceStatus {
   ) {}
 
   public async getLogIndexNames(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     sourceId: string
   ): Promise<string[]> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
+      requestContext.core.savedObjects.client,
+      sourceId
+    );
     const indexNames = await this.adapter.getIndexNames(
-      request,
+      requestContext,
       sourceConfiguration.configuration.logAlias
     );
     return indexNames;
   }
   public async getMetricIndexNames(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     sourceId: string
   ): Promise<string[]> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
+      requestContext.core.savedObjects.client,
+      sourceId
+    );
     const indexNames = await this.adapter.getIndexNames(
-      request,
+      requestContext,
       sourceConfiguration.configuration.metricAlias
     );
     return indexNames;
   }
-  public async hasLogAlias(request: InfraFrameworkRequest, sourceId: string): Promise<boolean> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const hasAlias = await this.adapter.hasAlias(
-      request,
-      sourceConfiguration.configuration.logAlias
-    );
-    return hasAlias;
-  }
-  public async hasMetricAlias(request: InfraFrameworkRequest, sourceId: string): Promise<boolean> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const hasAlias = await this.adapter.hasAlias(
-      request,
-      sourceConfiguration.configuration.metricAlias
-    );
-    return hasAlias;
-  }
-  public async hasLogIndices(request: InfraFrameworkRequest, sourceId: string): Promise<boolean> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const hasIndices = await this.adapter.hasIndices(
-      request,
-      sourceConfiguration.configuration.logAlias
-    );
-    return hasIndices;
-  }
-  public async hasMetricIndices(
-    request: InfraFrameworkRequest,
+  public async hasLogAlias(
+    requestContext: RequestHandlerContext,
     sourceId: string
   ): Promise<boolean> {
-    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const hasIndices = await this.adapter.hasIndices(
-      request,
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
+      requestContext.core.savedObjects.client,
+      sourceId
+    );
+    const hasAlias = await this.adapter.hasAlias(
+      requestContext,
+      sourceConfiguration.configuration.logAlias
+    );
+    return hasAlias;
+  }
+  public async hasMetricAlias(
+    requestContext: RequestHandlerContext,
+    sourceId: string
+  ): Promise<boolean> {
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
+      requestContext.core.savedObjects.client,
+      sourceId
+    );
+    const hasAlias = await this.adapter.hasAlias(
+      requestContext,
       sourceConfiguration.configuration.metricAlias
     );
-    return hasIndices;
+    return hasAlias;
+  }
+  public async getLogIndexStatus(
+    requestContext: RequestHandlerContext,
+    sourceId: string
+  ): Promise<SourceIndexStatus> {
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
+      requestContext.core.savedObjects.client,
+      sourceId
+    );
+    const indexStatus = await this.adapter.getIndexStatus(
+      requestContext,
+      sourceConfiguration.configuration.logAlias
+    );
+    return indexStatus;
+  }
+  public async hasMetricIndices(
+    requestContext: RequestHandlerContext,
+    sourceId: string
+  ): Promise<boolean> {
+    const sourceConfiguration = await this.libs.sources.getSourceConfiguration(
+      requestContext.core.savedObjects.client,
+      sourceId
+    );
+    const indexStatus = await this.adapter.getIndexStatus(
+      requestContext,
+      sourceConfiguration.configuration.metricAlias
+    );
+    return indexStatus !== 'missing';
   }
 }
 
+export type SourceIndexStatus = 'missing' | 'empty' | 'available';
+
 export interface InfraSourceStatusAdapter {
-  getIndexNames(request: InfraFrameworkRequest, aliasName: string): Promise<string[]>;
-  hasAlias(request: InfraFrameworkRequest, aliasName: string): Promise<boolean>;
-  hasIndices(request: InfraFrameworkRequest, indexNames: string): Promise<boolean>;
+  getIndexNames(requestContext: RequestHandlerContext, aliasName: string): Promise<string[]>;
+  hasAlias(requestContext: RequestHandlerContext, aliasName: string): Promise<boolean>;
+  getIndexStatus(
+    requestContext: RequestHandlerContext,
+    indexNames: string
+  ): Promise<SourceIndexStatus>;
 }

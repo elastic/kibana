@@ -4,21 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type DescribeFn = (text: string, fn: () => void) => void;
+export type ExpectResponseBody = (response: Record<string, any>) => Promise<void>;
 
-export interface TestDefinitionAuthentication {
-  username?: string;
-  password?: string;
+export interface TestDefinition {
+  title: string;
+  responseStatusCode: number;
+  responseBody: ExpectResponseBody;
 }
 
-export type LoadTestFileFn = (path: string) => string;
+export interface TestSuite<T> {
+  user?: TestUser;
+  spaceId?: string;
+  tests: T[];
+}
 
-export type GetServiceFn = (service: string) => any;
+export interface TestCase {
+  type: string;
+  id: string;
+  expectedNamespaces?: string[];
+  failure?: 400 | 403 | 404 | 409;
+}
 
-export type ReadConfigFileFn = (path: string) => any;
-
-export interface TestInvoker {
-  getService: GetServiceFn;
-  loadTestFile: LoadTestFileFn;
-  readConfigFile: ReadConfigFileFn;
+export interface TestUser {
+  username: string;
+  password: string;
+  description: string;
+  authorizedAtSpaces: string[];
 }

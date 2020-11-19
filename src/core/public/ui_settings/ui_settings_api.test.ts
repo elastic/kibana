@@ -17,22 +17,23 @@
  * under the License.
  */
 
-// @ts-ignore
+// @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
 
-import { basePathServiceMock } from '../base_path/base_path_service.mock';
+import { setup as httpSetup } from '../../test_helpers/http_test_setup';
 import { UiSettingsApi } from './ui_settings_api';
 
 function setup() {
-  const basePath = basePathServiceMock.createSetupContract();
-  basePath.addToPath.mockImplementation(path => `/foo/bar${path}`);
+  const { http } = httpSetup((injectedMetadata) => {
+    injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
+  });
 
-  const uiSettingsApi = new UiSettingsApi(basePath, 'v9.9.9');
+  const uiSettingsApi = new UiSettingsApi(http);
 
   return {
-    basePath,
+    http,
     uiSettingsApi,
   };
 }
@@ -56,14 +57,14 @@ afterEach(() => {
 });
 
 describe('#batchSet', () => {
-  it('sends a single change immediately', () => {
+  it('sends a single change immediately', async () => {
     fetchMock.mock('*', {
       body: { settings: {} },
     });
 
     const { uiSettingsApi } = setup();
-    uiSettingsApi.batchSet('foo', 'bar');
-    expect(fetchMock.calls()).toMatchSnapshot('synchronous fetch');
+    await uiSettingsApi.batchSet('foo', 'bar');
+    expect(fetchMock.calls()).toMatchSnapshot('single change');
   });
 
   it('buffers changes while first request is in progress, sends buffered changes after first request completes', async () => {
@@ -76,7 +77,7 @@ describe('#batchSet', () => {
     uiSettingsApi.batchSet('foo', 'bar');
     const finalPromise = uiSettingsApi.batchSet('box', 'bar');
 
-    expect(fetchMock.calls()).toMatchSnapshot('initial, only one request');
+    expect(uiSettingsApi.hasPendingChanges()).toBe(true);
     await finalPromise;
     expect(fetchMock.calls()).toMatchSnapshot('final, includes both requests');
   });
@@ -147,7 +148,7 @@ describe('#batchSet', () => {
       '*',
       {
         status: 400,
-        body: 'invalid',
+        body: { message: 'invalid' },
       },
       {
         overwriteRoutes: false,
@@ -180,13 +181,7 @@ describe('#getLoadingCount$()', () => {
 
     const { uiSettingsApi } = setup();
     const done$ = new Rx.Subject();
-    const promise = uiSettingsApi
-      .getLoadingCount$()
-      .pipe(
-        takeUntil(done$),
-        toArray()
-      )
-      .toPromise();
+    const promise = uiSettingsApi.getLoadingCount$().pipe(takeUntil(done$), toArray()).toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');
     done$.next();
@@ -211,13 +206,7 @@ describe('#getLoadingCount$()', () => {
 
     const { uiSettingsApi } = setup();
     const done$ = new Rx.Subject();
-    const promise = uiSettingsApi
-      .getLoadingCount$()
-      .pipe(
-        takeUntil(done$),
-        toArray()
-      )
-      .toPromise();
+    const promise = uiSettingsApi.getLoadingCount$().pipe(takeUntil(done$), toArray()).toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');
     await expect(uiSettingsApi.batchSet('foo', 'bar')).rejects.toThrowError();
@@ -235,21 +224,18 @@ describe('#stop', () => {
 
     const { uiSettingsApi } = setup();
     const promise = Promise.all([
-      uiSettingsApi
-        .getLoadingCount$()
-        .pipe(toArray())
-        .toPromise(),
-      uiSettingsApi
-        .getLoadingCount$()
-        .pipe(toArray())
-        .toPromise(),
+      uiSettingsApi.getLoadingCount$().pipe(toArray()).toPromise(),
+      uiSettingsApi.getLoadingCount$().pipe(toArray()).toPromise(),
     ]);
 
     const batchSetPromise = uiSettingsApi.batchSet('foo', 'bar');
     uiSettingsApi.stop();
 
     // both observables should emit the same values, and complete before the request is done loading
-    await expect(promise).resolves.toEqual([[0, 1], [0, 1]]);
+    await expect(promise).resolves.toEqual([
+      [0, 1],
+      [0, 1],
+    ]);
     await batchSetPromise;
   });
 });

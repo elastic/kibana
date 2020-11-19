@@ -19,8 +19,7 @@ describe('settings module', () => {
           expect(actionTypes.webhook.enabled).to.be(true);
           expect(actionTypes.index.enabled).to.be(true);
           expect(actionTypes.logging.enabled).to.be(true);
-          expect(actionTypes.hipchat.enabled).to.be(false);
-          expect(actionTypes.slack.enabled).to.be(true);
+          expect(actionTypes.slack.enabled).to.be(false);
           expect(actionTypes.jira.enabled).to.be(false);
           expect(actionTypes.pagerduty.enabled).to.be(false);
         });
@@ -35,12 +34,12 @@ describe('settings module', () => {
                   email: {
                     account: {
                       foo: {},
-                      bar: {}
+                      bar: {},
                     },
-                    default_account: 'bar'
-                  }
-                }
-              }
+                    default_account: 'bar',
+                  },
+                },
+              },
             },
             defaults: {
               xpack: {
@@ -48,13 +47,13 @@ describe('settings module', () => {
                   email: {
                     account: {
                       scooby: {},
-                      scrappy: {}
+                      scrappy: {},
                     },
-                    default_account: 'scooby'
-                  }
-                }
-              }
-            }
+                    default_account: 'scooby',
+                  },
+                },
+              },
+            },
           };
           const settings = Settings.fromUpstreamJson(upstreamJson);
 
@@ -77,13 +76,13 @@ describe('settings module', () => {
                 email: {
                   account: {
                     scooby: {},
-                    scrappy: {}
+                    scrappy: {},
                   },
-                  default_account: 'scooby'
-                }
-              }
-            }
-          }
+                  default_account: 'scooby',
+                },
+              },
+            },
+          },
         };
         const settings = Settings.fromUpstreamJson(upstreamJson);
         const json = settings.downstreamJson;
@@ -94,8 +93,7 @@ describe('settings module', () => {
         expect(json.action_types.webhook.enabled).to.be(true);
         expect(json.action_types.index.enabled).to.be(true);
         expect(json.action_types.logging.enabled).to.be(true);
-        expect(json.action_types.hipchat.enabled).to.be(false);
-        expect(json.action_types.slack.enabled).to.be(true);
+        expect(json.action_types.slack.enabled).to.be(false);
         expect(json.action_types.jira.enabled).to.be(false);
         expect(json.action_types.pagerduty.enabled).to.be(false);
       });

@@ -10,12 +10,7 @@ import { StatementListHeading } from './statement_list_heading';
 import { EuiSpacer } from '@elastic/eui';
 import { StatementList } from './statement_list';
 
-export function StatementSection({
-  iconType,
-  headingText,
-  elements,
-  onShowVertexDetails,
-}) {
+export function StatementSection({ iconType, headingText, elements, onShowVertexDetails }) {
   if (!elements.length) {
     return null;
   }
@@ -24,10 +19,7 @@ export function StatementSection({
     <div>
       <StatementListHeading iconType={iconType} title={headingText} />
       <EuiSpacer size="s" />
-      <StatementList
-        elements={elements}
-        onShowVertexDetails={onShowVertexDetails}
-      />
+      <StatementList elements={elements} onShowVertexDetails={onShowVertexDetails} />
     </div>
   );
 }

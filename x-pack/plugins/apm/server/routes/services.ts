@@ -4,61 +4,238 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { CoreSetup } from 'src/core/server';
-import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
-import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
-import { withDefaultValidators } from '../lib/helpers/input_validation';
+import * as t from 'io-ts';
+import Boom from '@hapi/boom';
+import { uniq } from 'lodash';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getService } from '../lib/services/get_service';
+import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
+import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
+import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
+import { createRoute } from './create_route';
+import { uiFiltersRt, rangeRt } from './default_api_types';
+import { getServiceAnnotations } from '../lib/services/annotations';
+import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
+import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 
-const ROOT = '/api/apm/services';
-const defaultErrorHandler = (err: Error) => {
-  // eslint-disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
+export const servicesRoute = createRoute({
+  endpoint: 'GET /api/apm/services',
+  params: t.type({
+    query: t.intersection([uiFiltersRt, rangeRt]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
 
-export function initServicesApi(core: CoreSetup) {
-  const { server } = core.http;
-  server.route({
-    method: 'GET',
-    path: ROOT,
-    options: {
-      validate: {
-        query: withDefaultValidators()
-      },
-      tags: ['access:apm']
-    },
-    handler: async req => {
-      const setup = setupRequest(req);
-      const services = await getServices(setup).catch(defaultErrorHandler);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
-      // Store telemetry data derived from services
-      const agentNames = services.items.map(
-        ({ agentName }) => agentName as AgentName
-      );
-      const apmTelemetry = createApmTelementry(agentNames);
-      storeApmTelemetry(server, apmTelemetry);
+    const services = await getServices({
+      setup,
+      searchAggregatedTransactions,
+      logger: context.logger,
+    });
 
-      return services;
+    return services;
+  },
+});
+
+export const serviceAgentNameRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/agent_name',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: rangeRt,
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServiceAgentName({
+      serviceName,
+      setup,
+      searchAggregatedTransactions,
+    });
+  },
+});
+
+export const serviceTransactionTypesRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/transaction_types',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: rangeRt,
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    return getServiceTransactionTypes({
+      serviceName,
+      setup,
+      searchAggregatedTransactions: await getSearchAggregatedTransactions(
+        setup
+      ),
+    });
+  },
+});
+
+export const serviceNodeMetadataRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+      serviceNodeName: t.string,
+    }),
+    query: t.intersection([uiFiltersRt, rangeRt]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName, serviceNodeName } = context.params.path;
+    return getServiceNodeMetadata({ setup, serviceName, serviceNodeName });
+  },
+});
+
+export const serviceAnnotationsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.partial({
+        environment: t.string,
+      }),
+    ]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { environment } = context.params.query;
+
+    const [
+      annotationsClient,
+      searchAggregatedTransactions,
+    ] = await Promise.all([
+      context.plugins.observability?.getScopedAnnotationsClient(
+        context,
+        request
+      ),
+      getSearchAggregatedTransactions(setup),
+    ]);
+
+    return getServiceAnnotations({
+      setup,
+      searchAggregatedTransactions,
+      serviceName,
+      environment,
+      annotationsClient,
+      apiCaller: context.core.elasticsearch.legacy.client.callAsCurrentUser,
+      logger: context.logger,
+    });
+  },
+});
+
+export const serviceAnnotationsCreateRoute = createRoute({
+  endpoint: 'POST /api/apm/services/{serviceName}/annotation',
+  options: {
+    tags: ['access:apm', 'access:apm_write'],
+  },
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    body: t.intersection([
+      t.type({
+        '@timestamp': dateAsStringRt,
+        service: t.intersection([
+          t.type({
+            version: t.string,
+          }),
+          t.partial({
+            environment: t.string,
+          }),
+        ]),
+      }),
+      t.partial({
+        message: t.string,
+        tags: t.array(t.string),
+      }),
+    ]),
+  }),
+  handler: async ({ request, context }) => {
+    const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
+      context,
+      request
+    );
+
+    if (!annotationsClient) {
+      throw Boom.notFound();
     }
-  });
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/{serviceName}`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
+    const { body, path } = context.params;
+
+    return annotationsClient.create({
+      message: body.service.version,
+      ...body,
+      annotation: {
+        type: 'deployment',
       },
-      tags: ['access:apm']
-    },
-    handler: req => {
-      const setup = setupRequest(req);
-      const { serviceName } = req.params;
-      return getService(serviceName, setup).catch(defaultErrorHandler);
-    }
-  });
-}
+      service: {
+        ...body.service,
+        name: path.serviceName,
+      },
+      tags: uniq(['apm'].concat(body.tags ?? [])),
+    });
+  },
+});
+
+export const serviceErrorGroupsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      uiFiltersRt,
+      t.type({
+        size: toNumberRt,
+        numBuckets: toNumberRt,
+        pageIndex: toNumberRt,
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+        sortField: t.union([
+          t.literal('last_seen'),
+          t.literal('occurrences'),
+          t.literal('name'),
+        ]),
+      }),
+    ]),
+  }),
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const {
+      path: { serviceName },
+      query: { size, numBuckets, pageIndex, sortDirection, sortField },
+    } = context.params;
+
+    return getServiceErrorGroups({
+      serviceName,
+      setup,
+      size,
+      numBuckets,
+      pageIndex,
+      sortDirection,
+      sortField,
+    });
+  },
+});

@@ -23,26 +23,26 @@ describe('get_logstash_info', () => {
               logstash_stats: {
                 timestamp: moment().format(),
                 logstash: {
-                  host: 'myhost'
+                  host: 'myhost',
                 },
                 events: {
                   in: 300,
                   filtered: 300,
-                  out: 300
+                  out: 300,
                 },
                 reloads: {
                   successes: 5,
-                  failures: 2
+                  failures: 2,
                 },
                 queue: {
                   type: 'persisted',
-                  events: 100
-                }
-              }
-            }
-          }
-        ]
-      }
+                  events: 100,
+                },
+              },
+            },
+          },
+        ],
+      },
     });
     expect(result).to.be.eql({
       host: 'myhost',
@@ -54,9 +54,9 @@ describe('get_logstash_info', () => {
       },
       reloads: {
         successes: 5,
-        failures: 2
+        failures: 2,
       },
-      queue_type: 'persisted'
+      queue_type: 'persisted',
     });
   });
 
@@ -69,26 +69,26 @@ describe('get_logstash_info', () => {
               logstash_stats: {
                 timestamp: moment().subtract(11, 'minutes').format(),
                 logstash: {
-                  host: 'myhost'
+                  host: 'myhost',
                 },
                 events: {
                   in: 300,
                   filtered: 300,
-                  out: 300
+                  out: 300,
                 },
                 reloads: {
                   successes: 5,
-                  failures: 2
+                  failures: 2,
                 },
                 queue: {
                   type: 'persisted',
-                  events: 100
-                }
-              }
-            }
-          }
-        ]
-      }
+                  events: 100,
+                },
+              },
+            },
+          },
+        ],
+      },
     });
     expect(result).to.be.eql({
       host: 'myhost',
@@ -100,9 +100,9 @@ describe('get_logstash_info', () => {
       },
       reloads: {
         successes: 5,
-        failures: 2
+        failures: 2,
       },
-      queue_type: 'persisted'
+      queue_type: 'persisted',
     });
   });
 
@@ -115,22 +115,22 @@ describe('get_logstash_info', () => {
               logstash_stats: {
                 timestamp: moment().subtract(11, 'minutes').format(),
                 logstash: {
-                  host: 'myhost'
+                  host: 'myhost',
                 },
                 events: {
                   in: 300,
                   filtered: 300,
-                  out: 300
+                  out: 300,
                 },
                 reloads: {
                   successes: 5,
-                  failures: 2
-                }
-              }
-            }
-          }
-        ]
-      }
+                  failures: 2,
+                },
+              },
+            },
+          },
+        ],
+      },
     });
     expect(result).to.be.eql({
       host: 'myhost',
@@ -142,8 +142,8 @@ describe('get_logstash_info', () => {
       },
       reloads: {
         successes: 5,
-        failures: 2
-      }
+        failures: 2,
+      },
     });
   });
 });

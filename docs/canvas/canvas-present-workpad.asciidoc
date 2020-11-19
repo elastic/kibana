@@ -1,0 +1,51 @@
+[role="xpack"]
+[[canvas-present-workpad]]
+== Present your workpad
+
+When you are ready to present your workpad, use and enable the presentation options.
+
+. Configure the autoplay options.
+
+.. From the workpad menu, click *View > Autoplay settings*.
+
+.. Under *Change cycling interval*, select the interval you want to use, or *Set a custom interval*.
++
+[role="screenshot"]
+image::images/canvas-autoplay-interval.png[Element autoplay interval]
+
+. To enable autoplay, click *View > Turn autoplay on*.
+
+. To start your presentation, click *View > Enter fullscreen mode*.
++
+[role="screenshot"]
+image::images/canvas-fullscreen.png[Image showing how to enter fullscreen mode from view dropdown]
+
+. When you are ready to exit fullscreen mode, press the Esc (Escape) key.
+
+[float]
+[[zoom-in-out]]
+=== Use the zoom options
+
+To get a closer look at a portion of your workpad, use the zoom options.
+
+. Click *View > Zoom*.
+
+. Select the zoom option.
++
+[role="screenshot"]
+image::images/canvas-zoom-controls.png[Zoom controls, also in view dropdown]
+
+[float]
+[[configure-auto-refresh-interval]]
+=== Change the auto-refresh interval
+
+Change how often the data refreshes on your workpad.
+
+. Click *View > Auto refresh settings*.
+
+. Select the interval you want to use, or *Set a custom interval*.
++
+[role="screenshot"]
+image::images/canvas-refresh-interval.png[Element data refresh interval]
++
+To manually refresh the data, click image:canvas/images/canvas-refresh-data.png[].

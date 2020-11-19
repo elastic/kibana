@@ -1,30 +1,58 @@
 [[search]]
-== Searching Your Data
-You can search the indices that match the current index pattern by entering
-your search criteria in the Query bar. By default you can use Kibana's standard query language
-which features autocomplete and a simple, easy to use syntax. Kibana's legacy query
-language (based on Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax])
-is still available for the time being under the options menu in the Query Bar. When this
-legacy query language is selected, the full JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL]
-can also be used.
+== Search data
+Many Kibana apps embed a query bar for real-time search, including
+*Discover* and *Dashboard*.
 
-When you submit a search request, the histogram, Documents table, and Fields
-list are updated to reflect the search results. The total number of hits
-(matching documents) is shown in the toolbar. The Documents table shows the
-first five hundred hits. By default, the hits are listed in reverse
-chronological order, with the newest documents shown first. You can reverse
-the sort order by clicking the Time column header. You can also sort the table
-by the values in any indexed field. For more information, see <<sorting,
-Sorting the Documents Table>>.
+[float]
+=== Search your data
 
-To search your data, enter your search criteria in the Query bar and
-press *Enter* or click *Search* image:images/search-button.jpg[] to submit
-the request to Elasticsearch.
+To search the indices that match the current <<index-patterns, index pattern>>,
+enter your search criteria in the query bar. By default, you'll use
+{kib}'s <<kuery-query, standard query language>> (KQL), which
+features autocomplete and a simple, easy-to-use syntax. If you prefer to use
+{kib}'s legacy query
+language, based on the
+Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax],
+you can switch to it from the KQL popup in the query bar. When you enable the
+legacy query language, you can use the full
+JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL].
+
+
+[float]
+[[autorefresh]]
+=== Refresh search results
+As more documents are added to the indices you're searching, the search results
+shown in *Discover*, and used to display visualizations, get stale. Using the
+time filter, you can
+configure a refresh interval to periodically resubmit your searches to
+retrieve the latest results.
+
+[role="screenshot"]
+image::images/autorefresh-interval.png[Image showing what refresh interval option looks like. The configurable time interval is located in the dropdown]
+
+You can also manually refresh the search results by
+clicking the *Refresh* button.
+
+[float]
+=== Searching large amounts of data
+
+Sometimes you want to search through large amounts of data no matter how long
+the search takes.  While this might not happen often, there are times
+that long-running queries are required.  Consider a threat hunting scenario
+where you need to search through years of data.
+
+If you run a query, and the run time gets close to the
+timeout, you're presented the option to ignore the timeout.  This enables you to
+run queries with large amounts of data to completion.
+
+By default, a query times out after 30 seconds.
+The timeout is in place to avoid unintentional load on the cluster.
+
 
 include::kuery.asciidoc[]
 
 [[lucene-query]]
-=== Lucene Query Syntax
+=== Lucene query syntax
 Kibana's legacy query language was based on the Lucene query syntax. For the time being this syntax
 is still available under the options menu in the Query Bar and in Advanced Settings. The following
 are some tips that can help get you started.
@@ -55,20 +83,30 @@ query language you can also submit queries using the {ref}/query-dsl.html[Elasti
 
 
 [[save-open-search]]
-=== Saving and Opening Searches
-Saving searches enables you to reload them into Discover and use them as the basis
-for <<visualize, visualizations>>. Saving a search saves both the search query string
-and the currently selected index pattern.
+=== Save a search
+A saved search persists your current view of Discover for later retrieval and reuse. You can reload a saved search into Discover, add it to a dashboard, and use it as the basis for a visualization.
 
-==== Saving a Search
+A saved search includes the query text, filters, and optionally, the time filter. A saved search also includes the selected columns in the document table, the sort order, and the current index pattern.
+
+[role="xpack"]
+[[discover-read-only-access]]
+==== Read-only access
+When you have insufficient privileges to save searches, the following indicator in Kibana will be
+displayed and the *Save* button won't be visible. For more information on granting access to
+Kibana see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
+
+==== Save a search
 To save the current search:
 
 . Click *Save* in the Kibana toolbar.
 . Enter a name for the search and click *Save*.
 
-You can import, export and delete saved searches from *Management/Kibana/Saved Objects*.
+To import, export, and delete saved searches, open the main menu, then click *Stack Management > Saved Ojbects*.
 
-==== Opening a Saved Search
+==== Open a saved search
 To load a saved search into Discover:
 
 . Click *Open* in the Kibana toolbar.
@@ -78,36 +116,75 @@ If the saved search is associated with a different index pattern than is current
 selected, opening the saved search changes the selected index pattern. The query language
 used for the saved search will also be automatically selected.
 
+[[save-load-delete-query]]
+=== Save a query
+A saved query is a portable collection of query text and filters that you can reuse in <<discover, Discover>> and <<dashboard, Dashboard>>. Save a query when you want to:
 
-[[select-pattern]]
-=== Changing Which Indices You're Searching
-When you submit a search request, the indices that match the currently-selected
-index pattern are searched. The current index pattern is shown below the toolbar.
-To change which indices you are searching, click the index pattern and select a
-different index pattern.
+* Retrieve results from the same query at a later time without having to reenter the query text, add the filters or set the time filter
+* View the results of the same query in multiple apps
+* Share your query
 
-For more information about index patterns, see <<settings-create-pattern,
-Creating an Index Pattern>>.
+Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, saved search>> instead.
 
-[[autorefresh]]
-=== Refreshing the Search Results
-As more documents are added to the indices you're searching, the search results
-shown in Discover and used to display visualizations get stale. You can
-configure a refresh interval to periodically resubmit your searches to
-retrieve the latest results.
+[role="xpack"]
+==== Read-only access
+If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the saved query management popover. For more information, see <<xpack-security-authorization, Granting access to Kibana>>
 
-To enable auto refresh:
+==== Save a query
+To save the current query text, filters, and time filter:
 
-. Click the *Time Picker* image:images/time-picker.jpg[Time Picker] in the
-Kibana toolbar.
-. Click *Auto refresh*.
-. Choose a refresh interval from the list.
+. Click *#* in the search bar, next to the query text input.
+. Click *Save current query* in the popover.
 +
-image::images/autorefresh-intervals.png[]
+[role="screenshot"]
+image::discover/images/saved-query-management-component-all-privileges.png["Example of the saved query management popover with a list of saved queries with write access",width="80%"]
++
+. Enter a name, a description, and then select the filter options that you want to include. By default, filters are automatically included, but the time filter is not.
++
+[role="screenshot"]
+image::discover/images/saved-query-save-form-default-filters.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
+. Click *Save*.
 
-When auto refresh is enabled, the refresh interval is displayed next to the
-Time Picker, along with a Pause button. To temporarily disable auto refresh,
-click *Pause*.
+==== Load a query
+To load a saved query into Discover or Dashboard:
 
-NOTE: If auto refresh is not enabled, you can manually refresh visualizations
-by clicking *Refresh*.
+. Click *#* in the search bar, next to the query text input.
+. Select the query you want to load. You might need to scroll down to find the query you are looking for.
+
+==== Save changes to a query
+If you load a query and then make changes to the query text, the filters, or the time filter, you can save the changes as a new query or update the existing query.
+
+To save the changes as a new query:
+
+. Click *#* in the search bar, next to the query text input.
+. Click *Save as new* in the popover.
+. Enter a name and a description, and then select the filter options that you want to include.
+. Click *Save*.
++
+[role="screenshot"]
+image::discover/images/saved-query-management-component-save-as-new-query.png["Example of the saved query management popover when a query is loaded and we have made changes to the query",width="80%"]
+
+To save the changes to the current query:
+
+. Click *#* in the search bar.
+. Click *Save changes* in the popover.
+. Enter a description, and then select the filter options that you want to include.
+. Click *Save*.
+
+==== Clear a query
+To clear a query that is currently loaded in an application:
+
+. Click *#* in the search bar.
+. Click *Clear* in the popover.
+
+==== Delete a query
+To completely delete a query:
+
+. Click *#* in the search bar, next to the query text input.
+. Hover over the query you want to delete.
+. Click the trash can icon.
++
+[role="screenshot"]
+image::discover/images/saved-query-management-component-delete-query-button.png["Example of the saved query management popover when a query is hovered over and we are about to delete a query",width="80%"]
+
+You can import, export, and delete saved queries from <<managing-saved-objects, Saved Objects in Management>>.

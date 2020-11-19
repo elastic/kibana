@@ -1,0 +1,75 @@
+[role="xpack"]
+[[filters]]
+=== Filters
+
+++++
+<titleabbrev>Filter data</titleabbrev>
+++++
+
+APM provides two different ways you can filter your data within the APM App:
+
+* <<global-filters>>
+* <<contextual-filters>>
+
+[[global-filters]]
+==== Global filters
+
+Global filters are ways you can filter any and all data across the APM app.
+They are available in the Services, Transactions, Errors, Metrics, and Traces views,
+and any filter applied will persist as you move between pages.
+
+[role="screenshot"]
+image::apm/images/global-filters.png[Global filters available in the APM app in Kibana]
+
+[float]
+===== Global time range
+
+The <<set-time-filter,global time range filter>> in {kib} restricts APM data to a specific time period.
+
+[float]
+[[query-bar]]
+===== Query bar
+
+The query bar is a powerful data query feature.
+Similar to the query bar in {kibana-ref}/discover.html[Discover],
+it enables you to pass advanced queries on your data to filter on particular pieces of information that you're interested in.
+It comes with a handy autocomplete that helps find the fields and even provides suggestions to the data they include.
+You can select the query bar and hit the down arrow on your keyboard to begin seeing recommendations.
+
+See <<query-bar,advanced queries>> for more information and sample queries.
+
+[float]
+[[environment-selector]]
+===== Service environment filter
+
+The environment selector is a global filter for `service.environment`.
+It allows you to view only relevant data, and is especially useful for separating development from production environments.
+By default, all environments are displayed. If there are no environment options, you'll see "not defined".
+
+Service environments are defined when configuring your APM agents.
+It's vital to be consistent when naming environments in your agents.
+See the documentation for each agent you're using to learn how to configure service environments:
+
+* *Go:* {apm-go-ref}/configuration.html#config-environment[`ELASTIC_APM_ENVIRONMENT`]
+* *Java:* {apm-java-ref}/config-core.html#config-environment[`environment`]
+* *.NET* {apm-dotnet-ref}/config-core.html#config-environment[`Environment`]
+* *Node.js:* {apm-node-ref}/configuration.html#environment[`environment`]
+* *Python:* {apm-py-ref}/configuration.html#config-environment[`environment`]
+* *Ruby:* {apm-ruby-ref}/configuration.html#config-environment[`environment`]
+* *Real User Monitoring:* {apm-rum-ref}/configuration.html#environment[`environment`]
+
+[[contextual-filters]]
+==== Contextual filters
+
+Contextual filters are ways you can filter your specific APM data on each individual page.
+The filters shown are relevant to your data, and will persist between pages,
+but only where they are applicable -- they are typically most useful in their original context.
+As an example, if you select a host on the Services overview, then select a transaction group,
+the host filter will still be applied.
+
+These filters are very useful for quickly and easily removing noise from your data.
+With just a click, you can filter your transactions by the transaction result,
+host, container ID, Kubernetes pod, and more.
+
+[role="screenshot"]
+image::apm/images/local-filter.png[Local filters available in the APM app in Kibana]

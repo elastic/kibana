@@ -3,13 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
-import { boomify } from 'boom';
 
-export function wrapError(error: any) {
-  if (error.isBoom) {
-    return error;
-  }
+import { boomify, isBoom } from '@hapi/boom';
+import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
 
-  return boomify(error, { statusCode: error.status });
+export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
+  const boom = isBoom(error) ? error : boomify(error);
+  return {
+    body: boom,
+    headers: boom.output.headers,
+    statusCode: boom.output.statusCode,
+  };
 }

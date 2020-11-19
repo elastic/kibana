@@ -1,28 +1,26 @@
 {
   "name": "@kbn/test",
-  "main": "./target/index.js",
   "version": "1.0.0",
-  "license": "Apache-2.0",
   "private": true,
+  "license": "Apache-2.0",
+  "main": "./target/index.js",
   "scripts": {
-    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx",
-    "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
+    "build": "node scripts/build",
+    "kbn:bootstrap": "node scripts/build --source-maps",
+    "kbn:watch": "node scripts/build --watch --source-maps"
   },
-  "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@kbn/babel-preset": "1.0.0",
-    "@kbn/dev-utils": "1.0.0"
+  "kibana": {
+    "devOnly": true
   },
   "dependencies": {
-    "chalk": "^2.4.1",
-    "dedent": "^0.7.0",
-    "del": "^3.0.0",
-    "getopts": "^2.2.4",
-    "glob": "^7.1.2",
-    "rxjs": "^6.2.1",
-    "tar-fs": "^1.16.2",
-    "tmp": "^0.0.33",
-    "zlib": "^1.0.5"
+    "@kbn/es": "link:../kbn-es",
+    "@kbn/i18n": "link:../kbn-i18n",
+    "@kbn/optimizer": "link:../kbn-optimizer"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/expect": "link:../kbn-expect",
+    "@kbn/utils": "link:../kbn-utils"
   }
 }

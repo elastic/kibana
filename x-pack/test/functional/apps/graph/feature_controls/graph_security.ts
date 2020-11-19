@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'graph', 'security', 'error']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -66,24 +64,28 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       it('shows graph navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
-          'Graph',
-          'Management',
-        ]);
+        expect(navLinks.map((link) => link.text)).to.eql(['Overview', 'Graph']);
       });
 
-      it('shows save button', async () => {
+      it('landing page shows "Create new graph" button', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphSaveButton');
-      });
-
-      it('shows delete button', async () => {
-        await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphDeleteButton');
+        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
 
       it(`doesn't show read-only badge`, async () => {
         await globalNav.badgeMissingOrFail();
+      });
+
+      it('allows creating a new workspace', async () => {
+        await PageObjects.common.navigateToApp('graph');
+        await testSubjects.click('graphCreateGraphPromptButton');
+        const breadcrumb = await testSubjects.find('~graphCurrentGraphBreadcrumb');
+        expect(await breadcrumb.getVisibleText()).to.equal('Unsaved graph');
+      });
+
+      it('shows save button', async () => {
+        await testSubjects.existOrFail('graphSaveButton');
       });
     });
 
@@ -124,22 +126,14 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows graph navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Graph', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Graph']);
       });
 
-      it(`doesn't show save button`, async () => {
+      it('does not show a "Create new Workspace" button', async () => {
         await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphOpenButton');
-        await testSubjects.missingOrFail('graphSaveButton');
-      });
-
-      it(`doesn't show delete button`, async () => {
-        await PageObjects.common.navigateToApp('graph');
-        await testSubjects.existOrFail('graphOpenButton');
-        await testSubjects.missingOrFail('graphDeleteButton');
+        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
+        await testSubjects.missingOrFail('newItemButton');
       });
 
       it(`shows read-only badge`, async () => {
@@ -184,19 +178,17 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`doesn't show graph navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Graph');
       });
 
-      it(`navigating to app displays a 404`, async () => {
+      it(`navigating to app displays a 403`, async () => {
         await PageObjects.common.navigateToUrl('graph', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

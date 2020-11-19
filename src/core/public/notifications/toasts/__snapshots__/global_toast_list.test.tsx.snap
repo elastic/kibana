@@ -2,8 +2,11 @@
 
 exports[`renders matching snapshot 1`] = `
 <EuiGlobalToastList
-  dismissToast={[MockFunction]}
-  toastLifeTimeMs={6000}
+  aria-label="Notification message list"
+  data-test-subj="globalToastList"
+  dismissToast={[Function]}
+  side="right"
+  toastLifeTimeMs={Infinity}
   toasts={Array []}
 />
 `;

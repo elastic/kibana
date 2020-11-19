@@ -4,54 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import qs from 'querystring';
-import { StringMap } from '../../../../typings/common';
+import { parse, stringify } from 'query-string';
+import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+import { LocalUIFilterName } from '../../../../common/ui_filter';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
-  return search ? qs.parse(search.slice(1)) : {};
+  return search ? parse(search.slice(1), { sort: false }) : {};
 }
 
-export function fromQuery(query: StringMap<any>) {
-  return qs.stringify(query, undefined, undefined, {
-    encodeURIComponent: (value: string) => {
-      return encodeURIComponent(value).replace(/%3A/g, ':');
-    }
-  });
+export function fromQuery(query: Record<string, any>) {
+  const encodedQuery = url.encodeQuery(query, (value) =>
+    encodeURIComponent(value).replace(/%3A/g, ':')
+  );
+
+  return stringify(encodedQuery, { sort: false, encode: false });
 }
 
-export interface APMQueryParams {
+export type APMQueryParams = {
   transactionId?: string;
+  transactionName?: string;
+  transactionType?: string;
   traceId?: string;
   detailTab?: string;
   flyoutDetailTab?: string;
   waterfallItemId?: string;
   spanId?: string;
   page?: string | number;
+  pageSize?: string;
   sortDirection?: string;
   sortField?: string;
   kuery?: string;
+  environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
   refreshPaused?: string | boolean;
   refreshInterval?: string | number;
-}
+  searchTerm?: string;
+  percentile?: 50 | 75 | 90 | 95 | 99;
+} & { [key in LocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string
 type StringifyAll<T> = { [K in keyof T]: string };
 type APMQueryParamsRaw = StringifyAll<APMQueryParams>;
-
-// This is downright horrible 😭 💔
-// Angular decodes encoded url tokens like "%2F" to "/" which causes problems when path params contains forward slashes
-// This was originally fixed in Angular, but roled back to avoid breaking backwards compatability: https://github.com/angular/angular.js/commit/2bdf7126878c87474bb7588ce093d0a3c57b0026
-export function legacyEncodeURIComponent(rawUrl?: string) {
-  return (
-    rawUrl &&
-    encodeURIComponent(rawUrl)
-      .replace(/~/g, '%7E')
-      .replace(/%/g, '~')
-  );
-}
-
-export function legacyDecodeURIComponent(encodedUrl?: string) {
-  return encodedUrl && decodeURIComponent(encodedUrl.replace(/~/g, '%'));
-}

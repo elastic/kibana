@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { resolveKibanaPath } from '@kbn/plugin-helpers';
 import path from 'path';
-import { TestInvoker } from './lib/types';
-// @ts-ignore
-import { EsProvider } from './services/es';
+
+import { REPO_ROOT } from '@kbn/utils';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+
+import { services } from './services';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -19,28 +19,21 @@ interface CreateTestConfigOptions {
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [] } = options;
 
-  return async ({ readConfigFile }: TestInvoker) => {
+  return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
       kibana: {
-        api: await readConfigFile(resolveKibanaPath('test/api_integration/config.js')),
+        api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
         functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
       },
       xpack: {
-        api: await readConfigFile(require.resolve('../../api_integration/config.js')),
+        api: await readConfigFile(require.resolve('../../api_integration/config.ts')),
       },
     };
 
     return {
       testFiles: [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
-      services: {
-        es: EsProvider,
-        esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
-        supertest: config.kibana.api.get('services.supertest'),
-        supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),
-        esArchiver: config.kibana.functional.get('services.esArchiver'),
-        kibanaServer: config.kibana.functional.get('services.kibanaServer'),
-      },
+      services,
       junit: {
         reportName: 'X-Pack Saved Object API Integration Tests -- ' + name,
       },
@@ -62,10 +55,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...config.xpack.api.get('kbnTestServer'),
         serverArgs: [
           ...config.xpack.api.get('kbnTestServer.serverArgs'),
-          '--optimize.enabled=false',
           '--server.xsrf.disableProtection=true',
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'namespace_agnostic_type_plugin')}`,
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'saved_object_test_plugin')}`,
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

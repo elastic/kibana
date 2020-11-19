@@ -12,10 +12,11 @@
     "logs": {
       "enabled": false,
       "reason": {
-        "clusterExists": null,
+        "clusterExists": false,
         "indexPatternExists": false,
         "indexPatternInTimeRangeExists": false,
         "typeExistsAtAnyTime": false,
+        "usingStructuredLogs": false,
         "nodeExists": null,
         "indexExists": null,
         "typeExists": false
@@ -43,9 +44,6 @@
     "apms": {
       "total": 0
     }
-  },
-  "alerts": {
-    "message": "Cluster Alerts are not displayed because the [production] cluster's license could not be determined."
   },
   "isPrimary": false
 }]

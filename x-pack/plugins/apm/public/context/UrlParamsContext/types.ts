@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IUrlParams {
+import { LocalUIFilterName } from '../../../common/ui_filter';
+
+export type IUrlParams = {
   detailTab?: string;
   end?: string;
-  errorGroupId?: string;
   flyoutDetailTab?: string;
   kuery?: string;
+  environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
   refreshInterval?: number;
   refreshPaused?: boolean;
-  serviceName?: string;
   sortDirection?: string;
   sortField?: string;
   start?: string;
@@ -23,4 +24,8 @@ export interface IUrlParams {
   transactionName?: string;
   transactionType?: string;
   waterfallItemId?: string;
-}
+  page?: number;
+  pageSize?: number;
+  searchTerm?: string;
+  percentile?: number;
+} & Partial<Record<LocalUIFilterName, string>>;

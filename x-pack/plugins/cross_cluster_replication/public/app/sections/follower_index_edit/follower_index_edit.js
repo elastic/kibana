@@ -8,8 +8,6 @@ import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
   EuiButtonEmpty,
@@ -21,8 +19,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
-import routing from '../../services/routing';
+import { setBreadcrumbs, listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,
@@ -42,7 +40,7 @@ export class FollowerIndexEdit extends PureComponent {
     apiStatus: PropTypes.object.isRequired,
     followerIndex: PropTypes.object,
     followerIndexId: PropTypes.string,
-  }
+  };
 
   static getDerivedStateFromProps({ followerIndexId }, { lastFollowerIndexId }) {
     if (lastFollowerIndexId !== followerIndexId) {
@@ -54,10 +52,15 @@ export class FollowerIndexEdit extends PureComponent {
   state = {
     lastFollowerIndexId: undefined,
     showConfirmModal: false,
-  }
+  };
 
   componentDidMount() {
-    const { match: { params: { id } }, selectFollowerIndex } = this.props;
+    const {
+      match: {
+        params: { id },
+      },
+      selectFollowerIndex,
+    } = this.props;
     let decodedId;
     try {
       // When we navigate through the router (history.push) we need to decode both the uri and the id
@@ -71,7 +74,7 @@ export class FollowerIndexEdit extends PureComponent {
 
     selectFollowerIndex(decodedId);
 
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, editBreadcrumb ]);
+    setBreadcrumbs([listBreadcrumb('/follower_indices'), editBreadcrumb]);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -89,13 +92,13 @@ export class FollowerIndexEdit extends PureComponent {
   saveFollowerIndex = (name, followerIndex) => {
     this.editedFollowerIndexPayload = { name, followerIndex };
     this.showConfirmModal();
-  }
+  };
 
   confirmSaveFollowerIhdex = () => {
     const { name, followerIndex } = this.editedFollowerIndexPayload;
     this.props.saveFollowerIndex(name, followerIndex);
     this.closeConfirmModal();
-  }
+  };
 
   showConfirmModal = () => this.setState({ showConfirmModal: true });
 
@@ -113,21 +116,31 @@ export class FollowerIndexEdit extends PureComponent {
   }
 
   renderGetFollowerIndexError(error) {
-    const { match: { params: { id: name } } } = this.props;
-    const title = i18n.translate('xpack.crossClusterReplication.followerIndexEditForm.loadingErrorTitle', {
-      defaultMessage: 'Error loading follower index'
-    });
-    const errorMessage = error.status === 404 ? {
-      data: {
-        error: i18n.translate(
-          'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorMessage',
-          {
-            defaultMessage: `The follower index '{name}' does not exist.`,
-            values: { name }
-          }
-        )
+    const {
+      match: {
+        params: { id: name },
+      },
+    } = this.props;
+    const title = i18n.translate(
+      'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorTitle',
+      {
+        defaultMessage: 'Error loading follower index',
       }
-    } : error;
+    );
+    const errorMessage =
+      error.status === 404
+        ? {
+            data: {
+              error: i18n.translate(
+                'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorMessage',
+                {
+                  defaultMessage: `The follower index '{name}' does not exist.`,
+                  values: { name },
+                }
+              ),
+            },
+          }
+        : error;
 
     return (
       <Fragment>
@@ -138,7 +151,7 @@ export class FollowerIndexEdit extends PureComponent {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              {...routing.getRouterLinkProps('/follower_indices')}
+              {...reactRouterNavigate(this.props.history, `/follower_indices`)}
               iconType="arrowLeft"
               flush="left"
               data-test-subj="viewListFollowerIndexButton"
@@ -155,12 +168,15 @@ export class FollowerIndexEdit extends PureComponent {
   }
 
   renderConfirmModal = () => {
-    const { followerIndexId, followerIndex: { isPaused } } = this.props;
+    const {
+      followerIndexId,
+      followerIndex: { isPaused },
+    } = this.props;
     const title = i18n.translate(
       'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.title',
       {
         defaultMessage: `Update follower index '{id}'?`,
-        values: { id: followerIndexId }
+        values: { id: followerIndexId },
       }
     );
 
@@ -170,25 +186,25 @@ export class FollowerIndexEdit extends PureComponent {
           title={title}
           onCancel={this.closeConfirmModal}
           onConfirm={this.confirmSaveFollowerIhdex}
-          cancelButtonText={
-            i18n.translate(
-              'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.cancelButtonText',
-              {
-                defaultMessage: 'Cancel'
-              }
+          cancelButtonText={i18n.translate(
+            'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.cancelButtonText',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          confirmButtonText={
+            isPaused ? (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmAndResumeButtonText"
+                defaultMessage="Update and resume"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmButtonText"
+                defaultMessage="Update"
+              />
             )
           }
-          confirmButtonText={isPaused ? (
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmAndResumeButtonText"
-              defaultMessage="Update and resume"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmButtonText"
-              defaultMessage="Update"
-            />
-          )}
         >
           <p>
             {isPaused ? (
@@ -207,7 +223,7 @@ export class FollowerIndexEdit extends PureComponent {
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
-  }
+  };
 
   render() {
     const {
@@ -215,7 +231,7 @@ export class FollowerIndexEdit extends PureComponent {
       apiStatus,
       apiError,
       followerIndex,
-      match: { url: currentUrl }
+      match: { url: currentUrl },
     } = this.props;
 
     const { showConfirmModal } = this.state;
@@ -224,23 +240,20 @@ export class FollowerIndexEdit extends PureComponent {
     const { shards, ...rest } = followerIndex || {}; // eslint-disable-line no-unused-vars
 
     return (
-      <EuiPageContent
-        horizontalPosition="center"
-        className="ccrPageContent"
-      >
+      <EuiPageContent horizontalPosition="center" className="ccrPageContent">
         <FollowerIndexPageTitle
-          title={(
+          title={
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndex.editTitle"
               defaultMessage="Edit follower index"
             />
-          )}
+          }
         />
 
         {apiStatus.get === API_STATUS.LOADING && this.renderLoadingFollowerIndex()}
 
         {apiError.get && this.renderGetFollowerIndexError(apiError.get)}
-        { followerIndex && (
+        {followerIndex && (
           <RemoteClustersProvider>
             {({ isLoading, error, remoteClusters }) => {
               if (isLoading) {
@@ -263,19 +276,19 @@ export class FollowerIndexEdit extends PureComponent {
                   remoteClusters={error ? [] : remoteClusters}
                   saveFollowerIndex={this.saveFollowerIndex}
                   clearApiError={clearApiError}
-                  saveButtonLabel={(
+                  saveButtonLabel={
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndexEditForm.saveButtonLabel"
                       defaultMessage="Update"
                     />
-                  )}
+                  }
                 />
               );
             }}
           </RemoteClustersProvider>
-        ) }
+        )}
 
-        { showConfirmModal && this.renderConfirmModal() }
+        {showConfirmModal && this.renderConfirmModal()}
       </EuiPageContent>
     );
   }

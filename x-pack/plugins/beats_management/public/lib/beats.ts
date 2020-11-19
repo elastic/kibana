@@ -5,7 +5,7 @@
  */
 
 import { ReturnTypeBulkAction } from '../../common/return_types';
-import { CMBeat } from './../../common/domain_types';
+import { CMBeat } from '../../common/domain_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapters/beats/adapter_types';
 import { ElasticsearchLib } from './elasticsearch';
 

@@ -39,7 +39,7 @@ const ROOT_CONTEXT_NAME = 'root';
  */
 const DEFAULT_APPENDER_NAME = 'default';
 
-const createLevelSchema = schema.oneOf(
+const levelSchema = schema.oneOf(
   [
     schema.literal('all'),
     schema.literal('fatal'),
@@ -55,44 +55,79 @@ const createLevelSchema = schema.oneOf(
   }
 );
 
-const createLoggerSchema = schema.object({
+/**
+ * Config schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.
+ *
+ * @public
+ */
+export const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
   context: schema.string(),
-  level: createLevelSchema,
+  level: levelSchema,
 });
 
-const loggingSchema = schema.object({
+/** @public */
+export type LoggerConfigType = TypeOf<typeof loggerSchema>;
+export const config = {
+  path: 'logging',
+  schema: schema.object({
+    appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
+      defaultValue: new Map<string, AppenderConfigType>(),
+    }),
+    loggers: schema.arrayOf(loggerSchema, {
+      defaultValue: [],
+    }),
+    root: schema.object(
+      {
+        appenders: schema.arrayOf(schema.string(), {
+          defaultValue: [DEFAULT_APPENDER_NAME],
+          minSize: 1,
+        }),
+        level: levelSchema,
+      },
+      {
+        validate(rawConfig) {
+          if (!rawConfig.appenders.includes(DEFAULT_APPENDER_NAME)) {
+            return `"${DEFAULT_APPENDER_NAME}" appender required for migration period till the next major release`;
+          }
+        },
+      }
+    ),
+  }),
+};
+
+export type LoggingConfigType = Omit<TypeOf<typeof config.schema>, 'appenders'> & {
+  appenders: Map<string, AppenderConfigType>;
+};
+
+/**
+ * Config schema for validating the inputs to the {@link LoggingServiceStart.configure} API.
+ * See {@link LoggerContextConfigType}.
+ *
+ * @public
+ */
+export const loggerContextConfigSchema = schema.object({
   appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
     defaultValue: new Map<string, AppenderConfigType>(),
   }),
-  loggers: schema.arrayOf(createLoggerSchema, {
-    defaultValue: [],
-  }),
-  root: schema.object({
-    appenders: schema.arrayOf(schema.string(), {
-      defaultValue: [DEFAULT_APPENDER_NAME],
-      minSize: 1,
-    }),
-    level: createLevelSchema,
-  }),
+
+  loggers: schema.arrayOf(loggerSchema, { defaultValue: [] }),
 });
 
-/** @internal */
-export type LoggerConfigType = TypeOf<typeof createLoggerSchema>;
-export const config = {
-  path: 'logging',
-  schema: loggingSchema,
-};
-
-type LoggingConfigType = TypeOf<typeof loggingSchema>;
+/** @public */
+export type LoggerContextConfigType = TypeOf<typeof loggerContextConfigSchema>;
+/** @public */
+export interface LoggerContextConfigInput {
+  // config-schema knows how to handle either Maps or Records
+  appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;
+  loggers?: LoggerConfigType[];
+}
 
 /**
  * Describes the config used to fully setup logging subsystem.
  * @internal
  */
 export class LoggingConfig {
-  public static schema = loggingSchema;
-
   /**
    * Helper method that joins separate string context parts into single context string.
    * In case joined context is an empty string, `root` context name is returned.
@@ -122,7 +157,14 @@ export class LoggingConfig {
    */
   public readonly appenders: Map<string, AppenderConfigType> = new Map([
     [
-      DEFAULT_APPENDER_NAME,
+      'default',
+      {
+        kind: 'console',
+        layout: { kind: 'pattern', highlight: true },
+      } as AppenderConfigType,
+    ],
+    [
+      'console',
       {
         kind: 'console',
         layout: { kind: 'pattern', highlight: true },
@@ -135,9 +177,33 @@ export class LoggingConfig {
    */
   public readonly loggers: Map<string, LoggerConfigType> = new Map();
 
-  constructor(configType: LoggingConfigType) {
+  constructor(private readonly configType: LoggingConfigType) {
     this.fillAppendersConfig(configType);
     this.fillLoggersConfig(configType);
+  }
+
+  /**
+   * Returns a new LoggingConfig that merges the existing config with the specified config.
+   *
+   * @remarks
+   * Does not support merging the `root` config property.
+   *
+   * @param contextConfig
+   */
+  public extend(contextConfig: LoggerContextConfigType) {
+    // Use a Map to de-dupe any loggers for the same context. contextConfig overrides existing config.
+    const mergedLoggers = new Map<string, LoggerConfigType>([
+      ...this.configType.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
+      ...contextConfig.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
+    ]);
+
+    const mergedConfig: LoggingConfigType = {
+      appenders: new Map([...this.configType.appenders, ...contextConfig.appenders]),
+      loggers: [...mergedLoggers.values()],
+      root: this.configType.root,
+    };
+
+    return new LoggingConfig(mergedConfig);
   }
 
   private fillAppendersConfig(loggingConfig: LoggingConfigType) {
@@ -155,13 +221,13 @@ export class LoggingConfig {
     ];
 
     const loggerConfigByContext = new Map(
-      loggers.map(loggerConfig => toTuple(loggerConfig.context, loggerConfig))
+      loggers.map((loggerConfig) => toTuple(loggerConfig.context, loggerConfig))
     );
 
     for (const [loggerContext, loggerConfig] of loggerConfigByContext) {
       // Ensure logger config only contains valid appenders.
       const unsupportedAppenderKey = loggerConfig.appenders.find(
-        appenderKey => !this.appenders.has(appenderKey)
+        (appenderKey) => !this.appenders.has(appenderKey)
       );
 
       if (unsupportedAppenderKey) {

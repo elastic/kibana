@@ -5,17 +5,15 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
-import { assertDeeplyFalse } from '../../common/lib/assert_deeply_false';
 
-// eslint-disable-next-line import/no-default-export
-export default function fooTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function fooTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('foo', () => {
-    UserScenarios.forEach(scenario => {
+    UserScenarios.forEach((scenario) => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
           credentials: {
@@ -23,16 +21,14 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
             password: scenario.password,
           },
         });
-
-        expect(uiCapabilities.success).to.be(true);
-        expect(uiCapabilities.value).to.have.property('foo');
-
         switch (scenario.username) {
           // these users have a read/write view of Foo
           case 'superuser':
           case 'all':
           case 'dual_privileges_all':
           case 'foo_all':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('foo');
             expect(uiCapabilities.value!.foo).to.eql({
               create: true,
               edit: true,
@@ -44,6 +40,8 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
           case 'read':
           case 'dual_privileges_read':
           case 'foo_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('foo');
             expect(uiCapabilities.value!.foo).to.eql({
               create: false,
               edit: false,
@@ -51,10 +49,17 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
               show: true,
             });
             break;
-          // these users have no access to any ui capabilities
+          // these users have no access to even get the ui capabilities
           case 'legacy_all':
           case 'no_kibana_privileges':
-            assertDeeplyFalse(uiCapabilities.value!.foo);
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: false,
+              edit: false,
+              delete: false,
+              show: false,
+            });
             break;
           // all other users can't do anything with Foo
           default:

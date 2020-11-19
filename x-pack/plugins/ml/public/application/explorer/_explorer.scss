@@ -1,0 +1,66 @@
+$borderRadius: $euiBorderRadius / 2;
+
+.ml-explorer {
+  width: 100%;
+  display: inline-block;
+  color: $euiColorDarkShade;
+
+  .mlAnomalyExplorer__filterBar {
+    padding-right: $euiSize;
+    padding-left: $euiSize;
+  }
+
+  .results-container {
+    padding: 0px 0px $euiSize 0px;
+
+    // SASSTODO: Overwrite of bootstrap
+    .col-xs-12 {
+      width: calc(100% - #{$euiSizeXL});
+      padding-left: $euiSize;
+    }
+
+    .no-influencers-warning {
+      float: left;
+      padding-top: $euiSizeXS;
+      padding-left: $euiSize;
+      color: $euiColorDarkShade;
+      font-size: $euiFontSizeS;
+    }
+
+    .panel-title {
+      font-size: $euiFontSizeM;
+      font-weight: 400;
+      color: $euiColorDarkShade;
+      display: inline-block;
+      padding-bottom: $euiSizeXS;
+    }
+
+    .panel-sub-title {
+      color: $euiColorDarkShade;
+      font-size: $euiFontSizeXS;
+    }
+  }
+
+  .ml-anomalies-controls {
+    padding-top: $euiSizeXS;
+
+    #show_charts_checkbox_control {
+      padding-top: $euiSizeL;
+    }
+  }
+}
+
+.mlSwimLaneContainer {
+  /* Override legend styles */
+  .echLegendListContainer {
+    height: 34px !important;
+  }
+
+  .echLegendList {
+    display: flex !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap;
+    position: absolute;
+    right: 0;
+  }
+}

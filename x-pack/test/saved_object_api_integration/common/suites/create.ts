@@ -3,182 +3,150 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
-import { getUrlPrefix } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
+import {
+  expectResponses,
+  getUrlPrefix,
+  getTestTitle,
+  getRedactedNamespaces,
+} from '../lib/saved_object_test_utils';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
 
-interface CreateTest {
-  statusCode: number;
-  response: (resp: { [key: string]: any }) => void;
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+
+export interface CreateTestDefinition extends TestDefinition {
+  request: { type: string; id: string; initialNamespaces?: string[] };
+  overwrite: boolean;
+}
+export type CreateTestSuite = TestSuite<CreateTestDefinition>;
+export interface CreateTestCase extends TestCase {
+  initialNamespaces?: string[];
+  failure?: 400 | 403 | 409;
 }
 
-interface CreateCustomTest extends CreateTest {
-  type: string;
-  description: string;
-  requestBody: any;
-}
+const NEW_ATTRIBUTE_KEY = 'title'; // all type mappings include this attribute, for simplicity's sake
+const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
+const EACH_SPACE = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
 
-interface CreateTests {
-  spaceAware: CreateTest;
-  notSpaceAware: CreateTest;
-  custom?: CreateCustomTest;
-}
+// ID intentionally left blank on NEW_SINGLE_NAMESPACE_OBJ to ensure we can create saved objects without specifying the ID
+// we could create six separate test cases to test every permutation, but there's no real value in doing so
+const NEW_SINGLE_NAMESPACE_OBJ = Object.freeze({ type: 'dashboard', id: '' });
+const NEW_MULTI_NAMESPACE_OBJ = Object.freeze({ type: 'sharedtype', id: 'new-sharedtype-id' });
+const NEW_EACH_SPACE_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'new-each-space-id',
+  expectedNamespaces: EACH_SPACE, // expected namespaces of resulting object
+  initialNamespaces: EACH_SPACE, // args passed to the bulkCreate method
+});
+const NEW_ALL_SPACES_OBJ = Object.freeze({
+  type: 'sharedtype',
+  id: 'new-all-spaces-id',
+  expectedNamespaces: [ALL_SPACES_ID], // expected namespaces of resulting object
+  initialNamespaces: [ALL_SPACES_ID], // args passed to the bulkCreate method
+});
+const NEW_NAMESPACE_AGNOSTIC_OBJ = Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' });
+export const TEST_CASES: Record<string, CreateTestCase> = Object.freeze({
+  ...CASES,
+  NEW_SINGLE_NAMESPACE_OBJ,
+  NEW_MULTI_NAMESPACE_OBJ,
+  NEW_EACH_SPACE_OBJ,
+  NEW_ALL_SPACES_OBJ,
+  NEW_NAMESPACE_AGNOSTIC_OBJ,
+});
 
-interface CreateTestDefinition {
-  user?: TestDefinitionAuthentication;
-  spaceId?: string;
-  tests: CreateTests;
-}
-
-const spaceAwareType = 'visualization';
-const notSpaceAwareType = 'globaltype';
+const createRequest = ({ type, id, initialNamespaces }: CreateTestCase) => ({
+  type,
+  id,
+  initialNamespaces,
+});
 
 export function createTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to create ${type}`,
-    });
-  };
-
-  const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: {
-    [key: string]: any;
-  }) => {
-    expect(resp.body)
-      .to.have.property('id')
-      .match(/^[0-9a-f-]{36}$/);
-
-    // loose ISO8601 UTC time with milliseconds validation
-    expect(resp.body)
-      .to.have.property('updated_at')
-      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-
-    expect(resp.body).to.eql({
-      id: resp.body.id,
-      migrationVersion: resp.body.migrationVersion,
-      type: spaceAwareType,
-      updated_at: resp.body.updated_at,
-      version: resp.body.version,
-      attributes: {
-        title: 'My favorite vis',
-      },
-      references: [],
-    });
-
-    const expectedSpacePrefix = spaceId === DEFAULT_SPACE_ID ? '' : `${spaceId}:`;
-
-    // query ES directory to ensure namespace was or wasn't specified
-    const { _source } = await es.get({
-      id: `${expectedSpacePrefix}${spaceAwareType}:${resp.body.id}`,
-      type: '_doc',
-      index: '.kibana',
-    });
-
-    const { namespace: actualNamespace } = _source;
-
-    if (spaceId === DEFAULT_SPACE_ID) {
-      expect(actualNamespace).to.eql(undefined);
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('create');
+  const expectResponseBody = (
+    testCase: CreateTestCase,
+    user?: TestUser
+  ): ExpectResponseBody => async (response: Record<string, any>) => {
+    if (testCase.failure === 403) {
+      await expectSavedObjectForbidden(testCase.type)(response);
     } else {
-      expect(actualNamespace).to.eql(spaceId);
+      // permitted
+      const object = response.body;
+      await expectResponses.permitted(object, testCase);
+      if (!testCase.failure) {
+        expect(object.attributes[NEW_ATTRIBUTE_KEY]).to.eql(NEW_ATTRIBUTE_VAL);
+        const redactedNamespaces = getRedactedNamespaces(user, testCase.expectedNamespaces);
+        expect(object.namespaces).to.eql(redactedNamespaces);
+      }
     }
   };
-
-  const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden(notSpaceAwareType);
-
-  const expectNotSpaceAwareResults = async (resp: { [key: string]: any }) => {
-    expect(resp.body)
-      .to.have.property('id')
-      .match(/^[0-9a-f-]{36}$/);
-
-    // loose ISO8601 UTC time with milliseconds validation
-    expect(resp.body)
-      .to.have.property('updated_at')
-      .match(/^[\d-]{10}T[\d:\.]{12}Z$/);
-
-    expect(resp.body).to.eql({
-      id: resp.body.id,
-      type: notSpaceAwareType,
-      updated_at: resp.body.updated_at,
-      version: resp.body.version,
-      attributes: {
-        name: `Can't be contained to a space`,
-      },
-      references: [],
-    });
-
-    // query ES directory to ensure namespace wasn't specified
-    const { _source } = await es.get({
-      id: `${notSpaceAwareType}:${resp.body.id}`,
-      type: '_doc',
-      index: '.kibana',
-    });
-
-    const { namespace: actualNamespace } = _source;
-
-    expect(actualNamespace).to.eql(undefined);
+  const createTestDefinitions = (
+    testCases: CreateTestCase | CreateTestCase[],
+    forbidden: boolean,
+    overwrite: boolean,
+    options?: {
+      spaceId?: string;
+      user?: TestUser;
+      responseBodyOverride?: ExpectResponseBody;
+    }
+  ): CreateTestDefinition[] => {
+    let cases = Array.isArray(testCases) ? testCases : [testCases];
+    if (forbidden) {
+      // override the expected result in each test case
+      cases = cases.map((x) => ({ ...x, failure: 403 }));
+    }
+    return cases.map((x) => ({
+      title: getTestTitle(x),
+      responseStatusCode: x.failure ?? 200,
+      request: createRequest(x),
+      responseBody: options?.responseBodyOverride || expectResponseBody(x, options?.user),
+      overwrite,
+    }));
   };
 
-  const expectSpaceAwareRbacForbidden = createExpectRbacForbidden(spaceAwareType);
-
-  const makeCreateTest = (describeFn: DescribeFn) => (
+  const makeCreateTest = (describeFn: Mocha.SuiteFunction) => (
     description: string,
-    definition: CreateTestDefinition
+    definition: CreateTestSuite
   ) => {
-    const { user = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
+    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
-      it(`should return ${tests.spaceAware.statusCode} for a space-aware type`, async () => {
-        await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${spaceAwareType}`)
-          .auth(user.username, user.password)
-          .send({
-            attributes: {
-              title: 'My favorite vis',
-            },
-          })
-          .expect(tests.spaceAware.statusCode)
-          .then(tests.spaceAware.response);
-      });
 
-      it(`should return ${tests.notSpaceAware.statusCode} for a non space-aware type`, async () => {
-        await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${notSpaceAwareType}`)
-          .auth(user.username, user.password)
-          .send({
-            attributes: {
-              name: `Can't be contained to a space`,
-            },
-          })
-          .expect(tests.notSpaceAware.statusCode)
-          .then(tests.notSpaceAware.response);
-      });
-
-      if (tests.custom) {
-        it(tests.custom.description, async () => {
+      for (const test of tests) {
+        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+          const { type, id, initialNamespaces } = test.request;
+          const path = `${type}${id ? `/${id}` : ''}`;
+          const requestBody = {
+            attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL },
+            ...(initialNamespaces && { initialNamespaces }),
+          };
+          const query = test.overwrite ? '?overwrite=true' : '';
           await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${tests.custom!.type}`)
-            .auth(user.username, user.password)
-            .send(tests.custom!.requestBody)
-            .expect(tests.custom!.statusCode)
-            .then(tests.custom!.response);
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/${path}${query}`)
+            .auth(user?.username, user?.password)
+            .send(requestBody)
+            .expect(test.responseStatusCode)
+            .then(test.responseBody);
         });
       }
     });
   };
 
-  const createTest = makeCreateTest(describe);
+  const addTests = makeCreateTest(describe);
   // @ts-ignore
-  createTest.only = makeCreateTest(describe.only);
+  addTests.only = makeCreateTest(describe.only);
 
   return {
-    createExpectSpaceAwareResults,
-    createTest,
-    expectNotSpaceAwareRbacForbidden,
-    expectNotSpaceAwareResults,
-    expectSpaceAwareRbacForbidden,
+    addTests,
+    createTestDefinitions,
   };
 }

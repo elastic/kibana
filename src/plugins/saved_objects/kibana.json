@@ -1,0 +1,11 @@
+{
+  "id": "savedObjects",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact"
+  ]
+}

@@ -28,7 +28,6 @@ export async function checkCcrEnabled(req, esIndexPattern) {
   const params = {
     index: esIndexPattern,
     size: 1,
-    terminate_after: 1,
     ignoreUnavailable: true,
     body: {
       query: createQuery({
@@ -36,13 +35,11 @@ export async function checkCcrEnabled(req, esIndexPattern) {
         start,
         end,
         clusterUuid,
-        metric: metricFields
+        metric: metricFields,
       }),
-      sort: [ { timestamp: { order: 'desc' } } ]
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
-    filterPath: [
-      'hits.hits._source.stack_stats.xpack.ccr',
-    ]
+    filterPath: ['hits.hits._source.stack_stats.xpack.ccr'],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/forbid-elements */
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
@@ -20,7 +19,7 @@ interface Props {
   className?: string;
 }
 
-export const ConfirmModal: FunctionComponent<Props> = props => {
+export const ConfirmModal: FunctionComponent<Props> = (props) => {
   const {
     isOpen,
     title,

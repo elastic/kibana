@@ -1,0 +1,8 @@
+{
+  "list_id": "simple_list",
+  "tags": ["user added string for a tag", "malware"],
+  "type": "endpoint",
+  "os_types": ["linux"],
+  "description": "Different description",
+  "name": "Sample Endpoint Exception List"
+}

@@ -25,6 +25,23 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('resolve_import_errors', () => {
+    // mock success results including metadata
+    const indexPattern = {
+      type: 'index-pattern',
+      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+      meta: { title: 'logstash-*', icon: 'indexPatternApp' },
+    };
+    const visualization = {
+      type: 'visualization',
+      id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+      meta: { title: 'Count of requests', icon: 'visualizeApp' },
+    };
+    const dashboard = {
+      type: 'dashboard',
+      id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+      meta: { title: 'Requests', icon: 'dashboardApp' },
+    };
+
     describe('without kibana index', () => {
       // Cleanup data that got created in import
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -46,29 +63,37 @@ export default function ({ getService }) {
       it('should return 200 and import everything when overwrite parameters contains all objects', async () => {
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
-          .field('retries', JSON.stringify([
-            {
-              type: 'index-pattern',
-              id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-              overwrite: true,
-            },
-            {
-              type: 'visualization',
-              id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-              overwrite: true,
-            },
-            {
-              type: 'dashboard',
-              id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-              overwrite: true,
-            },
-          ]))
+          .field(
+            'retries',
+            JSON.stringify([
+              {
+                type: 'index-pattern',
+                id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                overwrite: true,
+              },
+              {
+                type: 'visualization',
+                id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                overwrite: true,
+              },
+              {
+                type: 'dashboard',
+                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                overwrite: true,
+              },
+            ])
+          )
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
           .expect(200)
           .then((resp) => {
             expect(resp.body).to.eql({
               success: true,
               successCount: 3,
+              successResults: [
+                { ...indexPattern, overwrite: true },
+                { ...visualization, overwrite: true },
+                { ...dashboard, overwrite: true },
+              ],
             });
           });
       });
@@ -82,20 +107,22 @@ export default function ({ getService }) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: 'child "file" fails because ["file" is required]',
-              validation: { source: 'payload', keys: [ 'file' ] }
+              message: '[request body.file]: expected value of type [Stream] but got [undefined]',
             });
           });
       });
 
       it('should return 200 when retrying unsupported types', async () => {
-        const fileBuffer = Buffer.from('{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}', 'utf8');
+        const fileBuffer = Buffer.from(
+          '{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}',
+          'utf8'
+        );
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
           .field('retries', JSON.stringify([{ type: 'wigwags', id: '1' }]))
           .attach('file', fileBuffer, 'export.ndjson')
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).to.eql({
               success: false,
               successCount: 0,
@@ -104,9 +131,8 @@ export default function ({ getService }) {
                   id: '1',
                   type: 'wigwags',
                   title: 'my title',
-                  error: {
-                    type: 'unsupported_type',
-                  },
+                  meta: { title: 'my title' },
+                  error: { type: 'unsupported_type' },
                 },
               ],
             });
@@ -127,7 +153,7 @@ export default function ({ getService }) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: 'Can\'t import more than 10000 objects',
+              message: "Can't import more than 10000 objects",
             });
           });
       });
@@ -150,14 +176,15 @@ export default function ({ getService }) {
         };
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
-          .field('retries', JSON.stringify(
-            [
+          .field(
+            'retries',
+            JSON.stringify([
               {
                 type: 'visualization',
                 id: '1',
               },
-            ]
-          ))
+            ])
+          )
           .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
           .expect(200)
           .then((resp) => {
@@ -169,9 +196,9 @@ export default function ({ getService }) {
                   id: '1',
                   type: 'visualization',
                   title: 'My favorite vis',
+                  meta: { title: 'My favorite vis', icon: 'visualizeApp' },
                   error: {
                     type: 'missing_references',
-                    blocking: [],
                     references: [
                       {
                         type: 'index-pattern',
@@ -205,8 +232,9 @@ export default function ({ getService }) {
         it('should return 200 when manually overwriting each object', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_errors')
-            .field('retries', JSON.stringify(
-              [
+            .field(
+              'retries',
+              JSON.stringify([
                 {
                   id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                   type: 'index-pattern',
@@ -222,31 +250,44 @@ export default function ({ getService }) {
                   type: 'dashboard',
                   overwrite: true,
                 },
-              ]
-            ))
+              ])
+            )
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true, successCount: 3 });
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 3,
+                successResults: [
+                  { ...indexPattern, overwrite: true },
+                  { ...visualization, overwrite: true },
+                  { ...dashboard, overwrite: true },
+                ],
+              });
             });
         });
 
         it('should return 200 with only one record when overwriting 1 and skipping 1', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_errors')
-            .field('retries', JSON.stringify(
-              [
+            .field(
+              'retries',
+              JSON.stringify([
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                   type: 'visualization',
                   overwrite: true,
                 },
-              ]
-            ))
+              ])
+            )
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true, successCount: 1 });
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 1,
+                successResults: [{ ...visualization, overwrite: true }],
+              });
             });
         });
 
@@ -264,12 +305,13 @@ export default function ({ getService }) {
                 type: 'index-pattern',
                 id: '2',
               },
-            ]
+            ],
           };
           await supertest
             .post('/api/saved_objects/_resolve_import_errors')
-            .field('retries', JSON.stringify(
-              [
+            .field(
+              'retries',
+              JSON.stringify([
                 {
                   type: 'visualization',
                   id: '1',
@@ -281,14 +323,21 @@ export default function ({ getService }) {
                     },
                   ],
                 },
-              ]
-            ))
+              ])
+            )
             .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
             .expect(200)
             .then((resp) => {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 1,
+                successResults: [
+                  {
+                    type: 'visualization',
+                    id: '1',
+                    meta: { title: 'My favorite vis', icon: 'visualizeApp' },
+                  },
+                ],
               });
             });
           await supertest

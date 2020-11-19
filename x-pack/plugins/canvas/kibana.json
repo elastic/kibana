@@ -1,0 +1,11 @@
+{
+    "id": "canvas",
+    "version": "8.0.0",
+    "kibanaVersion": "kibana",
+    "configPath": ["xpack", "canvas"],
+    "server": true,
+    "ui": true,
+    "requiredPlugins": ["bfetch", "data", "embeddable", "expressions", "features", "inspector", "uiActions", "charts"],
+    "optionalPlugins": ["usageCollection", "home"],
+    "requiredBundles": ["kibanaReact", "maps", "lens", "visualizations", "kibanaUtils", "kibanaLegacy", "discover", "savedObjects", "reporting", "home"]
+  }

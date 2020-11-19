@@ -22,18 +22,15 @@ import { render, shallow } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 import sinon from 'sinon';
 
-import {
-  DIRECTIONS,
-  KuiCollapseButton,
-} from './collapse_button';
+import { DIRECTIONS, KuiCollapseButton } from './collapse_button';
 
 describe('KuiCollapseButton', () => {
   describe('Props', () => {
     describe('direction', () => {
-      DIRECTIONS.forEach(direction => {
-        describe(direction, () => {
+      DIRECTIONS.forEach((direction) => {
+        describe(`${direction}`, () => {
           test(`renders the ${direction} class`, () => {
-            const component = <KuiCollapseButton direction={direction} {...requiredProps}/>;
+            const component = <KuiCollapseButton direction={direction} {...requiredProps} />;
             expect(render(component)).toMatchSnapshot();
           });
         });
@@ -44,9 +41,7 @@ describe('KuiCollapseButton', () => {
       test(`isn't called upon instantiation`, () => {
         const onClickHandler = sinon.stub();
 
-        shallow(
-          <KuiCollapseButton direction="left" onClick={onClickHandler} />
-        );
+        shallow(<KuiCollapseButton direction="left" onClick={onClickHandler} />);
 
         sinon.assert.notCalled(onClickHandler);
       });
@@ -54,9 +49,7 @@ describe('KuiCollapseButton', () => {
       test('is called when the button is clicked', () => {
         const onClickHandler = sinon.stub();
 
-        const $button = shallow(
-          <KuiCollapseButton direction="left" onClick={onClickHandler} />
-        );
+        const $button = shallow(<KuiCollapseButton direction="left" onClick={onClickHandler} />);
 
         $button.simulate('click');
 
