@@ -149,7 +149,7 @@ export const Description = React.memo<DescriptionProps>(
       [description, isTextArea, onDescriptionChanged, disabled]
     );
     return (
-      <DescriptionContainer data-test-subj="description-container" marginRight={marginRight}>
+      <DescriptionContainer data-test-subj="description-container">
         {disableTooltip ? (
           inputField
         ) : (

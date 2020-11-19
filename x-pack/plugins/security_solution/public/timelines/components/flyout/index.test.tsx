@@ -18,7 +18,6 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
-import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
 import * as timelineActions from '../../store/timeline/actions';
 
 import { Flyout } from '.';
@@ -105,15 +104,9 @@ describe.skip('Flyout', () => {
 
   describe('showFlyoutBottomBar', () => {
     test('should show the flyout button when show is true', () => {
-      const openMock = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <FlyoutBottomBar
-            dataProviders={mockDataProviders}
-            show={true}
-            timelineId="test"
-            onOpen={openMock}
-          />
+          <FlyoutBottomBar show={true} timelineId="test" />
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
@@ -125,12 +118,7 @@ describe.skip('Flyout', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <FlyoutBottomBar
-            dataProviders={mockDataProviders}
-            show={false}
-            timelineId="test"
-            onOpen={openMock}
-          />
+          <FlyoutBottomBar show={false} timelineId="test" />
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
@@ -142,12 +130,7 @@ describe.skip('Flyout', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <FlyoutBottomBar
-            dataProviders={mockDataProviders}
-            show={true}
-            timelineId="test"
-            onOpen={openMock}
-          />
+          <FlyoutBottomBar show={true} timelineId="test" />
         </TestProviders>
       );
       expect(
@@ -159,12 +142,7 @@ describe.skip('Flyout', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <FlyoutBottomBar
-            dataProviders={mockDataProviders}
-            show={true}
-            timelineId="test"
-            onOpen={openMock}
-          />
+          <FlyoutBottomBar show={true} timelineId="test" />
         </TestProviders>
       );
       wrapper.find('[data-test-subj="flyoutOverlay"]').first().simulate('click');

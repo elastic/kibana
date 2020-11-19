@@ -50,7 +50,7 @@ describe('Inspect', () => {
     );
   });
 
-  context.only('Timeline', () => {
+  context('Timeline', () => {
     it('inspects the timeline', () => {
       const hostExistsQuery = 'host.name: *';
       loginAndWaitForPage(HOSTS_URL);

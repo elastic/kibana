@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
@@ -44,14 +44,20 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <EuiButton data-test-subj="flyoutOverlay" size="s" fill={isOpen} onClick={handleToggleOpen}>
+        <EuiButtonEmpty
+          data-test-subj="flyoutOverlay"
+          size="s"
+          isSelected={isOpen}
+          onClick={handleToggleOpen}
+        >
           {title}
           <EuiButtonIcon
+            href="#"
             iconType="cross"
             aria-label={`Close ${timelineTitle}`}
             onClick={handleCreateNewTimeline}
           />
-        </EuiButton>
+        </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

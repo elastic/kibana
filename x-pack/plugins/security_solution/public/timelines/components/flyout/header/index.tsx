@@ -23,8 +23,9 @@ import { InspectButton } from '../../../../common/components/inspect';
 import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 
+// to hide side borders
 const StyledPanel = styled(EuiPanel)`
-  border-radius: 0;
+  margin: 0 -1px;
 `;
 
 interface FlyoutHeaderProps {
@@ -52,7 +53,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   );
 
   return (
-    <StyledPanel grow={false} paddingSize="s" hasShadow={false}>
+    <StyledPanel borderRadius="none" grow={false} paddingSize="s" hasShadow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <AddTimelineButton timelineId={timelineId} />
         <EuiFlexItem grow>
