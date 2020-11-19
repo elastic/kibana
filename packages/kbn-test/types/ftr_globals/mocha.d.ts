@@ -17,35 +17,13 @@
  * under the License.
  */
 
-import { IndexPattern } from './index_pattern';
+import { Suite } from 'mocha';
 
-export interface PatternCache {
-  get: (id: string) => Promise<IndexPattern> | undefined;
-  set: (id: string, value: Promise<IndexPattern>) => Promise<IndexPattern>;
-  clear: (id: string) => void;
-  clearAll: () => void;
-}
-
-export function createIndexPatternCache(): PatternCache {
-  const vals: Record<string, any> = {};
-  const cache: PatternCache = {
-    get: (id: string) => {
-      return vals[id];
-    },
-    set: (id: string, prom: any) => {
-      vals[id] = prom;
-      return prom;
-    },
-    clear: (id: string) => {
-      delete vals[id];
-    },
-    clearAll: () => {
-      for (const id in vals) {
-        if (vals.hasOwnProperty(id)) {
-          delete vals[id];
-        }
-      }
-    },
-  };
-  return cache;
+declare module 'mocha' {
+  interface Suite {
+    /**
+     * Assign tags to the test suite to determine in which CI job it should be run.
+     */
+    tags(tags: string[] | string): void;
+  }
 }
