@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { EuiButton } from '../../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 import { ENGINE_ANALYTICS_PATH, ENGINE_API_LOGS_PATH, getEngineRoute } from '../../../routes';
 import { TOTAL_QUERIES, TOTAL_API_OPERATIONS } from '../../analytics/constants';
@@ -52,9 +52,9 @@ export const TotalCharts: React.FC = () => {
               </EuiText>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              <EuiButton to={engineRoute + ENGINE_ANALYTICS_PATH} size="s">
+              <EuiButtonTo to={engineRoute + ENGINE_ANALYTICS_PATH} size="s">
                 {VIEW_ANALYTICS}
-              </EuiButton>
+              </EuiButtonTo>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
@@ -79,9 +79,9 @@ export const TotalCharts: React.FC = () => {
               </EuiText>
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
-              <EuiButton to={engineRoute + ENGINE_API_LOGS_PATH} size="s">
+              <EuiButtonTo to={engineRoute + ENGINE_API_LOGS_PATH} size="s">
                 {VIEW_API_LOGS}
-              </EuiButton>
+              </EuiButtonTo>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>

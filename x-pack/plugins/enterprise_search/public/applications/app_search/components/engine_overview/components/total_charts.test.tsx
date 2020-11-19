@@ -9,7 +9,7 @@ import { setMockValues } from '../../../../__mocks__/kea.mock';
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiButton } from '../../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 import { TotalCharts } from './total_charts';
 
@@ -32,7 +32,7 @@ describe('TotalCharts', () => {
     const chart = wrapper.find('[data-test-subj="TotalQueriesChart"]');
 
     expect(chart.find('h2').text()).toEqual('Total queries');
-    expect(chart.find(EuiButton).prop('to')).toEqual('/engines/some-engine/analytics');
+    expect(chart.find(EuiButtonTo).prop('to')).toEqual('/engines/some-engine/analytics');
     // TODO: find chart component
   });
 
@@ -40,7 +40,7 @@ describe('TotalCharts', () => {
     const chart = wrapper.find('[data-test-subj="TotalApiOperationsChart"]');
 
     expect(chart.find('h2').text()).toEqual('Total API operations');
-    expect(chart.find(EuiButton).prop('to')).toEqual('/engines/some-engine/api-logs');
+    expect(chart.find(EuiButtonTo).prop('to')).toEqual('/engines/some-engine/api-logs');
     // TODO: find chart component
   });
 });

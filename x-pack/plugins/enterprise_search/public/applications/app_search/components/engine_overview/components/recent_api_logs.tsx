@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { EuiButton } from '../../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 import { ENGINE_API_LOGS_PATH, getEngineRoute } from '../../../routes';
 import { RECENT_API_EVENTS } from '../../api_logs/constants';
@@ -36,9 +36,9 @@ export const RecentApiLogs: React.FC = () => {
           </EuiTitle>
         </EuiPageContentHeaderSection>
         <EuiPageContentHeaderSection>
-          <EuiButton to={engineRoute + ENGINE_API_LOGS_PATH} size="s">
+          <EuiButtonTo to={engineRoute + ENGINE_API_LOGS_PATH} size="s">
             {VIEW_API_LOGS}
-          </EuiButton>
+          </EuiButtonTo>
         </EuiPageContentHeaderSection>
       </EuiPageContentHeader>
       <EuiPageContentBody>
