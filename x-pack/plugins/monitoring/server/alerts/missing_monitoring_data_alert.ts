@@ -27,7 +27,6 @@ import {
   ALERT_MISSING_MONITORING_DATA,
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_DETAILS,
-  ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
@@ -140,14 +139,10 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       now - limit - LIMIT_BUFFER
     );
     return missingData.map((missing) => {
-      // TODO: only Elasticsearch until we can figure out how to handle upgrades for the rest of the stack
-      // https://github.com/elastic/kibana/issues/83309
-      const shouldFire =
-        missing.gapDuration > duration && missing.stackProduct === ELASTICSEARCH_SYSTEM_ID;
       return {
         instanceKey: `${missing.clusterUuid}:${missing.stackProduct}:${missing.stackProductUuid}`,
         clusterUuid: missing.clusterUuid,
-        shouldFire,
+        shouldFire: missing.gapDuration > duration,
         severity: AlertSeverity.Danger,
         meta: { missing, limit },
         ccs: missing.ccs,
