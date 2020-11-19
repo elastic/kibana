@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import { I18nStart, ChromeBreadcrumb, CoreStart } from 'kibana/public';
-import { InPortal, PortalNode } from 'react-reverse-portal';
+import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from 'kibana/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -32,7 +31,6 @@ import {
 } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
-import { ScopedHistory } from '../../../../../src/core/public';
 import { ActionMenu } from './action_menu';
 
 export interface UptimeAppColors {
@@ -50,7 +48,6 @@ export interface UptimeAppProps {
   canSave: boolean;
   core: CoreStart;
   darkMode: boolean;
-  history: ScopedHistory;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
@@ -61,7 +58,7 @@ export interface UptimeAppProps {
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedRange[];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  actionMenu: PortalNode;
+  appMountParameters: AppMountParameters;
 }
 
 const Application = (props: UptimeAppProps) => {
@@ -75,7 +72,7 @@ const Application = (props: UptimeAppProps) => {
     renderGlobalHelpControls,
     setBadge,
     startPlugins,
-    actionMenu,
+    appMountParameters,
   } = props;
 
   useEffect(() => {
@@ -104,7 +101,7 @@ const Application = (props: UptimeAppProps) => {
       <i18nCore.Context>
         <ReduxProvider store={store}>
           <KibanaContextProvider services={{ ...core, ...plugins }}>
-            <Router history={props.history}>
+            <Router history={appMountParameters.history}>
               <UptimeRefreshContextProvider>
                 <UptimeSettingsContextProvider {...props}>
                   <UptimeThemeContextProvider darkMode={darkMode}>
@@ -115,9 +112,7 @@ const Application = (props: UptimeAppProps) => {
                             <main>
                               <UptimeAlertsFlyoutWrapper />
                               <PageRouter />
-                              <InPortal node={actionMenu}>
-                                <ActionMenu />
-                              </InPortal>
+                              <ActionMenu appMountParameters={appMountParameters} />
                             </main>
                           </RedirectAppLinks>
                         </EuiPage>
