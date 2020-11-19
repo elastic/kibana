@@ -72,7 +72,7 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
   const { data: errorGroupData } = useFetcher(() => {
     if (start && end) {
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors/{groupId}',
+        endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
         params: {
           path: {
             serviceName,
@@ -91,7 +91,7 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
   const { data: errorDistributionData } = useFetcher(() => {
     if (start && end) {
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors/distribution',
+        endpoint: 'GET /api/apm/services/{serviceName}/errors/distribution',
         params: {
           path: {
             serviceName,
