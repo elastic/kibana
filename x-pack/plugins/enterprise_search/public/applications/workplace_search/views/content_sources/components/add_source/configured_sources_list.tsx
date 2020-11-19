@@ -26,7 +26,7 @@ import { getSourcesPath } from '../../../../routes';
 
 interface ConfiguredSourcesProps {
   sources: SourceDataItem[];
-  isOrganization?: boolean;
+  isOrganization: boolean;
 }
 
 export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
