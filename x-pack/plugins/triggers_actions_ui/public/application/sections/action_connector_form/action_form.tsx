@@ -432,6 +432,7 @@ export const ActionForm = ({
             connectors.push(savedAction);
             setActionIdByIndex(savedAction.id, activeActionItem.index);
           }}
+          actionTypeRegistry={actionTypeRegistry}
         />
       ) : null}
     </Fragment>

@@ -22,7 +22,12 @@ import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import './connector_add_modal.scss';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionType, ActionConnector, IErrorObject } from '../../../types';
+import {
+  ActionType,
+  ActionConnector,
+  IErrorObject,
+  ActionTypeRegistryContract,
+} from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 
 interface ConnectorAddModalProps {
@@ -30,6 +35,7 @@ interface ConnectorAddModalProps {
   onClose: () => void;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
   consumer?: string;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const ConnectorAddModal = ({
@@ -37,15 +43,14 @@ export const ConnectorAddModal = ({
   onClose,
   postSaveEventHandler,
   consumer,
+  actionTypeRegistry,
 }: ConnectorAddModalProps) => {
   const {
     http,
-    actionTypeRegistry,
     notifications: { toasts },
     application: { capabilities },
   } = useKibana().services;
   let hasErrors = false;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialConnector = {
     actionTypeId: actionType.id,
     config: {},

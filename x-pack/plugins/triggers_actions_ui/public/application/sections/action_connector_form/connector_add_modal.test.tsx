@@ -49,7 +49,6 @@ describe('connector_add_modal', () => {
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
-    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
 
     const actionType: ActionType = {
       id: 'my-action-type',
@@ -60,7 +59,13 @@ describe('connector_add_modal', () => {
       minimumLicenseRequired: 'basic',
     };
 
-    const wrapper = mountWithIntl(<ConnectorAddModal onClose={() => {}} actionType={actionType} />);
+    const wrapper = mountWithIntl(
+      <ConnectorAddModal
+        onClose={() => {}}
+        actionType={actionType}
+        actionTypeRegistry={actionTypeRegistry}
+      />
+    );
     expect(wrapper.exists('.euiModalHeader')).toBeTruthy();
     expect(wrapper.exists('[data-test-subj="saveActionButtonModal"]')).toBeTruthy();
   });
