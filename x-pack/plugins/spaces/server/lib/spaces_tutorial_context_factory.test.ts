@@ -7,7 +7,7 @@
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../spaces_service';
-import { coreMock } from '../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { spacesClientServiceMock } from '../spaces_client/spaces_client_service.mock';
 
@@ -23,7 +23,7 @@ describe('createSpacesTutorialContextFactory', () => {
     const spacesService = spacesServiceMock.createStartContract('my-space-id');
     const contextFactory = createSpacesTutorialContextFactory(() => spacesService);
 
-    const request = {};
+    const request = httpServerMock.createKibanaRequest();
 
     expect(contextFactory(request)).toEqual({
       spaceId: 'my-space-id',
@@ -42,7 +42,7 @@ describe('createSpacesTutorialContextFactory', () => {
       })
     );
 
-    const request = {};
+    const request = httpServerMock.createKibanaRequest();
 
     expect(contextFactory(request)).toEqual({
       spaceId: DEFAULT_SPACE_ID,

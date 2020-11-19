@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subscription } from 'rxjs';
 import type { KibanaRequest, IBasePath } from 'src/core/server';
 import { SpacesClientServiceStart } from '../spaces_client';
 import { getSpaceIdFromPath } from '../../common';
@@ -85,10 +84,6 @@ interface SpacesServiceStartDeps {
 }
 
 export class SpacesService {
-  private configSubscription$?: Subscription;
-
-  constructor() {}
-
   public setup({ basePath }: SpacesServiceSetupDeps): SpacesServiceSetup {
     return {
       getSpaceId: (request: KibanaRequest) => {
@@ -124,12 +119,7 @@ export class SpacesService {
     };
   }
 
-  public async stop() {
-    if (this.configSubscription$) {
-      this.configSubscription$.unsubscribe();
-      this.configSubscription$ = undefined;
-    }
-  }
+  public stop() {}
 
   private getSpaceId(request: KibanaRequest, basePathService: IBasePath) {
     const basePath = basePathService.get(request);

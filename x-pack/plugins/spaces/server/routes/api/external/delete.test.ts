@@ -176,6 +176,6 @@ describe('Spaces Public API', () => {
     const { status, payload } = response;
 
     expect(status).toEqual(400);
-    expect(payload.message).toEqual('This Space cannot be deleted because it is reserved.');
+    expect(payload.message).toEqual('The default space cannot be deleted because it is reserved.');
   });
 });

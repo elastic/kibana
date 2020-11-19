@@ -6,7 +6,7 @@
 
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
-import { ISavedObjectsRepository } from 'src/core/server';
+import { ISavedObjectsRepository, SavedObject } from 'src/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { isReservedSpace } from '../../common';
 import { Space } from '../../common/model/space';
@@ -93,7 +93,7 @@ export class SpacesClient {
   public async delete(id: string) {
     const existingSavedObject = await this.repository.get('space', id);
     if (isReservedSpace(this.transformSavedObjectToSpace(existingSavedObject))) {
-      throw Boom.badRequest('This Space cannot be deleted because it is reserved.');
+      throw Boom.badRequest(`The ${id} space cannot be deleted because it is reserved.`);
     }
 
     await this.repository.deleteByNamespace(id);

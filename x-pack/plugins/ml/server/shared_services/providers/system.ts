@@ -44,10 +44,7 @@ export function getMlSystemProvider(
           return await getGuards(request, savedObjectsClient)
             .isMinimumLicense()
             .ok(async ({ mlClient }) => {
-              const { isMlEnabledInSpace } =
-                getSpaces !== undefined
-                  ? spacesUtilsProvider(getSpaces, request)
-                  : { isMlEnabledInSpace: async () => true };
+              const { isMlEnabledInSpace } = spacesUtilsProvider(getSpaces, request);
 
               const mlCapabilities = await resolveMlCapabilities(request);
               if (mlCapabilities === null) {

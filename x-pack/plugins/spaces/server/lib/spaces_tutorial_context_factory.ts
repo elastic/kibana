@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest } from 'src/core/server';
 import { SpacesServiceStart } from '../spaces_service/spaces_service';
 
 export function createSpacesTutorialContextFactory(getSpacesService: () => SpacesServiceStart) {
-  return function spacesTutorialContextFactory(request: any) {
+  return function spacesTutorialContextFactory(request: KibanaRequest) {
     const spacesService = getSpacesService();
     return {
       spaceId: spacesService.getSpaceId(request),

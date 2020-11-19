@@ -85,10 +85,7 @@ export class Plugin {
     this.spacesClientService = new SpacesClientService((message) => this.log.debug(message));
   }
 
-  public async setup(
-    core: CoreSetup<PluginsStart>,
-    plugins: PluginsSetup
-  ): Promise<SpacesPluginSetup> {
+  public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
     const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
 
     const spacesServiceSetup = this.spacesService.setup({

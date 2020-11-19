@@ -6,7 +6,6 @@
 
 import { SpacesClient } from './spaces_client';
 import { ConfigType, ConfigSchema } from '../config';
-import { ISavedObjectsRepository } from 'src/core/server';
 import { GetAllSpacesPurpose } from '../../common/model/types';
 import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
 
@@ -123,11 +122,7 @@ describe('#get', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
-    const client = new SpacesClient(
-      mockDebugLogger,
-      mockConfig,
-      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-    );
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
     const id = savedObject.id;
     const actualSpace = await client.get(id);
 
@@ -189,11 +184,7 @@ describe('#create', () => {
       enabled: true,
     });
 
-    const client = new SpacesClient(
-      mockDebugLogger,
-      mockConfig,
-      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-    );
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
 
     const actualSpace = await client.create(spaceToCreate);
 
@@ -222,11 +213,7 @@ describe('#create', () => {
       enabled: true,
     });
 
-    const client = new SpacesClient(
-      mockDebugLogger,
-      mockConfig,
-      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-    );
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
 
     expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting"`
@@ -286,11 +273,7 @@ describe('#update', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
 
-    const client = new SpacesClient(
-      mockDebugLogger,
-      mockConfig,
-      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-    );
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
     const id = savedObject.id;
     const actualSpace = await client.update(id, spaceToUpdate);
 
@@ -305,6 +288,8 @@ describe('#delete', () => {
 
   const reservedSavedObject = {
     id,
+    type: 'foo',
+    references: [],
     attributes: {
       name: 'foo-name',
       description: 'foo-description',
@@ -327,18 +312,13 @@ describe('#delete', () => {
   test(`throws bad request when the space is reserved`, async () => {
     const mockDebugLogger = createMockDebugLogger();
     const mockConfig = createMockConfig();
-    const mockCallWithRequestRepository = {
-      get: jest.fn().mockReturnValue(reservedSavedObject),
-    };
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+    mockCallWithRequestRepository.get.mockResolvedValue(reservedSavedObject);
 
-    const client = new SpacesClient(
-      mockDebugLogger,
-      mockConfig,
-      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-    );
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
 
     expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"This Space cannot be deleted because it is reserved."`
+      `"The foo space cannot be deleted because it is reserved."`
     );
 
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
@@ -350,11 +330,7 @@ describe('#delete', () => {
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(notReservedSavedObject);
 
-    const client = new SpacesClient(
-      mockDebugLogger,
-      mockConfig,
-      (mockCallWithRequestRepository as unknown) as ISavedObjectsRepository
-    );
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository);
 
     await client.delete(id);
 

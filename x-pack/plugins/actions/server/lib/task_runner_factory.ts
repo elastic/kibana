@@ -8,6 +8,7 @@ import { pick } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
+import { addSpaceIdToPath } from '../../../spaces/server';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -88,7 +89,7 @@ export class TaskRunnerFactory {
           requestHeaders.authorization = `ApiKey ${apiKey}`;
         }
 
-        const path = spaceId ? `/s/${spaceId}` : '/';
+        const path = addSpaceIdToPath('/', spaceId);
 
         // Since we're using API keys and accessing elasticsearch can only be done
         // via a request, we're faking one with the proper authorization headers.
