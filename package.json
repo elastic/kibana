@@ -361,7 +361,7 @@
     "chai": "3.5.0",
     "chance": "1.0.18",
     "cheerio": "0.22.0",
-    "chromedriver": "^86.0.0",
+    "chromedriver": "^87.0.0",
     "classnames": "2.2.6",
     "compare-versions": "3.5.1",
     "d3": "3.5.17",
