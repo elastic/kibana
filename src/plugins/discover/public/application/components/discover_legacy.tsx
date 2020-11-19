@@ -124,7 +124,14 @@ export function DiscoverLegacy({
   updateQuery,
   updateSavedQueryId,
 }: DiscoverProps) {
-  const scrollable = useRef<HTMLDivElement>(null);
+  const scrollableDesktop = useRef<HTMLDivElement>(null);
+  const scrollableMobile = useRef<HTMLDivElement>(null);
+  const collapseIcon = useRef<HTMLDivElement>(null);
+  const isMobile = () => {
+    // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
+    return collapseIcon && !collapseIcon.current;
+  };
+
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const services = getServices();
@@ -159,7 +166,7 @@ export function DiscoverLegacy({
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
-        <div className="dscApp__frame">
+        <div className="dscApp__frame" ref={scrollableMobile}>
           <DiscoverSidebarResponsive
             columns={state.columns || []}
             fieldCounts={fieldCounts}
@@ -175,17 +182,19 @@ export function DiscoverLegacy({
             trackUiMetric={trackUiMetric}
           />
           <EuiHideFor sizes={['xs', 's']}>
-            <EuiButtonIcon
-              iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-              iconSize="m"
-              size="s"
-              onClick={() => setIsSidebarClosed(!isSidebarClosed)}
-              data-test-subj="collapseSideBarButton"
-              aria-controls="discover-sidebar"
-              aria-expanded={isSidebarClosed ? 'false' : 'true'}
-              aria-label="Toggle sidebar"
-              className={`dscCollapsibleSidebar__collapseButton ${sidebarClassName}`}
-            />
+            <span ref={collapseIcon}>
+              <EuiButtonIcon
+                iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
+                iconSize="m"
+                size="s"
+                onClick={() => setIsSidebarClosed(!isSidebarClosed)}
+                data-test-subj="collapseSideBarButton"
+                aria-controls="discover-sidebar"
+                aria-expanded={isSidebarClosed ? 'false' : 'true'}
+                aria-label="Toggle sidebar"
+                className={`dscCollapsibleSidebar__collapseButton ${sidebarClassName}`}
+              />
+            </span>
           </EuiHideFor>
           <div className="dscWrapper__content">
             {resultState === 'none' && (
@@ -258,7 +267,7 @@ export function DiscoverLegacy({
                   <section
                     className="dscTable dscTableFixedScroll"
                     aria-labelledby="documentsAriaLabel"
-                    ref={scrollable}
+                    ref={scrollableDesktop}
                   >
                     <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
                       <FormattedMessage
@@ -296,8 +305,12 @@ export function DiscoverLegacy({
 
                             <EuiButtonEmpty
                               onClick={() => {
-                                if (scrollable.current) {
-                                  scrollable.current.scrollTo(0, 0);
+                                // depending on screen size there are different
+                                if (!isMobile() && scrollableDesktop.current) {
+                                  scrollableDesktop.current.scrollTo(0, 0);
+                                }
+                                if (isMobile() && scrollableMobile.current) {
+                                  scrollableMobile.current.scrollTo(0, 0);
                                 }
                               }}
                             >

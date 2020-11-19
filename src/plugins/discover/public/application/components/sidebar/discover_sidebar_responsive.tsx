@@ -105,9 +105,9 @@ export interface DiscoverSidebarResponsiveProps {
 }
 
 /**
- * Component providing 2 different renderings for the sidebar
- * Desktop: Sidebar view, all elements visible
- * Mobile: Index pattern selector visible and a button to trigger a flyout with all elements
+ * Component providing 2 different renderings for the sidebar depending on available screen space
+ * Desktop: Sidebar view, all elements are visible
+ * Mobile: Index pattern selector is visible and a button to trigger a flyout with all elements
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
@@ -117,12 +117,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     return null;
   }
 
-  const className = `dscSidebar dscSidebar__desktop dscCollapsibleSidebar ${props.sidebarClassName}`;
-
   return (
     <>
       <EuiHideFor sizes={['xs', 's']}>
-        <div className={className}>
+        <div
+          className={`dscSidebar dscSidebar__desktop dscCollapsibleSidebar ${props.sidebarClassName}`}
+        >
           <DiscoverSidebar {...props} fieldFilter={fieldFilter} setFieldFilter={setFieldFilter} />
         </div>
       </EuiHideFor>
