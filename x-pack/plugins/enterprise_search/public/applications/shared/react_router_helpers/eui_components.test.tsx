@@ -12,7 +12,7 @@ import { EuiLink, EuiButton, EuiPanel } from '@elastic/eui';
 
 import { mockKibanaValues, mockHistory } from '../../__mocks__';
 
-import { EuiReactRouterLink, EuiReactRouterButton, EuiReactRouterPanel } from './eui_link';
+import { EuiLinkTo, EuiButtonTo, EuiPanelTo } from './eui_components';
 
 describe('EUI & React Router Component Helpers', () => {
   beforeEach(() => {
@@ -20,26 +20,26 @@ describe('EUI & React Router Component Helpers', () => {
   });
 
   it('renders an EuiLink', () => {
-    const wrapper = shallow(<EuiReactRouterLink to="/" />);
+    const wrapper = shallow(<EuiLinkTo to="/" />);
 
     expect(wrapper.find(EuiLink)).toHaveLength(1);
   });
 
   it('renders an EuiButton', () => {
-    const wrapper = shallow(<EuiReactRouterButton to="/" />);
+    const wrapper = shallow(<EuiButtonTo to="/" />);
 
     expect(wrapper.find(EuiButton)).toHaveLength(1);
   });
 
   it('renders an EuiPanel', () => {
-    const wrapper = shallow(<EuiReactRouterPanel to="/" paddingSize="l" />);
+    const wrapper = shallow(<EuiPanelTo to="/" paddingSize="l" />);
 
     expect(wrapper.find(EuiPanel)).toHaveLength(1);
     expect(wrapper.find(EuiPanel).prop('paddingSize')).toEqual('l');
   });
 
   it('passes down all ...rest props', () => {
-    const wrapper = shallow(<EuiReactRouterLink to="/" data-test-subj="foo" external={true} />);
+    const wrapper = shallow(<EuiLinkTo to="/" data-test-subj="foo" external={true} />);
     const link = wrapper.find(EuiLink);
 
     expect(link.prop('external')).toEqual(true);
@@ -47,7 +47,7 @@ describe('EUI & React Router Component Helpers', () => {
   });
 
   it('renders with the correct href and onClick props', () => {
-    const wrapper = mount(<EuiReactRouterLink to="/foo/bar" />);
+    const wrapper = mount(<EuiLinkTo to="/foo/bar" />);
     const link = wrapper.find(EuiLink);
 
     expect(link.prop('onClick')).toBeInstanceOf(Function);
@@ -56,7 +56,7 @@ describe('EUI & React Router Component Helpers', () => {
   });
 
   it('renders with the correct non-basenamed href when shouldNotCreateHref is passed', () => {
-    const wrapper = mount(<EuiReactRouterLink to="/foo/bar" shouldNotCreateHref />);
+    const wrapper = mount(<EuiLinkTo to="/foo/bar" shouldNotCreateHref />);
     const link = wrapper.find(EuiLink);
 
     expect(link.prop('href')).toEqual('/foo/bar');
@@ -65,7 +65,7 @@ describe('EUI & React Router Component Helpers', () => {
 
   describe('onClick', () => {
     it('prevents default navigation and uses React Router history', () => {
-      const wrapper = mount(<EuiReactRouterLink to="/bar/baz" />);
+      const wrapper = mount(<EuiLinkTo to="/bar/baz" />);
 
       const simulatedEvent = {
         button: 0,
@@ -79,7 +79,7 @@ describe('EUI & React Router Component Helpers', () => {
     });
 
     it('does not prevent default browser behavior on new tab/window clicks', () => {
-      const wrapper = mount(<EuiReactRouterLink to="/bar/baz" />);
+      const wrapper = mount(<EuiLinkTo to="/bar/baz" />);
 
       const simulatedEvent = {
         shiftKey: true,
@@ -92,7 +92,7 @@ describe('EUI & React Router Component Helpers', () => {
 
     it('calls inherited onClick actions in addition to default navigation', () => {
       const customOnClick = jest.fn(); // Can be anything from telemetry to a state reset
-      const wrapper = mount(<EuiReactRouterLink to="/narnia" onClick={customOnClick} />);
+      const wrapper = mount(<EuiLinkTo to="/narnia" onClick={customOnClick} />);
 
       wrapper.find(EuiLink).simulate('click', { shiftKey: true });
 

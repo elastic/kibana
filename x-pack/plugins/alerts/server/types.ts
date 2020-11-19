@@ -148,7 +148,6 @@ export interface RawAlert extends SavedObjectAttributes {
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string;
-  updatedAt: string;
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
