@@ -62,7 +62,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
         return undefined;
       }
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/serviceNodes',
+        endpoint: 'GET /api/apm/services/{serviceName}/serviceNodes',
         params: {
           path: {
             serviceName,

@@ -21,11 +21,11 @@ import { getServiceErrorGroups } from '../lib/services/get_service_error_groups'
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
 
-export const servicesRoute = createRoute(() => ({
-  path: '/api/apm/services',
-  params: {
+export const servicesRoute = createRoute({
+  endpoint: 'GET /api/apm/services',
+  params: t.type({
     query: t.intersection([uiFiltersRt, rangeRt]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -41,16 +41,16 @@ export const servicesRoute = createRoute(() => ({
 
     return services;
   },
-}));
+});
 
-export const serviceAgentNameRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/agent_name',
-  params: {
+export const serviceAgentNameRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/agent_name',
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
     query: rangeRt,
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
@@ -64,16 +64,16 @@ export const serviceAgentNameRoute = createRoute(() => ({
       searchAggregatedTransactions,
     });
   },
-}));
+});
 
-export const serviceTransactionTypesRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/transaction_types',
-  params: {
+export const serviceTransactionTypesRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/transaction_types',
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
     query: rangeRt,
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
@@ -85,27 +85,28 @@ export const serviceTransactionTypesRoute = createRoute(() => ({
       ),
     });
   },
-}));
+});
 
-export const serviceNodeMetadataRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
-  params: {
+export const serviceNodeMetadataRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+  params: t.type({
     path: t.type({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
     query: t.intersection([uiFiltersRt, rangeRt]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName, serviceNodeName } = context.params.path;
     return getServiceNodeMetadata({ setup, serviceName, serviceNodeName });
   },
-}));
+});
 
-export const serviceAnnotationsRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/annotation/search',
-  params: {
+export const serviceAnnotationsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
@@ -115,7 +116,7 @@ export const serviceAnnotationsRoute = createRoute(() => ({
         environment: t.string,
       }),
     ]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
@@ -142,15 +143,14 @@ export const serviceAnnotationsRoute = createRoute(() => ({
       logger: context.logger,
     });
   },
-}));
+});
 
-export const serviceAnnotationsCreateRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/annotation',
-  method: 'POST',
+export const serviceAnnotationsCreateRoute = createRoute({
+  endpoint: 'POST /api/apm/services/{serviceName}/annotation',
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
-  params: {
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
@@ -171,7 +171,7 @@ export const serviceAnnotationsCreateRoute = createRoute(() => ({
         tags: t.array(t.string),
       }),
     ]),
-  },
+  }),
   handler: async ({ request, context }) => {
     const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
       context,
@@ -197,11 +197,11 @@ export const serviceAnnotationsCreateRoute = createRoute(() => ({
       tags: uniq(['apm'].concat(body.tags ?? [])),
     });
   },
-}));
+});
 
-export const serviceErrorGroupsRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/error_groups',
-  params: {
+export const serviceErrorGroupsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
@@ -220,7 +220,7 @@ export const serviceErrorGroupsRoute = createRoute(() => ({
         ]),
       }),
     ]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -238,11 +238,11 @@ export const serviceErrorGroupsRoute = createRoute(() => ({
       sortField,
     });
   },
-}));
+});
 
-export const serviceTransactionGroupsRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/overview_transaction_groups',
-  params: {
+export const serviceTransactionGroupsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/overview_transaction_groups',
+  params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
       rangeRt,
@@ -260,7 +260,7 @@ export const serviceTransactionGroupsRoute = createRoute(() => ({
         ]),
       }),
     ]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -284,4 +284,4 @@ export const serviceTransactionGroupsRoute = createRoute(() => ({
       numBuckets,
     });
   },
-}));
+});

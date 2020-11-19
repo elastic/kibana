@@ -91,6 +91,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     sortOrder: 'asc',
     full: true,
   });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const agentPolicies = agentPoliciesData?.items || [];
   const agentPoliciesById = agentPolicies.reduce(
     (acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
@@ -131,6 +132,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     }
   }, [selectedPolicyId, agentPolicy, updateAgentPolicy, setIsLoadingSecondStep]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const agentPolicyOptions: Array<EuiComboBoxOptionOption<string>> = packageInfoData
     ? agentPolicies.map((agentConf) => {
         const alreadyHasLimitedPackage =
