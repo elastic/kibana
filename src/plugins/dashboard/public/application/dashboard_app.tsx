@@ -166,7 +166,7 @@ const getDashboardContainerInput = ({
     id: dashboardStateManager.savedDashboard.id || '',
     filters: query.filterManager.getFilters(),
     hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
-    query: query.queryString.getQuery(),
+    query: dashboardStateManager.getQuery(),
     searchSessionId,
     timeRange: {
       ..._.cloneDeep(query.timefilter.timefilter.getTime()),
@@ -410,7 +410,7 @@ export function DashboardApp({
     (newMode: ViewMode) => {
       state.dashboardStateManager?.switchViewMode(newMode);
     },
-    [state.dashboardStateManager?.switchViewMode]
+    [state.dashboardStateManager]
   );
 
   // Load Saved Dashboard
