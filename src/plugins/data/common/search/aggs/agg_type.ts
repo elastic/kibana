@@ -54,7 +54,7 @@ export interface AggTypeConfig<
     aggConfigs: IAggConfigs,
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
-    inspectorRequestAdapter: RequestAdapter,
+    inspectorRequestAdapter?: RequestAdapter,
     abortSignal?: AbortSignal
   ) => Promise<any>;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
@@ -189,7 +189,7 @@ export class AggType<
     aggConfigs: IAggConfigs,
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
-    inspectorRequestAdapter: RequestAdapter,
+    inspectorRequestAdapter?: RequestAdapter,
     abortSignal?: AbortSignal
   ) => Promise<any>;
   /**
