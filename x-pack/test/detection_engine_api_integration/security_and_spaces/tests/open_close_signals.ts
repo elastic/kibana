@@ -167,11 +167,12 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should NOT be able to close signals with t1 analyst user', async () => {
-          const rule = { ...getSimpleRule(), from: '1900-01-01T00:00:00.000Z', query: '*:*' };
-          await createRule(supertest, rule);
-          await waitForSignalsToBePresent(supertest);
+          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccess(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
           await createUserAndRole(securityService, ROLES.t1_analyst);
-          const signalsOpen = await getAllSignals(supertest);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
           // Try to set all of the signals to the state of closed.
@@ -204,12 +205,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be able to close signals with soc_manager user', async () => {
-          const rule = { ...getSimpleRule(), from: '1900-01-01T00:00:00.000Z', query: '*:*' };
-          await createRule(supertest, rule);
-          await waitForSignalsToBePresent(supertest);
+          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccess(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
           const userAndRole = ROLES.soc_manager;
           await createUserAndRole(securityService, userAndRole);
-          const signalsOpen = await getAllSignals(supertest);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
           const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
 
           // Try to set all of the signals to the state of closed.
