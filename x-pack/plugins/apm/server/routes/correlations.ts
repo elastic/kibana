@@ -30,6 +30,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const {
@@ -71,6 +72,7 @@ export const correlationsForRangesRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
