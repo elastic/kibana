@@ -30,6 +30,12 @@ import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
+import {
+  esQuery,
+  esKuery,
+  Query,
+  QueryStringInput,
+} from '../../../../../../../src/plugins/data/public';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
@@ -67,6 +73,18 @@ const labelForDelayOffset = (
   </>
 );
 
+function validateQuery(query: Query) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    query.language === 'kuery'
+      ? esKuery.fromKueryExpression(query.query)
+      : esQuery.luceneStringToDsl(query.query);
+  } catch (err) {
+    return false;
+  }
+  return true;
+}
+
 export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
   GeoThresholdAlertParams,
   AlertsContextValue
@@ -74,6 +92,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
   const {
     index,
     indexId,
+    indexQuery,
     geoField,
     entity,
     dateField,
@@ -81,6 +100,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
     boundaryType,
     boundaryIndexTitle,
     boundaryIndexId,
+    boundaryIndexQuery,
     boundaryGeoField,
     boundaryNameField,
     delayOffsetWithUnits,
@@ -102,6 +122,12 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       }
     }
   };
+  const [indexQueryInput, setIndexQueryInput] = useState<Query>(
+    indexQuery || {
+      query: '',
+      language: 'kuery',
+    }
+  );
   const [boundaryIndexPattern, _setBoundaryIndexPattern] = useState<IIndexPattern>({
     id: '',
     fields: [],
@@ -118,6 +144,12 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       }
     }
   };
+  const [boundaryIndexQueryInput, setBoundaryIndexQueryInput] = useState<Query>(
+    boundaryIndexQuery || {
+      query: '',
+      language: 'kuery',
+    }
+  );
   const [delayOffset, _setDelayOffset] = useState<number>(0);
   function setDelayOffset(_delayOffset: number) {
     setAlertParams('delayOffsetWithUnits', `${_delayOffset}${delayOffsetUnit}`);
@@ -248,6 +280,23 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         indexFields={indexPattern.fields}
         isInvalid={indexId && dateField && geoField ? !entity : false}
       />
+      <EuiSpacer size="s" />
+      <EuiFlexItem>
+        <QueryStringInput
+          disableAutoFocus
+          bubbleSubmitEvent
+          indexPatterns={indexPattern ? [indexPattern] : []}
+          query={indexQueryInput}
+          onChange={(query) => {
+            if (query.language) {
+              if (validateQuery(query)) {
+                setAlertParams('indexQuery', query);
+              }
+              setIndexQueryInput(query);
+            }
+          }}
+        />
+      </EuiFlexItem>
 
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
@@ -277,7 +326,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
                 }
                 fullWidth
                 onChange={(e) => setAlertParams('trackingEvent', e.target.value)}
-                options={[conditionOptions[0]]} // TODO: Make all options avab. before merge
+                options={conditionOptions}
               />
             </div>
           </EuiFormRow>
@@ -313,6 +362,24 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
         }
         boundaryNameField={boundaryNameField}
       />
+      <EuiSpacer size="s" />
+      <EuiFlexItem>
+        <QueryStringInput
+          disableAutoFocus
+          bubbleSubmitEvent
+          indexPatterns={boundaryIndexPattern ? [boundaryIndexPattern] : []}
+          query={boundaryIndexQueryInput}
+          onChange={(query) => {
+            if (query.language) {
+              if (validateQuery(query)) {
+                setAlertParams('boundaryIndexQuery', query);
+              }
+              setBoundaryIndexQueryInput(query);
+            }
+          }}
+        />
+      </EuiFlexItem>
+      <EuiSpacer size="l" />
     </Fragment>
   );
 };

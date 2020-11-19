@@ -9,16 +9,16 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
 import { createRoute } from './create_route';
 
-export const transactionByTraceIdRoute = createRoute(() => ({
-  path: '/api/apm/transaction/{traceId}',
-  params: {
+export const transactionByTraceIdRoute = createRoute({
+  endpoint: 'GET /api/apm/transaction/{traceId}',
+  params: t.type({
     path: t.type({
       traceId: t.string,
     }),
-  },
+  }),
   handler: async ({ context, request }) => {
     const { traceId } = context.params.path;
     const setup = await setupRequest(context, request);
     return getRootTransactionByTraceId(traceId, setup);
   },
-}));
+});

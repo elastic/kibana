@@ -10,7 +10,7 @@ import { mockTelemetryActions, mountWithIntl } from '../../../__mocks__/';
 
 import React from 'react';
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty } from '@elastic/eui';
-import { EuiLink } from '../../../shared/react_router_helpers';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 import { EnginesTable } from './engines_table';
 
@@ -50,7 +50,7 @@ describe('EnginesTable', () => {
   });
 
   it('contains engine links which send telemetry', () => {
-    const engineLinks = wrapper.find(EuiLink);
+    const engineLinks = wrapper.find(EuiLinkTo);
 
     engineLinks.forEach((link) => {
       expect(link.prop('to')).toEqual('/engines/test-engine');
