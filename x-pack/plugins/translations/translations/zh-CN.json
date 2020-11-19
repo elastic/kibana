@@ -8150,7 +8150,6 @@
     "xpack.idxMgmt.dataStreamList.loadingDataStreamsErrorMessage": "加载数据流时出错",
     "xpack.idxMgmt.dataStreamList.reloadDataStreamsButtonLabel": "重新加载",
     "xpack.idxMgmt.dataStreamList.table.actionColumnTitle": "操作",
-    "xpack.idxMgmt.dataStreamList.table.actionDeleteDecription": "删除此数据流",
     "xpack.idxMgmt.dataStreamList.table.actionDeleteText": "删除",
     "xpack.idxMgmt.dataStreamList.table.deleteDataStreamsButtonLabel": "删除{count, plural, one {数据流} other {数据流} }",
     "xpack.idxMgmt.dataStreamList.table.healthColumnTitle": "运行状况",
