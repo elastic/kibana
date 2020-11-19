@@ -19,7 +19,7 @@ const unknownValue = { some: 'value' };
 const populateWithUnknownEntries = (v: unknown) => {
   if (isObject(v)) {
     for (const key of Object.keys(v)) {
-      if (key === 'require' || key === 'include' || key === 'exclude') continue; // this will generate an invalid policy
+      if (['require', 'include', 'exclude'].includes(key)) continue; // this will generate an invalid policy
       populateWithUnknownEntries(v[key]);
     }
     v.unknown = unknownValue;
@@ -51,6 +51,7 @@ const originalPolicy: SerializedPolicy = {
       min_age: '12ms',
     },
     warm: {
+      min_age: '12ms',
       actions: {
         shrink: { number_of_shards: 12 },
         allocate: {
@@ -63,6 +64,7 @@ const originalPolicy: SerializedPolicy = {
       },
     },
     cold: {
+      min_age: '30ms',
       actions: {
         allocate: {
           number_of_replicas: 12,
@@ -77,6 +79,7 @@ const originalPolicy: SerializedPolicy = {
       },
     },
     delete: {
+      min_age: '33ms',
       actions: {
         delete: {
           delete_searchable_snapshot: true,
@@ -101,20 +104,26 @@ describe('deserializer and serializer', () => {
 
   beforeEach(() => {
     policy = cloneDeep(originalPolicy);
-    serializer = createSerializer(policy);
     formInternal = deserializer(policy);
+    // Because the policy object is not deepCloned by the form lib we
+    // clone here so that we can mutate the policy and preserve the
+    // original reference in the createSerializer
+    serializer = createSerializer(cloneDeep(policy));
   });
 
   it('preserves any unknown policy settings', () => {
+    const thisTestPolicy = cloneDeep(originalPolicy);
     // We populate all levels of the policy with entries our UI does not know about
-    populateWithUnknownEntries(policy);
+    populateWithUnknownEntries(thisTestPolicy);
+    serializer = createSerializer(thisTestPolicy);
 
-    const copyOfPolicy = cloneDeep(policy);
+    const copyOfThisTestPolicy = cloneDeep(thisTestPolicy);
 
-    expect(serializer(formInternal)).toEqual(policy);
+    expect(serializer(deserializer(thisTestPolicy))).toEqual(thisTestPolicy);
 
     // Assert that the policy we passed in is unaltered after deserialization and serialization
-    expect(policy).toEqual(copyOfPolicy);
+    expect(thisTestPolicy).not.toBe(copyOfThisTestPolicy);
+    expect(thisTestPolicy).toEqual(copyOfThisTestPolicy);
   });
 
   it('removes all phases if they were disabled in the form', () => {
@@ -123,7 +132,7 @@ describe('deserializer and serializer', () => {
     formInternal._meta.delete.enabled = false;
 
     expect(serializer(formInternal)).toEqual({
-      ...policy,
+      name: 'test',
       phases: {
         hot: policy.phases.hot, // We expect to see only the hot phase
       },
@@ -179,5 +188,14 @@ describe('deserializer and serializer', () => {
 
     expect(result.phases.hot!.actions.rollover).toBeUndefined();
     expect(result.phases.hot!.actions.forcemerge).toBeUndefined();
+  });
+
+  it('removes min_age from warm when rollover is enabled', () => {
+    formInternal._meta.hot.useRollover = true;
+    formInternal._meta.warm.warmPhaseOnRollover = true;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.warm!.min_age).toBeUndefined();
   });
 });

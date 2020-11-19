@@ -132,7 +132,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete coldPhase.actions.freeze;
       }
 
-      if (!updatedPolicy.phases.cold!.actions?.set_priority && coldPhase.actions.set_priority) {
+      if (!updatedPolicy.phases.cold!.actions?.set_priority) {
         delete coldPhase.actions.set_priority;
       }
     } else {
