@@ -8,5 +8,5 @@ import { useStartServices } from './';
 
 export function useCapabilities() {
   const core = useStartServices();
-  return core.application.capabilities.ingestManager;
+  return core.application.capabilities.fleet;
 }

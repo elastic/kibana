@@ -14,7 +14,7 @@ import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eu
 import { CoreStart, AppMountParameters } from 'src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../xpack_legacy/common';
-import { IngestManagerConfigType, IngestManagerStartServices } from '../../plugin';
+import { FleetConfigType, FleetStartServices } from '../../plugin';
 import { PAGE_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
@@ -233,8 +233,8 @@ const IngestManagerApp = ({
   extensions,
 }: {
   basepath: string;
-  startServices: IngestManagerStartServices;
-  config: IngestManagerConfigType;
+  startServices: FleetStartServices;
+  config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
@@ -258,9 +258,9 @@ const IngestManagerApp = ({
 };
 
 export function renderApp(
-  startServices: IngestManagerStartServices,
+  startServices: FleetStartServices,
   { element, appBasePath, history }: AppMountParameters,
-  config: IngestManagerConfigType,
+  config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage
 ) {
@@ -281,7 +281,7 @@ export function renderApp(
   };
 }
 
-export const teardownIngestManager = (coreStart: CoreStart) => {
+export const teardownFleet = (coreStart: CoreStart) => {
   coreStart.chrome.docTitle.reset();
   coreStart.chrome.setBreadcrumbs([]);
   licenseService.stop();

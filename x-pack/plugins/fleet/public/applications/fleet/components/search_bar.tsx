@@ -72,6 +72,8 @@ export const SearchBar: React.FunctionComponent<Props> = ({
           ...suggestion,
           // For type
           onClick: () => {},
+          descriptionDisplay: 'wrap',
+          labelWidth: '40',
         };
       })}
     />

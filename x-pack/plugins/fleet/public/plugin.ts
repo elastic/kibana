@@ -11,7 +11,7 @@ import {
   CoreStart,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   HomePublicPluginSetup,
@@ -22,7 +22,7 @@ import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 import { BASE_PATH } from './applications/fleet/constants';
 
-import { IngestManagerConfigType } from '../common/types';
+import { FleetConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
 import { licenseService } from './applications/fleet/hooks/use_license';
 import { setHttpClient } from './applications/fleet/hooks/use_request/use_request';
@@ -34,49 +34,47 @@ import {
 import { createExtensionRegistrationCallback } from './applications/fleet/services/ui_extensions';
 import { UIExtensionRegistrationCallback, UIExtensionsStorage } from './applications/fleet/types';
 
-export { IngestManagerConfigType } from '../common/types';
+export { FleetConfigType } from '../common/types';
 
-// We need to provide an object instead of void so that dependent plugins know when Ingest Manager
+// We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IngestManagerSetup {}
+export interface FleetSetup {}
 
 /**
- * Describes public IngestManager plugin contract returned at the `start` stage.
+ * Describes public Fleet plugin contract returned at the `start` stage.
  */
-export interface IngestManagerStart {
+export interface FleetStart {
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
 
-export interface IngestManagerSetupDeps {
+export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
 }
 
-export interface IngestManagerStartDeps {
+export interface FleetStartDeps {
   data: DataPublicPluginStart;
 }
 
-export interface IngestManagerStartServices extends CoreStart, IngestManagerStartDeps {
+export interface FleetStartServices extends CoreStart, FleetStartDeps {
   storage: Storage;
 }
 
-export class IngestManagerPlugin
-  implements
-    Plugin<IngestManagerSetup, IngestManagerStart, IngestManagerSetupDeps, IngestManagerStartDeps> {
-  private config: IngestManagerConfigType;
+export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
+  private config: FleetConfigType;
   private kibanaVersion: string;
   private extensions: UIExtensionsStorage = {};
   private storage = new Storage(localStorage);
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = this.initializerContext.config.get<IngestManagerConfigType>();
+    this.config = this.initializerContext.config.get<FleetConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+  public setup(core: CoreSetup, deps: FleetSetupDeps) {
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
@@ -87,7 +85,7 @@ export class IngestManagerPlugin
     // Set up license service
     licenseService.start(deps.licensing.license$);
 
-    // Register main Ingest Manager app
+    // Register main Fleet app
     core.application.register({
       id: PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
@@ -97,21 +95,36 @@ export class IngestManagerPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
           CoreStart,
-          IngestManagerStartDeps,
-          IngestManagerStart
+          FleetStartDeps,
+          FleetStart
         ];
-        const startServices: IngestManagerStartServices = {
+        const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
         };
-        const { renderApp, teardownIngestManager } = await import('./applications/fleet');
+        const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
 
         return () => {
           unmount();
-          teardownIngestManager(startServices);
+          teardownFleet(startServices);
         };
+      },
+    });
+
+    // BWC < 7.11 redirect /app/ingestManager to /app/fleet
+    core.application.register({
+      id: 'ingestManager',
+      category: DEFAULT_APP_CATEGORIES.management,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      title: i18n.translate('xpack.fleet.oldAppTitle', { defaultMessage: 'Ingest Manager' }),
+      async mount(params: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('fleet', {
+          path: params.history.location.hash,
+        });
+        return () => {};
       },
     });
 
@@ -122,7 +135,7 @@ export class IngestManagerPlugin
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
 
       deps.home.featureCatalogue.register({
-        id: 'ingestManager',
+        id: 'fleet',
         title: i18n.translate('xpack.fleet.featureCatalogueTitle', {
           defaultMessage: 'Add Elastic Agent',
         }),
@@ -140,8 +153,8 @@ export class IngestManagerPlugin
     return {};
   }
 
-  public async start(core: CoreStart): Promise<IngestManagerStart> {
-    let successPromise: ReturnType<IngestManagerStart['isInitialized']>;
+  public async start(core: CoreStart): Promise<FleetStart> {
+    let successPromise: ReturnType<FleetStart['isInitialized']>;
 
     return {
       isInitialized: () => {

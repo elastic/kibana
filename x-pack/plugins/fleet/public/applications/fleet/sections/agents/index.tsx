@@ -7,7 +7,7 @@ import React from 'react';
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../constants';
 import { Loading } from '../../components';
-import { useConfig, useStartServices, useFleetStatus, useBreadcrumbs } from '../../hooks';
+import { useConfig, useFleetStatus, useBreadcrumbs, useCapabilities } from '../../hooks';
 import { AgentListPage } from './agent_list_page';
 import { SetupPage } from './setup_page';
 import { AgentDetailsPage } from './agent_details_page';
@@ -17,8 +17,8 @@ import { ListLayout } from './components/list_layout';
 
 export const FleetApp: React.FunctionComponent = () => {
   useBreadcrumbs('fleet');
-  const core = useStartServices();
   const { agents } = useConfig();
+  const capabilities = useCapabilities();
 
   const fleetStatus = useFleetStatus();
 
@@ -35,7 +35,7 @@ export const FleetApp: React.FunctionComponent = () => {
       />
     );
   }
-  if (!core.application.capabilities.ingestManager.read) {
+  if (!capabilities.read) {
     return <NoAccessPage />;
   }
 
