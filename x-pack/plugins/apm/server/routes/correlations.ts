@@ -49,7 +49,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
   },
 });
 
-export const correlationsForRangesRoute = createRoute({
+export const correlationsForFailedTransactionsRoute = createRoute({
   endpoint: 'GET /api/apm/correlations/failed_transactions',
   params: t.type({
     query: t.intersection([
