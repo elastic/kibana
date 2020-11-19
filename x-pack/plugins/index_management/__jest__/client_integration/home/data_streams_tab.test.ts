@@ -99,10 +99,10 @@ describe('Data Streams tab', () => {
         createNonDataStreamIndex('non-data-stream-index'),
       ]);
 
-      const dataStreamForDetailPanel = createDataStreamPayload('dataStream1');
+      const dataStreamForDetailPanel = createDataStreamPayload({ name: 'dataStream1' });
       setLoadDataStreamsResponse([
         dataStreamForDetailPanel,
-        createDataStreamPayload('dataStream2'),
+        createDataStreamPayload({ name: 'dataStream2' }),
       ]);
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
@@ -287,9 +287,9 @@ describe('Data Streams tab', () => {
         createDataStreamBackingIndex('data-stream-index2', 'dataStream2'),
       ]);
 
-      const dataStreamDollarSign = createDataStreamPayload('%dataStream');
-      setLoadDataStreamsResponse([dataStreamDollarSign]);
-      setLoadDataStreamResponse(dataStreamDollarSign);
+      const dataStreamPercentSign = createDataStreamPayload({ name: '%dataStream' });
+      setLoadDataStreamsResponse([dataStreamPercentSign]);
+      setLoadDataStreamResponse(dataStreamPercentSign);
 
       testBed = await setup({
         history: createMemoryHistory(),
@@ -327,10 +327,10 @@ describe('Data Streams tab', () => {
     test('with an ILM url generator and an ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
-      const dataStreamForDetailPanel = {
-        ...createDataStreamPayload('dataStream1'),
+      const dataStreamForDetailPanel = createDataStreamPayload({
+        name: 'dataStream1',
         ilmPolicyName: 'my_ilm_policy',
-      };
+      });
       setLoadDataStreamsResponse([dataStreamForDetailPanel]);
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
@@ -351,7 +351,7 @@ describe('Data Streams tab', () => {
     test('with an ILM url generator and no ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
-      const dataStreamForDetailPanel = createDataStreamPayload('dataStream1');
+      const dataStreamForDetailPanel = createDataStreamPayload({ name: 'dataStream1' });
       setLoadDataStreamsResponse([dataStreamForDetailPanel]);
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
@@ -373,10 +373,10 @@ describe('Data Streams tab', () => {
     test('without an ILM url generator and with an ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
-      const dataStreamForDetailPanel = {
-        ...createDataStreamPayload('dataStream1'),
+      const dataStreamForDetailPanel = createDataStreamPayload({
+        name: 'dataStream1',
         ilmPolicyName: 'my_ilm_policy',
-      };
+      });
       setLoadDataStreamsResponse([dataStreamForDetailPanel]);
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
@@ -393,6 +393,60 @@ describe('Data Streams tab', () => {
       await actions.clickNameAt(0);
       expect(findDetailPanelIlmPolicyLink().exists()).toBeFalsy();
       expect(findDetailPanelIlmPolicyName().contains('my_ilm_policy')).toBeTruthy();
+    });
+  });
+
+  describe('managed data streams', () => {
+    const nonBreakingSpace = ' ';
+    beforeEach(async () => {
+      const managedDataStream = createDataStreamPayload({
+        name: 'managed-data-stream',
+        _meta: {
+          package: 'test',
+          managed: true,
+          managed_by: 'ingest-manager',
+        },
+      });
+      const nonManagedDataStream = createDataStreamPayload({ name: 'non-managed-data-stream' });
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([managedDataStream, nonManagedDataStream]);
+
+      testBed = await setup({
+        history: createMemoryHistory(),
+      });
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+    });
+
+    test('listed in the table with Managed label', () => {
+      const { table } = testBed;
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+
+      expect(tableCellsValues).toEqual([
+        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
+      ]);
+    });
+
+    test('turning off "Include managed" switch hides managed data streams', async () => {
+      const { exists, actions, component, table } = testBed;
+      let { tableCellsValues } = table.getMetaData('dataStreamTable');
+
+      expect(tableCellsValues).toEqual([
+        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', 'Delete'],
+        ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
+      ]);
+
+      expect(exists('includeManagedSwitch')).toBe(true);
+
+      await act(async () => {
+        actions.clickIncludeManagedSwitch();
+      });
+      component.update();
+
+      ({ tableCellsValues } = table.getMetaData('dataStreamTable'));
+      expect(tableCellsValues).toEqual([['', 'non-managed-data-stream', 'green', '1', 'Delete']]);
     });
   });
 });

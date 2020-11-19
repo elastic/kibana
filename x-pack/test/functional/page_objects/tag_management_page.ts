@@ -156,6 +156,13 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     }
   }
 
+  /**
+   * Tag management page object.
+   *
+   * @remarks All the table manipulation helpers makes the assumption
+   *          that all tags are displayed on a single page. Pagination
+   *          and finding / interacting with a tag on another page is not supported.
+   */
   class TagManagementPage {
     public readonly tagModal = new TagModal(this);
 
@@ -270,6 +277,90 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
         tagRow
       );
       await connectionLink.click();
+    }
+
+    /**
+     * Return true if the selection column is displayed on the table, false otherwise.
+     */
+    async isSelectionColumnDisplayed() {
+      const firstRow = await testSubjects.find('tagsTableRow');
+      const checkbox = await firstRow.findAllByCssSelector(
+        '.euiTableRowCellCheckbox .euiCheckbox__input'
+      );
+      return Boolean(checkbox.length);
+    }
+
+    /**
+     * Click on the selection checkbox of the tag matching given tag name.
+     */
+    async selectTagByName(tagName: string) {
+      const tagRow = await this.getRowByName(tagName);
+      const checkbox = await tagRow.findByCssSelector(
+        '.euiTableRowCellCheckbox .euiCheckbox__input'
+      );
+      await checkbox.click();
+    }
+
+    /**
+     * Returns true if the tag bulk action menu is displayed, false otherwise.
+     */
+    async isActionMenuButtonDisplayed() {
+      return testSubjects.exists('actionBar-contextMenuButton');
+    }
+
+    /**
+     * Open the bulk action menu if not already opened.
+     */
+    async openActionMenu() {
+      if (!(await this.isActionMenuOpened())) {
+        await this.toggleActionMenu();
+      }
+    }
+
+    /**
+     * Check if the action for given `actionId` is present in the bulk action menu.
+     *
+     * The menu will automatically be opened if not already, but the test must still
+     * select tags to make the action menu button appear.
+     */
+    async isActionPresent(actionId: string) {
+      if (!(await this.isActionMenuButtonDisplayed())) {
+        return false;
+      }
+      const menuWasOpened = await this.isActionMenuOpened();
+      if (!menuWasOpened) {
+        await this.openActionMenu();
+      }
+
+      const actionExists = await testSubjects.exists(`actionBar-button-${actionId}`);
+
+      if (!menuWasOpened) {
+        await this.toggleActionMenu();
+      }
+
+      return actionExists;
+    }
+
+    /**
+     * Click on given bulk action button
+     */
+    async clickOnAction(actionId: string) {
+      await this.openActionMenu();
+      await testSubjects.click(`actionBar-button-${actionId}`);
+    }
+
+    /**
+     * Toggle (close if opened, open if closed) the bulk action menu.
+     */
+    async toggleActionMenu() {
+      await testSubjects.click('actionBar-contextMenuButton');
+    }
+
+    /**
+     * Return true if the bulk action menu is opened, false otherwise.
+     */
+    async isActionMenuOpened() {
+      return testSubjects.exists('actionBar-contextMenuPopover');
     }
 
     /**

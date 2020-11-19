@@ -71,7 +71,7 @@ export class SearchInterceptor {
    */
   protected application!: CoreStart['application'];
   private batchedFetch!: BatchedFunc<
-    { request: IKibanaSearchRequest; strategy?: string },
+    { request: IKibanaSearchRequest; options: ISearchOptions },
     IKibanaSearchResponse
   >;
 
@@ -135,10 +135,16 @@ export class SearchInterceptor {
    */
   protected runSearch(
     request: IKibanaSearchRequest,
-    signal: AbortSignal,
-    strategy?: string
+    options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
-    return this.batchedFetch({ request, strategy }, signal);
+    const { abortSignal, ...requestOptions } = options || {};
+    return this.batchedFetch(
+      {
+        request,
+        options: requestOptions,
+      },
+      abortSignal
+    );
   }
 
   /**
@@ -235,7 +241,7 @@ export class SearchInterceptor {
         abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-      return from(this.runSearch(request, combinedSignal, options?.strategy)).pipe(
+      return from(this.runSearch(request, { ...options, abortSignal: combinedSignal })).pipe(
         catchError((e: Error) => {
           return throwError(this.handleSearchError(e, request, timeoutSignal, options));
         }),

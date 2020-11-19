@@ -41,16 +41,14 @@ import {
   UiSettingsPublicToCommon,
 } from './index_patterns';
 import {
-  setFieldFormats,
   setIndexPatterns,
   setNotifications,
   setOverlays,
-  setQueryService,
   setSearchService,
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { esaggs } from './search/expressions';
+import { getEsaggs } from './search/expressions';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
@@ -111,8 +109,22 @@ export class DataPublicPlugin
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    expressions.registerFunction(esaggs);
     expressions.registerFunction(indexPatternLoad);
+    expressions.registerFunction(
+      getEsaggs({
+        getStartDependencies: async () => {
+          const [, , self] = await core.getStartServices();
+          const { fieldFormats, indexPatterns, query, search } = self;
+          return {
+            addFilters: query.filterManager.addFilters.bind(query.filterManager),
+            aggs: search.aggs,
+            deserializeFieldFormat: fieldFormats.deserialize.bind(fieldFormats),
+            indexPatterns,
+            searchSource: search.searchSource,
+          };
+        },
+      })
+    );
 
     this.usageCollection = usageCollection;
 
@@ -146,7 +158,7 @@ export class DataPublicPlugin
     });
 
     return {
-      autocomplete: this.autocomplete.setup(core),
+      autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -163,7 +175,6 @@ export class DataPublicPlugin
     setUiSettings(uiSettings);
 
     const fieldFormats = this.fieldFormatsService.start();
-    setFieldFormats(fieldFormats);
 
     const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
@@ -187,7 +198,6 @@ export class DataPublicPlugin
       savedObjectsClient: savedObjects.client,
       uiSettings,
     });
-    setQueryService(query);
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
