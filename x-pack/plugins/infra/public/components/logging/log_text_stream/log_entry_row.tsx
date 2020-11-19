@@ -22,7 +22,7 @@ import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
-import { LogEntry, LogColumn } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/http_api';
 import { LogEntryContextMenu } from './log_entry_context_menu';
 
 const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
@@ -117,38 +117,6 @@ export const LogEntryRow = memo(
       handleOpenViewLogInContext,
     ]);
 
-    const logEntryColumnsById = useMemo(
-      () =>
-        logEntry.columns.reduce<{
-          [columnId: string]: LogEntry['columns'][0];
-        }>(
-          (columnsById, column) => ({
-            ...columnsById,
-            [column.columnId]: column,
-          }),
-          {}
-        ),
-      [logEntry.columns]
-    );
-
-    const highlightsByColumnId = useMemo(
-      () =>
-        highlights.reduce<{
-          [columnId: string]: LogColumn[];
-        }>(
-          (columnsById, highlight) =>
-            highlight.columns.reduce(
-              (innerColumnsById, column) => ({
-                ...innerColumnsById,
-                [column.columnId]: [...(innerColumnsById[column.columnId] || []), column],
-              }),
-              columnsById
-            ),
-          {}
-        ),
-      [highlights]
-    );
-
     return (
       <LogEntryRowWrapper
         data-test-subj="streamEntry logTextStreamEntry"
@@ -161,15 +129,17 @@ export const LogEntryRow = memo(
         isHighlighted={isHighlighted}
         scale={scale}
       >
-        {columnConfigurations.map((columnConfiguration) => {
+        {columnConfigurations.map((columnConfiguration, columnPosition) => {
+          const column = logEntry.columns[columnPosition];
+          const columnHighlights = highlights.flatMap((h) => h.columns[columnPosition]);
+
           if (isTimestampLogColumnConfiguration(columnConfiguration)) {
-            const column = logEntryColumnsById[columnConfiguration.timestampColumn.id];
             const columnWidth = columnWidths[columnConfiguration.timestampColumn.id];
 
             return (
               <LogEntryColumn
                 data-test-subj="logColumn timestampLogColumn"
-                key={columnConfiguration.timestampColumn.id}
+                key={columnPosition}
                 {...columnWidth}
               >
                 {isTimestampColumn(column) ? (
@@ -178,19 +148,18 @@ export const LogEntryRow = memo(
               </LogEntryColumn>
             );
           } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
-            const column = logEntryColumnsById[columnConfiguration.messageColumn.id];
             const columnWidth = columnWidths[columnConfiguration.messageColumn.id];
 
             return (
               <LogEntryColumn
                 data-test-subj="logColumn messageLogColumn"
-                key={columnConfiguration.messageColumn.id}
+                key={columnPosition}
                 {...columnWidth}
               >
                 {column ? (
                   <LogEntryMessageColumn
                     columnValue={column}
-                    highlights={highlightsByColumnId[column.columnId] || []}
+                    highlights={columnHighlights}
                     isActiveHighlight={isActiveHighlight}
                     wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
@@ -198,19 +167,18 @@ export const LogEntryRow = memo(
               </LogEntryColumn>
             );
           } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
-            const column = logEntryColumnsById[columnConfiguration.fieldColumn.id];
             const columnWidth = columnWidths[columnConfiguration.fieldColumn.id];
 
             return (
               <LogEntryColumn
                 data-test-subj={`logColumn fieldLogColumn fieldLogColumn:${columnConfiguration.fieldColumn.field}`}
-                key={columnConfiguration.fieldColumn.id}
+                key={columnPosition}
                 {...columnWidth}
               >
                 {column ? (
                   <LogEntryFieldColumn
                     columnValue={column}
-                    highlights={highlightsByColumnId[column.columnId] || []}
+                    highlights={columnHighlights}
                     isActiveHighlight={isActiveHighlight}
                     wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
