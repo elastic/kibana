@@ -10,7 +10,7 @@ import {
   SafeEndpointEvent,
   SafeResolverEvent,
 } from '../../../../common/endpoint/types';
-import { TreeFetcherParameters } from '../../types';
+import { FetchedNodeData, TreeFetcherParameters } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
@@ -111,7 +111,7 @@ interface ServerReturnedNodeData {
     /**
      * A map of the node's ID to an array of events
      */
-    nodeData: Map<string, SafeResolverEvent[]>;
+    nodeData: Map<string, FetchedNodeData>;
     /**
      * The list of IDs that were originally sent to the server. This won't necessarily equal nodeData.keys() because
      * data could have been deleted in Elasticsearch since the original graph nodes were returned or the server's

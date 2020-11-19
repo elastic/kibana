@@ -6,7 +6,7 @@
 
 import { SafeResolverEvent } from '../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import { IDToNodeInfo } from '../types';
+import { FetchedNodeData, IDToNodeInfo } from '../types';
 import {
   idsNotInBase,
   setErrorNodes,
@@ -41,26 +41,26 @@ describe('node data model', () => {
 
   it('overwrites the existing entries and creates new ones when calling setRequestedNodes', () => {
     const state: IDToNodeInfo = new Map([
-      ['1', { events: [generator.generateEvent()], status: 'received' }],
+      ['1', { events: [generator.generateEvent()], status: 'received', terminated: false }],
     ]);
 
     expect(setRequestedNodes(state, new Set(['1', '2']))).toEqual(
       new Map([
-        ['1', { events: [], status: 'requested' }],
-        ['2', { events: [], status: 'requested' }],
+        ['1', { events: [], status: 'requested', terminated: false }],
+        ['2', { events: [], status: 'requested', terminated: false }],
       ])
     );
   });
 
   it('overwrites the existing entries and creates new ones when calling setErrorNodes', () => {
     const state: IDToNodeInfo = new Map([
-      ['1', { events: [generator.generateEvent()], status: 'received' }],
+      ['1', { events: [generator.generateEvent()], status: 'received', terminated: false }],
     ]);
 
     expect(setErrorNodes(state, new Set(['1', '2']))).toEqual(
       new Map([
-        ['1', { events: [], status: 'error' }],
-        ['2', { events: [], status: 'error' }],
+        ['1', { events: [], status: 'error', terminated: false }],
+        ['2', { events: [], status: 'error', terminated: false }],
       ])
     );
   });
@@ -72,7 +72,7 @@ describe('node data model', () => {
 
     it('only includes ids that are not in the base state', () => {
       const state: IDToNodeInfo = new Map([
-        ['1', { events: [generator.generateEvent()], status: 'error' }],
+        ['1', { events: [generator.generateEvent()], status: 'error', terminated: false }],
       ]);
       expect(idsNotInBase(state, new Set(['1', '2', '3']))).toEqual(new Set(['2', '3']));
     });
@@ -82,13 +82,15 @@ describe('node data model', () => {
     const node1Events = [generator.generateEvent({ entityID: '1' })];
     const node2Events = [generator.generateEvent({ entityID: '2' })];
     const state: IDToNodeInfo = new Map([
-      ['1', { events: node1Events, status: 'error' }],
-      ['2', { events: node2Events, status: 'error' }],
+      ['1', { events: node1Events, status: 'error', terminated: false }],
+      ['2', { events: node2Events, status: 'error', terminated: false }],
     ]);
     describe('reachedLimit is false', () => {
       it('overwrites entries with the received data', () => {
         const genNodeEvent = generator.generateEvent({ entityID: '3' });
-        const received = new Map<string, SafeResolverEvent[]>([['1', [genNodeEvent]]]);
+        const received = new Map<string, FetchedNodeData>([
+          ['1', { events: [genNodeEvent], terminated: false }],
+        ]);
         expect(
           updateWithReceivedNodes({
             storedNodeInfo: state,
@@ -98,8 +100,8 @@ describe('node data model', () => {
           })
         ).toEqual(
           new Map([
-            ['1', { events: [genNodeEvent], status: 'received' }],
-            ['2', { events: node2Events, status: 'error' }],
+            ['1', { events: [genNodeEvent], status: 'received', terminated: false }],
+            ['2', { events: node2Events, status: 'error', terminated: false }],
           ])
         );
       });
@@ -114,8 +116,8 @@ describe('node data model', () => {
           })
         ).toEqual(
           new Map([
-            ['1', { events: [], status: 'received' }],
-            ['2', { events: [], status: 'received' }],
+            ['1', { events: [], status: 'received', terminated: false }],
+            ['2', { events: [], status: 'received', terminated: false }],
           ])
         );
       });
@@ -130,7 +132,7 @@ describe('node data model', () => {
             requestedNodes: new Set(['1']),
             reachedLimit: true,
           })
-        ).toEqual(new Map([['2', { events: node2Events, status: 'error' }]]));
+        ).toEqual(new Map([['2', { events: node2Events, status: 'error', terminated: false }]]));
       });
 
       it('attempts to remove entries from the map even if they do not exist', () => {
@@ -143,15 +145,17 @@ describe('node data model', () => {
           })
         ).toEqual(
           new Map([
-            ['1', { events: node1Events, status: 'error' }],
-            ['2', { events: node2Events, status: 'error' }],
+            ['1', { events: node1Events, status: 'error', terminated: false }],
+            ['2', { events: node2Events, status: 'error', terminated: false }],
           ])
         );
       });
 
       it('does not delete the entry if it exists in the received node data from the server', () => {
         const genNodeEvent = generator.generateEvent({ entityID: '3' });
-        const received = new Map<string, SafeResolverEvent[]>([['1', [genNodeEvent]]]);
+        const received = new Map<string, FetchedNodeData>([
+          ['1', { events: [genNodeEvent], terminated: false }],
+        ]);
         expect(
           updateWithReceivedNodes({
             storedNodeInfo: state,
@@ -161,8 +165,8 @@ describe('node data model', () => {
           })
         ).toEqual(
           new Map([
-            ['1', { events: [genNodeEvent], status: 'received' }],
-            ['2', { events: node2Events, status: 'error' }],
+            ['1', { events: [genNodeEvent], status: 'received', terminated: false }],
+            ['2', { events: node2Events, status: 'error', terminated: false }],
           ])
         );
       });

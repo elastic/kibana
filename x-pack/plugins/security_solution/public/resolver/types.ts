@@ -240,10 +240,9 @@ export interface NodeEventsInCategoryState {
   error?: boolean;
 }
 
-export enum NodeDataRequestStatus {
-  Requested,
-  Received,
-  Error,
+export interface FetchedNodeData {
+  events: SafeResolverEvent[];
+  terminated: boolean;
 }
 
 /**
@@ -256,6 +255,7 @@ export interface NodeData {
    * An indication of the current state for retrieving the data.
    */
   status: 'requested' | 'received' | 'error';
+  terminated: boolean;
 }
 
 /**

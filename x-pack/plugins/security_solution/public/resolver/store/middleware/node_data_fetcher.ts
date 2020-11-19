@@ -8,10 +8,11 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { entityIDSafeVersion } from '../../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 
-import { ResolverState, DataAccessLayer } from '../../types';
+import { ResolverState, DataAccessLayer, FetchedNodeData } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 import * as nodeDataModel from '../../models/node_data';
+import { isTerminatedProcess } from '../../models/process_event';
 
 /**
  * Max number of nodes to request from the server
@@ -91,15 +92,17 @@ export function NodeDataFetcher(
 
     if (results) {
       // group the returned events by their ID
-      const newData = new Map<string, SafeResolverEvent[]>();
+      const newData = new Map<string, FetchedNodeData>();
       for (const result of results) {
         const id = entityIDSafeVersion(result);
+        const terminated = isTerminatedProcess(result);
         if (id) {
-          const events = newData.get(id);
-          if (!events) {
-            newData.set(id, [result]);
+          const info = newData.get(id);
+          if (!info) {
+            newData.set(id, { events: [result], terminated });
           } else {
-            events.push(result);
+            info.events.push(result);
+            info.terminated = info.terminated || terminated;
           }
         }
       }

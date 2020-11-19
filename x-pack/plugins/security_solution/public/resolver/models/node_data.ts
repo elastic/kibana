@@ -5,7 +5,7 @@
  */
 
 import { SafeResolverEvent } from '../../../common/endpoint/types';
-import { IDToNodeInfo, NodeData } from '../types';
+import { FetchedNodeData, IDToNodeInfo, NodeData } from '../types';
 
 /**
  * Creates a copy of the node data map and initializes the specified IDs to an empty object with status requested.
@@ -23,7 +23,7 @@ export function setRequestedNodes(
     ...originalData,
     ...requestedNodesArray.map((id: string): [string, NodeData] => [
       id,
-      { events: [], status: 'requested' },
+      { events: [], status: 'requested', terminated: false },
     ]),
   ]);
 }
@@ -44,7 +44,7 @@ export function setErrorNodes(
     ...originalData,
     ...errorNodesArray.map((id: string): [string, NodeData] => [
       id,
-      { events: [], status: 'error' },
+      { events: [], status: 'error', terminated: false },
     ]),
   ]);
 }
@@ -66,7 +66,7 @@ export function updateWithReceivedNodes({
   reachedLimit,
 }: {
   storedNodeInfo: IDToNodeInfo | undefined;
-  receivedNodes: Map<string, SafeResolverEvent[]>;
+  receivedNodes: Map<string, FetchedNodeData>;
   requestedNodes: Set<string>;
   reachedLimit: boolean;
 }): IDToNodeInfo {
@@ -82,14 +82,18 @@ export function updateWithReceivedNodes({
       } else {
         // if we didn't reach the limit but we didn't receive any node data for a particular ID
         // then that means Elasticsearch does not have any node data for that ID.
-        copiedMap.set(id, { events: [], status: 'received' });
+        copiedMap.set(id, { events: [], status: 'received', terminated: false });
       }
     }
   }
 
   // for the nodes we got results for, create a new array with the contents of those events
-  for (const [id, events] of receivedNodes.entries()) {
-    copiedMap.set(id, { events: [...events], status: 'received' });
+  for (const [id, info] of receivedNodes.entries()) {
+    copiedMap.set(id, {
+      events: [...info.events],
+      status: 'received',
+      terminated: info.terminated,
+    });
   }
 
   return copiedMap;

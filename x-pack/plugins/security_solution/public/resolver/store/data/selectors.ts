@@ -134,7 +134,7 @@ export const nodeDataForID: (
   };
 });
 
-// TODO:
+// TODO: show an error when this is true
 export const nodeDataUnableToLoad: (state: DataState) => (id: string) => boolean = createSelector(
   nodeDataForID,
   (nodeInfo) => {
