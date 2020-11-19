@@ -52,7 +52,6 @@ export function ContentPanel(props: ContentPanelProps) {
   const { panel, name, version, assets, title, removable, latestVersion } = props;
   const CustomView = useUIExtension(name, 'package-detail-custom');
   const { getPath } = useLink();
-  const { pkgkey } = useParams<{ pkgkey?: string }>();
 
   switch (panel) {
     case 'settings':
@@ -69,12 +68,12 @@ export function ContentPanel(props: ContentPanelProps) {
     case 'policies':
       return <PackagePoliciesPanel name={name} version={version} />;
     case 'custom':
-      return (
-        (CustomView && (
-          <ExtensionWrapper>
-            <CustomView />
-          </ExtensionWrapper>
-        )) || <Redirect to={getPath('integration_details', { pkgkey: pkgkey ?? '' })} />
+      return CustomView ? (
+        <ExtensionWrapper>
+          <CustomView />
+        </ExtensionWrapper>
+      ) : (
+        <Redirect to={getPath('integration_details', { pkgkey: `${name}-${version}` })} />
       );
     case 'overview':
     default:
