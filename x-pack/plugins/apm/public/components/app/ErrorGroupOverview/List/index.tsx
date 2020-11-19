@@ -11,8 +11,6 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiIconTip } from '@elastic/eui';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_groups';
 import {
   fontFamilyCode,
   fontSizes,
@@ -26,6 +24,7 @@ import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
@@ -50,7 +49,7 @@ const Culprit = styled.div`
 `;
 
 interface Props {
-  items: ErrorGroupListAPIResponse;
+  items: APIReturnType<'GET /api/apm/services/{serviceName}/errors'>;
   serviceName: string;
 }
 
