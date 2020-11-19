@@ -47,9 +47,6 @@ interface SeriesData {
 }
 
 export type TimeseriesVisData = SeriesData & {
-  dateFormat: string;
-  scaledDataFormat: Array<[string, string]>;
-  timezone: string;
   type: PANEL_TYPES;
   uiRestrictions: TimeseriesUIRestrictions;
   /**

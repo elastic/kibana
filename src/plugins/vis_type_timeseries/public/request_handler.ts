@@ -41,8 +41,6 @@ export const metricsRequestHandler = async ({
   const uiStateObj = uiState[visParams.type] ?? {};
   const dataSearch = getDataStart();
   const parsedTimeRange = dataSearch.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
-  const scaledDataFormat = config.get('dateFormat:scaled');
-  const dateFormat = config.get('dateFormat');
 
   if (visParams && visParams.id && !visParams.isModelInvalid) {
     const maxBuckets = config.get(MAX_BUCKETS_SETTING);
@@ -63,12 +61,7 @@ export const metricsRequestHandler = async ({
       }),
     });
 
-    return {
-      dateFormat,
-      scaledDataFormat,
-      timezone,
-      ...resp,
-    };
+    return resp;
   }
 
   return {};

@@ -44,7 +44,8 @@ export class TimeseriesVisualization extends Component {
   };
 
   xAxisFormatter = (interval) => (val) => {
-    const { scaledDataFormat, dateFormat } = this.props.visData;
+    const scaledDataFormat = this.props.getConfig('dateFormat:scaled');
+    const { dateFormat } = this.props;
 
     if (!scaledDataFormat || !dateFormat) {
       return val;

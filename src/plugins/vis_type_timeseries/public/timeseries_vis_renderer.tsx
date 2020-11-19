@@ -58,7 +58,6 @@ export const getTimeseriesVisRenderer: (deps: {
         showNoResult={showNoResult}
       >
         <TimeseriesVisualization
-          dateFormat={uiSettings.get('dateFormat')}
           // it is mandatory to bind uiSettings because of "this" usage inside "get" method
           getConfig={uiSettings.get.bind(uiSettings)}
           handlers={handlers}

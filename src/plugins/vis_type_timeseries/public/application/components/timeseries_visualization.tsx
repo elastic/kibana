@@ -31,7 +31,6 @@ import { TimeseriesVisData } from '../../types';
 
 interface TimeseriesVisualizationProps {
   className?: string;
-  dateFormat: string;
   getConfig: IUiSettingsClient['get'];
   handlers: IInterpreterRenderHandlers;
   model: TimeseriesVisParams;
@@ -45,7 +44,7 @@ function TimeseriesVisualization({
   model,
   handlers,
   uiState,
-  ...visProps
+  getConfig,
 }: TimeseriesVisualizationProps) {
   const onBrush = useCallback(
     (gte: string, lte: string) => {
@@ -97,7 +96,8 @@ function TimeseriesVisualization({
   if (VisComponent) {
     return (
       <VisComponent
-        {...visProps}
+        dateFormat={getConfig('dateFormat')}
+        getConfig={getConfig}
         model={model}
         visData={visData}
         uiState={uiState}
