@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 import { isEmpty, pick } from 'lodash';
 import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import archives_metadata from '../../../common/archives_metadata';
 
