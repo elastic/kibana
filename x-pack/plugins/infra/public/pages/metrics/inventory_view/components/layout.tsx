@@ -113,7 +113,7 @@ export const Layout = () => {
               <>
                 <TopActionContainer ref={topActionMeasureRef}>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-                    <Toolbar nodeType={nodeType} />
+                    <Toolbar nodeType={nodeType} currentTime={currentTime} />
                     <EuiFlexItem grow={false}>
                       <IntervalLabel intervalAsString={intervalAsString} />
                     </EuiFlexItem>
