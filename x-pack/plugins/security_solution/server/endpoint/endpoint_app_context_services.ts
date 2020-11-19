@@ -73,7 +73,7 @@ export const createMetadataService = (packageService: PackageService): MetadataS
 
 export type EndpointAppContextServiceStartContract = Partial<
   Pick<
-  FleetStartContract,
+    FleetStartContract,
     'agentService' | 'packageService' | 'packagePolicyService' | 'agentPolicyService'
   >
 > & {
