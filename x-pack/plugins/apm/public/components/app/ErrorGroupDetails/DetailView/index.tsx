@@ -20,6 +20,7 @@ import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { px, unit, units } from '../../../../style/variables';

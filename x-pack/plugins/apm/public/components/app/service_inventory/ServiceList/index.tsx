@@ -26,13 +26,13 @@ import { AgentIcon } from '../../../shared/AgentIcon';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
 
-type Items = APIReturnType<'GET /api/apm/services'>['items'];
+type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
+type Items = ServiceListAPIResponse['items'];
 
 interface Props {
   items: Items;
   noItemsMessage?: React.ReactNode;
 }
-
 type ServiceListItem = ValuesType<Items>;
 
 function formatNumber(value: number) {
