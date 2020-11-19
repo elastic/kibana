@@ -269,7 +269,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       actionExecutor,
       actionTypeRegistry,
       taskRunnerFactory,
-      kibanaIndex,
+      kibanaIndexConfig,
       isESOUsingEphemeralEncryptionKey,
       preconfiguredActions,
       instantiateAuthorization,
@@ -297,10 +297,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         request
       );
 
+      const kibanaIndex = (await kibanaIndexConfig.pipe(first()).toPromise()).kibana.index;
+
       return new ActionsClient({
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
-        defaultKibanaIndex: await kibanaIndex,
+        defaultKibanaIndex: kibanaIndex,
         scopedClusterClient: core.elasticsearch.legacy.client.asScoped(request),
         preconfiguredActions,
         request,
@@ -426,7 +428,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
   private createRouteHandlerContext = (
     core: CoreSetup<ActionsPluginsStart>,
-    defaultKibanaIndex: string
+    config: Observable<{ kibana: { index: string } }>
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
     const {
       actionTypeRegistry,
@@ -438,6 +440,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     return async function actionsRouteHandlerContext(context, request) {
       const [{ savedObjects }, { taskManager }] = await core.getStartServices();
+      const defaultKibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
+
       return {
         getActionsClient: () => {
           if (isESOUsingEphemeralEncryptionKey === true) {
