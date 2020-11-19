@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { bufferTime, filter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined } from 'lodash';
 import { SearchResponse, Client } from 'elasticsearch';
@@ -43,7 +43,6 @@ export class ClusterClientAdapter {
   private readonly logger: Logger;
   private readonly clusterClientPromise: Promise<EsClusterClient>;
   private readonly docBuffer$: Subject<Doc>;
-  private readonly docsBufferedSubscription: Subscription;
   private readonly doneWriting: ReadySignal;
   private readonly context: EsContext;
 
@@ -64,7 +63,7 @@ export class ClusterClientAdapter {
 
     // kick everything off, when the stream closes, signal finished
     const { doneWriting } = this;
-    this.docsBufferedSubscription = docsBuffered$.subscribe({
+    docsBuffered$.subscribe({
       complete() {
         doneWriting.signal();
       },
@@ -78,7 +77,6 @@ export class ClusterClientAdapter {
   public async shutdown(): Promise<void> {
     this.docBuffer$.complete();
     await this.doneWriting.wait();
-    this.docsBufferedSubscription.unsubscribe();
   }
 
   public indexDocument(doc: Doc): void {
@@ -86,7 +84,9 @@ export class ClusterClientAdapter {
   }
 
   async indexDocuments(docs: Doc[]): Promise<void> {
-    // if es initialization failed, don't try to index
+    // If es initialization failed, don't try to index.
+    // Also, don't log here, we log the failure case in plugin startup
+    // instead, otherwise we'd be spamming the log (if done here)
     if (!(await this.context.waitTillReady())) {
       return;
     }

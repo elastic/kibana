@@ -14,6 +14,7 @@ import {
 import { contextMock } from './context.mock';
 import { findOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
+import { times } from 'lodash';
 
 type EsClusterClient = Pick<jest.Mocked<LegacyClusterClient>, 'callAsInternalUser' | 'asScoped'>;
 type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
@@ -119,6 +120,39 @@ describe('buffering documents', () => {
     expect(clusterClient.callAsInternalUser).toHaveBeenNthCalledWith(2, 'bulk', {
       body: [{ create: { _index: 'event-log' } }, { message: `foo 100` }],
     });
+  });
+
+  test('should handle lots of docs correctly with a delay in the bulk index', async () => {
+    // @ts-ignore
+    clusterClient.callAsInternalUser.mockImplementation = async () => await delay(100);
+
+    const docs = times(EVENT_BUFFER_LENGTH * 10, (i) => ({
+      body: { message: `foo ${i}` },
+      index: 'event-log',
+    }));
+
+    // write EVENT_BUFFER_LENGTH * 10 docs
+    for (const doc of docs) {
+      clusterClientAdapter.indexDocument(doc);
+    }
+
+    await retryUntil('cluster client bulk called', () => {
+      return clusterClient.callAsInternalUser.mock.calls.length >= 10;
+    });
+
+    for (let i = 0; i < 10; i++) {
+      const expectedBody = [];
+      for (let j = 0; j < EVENT_BUFFER_LENGTH; j++) {
+        expectedBody.push(
+          { create: { _index: 'event-log' } },
+          { message: `foo ${i * EVENT_BUFFER_LENGTH + j}` }
+        );
+      }
+
+      expect(clusterClient.callAsInternalUser).toHaveBeenNthCalledWith(i + 1, 'bulk', {
+        body: expectedBody,
+      });
+    }
   });
 });
 
