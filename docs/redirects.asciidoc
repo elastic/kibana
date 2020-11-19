@@ -175,7 +175,7 @@ This content has moved. See <<discover, **Discover**>>.
 [[trigger-picker]]
 === Picking a trigger for a URL drilldown
 
-This page has moved. Refer to <<url-drilldown>>.
+This page has moved. Refer to <<url-drilldowns>>.
 
 [float]
 [[templating]]
