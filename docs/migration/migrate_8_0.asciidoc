@@ -37,6 +37,12 @@ for example, `logstash-*`.
 
 // tag::notable-breaking-changes[]
 [float]
+==== Multitenancy by changing `kibana.index` is no longer supported
+*Details:* `kibana.index`, `xpack.reporting.index` and `xpack.task_manager.index` can no longer be specified. 
+
+*Impact:* Users who relied on changing these settings to achieve multitenancy should use Spaces, cross-cluster replication or cross-cluster search instead. To migrate to Spaces, users are encouraged to use saved-object management to export their saved-objects from a tenant into the default tenant in a Space. There are improvements planned to improve on this workflow. See https://github.com/elastic/kibana/issues/82020 for more details.   
+
+[float]
 ==== Legacy browsers are now rejected by default
 *Details:* `csp.strict` is now enabled by default, so Kibana will fail to load for older, legacy browsers that do not enforce basic Content Security Policy protections - notably Internet Explorer 11.
 
