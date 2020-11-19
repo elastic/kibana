@@ -11,6 +11,12 @@ import { NavigationPanel } from './navigation_panel';
 import { getDefaultMapSettings } from '../../reducers/default_map_settings';
 import { INITIAL_LOCATION } from '../../../common/constants';
 
+jest.mock('../../kibana_services', () => ({
+  getIsDarkMode() {
+    return false;
+  },
+}));
+
 const defaultProps = {
   center: { lat: 0, lon: 0 },
   settings: getDefaultMapSettings(),

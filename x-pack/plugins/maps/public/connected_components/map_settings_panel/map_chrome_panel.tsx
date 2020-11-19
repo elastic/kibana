@@ -5,11 +5,10 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiPanel, EuiSpacer, EuiSwitch, EuiSwitchEvent, EuiTitle } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MapSettings } from '../../reducers/map';
-import { AlphaSlider } from '../../components/alpha_slider';
 import { MbValidatedColorPicker } from '../../classes/styles/vector/components/color/mb_validated_color_picker';
 
 interface Props {

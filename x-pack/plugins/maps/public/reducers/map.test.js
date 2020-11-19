@@ -9,6 +9,12 @@ jest.mock('../actions', () => ({}));
 import { resetDataRequest } from './map';
 import _ from 'lodash';
 
+jest.mock('../kibana_services', () => ({
+  getIsDarkMode() {
+    return false;
+  },
+}));
+
 describe('reducers/map', () => {
   it('Should clear datarequest without mutation store state', async () => {
     const layerId = 'foobar';
