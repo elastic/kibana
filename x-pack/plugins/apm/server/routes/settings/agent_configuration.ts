@@ -25,20 +25,20 @@ import { jsonRt } from '../../../common/runtime_types/json_rt';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 
 // get list of configurations
-export const agentConfigurationRoute = createRoute(() => ({
-  path: '/api/apm/settings/agent-configuration',
+export const agentConfigurationRoute = createRoute({
+  endpoint: 'GET /api/apm/settings/agent-configuration',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return await listConfigurations({ setup });
   },
-}));
+});
 
 // get a single configuration
-export const getSingleAgentConfigurationRoute = createRoute(() => ({
-  path: '/api/apm/settings/agent-configuration/view',
-  params: {
+export const getSingleAgentConfigurationRoute = createRoute({
+  endpoint: 'GET /api/apm/settings/agent-configuration/view',
+  params: t.partial({
     query: serviceRt,
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { name, environment } = context.params.query;
@@ -56,20 +56,19 @@ export const getSingleAgentConfigurationRoute = createRoute(() => ({
 
     return config._source;
   },
-}));
+});
 
 // delete configuration
-export const deleteAgentConfigurationRoute = createRoute(() => ({
-  method: 'DELETE',
-  path: '/api/apm/settings/agent-configuration',
+export const deleteAgentConfigurationRoute = createRoute({
+  endpoint: 'DELETE /api/apm/settings/agent-configuration',
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
-  params: {
+  params: t.type({
     body: t.type({
       service: serviceRt,
     }),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { service } = context.params.body;
@@ -92,19 +91,18 @@ export const deleteAgentConfigurationRoute = createRoute(() => ({
       setup,
     });
   },
-}));
+});
 
 // create/update configuration
-export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
-  method: 'PUT',
-  path: '/api/apm/settings/agent-configuration',
+export const createOrUpdateAgentConfigurationRoute = createRoute({
+  endpoint: 'PUT /api/apm/settings/agent-configuration',
   options: {
     tags: ['access:apm', 'access:apm_write'],
   },
-  params: {
-    query: t.partial({ overwrite: jsonRt.pipe(t.boolean) }),
-    body: agentConfigurationIntakeRt,
-  },
+  params: t.intersection([
+    t.partial({ query: t.partial({ overwrite: jsonRt.pipe(t.boolean) }) }),
+    t.type({ body: agentConfigurationIntakeRt }),
+  ]),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { body, query } = context.params;
@@ -135,7 +133,7 @@ export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
       setup,
     });
   },
-}));
+});
 
 const searchParamsRt = t.intersection([
   t.type({ service: serviceRt }),
@@ -145,12 +143,11 @@ const searchParamsRt = t.intersection([
 export type AgentConfigSearchParams = t.TypeOf<typeof searchParamsRt>;
 
 // Lookup single configuration (used by APM Server)
-export const agentConfigurationSearchRoute = createRoute(() => ({
-  method: 'POST',
-  path: '/api/apm/settings/agent-configuration/search',
-  params: {
+export const agentConfigurationSearchRoute = createRoute({
+  endpoint: 'POST /api/apm/settings/agent-configuration/search',
+  params: t.type({
     body: searchParamsRt,
-  },
+  }),
   handler: async ({ context, request }) => {
     const {
       service,
@@ -188,16 +185,15 @@ export const agentConfigurationSearchRoute = createRoute(() => ({
 
     return config;
   },
-}));
+});
 
 /*
  * Utility endpoints (not documented as part of the public API)
  */
 
 // get list of services
-export const listAgentConfigurationServicesRoute = createRoute(() => ({
-  method: 'GET',
-  path: '/api/apm/settings/agent-configuration/services',
+export const listAgentConfigurationServicesRoute = createRoute({
+  endpoint: 'GET /api/apm/settings/agent-configuration/services',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
@@ -208,14 +204,14 @@ export const listAgentConfigurationServicesRoute = createRoute(() => ({
       searchAggregatedTransactions,
     });
   },
-}));
+});
 
 // get environments for service
-export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
-  path: '/api/apm/settings/agent-configuration/environments',
-  params: {
+export const listAgentConfigurationEnvironmentsRoute = createRoute({
+  endpoint: 'GET /api/apm/settings/agent-configuration/environments',
+  params: t.partial({
     query: t.partial({ serviceName: t.string }),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
@@ -229,18 +225,18 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
       searchAggregatedTransactions,
     });
   },
-}));
+});
 
 // get agentName for service
-export const agentConfigurationAgentNameRoute = createRoute(() => ({
-  path: '/api/apm/settings/agent-configuration/agent_name',
-  params: {
+export const agentConfigurationAgentNameRoute = createRoute({
+  endpoint: 'GET /api/apm/settings/agent-configuration/agent_name',
+  params: t.type({
     query: t.type({ serviceName: t.string }),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
     const agentName = await getAgentNameByService({ serviceName, setup });
     return { agentName };
   },
-}));
+});

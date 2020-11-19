@@ -29,7 +29,7 @@ import { Request, RequestParams, RequestStatus } from './types';
  * instead it offers a generic API to log requests of any kind.
  * @extends EventEmitter
  */
-class RequestAdapter extends EventEmitter {
+export class RequestAdapter extends EventEmitter {
   private requests: Map<string, Request>;
 
   constructor() {
@@ -78,5 +78,3 @@ class RequestAdapter extends EventEmitter {
     this.emit('change');
   }
 }
-
-export { RequestAdapter };
