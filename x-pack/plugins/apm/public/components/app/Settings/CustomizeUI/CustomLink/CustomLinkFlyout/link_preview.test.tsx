@@ -18,9 +18,9 @@ export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
 
 describe('LinkPreview', () => {
-  let callApmApiSpy: jest.SpyInstance<any, never>;
+  let callApmApiSpy: jest.SpyInstance<any, any>;
   beforeAll(() => {
-    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockReturnValue({
+    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({
       transaction: { id: 'foo' },
     });
   });

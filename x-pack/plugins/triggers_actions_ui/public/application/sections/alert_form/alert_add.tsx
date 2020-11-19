@@ -36,6 +36,7 @@ export const AlertAdd = ({
   alertTypeId,
   initialValues,
 }: AlertAddProps) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialAlert = ({
     params: {},
     consumer,
