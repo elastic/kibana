@@ -50,7 +50,7 @@ import { ViewContentHeader } from '../../../components/shared/view_content_heade
 import { LicenseBadge } from '../../../components/shared/license_badge';
 import { Loading } from '../../../../../applications/shared/loading';
 
-import aclImage from '../../../components/assets/supports_acl.svg';
+import aclImage from '../../../assets/supports_acl.svg';
 import { SourceLogic } from '../source_logic';
 
 export const Overview: React.FC = () => {
