@@ -166,7 +166,7 @@ const PieComponent = (props: PieComponentProps) => {
       props.uiState?.set('vis.legendOpen', newValue);
       return newValue;
     });
-  }, [props.uiState?.set]);
+  }, [props.uiState]);
 
   const setColor = useCallback(
     (newColor: string | null, seriesLabel: string | number, event: BaseSyntheticEvent) => {
@@ -185,7 +185,7 @@ const PieComponent = (props: PieComponentProps) => {
       props.uiState?.emit('colorChanged');
       setOverwriteColors(colors);
     },
-    [props.uiState?.emit, props.uiState?.get, props.uiState?.set, props.uiState?.setSilent]
+    [props.uiState]
   );
 
   const { visData, visParams } = props;
