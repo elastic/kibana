@@ -79,7 +79,6 @@ describe('find()', () => {
               bar: true,
             },
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
             actions: [
               {
                 group: 'default',
