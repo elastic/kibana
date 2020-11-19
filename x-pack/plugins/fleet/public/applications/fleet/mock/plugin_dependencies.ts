@@ -5,7 +5,20 @@
  */
 
 import { IngestManagerSetupDeps, IngestManagerStartDeps } from '../../../plugin';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { licensingMock } from '../../../../../licensing/public/mocks';
+import { homePluginMock } from '../../../../../../../src/plugins/home/public/mocks';
 
-export const createSetupDepsMock = (): IngestManagerSetupDeps => {};
+export const createSetupDepsMock = (): IngestManagerSetupDeps => {
+  return {
+    licensing: licensingMock.createSetup(),
+    data: dataPluginMock.createSetupContract(),
+    home: homePluginMock.createSetupContract(),
+  };
+};
 
-export const createStartDepsMock = (): IngestManagerStartDeps => {};
+export const createStartDepsMock = (): IngestManagerStartDeps => {
+  return {
+    data: dataPluginMock.createStartContract(),
+  };
+};

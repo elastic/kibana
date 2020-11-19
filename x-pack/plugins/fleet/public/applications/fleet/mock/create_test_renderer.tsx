@@ -17,9 +17,9 @@ import {
   IngestManagerStartDeps,
 } from '../../../plugin';
 import { createSetupDepsMock, createStartDepsMock } from './plugin_dependencies';
-import { createPluginConfigurationMock } from './plugin_configuration';
+import { createConfigurationMock } from './plugin_configuration';
 import { UIExtensionsStorage } from '../types';
-import { createIngestManagerStartMock } from './plugin_interfaces';
+import { createStartMock } from './plugin_interfaces';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -40,9 +40,9 @@ export const createTestRendererMock = (): TestRenderer => {
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const setupDeps = createSetupDepsMock();
   const startDeps = createStartDepsMock();
-  const config = createPluginConfigurationMock();
+  const config = createConfigurationMock();
   const extensions: UIExtensionsStorage = {};
-  const startInterface: IngestManagerStart = createIngestManagerStartMock(extensions);
+  const startInterface = createStartMock(extensions);
 
   const AppWrapper: React.FC = memo(({ children }) => {
     return (

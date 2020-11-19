@@ -6,7 +6,7 @@
 
 import { IngestManagerConfigType } from '../../../plugin';
 
-export const createPluginConfigurationMock = (): IngestManagerConfigType => {
+export const createConfigurationMock = (): IngestManagerConfigType => {
   return {
     enabled: true,
     registryUrl: '',

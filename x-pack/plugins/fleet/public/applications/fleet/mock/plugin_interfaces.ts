@@ -8,8 +8,8 @@ import { IngestManagerStart } from '../../../plugin';
 import { UIExtensionsStorage } from '../types';
 import { createExtensionRegistrationCallback } from '../services/ui_extensions';
 
-export const createIngestManagerStartMock = (
-  extensionsStorage: UIExtensionsStorage
+export const createStartMock = (
+  extensionsStorage: UIExtensionsStorage = {}
 ): IngestManagerStart => {
   return {
     isInitialized: jest.fn().mockResolvedValue(true),
