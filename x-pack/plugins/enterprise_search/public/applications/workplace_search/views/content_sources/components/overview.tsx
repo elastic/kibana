@@ -42,6 +42,7 @@ import {
 } from '../../../routes';
 
 import { AppLogic } from '../../../app_logic';
+import { User } from '../../../types';
 
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { CredentialItem } from '../../../components/shared/credential_item';
@@ -221,7 +222,7 @@ export const Overview: React.FC = () => {
   };
 
   const GroupsSummary = () => {
-    const GroupAvatars = ({ users }) => {
+    const GroupAvatars = ({ users }: { users: User[] }) => {
       const MAX_USERS = 4;
       return (
         <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -231,7 +232,7 @@ export const Overview: React.FC = () => {
                 size="s"
                 initials={user.initials}
                 name={user.name || user.initials}
-                imageUrl={user.pictureUrl}
+                imageUrl={user.pictureUrl || ''}
               />
             </EuiFlexItem>
           ))}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 
 import { History } from 'history';
 import { useActions, useValues } from 'kea';
@@ -70,9 +70,9 @@ export const SourceSettings: React.FC = () => {
 
   const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
 
-  const handleNameChange = (e) => setValue(e.target.value);
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
-  const submitNameChange = (e) => {
+  const submitNameChange = (e: FormEvent) => {
     e.preventDefault();
     updateContentSource(id, { name: inputValue });
   };

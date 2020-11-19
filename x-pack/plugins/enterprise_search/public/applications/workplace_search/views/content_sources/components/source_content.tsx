@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 
 import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
+import { SourceContentItem } from '../../../types';
 
 import { TruncatedContent } from '../../../../shared/truncate';
 
@@ -115,7 +116,7 @@ export const SourceContent: React.FC = () => {
     </EuiPanel>
   );
 
-  const contentItem = (item) => {
+  const contentItem = (item: SourceContentItem) => {
     const { id: itemId, last_updated: updated } = item;
     const url = item[urlField] || '';
     const title = item[titleField] || '';
