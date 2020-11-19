@@ -20,9 +20,6 @@
 import React from 'react';
 import { EuiDraggable } from '@elastic/eui';
 
-import type { PANEL_TYPES } from '../common/panel_types';
-import { TimeseriesUIRestrictions } from '../common/ui_restrictions';
-
 type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;
 type FirstArgumentOf<Func> = Func extends (arg1: infer FirstArgument, ...rest: any[]) => any
   ? FirstArgument
@@ -30,27 +27,3 @@ type FirstArgumentOf<Func> = Func extends (arg1: infer FirstArgument, ...rest: a
 export type DragHandleProps = FirstArgumentOf<
   Exclude<PropsOf<typeof EuiDraggable>['children'], React.ReactElement>
 >['dragHandleProps'];
-
-/**
- * series data is not typed yet.
- * Should be in sync with returned data from server [GetVisDataPanel] in src/plugins/vis_type_timeseries/server/lib/get_vis_data.ts
- */
-interface SeriesData {
-  [key: string]: {
-    annotations: {
-      [key: string]: unknown[];
-    };
-    id: string;
-    series: unknown[];
-    error?: unknown;
-  };
-}
-
-export type TimeseriesVisData = SeriesData & {
-  type: PANEL_TYPES;
-  uiRestrictions: TimeseriesUIRestrictions;
-  /**
-   * series array is responsible only for "table" vis type
-   */
-  series?: unknown[];
-};

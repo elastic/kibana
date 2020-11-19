@@ -24,7 +24,7 @@ import { IUiSettingsClient } from 'kibana/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { TimeseriesRenderValue, TimeseriesVisParams } from './metrics_fn';
-import { TimeseriesVisData } from './types';
+import { TimeseriesVisData } from '../common/types';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')

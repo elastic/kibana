@@ -20,46 +20,35 @@
 import { FakeRequest, RequestHandlerContext } from 'kibana/server';
 import _ from 'lodash';
 import { first, map } from 'rxjs/operators';
+
+import { Filter, TimeRangeBounds, Query } from 'src/plugins/data/common';
 import { getPanelData } from './vis_data/get_panel_data';
 import { Framework } from '../plugin';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
-
-interface GetVisDataResponse {
-  [key: string]: GetVisDataPanel;
-}
-
-interface GetVisDataPanel {
-  id: string;
-  series: GetVisDataSeries[];
-}
-
-interface GetVisDataSeries {
-  id: string;
-  label: string;
-  data: GetVisDataDataPoint[];
-}
-
-type GetVisDataDataPoint = [number, number];
+import { PanelSchema, TimeseriesVisData } from '../../common/types';
 
 export interface GetVisDataOptions {
-  timerange?: any;
-  panels?: any;
-  filters?: any;
-  state?: any;
-  query?: any;
+  timerange: TimeRangeBounds & {
+    timezone: string;
+  };
+  panels: PanelSchema[];
+  filters?: Filter[];
+  state?: Record<string, unknown>;
+  query?: Query | Query[];
+  sessionId?: string;
 }
 
 export type GetVisData = (
   requestContext: RequestHandlerContext,
   options: GetVisDataOptions,
   framework: Framework
-) => Promise<GetVisDataResponse>;
+) => Promise<TimeseriesVisData>;
 
 export function getVisData(
   requestContext: RequestHandlerContext,
   request: FakeRequest & { body: GetVisDataOptions },
   framework: Framework
-): Promise<GetVisDataResponse> {
+): Promise<TimeseriesVisData> {
   // NOTE / TODO: This facade has been put in place to make migrating to the New Platform easier. It
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
@@ -81,10 +70,10 @@ export function getVisData(
         .toPromise();
     },
   };
-  const promises = (reqFacade.payload as GetVisDataOptions).panels.map(getPanelData(reqFacade));
+  const promises = reqFacade.payload.panels.map(getPanelData(reqFacade));
   return Promise.all(promises).then((res) => {
     return res.reduce((acc, data) => {
       return _.assign(acc as any, data);
     }, {});
-  }) as Promise<GetVisDataResponse>;
+  }) as Promise<TimeseriesVisData>;
 }

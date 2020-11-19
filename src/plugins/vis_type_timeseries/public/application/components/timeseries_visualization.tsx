@@ -27,7 +27,7 @@ import { PersistedState } from 'src/plugins/visualizations/public';
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
 import { TimeseriesVisParams } from '../../metrics_fn';
-import { TimeseriesVisData } from '../../types';
+import { TimeseriesVisData } from '../../../common/types';
 
 interface TimeseriesVisualizationProps {
   className?: string;

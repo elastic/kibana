@@ -39,7 +39,7 @@ import { gauge } from './gauge/vis';
 // @ts-expect-error
 import { MarkdownVisualization as markdown } from './markdown/vis';
 import { TimeseriesVisParams } from '../../../metrics_fn';
-import { TimeseriesVisData } from '../../../types';
+import { TimeseriesVisData } from '../../../../common/types';
 
 export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVisProps>> = {
   timeseries,

@@ -21,9 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContext } from '../../data/public';
 import { ExpressionFunctionDefinition, Render } from '../../expressions/public';
 
-import { PanelSchema } from '../common/types';
+import { PanelSchema, TimeseriesVisData } from '../common/types';
 import { metricsRequestHandler } from './request_handler';
-import { TimeseriesVisData } from './types';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimeseriesRenderValue>>;
