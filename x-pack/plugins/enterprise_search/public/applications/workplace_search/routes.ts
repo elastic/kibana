@@ -124,3 +124,5 @@ export const getContentSourcePath = (
 export const getGroupPath = (groupId: string) => generatePath(GROUP_PATH, { groupId });
 export const getGroupSourcePrioritizationPath = (groupId: string) =>
   `${GROUPS_PATH}/${groupId}/source_prioritization`;
+export const getSourcesPath = (path: string, isOrganization: boolean) =>
+  isOrganization ? `${ORG_PATH}${path}` : path;
