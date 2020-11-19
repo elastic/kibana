@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState, useEffect } from 'react';
+import React, { useCallback, useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -35,17 +35,20 @@ export const AlertAdd = ({
   alertTypeId,
   initialValues,
 }: AlertAddProps) => {
-  const initialAlert: InitialAlert = {
-    params: {},
-    consumer,
-    alertTypeId,
-    schedule: {
-      interval: '1m',
-    },
-    actions: [],
-    tags: [],
-    ...(initialValues ? initialValues : {}),
-  };
+  const initialAlert: InitialAlert = useMemo(
+    () => ({
+      params: {},
+      consumer,
+      alertTypeId,
+      schedule: {
+        interval: '1m',
+      },
+      actions: [],
+      tags: [],
+      ...(initialValues ? initialValues : {}),
+    }),
+    [alertTypeId, consumer, initialValues]
+  );
 
   const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
     alert: initialAlert,
