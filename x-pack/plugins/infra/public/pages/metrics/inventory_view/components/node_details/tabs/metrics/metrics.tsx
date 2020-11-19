@@ -81,10 +81,8 @@ const TabComponent = (props: TabProps) => {
     filter = convertKueryToElasticSearchQuery(filter, derivedIndexPattern);
   }
 
-
   const buildCustomMetric = useCallback(
     (field: string, id: string) => ({
-
       type: 'custom' as SnapshotMetricType,
       aggregation: 'avg',
       field,
