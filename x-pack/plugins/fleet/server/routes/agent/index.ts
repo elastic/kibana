@@ -55,7 +55,7 @@ import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
-import { IngestManagerConfigType } from '../..';
+import { FleetConfigType } from '../..';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
 const ajv = new Ajv({
@@ -81,7 +81,7 @@ function makeValidator(jsonSchema: any) {
   };
 }
 
-export const registerRoutes = (router: IRouter, config: IngestManagerConfigType) => {
+export const registerRoutes = (router: IRouter, config: FleetConfigType) => {
   // Get one
   router.get(
     {

@@ -31,6 +31,13 @@ interface UserChangedPolicyConfig {
   };
 }
 
+interface UserChangedAntivirusRegistration {
+  type: 'userChangedAntivirusRegistration';
+  payload: {
+    enabled: boolean;
+  };
+}
+
 interface ServerReturnedPolicyDetailsAgentSummaryData {
   type: 'serverReturnedPolicyDetailsAgentSummaryData';
   payload: {
@@ -62,4 +69,5 @@ export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsUpdateFailure
   | ServerReturnedUpdatedPolicyDetailsData
   | ServerFailedToReturnPolicyDetailsData
-  | UserChangedPolicyConfig;
+  | UserChangedPolicyConfig
+  | UserChangedAntivirusRegistration;

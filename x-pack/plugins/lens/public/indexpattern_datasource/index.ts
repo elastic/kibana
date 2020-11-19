@@ -38,8 +38,10 @@ export class IndexPatternDatasource {
         renameColumns,
         formatColumn,
         getTimeScaleFunction,
+        getSuffixFormatter,
       } = await import('../async_services');
       return core.getStartServices().then(([coreStart, { data }]) => {
+        data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
         expressions.registerFunction(getTimeScaleFunction(data));
         expressions.registerFunction(renameColumns);
         expressions.registerFunction(formatColumn);

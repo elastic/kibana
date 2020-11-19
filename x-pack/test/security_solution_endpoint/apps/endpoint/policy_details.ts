@@ -244,6 +244,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                     message: 'Elastic Security { action } { filename }',
                   },
                 },
+                antivirus_registration: {
+                  enabled: false,
+                },
               },
             },
             streams: [],

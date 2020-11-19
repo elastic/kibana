@@ -5,11 +5,11 @@
  */
 
 import React, { useContext } from 'react';
-import { IngestManagerSetupDeps, IngestManagerStartDeps } from '../../../plugin';
+import { FleetSetupDeps, FleetStartDeps } from '../../../plugin';
 
 export const DepsContext = React.createContext<{
-  setup: IngestManagerSetupDeps;
-  start: IngestManagerStartDeps;
+  setup: FleetSetupDeps;
+  start: FleetStartDeps;
 } | null>(null);
 
 export function useSetupDeps() {

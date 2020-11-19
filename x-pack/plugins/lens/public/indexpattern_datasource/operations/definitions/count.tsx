@@ -25,7 +25,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     defaultMessage: 'Count',
   }),
   input: 'field',
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
       label: field.displayName,
@@ -41,20 +41,20 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       };
     }
   },
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  buildColumn({ field, previousColumn }) {
     return {
       label: countLabel,
       dataType: 'number',
       operationType: 'count',
-      suggestedPriority,
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
-        'format' in previousColumn.params
-          ? previousColumn.params
+        'format' in previousColumn.params &&
+        previousColumn.params.format
+          ? { format: previousColumn.params.format }
           : undefined,
     };
   },

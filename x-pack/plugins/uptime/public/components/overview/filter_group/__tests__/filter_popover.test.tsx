@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import { FilterPopoverProps, FilterPopover } from '../filter_popover';
 import { UptimeFilterButton } from '../uptime_filter_button';
 import { EuiFilterSelectItem } from '@elastic/eui';

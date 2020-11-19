@@ -14,10 +14,13 @@ import {
 } from '@testing-library/react';
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 
+export const removeExternalLinkText = (str: string) =>
+  str.replace(/\(opens in a new tab or window\)/g, '');
+
 describe('LinkPreview', () => {
-  let callApmApiSpy: jest.SpyInstance<any, never>;
+  let callApmApiSpy: jest.SpyInstance<any, any>;
   beforeAll(() => {
-    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockReturnValue({
+    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({
       transaction: { id: 'foo' },
     });
   });
@@ -53,7 +56,9 @@ describe('LinkPreview', () => {
       );
       expect(getElementValue(container, 'preview-label')).toEqual('foo');
       expect(
-        (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+        removeExternalLinkText(
+          (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+        )
       ).toEqual('https://baz.co');
     });
   });
@@ -69,7 +74,9 @@ describe('LinkPreview', () => {
       );
       expect(getElementValue(container, 'preview-label')).toEqual('foo');
       expect(
-        (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+        removeExternalLinkText(
+          (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+        )
       ).toEqual('https://baz.co?service.name={{invalid}');
       expect(getByTestId(container, 'preview-warning')).toBeInTheDocument();
     });
@@ -85,7 +92,9 @@ describe('LinkPreview', () => {
     await waitFor(() => expect(callApmApiSpy).toHaveBeenCalled());
     expect(getElementValue(container, 'preview-label')).toEqual('foo');
     expect(
-      (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+      removeExternalLinkText(
+        (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+      )
     ).toEqual('https://baz.co?transaction=foo');
   });
 });

@@ -10,7 +10,7 @@ import { getIsFleetEnabled } from './config_collectors';
 import { AgentUsage, getAgentUsage } from './agent_collectors';
 import { getInternalSavedObjectsClient } from './helpers';
 import { PackageUsage, getPackageUsage } from './package_collectors';
-import { IngestManagerConfigType } from '..';
+import { FleetConfigType } from '..';
 
 interface Usage {
   fleet_enabled: boolean;
@@ -20,7 +20,7 @@ interface Usage {
 
 export function registerIngestManagerUsageCollector(
   core: CoreSetup,
-  config: IngestManagerConfigType,
+  config: FleetConfigType,
   usageCollection: UsageCollectionSetup | undefined
 ): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered.

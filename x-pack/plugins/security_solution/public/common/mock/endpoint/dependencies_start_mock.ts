@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IngestManagerStart, registerPackagePolicyComponent } from '../../../../../fleet/public';
+import { FleetStart } from '../../../../../fleet/public';
 import {
   dataPluginMock,
   Start as DataPublicStartMock,
@@ -33,7 +33,7 @@ type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
  */
 export interface DepsStartMock {
   data: DataMock;
-  ingestManager: IngestManagerStart;
+  fleet: FleetStart;
 }
 
 /**
@@ -56,9 +56,9 @@ export const depsStartMock: () => DepsStartMock = () => {
 
   return {
     data: dataMock,
-    ingestManager: {
+    fleet: {
       isInitialized: () => Promise.resolve(true),
-      registerPackagePolicyComponent,
+      registerExtension: jest.fn(),
     },
   };
 };

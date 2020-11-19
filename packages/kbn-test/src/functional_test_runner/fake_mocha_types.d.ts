@@ -28,10 +28,17 @@ import EventEmitter from 'events';
 export interface Suite {
   suites: Suite[];
   tests: Test[];
+  title: string;
+  file?: string;
+  parent?: Suite;
 }
 
 export interface Test {
   fullTitle(): string;
+  title: string;
+  file?: string;
+  parent?: Suite;
+  isPassed: () => boolean;
 }
 
 export interface Runner extends EventEmitter {

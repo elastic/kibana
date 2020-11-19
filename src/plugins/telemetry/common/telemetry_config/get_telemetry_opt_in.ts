@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import semver from 'semver';
+import SemVer from 'semver/classes/semver';
+import semverParse from 'semver/functions/parse';
 import { TelemetrySavedObject } from './types';
 
 interface GetTelemetryOptInConfig {
@@ -80,10 +81,10 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
   return savedOptIn;
 };
 
-function parseSemver(version: string): semver.SemVer | null {
+function parseSemver(version: string): SemVer | null {
   // semver functions both return nulls AND throw exceptions: "it depends!"
   try {
-    return semver.parse(version);
+    return semverParse(version);
   } catch (err) {
     return null;
   }

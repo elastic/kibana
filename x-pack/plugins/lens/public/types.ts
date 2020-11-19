@@ -72,9 +72,6 @@ export interface EditorFrameStart {
   createInstance: () => Promise<EditorFrameInstance>;
 }
 
-// Hints the default nesting to the data source. 0 is the highest priority
-export type DimensionPriority = 0 | 1 | 2;
-
 export interface TableSuggestionColumn {
   columnId: string;
   operation: Operation;
@@ -220,11 +217,6 @@ interface SharedDimensionProps {
    */
   filterOperations: (operation: OperationMetadata) => boolean;
 
-  /** Visualizations can hint at the role this dimension would play, which
-   * affects the default ordering of the query
-   */
-  suggestedPriority?: DimensionPriority;
-
   /** Some dimension editors will allow users to change the operation grouping
    * from the panel, and this lets the visualization hint that it doesn't want
    * users to have that level of control
@@ -250,7 +242,6 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   dragDropContext: DragContextState;
-  onClick: () => void;
 };
 
 export interface DatasourceLayerPanelProps<T> {
@@ -349,12 +340,19 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   setState: (newState: T) => void;
 };
 
+export interface AccessorConfig {
+  columnId: string;
+  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none';
+  color?: string;
+  palette?: string[];
+}
+
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
 
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
-  accessors: string[];
+  accessors: AccessorConfig[];
   supportsMoreColumns: boolean;
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;

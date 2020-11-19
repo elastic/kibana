@@ -58,8 +58,8 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname:
-            '/api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
+          endpoint:
+            'GET /api/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
           params: {
             path: { serviceName, serviceNodeName },
             query: {
@@ -83,7 +83,7 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
       <ApmHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+            <EuiTitle>
               <h1>{serviceName}</h1>
             </EuiTitle>
           </EuiFlexItem>
