@@ -7,10 +7,11 @@
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import { isPackageLimited, installationStatuses } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { ValueOf } from '../../../../common/types';
+import { ArchivePackage, InstallSource, RegistryPackage, ValueOf } from '../../../../common/types';
 import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
+import { getArchivePackage } from '../archive';
 
 export { fetchFile as getFile, SearchParams } from '../registry';
 
@@ -109,21 +110,48 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [savedObject, latestPackage, { paths: assets, packageInfo: item }] = await Promise.all([
+  const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
-    Registry.getRegistryPackage(pkgName, pkgVersion),
   ]);
 
-  // add properties that aren't (or aren't yet) on Registry response
+  const pkgInstallSource = savedObject?.attributes.install_source;
+  if (!pkgInstallSource) throw new Error('package install source does not exist');
+
+  const { packageInfo, paths } = await getPackageFromInstallSource({
+    pkgName,
+    pkgVersion,
+    pkgInstallSource,
+  });
+
+  // add properties that aren't (or aren't yet) on the package
   const updated = {
-    ...item,
+    ...packageInfo,
     latestVersion: latestPackage.version,
-    title: item.title || nameAsTitle(item.name),
-    assets: Registry.groupPathsByService(assets || []),
+    title: packageInfo.title || nameAsTitle(packageInfo.name),
+    assets: Registry.groupPathsByService(paths || []),
     removable: !isRequiredPackage(pkgName),
   };
   return createInstallableFrom(updated, savedObject);
+}
+export async function getPackageFromInstallSource(options: {
+  pkgName: string;
+  pkgVersion: string;
+  pkgInstallSource?: InstallSource;
+}): Promise<{ paths: string[] | undefined; packageInfo: RegistryPackage | ArchivePackage }> {
+  const { pkgName, pkgVersion, pkgInstallSource } = options;
+  // TODO: Check package storage before checking registry
+  let res;
+  if (pkgInstallSource === 'upload') {
+    res = getArchivePackage({
+      name: pkgName,
+      version: pkgVersion,
+      installSource: pkgInstallSource,
+    });
+  } else {
+    res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+  }
+  return res;
 }
 
 export async function getInstallationObject(options: {
