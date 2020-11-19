@@ -21,6 +21,7 @@ import {
   ServiceNowGetFieldsResponse,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../actions/server/types';
+import { ConnectorTypes } from '../../../../../common/api/connectors';
 
 export function initCaseConfigureGetFields({ router }: RouteDeps) {
   router.get(
@@ -37,7 +38,7 @@ export function initCaseConfigureGetFields({ router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const connectorType = request.query.connectorType as ConnectorType;
+        let connectorType = request.query.connectorType as ConnectorTypes;
 
         if (connectorType == null) {
           throw Boom.illegal('no connectorType value provided');
@@ -54,12 +55,15 @@ export function initCaseConfigureGetFields({ router }: RouteDeps) {
             subActionParams: {},
           },
         });
-        if (connectorType === '.jira') {
+        if (connectorType === ConnectorTypes.jira) {
+          connectorType = connectorType as ConnectorTypes.jira;
           results = results as JiraResponse;
-        } else if (connectorType === '.resilient') {
+        } else if (connectorType === ConnectorTypes.resilient) {
           results = results as ResilientResponse;
-        } else if (connectorType === '.servicenow') {
+          connectorType = connectorType as ConnectorTypes.resilient;
+        } else if (connectorType === ConnectorTypes.servicenow) {
           results = results as ServiceNowResponse;
+          connectorType = connectorType as ConnectorTypes.servicenow;
         }
         return response.ok({ body: formatData({ theData: results.data, theType: connectorType }) });
       } catch (error) {
@@ -96,17 +100,16 @@ type FieldType = 'text' | 'textarea';
 type ThirdPartyFields =
   | {
       theData: ServiceNowGetFieldsResponse;
-      theType: '.servicenow';
+      theType: ConnectorTypes.servicenow;
     }
   | {
       theData: JiraGetFieldsResponse;
-      theType: '.jira';
+      theType: ConnectorTypes.jira;
     }
   | {
       theData: ResilientGetFieldsResponse;
-      theType: '.resilient';
+      theType: ConnectorTypes.resilient;
     };
-type ConnectorType = '.jira' | '.resilient' | '.servicenow';
 export interface Field {
   id: string;
   name: string;

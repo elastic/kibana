@@ -21,7 +21,8 @@ import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
 } from '../helpers';
-import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../../saved_object_types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ACTION_SAVED_OBJECT_TYPE } from '../../../../../../actions/server/saved_objects';
 
 export function initPostCaseConfigure({
   caseConfigureService,
@@ -46,19 +47,7 @@ export function initPostCaseConfigure({
 
         console.log('hello 111');
         const myCaseConfigure = await caseConfigureService.find({ client });
-        console.log('hello 222');
-        const myConnectorMappings = await connectorMappingsService.find({
-          client,
-          options: {
-            hasReference: {
-              type: CASE_CONFIGURE_SAVED_OBJECT,
-              name: `associated-${CASE_CONFIGURE_SAVED_OBJECT}`,
-              id: post.id,
-            },
-          },
-        });
         console.log('myCaseConfigure', JSON.stringify(myCaseConfigure));
-        console.log('myConnectorMappings', JSON.stringify(myConnectorMappings));
         if (myCaseConfigure.saved_objects.length > 0) {
           await Promise.all(
             myCaseConfigure.saved_objects.map((cc) =>
@@ -82,36 +71,52 @@ export function initPostCaseConfigure({
           },
         });
 
-        // const connectorMappings = await connectorMappingsService.post({
-        //   client,
-        //   attributes: {
-        //     mappings: [
-        //       {
-        //         source: 'title',
-        //         target: 'short_description',
-        //         action_type: 'overwrite',
-        //       },
-        //       {
-        //         source: 'description',
-        //         target: 'description',
-        //         action_type: 'overwrite',
-        //       },
-        //       {
-        //         source: 'comments',
-        //         target: 'comments',
-        //         action_type: 'overwrite',
-        //       },
-        //     ],
-        //   },
-        //   references: [
-        //     {
-        //       type: CASE_CONFIGURE_SAVED_OBJECT,
-        //       name: `associated-${CASE_CONFIGURE_SAVED_OBJECT}`,
-        //       id: post.id,
-        //     },
-        //   ],
-        // });
-        // console.log('THE MAPPINGS?!', JSON.stringify(connectorMappings));
+        console.log('hello 222');
+        const myConnectorMappings = await connectorMappingsService.find({
+          client,
+          options: {
+            hasReference: {
+              type: ACTION_SAVED_OBJECT_TYPE,
+              id: query.connector.id,
+            },
+          },
+        });
+        let connectorMappings;
+        if (myConnectorMappings.total === 0) {
+          connectorMappings = await connectorMappingsService.post({
+            client,
+            attributes: {
+              mappings: [
+                {
+                  source: 'title',
+                  target: 'short_description',
+                  action_type: 'overwrite',
+                },
+                {
+                  source: 'description',
+                  target: 'description',
+                  action_type: 'overwrite',
+                },
+                {
+                  source: 'comments',
+                  target: 'comments',
+                  action_type: 'overwrite',
+                },
+              ],
+            },
+            references: [
+              {
+                type: ACTION_SAVED_OBJECT_TYPE,
+                name: `associated-${ACTION_SAVED_OBJECT_TYPE}`,
+                id: query.connector.id,
+              },
+            ],
+          });
+        } else {
+          connectorMappings = myConnectorMappings.saved_objects[0];
+        }
+        console.log('myConnectorMappings', JSON.stringify(myConnectorMappings));
+        console.log('THE MAPPINGS?!', JSON.stringify(connectorMappings));
 
         return response.ok({
           body: CaseConfigureResponseRt.encode({
