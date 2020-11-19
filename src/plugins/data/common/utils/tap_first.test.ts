@@ -17,29 +17,14 @@
  * under the License.
  */
 
-import { Suite } from 'mocha';
+import { of } from 'rxjs';
+import { tapFirst } from './tap_first';
 
-type Tags =
-  | 'ciGroup1'
-  | 'ciGroup2'
-  | 'ciGroup3'
-  | 'ciGroup4'
-  | 'ciGroup5'
-  | 'ciGroup6'
-  | 'ciGroup7'
-  | 'ciGroup8'
-  | 'ciGroup9'
-  | 'ciGroup10'
-  | 'ciGroup11'
-  | 'ciGroup12';
-
-// We need to use the namespace here to match the Mocha definition
-declare module 'mocha' {
-  interface Suite {
-    /**
-     * Assign tags to the test suite to determine in which CI job it should be run.
-     */
-    tags<T extends Tags>(tags: T | T[]): void;
-    tags<T extends string>(tags: T | T[]): void;
-  }
-}
+describe('tapFirst', () => {
+  it('should tap the first and only the first', () => {
+    const fn = jest.fn();
+    of(1, 2, 3).pipe(tapFirst(fn)).subscribe();
+    expect(fn).toBeCalledTimes(1);
+    expect(fn).lastCalledWith(1);
+  });
+});

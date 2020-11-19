@@ -361,17 +361,7 @@ export class IndexPatternsService {
     };
   };
 
-  /**
-   * Get an index pattern by id. Cache optimized
-   * @param id
-   */
-
-  get = async (id: string): Promise<IndexPattern> => {
-    const cache = indexPatternCache.get(id);
-    if (cache) {
-      return cache;
-    }
-
+  private getSavedObjectAndInit = async (id: string): Promise<IndexPattern> => {
     const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
       savedObjectType,
       id
@@ -427,7 +417,6 @@ export class IndexPatternsService {
       : {};
 
     const indexPattern = await this.create(spec, true);
-    indexPatternCache.set(id, indexPattern);
     if (isSaveRequired) {
       try {
         this.updateSavedObject(indexPattern);
@@ -476,6 +465,23 @@ export class IndexPatternsService {
       })
       .then(() => this);
   }
+
+  /**
+   * Get an index pattern by id. Cache optimized
+   * @param id
+   */
+
+  get = async (id: string): Promise<IndexPattern> => {
+    const indexPatternPromise =
+      indexPatternCache.get(id) || indexPatternCache.set(id, this.getSavedObjectAndInit(id));
+
+    // don't cache failed requests
+    indexPatternPromise.catch(() => {
+      indexPatternCache.clear(id);
+    });
+
+    return indexPatternPromise;
+  };
 
   /**
    * Create a new index pattern instance
@@ -535,7 +541,7 @@ export class IndexPatternsService {
       id: indexPattern.id,
     });
     indexPattern.id = response.id;
-    indexPatternCache.set(indexPattern.id, indexPattern);
+    indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
     return indexPattern;
   }
 
