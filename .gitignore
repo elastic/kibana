@@ -57,6 +57,10 @@ npm-debug.log*
 /x-pack/plugins/apm/tsconfig.json
 apm.tsconfig.json
 
+## @cypress/snapshot from apm plugin that could be added by mistake
+## when switching from master or 7.x branches
+snapshots.js
+
 # release notes script output
 report.csv
 report.asciidoc
