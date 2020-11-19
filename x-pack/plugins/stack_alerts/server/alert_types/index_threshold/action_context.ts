@@ -27,8 +27,8 @@ export interface BaseActionContext extends AlertInstanceContext {
   date: string;
   // the value that met the threshold
   value: number;
-  // the function that is used
-  function: string;
+  // threshold conditions
+  conditions: string;
 }
 
 export function addMessages(
@@ -49,12 +49,12 @@ export function addMessages(
     'xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription',
     {
       defaultMessage:
-        'alert {name} group {group} value {value} exceeded threshold {function} over {window} on {date}',
+        'alert {name} group {group} value {value} exceeded threshold {conditions} over {window} on {date}',
       values: {
         name: alertInfo.name,
         group: baseContext.group,
         value: baseContext.value,
-        function: baseContext.function,
+        conditions: baseContext.conditions,
         window,
         date: baseContext.date,
       },

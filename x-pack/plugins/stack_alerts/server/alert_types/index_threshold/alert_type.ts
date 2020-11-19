@@ -86,8 +86,8 @@ export function getAlertType(
     }
   );
 
-  const actionVariableContextFunctionLabel = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.actionVariableContextFunctionLabel',
+  const actionVariableContextConditionsLabel = i18n.translate(
+    'xpack.stackAlerts.indexThreshold.actionVariableContextConditionsLabel',
     {
       defaultMessage: 'A string describing the threshold comparator and threshold',
     }
@@ -117,7 +117,7 @@ export function getAlertType(
         { name: 'group', description: actionVariableContextGroupLabel },
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
-        { name: 'function', description: actionVariableContextFunctionLabel },
+        { name: 'conditions', description: actionVariableContextConditionsLabel },
       ],
       params: [
         { name: 'threshold', description: actionVariableContextThresholdLabel },
@@ -178,7 +178,7 @@ export function getAlertType(
         date,
         group: instanceId,
         value,
-        function: humanFn,
+        conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
       const alertInstance = options.services.alertInstanceFactory(instanceId);
