@@ -17,7 +17,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { CASES_URL } from '../urls/navigation';
 
-describe('Cases connectors', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/65278
+describe.skip('Cases connectors', () => {
   before(() => {
     cy.server();
     cy.route('POST', '**/api/actions/action').as('createConnector');
