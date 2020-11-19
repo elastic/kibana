@@ -5,12 +5,14 @@
  */
 
 import { KibanaRequest, SavedObjectsClientContract } from '../../../../../src/core/server';
+import { ActionsClient } from '../../../actions/server';
 import {
   CasePostRequest,
   CasesPatchRequest,
   CommentRequest,
   CaseResponse,
   CasesResponse,
+  Field,
 } from '../../common/api';
 import {
   CaseConfigureServiceSetup,
@@ -18,7 +20,6 @@ import {
   CaseUserActionServiceSetup,
 } from '../services';
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
-
 export interface CaseClientCreate {
   theCase: CasePostRequest;
 }
@@ -41,8 +42,14 @@ export interface CaseClientFactoryArguments {
   userActionService: CaseUserActionServiceSetup;
 }
 
+export interface ConfigureFields {
+  actionsClient: ActionsClient;
+  connectorId: string;
+  connectorType: string;
+}
 export interface CaseClient {
   addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
   create: (args: CaseClientCreate) => Promise<CaseResponse>;
   update: (args: CaseClientUpdate) => Promise<CasesResponse>;
+  getFields: (args: ConfigureFields) => Promise<Field[]>;
 }

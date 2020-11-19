@@ -9,19 +9,7 @@ import Boom from '@hapi/boom';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 
-import {
-  CASE_CONFIGURE_CONNECTOR_DETAILS_URL,
-  JIRA_ACTION_TYPE_ID,
-  RESILIENT_ACTION_TYPE_ID,
-  SERVICENOW_ACTION_TYPE_ID,
-} from '../../../../../common/constants';
-import {
-  JiraGetFieldsResponse,
-  ResilientGetFieldsResponse,
-  ServiceNowGetFieldsResponse,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../actions/server/types';
-import { ConnectorTypes } from '../../../../../common/api';
+import { CASE_CONFIGURE_CONNECTOR_DETAILS_URL } from '../../../../../common/constants';
 
 export function initCaseConfigureGetFields({ router }: RouteDeps) {
   router.get(
@@ -32,136 +20,40 @@ export function initCaseConfigureGetFields({ router }: RouteDeps) {
           connector_id: schema.string(),
         }),
         query: schema.object({
-          connectorType: schema.string(),
+          connector_type: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
       try {
-        let connectorType = request.query.connectorType as ConnectorTypes;
+        if (!context.case) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
 
+        const caseClient = context.case.getCaseClient();
+
+        const connectorType = request.query.connector_type;
         if (connectorType == null) {
           throw Boom.illegal('no connectorType value provided');
         }
-        const actionsClient = await context.actions?.getActionsClient();
 
+        const actionsClient = await context.actions?.getActionsClient();
         if (actionsClient == null) {
           throw Boom.notFound('Action client have not been found');
         }
-        let results = await actionsClient.execute({
-          actionId: request.params.connector_id,
-          params: {
-            subAction: 'getFields',
-            subActionParams: {},
-          },
+
+        const body = await caseClient.getFields({
+          actionsClient,
+          connectorId: request.params.connector_id,
+          connectorType,
         });
-        if (connectorType === ConnectorTypes.jira) {
-          connectorType = connectorType as ConnectorTypes.jira;
-          results = results as JiraResponse;
-        } else if (connectorType === ConnectorTypes.resilient) {
-          results = results as ResilientResponse;
-          connectorType = connectorType as ConnectorTypes.resilient;
-        } else if (connectorType === ConnectorTypes.servicenow) {
-          results = results as ServiceNowResponse;
-          connectorType = connectorType as ConnectorTypes.servicenow;
-        }
-        return response.ok({ body: formatData({ theData: results.data, theType: connectorType }) });
+
+        return response.ok({
+          body,
+        });
       } catch (error) {
         return response.customError(wrapError(error));
       }
     }
   );
-}
-interface JiraResponse {
-  actionId: string;
-  data: JiraGetFieldsResponse;
-  status: 'ok' | 'error';
-}
-interface ResilientResponse {
-  actionId: string;
-  data: ResilientGetFieldsResponse;
-  status: 'ok' | 'error';
-}
-interface ServiceNowResponse {
-  actionId: string;
-  data: ServiceNowGetFieldsResponse;
-  status: 'ok' | 'error';
-}
-// interface RequestResponse {
-//   actionId: string;
-//   data: GetFieldsResponse;
-//   status: 'ok' | 'error';
-// }
-// type GetFieldsResponse =
-//   | JiraGetFieldsResponse
-//   | ResilientGetFieldsResponse
-//   | ServiceNowGetFieldsResponse;
-type FieldType = 'text' | 'textarea';
-type ThirdPartyFields =
-  | {
-      theData: ServiceNowGetFieldsResponse;
-      theType: ConnectorTypes.servicenow;
-    }
-  | {
-      theData: JiraGetFieldsResponse;
-      theType: ConnectorTypes.jira;
-    }
-  | {
-      theData: ResilientGetFieldsResponse;
-      theType: ConnectorTypes.resilient;
-    };
-export interface Field {
-  id: string;
-  name: string;
-  required: boolean;
-  type: FieldType;
-}
-
-function formatData({ theData, theType }: ThirdPartyFields) {
-  switch (theType) {
-    case JIRA_ACTION_TYPE_ID:
-      const jiraFields = theData as JiraGetFieldsResponse;
-      return Object.keys(jiraFields).reduce<Field[]>(
-        (acc, data) =>
-          jiraFields[data].schema.type === 'string'
-            ? [
-                ...acc,
-                {
-                  id: data,
-                  name: jiraFields[data].name,
-                  required: jiraFields[data].required,
-                  type: 'text',
-                },
-              ]
-            : acc,
-        []
-      );
-    case RESILIENT_ACTION_TYPE_ID:
-      const resilientFields = theData as ResilientGetFieldsResponse;
-      return resilientFields.reduce<Field[]>(
-        (acc, data) =>
-          (data.input_type === 'textarea' || data.input_type === 'text') && !data.read_only
-            ? [
-                ...acc,
-                {
-                  id: data.name,
-                  name: data.text,
-                  required: data.required === 'always',
-                  type: data.input_type,
-                },
-              ]
-            : acc,
-        []
-      );
-    case SERVICENOW_ACTION_TYPE_ID:
-      const snFields = theData as ServiceNowGetFieldsResponse;
-      return snFields.map<Field>((data) => ({
-        id: data.element,
-        name: data.column_label,
-        required: data.mandatory === 'true',
-        type: parseFloat(data.max_length) > 160 ? 'textarea' : 'text',
-      }));
-    default:
-      return [];
-  }
 }
