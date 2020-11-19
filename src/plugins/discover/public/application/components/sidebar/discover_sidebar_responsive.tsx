@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import './discover_sidebar.scss';
 import React, { useState } from 'react';
+import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { UiStatsMetricType } from '@kbn/analytics';
 import {
   EuiFlexItem,
@@ -33,14 +34,13 @@ import {
   EuiFlyoutBody,
   EuiFlyout,
 } from '@elastic/eui';
-import { sortBy } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
+import { DiscoverServices } from '../../../build_services';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -77,6 +77,10 @@ export interface DiscoverSidebarResponsiveProps {
    */
   selectedIndexPattern?: IndexPattern;
   /**
+   * Discover plugin services;
+   */
+  services: DiscoverServices;
+  /**
    * Callback function to select another index pattern
    */
   setIndexPattern: (id: string) => void;
@@ -89,11 +93,7 @@ export interface DiscoverSidebarResponsiveProps {
    */
   useFlyout?: boolean;
   /**
-   * Adapt to legacy layout
-   */
-  legacy?: boolean;
-  /**
-   * Additional classname used for legacy
+   * Additional classname
    */
   sidebarClassName?: string;
   /**
@@ -104,6 +104,11 @@ export interface DiscoverSidebarResponsiveProps {
   trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
+/**
+ * Component providing 2 different renderings for the sidebar
+ * Desktop: Sidebar view, all elements visible
+ * Mobile: Index pattern selector visible and a button to trigger a flyout with all elements
+ */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -112,9 +117,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     return null;
   }
 
-  const className = props.legacy
-    ? `dscSidebar dscSidebar__desktop dscCollapsibleSidebar ${props.sidebarClassName}`
-    : `dscSidebar dscSidebar__desktop`;
+  const className = `dscSidebar dscSidebar__desktop dscCollapsibleSidebar ${props.sidebarClassName}`;
 
   return (
     <>

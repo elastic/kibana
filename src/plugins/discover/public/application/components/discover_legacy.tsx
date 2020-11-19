@@ -127,8 +127,9 @@ export function DiscoverLegacy({
   const scrollable = useRef<HTMLDivElement>(null);
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const { TopNavMenu } = getServices().navigation.ui;
-  const { trackUiMetric } = getServices();
+  const services = getServices();
+  const { TopNavMenu } = services.navigation.ui;
+  const { trackUiMetric } = services;
   const { savedSearch, indexPatternList } = opts;
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
@@ -168,8 +169,8 @@ export function DiscoverLegacy({
             onAddFilter={onAddFilter}
             onRemoveField={onRemoveColumn}
             selectedIndexPattern={searchSource && searchSource.getField('index')}
+            services={services}
             setIndexPattern={setIndexPattern}
-            legacy={true}
             sidebarClassName={sidebarClassName}
             trackUiMetric={trackUiMetric}
           />

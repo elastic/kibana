@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isEqual } from 'lodash';
-import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { isEqual, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { UiStatsMetricType } from '@kbn/analytics';
+import './discover_sidebar.scss';
 import {
   EuiAccordion,
   EuiFlexItem,
@@ -29,9 +31,6 @@ import {
   EuiSpacer,
   EuiNotificationBadge,
 } from '@elastic/eui';
-import { sortBy } from 'lodash';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { UiStatsMetricType } from '@kbn/analytics';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -43,7 +42,7 @@ import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
-import { getServices } from '../../../kibana_services';
+import { DiscoverServices } from '../../../build_services';
 
 export interface DiscoverSidebarProps {
   /**
@@ -79,6 +78,10 @@ export interface DiscoverSidebarProps {
    * Currently selected index pattern
    */
   selectedIndexPattern?: IndexPattern;
+  /**
+   * Discover plugin services;
+   */
+  services: DiscoverServices;
   /**
    * Callback function to select another index pattern
    */
@@ -116,6 +119,7 @@ export function DiscoverSidebar({
   onAddFilter,
   onRemoveField,
   selectedIndexPattern,
+  services,
   setIndexPattern,
   trackUiMetric,
   mobile = false,
@@ -124,11 +128,10 @@ export function DiscoverSidebar({
   setFieldFilter,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
-  const services = useMemo(() => getServices(), []);
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
-  }, [selectedIndexPattern, fieldCounts, hits, services]);
+  }, [selectedIndexPattern, fieldCounts, hits]);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
