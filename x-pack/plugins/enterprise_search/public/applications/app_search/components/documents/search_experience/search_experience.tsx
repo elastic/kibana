@@ -8,8 +8,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useValues } from 'kea';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-// @ts-expect-error types are not available for this package yet
-import { SearchProvider, SearchBox, Results, Sorting } from '@elastic/react-search-ui';
+// @ts-expect-error types are not available for this package yet;
+import { SearchProvider, SearchBox, Sorting } from '@elastic/react-search-ui';
 // @ts-expect-error types are not available for this package yet
 import AppSearchAPIConnector from '@elastic/search-ui-app-search-connector';
 
@@ -19,6 +19,7 @@ import { EngineLogic } from '../../engine';
 import { externalUrl } from '../../../../shared/enterprise_search_url';
 
 import { SearchBoxView, SortingView } from './views';
+import { SearchExperienceContent } from './search_experience_content';
 
 const DEFAULT_SORT_OPTIONS = [
   {
@@ -88,8 +89,10 @@ export const SearchExperience: React.FC = () => {
               view={SortingView}
             />
           </EuiFlexItem>
+          <EuiFlexItem className="documents-search-experience__content">
+            <SearchExperienceContent />
+          </EuiFlexItem>
         </EuiFlexGroup>
-        <Results />
       </SearchProvider>
     </div>
   );
