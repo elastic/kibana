@@ -18,19 +18,19 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
+import chalk from 'chalk';
 import * as LmdbStore from 'lmdb-store';
 import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/dev-utils';
 
-const CACHE_DIR = Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH);
-const reportError = () => {
-  // right now I'm not sure we need to worry about errors, the cache isn't actually
-  // necessary, and if the cache is broken it should just rebuild on the next restart
-  // of the process. We don't know how often errors occur though and what types of
-  // things might fail on different machines so we probably want some way to signal
-  // to users that something is wrong
-};
+const CACHE_LOG = process.env.DEBUG_NODE_TRANSPILER_CACHE
+  ? Fs.createWriteStream(Path.resolve(REPO_ROOT, 'node_auto_transpilation_cache.log'), {
+      flags: 'a',
+    })
+  : undefined;
 
+const CACHE_DIR = Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH);
 const GLOBAL_ATIME = `${Date.now()}`;
 const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
@@ -46,24 +46,24 @@ export class Cache {
   constructor(config: { prefix: string }) {
     this.prefix = config.prefix;
 
-    this.codes = LmdbStore.open({
+    this.codes = LmdbStore.open(CACHE_DIR, {
       name: 'codes',
-      path: CACHE_DIR,
       maxReaders: 500,
     });
 
-    this.atimes = this.codes.openDB({
-      name: 'atimes',
+    // TODO: redundant 'name' syntax is necessary because of a bug that I have yet to fix
+    this.atimes = this.codes.openDB('atime', {
+      name: 'atime',
       encoding: 'string',
     });
 
-    this.mtimes = this.codes.openDB({
-      name: 'mtimes',
+    this.mtimes = this.codes.openDB('mtime', {
+      name: 'mtime',
       encoding: 'string',
     });
 
-    this.sourceMaps = this.codes.openDB({
-      name: 'sourceMaps',
+    this.sourceMaps = this.codes.openDB('smaps', {
+      name: 'smaps',
       encoding: 'msgpack',
     });
 
@@ -86,7 +86,7 @@ export class Cache {
     // when we use a file from the cache set the "atime" of that cache entry
     // so that we know which cache items we use and which haven't been
     // touched in a long time (currently 30 days)
-    this.atimes.put(key, GLOBAL_ATIME).catch(reportError);
+    this.safePut(this.atimes, key, GLOBAL_ATIME);
 
     return this.safeGet<string>(this.codes, key);
   }
@@ -99,11 +99,11 @@ export class Cache {
     const key = this.getKey(path);
 
     Promise.all([
-      this.atimes.put(key, GLOBAL_ATIME),
-      this.mtimes.put(key, file.mtime),
-      this.codes.put(key, file.code),
-      this.sourceMaps.put(key, file.map),
-    ]).catch(reportError);
+      this.safePut(this.atimes, key, GLOBAL_ATIME),
+      this.safePut(this.mtimes, key, file.mtime),
+      this.safePut(this.codes, key, file.code),
+      this.safePut(this.sourceMaps, key, file.map),
+    ]);
   }
 
   private getKey(path: string) {
@@ -112,11 +112,36 @@ export class Cache {
 
   private safeGet<V>(db: LmdbStore.Database, key: string) {
     try {
-      return db.get(key) as V | undefined;
+      const value = db.get(key) as V | undefined;
+      this.debug(value === undefined ? 'MISS' : 'HIT', db, key);
+      return value;
     } catch (error) {
-      // get errors indicate that a key value is corrupt in some way, so remove it
-      db.removeSync(key);
+      this.logError('GET', db, key, error);
     }
+  }
+
+  private async safePut<V>(db: LmdbStore.Database, key: string, value: V) {
+    try {
+      await db.put(key, value);
+      this.debug('PUT', db, key);
+    } catch (error) {
+      this.logError('PUT', db, key, error);
+    }
+  }
+
+  private debug(type: string, db: any, key: string) {
+    if (CACHE_LOG) {
+      CACHE_LOG.write(`${type}\t[${db.name}]\t${key}\n`);
+    }
+  }
+
+  private logError(type: 'GET' | 'PUT', db: LmdbStore.Database, key: string, error: Error) {
+    // @ts-expect-error name is not a documented/typed property
+    const name = db.name;
+    this.debug(`ERROR/${type}`, db, `${key}: ${error.stack}`);
+    process.stderr.write(
+      chalk.red(`[@kbn/optimizer/node] ${type} error [${name}/${key}]: ${error.stack}\n`)
+    );
   }
 
   private async pruneOldKeys() {
