@@ -11,5 +11,6 @@ exports[`SortIndicator rendering renders correctly against snapshot 1`] = `
     data-test-subj="sortIndicator"
     type="sortDown"
   />
+  <SortNumber />
 </EuiToolTip>
 `;

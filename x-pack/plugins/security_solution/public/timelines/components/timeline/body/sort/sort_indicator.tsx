@@ -6,9 +6,11 @@
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 
 import { Direction } from '../../../../../graphql/types';
 import * as i18n from '../translations';
+import { SortNumber } from './sort_number';
 
 import { SortDirection } from '.';
 
@@ -35,10 +37,11 @@ export const getDirection = (sortDirection: SortDirection): SortDirectionIndicat
 
 interface Props {
   sortDirection: SortDirection;
+  sortNumber: number;
 }
 
 /** Renders a sort indicator */
-export const SortIndicator = React.memo<Props>(({ sortDirection }) => {
+export const SortIndicator = React.memo<Props>(({ sortDirection, sortNumber }) => {
   const direction = getDirection(sortDirection);
 
   if (direction != null) {
@@ -51,7 +54,10 @@ export const SortIndicator = React.memo<Props>(({ sortDirection }) => {
         }
         data-test-subj="sort-indicator-tooltip"
       >
-        <EuiIcon data-test-subj="sortIndicator" type={direction} />
+        <>
+          <EuiIcon data-test-subj="sortIndicator" type={direction} />
+          <SortNumber sortNumber={sortNumber} />
+        </>
       </EuiToolTip>
     );
   } else {

@@ -15,8 +15,6 @@ import { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
 import { HeaderToolTipContent } from '../header_tooltip_content';
 import { getSortDirection, getSortIndex } from './helpers';
-import { SortNumber } from '../../sort/sort_number';
-
 interface HeaderContentProps {
   children: React.ReactNode;
   header: ColumnHeaderOptions;
@@ -52,9 +50,8 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
         <SortIndicator
           data-test-subj="header-sort-indicator"
           sortDirection={getSortDirection({ header, sort })}
+          sortNumber={getSortIndex({ header, sort })}
         />
-
-        <SortNumber sortNumber={getSortIndex({ header, sort })} />
       </EventsHeadingTitleButton>
     ) : (
       <EventsHeadingTitleSpan>
