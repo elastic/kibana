@@ -19,7 +19,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { metricsItems, panel, seriesItems, visPayloadSchema } from './vis_schema';
-import type { PANEL_TYPES } from './panel_types';
+import { PANEL_TYPES } from './panel_types';
 import { TimeseriesUIRestrictions } from './ui_restrictions';
 
 export type SeriesItemsSchema = TypeOf<typeof seriesItems>;

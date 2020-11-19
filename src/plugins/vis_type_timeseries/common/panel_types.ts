@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import { $Values } from '@kbn/utility-types';
-
-export const PANEL_TYPES = {
-  TABLE: 'table',
-  GAUGE: 'gauge',
-  MARKDOWN: 'markdown',
-  TOP_N: 'top_n',
-  TIMESERIES: 'timeseries',
-  METRIC: 'metric',
-};
-
-export type PANEL_TYPES = $Values<typeof PANEL_TYPES>;
+export enum PANEL_TYPES {
+  TABLE = 'table',
+  GAUGE = 'gauge',
+  MARKDOWN = 'markdown',
+  TOP_N = 'top_n',
+  TIMESERIES = 'timeseries',
+  METRIC = 'metric',
+}
