@@ -28,8 +28,16 @@ import stringify from 'json-stringify-safe';
 import { inspect } from 'util';
 
 import { applyFiltersToKeys } from './utils';
-import { isLogEvent, getLogEventData } from './metadata';
+import { getLogEventData } from './metadata';
 import { LegacyLoggingConfig } from './schema';
+import {
+  AnyEvent,
+  isResponseEvent,
+  isOpsEvent,
+  isErrorEvent,
+  isLogEvent,
+  isUndeclaredErrorEvent,
+} from './log_events';
 
 export type LogFormatConfig = Pick<LegacyLoggingConfig, 'json' | 'dest' | 'timezone' | 'filter'>;
 
@@ -67,7 +75,7 @@ export abstract class BaseLogFormat extends Stream.Transform {
     return applyFiltersToKeys(data, this.config.filter);
   }
 
-  _transform(event: any, enc: string, next: Stream.TransformCallback) {
+  _transform(event: AnyEvent, enc: string, next: Stream.TransformCallback) {
     const data = this.filter(this.readEvent(event));
     this.push(this.format(data) + '\n');
     next();
@@ -82,15 +90,15 @@ export abstract class BaseLogFormat extends Stream.Transform {
     return date.format(format);
   }
 
-  readEvent(event: any) {
+  readEvent(event: AnyEvent) {
     const data: Record<string, any> = {
       type: event.event,
       '@timestamp': event.timestamp,
-      tags: [].concat(event.tags || []),
+      tags: [...(event.tags ?? [])],
       pid: event.pid,
     };
 
-    if (data.type === 'response') {
+    if (isResponseEvent(event)) {
       _.defaults(data, _.pick(event, ['method', 'statusCode']));
 
       const source = _.get(event, 'source', {});
@@ -103,12 +111,10 @@ export abstract class BaseLogFormat extends Stream.Transform {
         referer: source.referer,
       };
 
-      let contentLength = 0;
-      if (typeof event.responsePayload === 'object') {
-        contentLength = stringify(event.responsePayload).length;
-      } else {
-        contentLength = String(event.responsePayload).length;
-      }
+      const contentLength =
+        event.responsePayload === 'object'
+          ? stringify(event.responsePayload).length
+          : String(event.responsePayload).length;
 
       data.res = {
         statusCode: event.statusCode,
@@ -117,7 +123,9 @@ export abstract class BaseLogFormat extends Stream.Transform {
       };
 
       const query = queryString.stringify(event.query, { sort: false });
-      if (query) data.req.url += '?' + query;
+      if (query) {
+        data.req.url += '?' + query;
+      }
 
       data.message = data.req.method.toUpperCase() + ' ';
       data.message += data.req.url;
@@ -126,7 +134,7 @@ export abstract class BaseLogFormat extends Stream.Transform {
       data.message += ' ';
       data.message += chalk.gray(data.res.responseTime + 'ms');
       data.message += chalk.gray(' - ' + numeral(contentLength).format('0.0b'));
-    } else if (data.type === 'ops') {
+    } else if (isOpsEvent(event)) {
       _.defaults(data, _.pick(event, ['pid', 'os', 'proc', 'load']));
       data.message = chalk.gray('memory: ');
       data.message += numeral(_.get(data, 'proc.mem.heapUsed')).format('0.0b');
@@ -144,19 +152,19 @@ export abstract class BaseLogFormat extends Stream.Transform {
       data.message += ' ';
       data.message += chalk.gray('delay: ');
       data.message += numeral(_.get(data, 'proc.delay')).format('0.000');
-    } else if (data.type === 'error') {
+    } else if (isErrorEvent(event)) {
       data.level = 'error';
       data.error = serializeError(event.error);
       data.url = event.url;
       const message = _.get(event, 'error.message');
       data.message = message || 'Unknown error (no message)';
-    } else if (event.error instanceof Error) {
+    } else if (isUndeclaredErrorEvent(event)) {
       data.type = 'error';
       data.level = _.includes(event.tags, 'fatal') ? 'fatal' : 'error';
       data.error = serializeError(event.error);
       const message = _.get(event, 'error.message');
       data.message = message || 'Unknown error object (no message)';
-    } else if (isLogEvent(event.data)) {
+    } else if (isLogEvent(event)) {
       _.assign(data, getLogEventData(event.data));
     } else {
       data.message = _.isString(event.data) ? event.data : inspect(event.data);

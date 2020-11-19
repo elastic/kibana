@@ -31,7 +31,7 @@ export interface EventMetadata {
   metadata: Record<string, any>;
 }
 
-export const isLogEvent = (eventData: EventData) => {
+export const isEventData = (eventData: EventData) => {
   return Boolean(isPlainObject(eventData) && eventData[metadataSymbol]);
 };
 
