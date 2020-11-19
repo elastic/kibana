@@ -40,8 +40,9 @@ export default {
   ],
   collectCoverageFrom: [
     'src/{cli,cli_keystore,cli_plugin,core}/**/*.{ts,tsx}',
-    '!src/{cli,cli_keystore,cli_plugin,core}/**/{test_helpers,__snapshots__,mocks,tests}/**/*',
-    '!src/{cli,cli_keystore,cli_plugin,core}/**/*.{test, mock}.ts',
+    '!src/**/{test_helpers,__snapshots__,mocks,integration_tests,tests}/**/*',
+    '!src/**/*mock*.ts',
+    '!src/**/*.test.ts',
     'src/plugins/**/*.{ts,tsx}',
     '!src/plugins/**/{__test__,__snapshots__,__examples__,mocks,tests}/**/*',
     '!src/plugins/**/*.d.ts',
