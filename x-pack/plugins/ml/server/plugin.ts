@@ -16,6 +16,7 @@ import {
   IClusterClient,
   SavedObjectsServiceStart,
 } from 'kibana/server';
+import type { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { PluginsSetup, RouteInitialization } from './types';
@@ -68,6 +69,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   private clusterClient: IClusterClient | null = null;
   private savedObjectsStart: SavedObjectsServiceStart | null = null;
   private spacesPlugin: SpacesPluginSetup | undefined;
+  private security: SecurityPluginSetup | undefined;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
 
@@ -80,6 +82,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
     this.spacesPlugin = plugins.spaces;
+    this.security = plugins.security;
     const { admin, user, apmUser } = getPluginPrivileges();
 
     plugins.features.registerKibanaFeature({
@@ -140,6 +143,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         getMlSavedObjectsClient,
         getInternalSavedObjectsClient,
         plugins.spaces,
+        plugins.security?.authz,
         () => this.isMlReady
       ),
       mlLicense: this.mlLicense,
@@ -185,6 +189,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         this.mlLicense,
         plugins.spaces,
         plugins.cloud,
+        plugins.security?.authz,
         resolveMlCapabilities,
         () => this.clusterClient,
         () => getInternalSavedObjectsClient(),
@@ -202,6 +207,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     // and create them if needed.
     const { initializeJobs } = jobSavedObjectsInitializationFactory(
       coreStart,
+      this.security,
       this.spacesPlugin !== undefined
     );
     initializeJobs().finally(() => {

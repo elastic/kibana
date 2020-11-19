@@ -22,7 +22,7 @@ import { getNodeLogsUrl } from '../../../../../link_to';
 const TabComponent = (props: TabProps) => {
   const [textQuery, setTextQuery] = useState('');
   const endTimestamp = props.currentTime;
-  const startTimestamp = endTimestamp - 60 * 60 * 1000; // 15 minutes
+  const startTimestamp = endTimestamp - 60 * 60 * 1000; // 60 minutes
   const { nodeType } = useWaffleOptionsContext();
   const { options, node } = props;
 
@@ -52,15 +52,15 @@ const TabComponent = (props: TabProps) => {
   return (
     <TabContent>
       <EuiFlexGroup gutterSize={'none'} alignItems="center">
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem>
           <QueryWrapper>
             <EuiFieldSearch
-              fullWidth={true}
+              fullWidth
               placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
                 defaultMessage: 'Search for log entries...',
               })}
               value={textQuery}
-              isClearable={true}
+              isClearable
               onChange={onQueryChange}
             />
           </QueryWrapper>

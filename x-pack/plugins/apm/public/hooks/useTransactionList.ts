@@ -11,7 +11,7 @@ import { APIReturnType } from '../services/rest/createCallApmApi';
 import { useFetcher } from './useFetcher';
 
 type TransactionsAPIResponse = APIReturnType<
-  '/api/apm/services/{serviceName}/transaction_groups'
+  'GET /api/apm/services/{serviceName}/transaction_groups'
 >;
 
 const DEFAULT_RESPONSE: Partial<TransactionsAPIResponse> = {
@@ -28,7 +28,7 @@ export function useTransactionList(urlParams: IUrlParams) {
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/transaction_groups',
+          endpoint: 'GET /api/apm/services/{serviceName}/transaction_groups',
           params: {
             path: { serviceName },
             query: {
