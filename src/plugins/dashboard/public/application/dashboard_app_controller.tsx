@@ -528,6 +528,7 @@ export class DashboardAppController {
                 incomingEmbeddable.type,
                 incomingEmbeddable.input
               );
+              updateViewMode(ViewMode.EDIT);
             }
           }
 
