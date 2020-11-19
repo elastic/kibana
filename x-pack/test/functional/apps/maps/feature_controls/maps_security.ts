@@ -7,7 +7,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'maps', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
@@ -17,11 +16,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
   describe('maps security feature controls', () => {
-    before(async () => {
-      await esArchiver.loadIfNeeded('maps/data');
-      await esArchiver.load('maps/kibana');
-    });
-
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       await PageObjects.security.forceLogout();
