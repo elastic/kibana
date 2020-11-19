@@ -311,10 +311,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
@@ -410,10 +412,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.template,
@@ -509,10 +513,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
@@ -606,10 +612,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
@@ -744,10 +752,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         width: 1100,
         id: 'savedObject-1',
@@ -911,10 +921,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         width: 1100,
         id: 'savedObject-1',
@@ -1006,10 +1018,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.immutable,
         title: 'Awesome Timeline',
         timelineType: TimelineType.template,
@@ -1105,10 +1119,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.active,
         title: 'Awesome Timeline',
         timelineType: TimelineType.default,

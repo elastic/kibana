@@ -199,7 +199,7 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="header"]').first().simulate('click');
+      wrapper.find(`[data-test-subj="header-${columnHeader.id}"]`).first().simulate('click');
 
       expect(mockOnColumnSorted).not.toHaveBeenCalled();
     });

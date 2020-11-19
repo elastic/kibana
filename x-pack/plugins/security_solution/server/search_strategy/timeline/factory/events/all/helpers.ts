@@ -45,7 +45,6 @@ const mergeTimelineFieldsWithHit = <T>(
   ecsFields: readonly string[]
 ) => {
   if (fieldName != null || dataFields.includes(fieldName)) {
-    const esField = fieldName;
     if (has(fieldName, hit.fields) || specialFields.includes(fieldName)) {
       const objectWithProperty = {
         node: {
@@ -56,7 +55,7 @@ const mergeTimelineFieldsWithHit = <T>(
                 {
                   field: fieldName,
                   value: specialFields.includes(fieldName)
-                    ? toStringArray(get(esField, hit))
+                    ? toStringArray(get(fieldName, hit))
                     : toStringArray(hit.fields[fieldName]),
                 },
               ]

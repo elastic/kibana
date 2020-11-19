@@ -174,7 +174,7 @@ export const timelineSchema = gql`
     timelineType: TimelineType
     dateRange: DateRangePickerInput
     savedQueryId: String
-    sort: SortTimelineInput
+    sort: [SortTimelineInput!]
     status: TimelineStatus
   }
 
@@ -238,10 +238,6 @@ export const timelineSchema = gql`
     ${favoriteTimeline}
   }
 
-  type SortTimelineResult {
-     ${sortTimeline}
-  }
-
   type FilterMetaTimelineResult {
     ${filtersMetaTimeline}
   }
@@ -277,7 +273,7 @@ export const timelineSchema = gql`
     pinnedEventsSaveObject: [PinnedEvent!]
     savedQueryId: String
     savedObjectId: String!
-    sort: SortTimelineResult
+    sort: ToAny
     status: TimelineStatus
     title: String
     templateTimelineId: String

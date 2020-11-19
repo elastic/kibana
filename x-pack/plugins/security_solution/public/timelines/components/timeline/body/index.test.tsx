@@ -65,7 +65,7 @@ describe('Body', () => {
     loadingEventIds: [],
     onColumnRemoved: jest.fn(),
     onColumnResized: jest.fn(),
-    onColumnSorted: jest.fn(),
+    onColumnsSorted: jest.fn(),
     onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
     onSelectAll: jest.fn(),

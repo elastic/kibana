@@ -970,8 +970,8 @@ describe('Timeline', () => {
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should update the timeline range', () => {
-      expect(update.foo.sort).toEqual({ columnId: 'some column', sortDirection: Direction.desc });
+    test('should update the sort attribute', () => {
+      expect(update.foo.sort).toEqual([{ columnId: 'some column', sortDirection: Direction.desc }]);
     });
   });
 

@@ -568,16 +568,18 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
               isSelectAllChecked={false}
               onColumnRemoved={[MockFunction]}
               onColumnResized={[MockFunction]}
-              onColumnSorted={[MockFunction]}
+              onColumnsSorted={[MockFunction]}
               onSelectAll={[Function]}
               onUpdateColumns={[MockFunction]}
               showEventsSelect={false}
               showSelectAllCheckbox={false}
               sort={
-                Object {
-                  "columnId": "fooColumn",
-                  "sortDirection": "desc",
-                }
+                Array [
+                  Object {
+                    "columnId": "@timestamp",
+                    "sortDirection": "desc",
+                  },
+                ]
               }
               timelineId="test"
               toggleColumn={[MockFunction]}

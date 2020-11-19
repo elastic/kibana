@@ -286,10 +286,12 @@ describe('Epic Timeline', () => {
           },
         },
         savedQueryId: 'my endgame timeline query',
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         templateTimelineId: null,
         templateTimelineVersion: null,
         timelineType: TimelineType.default,

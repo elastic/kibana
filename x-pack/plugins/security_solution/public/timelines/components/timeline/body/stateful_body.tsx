@@ -23,7 +23,7 @@ import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
   OnColumnResized,
-  OnColumnSorted,
+  OnColumnsSorted,
   OnPinEvent,
   OnRowSelected,
   OnSelectAll,
@@ -134,7 +134,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       [setSelected, clearSelected, id, data, queryFields]
     );
 
-    const onColumnSorted: OnColumnSorted = useCallback(
+    const onColumnsSorted: OnColumnsSorted = useCallback(
       (sorted) => {
         updateSort!({ id, sort: sorted });
       },
@@ -205,7 +205,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         loadingEventIds={loadingEventIds}
         onColumnRemoved={onColumnRemoved}
         onColumnResized={onColumnResized}
-        onColumnSorted={onColumnSorted}
+        onColumnsSorted={onColumnsSorted}
         onRowSelected={onRowSelected}
         onSelectAll={onSelectAll}
         onPinEvent={onPinEvent}

@@ -6,10 +6,10 @@
 
 import { EuiButtonIcon, EuiCheckbox, EuiDataGridSorting, EuiToolTip } from '@elastic/eui';
 import { useColumnSorting } from '@elastic/eui/lib/components/datagrid/column_sorting';
-
 import deepEqual from 'fast-deep-equal';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
+import styled from 'styled-components';
 
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
@@ -26,7 +26,7 @@ import { TimelineId } from '../../../../../../common/types/timeline';
 import {
   OnColumnRemoved,
   OnColumnResized,
-  OnColumnSorted,
+  OnColumnsSorted,
   OnSelectAll,
   OnUpdateColumns,
 } from '../../events';
@@ -42,11 +42,17 @@ import {
   EventsThGroupData,
   EventsTrHeader,
 } from '../../styles';
-import { Sort } from '../sort';
+import { Sort, SortDirection } from '../sort';
 import { EventsSelect } from './events_select';
 import { ColumnHeader } from './column_header';
 
 import * as i18n from './translations';
+
+const SortingColumnsContainer = styled.div`
+  .euiPopover .euiButtonEmpty .euiButtonContent .euiButtonEmpty__text {
+    display: none;
+  }
+`;
 
 interface Props {
   actionsColumnWidth: number;
@@ -56,7 +62,7 @@ interface Props {
   isSelectAllChecked: boolean;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
-  onColumnSorted: OnColumnSorted;
+  onColumnsSorted: OnColumnsSorted;
   onSelectAll: OnSelectAll;
   onUpdateColumns: OnUpdateColumns;
   showEventsSelect: boolean;
@@ -107,7 +113,7 @@ export const ColumnHeadersComponent = ({
   isSelectAllChecked,
   onColumnRemoved,
   onColumnResized,
-  onColumnSorted,
+  onColumnsSorted,
   onSelectAll,
   onUpdateColumns,
   showEventsSelect,
@@ -171,6 +177,31 @@ export const ColumnHeadersComponent = ({
     [columnHeaders, setDraggingIndex]
   );
 
+  const onColumnSorted = useCallback(
+    ({ columnId, sortDirection }) => {
+      const headerIndex = sort.findIndex((col) => col.columnId === columnId);
+      if (headerIndex === -1) {
+        onColumnsSorted!([
+          ...sort,
+          {
+            columnId,
+            sortDirection,
+          },
+        ]);
+      } else {
+        onColumnsSorted!([
+          ...sort.slice(0, headerIndex),
+          {
+            columnId,
+            sortDirection,
+          },
+          ...sort.slice(headerIndex + 1),
+        ]);
+      }
+    },
+    [sort, onColumnsSorted]
+  );
+
   const ColumnHeaderList = useMemo(
     () =>
       columnHeaders.map((header, draggableIndex) => (
@@ -218,28 +249,44 @@ export const ColumnHeadersComponent = ({
     [ColumnHeaderList]
   );
 
-  const myColumns = columnHeaders.map(({ aggregatable, label, id, type }) => ({
-    id,
-    isSortable: aggregatable,
-    displayAsText: label,
-    schema: type,
-  }));
-
-  const sortedColumns = {
-    onSort: (cols: EuiDataGridSorting['columns']) => {
-      console.error('sortedColumns', cols);
-    },
-    columns: sort.map<{ id: string; direction: 'asc' | 'desc' }>(({ columnId, sortDirection }) => ({
-      id: columnId,
-      direction: sortDirection as 'asc' | 'desc',
-    })),
-  };
-
-  const displayValues = columnHeaders.reduce(
-    (acc, ch) => ({ ...acc, [ch.id]: ch.label ?? ch.id }),
-    {}
+  const myColumns = useMemo(
+    () =>
+      columnHeaders.map(({ aggregatable, label, id, type }) => ({
+        id,
+        isSortable: aggregatable,
+        displayAsText: label,
+        schema: type,
+      })),
+    [columnHeaders]
   );
 
+  const onSortColumns = useCallback(
+    (cols: EuiDataGridSorting['columns']) => {
+      onColumnsSorted(
+        cols.map(({ id, direction }) => ({
+          columnId: id,
+          sortDirection: direction as SortDirection,
+        }))
+      );
+    },
+    [onColumnsSorted]
+  );
+  const sortedColumns = useMemo(
+    () => ({
+      onSort: onSortColumns,
+      columns: sort.map<{ id: string; direction: 'asc' | 'desc' }>(
+        ({ columnId, sortDirection }) => ({
+          id: columnId,
+          direction: sortDirection as 'asc' | 'desc',
+        })
+      ),
+    }),
+    [onSortColumns, sort]
+  );
+  const displayValues = useMemo(
+    () => columnHeaders.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.label ?? ch.id }), {}),
+    [columnHeaders]
+  );
   const ColumnSorting = useColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
 
   return (
@@ -300,7 +347,9 @@ export const ColumnHeadersComponent = ({
               </EuiToolTip>
             </EventsThContent>
           </EventsTh>
-          <EventsTh>{ColumnSorting}</EventsTh>
+          <EventsTh>
+            <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
+          </EventsTh>
 
           {showEventsSelect && (
             <EventsTh>
@@ -333,7 +382,7 @@ export const ColumnHeaders = React.memo(
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
     prevProps.onColumnRemoved === nextProps.onColumnRemoved &&
     prevProps.onColumnResized === nextProps.onColumnResized &&
-    prevProps.onColumnSorted === nextProps.onColumnSorted &&
+    prevProps.onColumnsSorted === nextProps.onColumnsSorted &&
     prevProps.onSelectAll === nextProps.onSelectAll &&
     prevProps.onUpdateColumns === nextProps.onUpdateColumns &&
     prevProps.showEventsSelect === nextProps.showEventsSelect &&

@@ -897,10 +897,12 @@ In other use cases the message field can be used to concatenate different values
               show={true}
               showCallOutUnauthorizedMsg={false}
               sort={
-                Object {
-                  "columnId": "@timestamp",
-                  "sortDirection": "desc",
-                }
+                Array [
+                  Object {
+                    "columnId": "@timestamp",
+                    "sortDirection": "desc",
+                  },
+                ]
               }
               start="2018-03-23T18:49:23.132Z"
               status="active"

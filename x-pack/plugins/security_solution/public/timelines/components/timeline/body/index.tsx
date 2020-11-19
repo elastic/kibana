@@ -15,7 +15,7 @@ import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
   OnColumnResized,
-  OnColumnSorted,
+  OnColumnsSorted,
   OnPinEvent,
   OnRowSelected,
   OnSelectAll,
@@ -49,7 +49,7 @@ export interface BodyProps {
   loadingEventIds: Readonly<string[]>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
-  onColumnSorted: OnColumnSorted;
+  onColumnsSorted: OnColumnsSorted;
   onRowSelected: OnRowSelected;
   onSelectAll: OnSelectAll;
   onPinEvent: OnPinEvent;
@@ -93,7 +93,7 @@ export const Body = React.memo<BodyProps>(
     loadingEventIds,
     onColumnRemoved,
     onColumnResized,
-    onColumnSorted,
+    onColumnsSorted,
     onRowSelected,
     onSelectAll,
     onPinEvent,
@@ -156,7 +156,7 @@ export const Body = React.memo<BodyProps>(
               isSelectAllChecked={isSelectAllChecked}
               onColumnRemoved={onColumnRemoved}
               onColumnResized={onColumnResized}
-              onColumnSorted={onColumnSorted}
+              onColumnsSorted={onColumnsSorted}
               onSelectAll={onSelectAll}
               onUpdateColumns={onUpdateColumns}
               showEventsSelect={false}

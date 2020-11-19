@@ -48,3 +48,6 @@ export const getSortDirection = ({ header, sort }: GetSortDirectionParams): Sort
     (acc, item) => (header.id === item.columnId ? item.sortDirection : acc),
     'none'
   );
+
+export const getSortIndex = ({ header, sort }: GetSortDirectionParams): number =>
+  sort.findIndex((s) => s.columnId === header.id);
