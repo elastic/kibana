@@ -17,8 +17,7 @@ import {
   LogEntryRowWrapper,
   LogEntryTimestampColumn,
   LogEntryContextMenu,
-  LogEntryColumnWidths,
-  iconColumnId,
+  LogEntryColumnWidth,
 } from '../../../../../components/logging/log_text_stream';
 import {
   LogColumnHeadersWrapper,
@@ -207,11 +206,12 @@ const noHighlights: never[] = [];
 const timestampColumnId = 'log-entry-example-timestamp-column' as const;
 const messageColumnId = 'log-entry-examples-message-column' as const;
 const datasetColumnId = 'log-entry-examples-dataset-column' as const;
+const iconColumnId = 'log-entry-examples-icon-column' as const;
 
 const DETAIL_FLYOUT_ICON_MIN_WIDTH = 32;
 const COLUMN_PADDING = 8;
 
-export const columnWidths: LogEntryColumnWidths = {
+export const columnWidths: { [id: string]: LogEntryColumnWidth } = {
   [timestampColumnId]: {
     growWeight: 0,
     shrinkWeight: 0,

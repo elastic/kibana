@@ -17,7 +17,7 @@ import {
   isFieldLogColumnConfiguration,
 } from '../../../utils/source_configuration';
 import { TextScale } from '../../../../common/log_text_scale';
-import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
+import { LogEntryColumn, LogEntryColumnWidths } from './log_entry_column';
 import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';

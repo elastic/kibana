@@ -6,9 +6,9 @@
 
 export {
   LogEntryColumn,
+  LogEntryColumnWidth,
   LogEntryColumnWidths,
   useColumnWidths,
-  iconColumnId,
 } from './log_entry_column';
 export { LogEntryFieldColumn } from './log_entry_field_column';
 export { LogEntryMessageColumn } from './log_entry_message_column';

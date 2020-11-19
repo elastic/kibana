@@ -51,14 +51,7 @@ export type LogEntryColumnWidth = Pick<
   'baseWidth' | 'growWeight' | 'shrinkWeight'
 >;
 
-export const iconColumnId = Symbol('iconColumnId');
-
 export type LogEntryColumnWidths = LogEntryColumnWidth[];
-
-// export interface LogEntryColumnWidths {
-//   [columnId: string]: LogEntryColumnWidth;
-//   [iconColumnId]: LogEntryColumnWidth;
-// }
 
 export const getColumnWidths = (
   columns: LogColumnConfiguration[],
