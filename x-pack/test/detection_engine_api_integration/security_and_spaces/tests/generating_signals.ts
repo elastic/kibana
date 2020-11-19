@@ -196,15 +196,15 @@ export default ({ getService }: FtrProviderContext) => {
       describe('EQL Rules', () => {
         it('generates signals from EQL sequences in the expected form', async () => {
           const rule: EqlCreateSchema = {
-            ...getSimpleRule(),
-            from: '1900-01-01T00:00:00.000Z',
+            ...getRuleForSignalTesting(['auditbeat-*']),
             rule_id: 'eql-rule',
             type: 'eql',
             language: 'eql',
             query: 'sequence by host.name [any where true] [any where true]',
           };
-          await createRule(supertest, rule);
-          await waitForSignalsToBePresent(supertest, 1);
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccess(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
           const signals = await getSignalsByRuleIds(supertest, ['eql-rule']);
           const signal = signals.hits.hits[0]._source.signal;
 
@@ -248,15 +248,15 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('generates building block signals from EQL sequences in the expected form', async () => {
           const rule: EqlCreateSchema = {
-            ...getSimpleRule(),
-            from: '1900-01-01T00:00:00.000Z',
+            ...getRuleForSignalTesting(['auditbeat-*']),
             rule_id: 'eql-rule',
             type: 'eql',
             language: 'eql',
             query: 'sequence by host.name [any where true] [any where true]',
           };
-          await createRule(supertest, rule);
-          await waitForSignalsToBePresent(supertest, 1);
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccess(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByRuleIds(supertest, ['eql-rule']);
           const sequenceSignal = signalsOpen.hits.hits.find(
             (signal) => signal._source.signal.depth === 2
