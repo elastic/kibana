@@ -143,6 +143,20 @@ describe('savedObjectsResultProvider', () => {
     });
   });
 
+  it('ignore the case for the `types` parameter', async () => {
+    await provider.find({ term: 'term', types: ['TyPEa'] }, defaultOption, context).toPromise();
+
+    expect(context.core.savedObjects.client.find).toHaveBeenCalledTimes(1);
+    expect(context.core.savedObjects.client.find).toHaveBeenCalledWith({
+      page: 1,
+      perPage: defaultOption.maxResults,
+      search: 'term*',
+      preference: 'pref',
+      searchFields: ['title'],
+      type: ['typeA'],
+    });
+  });
+
   it('calls `savedObjectClient.find` with the correct references when the `tags` option is set', async () => {
     await provider
       .find({ term: 'term', tags: ['tag-id-1', 'tag-id-2'] }, defaultOption, context)

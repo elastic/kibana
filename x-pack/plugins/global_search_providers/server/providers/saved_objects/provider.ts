@@ -25,7 +25,7 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
 
       const searchableTypes = typeRegistry
         .getVisibleTypes()
-        .filter(types ? (type) => types!.includes(type.name) : () => true)
+        .filter(types ? (type) => includeIgnoreCase(types, type.name) : () => true)
         .filter((type) => type.management?.defaultSearchField && type.management?.getInAppUrl);
 
       const searchFields = uniq(
@@ -55,3 +55,6 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
 };
 
 const uniq = <T>(values: T[]): T[] => [...new Set(values)];
+
+const includeIgnoreCase = (list: string[], item: string) =>
+  list.find((e) => e.toLowerCase() === item.toLowerCase()) !== undefined;
