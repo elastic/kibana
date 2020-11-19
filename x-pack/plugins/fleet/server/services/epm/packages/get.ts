@@ -115,14 +115,19 @@ export async function getPackageInfo(options: {
     Registry.fetchFindLatestPackage(pkgName),
   ]);
 
-  const pkgInstallSource = savedObject?.attributes.install_source;
-  if (!pkgInstallSource) throw new Error('package install source does not exist');
-
-  const { packageInfo, paths } = await getPackageFromInstallSource({
-    pkgName,
-    pkgVersion,
-    pkgInstallSource,
-  });
+  let paths: string[] | undefined;
+  let packageInfo: RegistryPackage | ArchivePackage;
+  try {
+    const getPackageRes = await getPackageFromSource({
+      pkgName,
+      pkgVersion,
+      pkgInstallSource: savedObject?.attributes.install_source,
+    });
+    paths = getPackageRes.paths;
+    packageInfo = getPackageRes.packageInfo;
+  } catch (err) {
+    throw new Error(err);
+  }
 
   // add properties that aren't (or aren't yet) on the package
   const updated = {
@@ -134,7 +139,9 @@ export async function getPackageInfo(options: {
   };
   return createInstallableFrom(updated, savedObject);
 }
-export async function getPackageFromInstallSource(options: {
+
+// gets package from install_source if it exists otherwise gets from registry
+export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
   pkgInstallSource?: InstallSource;
@@ -148,6 +155,8 @@ export async function getPackageFromInstallSource(options: {
       version: pkgVersion,
       installSource: pkgInstallSource,
     });
+    if (!res.packageInfo)
+      throw new Error(`installed package ${pkgName}-${pkgVersion} does not exist in cache`);
   } else {
     res = await Registry.getRegistryPackage(pkgName, pkgVersion);
   }
