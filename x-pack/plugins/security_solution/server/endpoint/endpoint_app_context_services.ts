@@ -14,7 +14,7 @@ import {
   AgentService,
   FleetStartContract,
   PackageService,
-  AgentPolicyService,
+  AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
@@ -95,7 +95,7 @@ export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
   private packagePolicyService: PackagePolicyServiceInterface | undefined;
-  private agentPolicyService: AgentPolicyService | undefined;
+  private agentPolicyService: AgentPolicyServiceInterface | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private metadataService: MetadataService | undefined;
 
@@ -132,7 +132,7 @@ export class EndpointAppContextService {
     return this.packagePolicyService;
   }
 
-  public getAgentPolicyService(): AgentPolicyService | undefined {
+  public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
     return this.agentPolicyService;
   }
 

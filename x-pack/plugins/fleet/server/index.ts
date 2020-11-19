@@ -18,7 +18,7 @@ export {
   ESIndexPatternService,
   getRegistryUrl,
   PackageService,
-  AgentPolicyService,
+  AgentPolicyServiceInterface,
 } from './services';
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
 
