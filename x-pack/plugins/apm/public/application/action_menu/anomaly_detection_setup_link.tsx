@@ -24,8 +24,7 @@ import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { units } from '../../style/variables';
 
 export type AnomalyDetectionApiResponse = APIReturnType<
-  '/api/apm/settings/anomaly-detection',
-  'GET'
+  'GET /api/apm/settings/anomaly-detection'
 >;
 
 const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
@@ -60,7 +59,7 @@ export function AnomalyDetectionSetupLink() {
 export function MissingJobsAlert({ environment }: { environment?: string }) {
   const { data = DEFAULT_DATA, status } = useFetcher(
     (callApmApi) =>
-      callApmApi({ pathname: `/api/apm/settings/anomaly-detection` }),
+      callApmApi({ endpoint: `GET /api/apm/settings/anomaly-detection` }),
     [],
     { preservePreviousData: false, showToastOnError: false }
   );
