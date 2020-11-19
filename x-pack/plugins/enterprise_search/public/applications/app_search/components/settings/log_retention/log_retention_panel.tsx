@@ -10,9 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiSpacer, EuiSwitch, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { useActions, useValues } from 'kea';
 
+import { DOCS_PREFIX } from '../../../routes';
+
 import { LogRetentionLogic } from './log_retention_logic';
 import { AnalyticsLogRetentionMessage, ApiLogRetentionMessage } from './messaging';
-import { ELogRetentionOptions } from './types';
+import { LogRetentionOptions } from './types';
 
 export const LogRetentionPanel: React.FC = () => {
   const { toggleLogRetention, fetchLogRetention } = useActions(LogRetentionLogic);
@@ -20,8 +22,8 @@ export const LogRetentionPanel: React.FC = () => {
   const { logRetention, isLogRetentionUpdating } = useValues(LogRetentionLogic);
 
   const hasILM = logRetention !== null;
-  const analyticsLogRetentionSettings = logRetention?.[ELogRetentionOptions.Analytics];
-  const apiLogRetentionSettings = logRetention?.[ELogRetentionOptions.API];
+  const analyticsLogRetentionSettings = logRetention?.[LogRetentionOptions.Analytics];
+  const apiLogRetentionSettings = logRetention?.[LogRetentionOptions.API];
 
   useEffect(() => {
     fetchLogRetention();
@@ -41,10 +43,7 @@ export const LogRetentionPanel: React.FC = () => {
           {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.description', {
             defaultMessage: 'Manage the default write settings for API Logs and Analytics.',
           })}{' '}
-          <EuiLink
-            href="https://www.elastic.co/guide/en/app-search/current/logs.html"
-            target="_blank"
-          >
+          <EuiLink href={`${DOCS_PREFIX}/logs.html`} target="_blank">
             {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.learnMore', {
               defaultMessage: 'Learn more about retention settings.',
             })}
@@ -73,7 +72,7 @@ export const LogRetentionPanel: React.FC = () => {
             </>
           }
           checked={!!analyticsLogRetentionSettings?.enabled}
-          onChange={() => toggleLogRetention(ELogRetentionOptions.Analytics)}
+          onChange={() => toggleLogRetention(LogRetentionOptions.Analytics)}
           disabled={isLogRetentionUpdating}
           data-test-subj="LogRetentionPanelAnalyticsSwitch"
         />
@@ -100,7 +99,7 @@ export const LogRetentionPanel: React.FC = () => {
             </>
           }
           checked={!!apiLogRetentionSettings?.enabled}
-          onChange={() => toggleLogRetention(ELogRetentionOptions.API)}
+          onChange={() => toggleLogRetention(LogRetentionOptions.API)}
           disabled={isLogRetentionUpdating}
           data-test-subj="LogRetentionPanelAPISwitch"
         />

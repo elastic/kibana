@@ -46,16 +46,8 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
   getEsShardTimeout: () => Promise<number>;
 }
 
-export class AbstractSearchStrategy {
-  public indexType?: string;
-  public additionalParams: any;
-
-  constructor(type?: string, additionalParams: any = {}) {
-    this.indexType = type;
-    this.additionalParams = additionalParams;
-  }
-
-  async search(req: ReqFacade<VisPayload>, bodies: any[], options = {}) {
+export abstract class AbstractSearchStrategy {
+  async search(req: ReqFacade<VisPayload>, bodies: any[], indexType?: string) {
     const requests: any[] = [];
     const { sessionId } = req.payload;
 
@@ -64,15 +56,13 @@ export class AbstractSearchStrategy {
         req.requestContext
           .search!.search(
             {
+              indexType,
               params: {
                 ...body,
-                ...this.additionalParams,
               },
-              indexType: this.indexType,
             },
             {
               sessionId,
-              ...options,
             }
           )
           .toPromise()
@@ -81,19 +71,23 @@ export class AbstractSearchStrategy {
     return Promise.all(requests);
   }
 
-  async getFieldsForWildcard(req: ReqFacade, indexPattern: string, capabilities: any) {
+  checkForViability(
+    req: ReqFacade<VisPayload>,
+    indexPattern: string
+  ): Promise<{ isViable: boolean; capabilities: unknown }> {
+    throw new TypeError('Must override method');
+  }
+
+  async getFieldsForWildcard<TPayload = unknown>(
+    req: ReqFacade<TPayload>,
+    indexPattern: string,
+    capabilities?: unknown
+  ) {
     const { indexPatternsService } = req.pre;
 
     return await indexPatternsService!.getFieldsForWildcard({
       pattern: indexPattern,
       fieldCapsOptions: { allow_no_indices: true },
     });
-  }
-
-  checkForViability(
-    req: ReqFacade,
-    indexPattern: string
-  ): { isViable: boolean; capabilities: any } {
-    throw new TypeError('Must override method');
   }
 }
