@@ -29,6 +29,7 @@ import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
+import { getTPMTooltipFormatter } from '../helper/helper';
 import { LineChart } from '../line_chart';
 import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 import { getResponseTimeTickFormatter } from './helper';
@@ -46,14 +47,6 @@ export function TransactionCharts({
   urlParams,
   fetchStatus,
 }: TransactionChartProps) {
-  const getTPMFormatter = (t: number) => {
-    return `${asDecimal(t)} ${tpmUnit(urlParams.transactionType)}`;
-  };
-
-  const getTPMTooltipFormatter = (y: Coordinate['y']) => {
-    return isValidCoordinateValue(y) ? getTPMFormatter(y) : NOT_AVAILABLE_LABEL;
-  };
-
   const { transactionType } = urlParams;
 
   const { responseTimeSeries, tpmSeries } = charts;
@@ -104,7 +97,7 @@ export function TransactionCharts({
                 fetchStatus={fetchStatus}
                 id="requestPerMinutes"
                 timeseries={tpmSeries || []}
-                yLabelFormat={getTPMTooltipFormatter}
+                yLabelFormat={getTPMTooltipFormatter(transactionType)}
               />
             </EuiPanel>
           </EuiFlexItem>

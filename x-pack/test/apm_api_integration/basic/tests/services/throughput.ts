@@ -29,11 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })}`
         );
         expect(response.status).to.be(200);
-
-        expect(response.body.noHits).to.be(true);
-
         expect(response.body.throughput.length).to.be(0);
-        expect(response.body.average).to.be(null);
       });
     });
 
@@ -44,7 +40,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('returns the service throughput', () => {
         let throughputResponse: {
           throughput: Array<{ x: number; y: number | null }>;
-          average: number;
         };
         before(async () => {
           const response = await supertest.get(
@@ -59,8 +54,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns some data', () => {
-          expect(throughputResponse.average).to.be.greaterThan(0);
-
           expect(throughputResponse.throughput.length).to.be.greaterThan(0);
 
           const nonNullDataPoints = throughputResponse.throughput.filter(({ y }) => y !== null);
@@ -82,10 +75,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('has the correct number of buckets', () => {
           expectSnapshot(throughputResponse.throughput.length).toMatchInline(`61`);
-        });
-
-        it('has the correct calculation for average', () => {
-          expectSnapshot(throughputResponse.average).toMatchInline(`0.152173913043478`);
         });
 
         it('has the correct throughput', () => {

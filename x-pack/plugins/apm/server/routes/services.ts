@@ -19,6 +19,7 @@ import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
+import { getThroughput } from '../lib/services/get_throughput';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -240,9 +241,9 @@ export const serviceErrorGroupsRoute = createRoute({
   },
 });
 
-export const serviceThroughputRoute = createRoute(() => ({
+export const serviceThroughputRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/throughput',
-  params: {
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
@@ -251,7 +252,7 @@ export const serviceThroughputRoute = createRoute(() => ({
       uiFiltersRt,
       rangeRt,
     ]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
@@ -267,4 +268,4 @@ export const serviceThroughputRoute = createRoute(() => ({
       transactionType,
     });
   },
-}));
+});

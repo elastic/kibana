@@ -6,7 +6,22 @@
 
 import { XYBrushArea } from '@elastic/charts';
 import { History } from 'history';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { asDecimal, tpmUnit } from '../../../../../common/utils/formatters';
+import { Coordinate } from '../../../../../typings/timeseries';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { fromQuery, toQuery } from '../../Links/url_helpers';
+
+function getTPMFormatter(t: number, transactionType?: string) {
+  return `${asDecimal(t)} ${tpmUnit(transactionType)}`;
+}
+
+export function getTPMTooltipFormatter(transactionType?: string) {
+  return (y: Coordinate['y']) =>
+    isValidCoordinateValue(y)
+      ? getTPMFormatter(y, transactionType)
+      : NOT_AVAILABLE_LABEL;
+}
 
 export const onBrushEnd = ({
   x,

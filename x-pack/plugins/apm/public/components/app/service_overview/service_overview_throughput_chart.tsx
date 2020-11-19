@@ -7,7 +7,12 @@
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useFetcher } from '../../../hooks/useFetcher';
 import { useTheme } from '../../../hooks/useTheme';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { getTPMTooltipFormatter } from '../../shared/charts/helper/helper';
 import { LineChart } from '../../shared/charts/line_chart';
 
 export function ServiceOverviewThroughputChart({
@@ -16,8 +21,30 @@ export function ServiceOverviewThroughputChart({
   height?: number;
 }) {
   const theme = useTheme();
-  const throughput = [];
-  const status = 'success';
+  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { urlParams, uiFilters } = useUrlParams();
+  const transactionType = 'request';
+  const { start, end } = urlParams;
+
+  const { data, status } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return callApmApi({
+        endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+        params: {
+          path: {
+            serviceName,
+          },
+          query: {
+            start,
+            end,
+            transactionType,
+            uiFilters: JSON.stringify(uiFilters),
+          },
+        },
+      });
+    }
+  }, [serviceName, start, end, uiFilters, transactionType]);
+  const { throughput } = data ?? { throughput: [] };
 
   return (
     <EuiPanel>
@@ -37,7 +64,7 @@ export function ServiceOverviewThroughputChart({
           {
             data: throughput,
             type: 'linemark',
-            color: theme.eui.euiColorVis7,
+            color: theme.eui.euiColorVis0,
             hideLegend: true,
             title: i18n.translate(
               'xpack.apm.serviceOverview.throughputChart.currentPeriodLabel',
@@ -47,8 +74,7 @@ export function ServiceOverviewThroughputChart({
             ),
           },
         ]}
-        // yLabelFormat={yLabelFormat}
-        // yTickFormat={yTickFormat}
+        yLabelFormat={getTPMTooltipFormatter(transactionType)}
       />
     </EuiPanel>
   );
