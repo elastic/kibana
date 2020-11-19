@@ -25,12 +25,28 @@ import {
   InsecureClusterServiceStart,
 } from './insecure_cluster_service';
 
+export interface SavedObjectTypeAnonymousAccess {
+  /**
+   * Indicates whether anonymous user can access particular Saved Object type (e.g. dashboard, map etc.).
+   */
+  canAccess: boolean;
+  /**
+   * A map of query string parameters that should be specified in URL so that anonymous user can use
+   * to automatically log in to Kibana and access particular Saved Object type.
+   */
+  accessURLParameters: Record<string, string> | null;
+}
+
 export interface SecurityOssPluginSetup {
   insecureCluster: InsecureClusterServiceSetup;
 }
 
 export interface SecurityOssPluginStart {
   insecureCluster: InsecureClusterServiceStart;
+  anonymousAccess: {
+    isAnonymousAccessEnabled: boolean;
+    canAccessSavedObjectType: (savedObjectType: string) => Promise<SavedObjectTypeAnonymousAccess>;
+  };
 }
 
 export class SecurityOssPlugin
@@ -51,8 +67,23 @@ export class SecurityOssPlugin
   }
 
   public start(core: CoreStart) {
+    const isAnonymousAccessEnabled = !!core.application.capabilities.security?.anonymousAccess;
     return {
       insecureCluster: this.insecureClusterService.start({ core }),
+      anonymousAccess: {
+        isAnonymousAccessEnabled,
+        async canAccessSavedObjectType(savedObjectType: string) {
+          if (isAnonymousAccessEnabled) {
+            return await core.http.get<SavedObjectTypeAnonymousAccess>(
+              `/internal/security/anonymous_access/_can_access_saved_object_type?type=${encodeURIComponent(
+                savedObjectType
+              )}`
+            );
+          }
+
+          return { canAccess: false, accessURLParameters: null };
+        },
+      },
     };
   }
 }

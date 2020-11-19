@@ -9,12 +9,14 @@ import type { HttpResources, IBasePath, IRouter, Logger } from '../../../../../s
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceStart } from '../authentication';
 import type { AuthorizationServiceSetup } from '../authorization';
+import type { AnonymousAccessServiceStart } from '../anonymous_access';
 import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
 
 import { defineAuthenticationRoutes } from './authentication';
 import { defineAuthorizationRoutes } from './authorization';
+import { defineAnonymousAccessRoutes } from './anonymous_access';
 import { defineApiKeysRoutes } from './api_keys';
 import { defineIndicesRoutes } from './indices';
 import { defineUsersRoutes } from './users';
@@ -37,11 +39,13 @@ export interface RouteDefinitionParams {
   getFeatures: () => Promise<KibanaFeature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   getAuthenticationService: () => AuthenticationServiceStart;
+  getAnonymousAccessService: () => AnonymousAccessServiceStart;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
   defineAuthenticationRoutes(params);
   defineAuthorizationRoutes(params);
+  defineAnonymousAccessRoutes(params);
   defineSessionManagementRoutes(params);
   defineApiKeysRoutes(params);
   defineIndicesRoutes(params);
