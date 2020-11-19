@@ -55,6 +55,9 @@ export const handleErrors = <A, B, C, D extends RouteMethod>(
       }
 
       return response.badRequest({
+        headers: {
+          'content-type': 'application/json',
+        },
         body,
       });
     }

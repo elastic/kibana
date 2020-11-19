@@ -46,6 +46,9 @@ export const registerGetIndexPatternRoute = (router: IRouter) => {
           const indexPattern = await ip.get(id);
 
           return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
             body: JSON.stringify({
               index_pattern: indexPattern.toSpec(),
             }),

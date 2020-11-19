@@ -37,6 +37,9 @@ export const registerDeleteIndexPatternRoute = (router: IRouter) => {
           { unknowns: 'allow' }
         ),
       },
+      options: {
+        xsrfRequired: false,
+      },
     },
     router.handleLegacyErrors(
       handleErrors(
@@ -46,7 +49,11 @@ export const registerDeleteIndexPatternRoute = (router: IRouter) => {
 
           await ip.delete(id);
 
-          return res.ok();
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
         })
       )
     )

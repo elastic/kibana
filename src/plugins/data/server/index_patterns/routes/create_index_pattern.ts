@@ -62,6 +62,9 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
           index_pattern: indexPatternSpecSchema,
         }),
       },
+      options: {
+        xsrfRequired: false,
+      },
     },
     router.handleLegacyErrors(
       handleErrors(
@@ -76,6 +79,9 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
           );
 
           return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
             body: JSON.stringify({
               index_pattern: indexPattern.toSpec(),
             }),

@@ -59,6 +59,9 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           index_pattern: indexPatternUpdateSchema,
         }),
       },
+      options: {
+        xsrfRequired: false,
+      },
     },
     router.handleLegacyErrors(
       handleErrors(
@@ -142,6 +145,9 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           }
 
           return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
             body: JSON.stringify({
               index_pattern: indexPattern.toSpec(),
             }),
