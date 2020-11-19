@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { useRouteMatch } from 'react-router-dom';
 import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../../state/actions';
 import { ToggleAlertFlyoutButtonComponent } from '../index';
+import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/alerts';
 
 export interface ToggleAlertFlyoutButtonProps {
   alertOptions?: string[];
@@ -15,6 +17,25 @@ export interface ToggleAlertFlyoutButtonProps {
 
 export const ToggleAlertFlyoutButton: React.FC<ToggleAlertFlyoutButtonProps> = (props) => {
   const dispatch = useDispatch();
+
+  const isCreateAlert = useRouteMatch('/status-alert/new');
+
+  const isTlsAlert = useRouteMatch('/tls-alert/new');
+
+  useEffect(() => {
+    if (isCreateAlert) {
+      dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.MONITOR_STATUS));
+      dispatch(setAlertFlyoutVisible(true));
+    }
+  }, [isCreateAlert, dispatch]);
+
+  useEffect(() => {
+    if (isTlsAlert) {
+      dispatch(setAlertFlyoutType(CLIENT_ALERT_TYPES.TLS));
+      dispatch(setAlertFlyoutVisible(true));
+    }
+  }, [isTlsAlert, dispatch]);
+
   return (
     <ToggleAlertFlyoutButtonComponent
       {...props}

@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { I18nStart, ChromeBreadcrumb, CoreStart } from 'kibana/public';
+import { InPortal, PortalNode } from 'react-reverse-portal';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -32,6 +33,7 @@ import {
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ScopedHistory } from '../../../../../src/core/public';
+import { ActionMenu } from './action_menu';
 
 export interface UptimeAppColors {
   danger: string;
@@ -59,6 +61,7 @@ export interface UptimeAppProps {
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedRange[];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  actionMenu: PortalNode;
 }
 
 const Application = (props: UptimeAppProps) => {
@@ -72,6 +75,7 @@ const Application = (props: UptimeAppProps) => {
     renderGlobalHelpControls,
     setBadge,
     startPlugins,
+    actionMenu,
   } = props;
 
   useEffect(() => {
@@ -111,6 +115,9 @@ const Application = (props: UptimeAppProps) => {
                             <main>
                               <UptimeAlertsFlyoutWrapper />
                               <PageRouter />
+                              <InPortal node={actionMenu}>
+                                <ActionMenu />
+                              </InPortal>
                             </main>
                           </RedirectAppLinks>
                         </EuiPage>

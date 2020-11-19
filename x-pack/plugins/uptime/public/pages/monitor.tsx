@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { monitorStatusSelector } from '../state/selectors';
-import { PageHeader } from './page_header';
+import { PageHeader } from '../components/common/header/page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useTrackPageview } from '../../../observability/public';
 import { useMonitorId } from '../hooks';

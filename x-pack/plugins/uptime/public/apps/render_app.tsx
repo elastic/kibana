@@ -8,6 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n as i18nFormatter } from '@kbn/i18n';
 import { AppMountParameters, CoreStart } from 'kibana/public';
+import { createPortalNode, OutPortal } from 'react-reverse-portal';
 import { getIntegratedAppAvailability } from '../lib/adapters/framework/capabilities_adapter';
 import {
   DEFAULT_DARK_MODE,
@@ -21,7 +22,7 @@ export function renderApp(
   core: CoreStart,
   plugins: ClientPluginsSetup,
   startPlugins: ClientPluginsStart,
-  { element, history }: AppMountParameters
+  { element, history, setHeaderActionMenu }: AppMountParameters
 ) {
   const {
     application: { capabilities },
@@ -30,6 +31,8 @@ export function renderApp(
     http: { basePath },
     i18n,
   } = core;
+
+  const portalNode = createPortalNode();
 
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
     capabilities,
@@ -51,6 +54,7 @@ export function renderApp(
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
     isLogsAvailable: logs,
+    actionMenu: portalNode,
     renderGlobalHelpControls: () =>
       setHelpExtension({
         appName: i18nFormatter.translate('xpack.uptime.header.appName', {
@@ -70,6 +74,18 @@ export function renderApp(
     setBadge,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
   };
+
+  function renderActionMenu(elem: HTMLElement) {
+    ReactDOM.render(<OutPortal node={portalNode} />, elem);
+
+    return () => {
+      ReactDOM.unmountComponentAtNode(elem);
+    };
+  }
+
+  setHeaderActionMenu((elem) => {
+    return renderActionMenu(elem);
+  });
 
   ReactDOM.render(<UptimeApp {...props} />, element);
 

@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
 import { ENABLE_STATUS_ALERT } from './translations';
-import { SETTINGS_LINK_TEXT } from '../../../../pages/page_header';
+import { SETTINGS_LINK_TEXT } from '../../../common/header/page_header';
 
 export const DefineAlertConnectors = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

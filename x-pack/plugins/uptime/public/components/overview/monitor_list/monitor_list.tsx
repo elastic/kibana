@@ -9,7 +9,6 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -120,9 +119,9 @@ export const MonitorListComponent: ({
       align: 'left' as const,
       field: 'state.url.full',
       name: URL_LABEL,
-      render: (url: string, summary: MonitorSummary) => (
+      render: (url: string) => (
         <TruncatedEuiLink href={url} target="_blank" color="text">
-          {url} <EuiIcon size="s" type="popout" color="subbdued" />
+          {url}
         </TruncatedEuiLink>
       ),
     },

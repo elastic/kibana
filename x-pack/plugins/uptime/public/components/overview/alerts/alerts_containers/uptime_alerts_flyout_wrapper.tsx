@@ -6,15 +6,23 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { setAlertFlyoutVisible } from '../../../../state/actions';
 import { UptimeAlertsFlyoutWrapperComponent } from '../uptime_alerts_flyout_wrapper';
 import { selectAlertFlyoutVisibility, selectAlertFlyoutType } from '../../../../state/selectors';
 
 export const UptimeAlertsFlyoutWrapper: React.FC = () => {
   const dispatch = useDispatch();
-  const setAddFlyoutVisibility = (value: React.SetStateAction<boolean>) =>
+
+  const history = useHistory();
+
+  const setAddFlyoutVisibility = (value: React.SetStateAction<boolean>) => {
     // @ts-ignore the value here is a boolean, and it works with the action creator function
     dispatch(setAlertFlyoutVisible(value));
+    if (!value) {
+      history.push('/');
+    }
+  };
 
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
   const alertTypeId = useSelector(selectAlertFlyoutType);

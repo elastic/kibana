@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useHistory } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 import { ToggleFlyoutTranslations } from './translations';
@@ -34,13 +35,17 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const kibana = useKibana();
+
+  const history = useHistory();
+
   const monitorStatusAlertContextMenuItem: EuiContextMenuPanelItemDescriptor = {
     'aria-label': ToggleFlyoutTranslations.toggleMonitorStatusAriaLabel,
     'data-test-subj': 'xpack.uptime.toggleAlertFlyout',
     name: ToggleFlyoutTranslations.toggleMonitorStatusContent,
     onClick: () => {
-      setAlertFlyoutVisible(CLIENT_ALERT_TYPES.MONITOR_STATUS);
+      // setAlertFlyoutVisible(CLIENT_ALERT_TYPES.MONITOR_STATUS);
       setIsOpen(false);
+      history.push('/status-alert/new');
     },
   };
 
@@ -49,8 +54,9 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     'data-test-subj': 'xpack.uptime.toggleTlsAlertFlyout',
     name: ToggleFlyoutTranslations.toggleTlsContent,
     onClick: () => {
-      setAlertFlyoutVisible(CLIENT_ALERT_TYPES.TLS);
+      // setAlertFlyoutVisible(CLIENT_ALERT_TYPES.TLS);
       setIsOpen(false);
+      history.push('/tls-alert/new');
     },
   };
 

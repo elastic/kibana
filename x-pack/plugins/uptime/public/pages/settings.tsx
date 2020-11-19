@@ -35,6 +35,7 @@ import {
 } from '../../common/translations';
 import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
 import { AlertDefaultsForm } from '../components/settings/alert_defaults_form';
+import { PageHeader } from '../components/common/header/page_header';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
@@ -147,17 +148,9 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <>
-      <ReactRouterEuiButtonEmpty
-        color="primary"
-        data-test-subj="uptimeSettingsToOverviewLink"
-        iconType="arrowLeft"
-        to={OVERVIEW_ROUTE}
-        size="s"
-      >
-        {Translations.settings.returnToOverviewLinkLabel}
-      </ReactRouterEuiButtonEmpty>
+      <PageHeader />
       <EuiSpacer size="s" />
-      <EuiPanel>
+      <EuiPanel style={{ maxWidth: 1000, margin: 'auto' }}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>{cannotEditNotice}</EuiFlexItem>
         </EuiFlexGroup>

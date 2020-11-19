@@ -5,7 +5,6 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,13 +14,13 @@ import {
   EuiSpacer,
   EuiHideFor,
   EuiShowFor,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useTrackPageview } from '../../../observability/public';
-import { PageHeader } from './page_header';
+import { PageHeader } from '../components/common/header/page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../common/constants';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { UptimeRefreshContext } from '../contexts';
 import * as labels from './translations';
@@ -29,7 +28,6 @@ import { certificatesSelector, getCertificatesAction } from '../state/certificat
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
 import { CLIENT_ALERT_TYPES } from '../../common/constants/alerts';
-import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -74,37 +72,15 @@ export const CertificatesPage: React.FC = () => {
   }, [dispatch, page, search, sort.direction, sort.field, lastRefresh]);
 
   const { data: certificates } = useSelector(certificatesSelector);
-  const history = useHistory();
 
   return (
     <>
       <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem grow={false} style={{ marginRight: 'auto', alignSelf: 'center' }}>
-          <ReactRouterEuiButtonEmpty
-            color="primary"
-            data-test-subj="uptimeCertificatesToOverviewLink"
-            to={OVERVIEW_ROUTE}
-            iconType="arrowLeft"
-            size="s"
-            aria-label={labels.RETURN_TO_OVERVIEW}
-          >
-            {labels.RETURN_TO_OVERVIEW}
-          </ReactRouterEuiButtonEmpty>
+        <EuiFlexItem>
+          <PageHeader datePicker={false} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ToggleAlertFlyoutButton alertOptions={[CLIENT_ALERT_TYPES.TLS]} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-          <EuiButtonEmpty
-            aria-label={labels.SETTINGS_ON_CERT}
-            color="primary"
-            data-test-subj="uptimeCertificatesToOverviewLink"
-            iconType="gear"
-            href={history.createHref({ pathname: SETTINGS_ROUTE })}
-            size="s"
-          >
-            <EuiHideFor sizes={['xs']}> {labels.SETTINGS_ON_CERT}</EuiHideFor>
-          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiHideFor sizes={['xs']}>
@@ -133,8 +109,8 @@ export const CertificatesPage: React.FC = () => {
 
       <EuiSpacer size="m" />
       <EuiPanel>
-        <PageHeader
-          headingText={
+        <EuiTitle>
+          <h1 className="eui-textNoWrap">
             <FormattedMessage
               id="xpack.uptime.certificates.heading"
               defaultMessage="TLS Certificates ({total})"
@@ -142,9 +118,9 @@ export const CertificatesPage: React.FC = () => {
                 total: <span data-test-subj="uptimeCertTotal">{certificates?.total ?? 0}</span>,
               }}
             />
-          }
-          datePicker={false}
-        />
+          </h1>
+        </EuiTitle>
+
         <EuiSpacer size="m" />
         <CertificateSearch setSearch={setSearch} />
         <EuiSpacer size="m" />
