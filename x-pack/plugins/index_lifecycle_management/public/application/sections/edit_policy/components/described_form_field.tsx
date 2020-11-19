@@ -11,16 +11,22 @@ import { ToggleableField, Props as ToggleableFieldProps } from './toggleable_fie
 
 type Props = EuiDescribedFormGroupProps & {
   switchProps: ToggleableFieldProps;
+  hideSwitch?: boolean;
 };
 
 export const DescribedFormField: FunctionComponent<Props> = ({
   children,
   switchProps,
+  hideSwitch = false,
   ...restDescribedFormProps
 }) => {
   return (
     <EuiDescribedFormGroup {...restDescribedFormProps}>
-      <ToggleableField {...switchProps}>{children}</ToggleableField>
+      {!hideSwitch ? (
+        <ToggleableField {...switchProps}>{children}</ToggleableField>
+      ) : (
+        <>{children}</>
+      )}
     </EuiDescribedFormGroup>
   );
 };

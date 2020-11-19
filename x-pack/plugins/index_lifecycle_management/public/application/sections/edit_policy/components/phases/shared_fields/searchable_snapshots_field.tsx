@@ -19,6 +19,8 @@ import { UseField, ComboBoxField } from '../../../../../../shared_imports';
 import { useLoadSnapshotRepositories } from '../../../../../services/api';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
+import { useSearchableSnapshotState } from '../../../form';
+import { i18nTexts } from '../../../i18n_texts';
 
 import { FieldLoadingError, DescribedFormField } from '../../';
 
@@ -28,6 +30,7 @@ interface Props {
 
 export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) => {
   const { getUrlForApp, policy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase } = useSearchableSnapshotState();
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
   const { isLoading, error, data, resendRequest } = useLoadSnapshotRepositories();
 
@@ -35,8 +38,12 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
 
   let calloutContent: React.ReactNode | undefined;
 
+  const hideFieldControls = isUsingSearchableSnapshotInHotPhase && phase !== 'hot';
+
   if (!isLoading) {
-    if (error) {
+    if (hideFieldControls) {
+      calloutContent = null;
+    } else if (error) {
       calloutContent = (
         <FieldLoadingError
           resendRequest={resendRequest}
@@ -105,6 +112,7 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
 
   return (
     <DescribedFormField
+      hideSwitch={hideFieldControls}
       switchProps={{
         label: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
@@ -133,42 +141,58 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
       }
       fullWidth
     >
-      <UseField<string> path={searchableSnapshotPath}>
-        {(field) => {
-          const singleSelectionArray: [selectedSnapshot?: string] = field.value
-            ? [field.value]
-            : [];
+      {hideFieldControls ? (
+        <EuiCallOut
+          color="warning"
+          iconType="alert"
+          title={
+            i18nTexts.editPolicy.searchableSnapshotInHotPhase.searchableSnapshotDisallowed
+              .calloutTitle
+          }
+        >
+          {
+            i18nTexts.editPolicy.searchableSnapshotInHotPhase.searchableSnapshotDisallowed
+              .calloutBody
+          }
+        </EuiCallOut>
+      ) : (
+        <UseField<string> path={searchableSnapshotPath}>
+          {(field) => {
+            const singleSelectionArray: [selectedSnapshot?: string] = field.value
+              ? [field.value]
+              : [];
 
-          return (
-            <ComboBoxField
-              field={
-                {
-                  ...field,
-                  value: singleSelectionArray,
-                } as any
-              }
-              fullWidth={false}
-              euiFieldProps={{
-                'data-test-subj': 'snapshotPolicyCombobox',
-                options: repos.map((repo) => ({ label: repo, value: repo })),
-                singleSelection: { asPlainText: true },
-                isLoading,
-                noSuggestions: !!(error || repos.length === 0),
-                onCreateOption: (newOption: string) => {
-                  field.setValue(newOption);
-                },
-                onChange: (options: EuiComboBoxOptionOption[]) => {
-                  if (options.length > 0) {
-                    field.setValue(options[0].label);
-                  } else {
-                    field.setValue('');
-                  }
-                },
-              }}
-            />
-          );
-        }}
-      </UseField>
+            return (
+              <ComboBoxField
+                field={
+                  {
+                    ...field,
+                    value: singleSelectionArray,
+                  } as any
+                }
+                fullWidth={false}
+                euiFieldProps={{
+                  'data-test-subj': 'snapshotPolicyCombobox',
+                  options: repos.map((repo) => ({ label: repo, value: repo })),
+                  singleSelection: { asPlainText: true },
+                  isLoading,
+                  noSuggestions: !!(error || repos.length === 0),
+                  onCreateOption: (newOption: string) => {
+                    field.setValue(newOption);
+                  },
+                  onChange: (options: EuiComboBoxOptionOption[]) => {
+                    if (options.length > 0) {
+                      field.setValue(options[0].label);
+                    } else {
+                      field.setValue('');
+                    }
+                  },
+                }}
+              />
+            );
+          }}
+        </UseField>
+      )}
       {calloutContent}
     </DescribedFormField>
   );

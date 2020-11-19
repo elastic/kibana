@@ -6,13 +6,14 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { EuiSpacer, EuiTextColor, EuiCallOut } from '@elastic/eui';
 
 import { UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
+import { useSearchableSnapshotState } from '../../../form';
 
 import { LearnMoreLink, DescribedFormField } from '../../';
 
@@ -22,40 +23,24 @@ interface Props {
 
 export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
   const { policy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase } = useSearchableSnapshotState();
 
   const initialToggleValue = useMemo<boolean>(() => {
     return Boolean(policy.phases[phase]?.actions?.forcemerge);
   }, [policy, phase]);
 
-  return (
-    <DescribedFormField
-      title={
-        <h3>
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableText"
-            defaultMessage="Force merge"
-          />
-        </h3>
-      }
-      description={
-        <EuiTextColor color="subdued">
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText"
-            defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
-          />{' '}
-          <LearnMoreLink docPath="indices-forcemerge.html" />
-        </EuiTextColor>
-      }
-      titleSize="xs"
-      fullWidth
-      switchProps={{
-        'aria-label': i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
-        'data-test-subj': `${phase}-forceMergeSwitch`,
-        'aria-controls': 'forcemergeContent',
-        label: i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
-        initialValue: initialToggleValue,
-      }}
+  const hideFieldControls = isUsingSearchableSnapshotInHotPhase && phase !== 'hot';
+
+  const content = hideFieldControls ? (
+    <EuiCallOut
+      color="warning"
+      iconType="alert"
+      title={i18nTexts.editPolicy.searchableSnapshotInHotPhase.forceMergeDisallowed.calloutTitle}
     >
+      {i18nTexts.editPolicy.searchableSnapshotInHotPhase.forceMergeDisallowed.calloutBody}
+    </EuiCallOut>
+  ) : (
+    <>
       <EuiSpacer />
       <div id="forcemergeContent" aria-live="polite" role="region">
         <UseField
@@ -82,6 +67,40 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
           }}
         />
       </div>
+    </>
+  );
+
+  return (
+    <DescribedFormField
+      title={
+        <h3>
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableText"
+            defaultMessage="Force merge"
+          />
+        </h3>
+      }
+      description={
+        <EuiTextColor color="subdued">
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText"
+            defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
+          />{' '}
+          <LearnMoreLink docPath="indices-forcemerge.html" />
+        </EuiTextColor>
+      }
+      titleSize="xs"
+      fullWidth
+      hideSwitch={hideFieldControls}
+      switchProps={{
+        'aria-label': i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
+        'data-test-subj': `${phase}-forceMergeSwitch`,
+        'aria-controls': 'forcemergeContent',
+        label: i18nTexts.editPolicy.forceMergeEnabledFieldLabel,
+        initialValue: initialToggleValue,
+      }}
+    >
+      {content}
     </DescribedFormField>
   );
 };

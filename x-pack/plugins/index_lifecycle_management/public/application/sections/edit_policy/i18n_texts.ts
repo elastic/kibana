@@ -8,6 +8,32 @@ import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
   editPolicy: {
+    searchableSnapshotInHotPhase: {
+      forceMergeDisallowed: {
+        calloutTitle: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.disallowedCalloutTitle', {
+          defaultMessage: 'Force merge disabled',
+        }),
+        calloutBody: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.disallowedCalloutBody', {
+          defaultMessage:
+            'To use force merge in this phase you must disable searchable snapshot in the hot phase.',
+        }),
+      },
+      searchableSnapshotDisallowed: {
+        calloutTitle: i18n.translate(
+          'xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutTitle',
+          {
+            defaultMessage: 'Searchable snapshot disabled',
+          }
+        ),
+        calloutBody: i18n.translate(
+          'xpack.indexLifecycleMgmt.searchableSnapshot.disallowedCalloutBody',
+          {
+            defaultMessage:
+              'To use searchable snapshot in this phase you must disable searchable snapshot in the hot phase.',
+          }
+        ),
+      },
+    },
     forceMergeEnabledFieldLabel: i18n.translate('xpack.indexLifecycleMgmt.forcemerge.enableLabel', {
       defaultMessage: 'Force merge data',
     }),

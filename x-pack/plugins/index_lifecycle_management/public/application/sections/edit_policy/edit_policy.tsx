@@ -30,7 +30,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { useForm, Form, UseField, TextField, useFormData } from '../../../shared_imports';
+import { useForm, UseField, TextField, useFormData } from '../../../shared_imports';
 
 import { toasts } from '../../services/notification';
 
@@ -45,7 +45,7 @@ import {
   WarmPhase,
 } from './components';
 
-import { schema, deserializer, createSerializer, createPolicyNameValidations } from './form';
+import { schema, deserializer, createSerializer, createPolicyNameValidations, Form } from './form';
 
 import { useEditPolicyContext } from './edit_policy_context';
 import { FormInternal } from './types';

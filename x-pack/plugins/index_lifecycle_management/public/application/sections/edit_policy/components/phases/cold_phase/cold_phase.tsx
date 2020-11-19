@@ -9,13 +9,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import { EuiDescribedFormGroup, EuiTextColor } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiTextColor, EuiCallOut } from '@elastic/eui';
 
 import { Phases } from '../../../../../../../common/types';
 
 import { useFormData, UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
+import { useSearchableSnapshotState } from '../../../form';
 
 import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
 
@@ -27,6 +28,15 @@ import {
 } from '../shared_fields';
 
 const i18nTexts = {
+  freezeDisabled: {
+    calloutTitle: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeDisabledCalloutTitle', {
+      defaultMessage: 'Freeze disabled',
+    }),
+    calloutBody: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeDisabledCalloutBody', {
+      defaultMessage:
+        'To use freeze in this phase you must disable searchable snapshot in the hot phase.',
+    }),
+  },
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.dataTier.description', {
       defaultMessage:
@@ -43,6 +53,7 @@ const formFieldPaths = {
 
 export const ColdPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase } = useSearchableSnapshotState();
 
   const [formData] = useFormData({
     watch: [formFieldPaths.enabled],
@@ -163,15 +174,25 @@ export const ColdPhase: FunctionComponent = () => {
               fullWidth
               titleSize="xs"
             >
-              <UseField
-                path="_meta.cold.freezeEnabled"
-                component={ToggleField}
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': 'freezeSwitch',
-                  },
-                }}
-              />
+              {isUsingSearchableSnapshotInHotPhase ? (
+                <EuiCallOut
+                  color="warning"
+                  iconType="alert"
+                  title={i18nTexts.freezeDisabled.calloutTitle}
+                >
+                  {i18nTexts.freezeDisabled.calloutBody}
+                </EuiCallOut>
+              ) : (
+                <UseField
+                  path="_meta.cold.freezeEnabled"
+                  component={ToggleField}
+                  componentProps={{
+                    euiFieldProps: {
+                      'data-test-subj': 'freezeSwitch',
+                    },
+                  }}
+                />
+              )}
             </EuiDescribedFormGroup>
             <SetPriorityInput phase={coldProperty} />
           </>

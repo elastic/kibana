@@ -15,24 +15,39 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiDescribedFormGroup,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { useFormData, UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
 
 import { Phases } from '../../../../../../../common/types';
 
-import { useRolloverPath, MinAgeInputField, Forcemerge, SetPriorityInput } from '../shared_fields';
-
 import { useEditPolicyContext } from '../../../edit_policy_context';
+import { useSearchableSnapshotState } from '../../../form';
 
 import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
 
-import { DataTierAllocationField } from '../shared_fields';
+import {
+  useRolloverPath,
+  MinAgeInputField,
+  Forcemerge,
+  SetPriorityInput,
+  DataTierAllocationField,
+} from '../shared_fields';
 
 const i18nTexts = {
   shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
     defaultMessage: 'Shrink index',
   }),
+  shrinkDisabled: {
+    calloutTitle: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkDisabledCalloutTitle', {
+      defaultMessage: 'Shrink disabled',
+    }),
+    calloutBody: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkDisabledCalloutBody', {
+      defaultMessage:
+        'To use shrink in this phase you must disable searchable snapshot in the hot phase.',
+    }),
+  },
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.description', {
       defaultMessage: 'Move data to nodes optimized for less-frequent, read-only access.',
@@ -49,6 +64,7 @@ const formFieldPaths = {
 
 export const WarmPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase } = useSearchableSnapshotState();
   const [formData] = useFormData({
     watch: [useRolloverPath, formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
   });
@@ -187,6 +203,7 @@ export const WarmPhase: FunctionComponent = () => {
                 </EuiTextColor>
               }
               titleSize="xs"
+              hideSwitch={isUsingSearchableSnapshotInHotPhase}
               switchProps={{
                 'aria-controls': 'shrinkContent',
                 'data-test-subj': 'shrinkSwitch',
@@ -196,24 +213,34 @@ export const WarmPhase: FunctionComponent = () => {
               }}
               fullWidth
             >
-              <div id="shrinkContent" aria-live="polite" role="region">
-                <EuiSpacer />
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <UseField
-                      path="phases.warm.actions.shrink.number_of_shards"
-                      component={NumericField}
-                      componentProps={{
-                        euiFieldProps: {
-                          'data-test-subj': `${warmProperty}-selectedPrimaryShardCount`,
-                          min: 1,
-                        },
-                      }}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer />
-              </div>
+              {isUsingSearchableSnapshotInHotPhase ? (
+                <EuiCallOut
+                  color="warning"
+                  iconType="alert"
+                  title={i18nTexts.shrinkDisabled.calloutTitle}
+                >
+                  {i18nTexts.shrinkDisabled.calloutBody}
+                </EuiCallOut>
+              ) : (
+                <div id="shrinkContent" aria-live="polite" role="region">
+                  <EuiSpacer />
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <UseField
+                        path="phases.warm.actions.shrink.number_of_shards"
+                        component={NumericField}
+                        componentProps={{
+                          euiFieldProps: {
+                            'data-test-subj': `${warmProperty}-selectedPrimaryShardCount`,
+                            min: 1,
+                          },
+                        }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer />
+                </div>
+              )}
             </DescribedFormField>
 
             <Forcemerge phase="warm" />

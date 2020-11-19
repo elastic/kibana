@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import React, { FunctionalComponent, createContext, useContext } from 'react';
+import React, { FunctionComponent, createContext, useContext } from 'react';
 import { useFormData } from '../../../../shared_imports';
 
 export interface SearchableSnapshotValue {
@@ -23,12 +23,13 @@ const SearchableSnapshotStateContext = createContext<SearchableSnapshotValue>(nu
 const pathToHotPhaseSearchableSnapshot =
   'phases.hot.actions.searchable_snapshot.snapshot_repository';
 
-export const SearchableSnapshotStateProvider: FunctionalComponent = () => {
+export const SearchableSnapshotStateProvider: FunctionComponent = ({ children }) => {
   const [formData] = useFormData({ watch: pathToHotPhaseSearchableSnapshot });
   return (
     <SearchableSnapshotStateContext.Provider
       value={{
-        isUsingSearchableSnapshotInHotPhase: !!get(formData, pathToHotPhaseSearchableSnapshot),
+        isUsingSearchableSnapshotInHotPhase:
+          get(formData, pathToHotPhaseSearchableSnapshot) != null,
       }}
     >
       {children}
