@@ -21,7 +21,7 @@ import {
   ServiceNowGetFieldsResponse,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../actions/server/types';
-import { ConnectorTypes } from '../../../../../common/api/connectors';
+import { ConnectorTypes } from '../../../../../common/api';
 
 export function initCaseConfigureGetFields({ router }: RouteDeps) {
   router.get(

@@ -20,7 +20,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
-import { FieldResponse } from '../../../../../case/common/api/cases';
+import { FieldResponse } from '../../../../../case/common/api';
 import {
   ActionConnector,
   useActionsConnectorsContext,

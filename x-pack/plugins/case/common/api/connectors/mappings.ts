@@ -30,6 +30,11 @@ const ThirdPartyFieldRT = rt.union([
 export type ActionType = rt.TypeOf<typeof ActionTypeRT>;
 export type CaseField = rt.TypeOf<typeof CaseFieldRT>;
 export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRT>;
+export interface CasesConfigurationMapping {
+  source: CaseField;
+  target: string;
+  actionType: ActionType;
+}
 
 export const ConnectorMappingsAttributesRT = rt.type({
   source: CaseFieldRT,
@@ -42,3 +47,16 @@ export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttr
 export interface ConnectorMappings {
   mappings: ConnectorMappingsAttributes[];
 }
+
+const FieldTypeRT = rt.union([rt.literal('text'), rt.literal('textarea')]);
+
+const FieldRt = rt.type({
+  id: rt.string,
+  name: rt.string,
+  required: rt.boolean,
+  type: FieldTypeRT,
+});
+export type Field = rt.TypeOf<typeof FieldRt>;
+
+export const FieldResponseRt = rt.array(FieldRt);
+export type FieldResponse = rt.TypeOf<typeof FieldResponseRt>;

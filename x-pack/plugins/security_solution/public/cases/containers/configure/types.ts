@@ -6,22 +6,25 @@
 
 import { ElasticUser } from '../types';
 import {
+  ActionConnector,
   ActionType,
+  CaseConnector,
   CaseField,
+  CasesConfigurationMapping,
+  CasesConfigure,
   ClosureType,
   ThirdPartyField,
-  CasesConfigure,
-  ActionConnector,
-  CaseConnector,
 } from '../../../../../case/common/api';
 
-export { ActionType, CaseField, ClosureType, ThirdPartyField, ActionConnector, CaseConnector };
-
-export interface CasesConfigurationMapping {
-  source: CaseField;
-  target: string;
-  actionType: ActionType;
-}
+export {
+  ActionConnector,
+  ActionType,
+  CaseConnector,
+  CaseField,
+  CasesConfigurationMapping,
+  ClosureType,
+  ThirdPartyField,
+};
 
 export interface CaseConfigure {
   createdAt: string;
