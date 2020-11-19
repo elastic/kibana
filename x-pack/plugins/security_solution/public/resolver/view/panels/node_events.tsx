@@ -24,13 +24,10 @@ import * as nodeDataModel from '../../models/node_data';
 export function NodeEvents({ nodeID }: { nodeID: string }) {
   const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
   const processEvent = nodeDataModel.firstEvent(nodeData);
-  /* const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );*/
   const relatedEventsStats = useSelector((state: ResolverState) =>
     selectors.relatedEventsStats(state)(nodeID)
   );
-  // TODO: error state? Check for loading state?
+
   if (processEvent === undefined || relatedEventsStats === undefined) {
     return (
       <StyledPanel>

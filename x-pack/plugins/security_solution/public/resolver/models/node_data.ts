@@ -120,12 +120,12 @@ export function idsNotInBase(
 }
 
 /**
- * TODO: should these be selectors?
+ * This is used for displaying information in the node panel mainly and we should be able to remove it eventually.
+ *
+ *
+ * @param data node data for a specific node ID
+ * @returns the first event or undefined if the node data passed in was undefined
  */
-export function isLoading(data: NodeData | undefined) {
-  return !data || data.status === 'requested';
-}
-
 export function firstEvent(data: NodeData | undefined) {
   return !data || data.status !== 'received' || data.events.length <= 0
     ? undefined

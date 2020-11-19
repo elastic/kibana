@@ -85,6 +85,8 @@ export const originID: (state: DataState) => string | undefined = createSelector
 
 /**
  * Process events that will be displayed as terminated.
+ * @deprecated
+ * TODO: remove after swapping over tests
  */
 export const terminatedProcesses = createSelector(resolverTreeResponse, function (
   tree?: ResolverTree
@@ -104,6 +106,8 @@ export const terminatedProcesses = createSelector(resolverTreeResponse, function
 
 /**
  * A function that given an entity id returns a boolean indicating if the id is in the set of terminated processes.
+ * @deprecated use isNodeTerminated
+ * TODO: maybe delete this, it has tests so need to swap them over
  */
 export const isProcessTerminated = createSelector(terminatedProcesses, function (
   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -143,13 +147,12 @@ export const isNodeTerminated: (
   };
 });
 
-// TODO: show an error when this is true
-export const nodeDataUnableToLoad: (state: DataState) => (id: string) => boolean = createSelector(
+export const isNodeDataLoading: (state: DataState) => (id: string) => boolean = createSelector(
   nodeDataForID,
   (nodeInfo) => {
     return (id: string) => {
       const info = nodeInfo(id);
-      return info?.status === 'error' || (info?.events.length ?? 0) <= 0;
+      return !info || info.status === 'requested';
     };
   }
 );

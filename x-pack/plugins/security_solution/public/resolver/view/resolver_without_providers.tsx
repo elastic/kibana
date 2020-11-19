@@ -54,7 +54,8 @@ export const ResolverWithoutProviders = React.memo(
     } = useSelector((state: ResolverState) =>
       selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
     );
-    const terminatedProcesses = useSelector(selectors.terminatedProcesses);
+    // TODO: moving the check in each process node instead
+    // const terminatedProcesses = useSelector(selectors.terminatedProcesses);
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
 
     const ref = useCallback(
@@ -121,7 +122,6 @@ export const ResolverWithoutProviders = React.memo(
                   position={position}
                   projectionMatrix={projectionMatrix}
                   event={processEvent}
-                  isProcessTerminated={terminatedProcesses.has(processEntityId)}
                   timeAtRender={timeAtRender}
                 />
               );

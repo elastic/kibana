@@ -52,7 +52,8 @@ export const EventDetail = memo(function EventDetail({
   const isProcessTreeLoading = useSelector(selectors.isTreeLoading);
   const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
 
-  const isLoading = isEventLoading || isProcessTreeLoading || nodeDataModel.isLoading(nodeData);
+  const isNodeDataLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
+  const isLoading = isEventLoading || isProcessTreeLoading || isNodeDataLoading;
 
   const event = useSelector(selectors.currentRelatedEventData);
   /* const processEvent = useSelector((state: ResolverState) =>

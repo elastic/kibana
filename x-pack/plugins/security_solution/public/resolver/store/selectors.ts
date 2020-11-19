@@ -54,14 +54,6 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
 /**
- * Whether or not a given entity id is in the set of termination events.
- */
-export const isProcessTerminated = composeSelectors(
-  dataStateSelector,
-  dataSelectors.isProcessTerminated
-);
-
-/**
  * Retrieve an event from memory using the event's ID.
  */
 export const eventByID = composeSelectors(dataStateSelector, dataSelectors.eventByID);
@@ -104,11 +96,6 @@ export const treeRequestParametersToAbort = composeSelectors(
 export const resolverComponentInstanceID = composeSelectors(
   dataStateSelector,
   dataSelectors.resolverComponentInstanceID
-);
-
-export const terminatedProcesses = composeSelectors(
-  dataStateSelector,
-  dataSelectors.terminatedProcesses
 );
 
 /**
@@ -432,6 +419,11 @@ export const visibleNodes: (state: ResolverState) => (time: number) => Set<strin
  * Returns the full node data structure.
  */
 export const nodeData = composeSelectors(dataStateSelector, dataSelectors.nodeData);
+
+export const isNodeDataLoading = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isNodeDataLoading
+);
 
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a

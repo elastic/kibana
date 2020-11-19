@@ -43,10 +43,6 @@ export const NodeEventsInCategory = memo(function ({
   nodeID: string;
   eventCategory: string;
 }) {
-  /* const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  ); */
-  // TODO:
   const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
   const processEvent = nodeDataModel.firstEvent(nodeData);
   const eventCount = useSelector((state: ResolverState) =>
@@ -56,9 +52,9 @@ export const NodeEventsInCategory = memo(function ({
     selectors.relatedEventCountOfTypeForNode(state)(nodeID, eventCategory)
   );
   const events = useSelector((state: ResolverState) => selectors.nodeEventsInCategory(state));
+  const isNodeDataLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
 
-  const isLoading =
-    useSelector(selectors.isLoadingNodeEventsInCategory) || nodeDataModel.isLoading(nodeData);
+  const isLoading = useSelector(selectors.isLoadingNodeEventsInCategory) || isNodeDataLoading;
   const hasError = useSelector(selectors.hadErrorLoadingNodeEventsInCategory);
   return (
     <>
