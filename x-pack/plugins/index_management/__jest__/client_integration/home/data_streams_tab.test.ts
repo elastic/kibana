@@ -67,9 +67,9 @@ describe('Data Streams tab', () => {
       expect(exists('templateList')).toBe(true);
     });
 
-    test('when Ingest Manager is enabled, links to Ingest Manager', async () => {
+    test('when Fleet is enabled, links to Fleet', async () => {
       testBed = await setup({
-        plugins: { ingestManager: { hi: 'ok' } },
+        plugins: { fleet: { hi: 'ok' } },
       });
 
       await act(async () => {
@@ -80,7 +80,7 @@ describe('Data Streams tab', () => {
       component.update();
 
       // Assert against the text because the href won't be available, due to dependency upon our core mock.
-      expect(findEmptyPromptIndexTemplateLink().text()).toBe('Ingest Manager');
+      expect(findEmptyPromptIndexTemplateLink().text()).toBe('Fleet');
     });
   });
 
