@@ -34,7 +34,7 @@ import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
-import { IngestManagerStartContract, ExternalCallback } from '../../fleet/server';
+import { FleetStartContract, ExternalCallback } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -93,7 +93,7 @@ export interface SetupPlugins {
 export interface StartPlugins {
   alerts: AlertPluginStartContract;
   data: DataPluginStart;
-  ingestManager?: IngestManagerStartContract;
+  fleet?: FleetStartContract;
   licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
@@ -326,27 +326,27 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     let registerIngestCallback: ((...args: ExternalCallback) => void) | undefined;
 
     const exceptionListsStartEnabled = () => {
-      return this.lists && plugins.taskManager && plugins.ingestManager;
+      return this.lists && plugins.taskManager && plugins.fleet;
     };
 
     if (exceptionListsStartEnabled()) {
       const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = new ArtifactClient(savedObjectsClient);
 
-      registerIngestCallback = plugins.ingestManager!.registerExternalCallback;
+      registerIngestCallback = plugins.fleet!.registerExternalCallback;
       manifestManager = new ManifestManager({
         savedObjectsClient,
         artifactClient,
         exceptionListClient,
-        packagePolicyService: plugins.ingestManager!.packagePolicyService,
+        packagePolicyService: plugins.fleet!.packagePolicyService,
         logger: this.logger,
         cache: this.exceptionsCache,
       });
     }
 
     this.endpointAppContextService.start({
-      agentService: plugins.ingestManager?.agentService,
-      packageService: plugins.ingestManager?.packageService,
+      agentService: plugins.fleet?.agentService,
+      packageService: plugins.fleet?.packageService,
       appClientFactory: this.appClientFactory,
       security: this.setupPlugins!.security!,
       alerts: plugins.alerts,

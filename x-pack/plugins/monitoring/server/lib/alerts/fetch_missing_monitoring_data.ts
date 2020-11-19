@@ -100,7 +100,7 @@ export async function fetchMissingMonitoringData(
     'kibana_stats.kibana.name',
     'logstash_stats.logstash.host',
     'beats_stats.beat.name',
-    'beat_stats.beat.type',
+    'beats_stats.beat.type',
     'source_node.name',
   ];
   const subAggs = {

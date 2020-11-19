@@ -11,9 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPanel, EuiSpacer } from '@elast
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function StyleSettings({ layer, updateStyleDescriptor }) {
-  const settingsEditor = layer.renderStyleEditor({
-    onStyleDescriptorChange: updateStyleDescriptor,
-  });
+  const settingsEditor = layer.renderStyleEditor(updateStyleDescriptor);
 
   if (!settingsEditor) {
     return null;
