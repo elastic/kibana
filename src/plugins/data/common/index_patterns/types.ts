@@ -56,7 +56,7 @@ export interface FieldAttrs {
 }
 
 export interface FieldAttrSet {
-  customName?: string;
+  customLabel?: string;
   count?: number;
 }
 
@@ -174,7 +174,7 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
-  customName?: string;
+  customLabel?: string;
   // not persisted
   shortDotsEnable?: boolean;
 }

@@ -191,6 +191,9 @@
             "throttle": {
               "type": "keyword"
             },
+            "updatedAt": {
+              "type": "date"
+            },
             "updatedBy": {
               "type": "keyword"
             }

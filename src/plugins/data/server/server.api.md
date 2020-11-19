@@ -507,7 +507,7 @@ export interface IFieldType {
     // (undocumented)
     count?: number;
     // (undocumented)
-    customName?: string;
+    customLabel?: string;
     // (undocumented)
     displayName?: string;
     // (undocumented)

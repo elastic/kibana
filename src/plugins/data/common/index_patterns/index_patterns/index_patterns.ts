@@ -295,7 +295,7 @@ export class IndexPatternsService {
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
       collector[field.name] = {
         ...field,
-        customName: fieldAttrs?.[field.name]?.customName,
+        customLabel: fieldAttrs?.[field.name]?.customLabel,
         count: fieldAttrs?.[field.name]?.count,
       };
       return collector;
