@@ -7,11 +7,23 @@
 export type JobType = 'anomaly-detector' | 'data-frame-analytics';
 export const ML_SAVED_OBJECT_TYPE = 'ml-job';
 
-type Result = Record<string, { success: boolean; error?: any }>;
+export interface SavedObjectResult {
+  [jobId: string]: { success: boolean; error?: any };
+}
 
 export interface RepairSavedObjectResponse {
-  savedObjectsCreated: Result;
-  savedObjectsDeleted: Result;
-  datafeedsAdded: Result;
-  datafeedsRemoved: Result;
+  savedObjectsCreated: SavedObjectResult;
+  savedObjectsDeleted: SavedObjectResult;
+  datafeedsAdded: SavedObjectResult;
+  datafeedsRemoved: SavedObjectResult;
+}
+
+export type JobsSpacesResponse = {
+  [jobType in JobType]: { [jobId: string]: string[] };
+};
+
+export interface InitializeSavedObjectResponse {
+  jobs: Array<{ id: string; type: string }>;
+  success: boolean;
+  error?: any;
 }
