@@ -37,8 +37,7 @@ import { ServiceOverviewTable } from '../service_overview_table';
 
 type ServiceTransactionGroupItem = ValuesType<
   APIReturnType<
-    '/api/apm/services/{serviceName}/overview_transaction_groups',
-    'GET'
+    'GET /api/apm/services/{serviceName}/overview_transaction_groups'
   >['transaction_groups']
 >;
 
@@ -102,7 +101,8 @@ export function ServiceOverviewTransactionsTable(props: Props) {
     }
 
     return callApmApi({
-      pathname: '/api/apm/services/{serviceName}/overview_transaction_groups',
+      endpoint:
+        'GET /api/apm/services/{serviceName}/overview_transaction_groups',
       params: {
         path: { serviceName },
         query: {
