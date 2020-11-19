@@ -19,6 +19,7 @@
 
 import Path from 'path';
 
+// @ts-expect-error no types available
 import * as LmdbStore from 'lmdb-store';
 import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/dev-utils';
 
@@ -36,11 +37,25 @@ const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
+interface Lmdb<T> {
+  get(key: string): T | undefined;
+  put(key: string, value: T, version?: number, ifVersion?: number): Promise<boolean>;
+  remove(key: string, ifVersion?: number): Promise<boolean>;
+  openDB<T>(options: { name: string; encoding: 'msgpack' | 'string' | 'json' | 'binary' }): Lmdb<T>;
+  getRange(options?: {
+    start?: T;
+    end?: T;
+    reverse?: boolean;
+    limit?: number;
+    versions?: boolean;
+  }): Iterable<{ key: string; value: T }>;
+}
+
 export class Cache {
-  private readonly codes: LmdbStore.RootDatabase;
-  private readonly atimes: LmdbStore.Database;
-  private readonly mtimes: LmdbStore.Database;
-  private readonly sourceMaps: LmdbStore.Database;
+  private readonly codes: Lmdb<string>;
+  private readonly atimes: Lmdb<string>;
+  private readonly mtimes: Lmdb<string>;
+  private readonly sourceMaps: Lmdb<any>;
   private readonly prefix: string;
 
   constructor(config: { prefix: string }) {
@@ -49,23 +64,19 @@ export class Cache {
     this.codes = LmdbStore.open({
       name: 'codes',
       path: CACHE_DIR,
-      // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
       maxReaders: 500,
     });
 
-    // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
     this.atimes = this.codes.openDB({
       name: 'atimes',
       encoding: 'string',
     });
 
-    // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
     this.mtimes = this.codes.openDB({
       name: 'mtimes',
       encoding: 'string',
     });
 
-    // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
     this.sourceMaps = this.codes.openDB({
       name: 'sourceMaps',
       encoding: 'msgpack',
@@ -81,7 +92,7 @@ export class Cache {
   }
 
   getMtime(path: string) {
-    return this.safeGet<string>(this.mtimes, this.getKey(path));
+    return this.mtimes.get(this.getKey(path));
   }
 
   getCode(path: string) {
@@ -92,11 +103,11 @@ export class Cache {
     // touched in a long time (currently 30 days)
     this.atimes.put(key, GLOBAL_ATIME).catch(reportError);
 
-    return this.safeGet<string>(this.codes, key);
+    return this.codes.get(key);
   }
 
   getSourceMap(path: string) {
-    return this.safeGet<any>(this.sourceMaps, this.getKey(path));
+    return this.sourceMaps.get(this.getKey(path));
   }
 
   update(path: string, file: { mtime: string; code: string; map: any }) {
@@ -114,27 +125,17 @@ export class Cache {
     return `${this.prefix}${path}`;
   }
 
-  private safeGet<V>(db: LmdbStore.Database, key: string) {
-    try {
-      return db.get(key) as V | undefined;
-    } catch (error) {
-      // get errors indicate that a key value is corrupt in some way, so remove it
-      db.removeSync(key);
-    }
-  }
-
   private async pruneOldKeys() {
     try {
       const ATIME_LIMIT = Date.now() - 30 * DAY;
       const BATCH_SIZE = 1000;
 
-      const validKeys: LmdbStore.Key[] = [];
-      const invalidKeys: LmdbStore.Key[] = [];
+      const validKeys: string[] = [];
+      const invalidKeys: string[] = [];
 
-      // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
       for (const { key, value } of this.atimes.getRange()) {
-        const atime = parseInt(`${value}`, 10);
-        if (Number.isNaN(atime) || atime < ATIME_LIMIT) {
+        const atime = parseInt(value, 10);
+        if (atime < ATIME_LIMIT) {
           invalidKeys.push(key);
         } else {
           validKeys.push(key);
