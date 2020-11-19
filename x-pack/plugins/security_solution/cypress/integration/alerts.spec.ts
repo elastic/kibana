@@ -30,8 +30,7 @@ import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/83773
-describe.skip('Alerts', () => {
+describe('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       esArchiverLoad('alerts');
