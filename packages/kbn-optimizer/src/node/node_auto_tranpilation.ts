@@ -40,7 +40,7 @@ import Crypto from 'crypto';
 import * as babel from '@babel/core';
 import { addHook } from 'pirates';
 import { REPO_ROOT } from '@kbn/dev-utils';
-import sourceMapSupport from 'source-map-support';
+// import sourceMapSupport from 'source-map-support';
 
 import { Cache } from './cache';
 
@@ -137,23 +137,23 @@ export function registerNodeAutoTranspilation() {
     prefix: determineCachePrefix(),
   });
 
-  sourceMapSupport.install({
-    handleUncaughtExceptions: false,
-    environment: 'node',
-    // @ts-expect-error bad source-map-support types
-    retrieveSourceMap(path: string) {
-      const map = cache.getSourceMap(path);
+  // sourceMapSupport.install({
+  //   handleUncaughtExceptions: false,
+  //   environment: 'node',
+  //   // @ts-expect-error bad source-map-support types
+  //   retrieveSourceMap(path: string) {
+  //     const map = cache.getSourceMap(path);
 
-      if (map) {
-        return {
-          url: null,
-          map,
-        };
-      } else {
-        return null;
-      }
-    },
-  });
+  //     if (map) {
+  //       return {
+  //         url: null,
+  //         map,
+  //       };
+  //     } else {
+  //       return null;
+  //     }
+  //   },
+  // });
 
   let compiling = false;
 
