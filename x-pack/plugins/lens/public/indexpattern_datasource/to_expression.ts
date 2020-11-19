@@ -29,34 +29,16 @@ function getExpressionForLayer(
   }
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
-  const bucketsCount = columnEntries.filter(([, entry]) => entry.isBucketed).length;
-  const metricsCount = columnEntries.length - bucketsCount;
 
   if (columnEntries.length) {
     const aggs = columnEntries.map(([colId, col]) => {
       return getEsAggsConfig(col, colId);
     });
 
-    /**
-     * Because we are turning on metrics at all levels, the sequence generation
-     * logic here is more complicated. Examples follow:
-     *
-     * Example 1: [Count]
-     * Output: [`col-0-count`]
-     *
-     * Example 2: [Terms, Terms, Count]
-     * Output: [`col-0-terms0`, `col-2-terms1`, `col-3-count`]
-     *
-     * Example 3: [Terms, Terms, Count, Max]
-     * Output: [`col-0-terms0`, `col-3-terms1`, `col-4-count`, `col-5-max`]
-     */
     const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
-      const newIndex = column.isBucketed
-        ? index * (metricsCount + 1) // Buckets are spaced apart by N + 1
-        : (index ? index + 1 : 0) - bucketsCount + (bucketsCount - 1) * (metricsCount + 1);
       return {
         ...currentIdMap,
-        [`col-${columnEntries.length === 1 ? 0 : newIndex}-${colId}`]: {
+        [`col-${columnEntries.length === 1 ? 0 : index}-${colId}`]: {
           ...column,
           id: colId,
         },
@@ -104,8 +86,8 @@ function getExpressionForLayer(
           function: 'esaggs',
           arguments: {
             index: [indexPattern.id],
-            metricsAtAllLevels: [true],
-            partialRows: [true],
+            metricsAtAllLevels: [false],
+            partialRows: [false],
             includeFormatHints: [true],
             timeFields: allDateHistogramFields,
             aggConfigs: [JSON.stringify(aggs)],

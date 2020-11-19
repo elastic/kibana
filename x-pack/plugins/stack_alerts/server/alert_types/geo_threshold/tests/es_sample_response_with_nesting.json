@@ -41,10 +41,10 @@
                         "_id" : "N-ng1XQB6yyY-xQxnGSM",
                         "_score" : null,
                         "fields" : {
-                          "@timestamp" : [
+                          "time_data.@timestamp" : [
                             "2020-09-28T18:01:41.190Z"
                           ],
-                          "location" : [
+                          "geo.coords.location" : [
                             "40.62806099653244, -82.8814151789993"
                           ],
                           "entity_id" : [
@@ -75,10 +75,10 @@
                         "_id" : "iOng1XQB6yyY-xQxnGSM",
                         "_score" : null,
                         "fields" : {
-                          "@timestamp" : [
+                          "time_data.@timestamp" : [
                             "2020-09-28T18:01:41.191Z"
                           ],
-                          "location" : [
+                          "geo.coords.location" : [
                             "39.006176185794175, -82.22068064846098"
                           ],
                           "entity_id" : [
@@ -109,10 +109,10 @@
                         "_id" : "n-ng1XQB6yyY-xQxnGSM",
                         "_score" : null,
                         "fields" : {
-                          "@timestamp" : [
+                          "time_data.@timestamp" : [
                             "2020-09-28T18:01:41.191Z"
                           ],
-                          "location" : [
+                          "geo.coords.location" : [
                             "41.6677269525826, -84.71324851736426"
                           ],
                           "entity_id" : [
@@ -143,10 +143,10 @@
                         "_id" : "GOng1XQB6yyY-xQxnGWM",
                         "_score" : null,
                         "fields" : {
-                          "@timestamp" : [
+                          "time_data.@timestamp" : [
                             "2020-09-28T18:01:41.192Z"
                           ],
-                          "location" : [
+                          "geo.coords.location" : [
                             "39.07997465226799, 6.073727197945118"
                           ],
                           "entity_id" : [

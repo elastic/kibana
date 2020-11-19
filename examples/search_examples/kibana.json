@@ -1,6 +1,7 @@
 {
   "id": "searchExamples",
-  "version": "7.10.1",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
   "requiredPlugins": ["navigation", "data", "developerExamples"],
