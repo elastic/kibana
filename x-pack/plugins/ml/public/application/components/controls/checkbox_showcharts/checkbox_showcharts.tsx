@@ -16,24 +16,24 @@ export const useShowCharts = (): [boolean, (v: boolean) => void] => {
 
   const showCharts = explorerUrlState?.mlShowCharts ?? SHOW_CHARTS_DEFAULT;
 
-  const setShowCarts = useCallback(
+  const setShowCharts = useCallback(
     (v: boolean) => {
       setExplorerUrlState({ mlShowCharts: v });
     },
     [setExplorerUrlState]
   );
 
-  return [showCharts, setShowCarts];
+  return [showCharts, setShowCharts];
 };
 
 /*
  * React component for a checkbox element to toggle charts display.
  */
 export const CheckboxShowCharts: FC = () => {
-  const [showCharts, setShowCarts] = useShowCharts();
+  const [showCharts, setShowCharts] = useShowCharts();
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setShowCarts(e.target.checked);
+    setShowCharts(e.target.checked);
   };
 
   const id = useMemo(() => htmlIdGenerator()(), []);
