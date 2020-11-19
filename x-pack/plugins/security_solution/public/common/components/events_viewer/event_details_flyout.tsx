@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
 
-import { TimelineExpandedEventType } from '../../../../common/types/timeline';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { BrowserFields, DocValueFields } from '../../containers/source';
@@ -41,15 +40,13 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   );
 
   const handleClearSelection = useCallback(() => {
-    if (expandedEvent.eventId) {
-      dispatch(
-        timelineActions.toggleExpandedEvent({
-          timelineId,
-          ...(expandedEvent as TimelineExpandedEventType),
-        })
-      );
-    }
-  }, [dispatch, expandedEvent, timelineId]);
+    dispatch(
+      timelineActions.toggleExpandedEvent({
+        timelineId,
+        event: {},
+      })
+    );
+  }, [dispatch, timelineId]);
 
   if (!expandedEvent.eventId) {
     return null;

@@ -108,9 +108,11 @@ const StatefulEventComponent: React.FC<Props> = ({
     dispatch(
       timelineActions.toggleExpandedEvent({
         timelineId,
-        eventId,
-        indexName,
-        loading: false,
+        event: {
+          eventId,
+          indexName,
+          loading: false,
+        },
       })
     );
 
