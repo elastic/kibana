@@ -57,11 +57,12 @@ This action type has no `secrets` properties.
 
 #### `subActionParams (addComment)`
 
-| Property | Description                                                                                                                                                            | Type   |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| comment  | The case’s new comment.                                                                                                                                                | string |
-| context  | Must be of: `{ type: "user" | "alert", savedObjectId: string | null}`. Comments of type `user` should have `savedObjectId: null`. All others, `savedObjectId: string`. | object |
-
+| Property | Description                                                             | Type              |
+| -------- | ----------------------------------------------------------------------- | ----------------- |
+| type     | The type of the comment                                                 | `user` \| `alert` |
+| comment  | The comment. Valid only when type is `user`.                            | string            |
+| alertId  | The alert ID. Valid only when the type is `alert`                       | string            |
+| index    | The index where the alert is saved. Valid only when the type is `alert` | string            |
 #### `connector`
 
 | Property | Description                                                                                       | Type              |
