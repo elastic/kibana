@@ -33,7 +33,11 @@ jest.mock('../../../../common/lib/kibana', () => ({
 describe('StepRuleActions', () => {
   it('renders correctly', () => {
     const wrapper = shallow(
-      <StepRuleActions actionMessageParams={[]} isReadOnlyView={false} isLoading={false} />
+      <StepRuleActions
+        actionMessageParams={{ params: [], state: [] }}
+        isReadOnlyView={false}
+        isLoading={false}
+      />
     );
 
     expect(wrapper.find('[data-test-subj="stepRuleActions"]')).toHaveLength(1);

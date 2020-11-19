@@ -24,8 +24,8 @@ import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
-import { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
+import type { ConnectorAddFlyoutProps } from './application/sections/action_connector_form/connector_add_flyout';
+import type { ConnectorEditFlyoutProps } from './application/sections/action_connector_form/connector_edit_flyout';
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 

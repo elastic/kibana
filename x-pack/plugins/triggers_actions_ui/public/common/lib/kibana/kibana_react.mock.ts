@@ -5,36 +5,25 @@
  */
 
 import React from 'react';
+import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { featuresPluginMock } from '../../../../../features/public/mocks';
 
 import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUiServices } from '../../../application/app';
-import { ValidationResult } from '../../../types';
+import { AlertTypeRegistryContract, ActionTypeRegistryContract } from '../../../types';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
-  return ({
+  return {
     ...core,
     alertTypeRegistry: {
-      has: jest.fn().mockReturnValue(true),
+      has: jest.fn(),
       register: jest.fn(),
-      get: jest.fn().mockReturnValue({
-        id: 'my-alert-type',
-        iconClass: 'test',
-        name: 'test-alert',
-        validate: (): ValidationResult => {
-          return { errors: {} };
-        },
-        requiresAppContext: false,
-      }),
-      actionTypeRegistry: jest.fn(),
+      get: jest.fn(),
       list: jest.fn(),
-    },
-    application: {
-      capabilities: {
-        get: jest.fn(() => ({})),
-      },
-    },
+    } as AlertTypeRegistryContract,
     notifications: core.notifications,
     dataPlugin: jest.fn(),
     navigateToApp: jest.fn(),
@@ -45,7 +34,19 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     },
     history: scopedHistoryMock.create(),
     setBreadcrumbs: jest.fn(),
-  } as unknown) as TriggersAndActionsUiServices;
+    data: dataPluginMock.createStartContract(),
+    actionTypeRegistry: {
+      has: jest.fn(),
+      register: jest.fn(),
+      get: jest.fn(),
+      list: jest.fn(),
+    } as ActionTypeRegistryContract,
+    charts: chartPluginMock.createStartContract(),
+    kibanaFeatures: [],
+    element: ({
+      style: { cursor: 'pointer' },
+    } as unknown) as HTMLElement,
+  } as TriggersAndActionsUiServices;
 };
 
 export const createWithKibanaMock = () => {

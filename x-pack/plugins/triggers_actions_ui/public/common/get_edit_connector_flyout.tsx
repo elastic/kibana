@@ -5,7 +5,7 @@
  */
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ConnectorEditFlyoutProps } from '../application/sections/action_connector_form/connector_edit_flyout';
+import type { ConnectorEditFlyoutProps } from '../application/sections/action_connector_form/connector_edit_flyout';
 
 export const getEditConnectorFlyoutLazy = (props: ConnectorEditFlyoutProps) => {
   const ConnectorEditFlyoutLazy = lazy(

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
 import {
   createKibanaContextProviderMock,
@@ -15,16 +16,7 @@ export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => 
 export const useKibana = jest.fn().mockReturnValue({
   services: {
     ...mockStartServicesMock,
-    data: {
-      search: {
-        search: jest.fn().mockImplementation(() => ({
-          subscribe: jest.fn().mockImplementation(() => ({
-            error: jest.fn(),
-            next: jest.fn(),
-          })),
-        })),
-      },
-    },
+    data: dataPluginMock.createStartContract(),
   },
 });
 export const useHttp = jest.fn().mockReturnValue(createStartServicesMock().http);

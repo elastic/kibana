@@ -22,7 +22,7 @@ export function withActionOperations<T>(
   return (props: PropsWithOptionalApiHandlers<T>) => {
     const { http } = useKibana().services;
     if (!http) {
-      return null;
+      throw new Error('KibanaContext has not been initalized correctly.');
     }
     return (
       <WrappedComponent {...(props as T)} loadActionTypes={async () => loadActionTypes({ http })} />

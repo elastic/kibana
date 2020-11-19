@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlexItem, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 import {
@@ -51,11 +51,14 @@ export const ConnectorAddModal = ({
     application: { capabilities },
   } = useKibana().services;
   let hasErrors = false;
-  const initialConnector = {
-    actionTypeId: actionType.id,
-    config: {},
-    secrets: {},
-  } as ActionConnector;
+  const initialConnector = useMemo(
+    () => ({
+      actionTypeId: actionType.id,
+      config: {},
+      secrets: {},
+    }),
+    [actionType.id]
+  );
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
 

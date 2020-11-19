@@ -71,7 +71,7 @@ export function withBulkAlertOperations<T>(
   return (props: PropsWithOptionalApiHandlers<T>) => {
     const { http } = useKibana().services;
     if (!http) {
-      return null;
+      throw new Error('KibanaContext has not been initalized correctly.');
     }
     return (
       <WrappedComponent
