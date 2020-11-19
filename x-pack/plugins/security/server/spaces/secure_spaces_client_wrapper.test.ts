@@ -49,7 +49,7 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
     if (!space) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError('space', spaceId);
     }
-    return Promise.resolve(space);
+    return space;
   });
 
   const authorization = authorizationMock.create({

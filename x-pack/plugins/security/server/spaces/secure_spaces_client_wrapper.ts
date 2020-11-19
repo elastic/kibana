@@ -42,7 +42,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     private readonly authorization: AuthorizationServiceSetup,
     private readonly legacyAuditLogger: LegacySpacesAuditLogger
   ) {
-    this.useRbac = authorization.mode.useRbacForRequest(request);
   }
 
   public async getAll({
@@ -170,7 +169,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
   }
 
   private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {
-    const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
+    const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
     const { username, hasAllRequested } = await checkPrivileges.globally({ kibana: action });
 
     if (hasAllRequested) {

@@ -7,7 +7,7 @@
 import { Subscription } from 'rxjs';
 import type { KibanaRequest, IBasePath } from 'src/core/server';
 import { SpacesClientServiceStart } from '../spaces_client';
-import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
+import { getSpaceIdFromPath } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
 import { Space } from '..';

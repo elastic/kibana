@@ -8,7 +8,7 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import { ISavedObjectsRepository } from 'src/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { isReservedSpace } from '../../common/is_reserved_space';
+import { isReservedSpace } from '../../common';
 import { Space } from '../../common/model/space';
 import { ConfigType } from '../config';
 import { GetAllSpacesPurpose, GetSpaceResult } from '../../common/model/types';
@@ -55,7 +55,7 @@ export class SpacesClient {
     return savedObjects.map(this.transformSavedObjectToSpace);
   }
 
-  public async get(id: string): Promise<Space> {
+  public async get(id: string) {
     const savedObject = await this.repository.get('space', id);
     return this.transformSavedObjectToSpace(savedObject);
   }
@@ -101,7 +101,7 @@ export class SpacesClient {
     await this.repository.delete('space', id);
   }
 
-  private transformSavedObjectToSpace(savedObject: any): Space {
+  private transformSavedObjectToSpace(savedObject: SavedObject<any>) {
     return {
       id: savedObject.id,
       ...savedObject.attributes,

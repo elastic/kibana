@@ -268,7 +268,7 @@ export class AlertingPlugin {
       includedHiddenTypes: ['alert'],
     });
 
-    const spaceIdToNamespace = (spaceId?: string): string | undefined => {
+    const spaceIdToNamespace = (spaceId?: string) => {
       return plugins.spaces && spaceId
         ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
         : undefined;

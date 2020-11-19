@@ -28,7 +28,7 @@ export interface SpacesClientServiceSetup {
   /**
    * Sets the factory that should be used to create the Saved Objects Repository
    * whenever a new instance of the SpacesClient is created. By default, a repository
-   * scoped the current user will be created.
+   * scoped to the current user will be created.
    */
   setClientRepositoryFactory: (factory: SpacesClientRepositoryFactory) => void;
 
