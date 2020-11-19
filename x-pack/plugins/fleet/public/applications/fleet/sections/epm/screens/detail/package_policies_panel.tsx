@@ -23,25 +23,25 @@ import {
 } from '../../../../../../../common/constants';
 import { useUrlPagination } from '../../../../hooks';
 import {
-  PackagePolicyEnriched,
-  useGetEnrichedPackagePolicies,
-} from './use_get_enriched_package_policies';
+  PackagePolicyAndAgentPolicy,
+  usePackagePoliciesWithAgentPolicy,
+} from './use_package_policies_with_agent_policy';
 import { LinkAndRevision, LinkAndRevisionProps } from '../../../../components';
 import { Persona } from './persona';
 
 const IntegrationDetailsLink = memo<{
-  integrationPolicy: PackagePolicyEnriched;
-}>(({ integrationPolicy }) => {
+  packagePolicy: PackagePolicyAndAgentPolicy['packagePolicy'];
+}>(({ packagePolicy }) => {
   const { getHref } = useLink();
   return (
     <EuiLink
       className="eui-textTruncate"
       href={getHref('edit_integration', {
-        policyId: integrationPolicy.policy_id,
-        packagePolicyId: integrationPolicy.id,
+        policyId: packagePolicy.policy_id,
+        packagePolicyId: packagePolicy.id,
       })}
     >
-      {integrationPolicy.name}
+      {packagePolicy.name}
     </EuiLink>
   );
 });
@@ -90,14 +90,14 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const { data } = useGetEnrichedPackagePolicies({
+  const { data } = usePackagePoliciesWithAgentPolicy({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
   });
 
   const handleTableOnChange = useCallback(
-    ({ page }: CriteriaWithPagination<PackagePolicyEnriched>) => {
+    ({ page }: CriteriaWithPagination<PackagePolicyAndAgentPolicy>) => {
       setPagination({
         currentPage: page.index + 1,
         pageSize: page.size,
@@ -106,37 +106,34 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
     [setPagination]
   );
 
-  const columns: Array<EuiTableFieldDataColumnType<PackagePolicyEnriched>> = useMemo(
+  const columns: Array<EuiTableFieldDataColumnType<PackagePolicyAndAgentPolicy>> = useMemo(
     () => [
       {
-        field: 'name',
+        field: 'packagePolicy.name',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.name', {
           defaultMessage: 'Integration',
         }),
-        render(_, integrationPolicy) {
-          return <IntegrationDetailsLink integrationPolicy={integrationPolicy} />;
+        render(_, { packagePolicy }) {
+          return <IntegrationDetailsLink packagePolicy={packagePolicy} />;
         },
       },
       {
-        field: 'description',
+        field: 'packagePolicy.description',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.description', {
           defaultMessage: 'Description',
         }),
         truncateText: true,
       },
       {
-        field: 'policy_id',
+        field: 'packagePolicy.policy_id',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentPolicy', {
           defaultMessage: 'Agent policy',
         }),
         truncateText: true,
-        render(id, packagePolicy) {
+        render(id, { agentPolicy }) {
           return (
-            <AgentPolicyDetailLink
-              agentPolicyId={id}
-              revision={packagePolicy._agentPolicy?.revision}
-            >
-              {packagePolicy._agentPolicy?.name ?? id}
+            <AgentPolicyDetailLink agentPolicyId={id} revision={agentPolicy.revision}>
+              {agentPolicy.name ?? id}
             </AgentPolicyDetailLink>
           );
         },
@@ -149,16 +146,16 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
         truncateText: true,
         align: 'right',
         width: '8ch',
-        render(packagePolicy: PackagePolicyEnriched) {
+        render({ packagePolicy, agentPolicy }: PackagePolicyAndAgentPolicy) {
           return (
             <PolicyAgentListLink agentPolicyId={packagePolicy.policy_id}>
-              {packagePolicy._agentPolicy?.agents ?? 0}
+              {agentPolicy?.agents ?? 0}
             </PolicyAgentListLink>
           );
         },
       },
       {
-        field: 'updated_by',
+        field: 'packagePolicy.updated_by',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.updatedBy', {
           defaultMessage: 'Last Updated By',
         }),
@@ -168,12 +165,12 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
         },
       },
       {
-        field: 'updated_at',
+        field: 'packagePolicy.updated_at',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.updatedAt', {
           defaultMessage: 'Last Updated',
         }),
         truncateText: true,
-        render(updatedAt: PackagePolicyEnriched['updated_at']) {
+        render(updatedAt: PackagePolicyAndAgentPolicy['packagePolicy']['updated_at']) {
           return (
             <span className="eui-textTruncate">
               <FormattedRelative value={updatedAt} />

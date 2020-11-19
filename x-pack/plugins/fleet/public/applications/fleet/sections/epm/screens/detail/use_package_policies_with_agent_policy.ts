@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { AgentPolicy, PackagePolicy } from '../../../../../../../common/types/models';
+import { PackagePolicy } from '../../../../../../../common/types/models';
 import {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
@@ -23,8 +23,13 @@ export interface PackagePolicyEnriched extends PackagePolicy {
   _agentPolicy: GetAgentPoliciesResponseItem | undefined;
 }
 
-type GetEnrichedPackagePoliciesResponse = Exclude<GetPackagePoliciesResponse, 'items'> & {
-  items: PackagePolicyEnriched[];
+export interface PackagePolicyAndAgentPolicy {
+  packagePolicy: PackagePolicy;
+  agentPolicy: GetAgentPoliciesResponseItem;
+}
+
+type GetPackagePoliciesWithAgentPolicy = Omit<GetPackagePoliciesResponse, 'items'> & {
+  items: PackagePolicyAndAgentPolicy[];
 };
 
 /**
@@ -33,12 +38,12 @@ type GetEnrichedPackagePoliciesResponse = Exclude<GetPackagePoliciesResponse, 'i
  * given package policy.
  * @param query
  */
-export const useGetEnrichedPackagePolicies = (
+export const usePackagePoliciesWithAgentPolicy = (
   query: Parameters<typeof useGetPackagePolicies>[0]
 ): {
   isLoading: boolean;
   error: Error | null;
-  data?: GetEnrichedPackagePoliciesResponse;
+  data?: GetPackagePoliciesWithAgentPolicy;
 } => {
   const {
     data: packagePoliciesData,
@@ -80,9 +85,7 @@ export const useGetEnrichedPackagePolicies = (
     shouldSendRequest: !!packagePoliciesData?.items.length,
   } as SendConditionalRequestConfig);
 
-  const [enrichedData, setEnrichedData] = useState<
-    GetEnrichedPackagePoliciesResponse | undefined
-  >();
+  const [enrichedData, setEnrichedData] = useState<GetPackagePoliciesWithAgentPolicy | undefined>();
 
   useEffect(() => {
     if (isLoadingPackagePolicies || isLoadingAgentPolicies) {
@@ -94,7 +97,7 @@ export const useGetEnrichedPackagePolicies = (
       return;
     }
 
-    const agentPoliciesById: Record<string, AgentPolicy> = {};
+    const agentPoliciesById: Record<string, GetAgentPoliciesResponseItem> = {};
 
     if (agentPoliciesData?.items) {
       for (const agentPolicy of agentPoliciesData?.items) {
@@ -102,14 +105,18 @@ export const useGetEnrichedPackagePolicies = (
       }
     }
 
+    const updatedPackageData: PackagePolicyAndAgentPolicy[] = packagePoliciesData.items.map(
+      (packagePolicy) => {
+        return {
+          packagePolicy,
+          agentPolicy: agentPoliciesById[packagePolicy.policy_id],
+        };
+      }
+    );
+
     setEnrichedData({
       ...packagePoliciesData,
-      items: packagePoliciesData.items.map((packagePolicy) => {
-        return {
-          ...packagePolicy,
-          _agentPolicy: agentPoliciesById[packagePolicy.policy_id],
-        };
-      }),
+      items: updatedPackageData,
     });
   }, [isLoadingAgentPolicies, isLoadingPackagePolicies, packagePoliciesData, agentPoliciesData]);
 
