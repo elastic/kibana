@@ -20,11 +20,11 @@
 import { updateSearchSource } from './update_search_source';
 import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { AppState } from '../angular/discover_state';
 import { IUiSettingsClient } from 'kibana/public';
 import { DiscoverServices } from '../../build_services';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { SAMPLE_SIZE_SETTING } from '../../../common';
+import { SortOrder } from '../../saved_searches/types';
 
 describe('updateSearchSource', () => {
   test('updates a given search source', async () => {
@@ -43,7 +43,7 @@ describe('updateSearchSource', () => {
           },
         } as unknown) as IUiSettingsClient,
       } as unknown) as DiscoverServices,
-      state: ({ sort: [] } as unknown) as AppState,
+      sort: [] as SortOrder[],
     });
     expect(result.getField('index')).toEqual(indexPatternMock);
     expect(result.getField('size')).toEqual(sampleSize);

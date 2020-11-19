@@ -48,7 +48,7 @@ export async function persistSavedSearch(
   updateSearchSource(savedSearch.searchSource, {
     indexPattern,
     services,
-    state,
+    sort: state.sort as SortOrder[],
   });
 
   savedSearch.columns = state.columns || [];

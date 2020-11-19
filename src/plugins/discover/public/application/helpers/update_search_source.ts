@@ -19,7 +19,6 @@
 import { getSortForSearchSource } from '../angular/doc_table';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { IndexPattern, ISearchSource } from '../../../../data/common/';
-import { AppState } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
 import { DiscoverServices } from '../../build_services';
 
@@ -31,26 +30,24 @@ export function updateSearchSource(
   {
     indexPattern,
     services,
-    state,
+    sort,
   }: {
-    services: DiscoverServices;
     indexPattern: IndexPattern;
-    state: AppState;
+    services: DiscoverServices;
+    sort: SortOrder[];
   }
 ) {
   const { uiSettings, data } = services;
+  const usedSort = getSortForSearchSource(
+    sort,
+    indexPattern,
+    uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+  );
 
   searchSource
     .setField('index', indexPattern)
     .setField('size', uiSettings.get(SAMPLE_SIZE_SETTING))
-    .setField(
-      'sort',
-      getSortForSearchSource(
-        state.sort as SortOrder[],
-        indexPattern,
-        uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-      )
-    )
+    .setField('sort', usedSort)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
   return searchSource;
