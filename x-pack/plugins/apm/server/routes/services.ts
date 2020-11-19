@@ -259,6 +259,7 @@ export const serviceThroughputRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
