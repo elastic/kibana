@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { CommonAlertState } from '../../../common/types/alerts';
 import { Legacy } from '../../legacy_shims';
 
