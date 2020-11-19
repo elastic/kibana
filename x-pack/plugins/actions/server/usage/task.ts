@@ -6,6 +6,8 @@
 
 import { Logger, CoreSetup, LegacyAPICaller } from 'kibana/server';
 import moment from 'moment';
+import { first } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -21,9 +23,9 @@ export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string
+  config: Observable<{ kibana: { index: string } }>
 ) {
-  registerActionsTelemetryTask(logger, taskManager, core, kibanaIndex);
+  registerActionsTelemetryTask(logger, taskManager, core, config);
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -34,13 +36,13 @@ function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  kibanaIndex: string
+  config: Observable<{ kibana: { index: string } }>
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
+      createTaskRunner: telemetryTaskRunner(logger, core, config),
     },
   });
 }
@@ -58,7 +60,11 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
+export function telemetryTaskRunner(
+  logger: Logger,
+  core: CoreSetup,
+  config: Observable<{ kibana: { index: string } }>
+) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     const callCluster = (...args: Parameters<LegacyAPICaller>) => {
@@ -68,6 +74,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
     };
     return {
       async run() {
+        const kibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
         return Promise.all([
           getTotalCount(callCluster, kibanaIndex),
           getInUseTotalCount(callCluster, kibanaIndex),

@@ -26,11 +26,16 @@ const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
 
 export function createActionsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  taskManager: TaskManagerStartContract
+  taskManager: Promise<TaskManagerStartContract>
 ) {
+  let isCollectorReady = false;
+  taskManager.then(() => {
+    // mark lensUsageCollector as ready to collect when the TaskManager is ready
+    isCollectorReady = true;
+  });
   return usageCollection.makeUsageCollector<ActionsUsage>({
     type: 'actions',
-    isReady: () => true,
+    isReady: () => isCollectorReady,
     schema: {
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },
@@ -79,7 +84,7 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
 
 export function registerActionsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  taskManager: TaskManagerStartContract
+  taskManager: Promise<TaskManagerStartContract>
 ) {
   const collector = createActionsUsageCollector(usageCollection, taskManager);
   usageCollection.registerCollector(collector);

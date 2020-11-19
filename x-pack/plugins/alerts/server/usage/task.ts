@@ -6,6 +6,8 @@
 
 import { Logger, CoreSetup, LegacyAPICaller } from 'kibana/server';
 import moment from 'moment';
+import { first } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -22,9 +24,9 @@ export function initializeAlertingTelemetry(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  kibanaIndex: string
+  config: Observable<{ kibana: { index: string } }>
 ) {
-  registerAlertingTelemetryTask(logger, core, taskManager, kibanaIndex);
+  registerAlertingTelemetryTask(logger, core, taskManager, config);
 }
 
 export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
@@ -37,13 +39,13 @@ function registerAlertingTelemetryTask(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  kibanaIndex: string
+  config: Observable<{ kibana: { index: string } }>
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
+      createTaskRunner: telemetryTaskRunner(logger, core, config),
     },
   });
 }
@@ -61,7 +63,11 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
+export function telemetryTaskRunner(
+  logger: Logger,
+  core: CoreSetup,
+  config: Observable<{ kibana: { index: string } }>
+) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     const callCluster = (...args: Parameters<LegacyAPICaller>) => {
@@ -72,6 +78,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
 
     return {
       async run() {
+        const kibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
         return Promise.all([
           getTotalCountAggregations(callCluster, kibanaIndex),
           getTotalCountInUse(callCluster, kibanaIndex),

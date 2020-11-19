@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { Observable } from 'rxjs';
 import {
   PluginInitializerContext,
   Plugin,
@@ -13,7 +14,6 @@ import {
   CoreStart,
   KibanaRequest,
   Logger,
-  SharedGlobalConfig,
   RequestHandler,
   IContextProvider,
   ElasticsearchServiceStart,
@@ -128,7 +128,6 @@ const includedHiddenTypes = [
 ];
 
 export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, PluginStartContract> {
-  private readonly kibanaIndex: Promise<string>;
   private readonly config: Promise<ActionsConfig>;
 
   private readonly logger: Logger;
@@ -145,20 +144,14 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.create<ActionsConfig>().pipe(first()).toPromise();
-
-    this.kibanaIndex = initContext.config.legacy.globalConfig$
-      .pipe(
-        first(),
-        map((config: SharedGlobalConfig) => config.kibana.index)
-      )
-      .toPromise();
-
     this.logger = initContext.logger.get('actions');
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
+    this.kibanaIndexConfig = initContext.config.legacy.globalConfig$;
   }
 
   public async setup(
@@ -224,21 +217,24 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
+      registerActionsUsageCollector(
+        usageCollection,
+        core
+          .getStartServices()
+          .then(([_, { taskManager }]) => taskManager as TaskManagerStartContract)
+      );
+
       initializeActionsTelemetry(
         this.telemetryLogger,
         plugins.taskManager,
         core,
-        await this.kibanaIndex
+        this.kibanaIndexConfig
       );
-
-      core.getStartServices().then(async ([, startPlugins]) => {
-        registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
-      });
     }
 
     core.http.registerRouteHandlerContext(
       'actions',
-      this.createRouteHandlerContext(core, await this.kibanaIndex)
+      this.createRouteHandlerContext(core, this.kibanaIndexConfig)
     );
 
     // Routes
