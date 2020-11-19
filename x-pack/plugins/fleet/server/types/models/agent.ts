@@ -71,6 +71,7 @@ export const NewAgentActionSchema = schema.oneOf([
       schema.literal('INTERNAL_POLICY_REASSIGN'),
     ]),
     data: schema.any(),
+    ack_data: schema.any(),
   }),
   schema.object({
     type: schema.oneOf([schema.literal('SETTINGS')]),
