@@ -18938,24 +18938,24 @@ livereload-js@^2.3.0:
   resolved "https://registry.yarnpkg.com/livereload-js/-/livereload-js-2.4.0.tgz#447c31cf1ea9ab52fc20db615c5ddf678f78009c"
   integrity sha512-XPQH8Z2GDP/Hwz2PCDrh2mth4yFejwA1OZ/81Ti3LgKyhDcEjsSsqFWZojHG0va/duGd+WyosY7eXLDoOyqcPw==
 
-lmdb-store-0.9@0.7.2:
-  version "0.7.2"
-  resolved "https://registry.yarnpkg.com/lmdb-store-0.9/-/lmdb-store-0.9-0.7.2.tgz#45b907a46d0a676fee955629bd2f70f06efb26bb"
-  integrity sha512-/MO8G6p4l7ku1ltCCdE/2ZOtSQBSM0B02vIemMHjoKgjE/fooanJYXIFwtZYM5r/hBDxmO+L3q5ASAXbfHQ6pQ==
+lmdb-store-0.9@0.7.3:
+  version "0.7.3"
+  resolved "https://registry.yarnpkg.com/lmdb-store-0.9/-/lmdb-store-0.9-0.7.3.tgz#c2cb27dfa916ab966cceed692c67e4236813104a"
+  integrity sha512-t8iCnN6T3NZPFelPmjYIjCg+nhGbOdc0xcHCG40v01AWRTN49OINSt2k/u+16/2/HrI+b6Ssb8WByXUhbyHz6w==
   dependencies:
     fs-extra "^9.0.1"
     msgpackr "^0.5.3"
     nan "^2.14.1"
     node-gyp-build "^4.2.3"
-    weak-lru-cache "^0.2.0"
+    weak-lru-cache "^0.3.9"
 
-lmdb-store@^0.8.11:
-  version "0.8.11"
-  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-0.8.11.tgz#7f7c756a115ceab32c51c0948444bfd5d1716ab3"
-  integrity sha512-CFgxh2/TL1NXyJ8FQPXY50O/gADxih7Gx0RjKRScGlyxihqSLd/fGzMkbvDdeAOAS8bsnYpLojAMTSeNiwN8dQ==
+lmdb-store@^0.8.15:
+  version "0.8.15"
+  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-0.8.15.tgz#4efb0341c2df505dd6f3a7f26f834f0a142a80a2"
+  integrity sha512-4Q0WZh2FmcJC6esZRUWMfkCmNiz0WU9cOgrxt97ZMTnVfHyOdZhtrt0oOF5EQPfetxxJf/BorKY28aX92R6G6g==
   dependencies:
     fs-extra "^9.0.1"
-    lmdb-store-0.9 "0.7.2"
+    lmdb-store-0.9 "0.7.3"
     msgpackr "^0.5.4"
     nan "^2.14.1"
     node-gyp-build "^4.2.3"
@@ -29334,11 +29334,6 @@ wcwidth@^1.0.1:
   integrity sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g=
   dependencies:
     defaults "^1.0.3"
-
-weak-lru-cache@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/weak-lru-cache/-/weak-lru-cache-0.2.0.tgz#447379ccff6dfda1b7a9566c9ef168260be859d1"
-  integrity sha512-M1l5CzKvM7maa7tCbtL0NW6sOnp8gqup853+9Aq7GL0XNWKNnFOkeE3v3Z5X2IeMzedPwQyPbi4RlFvD6rxs7A==
 
 weak-lru-cache@^0.3.9:
   version "0.3.9"
