@@ -5,14 +5,17 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
+import { useRouteMatch } from 'react-router-dom';
 import { UptimeDatePicker } from '../uptime_date_picker';
 import { SyntheticsCallout } from '../../overview/synthetics_callout';
 import { PageTabs } from './page_tabs';
+import { MONITOR_ROUTE } from '../../../../common/constants';
 
 interface PageHeaderProps {
   datePicker?: boolean;
+  headingText?: string | JSX.Element;
 }
 
 const StyledPicker = styled(EuiFlexItem)`
@@ -31,13 +34,15 @@ const StyledPicker = styled(EuiFlexItem)`
   }
 `;
 
-export const PageHeader = React.memo(({ datePicker = true }: PageHeaderProps) => {
+export const PageHeader = React.memo(({ datePicker = true, headingText }: PageHeaderProps) => {
   const DatePickerComponent = () =>
     datePicker ? (
       <StyledPicker grow={false} style={{ flexBasis: 485 }}>
         <UptimeDatePicker />
       </StyledPicker>
     ) : null;
+
+  const isMonRoute = useRouteMatch(MONITOR_ROUTE);
 
   return (
     <>
@@ -51,11 +56,19 @@ export const PageHeader = React.memo(({ datePicker = true }: PageHeaderProps) =>
       >
         <EuiFlexItem>
           <PageTabs />
-          <EuiSpacer size="s" />
         </EuiFlexItem>
         <DatePickerComponent />
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
+      {isMonRoute && <EuiHorizontalRule margin="m" />}
+      {!isMonRoute && <EuiSpacer size="m" />}
+      {headingText && (
+        <>
+          <EuiTitle>
+            <h1 className="eui-textNoWrap">{headingText}</h1>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+        </>
+      )}
     </>
   );
 });

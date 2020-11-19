@@ -26,8 +26,6 @@ import { UptimeRefreshContext } from '../contexts';
 import * as labels from './translations';
 import { certificatesSelector, getCertificatesAction } from '../state/certificates/certificates';
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
-import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
-import { CLIENT_ALERT_TYPES } from '../../common/constants/alerts';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -80,9 +78,6 @@ export const CertificatesPage: React.FC = () => {
           <PageHeader datePicker={false} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ToggleAlertFlyoutButton alertOptions={[CLIENT_ALERT_TYPES.TLS]} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <EuiHideFor sizes={['xs']}>
             <EuiButton
               fill
@@ -106,8 +101,6 @@ export const CertificatesPage: React.FC = () => {
           </EuiShowFor>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
       <EuiPanel>
         <EuiTitle>
           <h1 className="eui-textNoWrap">

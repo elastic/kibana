@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
@@ -49,7 +49,7 @@ export const PageTabs = () => {
   };
 
   useEffect(() => {
-    if (isOverView) {
+    if (isOverView?.isExact) {
       setSelectedTabId(OVERVIEW_ROUTE);
     }
     if (isCerts) {
@@ -61,12 +61,12 @@ export const PageTabs = () => {
   }, [isOverView, isSettings, isCerts]);
 
   const renderTabs = () => {
-    return tabs.map((tab, index, dataTestSubj) => (
+    return tabs.map((tab, index) => (
       <EuiTab
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
         key={index}
-        data-test-subj={dataTestSubj}
+        data-test-subj={tab.dataTestSubj}
       >
         {tab.name}
       </EuiTab>
