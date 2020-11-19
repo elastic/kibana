@@ -10,13 +10,17 @@ import {
   JOB_MAP_NODE_TYPES,
   JobMapNodeTypes,
 } from '../../../common/constants/data_frame_analytics';
+import { TrainedModelConfigResponse } from '../../../common/types/trained_models';
 import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
   AnalyticsMapEdgeElement,
   AnalyticsMapReturnType,
   AnalyticsMapNodeElement,
+  ExtendAnalyticsMapArgs,
+  GetAnalyticsMapArgs,
   InitialElementsReturnType,
+  isCompleteInitialReturnType,
   isAnalyticsMapEdgeElement,
   isAnalyticsMapNodeElement,
   isIndexPatternLinkReturnType,
@@ -30,7 +34,7 @@ import type { MlClient } from '../../lib/ml_client';
 export class AnalyticsManager {
   private _client: IScopedClusterClient['asInternalUser'];
   private _mlClient: MlClient;
-  public _inferenceModels: any; // TODO: update types
+  public _inferenceModels: TrainedModelConfigResponse[];
 
   constructor(mlClient: MlClient, client: IScopedClusterClient['asInternalUser']) {
     this._client = client;
@@ -38,11 +42,11 @@ export class AnalyticsManager {
     this._inferenceModels = [];
   }
 
-  public set inferenceModels(models: any) {
+  public set inferenceModels(models) {
     this._inferenceModels = models;
   }
 
-  public get inferenceModels(): any {
+  public get inferenceModels() {
     return this._inferenceModels;
   }
 
@@ -57,10 +61,14 @@ export class AnalyticsManager {
     }
   }
 
-  private isDuplicateElement(analyticsId: string, elements: any[]): boolean {
+  private isDuplicateElement(analyticsId: string, elements: MapElements[]): boolean {
     let isDuplicate = false;
-    elements.forEach((elem: any) => {
-      if (elem.data.label === analyticsId && elem.data.type === JOB_MAP_NODE_TYPES.ANALYTICS) {
+    elements.forEach((elem) => {
+      if (
+        isAnalyticsMapNodeElement(elem) &&
+        elem.data.label === analyticsId &&
+        elem.data.type === JOB_MAP_NODE_TYPES.ANALYTICS
+      ) {
         isDuplicate = true;
       }
     });
@@ -311,11 +319,8 @@ export class AnalyticsManager {
   async getAnalyticsMap({
     analyticsId,
     modelId,
-  }: {
-    analyticsId?: string;
-    modelId?: string;
-  }): Promise<AnalyticsMapReturnType> {
-    const result: any = { elements: [], details: {}, error: null };
+  }: GetAnalyticsMapArgs): Promise<AnalyticsMapReturnType> {
+    const result: AnalyticsMapReturnType = { elements: [], details: {}, error: null };
     const modelElements: MapElements[] = [];
     const indexPatternElements: MapElements[] = [];
 
@@ -329,7 +334,6 @@ export class AnalyticsManager {
         initialData = await this.getInitialElementsModelRoot(modelId);
       }
 
-      let { data, nextLinkId, nextType, previousNodeId } = initialData;
       const {
         resultElements,
         details: initialDetails,
@@ -340,7 +344,9 @@ export class AnalyticsManager {
       result.details = initialDetails;
       modelElements.push(...initialModelElements);
 
-      if (nextLinkId !== undefined && nextType !== undefined && previousNodeId !== undefined) {
+      if (isCompleteInitialReturnType(initialData)) {
+        let { data, nextLinkId, nextType, previousNodeId } = initialData;
+
         let complete = false;
         let link: NextLinkReturnType;
         let count = 0;
@@ -359,7 +365,7 @@ export class AnalyticsManager {
 
           try {
             link = await this.getNextLink({
-              id: nextLinkId!,
+              id: nextLinkId,
               type: nextType,
             });
           } catch (error) {
@@ -523,11 +529,8 @@ export class AnalyticsManager {
   async extendAnalyticsMapForAnalyticsJob({
     analyticsId,
     index,
-  }: {
-    analyticsId?: string;
-    index?: string;
-  }): Promise<AnalyticsMapReturnType> {
-    const result: any = { elements: [], details: {}, error: null };
+  }: ExtendAnalyticsMapArgs): Promise<AnalyticsMapReturnType> {
+    const result: AnalyticsMapReturnType = { elements: [], details: {}, error: null };
     try {
       await this.setInferenceModels();
       const jobs = await this.getAnalyticsData();

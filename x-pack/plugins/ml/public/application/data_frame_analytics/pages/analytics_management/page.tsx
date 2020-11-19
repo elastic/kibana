@@ -107,7 +107,11 @@ export const Page: FC = () => {
           <UpgradeWarning />
 
           <EuiPageContent>
-            <AnalyticsNavigationBar selectedTabId={selectedTabId} jobId={mapJobId} />
+            <AnalyticsNavigationBar
+              selectedTabId={selectedTabId}
+              jobId={mapJobId}
+              modelId={mapModelId}
+            />
             {selectedTabId === 'map' && (mapJobId || mapModelId) && (
               <JobMap analyticsId={mapJobId} modelId={mapModelId} />
             )}

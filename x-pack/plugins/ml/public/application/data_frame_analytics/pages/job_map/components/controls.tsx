@@ -25,7 +25,7 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { CytoscapeContext } from './cytoscape';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
-// import { DeleteButton } from './delete_button';
+// import { DeleteButton } from './delete_button'; // TODO: add delete functionality in followup
 
 interface Props {
   analyticsId?: string;

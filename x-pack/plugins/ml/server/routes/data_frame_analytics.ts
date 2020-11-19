@@ -20,6 +20,7 @@ import {
   deleteDataFrameAnalyticsJobSchema,
   jobsExistSchema,
 } from './schemas/data_analytics_schema';
+import { GetAnalyticsMapArgs, ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
@@ -40,19 +41,19 @@ function deleteDestIndexPatternById(context: RequestHandlerContext, indexPattern
 function getAnalyticsMap(
   mlClient: MlClient,
   client: IScopedClusterClient,
-  { analyticsId, modelId }: { analyticsId?: string; modelId?: string }
+  idOptions: GetAnalyticsMapArgs
 ) {
   const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
-  return analytics.getAnalyticsMap({ analyticsId, modelId });
+  return analytics.getAnalyticsMap(idOptions);
 }
 
 function getExtendedMap(
   mlClient: MlClient,
   client: IScopedClusterClient,
-  { analyticsId, index }: { analyticsId?: string; index?: string }
+  idOptions: ExtendAnalyticsMapArgs
 ) {
   const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
-  return analytics.extendAnalyticsMapForAnalyticsJob({ analyticsId, index });
+  return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
 }
 
 /**

@@ -6,6 +6,27 @@
 
 import { JobMapNodeTypes } from '../../../common/constants/data_frame_analytics';
 
+interface AnalyticsMapArg {
+  analyticsId: string;
+}
+interface GetAnalyticsJobIdArg extends AnalyticsMapArg {
+  modelId?: never;
+}
+interface GetAnalyticsModelIdArg {
+  analyticsId?: never;
+  modelId: string;
+}
+interface ExtendAnalyticsJobIdArg extends AnalyticsMapArg {
+  index?: never;
+}
+interface ExtendAnalyticsIndexArg {
+  analyticsId?: never;
+  index: string;
+}
+
+export type GetAnalyticsMapArgs = GetAnalyticsJobIdArg | GetAnalyticsModelIdArg;
+export type ExtendAnalyticsMapArgs = ExtendAnalyticsJobIdArg | ExtendAnalyticsIndexArg;
+
 export interface IndexPatternLinkReturnType {
   isWildcardIndexPattern: boolean;
   isIndexPattern: boolean;
@@ -28,18 +49,26 @@ export type NextLinkReturnType =
 export type MapElements = AnalyticsMapNodeElement | AnalyticsMapEdgeElement;
 export interface AnalyticsMapReturnType {
   elements: MapElements[];
-  details: object; // transform, job, or index details
+  details: Record<string, any>; // transform, job, or index details
   error: null | any;
 }
 
-export interface InitialElementsReturnType {
+interface BasicInitialElementsReturnType {
   data: any;
   details: object;
   resultElements: MapElements[];
   modelElements: MapElements[];
+}
+
+export interface InitialElementsReturnType extends BasicInitialElementsReturnType {
   nextLinkId?: string;
   nextType?: JobMapNodeTypes;
   previousNodeId?: string;
+}
+interface CompleteInitialElementsReturnType extends BasicInitialElementsReturnType {
+  nextLinkId: string;
+  nextType: JobMapNodeTypes;
+  previousNodeId: string;
 }
 export interface AnalyticsMapNodeElement {
   data: {
@@ -56,6 +85,16 @@ export interface AnalyticsMapEdgeElement {
     target: string;
   };
 }
+export const isCompleteInitialReturnType = (arg: any): arg is CompleteInitialElementsReturnType => {
+  if (typeof arg !== 'object' || arg === null) return false;
+  const keys = Object.keys(arg);
+  return (
+    keys.length > 0 &&
+    keys.includes('nextLinkId') &&
+    keys.includes('nextType') &&
+    keys.includes('previousNodeId')
+  );
+};
 export const isAnalyticsMapNodeElement = (arg: any): arg is AnalyticsMapNodeElement => {
   if (typeof arg !== 'object' || arg === null) return false;
   const keys = Object.keys(arg);
