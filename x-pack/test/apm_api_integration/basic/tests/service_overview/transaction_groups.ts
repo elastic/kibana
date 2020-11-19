@@ -7,7 +7,6 @@
 import expect from '@kbn/expect';
 import { pick, uniqBy } from 'lodash';
 import url from 'url';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import archives from '../../../common/archives_metadata';
 
@@ -39,9 +38,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(response.body).to.eql({
-          total_transaction_groups: 0,
-          transaction_groups: [],
-          is_aggregation_accurate: true,
+          totalTransactionGroups: 0,
+          transactionGroups: [],
+          isAggregationAccurate: true,
         });
       });
     });
@@ -69,9 +68,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        expectSnapshot(response.body.total_transaction_groups).toMatchInline(`12`);
+        expectSnapshot(response.body.totalTransactionGroups).toMatchInline(`12`);
 
-        expectSnapshot(response.body.transaction_groups.map((group: any) => group.name))
+        expectSnapshot(response.body.transactionGroups.map((group: any) => group.name))
           .toMatchInline(`
           Array [
             "DispatcherServlet#doGet",
@@ -82,7 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]
         `);
 
-        expectSnapshot(response.body.transaction_groups.map((group: any) => group.impact))
+        expectSnapshot(response.body.transactionGroups.map((group: any) => group.impact))
           .toMatchInline(`
           Array [
             100,
@@ -93,13 +92,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]
         `);
 
-        const firstItem = response.body.transaction_groups[0];
+        const firstItem = response.body.transactionGroups[0];
 
         expectSnapshot(
-          pick(firstItem, 'name', 'latency.value', 'traffic.value', 'error_rate.value', 'impact')
+          pick(firstItem, 'name', 'latency.value', 'traffic.value', 'errorRate.value', 'impact')
         ).toMatchInline(`
           Object {
-            "error_rate": Object {
+            "errorRate": Object {
               "value": 0.107142857142857,
             },
             "impact": 100,
@@ -122,7 +121,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`15`);
 
         expectSnapshot(
-          firstItem.error_rate.timeseries.filter(({ y }: any) => y > 0).length
+          firstItem.errorRate.timeseries.filter(({ y }: any) => y > 0).length
         ).toMatchInline(`3`);
       });
 
@@ -145,7 +144,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(descendingResponse.status).to.be(200);
 
-        const descendingOccurrences = descendingResponse.body.transaction_groups.map(
+        const descendingOccurrences = descendingResponse.body.transactionGroups.map(
           (item: any) => item.impact
         );
 
@@ -167,7 +166,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
         );
 
-        const ascendingOccurrences = ascendingResponse.body.transaction_groups.map(
+        const ascendingOccurrences = ascendingResponse.body.transactionGroups.map(
           (item: any) => item.impact
         );
 
@@ -193,7 +192,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
 
-        const latencies = response.body.transaction_groups.map((group: any) => group.latency.value);
+        const latencies = response.body.transactionGroups.map((group: any) => group.latency.value);
 
         expect(latencies).to.eql(latencies.concat().sort().reverse());
       });
@@ -219,7 +218,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(firstPage.status).to.eql(200);
 
-        const totalItems = firstPage.body.total_transaction_groups;
+        const totalItems = firstPage.body.totalTransactionGroups;
 
         const pages = Math.floor(totalItems / size);
 
@@ -244,7 +243,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               })
             );
 
-            return prevItems.concat(thisPage.body.transaction_groups);
+            return prevItems.concat(thisPage.body.transactionGroups);
           }, Promise.resolve([]));
 
         expect(items.length).to.eql(totalItems);

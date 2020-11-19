@@ -255,7 +255,7 @@ export const serviceTransactionGroupsRoute = createRoute({
         sortField: t.union([
           t.literal('latency'),
           t.literal('traffic'),
-          t.literal('error_rate'),
+          t.literal('errorRate'),
           t.literal('impact'),
         ]),
       }),

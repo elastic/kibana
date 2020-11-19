@@ -38,14 +38,14 @@ import { ServiceOverviewTable } from '../service_overview_table';
 type ServiceTransactionGroupItem = ValuesType<
   APIReturnType<
     'GET /api/apm/services/{serviceName}/overview_transaction_groups'
-  >['transaction_groups']
+  >['transactionGroups']
 >;
 
 interface Props {
   serviceName: string;
 }
 
-type SortField = 'latency' | 'traffic' | 'error_rate' | 'impact';
+type SortField = 'latency' | 'traffic' | 'errorRate' | 'impact';
 type SortDirection = 'asc' | 'desc';
 
 const PAGE_SIZE = 5;
@@ -118,8 +118,8 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       },
     }).then((response) => {
       return {
-        items: response.transaction_groups,
-        totalItemCount: response.total_transaction_groups,
+        items: response.transactionGroups,
+        totalItemCount: response.totalTransactionGroups,
         tableOptions: {
           pageIndex: tableOptions.pageIndex,
           sort: {
@@ -154,7 +154,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
           defaultMessage: 'Name',
         }
       ),
-      render: (_, { name, transaction_type: transactionType }) => {
+      render: (_, { name, transactionType }) => {
         return (
           <TransactionGroupLinkWrapper>
             <EuiToolTip delay="long" content={name}>
@@ -223,7 +223,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
         }
       ),
       width: px(unit * 8),
-      render: (_, { error_rate: errorRate }) => {
+      render: (_, { errorRate }) => {
         return (
           <SparkPlotWithValueLabel
             color="euiColorVis7"
