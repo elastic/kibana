@@ -46,6 +46,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from './../../contexts/vis_data_context';
+import { BUCKET_TYPES } from '../../../../common/metric_types';
 export class TablePanelConfig extends Component {
   static contextType = VisDataContext;
   constructor(props) {
@@ -123,7 +124,7 @@ export class TablePanelConfig extends Component {
                       indexPattern={model.index_pattern}
                       onChange={this.handlePivotChange}
                       uiRestrictions={this.context.uiRestrictions}
-                      type={'terms'}
+                      type={BUCKET_TYPES.TERMS}
                       fullWidth
                     />
                   </EuiFormRow>
