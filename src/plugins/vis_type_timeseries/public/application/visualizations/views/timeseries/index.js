@@ -54,7 +54,7 @@ const generateAnnotationData = (values, formatter) =>
 const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
 const handleCursorUpdate = (cursor) => {
-  eventBus.trigger(ACTIVE_CURSOR, cursor);
+  eventBus.next({ eventName: ACTIVE_CURSOR, cursor });
 };
 
 export const TimeSeries = ({
@@ -73,16 +73,21 @@ export const TimeSeries = ({
   const chartRef = useRef();
 
   useEffect(() => {
-    const updateCursor = (_, cursor) => {
-      if (chartRef.current) {
+    const updateCursor = ({ eventName, cursor }) => {
+      if (
+        chartRef.current &&
+        eventName === ACTIVE_CURSOR &&
+        cursor &&
+        chartRef.current.chartStore.getState().chartId !== cursor.chartId
+      ) {
         chartRef.current.dispatchExternalPointerEvent(cursor);
       }
     };
 
-    eventBus.on(ACTIVE_CURSOR, updateCursor);
+    const subscription = eventBus.asObservable().subscribe(updateCursor);
 
     return () => {
-      eventBus.off(ACTIVE_CURSOR, undefined, updateCursor);
+      subscription.unsubscribe();
     };
   }, []);
 

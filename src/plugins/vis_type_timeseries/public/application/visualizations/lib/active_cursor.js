@@ -17,9 +17,8 @@
  * under the License.
  */
 
-// TODO: Remove bus when action/triggers are available with LegacyPluginApi or metric is converted to Embeddable
-import $ from 'jquery';
+import { Subject } from 'rxjs';
 
 export const ACTIVE_CURSOR = 'ACTIVE_CURSOR';
 
-export const eventBus = $({});
+export const eventBus = new Subject();
