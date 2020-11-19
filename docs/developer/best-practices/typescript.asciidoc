@@ -19,7 +19,7 @@ More details are available in the https://www.typescriptlang.org/docs/handbook/p
 ==== Caveats
 This architecture imposes several limitations to which we must comply:
 
-- Projects cannot have circular dependencies. Even though the Kibana platform doesn't support circular dependencies between Kibana plugins, TypeScript (and ES6 modules) does allow circular imports between files. So in theory, you may face a problem when migrating to the TS project references and you will have to resolve this circular dependency. https://github.com/elastic/kibana/issues/78162 is going to provide a tool to find such problem places.
+- Projects cannot have circular dependencies. Even though the Kibana platform doesn't support circular dependencies between Kibana plugins, TypeScript (and ES6 modules) does allow circular imports between files. So in theory, you may face a problem when migrating to the TS project references and you will have to resolve this circular dependency. With https://github.com/elastic/kibana/issues/78162 we've built a tool to find such problems. Please read the prerequisites section below to know how to use it.
 - A project must emit its type declaration. It's not always possible to generate a type declaration if the compiler cannot infer a type. There are two basic cases:
 
 1. Your plugin exports a type inferring an internal type declared in Kibana codebase. In this case, you'll have to either export an internal type or to declare an exported type explicitly.
@@ -29,6 +29,8 @@ This architecture imposes several limitations to which we must comply:
 ==== Prerequisites
 Since project refs rely on generated `d.ts` files, the migration order does matter. You can migrate your plugin only when all the plugin dependencies already have migrated. It creates a situation where commonly used plugins (such as `data` or `kibana_react`) have to migrate first.
 Run `node scripts/find_plugins_without_ts_refs.js --id your_plugin_id` to get a list of plugins that should be switched to TS project refs to unblock your plugin migration.
+
+Additionally in order to migrate into project refs you also need to make sure you plugin doesn't have circular dependencies with other plugins. Our CI should catch such problems but if you want to check it locally you can run `node scripts/find_plugins_with_circular_deps` which will output a list of the problems. In case you need more information to solve the problems you can run it with the `--debug` flag which will print the complete paths for the circular imports.
 
 [discrete]
 ==== Implementation
