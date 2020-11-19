@@ -21,9 +21,6 @@ fun ProjectFeatures.kibanaAgent(init: ProjectFeature.() -> Unit) {
     param("growingId", "true")
     param("agent_pool_id", "-2")
     param("preemptible", "false")
-//    param("sourceProject", "elastic-kibana-184716")
-//    param("sourceImageFamily", "kibana-ci-elastic-dev")
-//    param("sourceImageFamily", "elastic-kibana-ci-ubuntu-1804-lts-nocache")
     param("sourceProject", "elastic-images-prod")
     param("sourceImageFamily", "elastic-kibana-ci-ubuntu-1804-lts")
     param("zone", "us-central1-a")
@@ -83,34 +80,11 @@ fun BuildType.addTestSettings() {
   }
 }
 
-fun BuildType.addTestArtifacts() {
-  this.artifactRules += "\n" + testArtifactRules
-}
-
 fun BuildType.addSlackNotifications(to: String = "#kibana-teamcity-testing") {
   params {
     param("elastic.slack.enabled", "true")
     param("elastic.slack.channels", to)
   }
-//  features {
-//    notifications {
-//      notifierSettings = slackNotifier {
-//        connection = "KIBANA_SLACK"
-//        sendTo = to
-//        messageFormat = verboseMessageFormat {
-//          addBranch = true
-//          addChanges = true
-//          addStatusText = true
-//          maximumNumberOfChanges = 5
-//        }
-//      }
-//      buildFailedToStart = true
-//      buildFailed = true
-//      buildFinishedSuccessfully = false
-//      firstBuildErrorOccurs = true
-//      buildProbablyHanging = true
-//    }
-//  }
 }
 
 fun BuildType.dependsOn(buildType: BuildType, init: SnapshotDependency.() -> Unit = {}) {
