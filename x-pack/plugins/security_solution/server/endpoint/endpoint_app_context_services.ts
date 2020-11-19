@@ -10,7 +10,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
-import { AgentService, IngestManagerStartContract, PackageService } from '../../../fleet/server';
+import { AgentService, FleetStartContract, PackageService } from '../../../fleet/server';
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
@@ -66,7 +66,7 @@ export const createMetadataService = (packageService: PackageService): MetadataS
 };
 
 export type EndpointAppContextServiceStartContract = Partial<
-  Pick<IngestManagerStartContract, 'agentService' | 'packageService'>
+  Pick<FleetStartContract, 'agentService' | 'packageService'>
 > & {
   logger: Logger;
   manifestManager?: ManifestManager;
@@ -74,7 +74,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   security: SecurityPluginSetup;
   alerts: AlertsPluginStartContract;
   config: ConfigType;
-  registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
+  registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
 };
 
