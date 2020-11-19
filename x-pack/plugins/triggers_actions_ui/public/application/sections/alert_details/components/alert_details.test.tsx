@@ -15,7 +15,6 @@ import {
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerts/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
 
 jest.mock('../../../../common/lib/kibana');
