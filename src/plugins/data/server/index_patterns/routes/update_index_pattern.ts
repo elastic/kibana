@@ -24,6 +24,7 @@ import { handleErrors } from './util/handle_errors';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
+  timeFieldName: schema.maybe(schema.string()),
 });
 
 export const registerUpdateIndexPatternRoute = (router: IRouter) => {
@@ -54,7 +55,7 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           const indexPattern = await ip.get(id);
 
           const {
-            index_pattern: { title },
+            index_pattern: { title, timeFieldName },
           } = req.body;
 
           let changeCount = 0;
@@ -64,7 +65,12 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
             indexPattern.title = title;
           }
 
-          if (!changeCount) {
+          if (timeFieldName !== undefined && timeFieldName !== indexPattern.timeFieldName) {
+            changeCount++;
+            indexPattern.timeFieldName = timeFieldName;
+          }
+
+          if (changeCount < 1) {
             return res.badRequest({
               body: JSON.stringify({
                 message: 'Index pattern chagne set is empty.',
