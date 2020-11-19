@@ -77,6 +77,7 @@ async function createAnomalyDetectionJob({
     prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
     groups: [APM_ML_JOB_GROUP],
     indexPatternName,
+    applyToAllSpaces: true,
     query: {
       bool: {
         filter: [
