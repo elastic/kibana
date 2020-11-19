@@ -9,7 +9,6 @@ import { format } from 'url';
 import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives_metadata from '../../../common/archives_metadata';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { expectSnapshot } from '../../../common/match_snapshot';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -43,10 +42,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       after(() => esArchiver.unload(archiveName));
 
       describe('making request with default args', () => {
-        type ResponseBody = APIReturnType<'/api/apm/correlations/slow_transactions', 'GET'>;
+        type ResponseBody = APIReturnType<'GET /api/apm/correlations/slow_transactions'>;
         let response: {
           status: number;
-          body: ResponseBody;
+          body: NonNullable<ResponseBody>;
         };
 
         before(async () => {
@@ -58,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns significant terms', () => {
-          expectSnapshot(response.body?.significantTerms.map((term) => term.fieldName))
+          expectSnapshot(response.body?.significantTerms?.map((term) => term.fieldName))
             .toMatchInline(`
             Array [
               "host.ip",
@@ -76,20 +75,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns a timeseries per term', () => {
+          // @ts-ignore
           expectSnapshot(response.body?.significantTerms[0].timeseries.length).toMatchInline(`31`);
         });
 
         it('returns a distribution per term', () => {
+          // @ts-ignore
           expectSnapshot(response.body?.significantTerms[0].distribution.length).toMatchInline(
             `11`
           );
         });
 
         it('returns overall timeseries', () => {
+          // @ts-ignore
           expectSnapshot(response.body?.overall.timeseries.length).toMatchInline(`31`);
         });
 
         it('returns overall distribution', () => {
+          // @ts-ignore
           expectSnapshot(response.body?.overall.distribution.length).toMatchInline(`11`);
         });
       });
