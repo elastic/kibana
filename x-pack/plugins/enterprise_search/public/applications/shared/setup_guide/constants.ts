@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SetupGuide } from './setup_guide';
-export { SETUP_GUIDE_TITLE } from './constants';
+import { i18n } from '@kbn/i18n';
+
+export const SETUP_GUIDE_TITLE = i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
+  defaultMessage: 'Setup Guide',
+});

@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
+import { SetupGuide as SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import GettingStarted from './assets/getting_started.png';
@@ -22,13 +22,7 @@ export const SetupGuide: React.FC = () => (
     standardAuthLink="https://www.elastic.co/guide/en/app-search/current/security-and-users.html#app-search-self-managed-security-and-user-management-standard"
     elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/app-search/current/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm"
   >
-    <SetPageChrome
-      trail={[
-        i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
-          defaultMessage: 'Setup Guide',
-        }),
-      ]}
-    />
+    <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
     <SendTelemetry action="viewed" metric="setup_guide" />
 
     <a href="https://www.elastic.co/enterprise-search" target="_blank" rel="noopener noreferrer">
