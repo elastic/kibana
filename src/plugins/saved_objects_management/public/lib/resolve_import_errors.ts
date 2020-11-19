@@ -83,7 +83,7 @@ async function callResolveImportErrorsApi(
   const formData = new FormData();
   formData.append('file', file);
   formData.append('retries', JSON.stringify(retries));
-  const query = createNewCopies ? { createNewCopies } : {};
+  const query = { createNewCopies };
   return http.post<any>('/api/saved_objects/_resolve_import_errors', {
     headers: {
       // Important to be undefined, it forces proper headers to be set for FormData

@@ -44,22 +44,70 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       return await searchBox.getAttribute('value');
     }
 
-    async importFile(path: string, overwriteAll = true) {
+    async importFile(
+      path: string,
+      options: {
+        createNewCopies?: boolean;
+        overwrite?: boolean;
+      }
+    ) {
+      const { createNewCopies, overwrite } = options;
       log.debug(`importFile(${path})`);
 
       log.debug(`Clicking importObjects`);
       await testSubjects.click('importObjects');
       await PageObjects.common.setFileInputPath(path);
 
-      if (!overwriteAll) {
+      if (createNewCopies && overwrite) {
+        throw new Error('createNewCopies and overwrite options cannot be used together');
+      }
+
+      if (!createNewCopies) {
+        log.debug(`Toggling createNewCopies`);
+        const form = await testSubjects.find('savedObjectsManagement-importModeControl');
+        // a radio button consists of a div tag that contains an input, a div, and a label
+        // we can't click the input directly, need to click the label
+        const label = await form.findByCssSelector('label[for="createNewCopiesDisabled"]');
+        await label.click();
+      } else {
+        log.debug(`Leaving createNewCopies alone`);
+      }
+
+      if (!overwrite) {
         log.debug(`Toggling overwriteAll`);
         const radio = await testSubjects.find(
           'savedObjectsManagement-importModeControl-overwriteRadioGroup'
         );
         // a radio button consists of a div tag that contains an input, a div, and a label
         // we can't click the input directly, need to go up one level and click the parent div
-        const div = await radio.findByXpath("//div[input[@id='overwriteDisabled']]");
-        await div.click();
+        const label = await radio.findByCssSelector('label[for="overwriteDisabled"]');
+        await label.click();
+      } else {
+        log.debug(`Leaving overwriteAll alone`);
+      }
+      await testSubjects.click('importSavedObjectsImportBtn');
+      log.debug(`done importing the file`);
+
+      // Wait for all the saves to happen
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async importLegacyFile(path: string, overwrite = true) {
+      log.debug(`importFile(${path})`);
+
+      log.debug(`Clicking importObjects`);
+      await testSubjects.click('importObjects');
+      await PageObjects.common.setFileInputPath(path);
+
+      if (!overwrite) {
+        log.debug(`Toggling overwriteAll`);
+        const radio = await testSubjects.find(
+          'savedObjectsManagement-importModeControl-overwriteRadioGroup'
+        );
+        // a radio button consists of a div tag that contains an input, a div, and a label
+        // we can't click the input directly, need to go up one level and click the parent div
+        const label = await radio.findByCssSelector('label[for="overwriteDisabled"]');
+        await label.click();
       } else {
         log.debug(`Leaving overwriteAll alone`);
       }

@@ -68,7 +68,7 @@ import { OverwriteModal } from './overwrite_modal';
 import { ImportModeControl, ImportMode } from './import_mode_control';
 import { ImportSummary } from './import_summary';
 
-const CREATE_NEW_COPIES_DEFAULT = false;
+const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export interface FlyoutProps {

@@ -241,13 +241,9 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           const requestBody = test.request
             .map((obj) => JSON.stringify({ ...obj, ...attrs }))
             .join('\n');
-          const query = test.overwrite
-            ? '?overwrite=true'
-            : test.createNewCopies
-            ? '?createNewCopies=true'
-            : '';
           await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import${query}`)
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)
+            .query({ createNewCopies: test.createNewCopies, overwrite: test.overwrite })
             .auth(user?.username, user?.password)
             .attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson')
             .expect(test.responseStatusCode)

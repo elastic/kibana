@@ -53,7 +53,7 @@ export const registerResolveImportErrorsRoute = (router: IRouter, deps: RouteDep
       },
       validate: {
         query: schema.object({
-          createNewCopies: schema.boolean({ defaultValue: false }),
+          createNewCopies: schema.boolean({ defaultValue: true }),
         }),
         body: schema.object({
           file: schema.stream(),

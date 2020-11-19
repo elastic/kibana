@@ -23,14 +23,14 @@ experimental[] Create sets of {kib} saved objects from a file created by the exp
 ==== Query parameters
 
 `createNewCopies`::
-  (Optional, boolean) Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict
-  errors are avoided.
+  (Optional, boolean) Creates new copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict
+  errors are avoided. The default value is `true`.
 +
 NOTE: This cannot be used with the `overwrite` option.
 
 `overwrite`::
   (Optional, boolean) Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by
-  overwriting the destination object.
+  overwriting the destination object. The default value is `false`.
 +
 NOTE: This cannot be used with the `createNewCopies` option.
 
@@ -80,7 +80,7 @@ Import an index pattern and dashboard:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import?createNewCopies=true -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
 // KIBANA
 
@@ -132,7 +132,7 @@ Import an index pattern and dashboard:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import?createNewCopies=false -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
 // KIBANA
 
@@ -181,7 +181,7 @@ Import an index pattern, visualization, *Canvas* workpad, and dashboard that inc
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import?createNewCopies=false -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
 // KIBANA
 
@@ -292,7 +292,7 @@ Import a visualization and dashboard when the index pattern for the visualizatio
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import?createNewCopies=false -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
 // KIBANA
 

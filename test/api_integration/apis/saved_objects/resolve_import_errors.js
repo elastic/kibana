@@ -49,6 +49,7 @@ export default function ({ getService }) {
       it('should return 200 and import nothing when empty parameters are passed in', async () => {
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
+          .query({ createNewCopies: false })
           .field('retries', '[]')
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
           .expect(200)
@@ -63,6 +64,7 @@ export default function ({ getService }) {
       it('should return 200 and import everything when overwrite parameters contains all objects', async () => {
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
+          .query({ createNewCopies: false })
           .field(
             'retries',
             JSON.stringify([
@@ -119,6 +121,7 @@ export default function ({ getService }) {
         );
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
+          .query({ createNewCopies: false })
           .field('retries', JSON.stringify([{ type: 'wigwags', id: '1' }]))
           .attach('file', fileBuffer, 'export.ndjson')
           .expect(200)
@@ -146,6 +149,7 @@ export default function ({ getService }) {
         }
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
+          .query({ createNewCopies: false })
           .field('retries', '[]')
           .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
           .expect(400)
@@ -176,6 +180,7 @@ export default function ({ getService }) {
         };
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
+          .query({ createNewCopies: false })
           .field(
             'retries',
             JSON.stringify([
@@ -221,6 +226,7 @@ export default function ({ getService }) {
         it('should return 200 when skipping all the records', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_errors')
+            .query({ createNewCopies: false })
             .field('retries', '[]')
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
@@ -232,6 +238,7 @@ export default function ({ getService }) {
         it('should return 200 when manually overwriting each object', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_errors')
+            .query({ createNewCopies: false })
             .field(
               'retries',
               JSON.stringify([
@@ -270,6 +277,7 @@ export default function ({ getService }) {
         it('should return 200 with only one record when overwriting 1 and skipping 1', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_errors')
+            .query({ createNewCopies: false })
             .field(
               'retries',
               JSON.stringify([
@@ -309,6 +317,7 @@ export default function ({ getService }) {
           };
           await supertest
             .post('/api/saved_objects/_resolve_import_errors')
+            .query({ createNewCopies: false })
             .field(
               'retries',
               JSON.stringify([

@@ -55,7 +55,7 @@ export const registerImportRoute = (router: IRouter, deps: RouteDependencies) =>
         query: schema.object(
           {
             overwrite: schema.boolean({ defaultValue: false }),
-            createNewCopies: schema.boolean({ defaultValue: false }),
+            createNewCopies: schema.boolean({ defaultValue: true }),
           },
           {
             validate: (object) => {
