@@ -5,7 +5,7 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Anomaly } from '../types';
 import { useKibana } from '../../../lib/kibana';
 
@@ -22,26 +22,46 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
   endDate,
   linkName,
 }) => {
-  const { getUrlForApp } = useKibana().services.application;
+  const urlGenerator = useKibana().services.ml?.urlGenerator;
+  const [explorerUrl, setExplorerUrl] = useState('');
+
+  useEffect(() => {
+    let unmount = false;
+    if (!urlGenerator) return;
+
+    urlGenerator
+      .createUrl({
+        page: 'explorer',
+        pageState: {
+          jobIds: [score.jobId],
+          timeRange: {
+            from: new Date(startDate).toISOString(),
+            to: new Date(endDate).toISOString(),
+            mode: 'absolute',
+          },
+          refreshInterval: {
+            pause: true,
+            value: 0,
+            display: 'Off',
+          },
+        },
+      })
+      .then((url) => {
+        if (!unmount) {
+          setExplorerUrl(url);
+        }
+      });
+
+    return () => {
+      unmount = true;
+    };
+  }, [urlGenerator, startDate, endDate, score]);
+
+  if (!explorerUrl) return null;
+
   return (
-    <EuiLink
-      href={`${getUrlForApp('ml', {
-        path: createExplorerLink(score, startDate, endDate),
-      })}`}
-      target="_blank"
-    >
+    <EuiLink href={explorerUrl} target="_blank">
       {linkName}
     </EuiLink>
   );
-};
-
-export const createExplorerLink = (score: Anomaly, startDate: string, endDate: string): string => {
-  const startDateIso = new Date(startDate).toISOString();
-  const endDateIso = new Date(endDate).toISOString();
-
-  const JOB_PREFIX = `#/explorer?_g=(ml:(jobIds:!(${score.jobId}))`;
-  const REFRESH_INTERVAL = `,refreshInterval:(display:Off,pause:!f,value:0),time:(from:'${startDateIso}',mode:absolute,to:'${endDateIso}'))`;
-  const INTERVAL_SELECTION = `&_a=(mlExplorerFilter:(),mlExplorerSwimlane:(),mlSelectLimit:(display:'10',val:10),mlShowCharts:!t)`;
-
-  return `${JOB_PREFIX}${REFRESH_INTERVAL}${INTERVAL_SELECTION}`;
 };
