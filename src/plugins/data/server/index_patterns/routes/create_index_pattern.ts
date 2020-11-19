@@ -21,45 +21,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../core/server';
 import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
-
-const serializedFieldFormatSchema = schema.object({
-  id: schema.maybe(schema.string()),
-  params: schema.maybe(schema.any()),
-});
-
-const fieldSpecSchema = schema.object({
-  name: schema.string(),
-  type: schema.string(),
-  searchable: schema.boolean(),
-  aggregatable: schema.boolean(),
-  count: schema.maybe(schema.number()),
-  script: schema.maybe(schema.string()),
-  lang: schema.maybe(schema.string()),
-  conflictDescriptions: schema.maybe(
-    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
-  ),
-  format: schema.maybe(serializedFieldFormatSchema),
-  esTypes: schema.maybe(schema.arrayOf(schema.string())),
-  scripted: schema.maybe(schema.boolean()),
-  readFromDocValues: schema.maybe(schema.boolean()),
-  subType: schema.maybe(
-    schema.object({
-      multi: schema.maybe(
-        schema.object({
-          parent: schema.string(),
-        })
-      ),
-      nested: schema.maybe(
-        schema.object({
-          path: schema.string(),
-        })
-      ),
-    })
-  ),
-  indexed: schema.maybe(schema.boolean()),
-  customName: schema.maybe(schema.string()),
-  shortDotsEnable: schema.maybe(schema.boolean()),
-});
+import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
 
 const indexPatternSpecSchema = schema.object({
   id: schema.maybe(schema.string()),

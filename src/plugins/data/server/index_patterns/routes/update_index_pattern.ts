@@ -21,10 +21,20 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../core/server';
 import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
+import { serializedFieldFormatSchema } from './util/schemas';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
   timeFieldName: schema.maybe(schema.string()),
+  intervalName: schema.maybe(schema.string()),
+  sourceFilters: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        value: schema.string(),
+      })
+    )
+  ),
+  fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
 });
 
 export const registerUpdateIndexPatternRoute = (router: IRouter) => {
@@ -55,7 +65,7 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           const indexPattern = await ip.get(id);
 
           const {
-            index_pattern: { title, timeFieldName },
+            index_pattern: { title, timeFieldName, intervalName, sourceFilters, fieldFormats },
           } = req.body;
 
           let changeCount = 0;
@@ -68,6 +78,21 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           if (timeFieldName !== undefined && timeFieldName !== indexPattern.timeFieldName) {
             changeCount++;
             indexPattern.timeFieldName = timeFieldName;
+          }
+
+          if (intervalName !== undefined && intervalName !== indexPattern.intervalName) {
+            changeCount++;
+            indexPattern.intervalName = intervalName;
+          }
+
+          if (sourceFilters !== undefined) {
+            changeCount++;
+            indexPattern.sourceFilters = sourceFilters;
+          }
+
+          if (fieldFormats !== undefined) {
+            changeCount++;
+            indexPattern.fieldFormatMap = fieldFormats;
           }
 
           if (changeCount < 1) {
