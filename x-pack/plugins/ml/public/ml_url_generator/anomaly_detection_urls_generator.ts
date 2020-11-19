@@ -163,6 +163,7 @@ export function createSingleMetricViewerUrl(
     forecastId,
     entities,
     globalState,
+    functionDescription,
   } = params;
 
   let queryState: Partial<TimeSeriesExplorerGlobalState> = {};
@@ -189,6 +190,10 @@ export function createSingleMetricViewerUrl(
   if (entities !== undefined) {
     mlTimeSeriesExplorer.entities = entities;
   }
+  if (functionDescription !== undefined) {
+    mlTimeSeriesExplorer.functionDescription = functionDescription;
+  }
+
   appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
   if (zoom) appState.zoom = zoom;
