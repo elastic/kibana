@@ -154,6 +154,16 @@ export class Embeddable
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
+    if (
+      this.savedVis &&
+      (containerState as LensByReferenceInput).savedObjectId !== this.savedVis.savedObjectId
+    ) {
+      console.log('woah nelly');
+      this.initializeSavedVis(containerState).then(() =>
+        this.onContainerStateChanged(containerState)
+      );
+      return;
+    }
     const cleanedFilters = containerState.filters
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
