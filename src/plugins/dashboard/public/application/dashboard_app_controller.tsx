@@ -97,11 +97,7 @@ import {
 } from '../../../kibana_legacy/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
-import {
-  createDashboardUrl,
-  DASHBOARD_APP_URL_GENERATOR,
-  DashboardUrlGeneratorState,
-} from '../url_generator';
+import { DASHBOARD_APP_URL_GENERATOR, DashboardUrlGeneratorState } from '../url_generator';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
