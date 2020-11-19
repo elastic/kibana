@@ -33,7 +33,7 @@ import {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
 } from './state_sync_state_storage';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { createBrowserHistory, History } from 'history';
 import { INullableBaseStateContainer } from './types';
 
@@ -354,7 +354,7 @@ describe('state_sync', () => {
 
 function withDefaultState<State extends BaseState>(
   stateContainer: BaseStateContainer<State>,
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   defaultState: State
 ): INullableBaseStateContainer<State> {
   return {

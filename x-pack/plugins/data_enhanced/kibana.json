@@ -12,5 +12,5 @@
   "optionalPlugins": ["kibanaUtils", "usageCollection"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
-import useMount from 'react-use/lib/useMount';
 import { euiStyled } from '../../../../observability/public';
 
 import { LogEntriesCursor } from '../../../common/http_api';
@@ -16,6 +15,8 @@ import { useLogSource } from '../../containers/logs/log_source';
 import { useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
+
+const PAGE_THRESHOLD = 2;
 
 export interface LogStreamProps {
   sourceId?: string;
@@ -58,7 +59,16 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   });
 
   // Internal state
-  const { loadingState, entries, fetchEntries } = useLogStream({
+  const {
+    loadingState,
+    pageLoadingState,
+    entries,
+    hasMoreBefore,
+    hasMoreAfter,
+    fetchEntries,
+    fetchPreviousEntries,
+    fetchNextEntries,
+  } = useLogStream({
     sourceId,
     startTimestamp,
     endTimestamp,
@@ -69,6 +79,8 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   // Derived state
   const isReloading =
     isLoadingSourceConfiguration || loadingState === 'uninitialized' || loadingState === 'loading';
+
+  const isLoadingMore = pageLoadingState === 'loading';
 
   const columnConfigurations = useMemo(() => {
     return sourceConfiguration ? sourceConfiguration.configuration.logColumns : [];
@@ -84,13 +96,36 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
     [entries]
   );
 
-  // Component lifetime
-  useMount(() => {
-    loadSourceConfiguration();
-    fetchEntries();
-  });
-
   const parsedHeight = typeof height === 'number' ? `${height}px` : height;
+
+  // Component lifetime
+  useEffect(() => {
+    loadSourceConfiguration();
+  }, [loadSourceConfiguration]);
+
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
+
+  // Pagination handler
+  const handlePagination = useCallback(
+    ({ fromScroll, pagesBeforeStart, pagesAfterEnd }) => {
+      if (!fromScroll) {
+        return;
+      }
+
+      if (isLoadingMore) {
+        return;
+      }
+
+      if (pagesBeforeStart < PAGE_THRESHOLD) {
+        fetchPreviousEntries();
+      } else if (pagesAfterEnd < PAGE_THRESHOLD) {
+        fetchNextEntries();
+      }
+    },
+    [isLoadingMore, fetchPreviousEntries, fetchNextEntries]
+  );
 
   return (
     <LogStreamContent height={parsedHeight}>
@@ -101,13 +136,13 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
         scale="medium"
         wrap={false}
         isReloading={isReloading}
-        isLoadingMore={false}
-        hasMoreBeforeStart={false}
-        hasMoreAfterEnd={false}
+        isLoadingMore={isLoadingMore}
+        hasMoreBeforeStart={hasMoreBefore}
+        hasMoreAfterEnd={hasMoreAfter}
         isStreaming={false}
         lastLoadedTime={null}
         jumpToTarget={noop}
-        reportVisibleInterval={noop}
+        reportVisibleInterval={handlePagination}
         loadNewerItems={noop}
         reloadItems={fetchEntries}
         highlightedItem={highlight ?? null}

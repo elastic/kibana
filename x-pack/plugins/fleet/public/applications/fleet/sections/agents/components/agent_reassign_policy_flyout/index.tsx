@@ -49,6 +49,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
     page: 1,
     perPage: 1000,
   });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
   useEffect(() => {
     if (!selectedAgentPolicyId && agentPolicies[0]) {
