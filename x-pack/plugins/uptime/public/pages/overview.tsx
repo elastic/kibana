@@ -69,7 +69,7 @@ export const OverviewPageComponent = React.memo(
 
     return (
       <>
-        <PageHeader extraLinks={true} datePicker={true} />
+        <PageHeader datePicker={true} />
         <EmptyState>
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
             <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>

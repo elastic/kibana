@@ -31,7 +31,7 @@ import {
 } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
-import { ActionMenu } from './action_menu';
+import { ActionMenu } from '../components/common/header/action_menu';
 
 export interface UptimeAppColors {
   danger: string;
