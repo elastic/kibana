@@ -163,7 +163,6 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
       <LogEntryColumn {...columnWidths[messageColumnId]}>
         <LogEntryMessageColumn
           columnValue={{
-            columnId: messageColumnId,
             message: [{ field: 'message', value: [message], highlights: [] }],
           }}
           highlights={noHighlights}
@@ -174,7 +173,6 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
       <LogEntryColumn {...columnWidths[datasetColumnId]}>
         <LogEntryFieldColumn
           columnValue={{
-            columnId: datasetColumnId,
             field: 'event.dataset',
             value: [humanFriendlyDataset],
             highlights: [],

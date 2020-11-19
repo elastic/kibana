@@ -61,15 +61,13 @@ export const logMessageFieldPartRT = rt.type({
 
 export const logMessagePartRT = rt.union([logMessageConstantPartRT, logMessageFieldPartRT]);
 
-export const logTimestampColumnRT = rt.type({ columnId: rt.string, timestamp: rt.number });
+export const logTimestampColumnRT = rt.type({ timestamp: rt.number });
 export const logFieldColumnRT = rt.type({
-  columnId: rt.string,
   field: rt.string,
   value: jsonArrayRT,
   highlights: rt.array(rt.string),
 });
 export const logMessageColumnRT = rt.type({
-  columnId: rt.string,
   message: rt.array(logMessagePartRT),
 });
 
