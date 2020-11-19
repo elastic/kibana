@@ -18,6 +18,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiEmptyPrompt,
+  Criteria,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
@@ -52,6 +53,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [actions, setActions] = useState<ActionConnector[]>([]);
+  const [pageIndex, setPageIndex] = useState<number>(0);
   const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
@@ -231,7 +233,15 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             : '',
       })}
       data-test-subj="actionsTable"
-      pagination={true}
+      pagination={{
+        initialPageIndex: 0,
+        pageIndex,
+      }}
+      onTableChange={({ page }: Criteria<ActionConnectorTableItem>) => {
+        if (page) {
+          setPageIndex(page.index);
+        }
+      }}
       selection={
         canDelete
           ? {

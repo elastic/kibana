@@ -9,8 +9,8 @@ import { useLocation } from 'react-router-dom';
 import classNames from 'classnames';
 
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiTitle, EuiText, EuiLink as EuiLinkExternal } from '@elastic/eui'; // TODO: Remove EuiLinkExternal after full Kibana transition
-import { EuiLink } from '../react_router_helpers';
+import { EuiIcon, EuiTitle, EuiText, EuiLink } from '@elastic/eui'; // TODO: Remove EuiLink after full Kibana transition
+import { EuiLinkTo } from '../react_router_helpers';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../common/constants';
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
@@ -96,19 +96,14 @@ export const SideNavLink: React.FC<SideNavLinkProps> = ({
   return (
     <li>
       {isExternal ? (
-        <EuiLinkExternal
-          {...rest}
-          className={classes}
-          href={to}
-          target="_blank"
-          onClick={closeNavigation}
-        >
-          {children}
-        </EuiLinkExternal>
-      ) : (
-        <EuiLink {...rest} className={classes} to={to} onClick={closeNavigation}>
+        // eslint-disable-next-line @elastic/eui/href-or-on-click
+        <EuiLink {...rest} className={classes} href={to} target="_blank" onClick={closeNavigation}>
           {children}
         </EuiLink>
+      ) : (
+        <EuiLinkTo {...rest} className={classes} to={to} onClick={closeNavigation}>
+          {children}
+        </EuiLinkTo>
       )}
       {subNav && <ul className="enterpriseSearchNavLinks__subNav">{subNav}</ul>}
     </li>

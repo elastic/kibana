@@ -12,7 +12,7 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
-import { getBeforeSetup, setGlobalDate } from './lib';
+import { getBeforeSetup } from './lib';
 import { InvalidatePendingApiKey } from '../../types';
 
 const taskManager = taskManagerMock.createStart();
@@ -44,8 +44,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
 });
-
-setGlobalDate();
 
 describe('disable()', () => {
   let alertsClient: AlertsClient;
@@ -138,7 +136,6 @@ describe('disable()', () => {
         scheduledTaskId: null,
         apiKey: null,
         apiKeyOwner: null,
-        updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [
           {
@@ -193,7 +190,6 @@ describe('disable()', () => {
         scheduledTaskId: null,
         apiKey: null,
         apiKeyOwner: null,
-        updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [
           {
