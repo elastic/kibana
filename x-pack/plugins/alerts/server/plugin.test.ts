@@ -158,7 +158,6 @@ describe('Alerting Plugin', () => {
               getActionsClientWithRequest: jest.fn(),
               getActionsAuthorizationWithRequest: jest.fn(),
             },
-            spaces: () => null,
             encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
             features: mockFeatures(),
           } as unknown) as AlertingPluginsStart
