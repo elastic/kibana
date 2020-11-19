@@ -9,14 +9,12 @@ import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mock
 import { securityMock } from '../../../security/server/mocks';
 import { alertsMock } from '../../../alerts/server/mocks';
 import { xpackMocks } from '../../../../mocks';
+import { FleetStartContract, ExternalCallback, PackageService } from '../../../fleet/server';
 import {
-  AgentService,
-  FleetStartContract,
-  ExternalCallback,
-  PackageService,
-  AgentPolicyService,
-} from '../../../fleet/server';
-import { createPackagePolicyServiceMock } from '../../../fleet/server/mocks';
+  createPackagePolicyServiceMock,
+  createMockAgentPolicyService,
+  createMockAgentService,
+} from '../../../fleet/server/mocks';
 import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
@@ -90,31 +88,6 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
 export const createMockPackageService = (): jest.Mocked<PackageService> => {
   return {
     getInstalledEsAssetReferences: jest.fn(),
-  };
-};
-
-/**
- * Create mock AgentPolicyService
- */
-
-export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyService> => {
-  return {
-    get: jest.fn(),
-    list: jest.fn(),
-    getDefaultAgentPolicyId: jest.fn(),
-    getFullAgentPolicy: jest.fn(),
-  };
-};
-
-/**
- * Creates a mock AgentService
- */
-export const createMockAgentService = (): jest.Mocked<AgentService> => {
-  return {
-    getAgentStatusById: jest.fn(),
-    authenticateAgentWithAccessToken: jest.fn(),
-    getAgent: jest.fn(),
-    listAgents: jest.fn(),
   };
 };
 

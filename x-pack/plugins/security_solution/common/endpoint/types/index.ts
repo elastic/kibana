@@ -532,10 +532,19 @@ export type HostInfo = Immutable<{
   host_status: HostStatus;
   policy_info?: {
     agent: {
-      configured: PolicyInfo; // as set in kibana
-      applied: PolicyInfo; // last reported running in agent (may lag behind configured)
+      /**
+       * As set in Kibana
+       */
+      configured: PolicyInfo;
+      /**
+       * Last reported running in agent (may lag behind configured)
+       */
+      applied: PolicyInfo;
     };
-    endpoint: PolicyInfo; // current intended 'endpoint' package policy
+    /**
+     * Current intended 'endpoint' package policy
+     */
+    endpoint: PolicyInfo;
   };
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
