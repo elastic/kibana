@@ -25,7 +25,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     const esArchiver = getService('esArchiver');
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
-      // await esArchiver.loadIfNeeded('dashboard/current');
     });
 
     loadTestFile(require.resolve('./dashboard_embedding'));
