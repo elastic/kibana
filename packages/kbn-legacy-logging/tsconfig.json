@@ -7,5 +7,5 @@
     "declarationMap": true,
     "types": ["jest", "node"]
   },
-  "include": ["./src/**/*.ts", "./typings/**/*.d.ts"]
+  "include": ["./src/**/*.ts"]
 }
