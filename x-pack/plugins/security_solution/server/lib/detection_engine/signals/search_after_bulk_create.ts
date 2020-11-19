@@ -103,6 +103,11 @@ export const searchAfterAndBulkCreate = async ({
     throw Error(`No indices contained timestamp fields: ${JSON.stringify(timestampsToSort)}`);
   }
 
+  const indexPatternRegEx = inputIndexPattern.reduce(
+    (acc, indexPattern) => ({ [indexPattern]: new RegExp(indexPattern), ...acc }),
+    {} as Record<string, RegExp>
+  );
+
   for (const timestamp of timestampsToSort) {
     const totalToFromTuples = getSignalTimeTuples({
       logger,
@@ -157,11 +162,6 @@ export const searchAfterAndBulkCreate = async ({
             );
             break;
           } else if (inputIndexPattern.length !== timestampsAndIndices[timestamp].length) {
-            const indexPatternRegEx = inputIndexPattern.reduce(
-              (acc, indexPattern) => ({ [indexPattern]: new RegExp(indexPattern), ...acc }),
-              {} as Record<string, RegExp>
-            );
-
             // find the full name indices which match one of the index patterns
             const indexPatternsMissing = Object.keys(indexPatternRegEx).filter(
               (regEx) =>
@@ -169,6 +169,9 @@ export const searchAfterAndBulkCreate = async ({
                   indexPatternRegEx[regEx].test(index)
                 )
             );
+
+            // open a separate PR to not only log this out but also write a "failure" status
+            // so that these are logged and visible to the user through the UI.
             logger.error(
               buildRuleMessage(
                 `indices matching index pattern ${JSON.stringify(
@@ -187,7 +190,14 @@ export const searchAfterAndBulkCreate = async ({
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortId: sortId,
-            index: inputIndexPattern,
+            // we are logging the index patterns that do not have the timestamp we are about to sort on
+            // so filtering those index patterns out so that we do not have to do weird things with the
+            // errors that we get back.
+            index: inputIndexPattern.filter((indexPattern) =>
+              timestampsAndIndices[timestamp].some((index) =>
+                indexPatternRegEx[indexPattern].test(index)
+              )
+            ),
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,
