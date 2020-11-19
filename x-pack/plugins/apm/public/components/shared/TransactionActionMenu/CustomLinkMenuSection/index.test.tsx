@@ -7,7 +7,7 @@
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CustomLink } from '.';
+import { CustomLinkMenuSection } from '.';
 import { CustomLink as CustomLinkType } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
@@ -28,7 +28,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {
     const component = render(
-      <CustomLink
+      <CustomLinkMenuSection
         customLinks={[]}
         transaction={({} as unknown) as Transaction}
         onCreateCustomLinkClick={jest.fn()}
@@ -46,7 +46,7 @@ describe('Custom links', () => {
 
   it('shows loading while custom links are fetched', () => {
     const { getByTestId } = render(
-      <CustomLink
+      <CustomLinkMenuSection
         customLinks={[]}
         transaction={({} as unknown) as Transaction}
         onCreateCustomLinkClick={jest.fn()}
@@ -66,7 +66,7 @@ describe('Custom links', () => {
       { id: '4', label: 'qux', url: 'qux' },
     ] as CustomLinkType[];
     const component = render(
-      <CustomLink
+      <CustomLinkMenuSection
         customLinks={customLinks}
         transaction={({} as unknown) as Transaction}
         onCreateCustomLinkClick={jest.fn()}
@@ -88,7 +88,7 @@ describe('Custom links', () => {
     ] as CustomLinkType[];
     const onSeeMoreClickMock = jest.fn();
     const component = render(
-      <CustomLink
+      <CustomLinkMenuSection
         customLinks={customLinks}
         transaction={({} as unknown) as Transaction}
         onCreateCustomLinkClick={jest.fn()}
@@ -107,7 +107,7 @@ describe('Custom links', () => {
   describe('create custom link buttons', () => {
     it('shows create button below empty message', () => {
       const component = render(
-        <CustomLink
+        <CustomLinkMenuSection
           customLinks={[]}
           transaction={({} as unknown) as Transaction}
           onCreateCustomLinkClick={jest.fn()}
@@ -128,7 +128,7 @@ describe('Custom links', () => {
         { id: '4', label: 'qux', url: 'qux' },
       ] as CustomLinkType[];
       const component = render(
-        <CustomLink
+        <CustomLinkMenuSection
           customLinks={customLinks}
           transaction={({} as unknown) as Transaction}
           onCreateCustomLinkClick={jest.fn()}

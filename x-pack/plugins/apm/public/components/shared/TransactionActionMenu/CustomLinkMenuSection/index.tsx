@@ -18,7 +18,7 @@ import {
   ActionMenuDivider,
   SectionSubtitle,
 } from '../../../../../../observability/public';
-import { CustomLinkSection } from './CustomLinkSection';
+import { CustomLinkList } from './CustomLinkList';
 import { ManageCustomLink } from './ManageCustomLink';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
 import { LoadingStatePrompt } from '../../LoadingStatePrompt';
@@ -26,13 +26,17 @@ import { px } from '../../../../style/variables';
 import { CreateEditCustomLinkFlyout } from '../../../app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout';
 import { convertFiltersToQuery } from '../../../app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/helper';
 import {
-  CustomLink as CustomLinkType,
+  CustomLink,
   Filter,
 } from '../../../../../common/custom_link/custom_link_types';
 
 const DEFAULT_LINKS_TO_SHOW = 3;
 
-export function CustomLink({ transaction }: { transaction: Transaction }) {
+export function CustomLinkMenuSection({
+  transaction,
+}: {
+  transaction: Transaction;
+}) {
   const [showAllLinks, setShowAllLinks] = useState(false);
   const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
 
@@ -102,7 +106,7 @@ export function CustomLink({ transaction }: { transaction: Transaction }) {
           defaultMessage: 'Links will open in a new window.',
         })}
       </SectionSubtitle>
-      <CustomLinkSection
+      <CustomLinkList
         customLinks={
           showAllLinks
             ? customLinks
@@ -130,7 +134,7 @@ function BottomSection({
   onClickCreate,
 }: {
   status: FETCH_STATUS;
-  customLinks: CustomLinkType[];
+  customLinks: CustomLink[];
   showAllLinks: boolean;
   toggleShowAll: () => void;
   onClickCreate: () => void;

@@ -24,7 +24,7 @@ const TruncateText = styled(EuiText)`
   ${truncate(px(units.unit * 25))}
 `;
 
-export function CustomLinkSection({
+export function CustomLinkList({
   customLinks,
   transaction,
 }: {

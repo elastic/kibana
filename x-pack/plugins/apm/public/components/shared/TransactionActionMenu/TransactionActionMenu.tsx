@@ -21,7 +21,7 @@ import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useLicense } from '../../../hooks/useLicense';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { CustomLink } from './CustomLink';
+import { CustomLinkMenuSection } from './CustomLinkMenuSection';
 import { getSections } from './sections';
 
 interface Props {
@@ -93,7 +93,9 @@ export function TransactionActionMenu({ transaction }: Props) {
             );
           })}
 
-          {hasGoldLicense && <CustomLink transaction={transaction} />}
+          {hasGoldLicense && (
+            <CustomLinkMenuSection transaction={transaction} />
+          )}
         </div>
       </ActionMenu>
     </>
