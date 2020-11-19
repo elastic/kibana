@@ -11,7 +11,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { exportAsCSVs } from '../../../../../src/plugins/data/public';
+import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -26,6 +26,7 @@ import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   esFilters,
+  exportAsCSVs,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   syncQueryStateWithUrl,
@@ -491,11 +492,18 @@ export function App({
     savingPermitted,
     actions: {
       exportToCSV: () => {
-        exportAsCSVs(lastKnownDoc?.title || 'unsaved', lastKnownDoc?.state?.activeData, {
-          csvSeparator: uiSettings.get('csv:separator', ','),
-          quoteValues: uiSettings.get('csv:quoteValues', true),
-          formatFactory: data.fieldFormats.deserialize,
-        });
+        const content = exportAsCSVs(
+          lastKnownDoc?.title || 'unsaved',
+          lastKnownDoc?.state?.activeData,
+          {
+            csvSeparator: uiSettings.get('csv:separator', ','),
+            quoteValues: uiSettings.get('csv:quoteValues', true),
+            formatFactory: data.fieldFormats.deserialize,
+          }
+        );
+        if (content) {
+          downloadMultipleAs(content);
+        }
       },
       saveAndReturn: () => {
         if (savingPermitted && lastKnownDoc) {
