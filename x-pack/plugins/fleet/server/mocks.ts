@@ -9,7 +9,7 @@ import { FleetAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
 import { PackagePolicyServiceInterface } from './services/package_policy';
-import { AgentPolicyService, AgentService } from './services';
+import { AgentPolicyServiceInterface, AgentService } from './services';
 
 export const createAppContextStartContractMock = (): FleetAppContext => {
   return {
@@ -41,7 +41,7 @@ export const createPackagePolicyServiceMock = () => {
  * Create mock AgentPolicyService
  */
 
-export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyService> => {
+export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
   return {
     get: jest.fn(),
     list: jest.fn(),
