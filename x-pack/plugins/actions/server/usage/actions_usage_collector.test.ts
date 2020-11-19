@@ -7,7 +7,6 @@
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { registerActionsUsageCollector } from './actions_usage_collector';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
-import { coreMock } from 'src/core/server/mocks';
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 
