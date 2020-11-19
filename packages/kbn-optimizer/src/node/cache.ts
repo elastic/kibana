@@ -17,20 +17,11 @@
  * under the License.
  */
 
-import Path from 'path';
-import Fs from 'fs';
+import { Writable } from 'stream';
 
 import chalk from 'chalk';
 import * as LmdbStore from 'lmdb-store';
-import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/dev-utils';
 
-const CACHE_LOG = process.env.DEBUG_NODE_TRANSPILER_CACHE
-  ? Fs.createWriteStream(Path.resolve(REPO_ROOT, 'node_auto_transpilation_cache.log'), {
-      flags: 'a',
-    })
-  : undefined;
-
-const CACHE_DIR = Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH);
 const GLOBAL_ATIME = `${Date.now()}`;
 const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
@@ -42,38 +33,47 @@ export class Cache {
   private readonly mtimes: LmdbStore.Database;
   private readonly sourceMaps: LmdbStore.Database;
   private readonly prefix: string;
+  private readonly log?: Writable;
+  private readonly timer: NodeJS.Timer;
 
-  constructor(config: { prefix: string }) {
+  constructor(config: { dir: string; prefix: string; log?: Writable }) {
     this.prefix = config.prefix;
+    this.log = config.log;
 
-    this.codes = LmdbStore.open(CACHE_DIR, {
+    this.codes = LmdbStore.open(config.dir, {
       name: 'codes',
+      encoding: 'string',
       maxReaders: 500,
     });
 
     // TODO: redundant 'name' syntax is necessary because of a bug that I have yet to fix
-    this.atimes = this.codes.openDB('atime', {
-      name: 'atime',
+    this.atimes = this.codes.openDB('atimes', {
+      name: 'atimes',
       encoding: 'string',
     });
 
-    this.mtimes = this.codes.openDB('mtime', {
-      name: 'mtime',
+    this.mtimes = this.codes.openDB('mtimes', {
+      name: 'mtimes',
       encoding: 'string',
     });
 
-    this.sourceMaps = this.codes.openDB('smaps', {
-      name: 'smaps',
-      encoding: 'msgpack',
+    this.sourceMaps = this.codes.openDB('sourceMaps', {
+      name: 'sourceMaps',
+      encoding: 'string',
     });
 
     // after the process has been running for 30 minutes prune the
     // keys which haven't been used in 30 days. We use `unref()` to
     // make sure this timer doesn't hold other processes open
     // unexpectedly
-    setTimeout(() => {
+    this.timer = setTimeout(() => {
       this.pruneOldKeys();
-    }, 30 * MINUTE).unref();
+    }, 30 * MINUTE);
+
+    // timer.unref is not defined in jest which emulates the dom by default
+    if (typeof this.timer.unref === 'function') {
+      this.timer.unref();
+    }
   }
 
   getMtime(path: string) {
@@ -82,28 +82,38 @@ export class Cache {
 
   getCode(path: string) {
     const key = this.getKey(path);
+    const code = this.safeGet<string>(this.codes, key);
 
-    // when we use a file from the cache set the "atime" of that cache entry
-    // so that we know which cache items we use and which haven't been
-    // touched in a long time (currently 30 days)
-    this.safePut(this.atimes, key, GLOBAL_ATIME);
+    if (code !== undefined) {
+      // when we use a file from the cache set the "atime" of that cache entry
+      // so that we know which cache items we use and which haven't been
+      // touched in a long time (currently 30 days)
+      this.safePut(this.atimes, key, GLOBAL_ATIME);
+    }
 
-    return this.safeGet<string>(this.codes, key);
+    return code;
   }
 
   getSourceMap(path: string) {
-    return this.safeGet<any>(this.sourceMaps, this.getKey(path));
+    const map = this.safeGet<any>(this.sourceMaps, this.getKey(path));
+    if (typeof map === 'string') {
+      return JSON.parse(map);
+    }
   }
 
-  update(path: string, file: { mtime: string; code: string; map: any }) {
+  async update(path: string, file: { mtime: string; code: string; map: any }) {
     const key = this.getKey(path);
 
-    Promise.all([
+    await Promise.all([
       this.safePut(this.atimes, key, GLOBAL_ATIME),
       this.safePut(this.mtimes, key, file.mtime),
       this.safePut(this.codes, key, file.code),
-      this.safePut(this.sourceMaps, key, file.map),
+      this.safePut(this.sourceMaps, key, JSON.stringify(file.map)),
     ]);
+  }
+
+  close() {
+    clearTimeout(this.timer);
   }
 
   private getKey(path: string) {
@@ -130,8 +140,8 @@ export class Cache {
   }
 
   private debug(type: string, db: any, key: string) {
-    if (CACHE_LOG) {
-      CACHE_LOG.write(`${type}\t[${db.name}]\t${key}\n`);
+    if (this.log) {
+      this.log.write(`${type}   [${db.name}]   ${key}\n`);
     }
   }
 
