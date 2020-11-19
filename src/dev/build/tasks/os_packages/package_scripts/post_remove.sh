@@ -50,15 +50,11 @@ if [ "$REMOVE_DIRS" = "true" ]; then
 fi
 
 if [ "$REMOVE_USER_AND_GROUP" = "true" ]; then
-  if getent passwd "<%= user %>" >/dev/null 2>&1 ; then
-    echo -n "Deleting <%= user %> user..."
-    userdel "<%= user %>"
-    echo " OK"
-  fi
+    if id <%= user %> > /dev/null 2>&1 ; then
+        userdel <%= user %>
+    fi
 
-  if getent group "<%= group %>" >/dev/null 2>&1 ; then
-    echo -n "Deleting <%= group %> group..."
-    groupdel "<%= group %>"
-    echo " OK"
-  fi
+    if getent group <%= group %> > /dev/null 2>&1 ; then
+        groupdel <%= group %>
+    fi
 fi
