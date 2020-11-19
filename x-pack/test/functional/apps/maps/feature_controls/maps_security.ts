@@ -23,7 +23,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('maps/kibana');
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       await PageObjects.security.forceLogout();
     });
