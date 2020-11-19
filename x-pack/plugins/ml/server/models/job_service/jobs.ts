@@ -8,7 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
-import { parseTimeIntervalForJob } from '../../../common/util/job_utils';
+import {
+  getSingleMetricViewerJobErrorMessage,
+  parseTimeIntervalForJob,
+} from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
@@ -17,7 +20,6 @@ import {
   JobStats,
   DatafeedWithStats,
   CombinedJobWithStats,
-  CombinedJob,
 } from '../../../common/types/anomaly_detection_jobs';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
@@ -28,16 +30,9 @@ import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import {
   getEarliestDatafeedStartTime,
   getLatestDataOrBucketTimestamp,
-  isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
-import {
-  getAggregationBucketsName,
-  getAggregations,
-  getDatafeedAggregations,
-} from '../../../common/util/datafeed_utils';
-import { findAggField } from '../../../common/util/validation_utils';
 
 export interface MlJobsResponse {
   jobs: Job[];
@@ -158,32 +153,6 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     return { success: true };
   }
 
-  function isSupportedTimeSeriesViewJob(job: CombinedJob): boolean {
-    let isSupported = true;
-    const hasDatafeed =
-      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
-    if (hasDatafeed) {
-      const aggs = getDatafeedAggregations(job.datafeed_config);
-      if (aggs !== undefined) {
-        const aggBucketsName = getAggregationBucketsName(aggs);
-        if (aggBucketsName !== undefined) {
-          // if datafeed has any nested terms aggregations at all
-          const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
-          const termsField = findAggField(aggregations, 'terms', true);
-          if (termsField !== undefined && Object.keys(termsField).length > 1) {
-            isSupported = false;
-          }
-
-          // if aggregation interval is different from bucket span
-          const datetimeBucket = aggs[aggBucketsName].date_histogram;
-          if (datetimeBucket?.fixed_interval !== job.analysis_config?.bucket_span) {
-            isSupported = false;
-          }
-        }
-      }
-    }
-    return isSupported;
-  }
   async function jobsSummary(jobIds: string[] = []) {
     const fullJobsList: CombinedJobWithStats[] = await createFullJobsList();
     const fullJobsIds = fullJobsList.map((job) => job.job_id);
@@ -208,6 +177,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       const hasDatafeed =
         typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
       const dataCounts = job.data_counts;
+      const errorMessage = getSingleMetricViewerJobErrorMessage(job);
 
       const tempJob: MlSummaryJob = {
         id: job.job_id,
@@ -233,7 +203,8 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
           dataCounts?.latest_record_timestamp,
           dataCounts?.latest_bucket_timestamp
         ),
-        isSingleMetricViewerJob: isTimeSeriesViewJob(job) && isSupportedTimeSeriesViewJob(job),
+        isSingleMetricViewerJob: errorMessage === undefined,
+        isNotSingleMetricViewerJobMessage: errorMessage,
         nodeName: job.node ? job.node.name : undefined,
         deleting: job.deleting || undefined,
       };
@@ -275,13 +246,15 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         );
         timeRange.from = dataCounts.earliest_record_timestamp;
       }
+      const errorMessage = getSingleMetricViewerJobErrorMessage(job);
 
       const tempJob = {
         id: job.job_id,
         job_id: job.job_id,
         groups: Array.isArray(job.groups) ? job.groups.sort() : [],
         isRunning: hasDatafeed && job.datafeed_config.state === 'started',
-        isSingleMetricViewerJob: isTimeSeriesViewJob(job) && isSupportedTimeSeriesViewJob(job),
+        isSingleMetricViewerJob: errorMessage === undefined,
+        isNotSingleMetricViewerJobMessage: errorMessage,
         timeRange,
       };
 

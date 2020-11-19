@@ -20,7 +20,12 @@ import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
-import { getDatafeedAggregations } from './datafeed_utils';
+import {
+  getAggregationBucketsName,
+  getAggregations,
+  getDatafeedAggregations,
+} from './datafeed_utils';
+import { findAggField } from './validation_utils';
 
 export interface ValidationResults {
   valid: boolean;
@@ -132,6 +137,46 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
   }
 
   return isModelPlotChartable;
+}
+
+// Returns a reason to indicate why the job configuration is not supported
+// if the result is undefined, that means the single metric job should be viewable
+export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
+  let isSupported;
+  if (!isTimeSeriesViewJob(job)) {
+    isSupported = 'not_time_series_view';
+  }
+  // const detectors = job.analysis_config.detectors;
+  // if (detectors.every((dtr, i) => !isSourceDataChartableForDetector(job, i))) {
+  //   isSupported = 'source_data_not_chartable';
+  // }
+  // if (detectors.every((dtr, i) => !isModelPlotChartableForDetector(job, i))) {
+  //   isSupported = 'model_plot_not_chartable';
+  // }
+
+  const hasDatafeed =
+    typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+  if (hasDatafeed) {
+    const aggs = getDatafeedAggregations(job.datafeed_config);
+    if (aggs !== undefined) {
+      const aggBucketsName = getAggregationBucketsName(aggs);
+      if (aggBucketsName !== undefined) {
+        // if datafeed has any nested terms aggregations at all
+        const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
+        const termsField = findAggField(aggregations, 'terms', true);
+        if (termsField !== undefined && Object.keys(termsField).length > 1) {
+          isSupported = 'detected_nested_terms_aggregations';
+        }
+
+        // if aggregation interval is different from bucket span
+        const datetimeBucket = aggs[aggBucketsName].date_histogram;
+        if (datetimeBucket?.fixed_interval !== job.analysis_config?.bucket_span) {
+          isSupported = 'varying_bucket_span_and_aggregation_interval';
+        }
+      }
+    }
+  }
+  return isSupported;
 }
 
 // Returns the names of the partition, by, and over fields for the detector with the
