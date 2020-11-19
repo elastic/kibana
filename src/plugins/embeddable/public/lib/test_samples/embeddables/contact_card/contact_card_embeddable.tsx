@@ -95,6 +95,24 @@ export class ContactCardEmbeddable extends Embeddable<
   }
 
   public reload() {}
+
+  public getInspectorAdapters = () => {
+    return {
+      layer1: {
+        type: 'datatable',
+        columns: [
+          { id: 'firstName', name: 'First Name' },
+          { id: 'originalLastName', name: 'Last Name' },
+        ],
+        rows: [
+          {
+            firstName: this.getInput().firstName,
+            orignialLastName: this.getInput().lastName,
+          },
+        ],
+      },
+    };
+  };
 }
 
 export const CONTACT_USER_TRIGGER = 'CONTACT_USER_TRIGGER';

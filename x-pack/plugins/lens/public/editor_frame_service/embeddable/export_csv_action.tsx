@@ -20,6 +20,8 @@ export interface Params {
 
 export interface ExportContext {
   embeddable?: IEmbeddable;
+  // used for testing
+  asString?: boolean;
 }
 
 /**
@@ -56,52 +58,82 @@ export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPO
     return adapters && (adapters.data || adapters[Object.keys(adapters)[0]]?.columns);
   };
 
-  private getFormatter = (type: string | undefined): FormatFactory | undefined => {
+  private getFormatter = (
+    type: string | undefined,
+    adapters: Adapters | undefined
+  ): FormatFactory | undefined => {
+    if (type === 'lens') {
+      return this.params.data.fieldFormats.deserialize;
+    }
+
     if (type === 'visualize') {
       return (() => ({
         convert: (item: { raw: string; formatted: string }) => item.formatted,
       })) as FormatFactory;
     }
-    if (type === 'lens') {
-      return this.params.data.fieldFormats.deserialize;
+
+    if (this.hasDatatableContent(adapters)) {
+      // if of unknown type, return an identity
+      return (() => ({
+        convert: (item) => item,
+      })) as FormatFactory;
     }
   };
 
-  private getDataTableContent = async (adapters: Adapters | undefined) => {
-    if (!adapters) {
+  private getDataTableContent = async (
+    type: string | undefined,
+    adapters: Adapters | undefined
+  ) => {
+    if (!adapters || !type) {
       return;
     }
     // Visualize
-    if (adapters.data) {
+    if (type === 'visualize') {
       const datatable = await adapters.data.tabular();
       datatable.columns = datatable.columns.map(({ field, ...rest }: { field: string }) => ({
         id: field,
         field,
         ...rest,
       }));
-      return { type: 'visualize', datatables: { layer1: datatable } };
+      return { layer1: datatable };
     }
     // Lens
-    if (adapters[Object.keys(adapters)[0]]?.columns) {
-      return { type: 'lens', datatables: adapters };
+    if (type === 'lens') {
+      return adapters;
+    }
+    // Make a last attempt to duck type the adapter (useful for testing)
+    if (this.hasDatatableContent(adapters)) {
+      return adapters;
     }
     return;
   };
 
-  private exportCSV = async (context: ExportContext): Promise<void> => {
-    const content = await this.getDataTableContent(context?.embeddable?.getInspectorAdapters());
-    const formatFactory = this.getFormatter(content?.type);
+  private exportCSV = async (context: ExportContext) => {
+    const formatFactory = this.getFormatter(
+      context?.embeddable?.type,
+      context?.embeddable?.getInspectorAdapters()
+    );
+    // early exit if not formatter is available
+    if (!formatFactory) {
+      return;
+    }
+    const datatables = await this.getDataTableContent(
+      context?.embeddable?.type,
+      context?.embeddable?.getInspectorAdapters()
+    );
 
-    if (content && formatFactory) {
-      exportAsCSVs(context?.embeddable?.getTitle()!, content.datatables, {
+    if (datatables) {
+      return exportAsCSVs(context?.embeddable?.getTitle()!, datatables, {
         csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
         quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
         formatFactory,
+        asString: context.asString,
       });
     }
   };
 
   public async execute(context: ExportContext): Promise<void> {
-    await this.exportCSV(context);
+    // make it testable: type here will be forced
+    return ((await this.exportCSV(context)) as unknown) as Promise<void>;
   }
 }

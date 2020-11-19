@@ -26,7 +26,7 @@ import pMap from 'p-map';
 import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
 import { Datatable } from 'src/plugins/expressions';
 
-const LINE_FEED_CHARACTER = '\r\n';
+export const LINE_FEED_CHARACTER = '\r\n';
 const nonAlphaNumRE = /[^a-zA-Z0-9]/;
 const allDoubleQuoteRE = /"/g;
 
