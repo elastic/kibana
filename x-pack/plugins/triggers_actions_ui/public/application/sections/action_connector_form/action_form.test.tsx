@@ -351,16 +351,31 @@ describe('action_form', () => {
         Array [
           Object {
             "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
+            "disabled": false,
             "inputDisplay": "Default",
             "value": "default",
           },
           Object {
             "data-test-subj": "addNewActionConnectorActionGroup-0-option-resolved",
+            "disabled": false,
             "inputDisplay": "Resolved",
             "value": "resolved",
           },
         ]
       `);
+    });
+
+    it('renders disabled action groups for selected action type', async () => {
+      const wrapper = await setup([
+        {
+          group: 'disabled',
+          id: 'test-disabled',
+          actionTypeId: actionType.id,
+          params: {
+            message: '',
+          },
+        },
+      ]);
     });
 
     it('renders selected Resolved action group', async () => {
@@ -385,11 +400,13 @@ describe('action_form', () => {
         Array [
           Object {
             "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
+            "disabled": false,
             "inputDisplay": "Default",
             "value": "default",
           },
           Object {
             "data-test-subj": "addNewActionConnectorActionGroup-0-option-resolved",
+            "disabled": false,
             "inputDisplay": "Resolved",
             "value": "resolved",
           },
