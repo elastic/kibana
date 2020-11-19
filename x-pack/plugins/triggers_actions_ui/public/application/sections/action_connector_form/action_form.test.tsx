@@ -66,6 +66,21 @@ describe('action_form', () => {
     actionParamsFields: mockedActionParamsFields,
   };
 
+  const disabledByActionType = {
+    id: 'disabled-by-action-type',
+    iconClass: 'test',
+    selectMessage: 'test',
+    validateConnector: (): ValidationResult => {
+      return { errors: {} };
+    },
+    validateParams: (): ValidationResult => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
+    actionConnectorFields: null,
+    actionParamsFields: mockedActionParamsFields,
+  };
+
   const disabledByLicenseActionType = {
     id: 'disabled-by-license',
     iconClass: 'test',
@@ -157,6 +172,14 @@ describe('action_form', () => {
           },
           isPreconfigured: false,
         },
+        {
+          secrets: {},
+          id: 'test5',
+          actionTypeId: disabledByActionType.id,
+          name: 'Connector with disabled action group',
+          config: {},
+          isPreconfigured: false,
+        },
       ]);
       const mocks = coreMock.createSetup();
       const [
@@ -183,6 +206,7 @@ describe('action_form', () => {
         actionType,
         disabledByConfigActionType,
         disabledByLicenseActionType,
+        disabledByActionType,
         preconfiguredOnly,
         actionTypeWithoutParams,
       ]);
@@ -287,6 +311,15 @@ describe('action_form', () => {
               minimumLicenseRequired: 'gold',
             },
             {
+              id: 'disabled-by-action-type',
+              name: 'Disabled by action type',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
+              disabledActionGroups: ['resolved'],
+            },
+            {
               id: actionTypeWithoutParams.id,
               name: 'Action type without params',
               enabled: true,
@@ -368,14 +401,37 @@ describe('action_form', () => {
     it('renders disabled action groups for selected action type', async () => {
       const wrapper = await setup([
         {
-          group: 'disabled',
-          id: 'test-disabled',
+          group: ResolvedActionGroup.id,
+          id: 'test',
           actionTypeId: actionType.id,
           params: {
             message: '',
           },
         },
       ]);
+      const actionOption = wrapper.find(
+        `[data-test-subj="disabled-by-action-type-ActionTypeSelectOption"]`
+      );
+      actionOption.first().simulate('click');
+      const actionGroupsSelect = wrapper.find(
+        `[data-test-subj="addNewActionConnectorActionGroup-1"]`
+      );
+      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-default",
+            "disabled": false,
+            "inputDisplay": "Default",
+            "value": "default",
+          },
+          Object {
+            "data-test-subj": "addNewActionConnectorActionGroup-1-option-resolved",
+            "disabled": true,
+            "inputDisplay": "Resolved (Not Currently Supported)",
+            "value": "resolved",
+          },
+        ]
+      `);
     });
 
     it('renders selected Resolved action group', async () => {
