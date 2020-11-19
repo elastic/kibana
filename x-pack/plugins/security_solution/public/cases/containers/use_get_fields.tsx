@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getFields } from './api';
 import * as i18n from './translations';
-import { FieldResponse } from '../../../../case/common/api/cases';
+import { FieldResponse } from '../../../../case/common/api';
 
 interface FieldsState {
   fields: FieldResponse;

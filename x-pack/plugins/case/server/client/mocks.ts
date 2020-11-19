@@ -21,6 +21,7 @@ export const createCaseClientMock = (): CaseClientMock => ({
   create: jest.fn(),
   update: jest.fn(),
   addComment: jest.fn(),
+  getFields: jest.fn(),
 });
 
 export const createCaseClientWithMockSavedObjectsClient = async (
