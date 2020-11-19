@@ -31,6 +31,7 @@ export const cumulativeSumOperation: OperationDefinition<
     defaultMessage: 'Cumulative sum',
   }),
   input: 'fullReference',
+  selectionStyle: 'field',
   requiredReferences: [
     {
       input: ['field'],
@@ -71,8 +72,8 @@ export const cumulativeSumOperation: OperationDefinition<
       },
     ];
   },
-  buildColumn: ({ referenceIds, previousColumn, columns }) => {
-    const metric = columns[referenceIds[0]];
+  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+    const metric = layer.columns[referenceIds[0]];
     return {
       label: ofName(metric.label),
       dataType: 'number',
@@ -100,6 +101,10 @@ export const cumulativeSumOperation: OperationDefinition<
     if (hasDateHistogram) {
       return undefined;
     }
-    return ['Needs a date histogram to work'];
+    return [
+      i18n.translate('xpack.lens.indexPattern.cumulativeSum.dateHistogramErrorMessage', {
+        defaultMessage: 'Needs a date histogram to work',
+      }),
+    ];
   },
 };
