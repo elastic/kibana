@@ -23,6 +23,7 @@ import { IndexPatternsFetcher } from './fetcher';
 import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
 import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
 import { registerDeleteIndexPatternRoute } from './routes/delete_index_pattern';
+import { registerUpdateIndexPatternRoute } from './routes/update_index_pattern';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const parseMetaFields = (metaFields: string | string[]) => {
@@ -40,6 +41,7 @@ export function registerRoutes(http: HttpServiceSetup) {
   registerCreateIndexPatternRoute(router);
   registerGetIndexPatternRoute(router);
   registerDeleteIndexPatternRoute(router);
+  registerUpdateIndexPatternRoute(router);
 
   router.get(
     {
