@@ -15,11 +15,11 @@ import { i18n } from '@kbn/i18n';
 import { APMLink } from '../../Links/apm/APMLink';
 
 export function ManageCustomLink({
-  onCreateCustomLinkClick,
-  showCreateCustomLinkButton = true,
+  onClickCreate,
+  showCreateButton = true,
 }: {
-  onCreateCustomLinkClick: () => void;
-  showCreateCustomLinkButton?: boolean;
+  onClickCreate: () => void;
+  showCreateButton?: boolean;
 }) {
   return (
     <EuiFlexGroup>
@@ -41,12 +41,12 @@ export function ManageCustomLink({
               </APMLink>
             </EuiToolTip>
           </EuiFlexItem>
-          {showCreateCustomLinkButton && (
+          {showCreateButton && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="plusInCircle"
                 size="xs"
-                onClick={onCreateCustomLinkClick}
+                onClick={onClickCreate}
               >
                 {i18n.translate('xpack.apm.customLink.buttom.create.title', {
                   defaultMessage: 'Create',

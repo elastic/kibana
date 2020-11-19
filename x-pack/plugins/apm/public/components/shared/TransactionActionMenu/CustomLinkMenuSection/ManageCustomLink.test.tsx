@@ -24,21 +24,18 @@ function Wrapper({ children }: { children?: ReactNode }) {
 
 describe('ManageCustomLink', () => {
   it('renders with create button', () => {
-    const component = render(
-      <ManageCustomLink onCreateCustomLinkClick={jest.fn()} />,
-      { wrapper: Wrapper }
-    );
+    const component = render(<ManageCustomLink onClickCreate={jest.fn()} />, {
+      wrapper: Wrapper,
+    });
     expect(
       component.getByLabelText('Custom links settings page')
     ).toBeInTheDocument();
     expectTextsInDocument(component, ['Create']);
   });
+
   it('renders without create button', () => {
     const component = render(
-      <ManageCustomLink
-        onCreateCustomLinkClick={jest.fn()}
-        showCreateCustomLinkButton={false}
-      />,
+      <ManageCustomLink onClickCreate={jest.fn()} showCreateButton={false} />,
       { wrapper: Wrapper }
     );
     expect(
@@ -46,12 +43,11 @@ describe('ManageCustomLink', () => {
     ).toBeInTheDocument();
     expectTextsNotInDocument(component, ['Create']);
   });
+
   it('opens flyout to create new custom link', () => {
     const handleCreateCustomLinkClickMock = jest.fn();
     const { getByText } = render(
-      <ManageCustomLink
-        onCreateCustomLinkClick={handleCreateCustomLinkClickMock}
-      />,
+      <ManageCustomLink onClickCreate={handleCreateCustomLinkClickMock} />,
       { wrapper: Wrapper }
     );
     expect(handleCreateCustomLinkClickMock).not.toHaveBeenCalled();

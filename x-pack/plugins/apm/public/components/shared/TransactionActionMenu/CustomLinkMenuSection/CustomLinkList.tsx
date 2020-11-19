@@ -41,7 +41,7 @@ export function CustomLinkList({
           // ignores any error that happens
         }
         return (
-          <ListItem key={link.id}>
+          <ListItem role="listitem" key={link.id}>
             <TruncateText size="s">
               <EuiLink href={href} target="_blank" external={true}>
                 {link.label}

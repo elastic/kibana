@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { CustomLinkList } from './CustomLinkSection';
+import { CustomLinkList } from './CustomLinkList';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,

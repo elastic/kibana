@@ -95,8 +95,8 @@ export function CustomLinkMenuSection({
         </EuiFlexItem>
         <EuiFlexItem>
           <ManageCustomLink
-            onCreateCustomLinkClick={() => setIsCreateEditFlyoutOpen(true)}
-            showCreateCustomLinkButton={customLinks.length === 0}
+            onClickCreate={() => setIsCreateEditFlyoutOpen(true)}
+            showCreateButton={customLinks.length > 0}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
