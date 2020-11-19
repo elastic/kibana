@@ -46,6 +46,9 @@
 
   @include euiFormControlWithIcon($isIconOptional: true);
   ~ .euiFormControlLayoutIcons {
+    // By default form control layout icon is vertically centered, but our textarea
+    // can expand to be multi-line, so we position it with padding that matches
+    // the parent textarea padding
     z-index: $euiZContentMenu + 1;
     top: $euiSizeS + 3px;
     bottom: unset;
