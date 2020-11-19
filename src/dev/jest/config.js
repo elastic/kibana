@@ -39,6 +39,9 @@ export default {
     '<rootDir>/src/dev/code_coverage/ingest_coverage',
   ],
   collectCoverageFrom: [
+    'src/{cli,cli_keystore,cli_plugin,core}/**/*.{ts,tsx}',
+    '!src/{cli,cli_keystore,cli_plugin,core}/**/{test_helpers,__snapshots__,mocks,tests}/**/*',
+    '!src/{cli,cli_keystore,cli_plugin,core}/**/*.{test, mock}.ts',
     'src/plugins/**/*.{ts,tsx}',
     '!src/plugins/**/{__test__,__snapshots__,__examples__,mocks,tests}/**/*',
     '!src/plugins/**/*.d.ts',
