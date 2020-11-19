@@ -7,15 +7,11 @@
 import { Alert } from '../../../alerts/common';
 import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
 
-export interface MockAlert {
-  isMock: true;
-}
-
 export interface CommonBaseAlert {
   type: string;
   label: string;
   paramDetails: CommonAlertParamDetails;
-  rawAlert: Alert | MockAlert;
+  rawAlert: Alert;
   isLegacy: boolean;
 }
 

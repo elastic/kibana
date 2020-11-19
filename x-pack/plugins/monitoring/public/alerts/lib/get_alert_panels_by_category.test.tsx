@@ -45,7 +45,7 @@ function getAllAlerts() {
         type: alertType,
         label: `${alertType}_label`,
         paramDetails: {},
-        rawAlert: { isMock: true },
+        rawAlert: {} as any,
         isLegacy: false,
       },
     };
@@ -103,7 +103,7 @@ describe('getAlertPanelsByCategory', () => {
         type,
         label: `${type}_label`,
         paramDetails: {},
-        rawAlert: { isMock: true as const },
+        rawAlert: {} as any,
         isLegacy: false,
       },
       states,

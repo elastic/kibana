@@ -103,9 +103,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_jvm_memory_usage_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_jvm_memory_usage",
         }
       }
@@ -147,9 +145,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_jvm_memory_usage_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_jvm_memory_usage",
         }
       }
@@ -413,9 +409,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_nodes_changed_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_nodes_changed",
         }
       }
@@ -457,9 +451,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_nodes_changed_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_nodes_changed",
         }
       }
@@ -501,9 +493,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_disk_usage_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_disk_usage",
         }
       }
@@ -545,9 +535,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_license_expiration_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_license_expiration",
         }
       }
@@ -589,9 +577,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_license_expiration_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_license_expiration",
         }
       }
@@ -662,9 +648,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_jvm_memory_usage_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_jvm_memory_usage",
         }
       }
@@ -746,9 +730,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_nodes_changed_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_nodes_changed",
         }
       }
@@ -765,9 +747,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_disk_usage_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_disk_usage",
         }
       }
@@ -784,9 +764,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_license_expiration_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_license_expiration",
         }
       }
@@ -868,9 +846,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_logstash_version_mismatch_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_logstash_version_mismatch",
         }
       }
@@ -887,9 +863,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_cpu_usage_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_cpu_usage",
         }
       }
@@ -906,9 +880,7 @@ Array [
           "isLegacy": false,
           "label": "monitoring_alert_thread_pool_write_rejections_label",
           "paramDetails": Object {},
-          "rawAlert": Object {
-            "isMock": true,
-          },
+          "rawAlert": Object {},
           "type": "monitoring_alert_thread_pool_write_rejections",
         }
       }
