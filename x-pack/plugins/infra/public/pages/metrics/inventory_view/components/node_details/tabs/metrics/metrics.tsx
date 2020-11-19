@@ -54,12 +54,13 @@ import {
 } from './translations';
 import { TimeDropdown } from './time_dropdown';
 
+const ONE_HOUR = 60 * 60 * 1000;
 const TabComponent = (props: TabProps) => {
   const cpuChartRef = useRef<Chart>(null);
   const networkChartRef = useRef<Chart>(null);
   const memoryChartRef = useRef<Chart>(null);
   const loadChartRef = useRef<Chart>(null);
-  const [time, setTime] = useState(60 * 60 * 1000);
+  const [time, setTime] = useState(ONE_HOUR);
   const chartRefs = useMemo(() => [cpuChartRef, networkChartRef, memoryChartRef, loadChartRef], [
     cpuChartRef,
     networkChartRef,
@@ -80,14 +81,17 @@ const TabComponent = (props: TabProps) => {
     filter = convertKueryToElasticSearchQuery(filter, derivedIndexPattern);
   }
 
-  const buildCustomMetric = useCallback((field: string, id: string) => {
-    return {
+
+  const buildCustomMetric = useCallback(
+    (field: string, id: string) => ({
+
       type: 'custom' as SnapshotMetricType,
       aggregation: 'avg',
       field,
       id,
-    };
-  }, []);
+    }),
+    []
+  );
 
   const updateTime = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -260,11 +264,9 @@ const TabComponent = (props: TabProps) => {
 
   return (
     <TabContent>
-      <div>
-        <TimepickerWrapper>
-          <TimeDropdown value={time} onChange={updateTime} />
-        </TimepickerWrapper>
-      </div>
+      <TimepickerWrapper>
+        <TimeDropdown value={time} onChange={updateTime} />
+      </TimepickerWrapper>
       <ChartsContainer>
         <ChartContainerWrapper>
           <ChartHeader title={CPU_CHART_TITLE} metrics={cpuChartMetrics} />

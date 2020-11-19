@@ -21,7 +21,7 @@ interface Props {
 export const ChartHeader = ({ title, metrics }: Props) => {
   return (
     <ChartHeaderWrapper>
-      <EuiFlexItem style={{ flex: 1 }} grow={true}>
+      <EuiFlexItem grow={1}>
         <EuiText>
           <strong>{title}</strong>
         </EuiText>

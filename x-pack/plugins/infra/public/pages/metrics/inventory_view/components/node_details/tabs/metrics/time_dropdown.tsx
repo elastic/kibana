@@ -13,43 +13,42 @@ interface Props {
   onChange(event: React.ChangeEvent<HTMLSelectElement>): void;
 }
 
-export const TimeDropdown = (props: Props) => {
-  return (
-    <EuiSelect
-      options={[
-        {
-          text: i18n.translate('xpack.infra.nodeDetails.metrics.last15Minutes', {
-            defaultMessage: 'Last 15 mintues',
-          }),
-          value: 15 * 60 * 1000,
-        },
-        {
-          text: i18n.translate('xpack.infra.nodeDetails.metrics.lastHour', {
-            defaultMessage: 'Last hour',
-          }),
-          value: 60 * 60 * 1000,
-        },
-        {
-          text: i18n.translate('xpack.infra.nodeDetails.metrics.last3Hours', {
-            defaultMessage: 'Last 3 hours',
-          }),
-          value: 3 * 60 * 60 * 1000,
-        },
-        {
-          text: i18n.translate('xpack.infra.nodeDetails.metrics.last24Hours', {
-            defaultMessage: 'Last 24 hours',
-          }),
-          value: 24 * 60 * 60 * 1000,
-        },
-        {
-          text: i18n.translate('xpack.infra.nodeDetails.metrics.last7Days', {
-            defaultMessage: 'Last 7 days',
-          }),
-          value: 7 * 24 * 60 * 60 * 1000,
-        },
-      ]}
-      value={props.value}
-      onChange={props.onChange}
-    />
-  );
-};
+export const TimeDropdown = (props: Props) => (
+  <EuiSelect
+    compressed
+    options={[
+      {
+        text: i18n.translate('xpack.infra.nodeDetails.metrics.last15Minutes', {
+          defaultMessage: 'Last 15 mintues',
+        }),
+        value: 15 * 60 * 1000,
+      },
+      {
+        text: i18n.translate('xpack.infra.nodeDetails.metrics.lastHour', {
+          defaultMessage: 'Last hour',
+        }),
+        value: 60 * 60 * 1000,
+      },
+      {
+        text: i18n.translate('xpack.infra.nodeDetails.metrics.last3Hours', {
+          defaultMessage: 'Last 3 hours',
+        }),
+        value: 3 * 60 * 60 * 1000,
+      },
+      {
+        text: i18n.translate('xpack.infra.nodeDetails.metrics.last24Hours', {
+          defaultMessage: 'Last 24 hours',
+        }),
+        value: 24 * 60 * 60 * 1000,
+      },
+      {
+        text: i18n.translate('xpack.infra.nodeDetails.metrics.last7Days', {
+          defaultMessage: 'Last 7 days',
+        }),
+        value: 7 * 24 * 60 * 60 * 1000,
+      },
+    ]}
+    value={props.value}
+    onChange={props.onChange}
+  />
+);
