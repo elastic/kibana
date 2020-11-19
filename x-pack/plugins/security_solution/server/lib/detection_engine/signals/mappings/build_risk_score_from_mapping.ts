@@ -70,7 +70,7 @@ function toValidNumberOrMinusOne(value: unknown): number {
 }
 
 function isValidNumber(value: number): boolean {
-  return Number.isSafeInteger(value) && value >= 0 && value <= 100;
+  return Number.isFinite(value) && value >= 0 && value <= 100;
 }
 
 function getMaxOf(array: number[]) {

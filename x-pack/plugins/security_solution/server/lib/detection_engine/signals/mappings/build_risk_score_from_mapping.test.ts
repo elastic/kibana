@@ -31,7 +31,7 @@ describe('buildRiskScoreFromMapping', () => {
   });
 
   describe('base cases: when mapping to a field of type number', () => {
-    test(`returns that number if it's within the range [0;100]`, () => {
+    test(`returns that number if it's integer and within the range [0;100]`, () => {
       testIt({
         fieldValue: 42,
         scoreDefault: 57,
@@ -40,9 +40,18 @@ describe('buildRiskScoreFromMapping', () => {
       });
     });
 
+    test(`returns that number if it's float and within the range [0;100]`, () => {
+      testIt({
+        fieldValue: 3.14,
+        scoreDefault: 57,
+        scoreMapping: mappingToSingleField(),
+        expected: overridenScoreOf(3.14),
+      });
+    });
+
     test(`returns default score if the number is < 0`, () => {
       testIt({
-        fieldValue: -1,
+        fieldValue: -0.0000000000001,
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
         expected: scoreOf(57),
@@ -51,16 +60,7 @@ describe('buildRiskScoreFromMapping', () => {
 
     test(`returns default score if the number is > 100`, () => {
       testIt({
-        fieldValue: 101,
-        scoreDefault: 57,
-        scoreMapping: mappingToSingleField(),
-        expected: scoreOf(57),
-      });
-    });
-
-    test(`returns default score if the number is not integer`, () => {
-      testIt({
-        fieldValue: 42.5,
+        fieldValue: 100.0000000000001,
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
         expected: scoreOf(57),
@@ -69,12 +69,21 @@ describe('buildRiskScoreFromMapping', () => {
   });
 
   describe('base cases: when mapping to a field of type string', () => {
-    test(`returns the number casted from string if it's within the range [0;100]`, () => {
+    test(`returns the number casted from string if it's integer and within the range [0;100]`, () => {
       testIt({
         fieldValue: '42',
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
         expected: overridenScoreOf(42),
+      });
+    });
+
+    test(`returns the number casted from string if it's float and within the range [0;100]`, () => {
+      testIt({
+        fieldValue: '3.14',
+        scoreDefault: 57,
+        scoreMapping: mappingToSingleField(),
+        expected: overridenScoreOf(3.14),
       });
     });
 
@@ -95,42 +104,33 @@ describe('buildRiskScoreFromMapping', () => {
         expected: scoreOf(57),
       });
     });
-
-    test(`returns default score if the "number" is not integer`, () => {
-      testIt({
-        fieldValue: '42.5',
-        scoreDefault: 57,
-        scoreMapping: mappingToSingleField(),
-        expected: scoreOf(57),
-      });
-    });
   });
 
   describe('base cases: when mapping to an array of numbers or strings', () => {
     test(`returns that number if it's a single element and it's within the range [0;100]`, () => {
       testIt({
-        fieldValue: [42],
+        fieldValue: [3.14],
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
-        expected: overridenScoreOf(42),
+        expected: overridenScoreOf(3.14),
       });
     });
 
-    test(`returns the max integer number of those that are within the range [0;100]`, () => {
+    test(`returns the max number of those that are within the range [0;100]`, () => {
       testIt({
-        fieldValue: [42, -42, 17, 87, 87.5, '88.5', 110, 66],
+        fieldValue: [42, -42, 17, 87, 87.5, '86.5', 110, 66],
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
-        expected: overridenScoreOf(87),
+        expected: overridenScoreOf(87.5),
       });
     });
 
-    test(`supports casting integers from string to number`, () => {
+    test(`supports casting strings to numbers`, () => {
       testIt({
-        fieldValue: [-1, 1, '3', '1.5', 2],
+        fieldValue: [-1, 1, '3', '1.5', '3.14', 2],
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
-        expected: overridenScoreOf(3),
+        expected: overridenScoreOf(3.14),
       });
     });
   });
@@ -143,8 +143,9 @@ describe('buildRiskScoreFromMapping', () => {
         NaN,
         Infinity,
         -Infinity,
-        Number.MIN_VALUE,
         Number.MAX_VALUE,
+        -Number.MAX_VALUE,
+        -Number.MIN_VALUE,
         'string',
         [],
         {},
@@ -166,9 +167,10 @@ describe('buildRiskScoreFromMapping', () => {
     describe('ignores junk, extracts valid numbers and returns the max number within the range [0;100]', () => {
       type Case = [unknown[], number];
       const cases: Case[] = [
-        [[undefined, null, 1.5, 1, -Infinity], 1],
+        [[undefined, null, 1.5, 1, -Infinity], 1.5],
         [['42', NaN, '44', '43', 42, {}], 44],
         [[Infinity, '101', 100, 99, Number.MIN_VALUE], 100],
+        [[Number.MIN_VALUE, -0], Number.MIN_VALUE],
       ];
 
       test.each(cases)('%p', (value, expectedScore) => {
