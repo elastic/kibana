@@ -45,7 +45,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
     schema,
   });
 
-  const { getFormData, submit } = form;
+  const { getFormData, getErrors, submit } = form;
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
@@ -56,12 +56,13 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   const getData = useCallback(async () => {
     const result = await submit();
     return result?.isValid
-      ? result
+      ? { ...result, errors: [] }
       : {
           isValid: false,
           data: getFormData(),
+          errors: getErrors(),
         };
-  }, [getFormData, submit]);
+  }, [getFormData, getErrors, submit]);
 
   useEffect(() => {
     let didCancel = false;

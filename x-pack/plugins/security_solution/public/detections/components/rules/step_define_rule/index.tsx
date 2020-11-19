@@ -131,7 +131,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, getFormData, reset, submit } = form;
+  const { getFields, getFormData, getErrors, reset, submit } = form;
   const [
     {
       index: formIndex,
@@ -180,12 +180,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const getData = useCallback(async () => {
     const result = await submit();
     return result.isValid
-      ? result
+      ? { ...result, errors: [] }
       : {
           isValid: false,
           data: getFormData(),
+          errors: getErrors(),
         };
-  }, [getFormData, submit]);
+  }, [getFormData, getErrors, submit]);
 
   useEffect(() => {
     let didCancel = false;

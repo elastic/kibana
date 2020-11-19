@@ -141,6 +141,12 @@ export function getGenericComboBoxProps<T>({
   };
 }
 
+/**
+ * Finds and returns matching BrowserField
+ *
+ * @param selectedField name of selected field
+ * @param browserFields
+ */
 export const getSelectedFieldToBrowserField = (
   selectedField: string,
   browserFields: BrowserFields
@@ -149,6 +155,12 @@ export const getSelectedFieldToBrowserField = (
   return fields.find((field) => field.name === selectedField);
 };
 
+/**
+ * Finds matching BrowserField, returning error if none exists
+ *
+ * @param selectedField name of selected field
+ * @param browserFields
+ */
 export const getSelectionToComboBoxOption = (
   selectedField: string,
   browserFields: BrowserFields
@@ -168,6 +180,11 @@ export const getSelectionToComboBoxOption = (
   }
 };
 
+/**
+ * Converts BrowserFields to EuiCombobox options
+ *
+ * @param fields BrowserFields
+ */
 export const getSelectOptions = (fields: BrowserFields | undefined): EuiComboBoxOptionOption[] => {
   if (fields == null) {
     return [];

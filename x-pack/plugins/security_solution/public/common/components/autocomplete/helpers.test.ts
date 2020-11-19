@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+
 import '../../../common/mock/match_media';
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 
@@ -20,11 +22,12 @@ import {
   checkEmptyValue,
   paramIsValid,
   getGenericComboBoxProps,
-  getFilteredBrowserFields,
+  getSelectionToComboBoxOption,
+  getSelectOptions,
   getSelectedFieldToBrowserField,
 } from './helpers';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { BrowserField, getAllBrowserFields } from '../../containers/source';
+import { BrowserField, BrowserFields } from '../../containers/source';
 
 describe('helpers', () => {
   // @ts-ignore
@@ -270,26 +273,6 @@ describe('helpers', () => {
     });
   });
 
-  describe('#getFilteredBrowserFields', () => {
-    test('it filters browserfields by type', () => {
-      const allAreOfTypeKeyword = (field: Partial<BrowserField>) =>
-        field.esTypes != null ? field.esTypes.includes('keyword') : false;
-      const result = getFilteredBrowserFields(mockBrowserFields, allAreOfTypeKeyword);
-      const allAreKeyword = getAllBrowserFields(result).every(allAreOfTypeKeyword);
-
-      expect(allAreKeyword).toBeTruthy();
-    });
-
-    test('it filters browserfields by which index they belong to', () => {
-      const isInFilebeatIndex = (field: Partial<BrowserField>) =>
-        field.indexes != null ? field.indexes.includes('filebeat') : false;
-      const result = getFilteredBrowserFields(mockBrowserFields, isInFilebeatIndex);
-      const allAreFromFilebeat = getAllBrowserFields(result).every(isInFilebeatIndex);
-
-      expect(allAreFromFilebeat).toBeTruthy();
-    });
-  });
-
   describe('#getSelectedFieldToBrowserField', () => {
     test('it returns matching BrowserField', () => {
       const result = getSelectedFieldToBrowserField('auditd.data.a0', mockBrowserFields);
@@ -312,6 +295,72 @@ describe('helpers', () => {
       const result = getSelectedFieldToBrowserField('blah', mockBrowserFields);
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('#getSelectionToComboBoxOption', () => {
+    test('it returns matching BrowserField', () => {
+      const result = getSelectionToComboBoxOption('auditd.data.a0', mockBrowserFields);
+      const expected = {
+        error: null,
+        selection: [{ label: 'auditd.data.a0' }],
+      };
+      expect(result).toEqual(expected);
+    });
+
+    test('it returns error when no matching BrowserField found', () => {
+      const result = getSelectionToComboBoxOption('blah', mockBrowserFields);
+      const expected = {
+        error: i18n.TIMESTAMP_OVERRIDE_ERROR('blah'),
+        selection: [],
+      };
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe('#getSelectOptions', () => {
+    test('it returns matching BrowserField', () => {
+      const mockFields: BrowserFields = {
+        agent: {
+          fields: {
+            'agent.id': {
+              aggregatable: true,
+              category: 'agent',
+              description: 'Unique identifier',
+              example: '8a4f500d',
+              format: '',
+              esTypes: ['keyword'],
+              indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+              name: 'agent.id',
+              searchable: true,
+              type: 'string',
+            },
+            'agent.name': {
+              aggregatable: true,
+              category: 'agent',
+              description: 'Name of the agent.',
+              example: 'foo',
+              format: '',
+              esTypes: ['keyword'],
+              indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+              name: 'agent.name',
+              searchable: true,
+              type: 'string',
+            },
+          },
+        },
+      };
+      const result = getSelectOptions(mockFields);
+      const expected: EuiComboBoxOptionOption[] = [
+        { label: 'agent', options: [{ label: 'agent.id' }, { label: 'agent.name' }] },
+      ];
+      expect(result).toEqual(expected);
+    });
+
+    test('it returns empty array if no fields passed in', () => {
+      const result = getSelectOptions(undefined);
+      const expected: EuiComboBoxOptionOption[] = [];
+      expect(result).toEqual(expected);
     });
   });
 });

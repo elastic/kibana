@@ -12,7 +12,6 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import * as i18n from './translations';
 import { FieldCategorizedComponent } from './field_categorized';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { getAllBrowserFields } from '../../containers/source';
 
 describe('FieldCategorizedComponent', () => {
   test('it renders disabled if "isDisabled" is true', () => {
@@ -25,7 +24,6 @@ describe('FieldCategorizedComponent', () => {
           isLoading={false}
           isClearable={false}
           isDisabled
-          dataTestSubj="testFieldComponent"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -46,7 +44,6 @@ describe('FieldCategorizedComponent', () => {
           selectedField={'agent.hostname'}
           isClearable={false}
           isDisabled={false}
-          dataTestSubj="testFieldComponent"
           onChange={jest.fn()}
           isLoading
         />
@@ -62,45 +59,6 @@ describe('FieldCategorizedComponent', () => {
     expect(wrapper.find('[data-test-subj="fieldAutocompleteOptionalLabel"]').exists()).toBeFalsy();
   });
 
-  test('it renders optional label if "showOptional" is true', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <FieldCategorizedComponent
-          placeholder="Placeholder text"
-          browserFields={mockBrowserFields}
-          selectedField={'agent.hostname'}
-          isClearable={false}
-          isDisabled={false}
-          isLoading={false}
-          dataTestSubj="testFieldComponent"
-          onChange={jest.fn()}
-          showOptional
-        />
-      </ThemeProvider>
-    );
-
-    expect(wrapper.find('[data-test-subj="fieldAutocompleteOptionalLabel"]').exists()).toBeTruthy();
-  });
-
-  test('it renders reset button if selected field does not match an option', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <FieldCategorizedComponent
-          placeholder="Placeholder text"
-          browserFields={mockBrowserFields}
-          selectedField={'blah'}
-          isClearable={false}
-          isDisabled={false}
-          isLoading={false}
-          dataTestSubj="testFieldComponent"
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
-    );
-
-    expect(wrapper.find('[data-test-subj="fieldAutocompleteResetButton"]').exists()).toBeTruthy();
-  });
-
   test('it allows user to clear values if "isClearable" is true', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -110,7 +68,6 @@ describe('FieldCategorizedComponent', () => {
           selectedField={'agent.hostname'}
           isLoading={false}
           isDisabled={false}
-          dataTestSubj="testFieldComponent"
           onChange={jest.fn()}
           isClearable
         />
@@ -134,7 +91,6 @@ describe('FieldCategorizedComponent', () => {
           isLoading={false}
           isDisabled={false}
           isClearable={false}
-          dataTestSubj="testFieldComponent"
           onChange={jest.fn()}
         />
       </ThemeProvider>
@@ -156,7 +112,6 @@ describe('FieldCategorizedComponent', () => {
           isLoading={false}
           isDisabled={false}
           isClearable={false}
-          dataTestSubj="testFieldComponent"
           onChange={mockOnChange}
         />
       </ThemeProvider>
@@ -169,7 +124,7 @@ describe('FieldCategorizedComponent', () => {
     expect(mockOnChange).toHaveBeenCalledWith('destination.address');
   });
 
-  test('it invokes "onError" when error exists', () => {
+  test('it invokes "onError" when passed in selected value is not found in available options', () => {
     const mockOnError = jest.fn();
     mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -180,7 +135,6 @@ describe('FieldCategorizedComponent', () => {
           isLoading={false}
           isDisabled={false}
           isClearable={false}
-          dataTestSubj="testFieldComponent"
           onError={mockOnError}
           onChange={jest.fn()}
         />
@@ -188,56 +142,5 @@ describe('FieldCategorizedComponent', () => {
     );
 
     expect(mockOnError).toHaveBeenCalledWith(i18n.TIMESTAMP_OVERRIDE_ERROR('blah'));
-  });
-
-  test('it does not filter browserFields if no "filterCallback" is passed', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <FieldCategorizedComponent
-          placeholder="Placeholder text"
-          browserFields={mockBrowserFields}
-          selectedField={'agent.hostname'}
-          isLoading={false}
-          isDisabled={false}
-          isClearable={false}
-          dataTestSubj="testFieldComponent"
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
-    );
-
-    const comboBoxOptions: EuiComboBoxOptionOption[] = wrapper
-      .find('[data-test-subj="fieldAutocompleteComboBox"]')
-      .at(0)
-      .prop('options');
-    const fields = comboBoxOptions.flatMap(({ options }) => options);
-    const mockFields = getAllBrowserFields(mockBrowserFields);
-    expect(fields.length).toEqual(mockFields.length);
-  });
-
-  test('it does filter browserFields if "filterByIndexes" is passed', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <FieldCategorizedComponent
-          placeholder="Placeholder text"
-          browserFields={mockBrowserFields}
-          selectedField={'agent.hostname'}
-          isLoading={false}
-          isDisabled={false}
-          isClearable={false}
-          filterByIndexes={['filebeat', 'auditbeat']}
-          dataTestSubj="testFieldComponent"
-          onChange={jest.fn()}
-        />
-      </ThemeProvider>
-    );
-
-    const comboBoxOptions: EuiComboBoxOptionOption[] = wrapper
-      .find('[data-test-subj="fieldAutocompleteComboBox"]')
-      .at(0)
-      .prop('options');
-    const fields = comboBoxOptions.flatMap(({ options }) => options);
-    const mockFields = getAllBrowserFields(mockBrowserFields);
-    expect(fields.length).not.toEqual(mockFields.length);
   });
 });

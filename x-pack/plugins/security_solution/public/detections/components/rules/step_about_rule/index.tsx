@@ -74,16 +74,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   setForm,
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
-  const indexes = useMemo(() => defineRuleData?.index ?? [], [defineRuleData?.index]);
+  const indexes = useMemo((): string[] => defineRuleData?.index ?? [], [defineRuleData?.index]);
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [indexPatternLoading, { indexPatterns, browserFields }] = useFetchIndex(indexes);
-  const [filteredTimestampOverrideFields] = useFilteredBrowserFields(browserFields, indexes, [
-    'date',
-  ]);
-  const [filteredNameOverrideFields] = useFilteredBrowserFields(browserFields, undefined, [
-    'keyword',
-    'text',
-  ]);
+  const [filteredTimestampOverrideFields] = useFilteredBrowserFields({
+    browserFields,
+    filterByIndexes: indexes,
+    filterByEsTypes: ['date'],
+  });
+  const [filteredNameOverrideFields] = useFilteredBrowserFields({
+    browserFields,
+    filterByEsTypes: ['keyword', 'text'],
+  });
   const schema = useMemo(
     () =>
       getSchema({
@@ -124,7 +126,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const getData = useCallback(async () => {
     const result = await submit();
     return result?.isValid
-      ? { ...result, errors: getErrors() }
+      ? { ...result, errors: [] }
       : {
           isValid: false,
           data: getFormData(),

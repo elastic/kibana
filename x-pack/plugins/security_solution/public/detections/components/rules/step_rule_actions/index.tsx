@@ -92,7 +92,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
-  const { getFields, getFormData, submit } = form;
+  const { getFields, getFormData, getErrors, submit } = form;
   const [{ throttle: formThrottle }] = useFormData<ActionsStepRule>({
     form,
     watch: ['throttle'],
@@ -112,12 +112,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const getData = useCallback(async () => {
     const result = await submit();
     return result?.isValid
-      ? result
+      ? { ...result, errors: [] }
       : {
           isValid: false,
           data: getFormData(),
+          errors: getErrors(),
         };
-  }, [getFormData, submit]);
+  }, [getFormData, getErrors, submit]);
 
   useEffect(() => {
     let didCancel = false;

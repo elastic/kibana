@@ -13,11 +13,17 @@ import { DocValueFields } from '../../../../common/search_strategy/common';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
-export const useFilteredBrowserFields = (
-  browserFields: BrowserFields | undefined,
-  filterByIndexes: string[] | undefined,
-  filterByEsTypes: string[] | undefined
-): [BrowserFields | undefined] => {
+export interface UseFilteredBrowserFieldsProps {
+  browserFields: BrowserFields | undefined;
+  filterByIndexes?: string[];
+  filterByEsTypes?: string[];
+}
+
+export const useFilteredBrowserFields = ({
+  browserFields,
+  filterByIndexes,
+  filterByEsTypes,
+}: UseFilteredBrowserFieldsProps): [BrowserFields | undefined] => {
   const [filteredFields, setFilteredFileds] = useState<BrowserFields | undefined>(undefined);
   const previousBrowserFields = useRef<BrowserFields | undefined>(undefined);
   const previousIndices = useRef<string[] | undefined>([]);

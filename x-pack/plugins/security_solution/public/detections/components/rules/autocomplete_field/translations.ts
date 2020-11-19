@@ -6,13 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const RESET = i18n.translate('xpack.securitySolution.autocomplete.resetLabel', {
+export const RESET = i18n.translate('xpack.securitySolution.rules.autocompleteField.resetLabel', {
   defaultMessage: 'Reset',
 });
-
-export const TIMESTAMP_OVERRIDE_ERROR = (field: string) =>
-  i18n.translate('xpack.securitySolution.autocomplete.invalidDateError', {
-    values: { field },
-    defaultMessage:
-      'Previously selected field of "{field}" does not exist in all selected rule indices. Select new field or hit "Reset" to clear.',
-  });

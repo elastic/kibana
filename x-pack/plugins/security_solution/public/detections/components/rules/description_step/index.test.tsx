@@ -27,13 +27,15 @@ import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import * as i18n from './translations';
 
-import { schema } from '../step_about_rule/schema';
+import { getSchema } from '../step_about_rule/schema';
 import { ListItems } from './types';
 import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('description_step', () => {
+  const schema = getSchema({ timestampOverrideFields: mockBrowserFields });
   const setupMock = coreMock.createSetup();
   const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
     switch (key) {

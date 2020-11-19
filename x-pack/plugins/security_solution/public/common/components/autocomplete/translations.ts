@@ -32,10 +32,6 @@ export const DATE_ERR = i18n.translate('xpack.securitySolution.autocomplete.inva
   defaultMessage: 'Not a valid date',
 });
 
-export const RESET = i18n.translate('xpack.securitySolution.autocomplete.resetLabel', {
-  defaultMessage: 'Reset',
-});
-
 export const TIMESTAMP_OVERRIDE_ERROR = (field: string) =>
   i18n.translate('xpack.securitySolution.autocomplete.invalidDateError', {
     values: { field },

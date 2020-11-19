@@ -55,6 +55,13 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
 
+const STEP_NAME = {
+  [RuleStep.defineRule]: ruleI18n.DEFINITION,
+  [RuleStep.aboutRule]: ruleI18n.ABOUT,
+  [RuleStep.scheduleRule]: ruleI18n.SCHEDULE,
+  [RuleStep.ruleActions]: ruleI18n.ACTIONS,
+};
+
 const formHookNoop = async (): Promise<undefined> => undefined;
 
 const EditRulePageComponent: FC = () => {
@@ -100,7 +107,7 @@ const EditRulePageComponent: FC = () => {
   });
   const invalidStepErrors = ruleStepsOrder.flatMap((step) => {
     const stepData = stepsData.current[step];
-    return stepData.errors ?? [];
+    return stepData.errors.map((err) => `${STEP_NAME[step]} - ${err}`);
   });
 
   const [{ isLoading, isSaved }, setRule] = useUpdateRule();
@@ -356,32 +363,26 @@ const EditRulePageComponent: FC = () => {
               title={i18n.PAGE_TITLE}
             />
             {invalidSteps.length > 0 && (
-              <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
+              <EuiCallOut
+                title={i18n.SORRY_ERRORS}
+                color="danger"
+                iconType="alert"
+                data-test-subj="ruleEditErrorCallout"
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
                   defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}."
                   values={{
                     countError: invalidSteps.length,
-                    tabHasError: invalidSteps
-                      .map((t) => {
-                        if (t === RuleStep.aboutRule) {
-                          return ruleI18n.ABOUT;
-                        } else if (t === RuleStep.defineRule) {
-                          return ruleI18n.DEFINITION;
-                        } else if (t === RuleStep.scheduleRule) {
-                          return ruleI18n.SCHEDULE;
-                        } else if (t === RuleStep.ruleActions) {
-                          return ruleI18n.RULE_ACTIONS;
-                        }
-                        return t;
-                      })
-                      .join(', '),
+                    tabHasError: invalidSteps.map((t) => STEP_NAME[t] ?? t).join(', '),
                   }}
                 />
                 {invalidStepErrors.length > 0 && (
-                  <ul>
+                  <ul data-test-subj="ruleEditErrorList">
                     {invalidStepErrors.map((errMessage) => (
-                      <li>{errMessage}</li>
+                      <li key={errMessage} data-test-subj="ruleEditErrorItem">
+                        {errMessage}
+                      </li>
                     ))}
                   </ul>
                 )}
@@ -389,6 +390,7 @@ const EditRulePageComponent: FC = () => {
             )}
 
             <EuiTabbedContent
+              data-test-subj="ruleEditTabbedContent"
               initialSelectedTab={tabs[0]}
               selectedTab={tabs.find((t) => t.id === activeStep)}
               onTabClick={onTabClick}
