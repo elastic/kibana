@@ -14,6 +14,7 @@ export const mocksSource = {
       category: 'base',
       description:
         'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
+      esTypes: ['date'],
       example: '2016-05-23T08:05:34.853Z',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -26,6 +27,7 @@ export const mocksSource = {
       category: 'agent',
       description:
         'Ephemeral identifier of this agent (if one exists). This id normally changes across restarts, but `agent.id` does not.',
+      esTypes: ['keyword'],
       example: '8a4f500f',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -37,6 +39,7 @@ export const mocksSource = {
     {
       category: 'agent',
       description: null,
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -49,6 +52,7 @@ export const mocksSource = {
       category: 'agent',
       description:
         'Unique identifier of this agent (if one exists). Example: For Beats this would be beat.id.',
+      esTypes: ['keyword'],
       example: '8a4f500d',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -61,6 +65,7 @@ export const mocksSource = {
       category: 'agent',
       description:
         'Name of the agent. This is a name that can be given to an agent. This can be helpful if for example two Filebeat instances are running on the same host but a human readable separation is needed on which Filebeat instance data is coming from. If no name is given, the name is often left empty.',
+      esTypes: ['keyword'],
       example: 'foo',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -72,6 +77,7 @@ export const mocksSource = {
     {
       category: 'auditd',
       description: null,
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat'],
@@ -83,6 +89,7 @@ export const mocksSource = {
     {
       category: 'auditd',
       description: null,
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat'],
@@ -94,6 +101,7 @@ export const mocksSource = {
     {
       category: 'auditd',
       description: null,
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat'],
@@ -106,6 +114,7 @@ export const mocksSource = {
       category: 'client',
       description:
         'Some event client addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the `.address` field. Then it should be duplicated to `.ip` or `.domain`, depending on which one it is.',
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -117,6 +126,7 @@ export const mocksSource = {
     {
       category: 'client',
       description: 'Bytes sent from the client to the server.',
+      esTypes: ['integer'],
       example: '184',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -128,6 +138,7 @@ export const mocksSource = {
     {
       category: 'client',
       description: 'Client domain.',
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -139,6 +150,7 @@ export const mocksSource = {
     {
       category: 'client',
       description: 'Country ISO code.',
+      esTypes: ['keyword'],
       example: 'CA',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -151,6 +163,7 @@ export const mocksSource = {
       category: 'cloud',
       description:
         'The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
+      esTypes: ['keyword'],
       example: '666777888999',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -162,6 +175,7 @@ export const mocksSource = {
     {
       category: 'cloud',
       description: 'Availability zone in which this host is running.',
+      esTypes: ['keyword'],
       example: 'us-east-1c',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -173,6 +187,7 @@ export const mocksSource = {
     {
       category: 'container',
       description: 'Unique container id.',
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -184,6 +199,7 @@ export const mocksSource = {
     {
       category: 'container',
       description: 'Name of the image the container was built on.',
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -195,6 +211,7 @@ export const mocksSource = {
     {
       category: 'container',
       description: 'Container image tag.',
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -207,6 +224,7 @@ export const mocksSource = {
       category: 'destination',
       description:
         'Some event destination addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the `.address` field. Then it should be duplicated to `.ip` or `.domain`, depending on which one it is.',
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -218,6 +236,7 @@ export const mocksSource = {
     {
       category: 'destination',
       description: 'Bytes sent from the destination to the source.',
+      esTypes: ['integer'],
       example: '184',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -229,6 +248,7 @@ export const mocksSource = {
     {
       category: 'destination',
       description: 'Destination domain.',
+      esTypes: ['keyword'],
       example: null,
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -241,6 +261,7 @@ export const mocksSource = {
       aggregatable: true,
       category: 'destination',
       description: 'IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.',
+      esTypes: ['ip'],
       example: '',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -252,6 +273,7 @@ export const mocksSource = {
       aggregatable: true,
       category: 'destination',
       description: 'Port of the destination.',
+      esTypes: ['long'],
       example: '',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -263,6 +285,7 @@ export const mocksSource = {
       aggregatable: true,
       category: 'source',
       description: 'IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.',
+      esTypes: ['ip'],
       example: '',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -274,6 +297,7 @@ export const mocksSource = {
       aggregatable: true,
       category: 'source',
       description: 'Port of the source.',
+      esTypes: ['long'],
       example: '',
       format: '',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -286,6 +310,7 @@ export const mocksSource = {
       category: 'event',
       description:
         'event.end contains the date when the event ended or when the activity was last observed.',
+      esTypes: ['date'],
       example: null,
       format: '',
       indexes: DEFAULT_INDEX_PATTERN,
@@ -458,7 +483,7 @@ export const mockBrowserFields: BrowserFields = {
         description: 'Bytes sent from the client to the server.',
         example: '184',
         format: '',
-        esTypes: ['long'],
+        esTypes: ['integer'],
         indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'client.bytes',
         searchable: true,
