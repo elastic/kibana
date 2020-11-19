@@ -15,11 +15,11 @@ import { createHref } from '../../shared/Links/url_helpers';
 
 type CorrelationsApiResponse =
   | APIReturnType<'GET /api/apm/correlations/failed_transactions'>
-  | APIReturnType<'GET /api/apm/correlations/slow_transactions';
+  | APIReturnType<'GET /api/apm/correlations/slow_transactions'>;
 
 type SignificantTerm = NonNullable<
-  CorrelationsApiResponse
->['significantTerms'][0];
+  NonNullable<CorrelationsApiResponse>['significantTerms']
+>[0];
 
 interface Props<T> {
   significantTerms?: T[];
