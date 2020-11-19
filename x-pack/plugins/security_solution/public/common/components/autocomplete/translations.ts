@@ -33,7 +33,7 @@ export const DATE_ERR = i18n.translate('xpack.securitySolution.autocomplete.inva
 });
 
 export const TIMESTAMP_OVERRIDE_ERROR = (field: string) =>
-  i18n.translate('xpack.securitySolution.autocomplete.invalidDateError', {
+  i18n.translate('xpack.securitySolution.autocomplete.invalidTimestampOverrideError', {
     values: { field },
     defaultMessage:
       'Previously selected field of "{field}" does not exist in all selected rule indices. Select new field or hit "Reset" to clear.',
