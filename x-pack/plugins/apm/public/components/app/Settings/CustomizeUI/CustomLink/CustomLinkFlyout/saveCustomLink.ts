@@ -34,8 +34,7 @@ export async function saveCustomLink({
 
     if (id) {
       await callApmApi({
-        pathname: '/api/apm/settings/custom_links/{id}',
-        method: 'PUT',
+        endpoint: 'PUT /api/apm/settings/custom_links/{id}',
         params: {
           path: { id },
           body: customLink,
@@ -43,8 +42,7 @@ export async function saveCustomLink({
       });
     } else {
       await callApmApi({
-        pathname: '/api/apm/settings/custom_links',
-        method: 'POST',
+        endpoint: 'POST /api/apm/settings/custom_links',
         params: {
           body: customLink,
         },

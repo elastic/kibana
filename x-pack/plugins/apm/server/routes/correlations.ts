@@ -12,9 +12,9 @@ import { scoringRt } from '../lib/transaction_groups/correlations/scoring_rt';
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
 
-export const correlationsForSlowTransactionsRoute = createRoute(() => ({
-  path: '/api/apm/correlations/slow_durations',
-  params: {
+export const correlationsForSlowTransactionsRoute = createRoute({
+  endpoint: 'GET /api/apm/correlations/slow_durations',
+  params: t.type({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
@@ -29,7 +29,7 @@ export const correlationsForSlowTransactionsRoute = createRoute(() => ({
       t.partial({ uiFilters: t.string }),
       rangeRt,
     ]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const {
@@ -51,11 +51,11 @@ export const correlationsForSlowTransactionsRoute = createRoute(() => ({
       setup,
     });
   },
-}));
+});
 
-export const correlationsForRangesRoute = createRoute(() => ({
-  path: '/api/apm/correlations/ranges',
-  params: {
+export const correlationsForRangesRoute = createRoute({
+  endpoint: 'GET /api/apm/correlations/ranges',
+  params: t.type({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
@@ -70,7 +70,7 @@ export const correlationsForRangesRoute = createRoute(() => ({
       t.partial({ uiFilters: t.string }),
       rangeRt,
     ]),
-  },
+  }),
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -98,4 +98,4 @@ export const correlationsForRangesRoute = createRoute(() => ({
       setup,
     });
   },
-}));
+});
