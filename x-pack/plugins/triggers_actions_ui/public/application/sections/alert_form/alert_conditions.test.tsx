@@ -39,7 +39,7 @@ describe('alert_conditions', () => {
     );
 
     expect(wrapper.find(EuiTitle).find(FormattedMessage).prop('id')).toMatchInlineSnapshot(
-      `"xpack.triggersActionsUI.sections.alertAdd.conditions.title"`
+      `"xpack.triggersActionsUI.sections.alertForm.conditions.title"`
     );
     expect(
       wrapper.find(EuiTitle).find(FormattedMessage).prop('defaultMessage')
