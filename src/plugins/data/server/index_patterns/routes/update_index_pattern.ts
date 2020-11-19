@@ -21,7 +21,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../core/server';
 import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
-import { serializedFieldFormatSchema } from './util/schemas';
+import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
@@ -37,6 +37,7 @@ const indexPatternUpdateSchema = schema.object({
     )
   ),
   fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
+  fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
 });
 
 export const registerUpdateIndexPatternRoute = (router: IRouter) => {
@@ -54,6 +55,7 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           { unknowns: 'allow' }
         ),
         body: schema.object({
+          skip_field_refresh: schema.maybe(schema.boolean({ defaultValue: false })),
           index_pattern: indexPatternUpdateSchema,
         }),
       },
@@ -67,6 +69,8 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           const indexPattern = await ip.get(id);
 
           const {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            skip_field_refresh = false,
             index_pattern: {
               title,
               timeFieldName,
@@ -75,10 +79,12 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
               fieldFormats,
               type,
               typeMeta,
+              fields,
             },
           } = req.body;
 
           let changeCount = 0;
+          let doRefreshFields = false;
 
           if (title !== undefined && title !== indexPattern.title) {
             changeCount++;
@@ -115,6 +121,12 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
             indexPattern.typeMeta = typeMeta;
           }
 
+          if (fields !== undefined) {
+            changeCount++;
+            doRefreshFields = true;
+            indexPattern.fields.replaceAll(Object.values(fields || {}));
+          }
+
           if (changeCount < 1) {
             return res.badRequest({
               body: JSON.stringify({
@@ -124,6 +136,10 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           }
 
           await ip.updateSavedObject(indexPattern);
+
+          if (doRefreshFields && !skip_field_refresh) {
+            await ip.refreshFields(indexPattern);
+          }
 
           return res.ok({
             body: JSON.stringify({
