@@ -11,7 +11,7 @@ import { CustomLink } from '../../../../../common/custom_link/custom_link_types'
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { px, truncate, units } from '../../../../style/variables';
 
-const LinkContainer = styled.li`
+const ListItem = styled.li`
   margin-top: ${px(units.half)};
   &:first-of-type {
     margin-top: 0;
@@ -41,11 +41,13 @@ export function CustomLinkSection({
           // ignores any error that happens
         }
         return (
-          <LinkContainer key={link.id}>
-            <EuiLink href={href} target="_blank">
-              <TruncateText size="s">{link.label}</TruncateText>
-            </EuiLink>
-          </LinkContainer>
+          <ListItem key={link.id}>
+            <TruncateText size="s">
+              <EuiLink href={href} target="_blank" external={true}>
+                {link.label}
+              </EuiLink>
+            </TruncateText>
+          </ListItem>
         );
       })}
     </ul>

@@ -3,19 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiText,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { isEmpty } from 'lodash';
-import { CustomLink as CustomLinkType } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import {
   ActionMenuDivider,
@@ -23,69 +20,61 @@ import {
 } from '../../../../../../observability/public';
 import { CustomLinkSection } from './CustomLinkSection';
 import { ManageCustomLink } from './ManageCustomLink';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
 import { LoadingStatePrompt } from '../../LoadingStatePrompt';
 import { px } from '../../../../style/variables';
+import { CreateEditCustomLinkFlyout } from '../../../app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout';
+import { convertFiltersToQuery } from '../../../app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/helper';
+import {
+  CustomLink as CustomLinkType,
+  Filter,
+} from '../../../../../common/custom_link/custom_link_types';
 
-const SeeMoreButton = styled.button<{ show: boolean }>`
-  display: ${(props) => (props.show ? 'flex' : 'none')};
-  align-items: center;
-  width: 100%;
-  justify-content: space-between;
-  &:hover {
-    text-decoration: underline;
-  }
-`;
+const DEFAULT_LINKS_TO_SHOW = 3;
 
-export function CustomLink({
-  customLinks,
-  status,
-  onCreateCustomLinkClick,
-  onSeeMoreClick,
-  transaction,
-}: {
-  customLinks: CustomLinkType[];
-  status: FETCH_STATUS;
-  onCreateCustomLinkClick: () => void;
-  onSeeMoreClick: () => void;
-  transaction: Transaction;
-}) {
-  const renderEmptyPrompt = (
-    <>
-      <EuiText size="xs" grow={false} style={{ width: px(300) }}>
-        {i18n.translate('xpack.apm.customLink.empty', {
-          defaultMessage:
-            'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.',
-        })}
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        iconType="plusInCircle"
-        size="xs"
-        onClick={onCreateCustomLinkClick}
-      >
-        {i18n.translate('xpack.apm.customLink.buttom.create', {
-          defaultMessage: 'Create custom link',
-        })}
-      </EuiButtonEmpty>
-    </>
+export function CustomLink({ transaction }: { transaction: Transaction }) {
+  const [showAllLinks, setShowAllLinks] = useState(false);
+  const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
+
+  const filters = useMemo(
+    () =>
+      [
+        { key: 'service.name', value: transaction?.service.name },
+        { key: 'service.environment', value: transaction?.service.environment },
+        { key: 'transaction.name', value: transaction?.transaction.name },
+        { key: 'transaction.type', value: transaction?.transaction.type },
+      ].filter((filter): filter is Filter => typeof filter.value === 'string'),
+    [transaction]
   );
 
-  const renderCustomLinkBottomSection = isEmpty(customLinks) ? (
-    renderEmptyPrompt
-  ) : (
-    <SeeMoreButton onClick={onSeeMoreClick} show={customLinks.length > 3}>
-      <EuiText size="s">
-        {i18n.translate('xpack.apm.transactionActionMenu.customLink.seeMore', {
-          defaultMessage: 'See more',
-        })}
-      </EuiText>
-      <EuiIcon type="arrowRight" />
-    </SeeMoreButton>
+  const { data: customLinks = [], status, refetch } = useFetcher(
+    (callApmApi) =>
+      callApmApi({
+        endpoint: 'GET /api/apm/settings/custom_links',
+        params: { query: convertFiltersToQuery(filters) },
+      }),
+    [filters]
   );
 
   return (
     <>
+      {isCreateEditFlyoutOpen && (
+        <CreateEditCustomLinkFlyout
+          defaults={{ filters }}
+          onClose={() => {
+            setIsCreateEditFlyoutOpen(false);
+          }}
+          onSave={() => {
+            setIsCreateEditFlyoutOpen(false);
+            refetch();
+          }}
+          onDelete={() => {
+            setIsCreateEditFlyoutOpen(false);
+            refetch();
+          }}
+        />
+      )}
+
       <ActionMenuDivider />
       <EuiFlexGroup>
         <EuiFlexItem style={{ justifyContent: 'center' }}>
@@ -102,8 +91,8 @@ export function CustomLink({
         </EuiFlexItem>
         <EuiFlexItem>
           <ManageCustomLink
-            onCreateCustomLinkClick={onCreateCustomLinkClick}
-            showCreateCustomLinkButton={!!customLinks.length}
+            onCreateCustomLinkClick={() => setIsCreateEditFlyoutOpen(true)}
+            showCreateCustomLinkButton={customLinks.length === 0}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -114,15 +103,89 @@ export function CustomLink({
         })}
       </SectionSubtitle>
       <CustomLinkSection
-        customLinks={customLinks.slice(0, 3)}
+        customLinks={
+          showAllLinks
+            ? customLinks
+            : customLinks.slice(0, DEFAULT_LINKS_TO_SHOW)
+        }
         transaction={transaction}
       />
       <EuiSpacer size="s" />
-      {status === FETCH_STATUS.LOADING ? (
-        <LoadingStatePrompt />
-      ) : (
-        renderCustomLinkBottomSection
-      )}
+      <BottomSection
+        status={status}
+        customLinks={customLinks}
+        showAllLinks={showAllLinks}
+        toggleShowAll={() => setShowAllLinks((show) => !show)}
+        onClickCreate={() => setIsCreateEditFlyoutOpen(true)}
+      />
     </>
   );
+}
+
+function BottomSection({
+  status,
+  customLinks,
+  showAllLinks,
+  toggleShowAll,
+  onClickCreate,
+}: {
+  status: FETCH_STATUS;
+  customLinks: CustomLinkType[];
+  showAllLinks: boolean;
+  toggleShowAll: () => void;
+  onClickCreate: () => void;
+}) {
+  if (status === FETCH_STATUS.LOADING) {
+    return <LoadingStatePrompt />;
+  }
+
+  // render empty prompt if there are no custom links
+  if (isEmpty(customLinks)) {
+    return (
+      <>
+        <EuiText size="xs" grow={false} style={{ width: px(300) }}>
+          {i18n.translate('xpack.apm.customLink.empty', {
+            defaultMessage:
+              'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.',
+          })}
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiButtonEmpty
+          iconType="plusInCircle"
+          size="xs"
+          onClick={onClickCreate}
+        >
+          {i18n.translate('xpack.apm.customLink.buttom.create', {
+            defaultMessage: 'Create custom link',
+          })}
+        </EuiButtonEmpty>
+      </>
+    );
+  }
+
+  // render button to toggle "Show all" / "Show fewer"
+  if (customLinks.length > DEFAULT_LINKS_TO_SHOW) {
+    return (
+      <EuiFlexItem>
+        <EuiButtonEmpty
+          iconType={showAllLinks ? 'arrowUp' : 'arrowDown'}
+          onClick={toggleShowAll}
+        >
+          <EuiText size="s">
+            {showAllLinks
+              ? i18n.translate(
+                  'xpack.apm.transactionActionMenu.customLink.showFewer',
+                  { defaultMessage: 'Show fewer' }
+                )
+              : i18n.translate(
+                  'xpack.apm.transactionActionMenu.customLink.showAll',
+                  { defaultMessage: 'Show all' }
+                )}
+          </EuiText>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    );
+  }
+
+  return null;
 }

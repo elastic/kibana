@@ -20,7 +20,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
 import { useLicense } from '../../../../../hooks/useLicense';
 import { LicensePrompt } from '../../../../shared/LicensePrompt';
 import { CreateCustomLinkButton } from './CreateCustomLinkButton';
-import { CustomLinkFlyout } from './CustomLinkFlyout';
+import { CreateEditCustomLinkFlyout } from './CreateEditCustomLinkFlyout';
 import { CustomLinkTable } from './CustomLinkTable';
 import { EmptyPrompt } from './EmptyPrompt';
 import { Title } from './Title';
@@ -61,7 +61,7 @@ export function CustomLinkOverview() {
   return (
     <>
       {isFlyoutOpen && (
-        <CustomLinkFlyout
+        <CreateEditCustomLinkFlyout
           onClose={onCloseFlyout}
           defaults={customLinkSelected}
           customLinkId={customLinkSelected?.id}
