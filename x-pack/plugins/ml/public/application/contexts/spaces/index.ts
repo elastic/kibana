@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { JobSpacesList, ALL_SPACES_ID } from './job_spaces_list';
+export {
+  SpacesContext,
+  SpacesContextValue,
+  createSpacesContext,
+  useSpacesContext,
+} from './spaces_context';
