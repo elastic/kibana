@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ConnectorEditFlyoutProps } from '../application/sections/action_connector_form/connector_edit_flyout';
 
 export const getEditConnectorFlyoutLazy = (props: ConnectorEditFlyoutProps) => {
@@ -12,15 +11,7 @@ export const getEditConnectorFlyoutLazy = (props: ConnectorEditFlyoutProps) => {
     () => import('../application/sections/action_connector_form/connector_edit_flyout')
   );
   return (
-    <Suspense
-      fallback={
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    >
+    <Suspense fallback={null}>
       <ConnectorEditFlyoutLazy {...props} />
     </Suspense>
   );

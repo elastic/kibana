@@ -386,7 +386,6 @@ export const getActionMessageParams = memoizeOne(
     };
   }
 );
-);
 
 // typed as null not undefined as the initial state for this value is null.
 export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
