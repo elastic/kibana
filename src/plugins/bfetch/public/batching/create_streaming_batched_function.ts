@@ -93,25 +93,25 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
         const promises: Array<Promise<void>> = [];
         const abortController = new AbortController();
 
-        // Filter out and reject any items who's signal is already aborted
-        items = items.filter((item) => {
-          if (item.signal?.aborted) {
-            item.future.reject(new AbortError());
-          }
-          return !item.signal?.aborted;
-        });
-
         // Prepare batch
-        const batch = items.map((item) => {
-          // Subscribe to reject promise on abort
-          rejectOnAbort(item);
+        const batch = items
+          // Filter out and reject any items who's signal is already aborted
+          .filter((item) => {
+            if (item.signal?.aborted) {
+              item.future.reject(new AbortError());
+            }
+            return !item.signal?.aborted;
+          })
+          .map((item) => {
+            // Subscribe to reject promise on abort
+            rejectOnAbort(item);
 
-          // Track batch progress
-          promises.push(getDonePromise(item));
+            // Track batch progress
+            promises.push(getDonePromise(item));
 
-          // Return payload to be sent
-          return item.payload;
-        });
+            // Return payload to be sent
+            return item.payload;
+          });
 
         // abort when all items were either resolved, rejected or aborted
         Promise.all(promises).then(() => abortController.abort());

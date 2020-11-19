@@ -27,21 +27,24 @@ export function isBatchDone(items: Array<BatchItem<any, any>>): boolean {
 export function getDonePromise(item: BatchItem<any, any>) {
   return new Promise<void>((resolve) => {
     const onDone = () => {
-      item.signal?.removeEventListener('abort', onDone);
+      item.done = true;
+      if (item.signal) item.signal.removeEventListener('abort', onDone);
       resolve();
     };
     item.future.promise.then(onDone, onDone);
-    item.signal?.addEventListener('abort', onDone);
+    if (item.signal) item.signal.addEventListener('abort', onDone);
   });
 }
 
 export function rejectOnAbort(item: BatchItem<any, any>) {
-  const cleanup = () => item.signal?.removeEventListener('abort', rejectAborted);
+  const cleanup = () => {
+    if (item.signal) item.signal.removeEventListener('abort', rejectAborted);
+  };
   const rejectAborted = () => {
     item.future.reject(new AbortError());
     cleanup();
   };
 
-  item.signal?.addEventListener('abort', rejectAborted);
+  if (item.signal) item.signal.addEventListener('abort', rejectAborted);
   item.future.promise.then(cleanup, cleanup);
 }

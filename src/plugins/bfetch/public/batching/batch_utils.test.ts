@@ -41,6 +41,7 @@ describe('getDonePromise()', () => {
     abortController.abort();
     await tick();
     expect(spy).toHaveBeenCalledTimes(1);
+    expect(item.done).toBeTruthy();
   });
 
   test('Triggers when resolved', async () => {
@@ -60,6 +61,7 @@ describe('getDonePromise()', () => {
     item.future.resolve(null);
     await tick();
     expect(spy).toHaveBeenCalledTimes(1);
+    expect(item.done).toBeTruthy();
   });
 
   test('Triggers when rejected', async () => {
@@ -79,5 +81,6 @@ describe('getDonePromise()', () => {
     item.future.reject(null);
     await tick();
     expect(spy).toHaveBeenCalledTimes(1);
+    expect(item.done).toBeTruthy();
   });
 });

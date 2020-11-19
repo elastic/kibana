@@ -50,11 +50,11 @@ export const fromStreamingXhr = (
       aborted = true;
       xhr.abort();
       subject.complete();
-      signal?.removeEventListener('abort', onBatchAbort);
+      if (signal) signal.removeEventListener('abort', onBatchAbort);
     }
   };
 
-  signal?.addEventListener('abort', onBatchAbort);
+  if (signal) signal.addEventListener('abort', onBatchAbort);
 
   xhr.onreadystatechange = () => {
     // Older browsers don't support onprogress, so we need
@@ -64,6 +64,8 @@ export const fromStreamingXhr = (
 
     // 4 is the magic number that means the request is done
     if (!aborted && xhr.readyState === 4) {
+      if (signal) signal.removeEventListener('abort', onBatchAbort);
+
       // 0 indicates a network failure. 400+ messages are considered server errors
       if (xhr.status === 0 || xhr.status >= 400) {
         subject.error(new Error(`Batch request failed with status ${xhr.status}`));
