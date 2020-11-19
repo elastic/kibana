@@ -15,6 +15,7 @@ import {
   sampleDocSearchResultsNoSortIdNoHits,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
+import { checkMappingForTimestampFields } from './utils';
 import { buildRuleMessageFactory } from './rule_messages';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
@@ -24,6 +25,14 @@ import { getExceptionListItemSchemaMock } from '../../../../../lists/common/sche
 import { BulkResponse } from './types';
 import { SearchListItemArraySchema } from '../../../../../lists/common/schemas';
 import { getSearchListItemResponseMock } from '../../../../../lists/common/schemas/response/search_list_item_schema.mock';
+
+jest.mock('./utils', () => {
+  const original = jest.requireActual('./utils');
+  return {
+    ...original,
+    checkMappingForTimestampFields: jest.fn(),
+  };
+});
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -36,6 +45,11 @@ describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
+  (checkMappingForTimestampFields as jest.Mock).mockImplementation(
+    (indexPattern: string[], t, s, l, b) => ({
+      '@timestamp': [...indexPattern],
+    })
+  );
   const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
   beforeEach(() => {
     jest.clearAllMocks();
@@ -460,7 +474,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
-    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[8][0]).toContain(
+    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[9][0]).toContain(
       'sortIds was empty on searchResult'
     );
   });
@@ -541,7 +555,7 @@ describe('searchAfterAndBulkCreate', () => {
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
-    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[15][0]).toContain(
+    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[16][0]).toContain(
       'sortIds was empty on searchResult name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });

@@ -16,6 +16,7 @@ import { ListArray } from '../../../../common/detection_engine/schemas/types/lis
 import {
   BulkResponse,
   BulkResponseErrorAggregation,
+  GetFieldMappingType,
   isValidUnit,
   SignalHit,
   SearchAfterAndBulkCreateReturnType,
@@ -660,4 +661,47 @@ export const createTotalHitsFromSearchResult = ({
       ? searchResult.hits.total
       : searchResult.hits.total.value;
   return totalHits;
+};
+
+interface ReturnType {
+  [timestampString: string]: string[]; // maps timestampString like @timestamp or 'event.ingested' to the indices that contain that timestamp mapping
+}
+
+export const checkMappingForTimestampFields = async (
+  indices: string[],
+  timestamps: string[],
+  services: AlertServices,
+  logger: Logger,
+  buildRuleMessage: BuildRuleMessage
+): Promise<ReturnType> => {
+  try {
+    const foundMappings: GetFieldMappingType = await services.callCluster(
+      'indices.getFieldMapping',
+      {
+        index: indices,
+        fields: timestamps,
+      }
+    );
+
+    // get the full names of the indices found to contain the given field mapping
+    const matchedIndices = Object.keys(foundMappings);
+
+    // map the timestamp fields like '@timestamp', 'event.ingested' etc.. to the indices that contain mappings for these fields
+    const toReturn = timestamps.reduce((acc, timestamp) => {
+      return {
+        [timestamp]: matchedIndices.filter(
+          (index) => foundMappings[index]?.mappings[timestamp] != null
+        ),
+        ...acc,
+      };
+    }, {} as ReturnType);
+    return toReturn;
+  } catch (exc) {
+    logger.error(
+      buildRuleMessage(
+        `An error occurred while getting the field mapping type for this rule ${exc}`
+      )
+    );
+    return {};
+  }
 };
