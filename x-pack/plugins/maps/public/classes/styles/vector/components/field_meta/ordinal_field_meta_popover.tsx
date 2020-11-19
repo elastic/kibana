@@ -7,34 +7,26 @@
 
 import _ from 'lodash';
 import React, { ChangeEvent, Fragment, MouseEvent } from 'react';
-import { EuiFormRow, EuiRange, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiIcon, EuiRange, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 
-function getIsEnableToggleLabel(styleName: string) {
+/* function getStepFunctionSelect(styleName: VECTOR_STYLES) {
   switch (styleName) {
     case VECTOR_STYLES.FILL_COLOR:
     case VECTOR_STYLES.LINE_COLOR:
-      return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.colorLabel', {
-        defaultMessage: 'Calculate color ramp range from indices',
-      });
     case VECTOR_STYLES.LINE_WIDTH:
-      return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.widthLabel', {
-        defaultMessage: 'Calculate border width range from indices',
-      });
     case VECTOR_STYLES.ICON_SIZE:
       return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.sizeLabel', {
         defaultMessage: 'Calculate symbol size range from indices',
       });
     default:
-      return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.defaultLabel', {
-        defaultMessage: 'Calculate symbolization range from indices',
-      });
+      return null;
   }
-}
+}*/
 
 type Props = {
   fieldMetaOptions: FieldMetaOptions;
@@ -58,37 +50,75 @@ export function OrdinalFieldMetaPopover(props: Props) {
     });
   };
 
+  function renderSigmaInput() {
+    if (!props.fieldMetaOptions.isEnabled) {
+      return null;
+    }
+
+    return (
+      <EuiFormRow
+        label={
+          <EuiToolTip
+            anchorClassName="eui-alignMiddle"
+            content={i18n.translate('xpack.maps.styles.fieldMetaOptions.sigmaTooltipContent', {
+              defaultMessage: `The min and max from elasticsearch are clamped to a standard deviation range from the median.
+              Set Sigma to a smaller value to minimize outliers by moving the min and max closer to the median.`,
+            })}
+          >
+            <span>
+              {i18n.translate('xpack.maps.styles.fieldMetaOptions.sigmaLabel', {
+                defaultMessage: 'Sigma',
+              })}{' '}
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </span>
+          </EuiToolTip>
+        }
+        display="columnCompressed"
+      >
+        <EuiRange
+          min={1}
+          max={5}
+          step={0.25}
+          value={_.get(props.fieldMetaOptions, 'sigma', DEFAULT_SIGMA)}
+          onChange={onSigmaChange}
+          showTicks
+          tickInterval={1}
+          compressed
+        />
+      </EuiFormRow>
+    );
+  }
+
   return (
     <FieldMetaPopover>
       <Fragment>
         <EuiFormRow display="columnCompressedSwitch">
-          <EuiSwitch
-            label={getIsEnableToggleLabel(props.styleName)}
-            checked={props.fieldMetaOptions.isEnabled}
-            onChange={onIsEnabledChange}
-            compressed
-            disabled={props.switchDisabled}
-          />
+          <>
+            <EuiSwitch
+              label={i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabledSwitchLabel', {
+                defaultMessage: 'Get min and max from elasticsearch',
+              })}
+              checked={props.fieldMetaOptions.isEnabled}
+              onChange={onIsEnabledChange}
+              compressed
+              disabled={props.switchDisabled}
+            />{' '}
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.maps.styles.fieldMetaOptions.isEnabledTooltipContent',
+                {
+                  defaultMessage: `When disabled, min and max are calculated with data from the local layer.
+                The min and max are re-calculated when layer data changes.
+                As a result, styling bands might be inconsistent as users pan, zoom, and filter the map.`,
+                }
+              )}
+            >
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </EuiToolTip>
+          </>
         </EuiFormRow>
 
-        <EuiFormRow
-          label={i18n.translate('xpack.maps.styles.fieldMetaOptions.sigmaLabel', {
-            defaultMessage: 'Sigma',
-          })}
-          display="columnCompressed"
-        >
-          <EuiRange
-            min={1}
-            max={5}
-            step={0.25}
-            value={_.get(props.fieldMetaOptions, 'sigma', DEFAULT_SIGMA)}
-            onChange={onSigmaChange}
-            disabled={!props.fieldMetaOptions.isEnabled}
-            showTicks
-            tickInterval={1}
-            compressed
-          />
-        </EuiFormRow>
+        {renderSigmaInput()}
       </Fragment>
     </FieldMetaPopover>
   );

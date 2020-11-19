@@ -11,6 +11,7 @@ import {
   LABEL_BORDER_SIZES,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
+  STEP_FUNCTION,
   STYLE_TYPE,
 } from '../constants';
 
@@ -36,6 +37,7 @@ export type LabelBorderSizeStylePropertyDescriptor = {
 export type FieldMetaOptions = {
   isEnabled: boolean;
   sigma?: number;
+  percentiles?: number[];
 };
 
 export type StylePropertyField = {
@@ -63,6 +65,7 @@ export type ColorDynamicOptions = {
   color?: string; // TODO move color category ramps to constants and make ENUM type
   customColorRamp?: OrdinalColorStop[];
   useCustomColorRamp?: boolean;
+  stepFunction?: STEP_FUNCTION;
 
   // category color properties
   colorCategory?: string; // TODO move color category palettes to constants and make ENUM type
@@ -155,6 +158,7 @@ export type OrientationStylePropertyDescriptor =
 export type SizeDynamicOptions = {
   minSize: number;
   maxSize: number;
+  stepFunction?: STEP_FUNCTION;
   field?: StylePropertyField;
   fieldMetaOptions: FieldMetaOptions;
 };

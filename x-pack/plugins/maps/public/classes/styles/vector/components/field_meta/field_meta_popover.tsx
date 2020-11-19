@@ -6,8 +6,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import React, { Component, ReactElement } from 'react';
-import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 type Props = {
   children: ReactElement<any>;
@@ -36,14 +36,17 @@ export class FieldMetaPopover extends Component<Props, State> {
 
   _renderButton() {
     return (
-      <EuiButtonIcon
+      <EuiButtonEmpty
         onClick={this._togglePopover}
-        size="s"
-        iconType="gear"
-        aria-label={i18n.translate('xpack.maps.styles.fieldMetaOptions.popoverToggle', {
-          defaultMessage: 'Field meta options popover toggle',
-        })}
-      />
+        size="xs"
+        iconType="controlsHorizontal"
+        iconSide="left"
+      >
+        <FormattedMessage
+          id="xpack.maps.styles.fieldMetaOptions.popoverToggle"
+          defaultMessage="Data domain options"
+        />
+      </EuiButtonEmpty>
     );
   }
 

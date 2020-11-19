@@ -269,6 +269,11 @@ export enum MB_LOOKUP_FUNCTION {
   FEATURE_STATE = 'feature-state',
 }
 
+export enum STEP_FUNCTION {
+  EASING_BETWEEN_MIN_AND_MAX = 'EASING_BETWEEN_MIN_AND_MAX',
+  PERCENTILES = 'PERCENTILES',
+}
+
 export type RawValue = string | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
