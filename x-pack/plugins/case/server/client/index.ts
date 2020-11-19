@@ -8,6 +8,7 @@ import { CaseClientFactoryArguments, CaseClient } from './types';
 import { create } from './cases/create';
 import { update } from './cases/update';
 import { addComment } from './comments/add';
+import { getFields } from './configure/fields';
 
 export { CaseClient } from './types';
 
@@ -44,5 +45,6 @@ export const createCaseClient = ({
       savedObjectsClient,
       userActionService,
     }),
+    getFields: getFields(),
   };
 };
