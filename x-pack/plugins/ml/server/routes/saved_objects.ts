@@ -5,14 +5,18 @@
  */
 
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, repairFactory } from '../saved_objects';
-import { jobsAndSpaces, repairJobObjects } from './schemas/saved_objects';
+import { jobsAndSpaces, repairJobObjects, jobTypeSchema } from './schemas/saved_objects';
+import { jobIdsSchema } from './schemas/job_service_schema';
 
 /**
  * Routes for job saved object management
  */
-export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) {
+export function savedObjectsRoutes(
+  { router, routeGuard }: RouteInitialization,
+  { spacesPlugin }: SavedObjectsRouteDeps
+) {
   /**
    * @apiGroup JobSavedObjects
    *
@@ -211,6 +215,42 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
             acc[type][cur.jobId] = cur.namespaces;
             return acc;
           }, {} as { [id: string]: { [id: string]: string[] | undefined } });
+
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobSavedObjects
+   *
+   * @api {get} /api/ml/saved_objects/delete_job_check Check whether user can delete a job
+   * @apiName JobsSpaces
+   * @apiDescription List all jobs and their spaces
+   *
+   */
+  router.post(
+    {
+      path: '/api/ml/saved_objects/delete_job_check/{jobType}',
+      validate: {
+        params: jobTypeSchema,
+        body: jobIdsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs', 'access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService, client }) => {
+      try {
+        const { jobType } = request.params;
+        const { jobIds }: { jobIds: string[] } = request.body;
+
+        const { deleteJobsCheck } = checksFactory(client, jobSavedObjectService);
+        const body = await deleteJobsCheck(request, jobType, jobIds, spacesPlugin !== undefined);
 
         return response.ok({
           body,

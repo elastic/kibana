@@ -27,3 +27,12 @@ export interface InitializeSavedObjectResponse {
   success: boolean;
   error?: any;
 }
+
+export interface DeleteJobCheckResponse {
+  [jobId: string]: DeleteJobPermission;
+}
+
+export interface DeleteJobPermission {
+  canDelete: boolean;
+  canUnTag: boolean;
+}

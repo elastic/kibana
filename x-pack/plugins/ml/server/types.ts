@@ -31,6 +31,11 @@ export interface SystemRouteDeps {
   resolveMlCapabilities: ResolveMlCapabilities;
 }
 
+export interface SavedObjectsRouteDeps {
+  spacesPlugin?: SpacesPluginSetup;
+  resolveMlCapabilities: ResolveMlCapabilities;
+}
+
 export interface PluginsSetup {
   cloud: CloudSetup;
   features: FeaturesPluginSetup;
