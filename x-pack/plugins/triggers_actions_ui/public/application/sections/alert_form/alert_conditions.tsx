@@ -56,7 +56,7 @@ export const AlertConditions = <ConditionProps extends any>({
             <EuiFlexItem grow={false}>
               <h6 className="alertConditions">
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertAdd.conditions.title"
+                  id="xpack.triggersActionsUI.sections.alertForm.conditions.title"
                   defaultMessage="Conditions:"
                 />
               </h6>
@@ -92,7 +92,7 @@ export const AlertConditions = <ConditionProps extends any>({
               <EuiFlexGroup direction="row" alignItems="baseline">
                 <EuiFlexItem grow={false}>
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertAdd.conditions.addConditionLabel"
+                    id="xpack.triggersActionsUI.sections.alertForm.conditions.addConditionLabel"
                     defaultMessage="Add:"
                   />
                 </EuiFlexItem>

@@ -37,7 +37,7 @@ export const AlertConditionsGroup = <ConditionProps extends unknown>({
             iconType="minusInCircle"
             color="danger"
             aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertAdd.conditions.removeConditionLabel',
+              'xpack.triggersActionsUI.sections.alertForm.conditions.removeConditionLabel',
               {
                 defaultMessage: 'Remove',
               }
