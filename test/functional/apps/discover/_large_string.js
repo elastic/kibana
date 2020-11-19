@@ -33,9 +33,7 @@ export default function ({ getService, getPageObjects }) {
       await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('hamlet');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'testlargestring',
-      });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
     });
 
     it('verify the large string book present', async function () {

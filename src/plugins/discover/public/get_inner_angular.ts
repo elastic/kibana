@@ -55,7 +55,6 @@ import {
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
 import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
-
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
  * needs to render, so in the end the current 'kibana' angular module is no longer necessary

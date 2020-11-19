@@ -135,14 +135,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add more columns to the table', async function () {
-        for (const column of extraColumns) {
-          await PageObjects.discover.clearFieldSearchInput();
-          await PageObjects.discover.findFieldByName(column);
-          await PageObjects.discover.clickFieldListItemAdd(column);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          // test the header now
-          expect(await PageObjects.discover.getDocHeader()).to.have.string(column);
-        }
+        const [column] = extraColumns;
+        await PageObjects.discover.findFieldByName(column);
+        log.debug(`add a ${column} column`);
+        await PageObjects.discover.clickFieldListItemAdd(column);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // test the header now
+        expect(await PageObjects.discover.getDocHeader()).to.have.string(column);
       });
 
       it('should remove columns from the table', async function () {

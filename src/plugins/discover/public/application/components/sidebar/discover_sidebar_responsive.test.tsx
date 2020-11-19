@@ -111,7 +111,7 @@ function getCompProps() {
   };
 }
 
-describe('discover sidebar', function () {
+describe('discover responsive sidebar', function () {
   let props: DiscoverSidebarProps;
   let comp: ReactWrapper<DiscoverSidebarProps>;
 

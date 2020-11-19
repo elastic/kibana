@@ -103,7 +103,6 @@ export class SearchEmbeddableFactory
           filterManager,
           editable: getServices().capabilities.discover.save as boolean,
           indexPatterns: indexPattern ? [indexPattern] : [],
-          services: getServices(),
         },
         input,
         executeTriggerActions,

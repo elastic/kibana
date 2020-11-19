@@ -42,13 +42,13 @@ import { getSortForSearchSource } from '../angular/doc_table';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
+  getServices,
   IndexPattern,
   ISearchSource,
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
-import { DiscoverServices } from '../../build_services';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -65,7 +65,6 @@ interface SearchScope extends ng.IScope {
   indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
-  showTimeCol?: boolean;
 }
 
 interface SearchEmbeddableConfig {
@@ -77,7 +76,6 @@ interface SearchEmbeddableConfig {
   indexPatterns?: IndexPattern[];
   editable: boolean;
   filterManager: FilterManager;
-  services: DiscoverServices;
 }
 
 export class SearchEmbeddable
@@ -96,7 +94,6 @@ export class SearchEmbeddable
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
   private abortController?: AbortController;
-  private services: DiscoverServices;
 
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
@@ -112,7 +109,6 @@ export class SearchEmbeddable
       indexPatterns,
       editable,
       filterManager,
-      services,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
     private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
@@ -130,7 +126,7 @@ export class SearchEmbeddable
       },
       parent
     );
-    this.services = services;
+
     this.filterManager = filterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
@@ -140,8 +136,8 @@ export class SearchEmbeddable
     };
     this.initializeSearchScope();
 
-    this.autoRefreshFetchSubscription = this.services.timefilter
-      .getAutoRefreshFetch$()
+    this.autoRefreshFetchSubscription = getServices()
+      .timefilter.getAutoRefreshFetch$()
       .subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
@@ -245,8 +241,6 @@ export class SearchEmbeddable
       this.updateInput({ columns });
     };
 
-    searchScope.showTimeCol = !this.services.uiSettings.get('doc_table:hideTimeColumn', false);
-
     searchScope.filter = async (field, value, operator) => {
       let filters = esFilters.generateFilters(
         this.filterManager,
@@ -282,13 +276,13 @@ export class SearchEmbeddable
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
+    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
     searchSource.setField(
       'sort',
       getSortForSearchSource(
         this.searchScope.sort,
         this.searchScope.indexPattern,
-        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
 
