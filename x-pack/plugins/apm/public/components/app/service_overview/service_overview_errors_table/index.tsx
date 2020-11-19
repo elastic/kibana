@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,9 +21,10 @@ import { px, truncate, unit } from '../../../../style/variables';
 import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
-import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { ServiceOverviewTable } from '../service_overview_table';
 import { TableLinkFlexItem } from '../table_link_flex_item';
+import { TableFetchWrapper } from './table_fetch_wrapper';
 
 interface Props {
   serviceName: string;
@@ -110,7 +110,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       render: (_, { last_seen: lastSeen }) => {
         return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
       },
-      width: px(unit * 8),
+      width: px(unit * 9),
     },
     {
       field: 'occurrences',
@@ -159,7 +159,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     }
 
     return callApmApi({
-      pathname: '/api/apm/services/{serviceName}/error_groups',
+      endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
       params: {
         path: { serviceName },
         query: {
@@ -225,8 +225,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <TableFetchWrapper hasData={!!items.length} status={status}>
-          <EuiBasicTable
+        <TableFetchWrapper status={status}>
+          <ServiceOverviewTable
             columns={columns}
             items={items}
             pagination={{

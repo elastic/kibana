@@ -4,26 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { ErrorStatePrompt } from '../ErrorStatePrompt';
-import { LoadingStatePrompt } from '../LoadingStatePrompt';
 
 export function TableFetchWrapper({
-  hasData,
   status,
   children,
 }: {
-  hasData: boolean;
   status: FETCH_STATUS;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   if (status === FETCH_STATUS.FAILURE) {
     return <ErrorStatePrompt />;
-  }
-
-  if (!hasData && status !== FETCH_STATUS.SUCCESS) {
-    return <LoadingStatePrompt />;
   }
 
   return <>{children}</>;
