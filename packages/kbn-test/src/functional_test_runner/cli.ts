@@ -119,7 +119,7 @@ export function runFtrCli() {
           'exclude-tag',
           'kibana-install-dir',
         ],
-        boolean: [ 'bail', 'invert', 'test-stats', 'updateBaselines', 'updateSnapshots', 'u' ],
+        boolean: ['bail', 'invert', 'test-stats', 'updateBaselines', 'updateSnapshots', 'u'],
         default: {
           config: 'test/functional/config.js',
         },
