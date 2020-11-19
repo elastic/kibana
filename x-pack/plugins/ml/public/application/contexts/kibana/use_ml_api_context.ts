@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { JobSpacesList, ALL_SPACES_ID } from './job_spaces_list';
+import { useMlKibana } from './kibana_context';
+
+export const useMlApiContext = () => {
+  return useMlKibana().services.mlServices.mlApiServices;
+};
