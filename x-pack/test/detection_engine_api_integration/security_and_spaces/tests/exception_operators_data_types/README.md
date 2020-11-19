@@ -17,3 +17,5 @@ Against the operator types of:
 * "does not exist"
 * "is in list"
 * "is not in list"
+
+If you add a test here, ensure you add it to the ./index.ts" file as well

@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { PrePackagedRulesAndTimelinesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -13,6 +14,7 @@ import {
   deleteAllAlerts,
   deleteAllTimelines,
   deleteSignalsIndex,
+  installPrePackagedRules,
   waitFor,
 } from '../../utils';
 
@@ -45,18 +47,27 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
         await deleteAllTimelines(es);
       });
 
-      it('should contain rules_installed, rules_updated, timelines_installed, and timelines_updated', async () => {
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
+      it('should create the prepackaged rules and return a count greater than zero, rules_updated to be zero, and contain the correct keys', async () => {
+        let responseBody: unknown;
+        await waitFor(async () => {
+          const { body, status } = await supertest
+            .put(DETECTION_ENGINE_PREPACKAGED_URL)
+            .set('kbn-xsrf', 'true')
+            .send();
+          if (status === 200) {
+            responseBody = body;
+          }
+          return status === 200;
+        }, DETECTION_ENGINE_PREPACKAGED_URL);
 
-        expect(Object.keys(body)).to.eql([
+        const prepackagedRules = responseBody as PrePackagedRulesAndTimelinesSchema;
+        expect(prepackagedRules.rules_installed).to.be.greaterThan(0);
+        expect(prepackagedRules.rules_updated).to.eql(0);
+        expect(Object.keys(prepackagedRules)).to.eql([
           'rules_installed',
           'rules_updated',
           'timelines_installed',
@@ -64,94 +75,34 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
 
-      it('should create the prepackaged rules and return a count greater than zero', async () => {
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body.rules_installed).to.be.greaterThan(0);
-      });
-
-      it('should create the prepackaged timelines and return a count greater than zero', async () => {
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body.timelines_installed).to.be.greaterThan(0);
-      });
-
-      it('should create the prepackaged rules that the rules_updated is of size zero', async () => {
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body.rules_updated).to.eql(0);
-      });
-
-      it('should create the prepackaged timelines and the timelines_updated is of size zero', async () => {
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body.timelines_updated).to.eql(0);
-      });
-
-      it('should be possible to call the API twice and the second time the number of rules installed should be zero', async () => {
-        await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
+      it('should be possible to call the API twice and the second time the number of rules installed should be zero as well as timeline', async () => {
+        await installPrePackagedRules(supertest);
 
         // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
-        // This is to reduce flakiness where it can for a short period of time try to install the same rule twice.
+        // This is to reduce flakiness where it can for a short period of time try to install the same rule the same rule twice.
         await waitFor(async () => {
           const { body } = await supertest
             .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
             .set('kbn-xsrf', 'true')
             .expect(200);
           return body.rules_not_installed === 0;
-        });
+        }, `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`);
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body.rules_installed).to.eql(0);
-      });
-
-      it('should be possible to call the API twice and the second time the number of timelines installed should be zero', async () => {
-        await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
+        let responseBody: unknown;
         await waitFor(async () => {
-          const { body } = await supertest
-            .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+          const { body, status } = await supertest
+            .put(DETECTION_ENGINE_PREPACKAGED_URL)
             .set('kbn-xsrf', 'true')
-            .expect(200);
-          return body.timelines_not_installed === 0;
-        });
+            .send();
+          if (status === 200) {
+            responseBody = body;
+          }
+          return status === 200;
+        }, DETECTION_ENGINE_PREPACKAGED_URL);
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_PREPACKAGED_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body.timelines_installed).to.eql(0);
+        const prepackagedRules = responseBody as PrePackagedRulesAndTimelinesSchema;
+        expect(prepackagedRules.rules_installed).to.eql(0);
+        expect(prepackagedRules.timelines_installed).to.eql(0);
       });
     });
   });

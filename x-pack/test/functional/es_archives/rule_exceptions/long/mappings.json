@@ -7,7 +7,7 @@
         "@timestamp": {
           "type": "date"
         },
-        "signal": { "type": "keyword" }
+        "long": { "type": "long" }
       }
     },
     "settings": {

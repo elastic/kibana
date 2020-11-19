@@ -79,9 +79,9 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId
- * @param enabled Enables the rule on creation or not. Defaulted to false to enable it on import
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
  */
-export const getSimpleRule = (ruleId = 'rule-1', enabled = true): QueryCreateSchema => ({
+export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryCreateSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
   enabled,
@@ -94,12 +94,38 @@ export const getSimpleRule = (ruleId = 'rule-1', enabled = true): QueryCreateSch
 });
 
 /**
+ * This is a typical signal testing rule that is easy for most basic testing of output of signals.
+ * It starts out in an enabled false state and it is up to the test writer to enable it when they
+ * are done with setups to kick it off. The from is set very far back to test the basics of signal
+ * creation and testing by getting all the signals at once.
+ * @param ruleId The optional ruleId which is rule-1 by default.
+ * @param enabled Enables the rule on creation or not. Defaulted to false.
+ */
+export const getRuleForSignalTesting = (
+  index: string[],
+  ruleId = 'rule-1',
+  enabled = true
+): QueryCreateSchema => ({
+  name: 'Signal Testing Query',
+  description: 'Tests a simple query',
+  enabled,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  index,
+  type: 'query',
+  query: '*:*',
+  from: '1900-01-01T00:00:00.000Z',
+});
+
+/**
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId
  */
-export const getSimpleRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
+export const getSimpleRuleUpdate = (ruleId = 'rule-1', enabled = false): UpdateRulesSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
+  enabled,
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
@@ -112,9 +138,10 @@ export const getSimpleRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
  * This is a representative ML rule payload as expected by the server
  * @param ruleId
  */
-export const getSimpleMlRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+export const getSimpleMlRule = (ruleId = 'rule-1', enabled = false): CreateRulesSchema => ({
   name: 'Simple ML Rule',
   description: 'Simple Machine Learning Rule',
+  enabled,
   anomaly_threshold: 44,
   risk_score: 1,
   rule_id: ruleId,
@@ -123,9 +150,10 @@ export const getSimpleMlRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
   type: 'machine_learning',
 });
 
-export const getSimpleMlRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
+export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): UpdateRulesSchema => ({
   name: 'Simple ML Rule',
   description: 'Simple Machine Learning Rule',
+  enabled,
   anomaly_threshold: 44,
   risk_score: 1,
   rule_id: ruleId,
@@ -159,6 +187,19 @@ export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
   query: {
     terms: {
       'signal.rule.rule_id': ruleIds,
+    },
+  },
+});
+
+/**
+ * Given an array of ids for a test this will get the signals
+ * created from that rule's regular id.
+ * @param ruleIds The rule_id to search for signals
+ */
+export const getQuerySignalsId = (ids: string[]) => ({
+  query: {
+    terms: {
+      'signal.rule.id': ids,
     },
   },
 });
@@ -219,12 +260,12 @@ export const binaryToString = (res: any, callback: any): void => {
  * This is the typical output of a simple rule that Kibana will output with all the defaults
  * except for the server generated properties.  Useful for testing end to end tests.
  */
-export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
+export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false): Partial<RulesSchema> => ({
   actions: [],
   author: [],
   created_by: 'elastic',
   description: 'Simple Rule Query',
-  enabled: true,
+  enabled,
   false_positives: [],
   from: 'now-6m',
   immutable: false,
@@ -277,21 +318,38 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
 };
 
 /**
- * Remove all alerts from the .kibana index
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
- * @param es The ElasticSearch handle
+ * Removes all rules by looping over any found and removing them from REST.
+ * @param supertest The supertest agent.
  */
-export const deleteAllAlerts = async (es: Client): Promise<void> => {
-  return countDownES(async () => {
-    return es.deleteByQuery({
-      index: '.kibana',
-      q: 'type:alert',
-      wait_for_completion: true,
-      refresh: true,
-      conflicts: 'proceed',
-      body: {},
-    });
-  }, 'deleteAllAlerts');
+export const deleteAllAlerts = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<void> => {
+  await countDownTest(
+    async () => {
+      const { body } = await supertest
+        .get(`${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`)
+        .set('kbn-xsrf', 'true')
+        .send();
+
+      const ids = body.data.map((rule: FullResponseSchema) => ({
+        id: rule.id,
+      }));
+
+      await supertest
+        .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+        .send(ids)
+        .set('kbn-xsrf', 'true');
+
+      const { body: finalCheck } = await supertest
+        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+        .set('kbn-xsrf', 'true')
+        .send();
+      return finalCheck.data.length === 0;
+    },
+    'deleteAllAlerts',
+    50,
+    1000
+  );
 };
 
 export const downgradeImmutableRule = async (es: Client, ruleId: string): Promise<void> => {
@@ -334,7 +392,7 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promise<void> => {
+export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
@@ -588,8 +646,8 @@ export const getWebHookAction = () => ({
   name: 'Some connector',
 });
 
-export const getRuleWithWebHookAction = (id: string): CreateRulesSchema => ({
-  ...getSimpleRule(),
+export const getRuleWithWebHookAction = (id: string, enabled = false): CreateRulesSchema => ({
+  ...getSimpleRule('rule-1', enabled),
   throttle: 'rule',
   actions: [
     {
@@ -621,7 +679,8 @@ export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<
 // Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
-  maxTimeout: number = 5000,
+  functionName: string,
+  maxTimeout: number = 10000,
   timeoutWait: number = 10
 ): Promise<void> => {
   await new Promise(async (resolve, reject) => {
@@ -639,7 +698,9 @@ export const waitFor = async (
     if (found) {
       resolve();
     } else {
-      reject(new Error('timed out waiting for function condition to be true'));
+      reject(
+        new Error(`timed out waiting for function condition to be true within ${functionName}`)
+      );
     }
   });
 };
@@ -810,7 +871,7 @@ export const waitForRuleSuccess = async (
       .send({ ids: [id] })
       .expect(200);
     return body[id]?.current_status?.status === 'succeeded';
-  });
+  }, 'waitForRuleSuccess');
 };
 
 /**
@@ -821,40 +882,19 @@ export const waitForRuleSuccess = async (
  */
 export const waitForSignalsToBePresent = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  numberOfSignals = 1
+  numberOfSignals = 1,
+  signalIds: string[]
 ): Promise<void> => {
   await waitFor(async () => {
-    const {
-      body: signalsOpen,
-    }: { body: SearchResponse<{ signal: Signal }> } = await supertest
-      .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-      .set('kbn-xsrf', 'true')
-      .send(getQueryAllSignals())
-      .expect(200);
+    const signalsOpen = await getSignalsByIds(supertest, signalIds);
     return signalsOpen.hits.hits.length >= numberOfSignals;
-  });
+  }, 'waitForSignalsToBePresent');
 };
 
 /**
- * Returns all signals both closed and opened
+ * Returns all signals both closed and opened by ruleId
  * @param supertest Deps
  */
-export const getAllSignals = async (
-  supertest: SuperTest<supertestAsPromised.Test>
-): Promise<
-  SearchResponse<{
-    signal: Signal;
-    [x: string]: unknown;
-  }>
-> => {
-  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQueryAllSignals())
-    .expect(200);
-  return signalsOpen;
-};
-
 export const getSignalsByRuleIds = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   ruleIds: string[]
@@ -872,10 +912,61 @@ export const getSignalsByRuleIds = async (
   return signalsOpen;
 };
 
+/**
+ * Given an array of rule ids this will return only signals based on that rule id both
+ * open and closed
+ * @param supertest agent
+ * @param ids Array of the rule ids
+ */
+export const getSignalsByIds = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  ids: string[]
+): Promise<
+  SearchResponse<{
+    signal: Signal;
+    [x: string]: unknown;
+  }>
+> => {
+  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsId(ids))
+    .expect(200);
+  return signalsOpen;
+};
+
+/**
+ * Given a single rule id this will return only signals based on that rule id.
+ * @param supertest agent
+ * @param ids Rule id
+ */
+export const getSignalsById = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  id: string
+): Promise<
+  SearchResponse<{
+    signal: Signal;
+    [x: string]: unknown;
+  }>
+> => {
+  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsId([id]))
+    .expect(200);
+  return signalsOpen;
+};
+
 export const installPrePackagedRules = async (
   supertest: SuperTest<supertestAsPromised.Test>
 ): Promise<void> => {
-  await supertest.put(DETECTION_ENGINE_PREPACKAGED_URL).set('kbn-xsrf', 'true').send().expect(200);
+  await countDownTest(async () => {
+    const { status } = await supertest
+      .put(DETECTION_ENGINE_PREPACKAGED_URL)
+      .set('kbn-xsrf', 'true')
+      .send();
+    return status === 200;
+  }, 'installPrePackagedRules');
 };
 
 /**
@@ -916,11 +1007,12 @@ export const createRuleWithExceptionEntries = async (
       }`
     );
     return body.data.length === entries.length;
-  });
+  }, `within createRuleWithExceptionEntries ${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${getCreateExceptionListDetectionSchemaMock().list_id}`);
 
   // create the rule but don't run it immediately as running it immediately can cause
   // the rule to sometimes not filter correctly the first time with an exception list
-  // or other timing issues.
+  // or other timing issues. Then afterwards wait for the rule to have succeeded before
+  // returning.
   const ruleWithException: QueryCreateSchema = {
     ...rule,
     enabled: false,

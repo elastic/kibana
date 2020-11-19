@@ -111,6 +111,7 @@ export const removeExceptionListServerGeneratedProperties = (
 // Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor
 export const waitFor = async (
   functionToTest: () => Promise<boolean>,
+  functionName: string,
   maxTimeout: number = 5000,
   timeoutWait: number = 10
 ) => {
@@ -129,7 +130,7 @@ export const waitFor = async (
     if (found) {
       resolve();
     } else {
-      reject(new Error('timed out waiting for function condition to be true'));
+      reject(new Error(`timed out waiting for function ${functionName} condition to be true`));
     }
   });
 };
@@ -194,6 +195,33 @@ export const importFile = async (
 };
 
 /**
+ * Convenience function for quickly importing a given type and contents and then
+ * waiting to ensure they're there before continuing. This specifically checks tokens
+ * from text file
+ * @param supertest The super test agent
+ * @param type The type to import as
+ * @param contents The contents of the import
+ * @param fileName filename to import as
+ */
+export const importTextFile = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  type: Type,
+  contents: string[],
+  fileName: string
+): Promise<void> => {
+  await supertest
+    .post(`${LIST_ITEM_URL}/_import?type=${type}`)
+    .set('kbn-xsrf', 'true')
+    .attach('file', getImportListItemAsBuffer(contents), fileName)
+    .expect('Content-Type', 'application/json; charset=utf-8')
+    .expect(200);
+
+  // although we have pushed the list and its items, it is async so we
+  // have to wait for the contents before continuing
+  await waitForTextListItems(supertest, contents, fileName);
+};
+
+/**
  * Convenience function for waiting for a particular file uploaded
  * and a particular item value to be available before continuing.
  * @param supertest The super test agent
@@ -209,8 +237,9 @@ export const waitForListItem = async (
     const { status } = await supertest
       .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${itemValue}`)
       .send();
-    return status !== 404;
-  });
+
+    return status === 200;
+  }, `waitForListItem fileName: "${fileName}" itemValue: "${itemValue}"`);
 };
 
 /**
@@ -226,4 +255,46 @@ export const waitForListItems = async (
   fileName: string
 ): Promise<void> => {
   await Promise.all(itemValues.map((item) => waitForListItem(supertest, item, fileName)));
+};
+
+/**
+ * Convenience function for waiting for a particular file uploaded
+ * and a particular item value to be available before continuing.
+ * @param supertest The super test agent
+ * @param fileName The filename imported
+ * @param itemValue The item value to wait for
+ */
+export const waitForTextListItem = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  itemValue: string,
+  fileName: string
+): Promise<void> => {
+  const tokens = itemValue.split(' ');
+  await waitFor(async () => {
+    const promises = await Promise.all(
+      tokens.map(async (token) => {
+        const { status } = await supertest
+          .get(`${LIST_ITEM_URL}?list_id=${fileName}&value=${token}`)
+          .send();
+        return status === 200;
+      })
+    );
+    return promises.every((one) => one);
+  }, `waitForTextListItem fileName: "${fileName}" itemValue: "${itemValue}"`);
+};
+
+/**
+ * Convenience function for waiting for a particular file uploaded
+ * and particular item values to be available before continuing. This works
+ * specifically with text types and does tokenization to ensure all words are uploaded
+ * @param supertest The super test agent
+ * @param fileName The filename imported
+ * @param itemValue The item value to wait for
+ */
+export const waitForTextListItems = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  itemValues: string[],
+  fileName: string
+): Promise<void> => {
+  await Promise.all(itemValues.map((item) => waitForTextListItem(supertest, item, fileName)));
 };
