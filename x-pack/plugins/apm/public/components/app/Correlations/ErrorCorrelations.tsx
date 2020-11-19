@@ -28,7 +28,7 @@ import { SignificantTermsTable } from './SignificantTermsTable';
 import { ChartContainer } from '../../shared/charts/chart_container';
 
 type CorrelationsApiResponse = NonNullable<
-  APIReturnType<'/api/apm/correlations/failed_transactions', 'GET'>
+  APIReturnType<'GET /api/apm/correlations/failed_transactions'>
 >;
 
 type SignificantTerm = NonNullable<

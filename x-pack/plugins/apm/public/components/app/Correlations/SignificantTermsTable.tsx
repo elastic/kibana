@@ -14,8 +14,8 @@ import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { createHref } from '../../shared/Links/url_helpers';
 
 type CorrelationsApiResponse =
-  | APIReturnType<'/api/apm/correlations/failed_transactions', 'GET'>
-  | APIReturnType<'/api/apm/correlations/slow_transactions', 'GET'>;
+  | APIReturnType<'GET /api/apm/correlations/failed_transactions'>
+  | APIReturnType<'GET /api/apm/correlations/slow_transactions';
 
 type SignificantTerm = NonNullable<
   CorrelationsApiResponse
