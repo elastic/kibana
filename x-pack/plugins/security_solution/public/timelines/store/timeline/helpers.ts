@@ -23,6 +23,7 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/m
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
+  TimelineExpandedEvent,
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
@@ -208,7 +209,7 @@ interface AddNewTimelineParams {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
-  expandedEvent?: any;
+  expandedEvent?: TimelineExpandedEvent;
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
