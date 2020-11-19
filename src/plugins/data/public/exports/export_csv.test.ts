@@ -19,7 +19,7 @@
 
 import { Datatable } from 'src/plugins/expressions';
 import { FieldFormat } from '../../common/field_formats';
-import { exportAsCSVs } from './export_csv';
+import { CSV_MIME_TYPE, exportAsCSVs } from './export_csv';
 
 function getDefaultOptions() {
   const formatFactory = jest.fn();
@@ -28,8 +28,6 @@ function getDefaultOptions() {
     csvSeparator: ',',
     quoteValues: true,
     formatFactory,
-    // this is for testing
-    asString: true,
   };
 }
 
@@ -69,7 +67,7 @@ describe('CSV exporter', () => {
 
   test('should export formatted values by default', () => {
     expect(exportAsCSVs('oneCSV', getDataTable(), getDefaultOptions())).toStrictEqual({
-      'oneCSV.csv': 'columnOne\r\n"Formatted_value"\r\n',
+      'oneCSV.csv': { content: 'columnOne\r\n"Formatted_value"\r\n', type: CSV_MIME_TYPE },
     });
   });
 
@@ -77,7 +75,7 @@ describe('CSV exporter', () => {
     return expect(
       exportAsCSVs('oneCSV', getDataTable(), { ...getDefaultOptions(), quoteValues: false })
     ).toStrictEqual({
-      'oneCSV.csv': 'columnOne\r\nFormatted_value\r\n',
+      'oneCSV.csv': { content: 'columnOne\r\nFormatted_value\r\n', type: CSV_MIME_TYPE },
     });
   });
 
@@ -85,7 +83,7 @@ describe('CSV exporter', () => {
     expect(
       exportAsCSVs('oneCSV', getDataTable(), { ...getDefaultOptions(), raw: true })
     ).toStrictEqual({
-      'oneCSV.csv': 'columnOne\r\nvalue\r\n',
+      'oneCSV.csv': { content: 'columnOne\r\nvalue\r\n', type: CSV_MIME_TYPE },
     });
   });
 
@@ -93,7 +91,10 @@ describe('CSV exporter', () => {
     expect(
       exportAsCSVs('oneCSV', getDataTable({ multipleColumns: true }), getDefaultOptions())
     ).toStrictEqual({
-      'oneCSV.csv': 'columnOne,columnTwo\r\n"Formatted_value","Formatted_5"\r\n',
+      'oneCSV.csv': {
+        content: 'columnOne,columnTwo\r\n"Formatted_value","Formatted_5"\r\n',
+        type: CSV_MIME_TYPE,
+      },
     });
   });
 
@@ -101,8 +102,8 @@ describe('CSV exporter', () => {
     expect(
       exportAsCSVs('twoCSVs', getDataTable({ multipleLayers: true }), getDefaultOptions())
     ).toStrictEqual({
-      'twoCSVs-1.csv': 'columnOne\r\n"Formatted_value"\r\n',
-      'twoCSVs-2.csv': 'columnOne\r\n"Formatted_value"\r\n',
+      'twoCSVs-1.csv': { content: 'columnOne\r\n"Formatted_value"\r\n', type: CSV_MIME_TYPE },
+      'twoCSVs-2.csv': { content: 'columnOne\r\n"Formatted_value"\r\n', type: CSV_MIME_TYPE },
     });
   });
 
@@ -110,7 +111,7 @@ describe('CSV exporter', () => {
     const datatables = getDataTable();
     datatables.layer1.rows[0].col1 = '"value"';
     expect(exportAsCSVs('oneCSV', datatables, getDefaultOptions())).toStrictEqual({
-      'oneCSV.csv': 'columnOne\r\n"Formatted_""value"""\r\n',
+      'oneCSV.csv': { content: 'columnOne\r\n"Formatted_""value"""\r\n', type: CSV_MIME_TYPE },
     });
   });
 });

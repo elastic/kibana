@@ -19,16 +19,14 @@
 
 // Inspired by the inspector CSV exporter
 
-// @ts-ignore
-import { saveAs } from '@elastic/filesaver';
-import pMap from 'p-map';
-
 import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
 import { Datatable } from 'src/plugins/expressions';
+import { DownloadableContent } from 'src/plugins/share/public/';
 
 const LINE_FEED_CHARACTER = '\r\n';
 const nonAlphaNumRE = /[^a-zA-Z0-9]/;
 const allDoubleQuoteRE = /"/g;
+export const CSV_MIME_TYPE = 'text/plain;charset=utf-8';
 
 // TODO: enhance this later on
 function escape(val: object | string, quoteValues: boolean) {
@@ -50,7 +48,6 @@ interface CSVOptions {
   quoteValues: boolean;
   formatFactory: FormatFactory;
   raw?: boolean;
-  asString?: boolean; // use it for testing
 }
 
 function buildCSV(
@@ -87,12 +84,12 @@ function buildCSV(
  * @param datatables - data (as a dictionary of Datatable) to be translated into CSVs. It can contain multiple tables.
  * @param options - set of options for the exporter
  *
- * @returns undefined (download) - Record\<string, string\> (only for testing)
+ * @returns A dictionary of files to download: the key is the filename (w/o extension) and the
  */
 export function exportAsCSVs(
   filename: string,
   datatables: Record<string, Datatable> | undefined,
-  { asString, ...options }: CSVOptions
+  options: CSVOptions
 ) {
   if (datatables == null) {
     return;
@@ -113,33 +110,10 @@ export function exportAsCSVs(
 
   const layerIds = Object.keys(csvs);
 
-  // useful for testing
-  if (asString) {
-    return layerIds.reduce<Record<string, string>>((memo, layerId, i) => {
-      const content = csvs[layerId];
-      const postFix = layerIds.length > 1 ? `-${i + 1}` : '';
-      memo[`${filename}${postFix}.csv`] = content;
-      return memo;
-    }, {});
-  }
-
-  const type = 'text/plain;charset=utf-8';
-
-  const downloadQueue = layerIds.map((layerId, i) => {
-    const blob = new Blob([csvs[layerId]], { type });
+  return layerIds.reduce<Record<string, Exclude<DownloadableContent, Blob>>>((memo, layerId, i) => {
+    const content = csvs[layerId];
     const postFix = layerIds.length > 1 ? `-${i + 1}` : '';
-    // TODO: remove this workaround for multiple files when fixed (in filesaver?)
-    return () => Promise.resolve().then(() => saveAs(blob, `${filename}${postFix}.csv`));
-  });
-
-  // There's a bug in some browser with multiple files downloaded at once
-  // * sometimes only the first/last content is downloaded multiple times
-  // * sometimes only the first/last filename is used multiple times
-  pMap(downloadQueue, (downloadFn) => Promise.all([downloadFn(), wait(50)]), {
-    concurrency: 1,
-  });
-}
-// Probably there's already another one around?
-function wait(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+    memo[`${filename}${postFix}.csv`] = { content, type: CSV_MIME_TYPE };
+    return memo;
+  }, {});
 }

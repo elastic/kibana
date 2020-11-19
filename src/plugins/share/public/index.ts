@@ -41,5 +41,6 @@ export {
 import { SharePlugin } from './plugin';
 
 export { KibanaURL } from './kibana_url';
+export * from './lib/download_as';
 
 export const plugin = () => new SharePlugin();
