@@ -34,6 +34,8 @@ import {
   colors,
   Axis,
   ACTIVE_CURSOR,
+  MOUSE_LEAVE,
+  TimelionEvent,
   eventBus,
 } from '../helpers/panel_utils';
 
@@ -348,39 +350,49 @@ function TimelionVisComponent({
     [plot, debouncedSetLegendNumbers]
   );
 
+  const mouseLeave = useCallback(() => {
+    (plot as CrosshairPlot).clearCrosshair();
+    clearLegendNumbers();
+  }, [plot, clearLegendNumbers]);
+
   const plotHoverHandler = useCallback(
     (event: JQuery.TriggeredEvent, pos: Position) => {
       if (!plot) {
         return;
       }
       plotHover(pos);
-      eventBus.trigger(ACTIVE_CURSOR, [event, pos]);
+      eventBus.next({ name: ACTIVE_CURSOR, data: pos });
     },
     [plot, plotHover]
   );
 
   useEffect(() => {
-    const updateCursor = (_: any, event: JQuery.TriggeredEvent, pos: Position) => {
+    const updateCursor = ({ name, data }: TimelionEvent) => {
       if (!plot) {
         return;
       }
-      plotHover(pos);
+
+      if (name === ACTIVE_CURSOR && data) {
+        plotHover(data);
+      } else if (name === MOUSE_LEAVE) {
+        mouseLeave();
+      }
     };
 
-    eventBus.on(ACTIVE_CURSOR, updateCursor);
+    const subscription = eventBus.asObservable().subscribe(updateCursor);
 
     return () => {
-      eventBus.off(ACTIVE_CURSOR, updateCursor);
+      subscription.unsubscribe();
     };
-  }, [plot, plotHover]);
+  }, [mouseLeave, plot, plotHover]);
 
   const mouseLeaveHandler = useCallback(() => {
     if (!plot) {
       return;
     }
-    (plot as CrosshairPlot).clearCrosshair();
-    clearLegendNumbers();
-  }, [plot, clearLegendNumbers]);
+    mouseLeave();
+    eventBus.next({ name: MOUSE_LEAVE });
+  }, [mouseLeave, plot]);
 
   const plotSelectedHandler = useCallback(
     (event: JQuery.TriggeredEvent, ranges: Ranges) => {
