@@ -15,9 +15,7 @@ import {
   EuiTitle,
   EuiPageContentBody,
   EuiPageContent,
-  EuiTable,
   EuiBasicTable,
-  EuiTableBody,
   EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
