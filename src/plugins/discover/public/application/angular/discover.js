@@ -710,7 +710,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     updateSearchSource($scope.searchSource, {
       indexPattern: $scope.indexPattern,
       services,
-      state: $scope.state,
+      sort: $scope.state.sort,
     });
     return Promise.resolve();
   };
