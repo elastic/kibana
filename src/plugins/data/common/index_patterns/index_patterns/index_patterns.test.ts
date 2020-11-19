@@ -223,4 +223,32 @@ describe('IndexPatterns', () => {
 
     expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
   });
+
+  test('failed requests are not cached', async () => {
+    savedObjectsClient.get = jest
+      .fn()
+      .mockImplementation(async (type, id) => {
+        return {
+          id: object.id,
+          version: object.version,
+          attributes: object.attributes,
+        };
+      })
+      .mockRejectedValueOnce({});
+
+    const id = '1';
+
+    // failed request!
+    /*
+    try {
+      await indexPatterns.get(id);
+    } catch (e) {
+      expect(e).toBeDefined();
+    }
+    */
+    expect(indexPatterns.get(id)).rejects.toBeDefined();
+
+    // successful subsequent request
+    expect(async () => await indexPatterns.get(id)).toBeDefined();
+  });
 });

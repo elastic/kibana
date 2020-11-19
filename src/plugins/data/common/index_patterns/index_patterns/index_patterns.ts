@@ -420,8 +420,17 @@ export class IndexPatternsService {
    * @param id
    */
 
-  get = async (id: string): Promise<IndexPattern> =>
-    indexPatternCache.get(id) || indexPatternCache.set(id, this.getSavedObjectAndInit(id));
+  get = async (id: string): Promise<IndexPattern> => {
+    const indexPatternPromise =
+      indexPatternCache.get(id) || indexPatternCache.set(id, this.getSavedObjectAndInit(id));
+
+    // don't cache failed requests
+    indexPatternPromise.catch(() => {
+      indexPatternCache.clear(id);
+    });
+
+    return indexPatternPromise;
+  };
 
   /**
    * Create a new index pattern instance
