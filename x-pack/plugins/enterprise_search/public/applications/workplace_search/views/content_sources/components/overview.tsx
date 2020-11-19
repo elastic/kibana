@@ -31,7 +31,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import FlashMessages from 'shared/components/FlashMessages';
 import {
   CUSTOM_SOURCE_DOCS_URL,
   DOCUMENT_PERMISSIONS_DOCS_URL,
@@ -54,7 +53,7 @@ import aclImage from '../../../components/assets/supports_acl.svg';
 import { SourceLogic } from '../source_logic';
 
 export const Overview: React.FC = () => {
-  const { contentSource, flashMessages, dataLoading } = useValues(SourceLogic);
+  const { contentSource, dataLoading } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   const {
@@ -473,7 +472,6 @@ export const Overview: React.FC = () => {
     <>
       <ViewContentHeader title="Source overview" />
       <EuiSpacer size="m" />
-      {!!flashMessages && <FlashMessages {...flashMessages} />}
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xl" direction="column">

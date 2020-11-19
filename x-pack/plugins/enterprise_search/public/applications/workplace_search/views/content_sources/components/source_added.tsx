@@ -10,6 +10,8 @@ import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 import { Redirect, useLocation } from 'react-router-dom';
 
+import { setErrorMessage } from '../../../../shared/flash_messages';
+
 import { parseQueryParams } from '../../../../../applications/shared/query_params';
 
 import { SOURCES_PATH, getSourcesPath } from '../../../routes';
@@ -30,13 +32,13 @@ export const SourceAdded: React.FC = () => {
   const { name, hasError, errorMessages, serviceType, indexPermissions } = (parseQueryParams(
     search
   ) as unknown) as SourceQueryParams;
-  const { setAddedSource, setFlashMessages } = useActions(SourcesLogic);
+  const { setAddedSource } = useActions(SourcesLogic);
   const { isOrganization } = useValues(AppLogic);
   const decodedName = decodeURIComponent(name);
 
   if (hasError) {
-    const defaultError = [`${decodedName} failed to connect.`];
-    setFlashMessages({ error: errorMessages || defaultError });
+    const defaultError = `${decodedName} failed to connect.`;
+    setErrorMessage(errorMessages ? errorMessages.join(' ') : defaultError);
   } else {
     setAddedSource(decodedName, indexPermissions, serviceType);
   }

@@ -23,7 +23,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import FlashMessages from 'shared/components/FlashMessages';
 import { SOURCES_PATH, getSourcesPath } from '../../../routes';
 
 import { ContentSection } from '../../../components/shared/content_section';
@@ -47,7 +46,6 @@ export const SourceSettings: React.FC = () => {
 
   const {
     contentSource: { name, id, serviceType },
-    flashMessages,
     buttonLoading,
     sourceConfigData: { configuredFields },
   } = useValues(SourceLogic);
@@ -111,7 +109,6 @@ export const SourceSettings: React.FC = () => {
     <>
       <ViewContentHeader title="Source settings" />
       <EuiSpacer />
-      {!!flashMessages && <FlashMessages {...flashMessages} />}
       <ContentSection
         title="Content source name"
         description="Customize the name of this content source."
