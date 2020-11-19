@@ -619,7 +619,7 @@ export const mergeReturns = (
 ): SearchAfterAndBulkCreateReturnType => {
   return searchAfters.reduce((prev, next) => {
     const {
-      success: existingSuccess,
+      success: tempExistingSuccess,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       lastLookBackDate: existingLastLookBackDate,
@@ -628,8 +628,16 @@ export const mergeReturns = (
       errors: existingErrors,
     } = prev;
 
+    let existingSuccess = tempExistingSuccess;
+    if (
+      !tempExistingSuccess &&
+      existingErrors.some((error) => error.includes('in order to sort on'))
+    ) {
+      existingSuccess = true;
+    }
+
     const {
-      success: newSuccess,
+      success: tempNewSuccess,
       searchAfterTimes: newSearchAfterTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
@@ -637,6 +645,11 @@ export const mergeReturns = (
       createdSignals: newCreatedSignals,
       errors: newErrors,
     } = next;
+
+    let newSuccess = tempNewSuccess;
+    if (!tempNewSuccess && newErrors.some((error) => error.includes('in order to sort on'))) {
+      newSuccess = true;
+    }
 
     return {
       success: existingSuccess && newSuccess,
