@@ -283,8 +283,8 @@ export class IndexPatternsService {
           values: { id, title },
         }),
       });
+      throw err;
     }
-    return fields;
   };
 
   /**
