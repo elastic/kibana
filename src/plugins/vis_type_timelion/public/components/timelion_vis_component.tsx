@@ -42,6 +42,7 @@ import {
   Axis as IAxis,
   ACTIVE_CURSOR,
   eventBus,
+  TimelionEvent,
 } from '../helpers/panel_utils';
 import { tickFormatters } from '../helpers/tick_formatters';
 
@@ -60,7 +61,7 @@ interface TimelionVisComponentProps {
 }
 
 const handleCursorUpdate = (cursor: PointerEvent) => {
-  eventBus.trigger(ACTIVE_CURSOR, cursor);
+  eventBus.next({ name: ACTIVE_CURSOR, data: cursor });
 };
 
 function TimelionVisComponent({
@@ -95,16 +96,16 @@ function TimelionVisComponent({
   };
 
   useEffect(() => {
-    const updateCursor = (_: any, cursor: PointerEvent) => {
-      if (chartRef.current) {
-        chartRef.current.dispatchExternalPointerEvent(cursor);
+    const updateCursor = ({ name, data }: TimelionEvent) => {
+      if (chartRef.current && name === ACTIVE_CURSOR && data) {
+        chartRef.current.dispatchExternalPointerEvent(data);
       }
     };
 
-    eventBus.on(ACTIVE_CURSOR, updateCursor);
+    const subscription = eventBus.asObservable().subscribe(updateCursor);
 
     return () => {
-      eventBus.off(ACTIVE_CURSOR, updateCursor);
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -142,55 +143,11 @@ function TimelionVisComponent({
     return Position.Left;
   }, [chart]);
 
-<<<<<<< HEAD
   const brushEndListener = useCallback<BrushEndListener>(
     ({ x }) => {
       if (!x) {
         return;
       }
-=======
-  const plotHover = useCallback(
-    (pos: Position) => {
-      (plot as CrosshairPlot).setCrosshair(pos);
-      debouncedSetLegendNumbers(pos);
-    },
-    [plot, debouncedSetLegendNumbers]
-  );
-
-  const plotHoverHandler = useCallback(
-    (event: JQuery.TriggeredEvent, pos: Position) => {
-      if (!plot) {
-        return;
-      }
-      plotHover(pos);
-      eventBus.trigger(ACTIVE_CURSOR, [event, pos]);
-    },
-    [plot, plotHover]
-  );
-
-  useEffect(() => {
-    const updateCursor = (_: any, event: JQuery.TriggeredEvent, pos: Position) => {
-      if (!plot) {
-        return;
-      }
-      plotHover(pos);
-    };
-
-    eventBus.on(ACTIVE_CURSOR, updateCursor);
-
-    return () => {
-      eventBus.off(ACTIVE_CURSOR, updateCursor);
-    };
-  }, [plot, plotHover]);
-
-  const mouseLeaveHandler = useCallback(() => {
-    if (!plot) {
-      return;
-    }
-    (plot as CrosshairPlot).clearCrosshair();
-    clearLegendNumbers();
-  }, [plot, clearLegendNumbers]);
->>>>>>> upstream/master
 
       fireEvent({
         name: 'applyFilter',

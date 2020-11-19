@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import $ from 'jquery';
+import { Subject } from 'rxjs';
 import moment, { Moment } from 'moment-timezone';
 import { Position } from '@elastic/charts';
 
@@ -56,8 +56,13 @@ interface TimeRangeBounds {
   max: Moment | undefined;
 }
 
-export const ACTIVE_CURSOR = 'ACTIVE_CURSOR_TIMELION';
-export const eventBus = $({});
+export interface TimelionEvent {
+  name: string;
+  data?: any;
+}
+
+const ACTIVE_CURSOR = 'ACTIVE_CURSOR_TIMELION';
+const eventBus = new Subject<TimelionEvent>();
 
 const colors = [
   '#01A4A4',
@@ -91,4 +96,4 @@ function createTickFormat(
   return (val: number) => moment(val).format(format);
 }
 
-export { createTickFormat, colors };
+export { createTickFormat, colors, ACTIVE_CURSOR, eventBus };
