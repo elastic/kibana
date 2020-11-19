@@ -115,45 +115,6 @@ export const addTimelineNoteToEvent = ({
   };
 };
 
-interface ToggleTimelineExpandedEventParams {
-  timelineId: string;
-  eventId: string;
-  indexName: string;
-  loading: boolean;
-  timelineById: TimelineById;
-}
-
-export const toggleTimelineExpandedEvent = ({
-  timelineId,
-  eventId,
-  indexName,
-  loading,
-  timelineById,
-}: ToggleTimelineExpandedEventParams): TimelineById => {
-  const timeline = timelineById[timelineId];
-  const existingExpandedEvent = timeline.expandedEvent;
-
-  let newExpandedEvent;
-
-  if (
-    existingExpandedEvent &&
-    existingExpandedEvent.eventId === eventId &&
-    existingExpandedEvent.loading === loading
-  ) {
-    newExpandedEvent = {};
-  } else {
-    newExpandedEvent = { eventId, indexName, loading };
-  }
-
-  return {
-    ...timelineById,
-    [timelineId]: {
-      ...timeline,
-      expandedEvent: newExpandedEvent,
-    },
-  };
-};
-
 interface AddTimelineParams {
   id: string;
   timeline: TimelineModel;

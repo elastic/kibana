@@ -74,7 +74,6 @@ import {
   setDeletedTimelineEvents,
   setLoadingTimelineEvents,
   setSelectedTimelineEvents,
-  toggleTimelineExpandedEvent,
   unPinTimelineEvent,
   updateExcludedRowRenderersIds,
   updateKqlFilterQueryDraft,
@@ -179,15 +178,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(toggleExpandedEvent, (state, { timelineId, eventId, indexName, loading }) => ({
+  .case(toggleExpandedEvent, (state, { timelineId, event }) => ({
     ...state,
-    timelineById: toggleTimelineExpandedEvent({
-      timelineId,
-      eventId,
-      indexName,
-      loading,
-      timelineById: state.timelineById,
-    }),
+    timelineById: {
+      ...state.timelineById,
+      [timelineId]: {
+        ...state.timelineById[timelineId],
+        expandedEvent: event,
+      },
+    },
   }))
   .case(addProvider, (state, { id, provider }) => ({
     ...state,

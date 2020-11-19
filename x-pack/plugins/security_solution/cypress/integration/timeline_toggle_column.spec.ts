@@ -41,7 +41,6 @@ describe('toggle column in timeline', () => {
   it('displays a checked Toggle field checkbox for `@timestamp`, a default timeline column', () => {
     expandFirstTimelineEventDetails();
     cy.get(TIMESTAMP_TOGGLE_FIELD).should('be.checked');
-    expandFirstTimelineEventDetails();
   });
 
   it('displays an Unchecked Toggle field checkbox for `_id`, because it is NOT a default timeline column', () => {
@@ -53,7 +52,6 @@ describe('toggle column in timeline', () => {
     uncheckTimestampToggleField();
 
     cy.get(TIMESTAMP_HEADER_FIELD).should('not.exist');
-    expandFirstTimelineEventDetails();
   });
 
   it('adds the _id field to the timeline when the user checks the field', () => {
@@ -61,7 +59,6 @@ describe('toggle column in timeline', () => {
     checkIdToggleField();
 
     cy.get(ID_HEADER_FIELD).should('exist');
-    expandFirstTimelineEventDetails();
   });
 
   it('adds the _id field to the timeline via drag and drop', () => {
@@ -69,6 +66,5 @@ describe('toggle column in timeline', () => {
     dragAndDropIdToggleFieldToTimeline();
 
     cy.get(ID_HEADER_FIELD).should('exist');
-    expandFirstTimelineEventDetails();
   });
 });

@@ -35,11 +35,11 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-export const toggleExpandedEvent = actionCreator<
-  TimelineExpandedEvent & {
-    timelineId: string;
-  }
->('TOGGLE_EXPANDED_EVENT');
+interface ToggleExpandedEvent {
+  timelineId: string;
+  event: TimelineExpandedEvent;
+}
+export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
 
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;

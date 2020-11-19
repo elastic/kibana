@@ -69,7 +69,8 @@ const ActionsComponent: React.FC<Props> = ({
           <EuiButtonIcon
             aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
             data-test-subj="expand-event"
-            iconType={expanded ? 'eye' : 'eyeClosed'}
+            disabled={expanded}
+            iconType="arrowRight"
             id={eventId}
             onClick={onEventToggled}
           />
