@@ -8,6 +8,17 @@ export * from '../../../common/types/workplace_search';
 
 export type SpacerSizeTypes = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
+export interface MetaPage {
+  current: number;
+  size: number;
+  total_pages: number;
+  total_results: number;
+}
+
+export interface Meta {
+  page: MetaPage;
+}
+
 export interface Group {
   id: string;
   name: string;
@@ -89,6 +100,30 @@ export interface ContentSourceDetails extends ContentSource {
   boost: number;
 }
 
+interface DescriptionList {
+  title: string;
+  description: string;
+}
+
+export interface ContentSourceFullData extends ContentSourceDetails {
+  activities: object[];
+  details: DescriptionList[];
+  summary: object[];
+  groups: object[];
+  custom: boolean;
+  accessToken: string;
+  key: string;
+  urlField: string;
+  titleField: string;
+  licenseSupportsPermissions: boolean;
+  serviceTypeSupportsPermissions: boolean;
+  indexPermissions: boolean;
+  hasPermissions: boolean;
+  urlFieldIsLinkable: boolean;
+  createdAt: string;
+  serviceName: string;
+}
+
 export interface ContentSourceStatus {
   id: string;
   name: string;
@@ -120,4 +155,11 @@ export enum FeatureIds {
   Private = 'Private',
   GlobalAccessPermissions = 'GlobalAccessPermissions',
   DocumentLevelPermissions = 'DocumentLevelPermissions',
+}
+
+export interface CustomSource {
+  accessToken: string;
+  key: string;
+  name: string;
+  id: string;
 }
