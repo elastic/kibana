@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _, { isEqual } from 'lodash';
+import { isEqual, cloneDeep } from 'lodash';
 import { History } from 'history';
 import { IUiSettingsClient, NotificationsStart } from 'kibana/public';
 import {
@@ -204,19 +204,15 @@ export function getStateDefaults(
     language: string;
   }
 ): AppState {
-  const { searchSource } = savedSearch;
-  const defaultState: AppState = {
+  const { searchSource, columns, sort } = savedSearch;
+  return {
     query: searchSource.getField('query') || defaultQuery,
-    sort: getSortArray(savedSearch.sort, indexPattern),
-    columns:
-      savedSearch.columns.length > 0
-        ? savedSearch.columns
-        : config.get(DEFAULT_COLUMNS_SETTING).slice(),
+    sort: getSortArray(sort, indexPattern),
+    columns: columns.length > 0 ? columns : config.get(DEFAULT_COLUMNS_SETTING).slice(),
     index: indexPattern.id,
     interval: 'auto',
-    filters: _.cloneDeep(searchSource.getOwnField('filter')) as Filter[],
+    filters: cloneDeep(searchSource.getOwnField('filter')) as Filter[],
   };
-  return defaultState;
 }
 
 /**
