@@ -29,7 +29,7 @@ import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { px, truncate, unit } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
-import { MetricsChart } from '../../shared/charts/MetricsChart';
+import { MetricsChart } from '../../shared/charts/metrics_chart';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
 const INITIAL_DATA = {

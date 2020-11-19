@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
-import { MetricsChart } from '../../shared/charts/MetricsChart';
+import { MetricsChart } from '../../shared/charts/metrics_chart';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { Projection } from '../../../../common/projections';

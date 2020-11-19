@@ -26,7 +26,7 @@ import { ChartsSyncContextProvider } from '../../../../context/charts_sync_conte
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { ITransactionChartData } from '../../../../selectors/chartSelectors';
+import { ITransactionChartData } from '../../../../selectors/chart_selectors';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
 import { LineChart } from '../line_chart';

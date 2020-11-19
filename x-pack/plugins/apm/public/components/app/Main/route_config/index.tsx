@@ -14,7 +14,7 @@ import { toQuery } from '../../../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
 import { Home } from '../../Home';
 import { ServiceDetails } from '../../ServiceDetails';
-import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
+import { ServiceNodeMetrics } from '../../service_node_metrics';
 import { Settings } from '../../Settings';
 import { AgentConfigurations } from '../../Settings/AgentConfigurations';
 import { AnomalyDetection } from '../../Settings/anomaly_detection';
