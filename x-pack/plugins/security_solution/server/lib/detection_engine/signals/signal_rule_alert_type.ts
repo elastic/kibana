@@ -41,6 +41,7 @@ import {
   createSearchAfterReturnType,
   mergeReturns,
   createSearchAfterReturnTypeFromResponse,
+  checkPrivileges,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -177,18 +178,9 @@ export const signalRulesAlertType = ({
       // move this collection of lines into a function in utils
       // so that we can use it in create rules route, bulk, etc.
       try {
-        const privileges = await services.callCluster('transport.request', {
-          path: '/_security/user/_has_privileges',
-          method: 'POST',
-          body: {
-            index: [
-              {
-                names: index ?? [],
-                privileges: ['read'],
-              },
-            ],
-          },
-        });
+        const inputIndex = await getInputIndex(services, version, index);
+        const privileges = await checkPrivileges(services, inputIndex);
+
         const indexNames = Object.keys(privileges.index);
         logger.debug(buildRuleMessage(`INDEX NAMES: ${JSON.stringify(indexNames, null, 2)}`));
         const everyIndexHasReadPrivileges = indexNames.every(
