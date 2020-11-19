@@ -2157,6 +2157,7 @@ export class SearchSource {
     // (undocumented)
     history: SearchRequest[];
     onRequestStart(handler: (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>): void;
+    removeField<K extends keyof SearchSourceFields>(field: K): this;
     serialize(): {
         searchSourceJSON: string;
         references: import("src/core/server").SavedObjectReference[];
