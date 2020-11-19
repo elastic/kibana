@@ -55,7 +55,7 @@ Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
 - `POST /api/index_patterns/index_pattern` &mdash; create an index pattern
 - `GET /api/index_patterns/index_pattern/{id}` &mdash; fetch an index pattern by `{id}`
 - `DELETE /api/index_patterns/index_pattern/{id}` &mdash; delete an index pattern by `{id}`
-- `POST /api/index_patterns/index_pattern/{id}` &mdash; partialy update index pattern by `{id}`
+- `POST /api/index_patterns/index_pattern/{id}` &mdash; partially update index pattern by `{id}`
 
 #### Create an index pattern
 
@@ -161,7 +161,7 @@ DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 Returns an '200 OK` response with empty body on success.
 
 
-### Partialy update index pattern
+### Partially update index pattern
 
 Update part of an index pattern. Only provided fields will be updated on the
 index pattern, missing fields will stay as they are persisted.
@@ -212,7 +212,7 @@ This endpoint returns the updated index pattern object.
 ```json
 {
     "index_pattern": {
-        
+
     }
 }
 ```
