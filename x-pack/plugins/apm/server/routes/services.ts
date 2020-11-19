@@ -239,3 +239,32 @@ export const serviceErrorGroupsRoute = createRoute({
     });
   },
 });
+
+export const serviceThroughputRoute = createRoute(() => ({
+  endpoint: 'GET /api/apm/services/{serviceName}/throughput',
+  params: {
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.type({ transactionType: t.string }),
+      uiFiltersRt,
+      rangeRt,
+    ]),
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
+    const { transactionType } = context.params.query;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+    return getThroughput({
+      searchAggregatedTransactions,
+      serviceName,
+      setup,
+      transactionType,
+    });
+  },
+}));

@@ -6,7 +6,7 @@
 
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-export function getThroughput({
+export async function getThroughput({
   searchAggregatedTransactions,
   serviceName,
   setup,
@@ -16,4 +16,10 @@ export function getThroughput({
   serviceName: string;
   setup: Setup & SetupTimeRange;
   transactionType: string;
-}) {}
+}) {
+  return {
+    average: null,
+    noHits: true,
+    throughput: [],
+  };
+}

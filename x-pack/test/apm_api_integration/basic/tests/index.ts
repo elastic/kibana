@@ -19,9 +19,10 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     });
 
     describe('Services', function () {
-      loadTestFile(require.resolve('./services/annotations'));
-      loadTestFile(require.resolve('./services/top_services'));
       loadTestFile(require.resolve('./services/agent_name'));
+      loadTestFile(require.resolve('./services/annotations'));
+      loadTestFile(require.resolve('./services/throughput'));
+      loadTestFile(require.resolve('./services/top_services'));
       loadTestFile(require.resolve('./services/transaction_types'));
     });
 

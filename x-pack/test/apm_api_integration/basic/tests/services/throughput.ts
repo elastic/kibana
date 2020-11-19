@@ -21,7 +21,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-java/transaction_groups/throughput?${qs.stringify({
+          `/api/apm/services/opbeans-java/throughput?${qs.stringify({
             start: metadata.start,
             end: metadata.end,
             uiFilters: encodeURIComponent('{}'),
@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         };
         before(async () => {
           const response = await supertest.get(
-            `/api/apm/services/opbeans-java/transaction_groups/throughput?${qs.stringify({
+            `/api/apm/services/opbeans-java/throughput?${qs.stringify({
               start: metadata.start,
               end: metadata.end,
               uiFilters: encodeURIComponent('{}'),
