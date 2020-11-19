@@ -44,7 +44,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
 jest.mock('../../../../../src/plugins/saved_objects/public', () => {
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   const { SavedObjectSaveModal, SavedObjectSaveModalOrigin } = jest.requireActual(
     '../../../../../src/plugins/saved_objects/public'
   );
