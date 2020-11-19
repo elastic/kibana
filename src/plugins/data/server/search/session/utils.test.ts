@@ -17,5 +17,21 @@
  * under the License.
  */
 
-export * from './status';
-export * from './types';
+import { createRequestHash } from './utils';
+
+describe('data/search/session utils', () => {
+  describe('createRequestHash', () => {
+    it('ignores `preference`', () => {
+      const request = {
+        foo: 'bar',
+      };
+
+      const withPreference = {
+        ...request,
+        preference: 1234,
+      };
+
+      expect(createRequestHash(request)).toEqual(createRequestHash(withPreference));
+    });
+  });
+});

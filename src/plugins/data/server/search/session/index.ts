@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './status';
-export * from './types';
+export { BackgroundSessionService, ISearchSessionClient } from './session_service';
