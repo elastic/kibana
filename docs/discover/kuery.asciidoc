@@ -278,6 +278,3 @@ To match on a single nested document:
 -------------------
 level1.level2:{ prop1:foo and prop2:bar }
 -------------------
-
-IMPORTANT: When you use the Lucene Query Syntax in the *KQL* search bar, {kib} is unable to search on nested objects, and perform aggregations across fields that contain nested objects. 
-Using `include_in_parent` or `copy_to` can cause {kib} to fail.

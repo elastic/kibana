@@ -27,7 +27,7 @@ threshold watch, take a look at the different watcher actions. If you are
 creating an advanced watch, you should be familiar with the parts of a
 watch&#8212;input, schedule, condition, and actions.
 
-NOTE: There are limitations in watcher that affect {kib}. For information, refer to {ref}/watcher-limitations.html[Alerting].
+NOTE: There are limitations in *Watcher* that affect {kib}. For information, refer to {ref}/watcher-limitations.html[Alerting].
 
 [float]
 [[watcher-security]]

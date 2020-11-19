@@ -13,8 +13,6 @@ a PDF, PNG, or CSV document, which you can keep for yourself, or share with othe
 Reporting is available from the *Share* menu
 in *Discover*, *Dashboard*, and *Canvas*.
 
-NOTE: When you export a data table or saved search from a dashboard report, the PDF includes only the visible data.
-
 [role="screenshot"]
 image::user/reporting/images/share-button.png["Share"]
 
@@ -56,6 +54,8 @@ click the share icon image:user/reporting/images/canvas-share-button.png["Canvas
 . Generate the report.
 +
 A notification appears when the report is complete.
+
+NOTE: When you export a data table or saved search from a dashboard report, the PDF includes only the visible data.
 
 [float]
 [[reporting-layout-sizing]]
