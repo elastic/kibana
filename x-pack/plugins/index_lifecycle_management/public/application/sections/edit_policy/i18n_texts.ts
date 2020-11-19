@@ -49,7 +49,7 @@ export const i18nTexts = {
     searchableSnapshotsFieldLabel: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldLabel',
       {
-        defaultMessage: 'Searchable snapshot',
+        defaultMessage: 'Searchable snapshot repository',
       }
     ),
     errors: {

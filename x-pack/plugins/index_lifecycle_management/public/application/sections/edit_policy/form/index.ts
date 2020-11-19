@@ -11,3 +11,8 @@ export { createSerializer } from './serializer';
 export { schema } from './schema';
 
 export * from './validations';
+
+export {
+  SearchableSnapshotStateProvider,
+  useSearchableSnapshotState,
+} from './searchable_snapshot_state';
