@@ -26,20 +26,20 @@ export async function getMockedAppDependencies() {
   const kibanaFeatures = await featuresPluginMock.createStart().getFeatures();
 
   return {
-    chrome,
-    docLinks,
-    dataPlugin: dataPluginMock.createStartContract(),
+    data: dataPluginMock.createStartContract(),
     charts: chartPluginMock.createStartContract(),
-    alerting: alertingPluginMock.createStartContract(),
+    chrome,
+    navigateToApp,
+    docLinks,
     toastNotifications: coreSetupMock.notifications.toasts,
     http: coreSetupMock.http,
     uiSettings: coreSetupMock.uiSettings,
-    navigateToApp,
-    capabilities,
-    history: scopedHistoryMock.create(),
     setBreadcrumbs: jest.fn(),
+    capabilities,
     actionTypeRegistry,
     alertTypeRegistry,
+    history: scopedHistoryMock.create(),
+    alerting: alertingPluginMock.createStartContract(),
     kibanaFeatures,
   };
 }
