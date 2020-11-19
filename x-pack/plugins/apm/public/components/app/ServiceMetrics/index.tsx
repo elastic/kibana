@@ -16,7 +16,7 @@ import React, { useMemo } from 'react';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { MetricsChart } from '../../shared/charts/MetricsChart';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
+import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { Projection } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { SearchBar } from '../../shared/search_bar';
@@ -31,7 +31,7 @@ export function ServiceMetrics({
   serviceName,
 }: ServiceMetricsProps) {
   const { urlParams } = useUrlParams();
-  const { data } = useServiceMetricCharts(urlParams, agentName);
+  const { data, status } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
 
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
@@ -60,7 +60,12 @@ export function ServiceMetrics({
                 {data.charts.map((chart) => (
                   <EuiFlexItem key={chart.key}>
                     <EuiPanel>
-                      <MetricsChart start={start} end={end} chart={chart} />
+                      <MetricsChart
+                        start={start}
+                        end={end}
+                        chart={chart}
+                        fetchStatus={status}
+                      />
                     </EuiPanel>
                   </EuiFlexItem>
                 ))}

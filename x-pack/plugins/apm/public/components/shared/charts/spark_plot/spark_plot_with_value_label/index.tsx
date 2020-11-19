@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { useTheme } from '../../../../../hooks/useTheme';
-import { getEmptySeries } from '../../CustomPlot/getEmptySeries';
+import { getEmptySeries } from '../../helper/get_empty_series';
 import { SparkPlot } from '../';
 
 type Color =
