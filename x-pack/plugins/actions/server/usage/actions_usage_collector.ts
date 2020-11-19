@@ -28,14 +28,12 @@ export function createActionsUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  let isCollectorReady = false;
-  taskManager.then(() => {
-    // mark lensUsageCollector as ready to collect when the TaskManager is ready
-    isCollectorReady = true;
-  });
   return usageCollection.makeUsageCollector<ActionsUsage>({
     type: 'actions',
-    isReady: () => isCollectorReady,
+    isReady: async () => {
+      await taskManager;
+      return true;
+    },
     schema: {
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },

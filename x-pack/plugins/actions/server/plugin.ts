@@ -219,23 +219,27 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     if (usageCollection) {
       registerActionsUsageCollector(
         usageCollection,
-        core
-          .getStartServices()
-          .then(([_, { taskManager }]) => taskManager as TaskManagerStartContract)
-      );
-
-      initializeActionsTelemetry(
-        this.telemetryLogger,
-        plugins.taskManager,
-        core,
-        this.kibanaIndexConfig
+        core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
     }
 
-    core.http.registerRouteHandlerContext(
-      'actions',
-      this.createRouteHandlerContext(core, this.kibanaIndexConfig)
-    );
+    this.kibanaIndexConfig
+      .pipe(first())
+      .toPromise()
+      .then((config) => {
+        core.http.registerRouteHandlerContext(
+          'actions',
+          this.createRouteHandlerContext(core, config.kibana.index)
+        );
+        if (usageCollection) {
+          initializeActionsTelemetry(
+            this.telemetryLogger,
+            plugins.taskManager,
+            core,
+            config.kibana.index
+          );
+        }
+      });
 
     // Routes
     const router = core.http.createRouter();
@@ -428,7 +432,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
   private createRouteHandlerContext = (
     core: CoreSetup<ActionsPluginsStart>,
-    config: Observable<{ kibana: { index: string } }>
+    defaultKibanaIndex: string
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
     const {
       actionTypeRegistry,
@@ -440,8 +444,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     return async function actionsRouteHandlerContext(context, request) {
       const [{ savedObjects }, { taskManager }] = await core.getStartServices();
-      const defaultKibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
-
       return {
         getActionsClient: () => {
           if (isESOUsingEphemeralEncryptionKey === true) {

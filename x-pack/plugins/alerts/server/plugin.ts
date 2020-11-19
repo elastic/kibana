@@ -29,7 +29,6 @@ import {
   SavedObjectsServiceStart,
   IContextProvider,
   RequestHandler,
-  SharedGlobalConfig,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
   StatusServiceSetup,
@@ -190,17 +189,19 @@ export class AlertingPlugin {
     if (usageCollection) {
       registerAlertsUsageCollector(
         usageCollection,
-        core
-          .getStartServices()
-          .then(([_, { taskManager }]) => taskManager as TaskManagerStartContract)
+        core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
-
-      initializeAlertingTelemetry(
-        this.telemetryLogger,
-        core,
-        plugins.taskManager,
-        this.kibanaIndexConfig
-      );
+      this.kibanaIndexConfig
+        .pipe(first())
+        .toPromise()
+        .then((config) =>
+          initializeAlertingTelemetry(
+            this.telemetryLogger,
+            core,
+            plugins.taskManager,
+            config.kibana.index
+          )
+        );
     }
 
     initializeApiKeyInvalidator(

@@ -6,8 +6,6 @@
 
 import { Logger, CoreSetup, LegacyAPICaller } from 'kibana/server';
 import moment from 'moment';
-import { first } from 'rxjs/operators';
-import { Observable } from 'rxjs';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -23,9 +21,9 @@ export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>
+  kibanaIndex: string
 ) {
-  registerActionsTelemetryTask(logger, taskManager, core, config);
+  registerActionsTelemetryTask(logger, taskManager, core, kibanaIndex);
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -36,13 +34,13 @@ function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>
+  kibanaIndex: string
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, config),
+      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },
   });
 }
@@ -60,11 +58,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function telemetryTaskRunner(
-  logger: Logger,
-  core: CoreSetup,
-  config: Observable<{ kibana: { index: string } }>
-) {
+export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     const callCluster = (...args: Parameters<LegacyAPICaller>) => {
@@ -74,7 +68,6 @@ export function telemetryTaskRunner(
     };
     return {
       async run() {
-        const kibanaIndex = (await config.pipe(first()).toPromise()).kibana.index;
         return Promise.all([
           getTotalCount(callCluster, kibanaIndex),
           getInUseTotalCount(callCluster, kibanaIndex),

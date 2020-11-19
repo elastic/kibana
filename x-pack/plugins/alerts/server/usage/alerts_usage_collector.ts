@@ -46,14 +46,12 @@ export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  let isCollectorReady = false;
-  taskManager.then(() => {
-    // mark lensUsageCollector as ready to collect when the TaskManager is ready
-    isCollectorReady = true;
-  });
   return usageCollection.makeUsageCollector<AlertsUsage>({
     type: 'alerts',
-    isReady: () => isCollectorReady,
+    isReady: async () => {
+      await taskManager;
+      return true;
+    },
     fetch: async () => {
       try {
         const doc = await getLatestTaskState(await taskManager);
