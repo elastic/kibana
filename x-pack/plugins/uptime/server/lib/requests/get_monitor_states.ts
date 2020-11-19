@@ -153,7 +153,7 @@ export const getHistogramForMonitors = async (
       },
     },
   };
-  const result = await queryContext.search(params);
+  const { body: result } = await queryContext.search(params);
 
   const histoBuckets: any[] = result.aggregations?.histogram.buckets ?? [];
   const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {

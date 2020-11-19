@@ -47,8 +47,7 @@ async function deleteConfig(
 ) {
   try {
     await callApmApi({
-      pathname: '/api/apm/settings/custom_links/{id}',
-      method: 'DELETE',
+      endpoint: 'DELETE /api/apm/settings/custom_links/{id}',
       params: {
         path: { id: customLinkId },
       },
