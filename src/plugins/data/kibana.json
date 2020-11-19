@@ -5,7 +5,8 @@
   "ui": true,
   "requiredPlugins": [
     "expressions",
-    "uiActions"
+    "uiActions",
+    "share"
   ],
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common"],

@@ -97,6 +97,11 @@ import {
 } from '../../../kibana_legacy/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
+import {
+  createDashboardUrl,
+  DASHBOARD_APP_URL_GENERATOR,
+  DashboardUrlGeneratorState,
+} from '../url_generator';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -429,6 +434,31 @@ export class DashboardAppController {
       DashboardContainer
     >(DASHBOARD_CONTAINER_TYPE);
 
+    searchService.session.setSearchSessionRestorationInfoProvider({
+      getName: async () => 'Dashboard',
+      getUrlGeneratorData: async () => {
+        const appState = dashboardStateManager.getAppState();
+        const state: DashboardUrlGeneratorState = {
+          dashboardId: dash.id,
+          timeRange: timefilter.getTime(),
+          filters: filterManager.getFilters(),
+          query: queryStringManager.formatQuery(appState.query),
+          savedQuery: appState.savedQuery,
+          useHash: false,
+          preserveSavedFilters: false,
+          viewMode: appState.viewMode,
+          panels: dash.id ? undefined : appState.panels,
+          searchSessionId: searchService.session.getSessionId(),
+        };
+
+        return {
+          urlGeneratorId: DASHBOARD_APP_URL_GENERATOR,
+          initialState: state,
+          restoreState: state, // TODO: handle relative time range
+        };
+      },
+    });
+
     if (dashboardFactory) {
       const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
       if (searchSessionIdFromURL) {
@@ -637,6 +667,13 @@ export class DashboardAppController {
         refreshDashboardContainer();
       }
     };
+
+    const searchServiceSessionRefreshSubscribtion = searchService.session.onRefresh$.subscribe(
+      () => {
+        lastReloadRequestTime = new Date().getTime();
+        refreshDashboardContainer();
+      }
+    );
 
     const updateStateFromSavedQuery = (savedQuery: SavedQuery) => {
       const allFilters = filterManager.getFilters();
@@ -1199,6 +1236,7 @@ export class DashboardAppController {
       if (dashboardContainer) {
         dashboardContainer.destroy();
       }
+      searchServiceSessionRefreshSubscribtion.unsubscribe();
       searchService.session.clear();
     });
   }

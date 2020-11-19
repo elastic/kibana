@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
+  const sendToBackground = getService('sendToBackground');
 
   describe('dashboard with async search', () => {
     before(async function () {
@@ -78,21 +79,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(panel1SessionId1).not.to.be(panel1SessionId2);
     });
 
-    // NOTE: this test will be revised when session functionality is really working
-    it('Opens a dashboard with existing session', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
-      const url = await browser.getCurrentUrl();
-      const fakeSessionId = '__fake__';
-      const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
-      await browser.navigateTo(savedSessionURL);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const session1 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
-      expect(session1).to.be(fakeSessionId);
-      await queryBar.clickQuerySubmitButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const session2 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
-      expect(session2).not.to.be(fakeSessionId);
+    describe('Send to background', () => {
+      it('Restore using non-existing sessionId errors out. Refresh starts a new session and completes.', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
+        const url = await browser.getCurrentUrl();
+        const fakeSessionId = '__fake__';
+        const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
+        await browser.navigateTo(savedSessionURL);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await sendToBackground.expectState('restored');
+        await testSubjects.existOrFail('embeddableErrorLabel'); // expected that panel errors out because of non existing session
+
+        const session1 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
+        expect(session1).to.be(fakeSessionId);
+
+        await queryBar.clickQuerySubmitButton(); // TODO: use refresh from the sendToBackgroundUI instead
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await sendToBackground.expectState('completed');
+        await testSubjects.missingOrFail('embeddableErrorLabel');
+        const session2 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
+        expect(session2).not.to.be(fakeSessionId);
+      });
+
+      // TODO:
+      // it.todo('Save and restore session');
+      // it.todo('Cancel running search');
+      // it.todo('Cancel saved search search. Saved session is deleted.');
     });
   });
 

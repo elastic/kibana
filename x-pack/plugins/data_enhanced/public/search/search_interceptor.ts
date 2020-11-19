@@ -66,7 +66,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   ) {
     let { id } = request;
 
-    const { combinedSignal, timeoutSignal, cleanup } = this.setupAbortSignal({
+    const { combinedSignal, timeoutSignal, cleanup, abort } = this.setupAbortSignal({
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
@@ -75,6 +75,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
+    const untrackSearch = this.deps.session.trackSearch(options.sessionId, { abort });
     return doPartialSearch<IEsSearchResponse>(
       () => this.runSearch(request, { ...options, strategy, abortSignal: combinedSignal }),
       (requestId) =>
@@ -103,6 +104,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
         abortedPromise.cleanup();
+        untrackSearch();
       })
     );
   }

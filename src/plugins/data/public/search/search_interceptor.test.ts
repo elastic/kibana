@@ -24,7 +24,7 @@ import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../../kibana_utils/public';
 import { SearchTimeoutError, PainlessError, TimeoutErrorMode } from './errors';
 import { searchServiceMock } from './mocks';
-import { ISearchStart } from '.';
+import { ISearchStart, ISessionService } from '.';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -99,7 +99,100 @@ describe('SearchInterceptor', () => {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest);
-      expect(response.toPromise()).resolves.toBe(mockResponse);
+      await expect(response.toPromise()).resolves.toBe(mockResponse);
+    });
+
+    describe('Search session', () => {
+      const setup = ({
+        isRestore = false,
+        isStored = false,
+        sessionId,
+      }: {
+        isRestore?: boolean;
+        isStored?: boolean;
+        sessionId?: string;
+      }) => {
+        const sessionServiceMock = searchMock.session as jest.Mocked<ISessionService>;
+        sessionServiceMock.getSessionId.mockImplementation(() => sessionId);
+        sessionServiceMock.isRestore.mockImplementation(() => isRestore);
+        sessionServiceMock.isStored.mockImplementation(() => isStored);
+        mockCoreSetup.http.fetch.mockResolvedValue({ result: 200 });
+      };
+
+      const mockRequest: IEsSearchRequest = {
+        params: {},
+      };
+
+      afterEach(() => {
+        const sessionServiceMock = searchMock.session as jest.Mocked<ISessionService>;
+        sessionServiceMock.getSessionId.mockReset();
+        sessionServiceMock.isRestore.mockReset();
+        sessionServiceMock.isStored.mockReset();
+        mockCoreSetup.http.fetch.mockReset();
+      });
+
+      test('infers isRestore from session service state', async () => {
+        const sessionId = 'sid';
+        setup({
+          isRestore: true,
+          sessionId,
+        });
+
+        await searchInterceptor.search(mockRequest, { sessionId }).toPromise();
+        expect(mockCoreSetup.http.fetch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: '{"sessionId":"sid","isStored":false,"isRestore":true,"params":{}}',
+          })
+        );
+      });
+
+      test('infers isStored from session service state', async () => {
+        const sessionId = 'sid';
+        setup({
+          isStored: true,
+          sessionId,
+        });
+
+        await searchInterceptor.search(mockRequest, { sessionId }).toPromise();
+        expect(mockCoreSetup.http.fetch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: '{"sessionId":"sid","isStored":true,"isRestore":false,"params":{}}',
+          })
+        );
+      });
+
+      test('skips isRestore & isStore in case not a current session Id', async () => {
+        setup({
+          isStored: true,
+          isRestore: true,
+          sessionId: 'session id',
+        });
+
+        await searchInterceptor
+          .search(mockRequest, { sessionId: 'different session id' })
+          .toPromise();
+        expect(mockCoreSetup.http.fetch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body:
+              '{"sessionId":"different session id","isStored":false,"isRestore":false,"params":{}}',
+          })
+        );
+      });
+
+      test('skips isRestore & isStore in case no session Id', async () => {
+        setup({
+          isStored: true,
+          isRestore: true,
+          sessionId: undefined,
+        });
+
+        await searchInterceptor.search(mockRequest, { sessionId: 'sessionId' }).toPromise();
+        expect(mockCoreSetup.http.fetch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: '{"sessionId":"sessionId","isStored":false,"isRestore":false,"params":{}}',
+          })
+        );
+      });
     });
 
     describe('Should throw typed errors', () => {

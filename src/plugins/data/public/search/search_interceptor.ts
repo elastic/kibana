@@ -28,7 +28,6 @@ import {
   IKibanaSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
-  ISessionService,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
@@ -42,6 +41,7 @@ import {
 } from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
 import { AbortError, getCombinedAbortSignal } from '../../../kibana_utils/public';
+import { ISessionService } from './session';
 
 export interface SearchInterceptorDeps {
   http: CoreSetup['http'];
@@ -135,8 +135,14 @@ export class SearchInterceptor {
     );
     const body = JSON.stringify({
       sessionId: options?.sessionId,
-      isStored: options?.isStored,
-      isRestore: options?.isRestore,
+      isStored:
+        this.deps.session.getSessionId() === options?.sessionId
+          ? this.deps.session.isStored()
+          : false,
+      isRestore:
+        this.deps.session.getSessionId() === options?.sessionId
+          ? this.deps.session.isRestore()
+          : false,
       ...searchRequest,
     });
 
@@ -166,13 +172,17 @@ export class SearchInterceptor {
       timeoutController.abort();
     });
 
+    const externalAbortController = new AbortController();
+
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
     // 1. The user manually aborts (via `cancelPending`)
     // 2. The request times out
-    // 3. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
+    // 3. abort() is called on `externalAbortController`
+    // 4. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
     const signals = [
       this.abortController.signal,
       timeoutSignal,
+      externalAbortController.signal,
       ...(abortSignal ? [abortSignal] : []),
     ];
 
@@ -190,6 +200,9 @@ export class SearchInterceptor {
       timeoutSignal,
       combinedSignal,
       cleanup,
+      abort: () => {
+        externalAbortController.abort();
+      },
     };
   }
 

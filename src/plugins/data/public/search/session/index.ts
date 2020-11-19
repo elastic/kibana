@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export { getSessionServiceMock } from './search/session/mocks';
+export {
+  SessionService,
+  ISessionService,
+  SearchSessionRestorationInfoProvider,
+} from './session_service';
+export { SessionState } from './session_state';
+export { SessionsClient, ISessionsClient } from './sessions_client';

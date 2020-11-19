@@ -9,14 +9,19 @@ import { render, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { createConnectedBackgroundSessionIndicator } from './connected_background_session_indicator';
 import { BehaviorSubject } from 'rxjs';
-import { ISessionService } from '../../../../../../../src/plugins/data/public';
+import { ISessionService, SessionState } from '../../../../../../../src/plugins/data/public';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 
+const coreStart = coreMock.createStart();
 const sessionService = dataPluginMock.createStartContract().search.session as jest.Mocked<
   ISessionService
 >;
 
 test("shouldn't show indicator in case no active search session", async () => {
-  const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({ sessionService });
+  const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({
+    sessionService,
+    application: coreStart.application,
+  });
   const { getByTestId, container } = render(<BackgroundSessionIndicator />);
 
   // make sure `backgroundSessionIndicator` isn't appearing after some time (lazy-loading)
@@ -27,10 +32,11 @@ test("shouldn't show indicator in case no active search session", async () => {
 });
 
 test('should show indicator in case there is an active search session', async () => {
-  const session$ = new BehaviorSubject('session_id');
-  sessionService.getSession$.mockImplementation(() => session$);
-  sessionService.getSessionId.mockImplementation(() => session$.getValue());
-  const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({ sessionService });
+  const state$ = new BehaviorSubject(SessionState.Loading);
+  const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({
+    sessionService: { ...sessionService, state$ },
+    application: coreStart.application,
+  });
   const { getByTestId } = render(<BackgroundSessionIndicator />);
 
   await waitFor(() => getByTestId('backgroundSessionIndicator'));

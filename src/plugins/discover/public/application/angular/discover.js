@@ -83,7 +83,7 @@ import {
   MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
+import { SEARCH_SESSION_ID_QUERY_PARAM, DISCOVER_APP_URL_GENERATOR } from '../../url_generator';
 import { removeQueryParam, getQueryParams } from '../../../../kibana_utils/public';
 
 const fetchStatuses = {
@@ -216,6 +216,13 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   // used for restoring background session
   let isInitialSearch = true;
 
+  // search session requested a data refresh
+  subscriptions.add(
+    data.search.session.onRefresh$.subscribe(() => {
+      refetch$.next();
+    })
+  );
+
   const {
     appStateContainer,
     startSync: startStateSync,
@@ -289,6 +296,31 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (!search && !hash && pathname === '/') {
       $route.reload();
     }
+  });
+
+  data.search.session.setSearchSessionRestorationInfoProvider({
+    getName: async () => 'Discover',
+    getUrlGeneratorData: async () => {
+      const appState = appStateContainer.getState();
+      const state = {
+        filters: filterManager.getFilters(),
+        indexPatternId: appState.index,
+        query: appState.query,
+        savedSearchId: savedSearch.id,
+        timeRange: timefilter.getTime(), // TODO: handle relative time range
+        searchSessionId: data.search.session.getSessionId(),
+        columns: appState.columns,
+        sort: appState.sort,
+        savedQuery: appState.savedQuery,
+        interval: appState.interval,
+        useHash: false,
+      };
+      return {
+        urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
+        initialState: state,
+        restoreState: state, // TODO: handle relative time range
+      };
+    },
   });
 
   $scope.setIndexPattern = async (id) => {

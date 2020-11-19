@@ -40,9 +40,15 @@ export {
   SearchSourceDependencies,
   SearchSourceFields,
   SortDirection,
-  ISessionService,
 } from '../../common/search';
-
+export {
+  SessionService,
+  ISessionService,
+  SearchSessionRestorationInfoProvider,
+  SessionState,
+  SessionsClient,
+  ISessionsClient,
+} from './session';
 export { getEsPreference } from './es_search';
 
 export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';

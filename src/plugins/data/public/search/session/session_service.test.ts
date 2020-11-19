@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { SessionService } from './session_service';
-import { ISessionService } from '../../common';
-import { coreMock } from '../../../../core/public/mocks';
+import { SessionService, ISessionService } from './session_service';
+import { coreMock } from '../../../../../core/public/mocks';
 import { take, toArray } from 'rxjs/operators';
+import { getSessionsClientMock } from './mocks';
 
 describe('Session service', () => {
   let sessionService: ISessionService;
@@ -29,7 +29,8 @@ describe('Session service', () => {
     const initializerContext = coreMock.createPluginInitializerContext();
     sessionService = new SessionService(
       initializerContext,
-      coreMock.createSetup().getStartServices
+      coreMock.createSetup().getStartServices,
+      getSessionsClientMock()
     );
   });
 

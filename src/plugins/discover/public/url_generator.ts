@@ -52,7 +52,7 @@ export interface DiscoverUrlGeneratorState {
   refreshInterval?: RefreshInterval;
 
   /**
-   * Optionally apply filers.
+   * Optionally apply filters.
    */
   filters?: Filter[];
 
@@ -72,6 +72,24 @@ export interface DiscoverUrlGeneratorState {
    * Background search session id
    */
   searchSessionId?: string;
+
+  /**
+   * Columns displayed in the table
+   */
+  columns?: string[];
+
+  /**
+   * Used interval of the histogram
+   */
+  interval?: string;
+  /**
+   * Array of the used sorting [[field,direction],...]
+   */
+  sort?: string[][];
+  /**
+   * id of the used saved query
+   */
+  savedQuery?: string;
 }
 
 interface Params {
@@ -88,20 +106,28 @@ export class DiscoverUrlGenerator
   public readonly id = DISCOVER_APP_URL_GENERATOR;
 
   public readonly createUrl = async ({
+    useHash = this.params.useHash,
     filters,
     indexPatternId,
     query,
     refreshInterval,
     savedSearchId,
     timeRange,
-    useHash = this.params.useHash,
     searchSessionId,
+    columns,
+    savedQuery,
+    sort,
+    interval,
   }: DiscoverUrlGeneratorState): Promise<string> => {
     const savedSearchPath = savedSearchId ? encodeURIComponent(savedSearchId) : '';
     const appState: {
       query?: Query;
       filters?: Filter[];
       index?: string;
+      columns?: string[];
+      interval?: string;
+      sort?: string[][];
+      savedQuery?: string;
     } = {};
     const queryState: QueryState = {};
 
@@ -109,6 +135,10 @@ export class DiscoverUrlGenerator
     if (filters && filters.length)
       appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
     if (indexPatternId) appState.index = indexPatternId;
+    if (columns) appState.columns = columns;
+    if (savedQuery) appState.savedQuery = savedQuery;
+    if (sort) appState.sort = sort;
+    if (interval) appState.interval = interval;
 
     if (timeRange) queryState.time = timeRange;
     if (filters && filters.length)
