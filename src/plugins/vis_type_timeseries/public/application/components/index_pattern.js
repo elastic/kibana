@@ -236,7 +236,7 @@ export const IndexPattern = ({
             >
               <EuiRange
                 id={htmlIdGenerator()()}
-                value={model[maxBarsName]}
+                value={model[maxBarsName] || ''}
                 onChange={handleNumberChange(maxBarsName)}
                 showInput="inputWithPopover"
                 showLabels={true}

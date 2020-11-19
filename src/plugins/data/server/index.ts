@@ -223,6 +223,7 @@ export {
   TabbedAggColumn,
   TabbedAggRow,
   TabbedTable,
+  calcAutoIntervalLessThan,
 } from '../common';
 
 export {
