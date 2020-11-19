@@ -9,6 +9,10 @@ import { i18n } from '@kbn/i18n';
 // TODO: It's very likely that we'll move these i18n constants to their respective component
 // folders once those are migrated over. This is a temporary way of DRYing them out for now.
 
+export const OVERVIEW_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.overview.title',
+  { defaultMessage: 'Overview' }
+);
 export const ANALYTICS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.title',
   { defaultMessage: 'Analytics' }
