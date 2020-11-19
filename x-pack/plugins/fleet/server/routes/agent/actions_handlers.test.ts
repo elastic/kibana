@@ -53,7 +53,6 @@ describe('test actions handlers', () => {
         action: {
           type: 'POLICY_CHANGE',
           data: 'data',
-          sent_at: '2020-03-14T19:45:02.620Z',
         },
       },
       params: {
