@@ -114,7 +114,8 @@ const expectedEditedtags = editedRule.tags.join('');
 const expectedEditedIndexPatterns =
   editedRule.index && editedRule.index.length ? editedRule.index : indexPatterns;
 
-describe('Custom detection rules creation', () => {
+// SKIP: https://github.com/elastic/kibana/issues/83769
+describe.skip('Custom detection rules creation', () => {
   before(() => {
     esArchiverLoad('timeline');
   });

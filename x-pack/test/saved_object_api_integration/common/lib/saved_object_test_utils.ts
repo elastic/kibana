@@ -332,7 +332,7 @@ export const getTestScenarios = <T>(modifiers?: T[]) => {
     },
   ];
   if (modifiers) {
-    const addModifier = <T>(list: T[]) =>
+    const addModifier = <U>(list: U[]) =>
       list.map((x) => modifiers.map((modifier) => ({ ...x, modifier }))).flat();
     spaces = addModifier(spaces);
     security = addModifier(security);
