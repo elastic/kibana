@@ -159,6 +159,9 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.slack',
   '.pagerduty',
   '.webhook',
+  '.servicenow',
+  '.jira',
+  '.resilient',
 ];
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
