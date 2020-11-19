@@ -7,3 +7,5 @@
 export { SearchBoxView } from './search_box_view';
 export { SortingView } from './sorting_view';
 export { ResultView } from './result_view';
+export { ResultsPerPageView } from './results_per_page_view';
+export { PagingView } from './paging_view';

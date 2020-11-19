@@ -41,4 +41,10 @@ describe('SearchExperienceContent', () => {
     const resultView: any = wrapper.find(Results).prop('resultView');
     expect(resultView(props)).toEqual(<ResultView engineName="engine1" {...props} />);
   });
+
+  it('renders pagination', () => {
+    const wrapper = shallow(<SearchExperienceContent />);
+    const pagination = wrapper.find('Pagination').at(0).dive();
+    expect(pagination.find(EuiFlexGroup).length).toBe(1);
+  });
 });
