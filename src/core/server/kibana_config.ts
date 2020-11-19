@@ -18,8 +18,21 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ConfigDeprecationProvider } from '@kbn/config';
 
 export type KibanaConfigType = TypeOf<typeof config.schema>;
+
+const deprecations: ConfigDeprecationProvider = () => [
+  (settings, fromPath, log) => {
+    const kibana = settings[fromPath];
+    if (kibana.index) {
+      log(
+        `Multitenancy by changing 'kibana.index' is no longer supported. See https://www.elastic.co/guide/en/kibana/master/breaking-changes-8.0.html#_multitenancy_by_changing_kibana_index_is_no_longer_supported for more details`
+      );
+    }
+    return settings;
+  },
+];
 
 export const config = {
   path: 'kibana',
@@ -29,4 +42,5 @@ export const config = {
     autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
     autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
   }),
+  deprecations,
 };
