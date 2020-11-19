@@ -133,6 +133,7 @@ export interface TimeSeriesExplorerAppState {
       from?: string;
       to?: string;
     };
+    functionDescription?: string;
   };
   query?: any;
 }
@@ -146,6 +147,7 @@ export interface TimeSeriesExplorerPageState
   entities?: Record<string, string>;
   forecastId?: string;
   globalState?: MlCommonGlobalState;
+  functionDescription?: string;
 }
 
 export type TimeSeriesExplorerUrlState = MLPageState<

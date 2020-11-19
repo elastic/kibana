@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
 
@@ -39,6 +39,8 @@ import { basicResolvers } from '../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
+import { AnnotationUpdatesService } from '../../services/annotations_service';
+import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
 import { TimeSeriesExplorerAppState } from '../../../../common/types/ml_url_generator';
 
@@ -66,13 +68,16 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
   });
+  const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
 
   return (
     <PageLoader context={context}>
-      <TimeSeriesExplorerUrlStateManager
-        config={deps.config}
-        jobsWithTimeRange={results.jobsWithTimeRange.jobs}
-      />
+      <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
+        <TimeSeriesExplorerUrlStateManager
+          config={deps.config}
+          jobsWithTimeRange={results.jobsWithTimeRange.jobs}
+        />
+      </MlAnnotationUpdatesContext.Provider>
     </PageLoader>
   );
 };
@@ -163,6 +168,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const selectedForecastId = isJobChange
     ? undefined
     : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.forecastId;
+  const selectedFunctionDescription = isJobChange
+    ? undefined
+    : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.functionDescription;
   const zoom: AppStateZoom | undefined = isJobChange
     ? undefined
     : timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.zoom;
@@ -190,14 +198,19 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           delete mlTimeSeriesExplorer.entities;
           delete mlTimeSeriesExplorer.forecastId;
           delete mlTimeSeriesExplorer.zoom;
+          delete mlTimeSeriesExplorer.functionDescription;
           break;
 
         case APP_STATE_ACTION.SET_DETECTOR_INDEX:
           mlTimeSeriesExplorer.detectorIndex = payload;
+          delete mlTimeSeriesExplorer.functionDescription;
+
           break;
 
         case APP_STATE_ACTION.SET_ENTITIES:
           mlTimeSeriesExplorer.entities = payload;
+          delete mlTimeSeriesExplorer.functionDescription;
+
           break;
 
         case APP_STATE_ACTION.SET_FORECAST_ID:
@@ -211,6 +224,10 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
         case APP_STATE_ACTION.UNSET_ZOOM:
           delete mlTimeSeriesExplorer.zoom;
+          break;
+
+        case APP_STATE_ACTION.SET_FUNCTION_DESCRIPTION:
+          mlTimeSeriesExplorer.functionDescription = payload;
           break;
       }
 
@@ -324,6 +341,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         timefilter,
         zoom: zoomProp,
         invalidTimeRangeError,
+        functionDescription: selectedFunctionDescription,
       }}
     />
   );
