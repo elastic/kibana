@@ -8148,7 +8148,6 @@
     "xpack.idxMgmt.dataStreamList.loadingDataStreamsErrorMessage": "データストリームの読み込み中にエラーが発生",
     "xpack.idxMgmt.dataStreamList.reloadDataStreamsButtonLabel": "再読み込み",
     "xpack.idxMgmt.dataStreamList.table.actionColumnTitle": "アクション",
-    "xpack.idxMgmt.dataStreamList.table.actionDeleteDecription": "このデータストリームを削除",
     "xpack.idxMgmt.dataStreamList.table.actionDeleteText": "削除",
     "xpack.idxMgmt.dataStreamList.table.deleteDataStreamsButtonLabel": "{count, plural, one {個のデータストリーム} other {個のデータストリーム}}を削除",
     "xpack.idxMgmt.dataStreamList.table.healthColumnTitle": "ヘルス",
