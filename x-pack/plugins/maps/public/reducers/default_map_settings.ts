@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { INITIAL_LOCATION, MAX_ZOOM, MIN_ZOOM } from '../../common/constants';
 import { MapSettings } from './map';
-import { getIsDarkMode } from '../kibana_services';
 
 export function getDefaultMapSettings(): MapSettings {
   return {
     autoFitToDataBounds: false,
-    backgroundColor: getIsDarkMode()
-      ? euiDarkVars.euiColorEmptyShade
-      : euiLightVars.euiColorEmptyShade,
+    backgroundColor: euiThemeVars.euiColorEmptyShade,
     initialLocation: INITIAL_LOCATION.LAST_SAVED_LOCATION,
     fixedLocation: { lat: 0, lon: 0, zoom: 2 },
     browserLocation: { zoom: 2 },

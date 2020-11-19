@@ -27,9 +27,6 @@ jest.mock('../kibana_services', () => ({
   getMapsCapabilities() {
     return { save: true };
   },
-  getIsDarkMode() {
-    return false;
-  },
 }));
 
 import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';
