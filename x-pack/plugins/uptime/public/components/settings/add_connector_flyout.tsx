@@ -23,7 +23,9 @@ interface KibanaDeps {
 export const AddConnectorFlyout = ({ focusInput }: Props) => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const {
-    services: { triggersActionsUi },
+    services: {
+      triggersActionsUi: { getAddConnectorFlyout },
+    },
   } = useKibana<KibanaDeps>();
 
   const dispatch = useDispatch();
@@ -33,7 +35,7 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
     focusInput();
   }, [addFlyoutVisible, dispatch, focusInput]);
 
-  const ConnectorAddFlyout = triggersActionsUi.getAddConnectorFlyout({
+  const ConnectorAddFlyout = getAddConnectorFlyout({
     consumer: 'uptime',
     onClose: () => setAddFlyoutVisibility(false),
   });
