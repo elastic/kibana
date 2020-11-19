@@ -25,6 +25,8 @@ import { serializedFieldFormatSchema } from './util/schemas';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),
+  type: schema.maybe(schema.string()),
+  typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   timeFieldName: schema.maybe(schema.string()),
   intervalName: schema.maybe(schema.string()),
   sourceFilters: schema.maybe(
@@ -65,7 +67,15 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           const indexPattern = await ip.get(id);
 
           const {
-            index_pattern: { title, timeFieldName, intervalName, sourceFilters, fieldFormats },
+            index_pattern: {
+              title,
+              timeFieldName,
+              intervalName,
+              sourceFilters,
+              fieldFormats,
+              type,
+              typeMeta,
+            },
           } = req.body;
 
           let changeCount = 0;
@@ -93,6 +103,16 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           if (fieldFormats !== undefined) {
             changeCount++;
             indexPattern.fieldFormatMap = fieldFormats;
+          }
+
+          if (type !== undefined) {
+            changeCount++;
+            indexPattern.type = type;
+          }
+
+          if (typeMeta !== undefined) {
+            changeCount++;
+            indexPattern.typeMeta = typeMeta;
           }
 
           if (changeCount < 1) {
