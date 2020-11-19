@@ -8,5 +8,5 @@ import { useCore } from './';
 
 export function useCapabilities() {
   const core = useCore();
-  return core.application.capabilities.ingestManager;
+  return core.application.capabilities.fleet;
 }

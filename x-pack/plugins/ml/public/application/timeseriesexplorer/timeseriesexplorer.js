@@ -8,7 +8,7 @@
  * React component for rendering Single Metric Viewer.
  */
 
-import { each, find, get, has, isEqual } from 'lodash';
+import { find, get, has, isEqual } from 'lodash';
 import moment from 'moment-timezone';
 import { Subject, Subscription, forkJoin } from 'rxjs';
 import { map, debounceTime, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -40,7 +40,6 @@ import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
   isSourceDataChartableForDetector,
-  isTimeSeriesViewDetector,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 
@@ -84,7 +83,8 @@ import { SeriesControls } from './components/series_controls';
 import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/timeseries_chart_with_tooltip';
 import { PlotByFunctionControls } from './components/plot_function_controls';
 import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
-import { getFunctionDescription } from './get_function_description';
+import { isMetricDetector } from './get_function_description';
+import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -92,20 +92,6 @@ import { getFunctionDescription } from './get_function_description';
 const allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionValuesLabel', {
   defaultMessage: 'all',
 });
-
-export function getViewableDetectors(selectedJob) {
-  const jobDetectors = selectedJob.analysis_config.detectors;
-  const viewableDetectors = [];
-  each(jobDetectors, (dtr, index) => {
-    if (isTimeSeriesViewDetector(selectedJob, index)) {
-      viewableDetectors.push({
-        index,
-        detector_description: dtr.detector_description,
-      });
-    }
-  });
-  return viewableDetectors;
-}
 
 function getTimeseriesexplorerDefaultState() {
   return {
@@ -143,8 +129,6 @@ function getTimeseriesexplorerDefaultState() {
     zoomTo: undefined,
     zoomFromFocusLoaded: undefined,
     zoomToFocusLoaded: undefined,
-    // Sets function to plot by if original function is metric
-    functionDescription: undefined,
   };
 }
 
@@ -223,9 +207,7 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   setFunctionDescription = (selectedFuction) => {
-    this.setState({
-      functionDescription: selectedFuction,
-    });
+    this.props.appStateHandler(APP_STATE_ACTION.SET_FUNCTION_DESCRIPTION, selectedFuction);
   };
 
   previousChartProps = {};
@@ -280,9 +262,17 @@ export class TimeSeriesExplorer extends React.Component {
    * Gets focus data for the current component state/
    */
   getFocusData(selection) {
-    const { selectedJobId, selectedForecastId, selectedDetectorIndex } = this.props;
-    const { modelPlotEnabled, functionDescription } = this.state;
+    const {
+      selectedJobId,
+      selectedForecastId,
+      selectedDetectorIndex,
+      functionDescription,
+    } = this.props;
+    const { modelPlotEnabled } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
+    if (isMetricDetector(selectedJob, selectedDetectorIndex) && functionDescription === undefined) {
+      return;
+    }
     const entityControls = this.getControlsForDetector();
 
     // Calculate the aggregation interval for the focus chart.
@@ -333,8 +323,8 @@ export class TimeSeriesExplorer extends React.Component {
       selectedJobId,
       tableInterval,
       tableSeverity,
+      functionDescription,
     } = this.props;
-    const { functionDescription } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
 
@@ -394,24 +384,6 @@ export class TimeSeriesExplorer extends React.Component {
       );
   };
 
-  getFunctionDescription = async () => {
-    const { selectedDetectorIndex, selectedEntities, selectedJobId } = this.props;
-    const selectedJob = mlJobService.getJob(selectedJobId);
-
-    const functionDescriptionToPlot = await getFunctionDescription(
-      {
-        selectedDetectorIndex,
-        selectedEntities,
-        selectedJobId,
-        selectedJob,
-      },
-      this.props.toastNotificationService
-    );
-    if (!this.unmounted) {
-      this.setFunctionDescription(functionDescriptionToPlot);
-    }
-  };
-
   setForecastId = (forecastId) => {
     this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
   };
@@ -424,14 +396,22 @@ export class TimeSeriesExplorer extends React.Component {
       selectedForecastId,
       selectedJobId,
       zoom,
+      functionDescription,
     } = this.props;
 
-    const { loadCounter: currentLoadCounter, functionDescription } = this.state;
+    const { loadCounter: currentLoadCounter } = this.state;
 
     const currentSelectedJob = mlJobService.getJob(selectedJobId);
     if (currentSelectedJob === undefined) {
       return;
     }
+    if (
+      isMetricDetector(currentSelectedJob, selectedDetectorIndex) &&
+      functionDescription === undefined
+    ) {
+      return;
+    }
+
     const functionToPlotByIfMetric = aggregationTypeTransform.toES(functionDescription);
 
     this.contextChartSelectedInitCallDone = false;
@@ -845,21 +825,12 @@ export class TimeSeriesExplorer extends React.Component {
     this.componentDidUpdate();
   }
 
-  componentDidUpdate(previousProps, previousState) {
+  componentDidUpdate(previousProps) {
     if (previousProps === undefined || previousProps.selectedJobId !== this.props.selectedJobId) {
       this.contextChartSelectedInitCallDone = false;
       this.setState({ fullRefresh: false, loading: true }, () => {
         this.loadForJobId(this.props.selectedJobId);
       });
-    }
-
-    if (
-      previousProps === undefined ||
-      previousProps.selectedJobId !== this.props.selectedJobId ||
-      previousProps.selectedDetectorIndex !== this.props.selectedDetectorIndex ||
-      !isEqual(previousProps.selectedEntities, this.props.selectedEntities)
-    ) {
-      this.getFunctionDescription();
     }
 
     if (
@@ -885,7 +856,7 @@ export class TimeSeriesExplorer extends React.Component {
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
       previousProps.selectedForecastId !== this.props.selectedForecastId ||
       previousProps.selectedJobId !== this.props.selectedJobId ||
-      previousState.functionDescription !== this.state.functionDescription
+      previousProps.functionDescription !== this.props.functionDescription
     ) {
       const fullRefresh =
         previousProps === undefined ||
@@ -894,7 +865,7 @@ export class TimeSeriesExplorer extends React.Component {
         !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
         previousProps.selectedForecastId !== this.props.selectedForecastId ||
         previousProps.selectedJobId !== this.props.selectedJobId ||
-        previousState.functionDescription !== this.state.functionDescription;
+        previousProps.functionDescription !== this.props.functionDescription;
       this.loadSingleMetricData(fullRefresh);
     }
 
@@ -965,7 +936,6 @@ export class TimeSeriesExplorer extends React.Component {
       zoomTo,
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
-      functionDescription,
     } = this.state;
     const chartProps = {
       modelPlotEnabled,
@@ -1014,7 +984,6 @@ export class TimeSeriesExplorer extends React.Component {
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
 
-    console.log('Timeseriesexplorer rerendered');
     return (
       <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
         {fieldNamesWithEmptyValues.length > 0 && (
@@ -1045,15 +1014,13 @@ export class TimeSeriesExplorer extends React.Component {
           selectedEntities={this.props.selectedEntities}
           bounds={bounds}
         >
-          {functionDescription && (
-            <PlotByFunctionControls
-              selectedJobId={selectedJobId}
-              selectedDetectorIndex={selectedDetectorIndex}
-              selectedEntities={this.props.selectedEntities}
-              functionDescription={functionDescription}
-              setFunctionDescription={this.setFunctionDescription}
-            />
-          )}
+          <PlotByFunctionControls
+            selectedJobId={selectedJobId}
+            selectedDetectorIndex={selectedDetectorIndex}
+            selectedEntities={this.props.selectedEntities}
+            functionDescription={this.props.functionDescription}
+            setFunctionDescription={this.setFunctionDescription}
+          />
 
           {arePartitioningFieldsProvided && (
             <EuiFlexItem style={{ textAlign: 'right' }}>
