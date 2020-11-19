@@ -142,11 +142,55 @@ function TimelionVisComponent({
     return Position.Left;
   }, [chart]);
 
+<<<<<<< HEAD
   const brushEndListener = useCallback<BrushEndListener>(
     ({ x }) => {
       if (!x) {
         return;
       }
+=======
+  const plotHover = useCallback(
+    (pos: Position) => {
+      (plot as CrosshairPlot).setCrosshair(pos);
+      debouncedSetLegendNumbers(pos);
+    },
+    [plot, debouncedSetLegendNumbers]
+  );
+
+  const plotHoverHandler = useCallback(
+    (event: JQuery.TriggeredEvent, pos: Position) => {
+      if (!plot) {
+        return;
+      }
+      plotHover(pos);
+      eventBus.trigger(ACTIVE_CURSOR, [event, pos]);
+    },
+    [plot, plotHover]
+  );
+
+  useEffect(() => {
+    const updateCursor = (_: any, event: JQuery.TriggeredEvent, pos: Position) => {
+      if (!plot) {
+        return;
+      }
+      plotHover(pos);
+    };
+
+    eventBus.on(ACTIVE_CURSOR, updateCursor);
+
+    return () => {
+      eventBus.off(ACTIVE_CURSOR, updateCursor);
+    };
+  }, [plot, plotHover]);
+
+  const mouseLeaveHandler = useCallback(() => {
+    if (!plot) {
+      return;
+    }
+    (plot as CrosshairPlot).clearCrosshair();
+    clearLegendNumbers();
+  }, [plot, clearLegendNumbers]);
+>>>>>>> upstream/master
 
       fireEvent({
         name: 'applyFilter',

@@ -19,8 +19,8 @@ import type {
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { createGenericMlUrl } from './common';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
-import type { AnomalyDetectionJobsListState } from '../application/jobs/jobs_list/jobs';
 import { getGroupQueryText, getJobQueryText } from '../../common/util/string_utils';
+import { AppPageState, ListingPageUrlState } from '../../common/types/common';
 /**
  * Creates URL to the Anomaly Detection Job management page
  */
@@ -41,11 +41,15 @@ export function createAnomalyDetectionJobManagementUrl(
     if (groupIds) {
       queryTextArr.push(getGroupQueryText(groupIds));
     }
-    const queryState: Partial<AnomalyDetectionJobsListState> = {
+    const jobsListState: Partial<ListingPageUrlState> = {
       ...(queryTextArr.length > 0 ? { queryText: queryTextArr.join(' ') } : {}),
     };
 
-    url = setStateToKbnUrl<Partial<AnomalyDetectionJobsListState>>(
+    const queryState: AppPageState<ListingPageUrlState> = {
+      [ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE]: jobsListState,
+    };
+
+    url = setStateToKbnUrl<AppPageState<ListingPageUrlState>>(
       '_a',
       queryState,
       { useHash: false, storeInHashQuery: false },
@@ -159,6 +163,7 @@ export function createSingleMetricViewerUrl(
     forecastId,
     entities,
     globalState,
+    functionDescription,
   } = params;
 
   let queryState: Partial<TimeSeriesExplorerGlobalState> = {};
@@ -185,6 +190,10 @@ export function createSingleMetricViewerUrl(
   if (entities !== undefined) {
     mlTimeSeriesExplorer.entities = entities;
   }
+  if (functionDescription !== undefined) {
+    mlTimeSeriesExplorer.functionDescription = functionDescription;
+  }
+
   appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
   if (zoom) appState.zoom = zoom;

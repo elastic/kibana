@@ -35,11 +35,18 @@ export function registerSearchRoute(router: IRouter): void {
 
         query: schema.object({}, { unknowns: 'allow' }),
 
-        body: schema.object({}, { unknowns: 'allow' }),
+        body: schema.object(
+          {
+            sessionId: schema.maybe(schema.string()),
+            isStored: schema.maybe(schema.boolean()),
+            isRestore: schema.maybe(schema.boolean()),
+          },
+          { unknowns: 'allow' }
+        ),
       },
     },
     async (context, request, res) => {
-      const searchRequest = request.body;
+      const { sessionId, isStored, isRestore, ...searchRequest } = request.body;
       const { strategy, id } = request.params;
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
@@ -50,6 +57,9 @@ export function registerSearchRoute(router: IRouter): void {
             {
               abortSignal,
               strategy,
+              sessionId,
+              isStored,
+              isRestore,
             }
           )
           .pipe(first())
