@@ -43,7 +43,7 @@ describe('event_log plugin', () => {
     await plugin.setup(coreSetup, { spaces });
     await plugin.start(coreStart);
     await plugin.stop();
-    expect(mockLogger.info).toBeCalledWith('shutdown: waiting to finish');
-    expect(mockLogger.info).toBeCalledWith('shutdown: finished');
+    expect(mockLogger.debug).toBeCalledWith('shutdown: waiting to finish');
+    expect(mockLogger.debug).toBeCalledWith('shutdown: finished');
   });
 });
