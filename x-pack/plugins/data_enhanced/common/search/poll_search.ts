@@ -10,12 +10,8 @@ import type {
   IEsSearchResponse,
   IKibanaSearchResponse,
 } from '../../../../../src/plugins/data/common';
-import {
-  AbortError,
-  isErrorResponse,
-  isPartialResponse,
-  toPromise,
-} from '../../../../../src/plugins/data/common';
+import { isErrorResponse, isPartialResponse } from '../../../../../src/plugins/data/common';
+import { AbortError, abortSignalToPromise } from '../../../../../src/plugins/kibana_utils/common';
 import type { IAsyncSearchOptions } from './types';
 
 export function pollSearch<Response extends IKibanaSearchResponse = IEsSearchResponse>(
@@ -23,7 +19,7 @@ export function pollSearch<Response extends IKibanaSearchResponse = IEsSearchRes
   { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
 ) {
   const aborted = options?.abortSignal
-    ? toPromise(options?.abortSignal)
+    ? abortSignalToPromise(options?.abortSignal)
     : { promise: NEVER, cleanup: () => {} };
 
   return from(search()).pipe(

@@ -4,18 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ApiResponse } from '@elastic/elasticsearch';
 import { getTotalLoaded } from '../../../../../src/plugins/data/server';
-import { AsyncSearchResponse } from './types';
+import { AsyncSearchResponse, EqlSearchResponse } from './types';
 
 /**
- * Get the Kibana representation of this response (see `IKibanaSearchResponse`).
+ * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).
  */
-export function toKibanaSearchResponse(response: AsyncSearchResponse) {
+export function toAsyncKibanaSearchResponse(response: AsyncSearchResponse) {
   return {
     id: response.id,
     rawResponse: response.response,
     isPartial: response.is_partial,
     isRunning: response.is_running,
     ...getTotalLoaded(response.response),
+  };
+}
+
+/**
+ * Get the Kibana representation of an EQL search response (see `IKibanaSearchResponse`).
+ * (EQL does not provide _shard info, so total/loaded cannot be calculated.)
+ */
+export function toEqlKibanaSearchResponse(response: ApiResponse<EqlSearchResponse>) {
+  return {
+    id: response.body.id,
+    rawResponse: response,
+    isPartial: response.body.is_partial,
+    isRunning: response.body.is_running,
   };
 }

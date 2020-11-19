@@ -49,7 +49,7 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
 
     deps.data.search.registerSearchStrategy(
       EQL_SEARCH_STRATEGY,
-      eqlSearchStrategyProvider(this.logger)
+      eqlSearchStrategyProvider(this.logger, usage)
     );
 
     deps.data.__enhance({

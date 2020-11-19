@@ -12,3 +12,9 @@ export interface AsyncSearchResponse<T = unknown> {
   is_partial: boolean;
   is_running: boolean;
 }
+
+export interface EqlSearchResponse<T = unknown> extends SearchResponse<T> {
+  id?: string;
+  is_partial: boolean;
+  is_running: boolean;
+}

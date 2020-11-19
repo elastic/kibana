@@ -9,7 +9,7 @@ import {
   AsyncSearchSubmit,
   Search,
 } from '@elastic/elasticsearch/api/requestParams';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
+import { ISearchOptions, UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { getDefaultSearchParams } from '../../../../../src/plugins/data/server';
 
 /**
@@ -26,7 +26,8 @@ export async function getIgnoreThrottled(
  @internal
  */
 export async function getDefaultAsyncSubmitParams(
-  uiSettingsClient: IUiSettingsClient
+  uiSettingsClient: IUiSettingsClient,
+  options: ISearchOptions
 ): Pick<
   AsyncSearchSubmit,
   | 'batched_reduce_size'
@@ -36,9 +37,11 @@ export async function getDefaultAsyncSubmitParams(
   | 'max_concurrent_shard_requests'
   | 'ignore_unavailable'
   | 'track_total_hits'
+  | 'keep_on_completion'
 > {
   return {
     batched_reduce_size: 64,
+    keep_on_completion: !!options.sessionId, // Always return an ID, even if the request completes quickly
     ...getDefaultAsyncGetParams(),
     ...(await getIgnoreThrottled(uiSettingsClient)),
     ...(await getDefaultSearchParams(uiSettingsClient)),

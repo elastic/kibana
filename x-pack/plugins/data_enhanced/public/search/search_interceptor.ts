@@ -60,17 +60,15 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       timeout: this.searchTimeout,
     });
     const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
-    const search = () => this.runSearch({ id, ...request }, combinedSignal, strategy);
+    const searchOptions = { ...options, strategy, abortSignal: combinedSignal };
+    const search = () => this.runSearch({ id, ...request }, searchOptions);
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
     return pollSearch(search, { ...options, abortSignal: combinedSignal }).pipe(
       tap((response) => (id = response.id)),
       catchError((e: AbortError) => {
-        if (id) {
-          this.deps.http.delete(`/internal/search/${strategy}/${id}`);
-        }
-
+        if (id) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
         return throwError(this.handleSearchError(e, timeoutSignal, options));
       }),
       finalize(() => {

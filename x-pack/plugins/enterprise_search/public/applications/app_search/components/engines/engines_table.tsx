@@ -11,33 +11,33 @@ import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/reac
 import { i18n } from '@kbn/i18n';
 
 import { TelemetryLogic } from '../../../shared/telemetry';
-import { EuiLink } from '../../../shared/react_router_helpers';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 
-interface IEnginesTableData {
+interface EnginesTableData {
   name: string;
   created_at: string;
   document_count: number;
   field_count: number;
 }
-interface IEnginesTablePagination {
+interface EnginesTablePagination {
   totalEngines: number;
   pageIndex: number;
   onPaginate(pageIndex: number): void;
 }
-interface IEnginesTableProps {
-  data: IEnginesTableData[];
-  pagination: IEnginesTablePagination;
+interface EnginesTableProps {
+  data: EnginesTableData[];
+  pagination: EnginesTablePagination;
 }
-interface IOnChange {
+interface OnChange {
   page: {
     index: number;
   };
 }
 
-export const EnginesTable: React.FC<IEnginesTableProps> = ({
+export const EnginesTable: React.FC<EnginesTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex, onPaginate },
 }) => {
@@ -52,16 +52,16 @@ export const EnginesTable: React.FC<IEnginesTableProps> = ({
       }),
   });
 
-  const columns: Array<EuiBasicTableColumn<IEnginesTableData>> = [
+  const columns: Array<EuiBasicTableColumn<EnginesTableData>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
         defaultMessage: 'Name',
       }),
       render: (name: string) => (
-        <EuiLink data-test-subj="engineNameLink" {...engineLinkProps(name)}>
+        <EuiLinkTo data-test-subj="engineNameLink" {...engineLinkProps(name)}>
           {name}
-        </EuiLink>
+        </EuiLinkTo>
       ),
       width: '30%',
       truncateText: true,
@@ -122,12 +122,12 @@ export const EnginesTable: React.FC<IEnginesTableProps> = ({
       ),
       dataType: 'string',
       render: (name: string) => (
-        <EuiLink {...engineLinkProps(name)}>
+        <EuiLinkTo {...engineLinkProps(name)}>
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage"
             defaultMessage="Manage"
           />
-        </EuiLink>
+        </EuiLinkTo>
       ),
       align: 'right',
       width: '100px',
@@ -144,7 +144,7 @@ export const EnginesTable: React.FC<IEnginesTableProps> = ({
         totalItemCount: totalEngines,
         hidePerPageOptions: true,
       }}
-      onChange={({ page }: IOnChange) => {
+      onChange={({ page }: OnChange) => {
         const { index } = page;
         onPaginate(index + 1); // Note on paging - App Search's API pages start at 1, EuiBasicTables' pages start at 0
       }}

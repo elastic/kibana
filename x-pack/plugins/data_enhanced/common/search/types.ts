@@ -9,7 +9,6 @@ import { ApiResponse, TransportRequestOptions } from '@elastic/elasticsearch/lib
 
 import {
   ISearchOptions,
-  IEsSearchRequest,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
 } from '../../../../../src/plugins/data/common';

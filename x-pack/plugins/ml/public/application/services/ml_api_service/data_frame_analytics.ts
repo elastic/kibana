@@ -83,6 +83,14 @@ export const dataFrameAnalytics = {
       body,
     });
   },
+  getDataFrameAnalyticsMap(analyticsId?: string, treatAsRoot?: boolean) {
+    const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
+    return http({
+      path: `${basePath()}/data_frame/analytics/map${analyticsIdString}`,
+      method: 'GET',
+      query: { treatAsRoot },
+    });
+  },
   evaluateDataFrameAnalytics(evaluateConfig: any) {
     const body = JSON.stringify(evaluateConfig);
     return http<any>({

@@ -32,7 +32,6 @@ import {
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
-export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 declare module 'src/core/server' {
@@ -178,6 +177,18 @@ export interface AlertsConfigType {
   healthCheck: {
     interval: string;
   };
+}
+
+export interface AlertsConfigType {
+  invalidateApiKeysTask: {
+    interval: string;
+    removalDelay: string;
+  };
+}
+
+export interface InvalidatePendingApiKey {
+  apiKeyId: string;
+  createdAt: string;
 }
 
 export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;

@@ -31,13 +31,13 @@ import {
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
-import { toKibanaSearchResponse } from './response_utils';
+import { toAsyncKibanaSearchResponse } from './response_utils';
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
-): ISearchStrategy<IEnhancedEsSearchRequest> => {
+): ISearchStrategy<IEsSearchRequest> => {
   function asyncSearch(
     { id, ...request }: IEsSearchRequest,
     options: IAsyncSearchOptions,
@@ -48,10 +48,10 @@ export const enhancedEsSearchStrategyProvider = (
     const search = async () => {
       const params = id
         ? { ...getDefaultAsyncGetParams(), id }
-        : { ...(await getDefaultAsyncSubmitParams(uiSettingsClient)), ...request.params };
+        : { ...(await getDefaultAsyncSubmitParams(uiSettingsClient, options)), ...request.params };
       const promise = id ? client.get(params) : client.submit(params);
       const { body } = await shimAbortSignal(promise, options.abortSignal);
-      return toKibanaSearchResponse(body);
+      return toAsyncKibanaSearchResponse(body);
     };
 
     return pollSearch(search, options).pipe(

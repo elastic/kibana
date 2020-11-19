@@ -16,6 +16,7 @@ import {
   KibanaRequest,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SpacesPluginStart } from '../../spaces/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -45,13 +46,17 @@ import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/t
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
-export interface PluginsSetup {
+interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
 }
 
-export interface IRouteDependencies {
+interface PluginsStart {
+  spaces?: SpacesPluginStart;
+}
+
+export interface RouteDependencies {
   router: IRouter;
   config: ConfigType;
   log: Logger;
@@ -69,7 +74,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public async setup(
-    { capabilities, http, savedObjects, getStartServices }: CoreSetup,
+    { capabilities, http, savedObjects, getStartServices }: CoreSetup<PluginsStart>,
     { usageCollection, security, features }: PluginsSetup
   ) {
     const config = await this.config.pipe(first()).toPromise();
@@ -97,7 +102,9 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register user access to the Enterprise Search plugins
      */
     capabilities.registerSwitcher(async (request: KibanaRequest) => {
-      const dependencies = { config, security, request, log };
+      const [, { spaces }] = await getStartServices();
+
+      const dependencies = { config, security, spaces, request, log };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
       const showEnterpriseSearchOverview = hasAppSearchAccess || hasWorkplaceSearchAccess;
