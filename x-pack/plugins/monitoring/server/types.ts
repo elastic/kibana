@@ -6,7 +6,6 @@
 import { Observable } from 'rxjs';
 import { IRouter, ILegacyClusterClient, Logger } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
 import { PluginStartContract as ActionsPluginsStartContact } from '../../actions/server';
 import {
@@ -35,7 +34,6 @@ export interface MonitoringElasticsearchConfig {
 
 export interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
-  telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
