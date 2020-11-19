@@ -7,7 +7,7 @@
 import { parseQueryParams } from './';
 
 describe('parseQueryParams', () => {
-  it('should call queryString parse method', () => {
+  it('parse query strings', () => {
     expect(parseQueryParams('?foo=bar')).toEqual({ foo: 'bar' });
     expect(parseQueryParams('?foo[]=bar&foo[]=baz')).toEqual({ foo: ['bar', 'baz'] });
   });
