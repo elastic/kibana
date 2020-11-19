@@ -18,20 +18,11 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 
-// @ts-expect-error no types available
 import * as LmdbStore from 'lmdb-store';
 import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/dev-utils';
 
-const LMDB_PKG = JSON.parse(
-  Fs.readFileSync(Path.resolve(REPO_ROOT, 'node_modules/lmdb-store/package.json'), 'utf8')
-);
-const CACHE_DIR = Path.resolve(
-  REPO_ROOT,
-  `data/node_auto_transpilation_cache/lmdb-${LMDB_PKG.version}/${UPSTREAM_BRANCH}`
-);
-
+const CACHE_DIR = Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH);
 const reportError = () => {
   // right now I'm not sure we need to worry about errors, the cache isn't actually
   // necessary, and if the cache is broken it should just rebuild on the next restart
@@ -45,30 +36,11 @@ const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
-interface Lmdb<T> {
-  name: string;
-  get(key: string): T | undefined;
-  put(key: string, value: T, version?: number, ifVersion?: number): Promise<boolean>;
-  remove(key: string, ifVersion?: number): Promise<boolean>;
-  removeSync(key: string): void;
-  openDB<T2>(options: {
-    name: string;
-    encoding: 'msgpack' | 'string' | 'json' | 'binary';
-  }): Lmdb<T2>;
-  getRange(options?: {
-    start?: T;
-    end?: T;
-    reverse?: boolean;
-    limit?: number;
-    versions?: boolean;
-  }): Iterable<{ key: string; value: T }>;
-}
-
 export class Cache {
-  private readonly codes: Lmdb<string>;
-  private readonly atimes: Lmdb<string>;
-  private readonly mtimes: Lmdb<string>;
-  private readonly sourceMaps: Lmdb<any>;
+  private readonly codes: LmdbStore.RootDatabase;
+  private readonly atimes: LmdbStore.Database;
+  private readonly mtimes: LmdbStore.Database;
+  private readonly sourceMaps: LmdbStore.Database;
   private readonly prefix: string;
 
   constructor(config: { prefix: string }) {
@@ -105,7 +77,7 @@ export class Cache {
   }
 
   getMtime(path: string) {
-    return this.safeGet(this.mtimes, this.getKey(path));
+    return this.safeGet<string>(this.mtimes, this.getKey(path));
   }
 
   getCode(path: string) {
@@ -116,11 +88,11 @@ export class Cache {
     // touched in a long time (currently 30 days)
     this.atimes.put(key, GLOBAL_ATIME).catch(reportError);
 
-    return this.safeGet(this.codes, key);
+    return this.safeGet<string>(this.codes, key);
   }
 
   getSourceMap(path: string) {
-    return this.safeGet(this.sourceMaps, this.getKey(path));
+    return this.safeGet<any>(this.sourceMaps, this.getKey(path));
   }
 
   update(path: string, file: { mtime: string; code: string; map: any }) {
@@ -138,13 +110,11 @@ export class Cache {
     return `${this.prefix}${path}`;
   }
 
-  private safeGet<V>(db: Lmdb<V>, key: string) {
+  private safeGet<V>(db: LmdbStore.Database, key: string) {
     try {
-      return db.get(key);
+      return db.get(key) as V | undefined;
     } catch (error) {
-      process.stderr.write(
-        `failed to read node transpilation [${db.name}] cache for [${key}]: ${error.stack}\n`
-      );
+      // get errors indicate that a key value is corrupt in some way, so remove it
       db.removeSync(key);
     }
   }
@@ -154,12 +124,13 @@ export class Cache {
       const ATIME_LIMIT = Date.now() - 30 * DAY;
       const BATCH_SIZE = 1000;
 
-      const validKeys: string[] = [];
-      const invalidKeys: string[] = [];
+      const validKeys: LmdbStore.Key[] = [];
+      const invalidKeys: LmdbStore.Key[] = [];
 
+      // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
       for (const { key, value } of this.atimes.getRange()) {
-        const atime = parseInt(value, 10);
-        if (atime < ATIME_LIMIT) {
+        const atime = parseInt(`${value}`, 10);
+        if (Number.isNaN(atime) || atime < ATIME_LIMIT) {
           invalidKeys.push(key);
         } else {
           validKeys.push(key);
