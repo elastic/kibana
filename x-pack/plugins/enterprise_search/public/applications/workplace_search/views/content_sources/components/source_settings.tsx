@@ -14,6 +14,8 @@ import { Link, useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiConfirmModal,
+  EuiOverlayMask,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +23,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import ConfirmModal from 'shared/components/ConfirmModal';
 import FlashMessages from 'shared/components/FlashMessages';
 import { SOURCES_PATH, getSourcesPath } from '../../../routes';
 
@@ -89,6 +90,23 @@ export const SourceSettings: React.FC = () => {
     removeContentSource(id, onSourceRemoved);
   };
 
+  const confirmModal = (
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        title="Please confirm"
+        onConfirm={handleSourceRemoval}
+        onCancel={hideConfirm}
+        buttonColor="danger"
+        cancelButtonText="Cancel"
+        confirmButtonText="Ok"
+        defaultFocusedButton="confirm"
+      >
+        Your source documents will be deleted from Workplace Search. <br />
+        Are you sure you want to remove {name}?
+      </EuiConfirmModal>
+    </EuiOverlayMask>
+  );
+
   return (
     <>
       <ViewContentHeader title="Source settings" />
@@ -154,12 +172,7 @@ export const SourceSettings: React.FC = () => {
         >
           Remove
         </EuiButton>
-        {confirmModalVisible && (
-          <ConfirmModal onConfirm={handleSourceRemoval} onCancel={hideConfirm} buttonColor="danger">
-            Your source documents will be deleted from Workplace Search. <br />
-            Are you sure you want to remove {name}?
-          </ConfirmModal>
-        )}
+        {confirmModalVisible && confirmModal}
       </ContentSection>
     </>
   );
