@@ -424,7 +424,6 @@ export function deleteColumn({
     };
   }
 
-  // @ts-expect-error this fails statically because there are no references added
   const extraDeletions: string[] = 'references' in column ? column.references : [];
 
   const hypotheticalColumns = { ...layer.columns };
@@ -452,11 +451,9 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
   );
   // If a reference has another reference as input, put it last in sort order
   referenceBased.sort(([idA, a], [idB, b]) => {
-    // @ts-expect-error not statically analyzed
     if ('references' in a && a.references.includes(idB)) {
       return 1;
     }
-    // @ts-expect-error not statically analyzed
     if ('references' in b && b.references.includes(idA)) {
       return -1;
     }
@@ -517,14 +514,12 @@ export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined
     }
 
     if ('references' in column) {
-      // @ts-expect-error references are not statically analyzed yet
       column.references.forEach((referenceId, index) => {
         if (!layer.columns[referenceId]) {
           errors.push(
             i18n.translate('xpack.lens.indexPattern.missingReferenceError', {
               defaultMessage: 'Dimension {dimensionLabel} is incomplete',
               values: {
-                // @ts-expect-error references are not statically analyzed yet
                 dimensionLabel: column.label,
               },
             })
@@ -544,7 +539,6 @@ export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined
               i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
                 defaultMessage: 'Dimension {dimensionLabel} does not have a valid configuration',
                 values: {
-                  // @ts-expect-error references are not statically analyzed yet
                   dimensionLabel: column.label,
                 },
               })
@@ -560,10 +554,7 @@ export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined
 
 export function isReferenced(layer: IndexPatternLayer, columnId: string): boolean {
   const allReferences = Object.values(layer.columns).flatMap((col) =>
-    'references' in col
-      ? // @ts-expect-error not statically analyzed
-        col.references
-      : []
+    'references' in col ? col.references : []
   );
   return allReferences.includes(columnId);
 }
