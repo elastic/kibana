@@ -25,7 +25,6 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { uniq } from 'lodash';
 
 import {
   Chart,
@@ -33,7 +32,6 @@ import {
   LayerValue,
   Partition,
   PartitionConfig,
-  PartitionLayer,
   PartitionLayout,
   PartitionFillLabel,
   RecursivePartial,
@@ -44,21 +42,19 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { keys } from '@elastic/eui';
-import { SeriesLayer } from '../../charts/public';
 
 // import {
 //   getFilterFromChartClickEventFn,
 //   getFilterFromSeriesFn,
 //   LegendToggle,
-//   getBrushFromChartBrushEventFn,
 //   ClickTriggerEvent,
 // } from '../../charts/public';
 import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../expressions/public';
 import { ValueClickContext } from '../../embeddable/public';
 
 import { PieVisParams, BucketColumns, LabelPositions, ValueFormats } from './types';
-import { getThemeService, getColorsService, getFormatService } from './services';
-import { getTooltip } from './components';
+import { getThemeService, getFormatService } from './services';
+import { getColorPicker, getLayers } from './utils';
 // import { colorSchemas } from 'src/plugins/charts/public';
 // import { ChartType } from '../common';
 
@@ -68,14 +64,11 @@ export interface PieComponentProps {
   visParams: PieVisParams;
   visData: Datatable;
   uiState: IInterpreterRenderHandlers['uiState'];
-  visFormattedData: any;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
 }
 
 export type PieComponentType = typeof PieComponent;
-
-const EMPTY_SLICE = Symbol('empty_slice');
 
 const PieComponent = (props: PieComponentProps) => {
   /**
@@ -84,7 +77,6 @@ const PieComponent = (props: PieComponentProps) => {
   // const allSeries: Array<string | number> = [];
   const chartTheme = getThemeService().useChartsTheme();
   const chartBaseTheme = getThemeService().useChartsBaseTheme();
-  const defaultPalette = getColorsService().get('kibana_palette');
 
   // const [showLegend, setShowLegend] = useState<boolean>(() => {
   //   // TODO: Check when this bwc can safely be removed
@@ -92,8 +84,8 @@ const PieComponent = (props: PieComponentProps) => {
   //     props.visParams.addLegend == null ? true : props.visParams.addLegend;
   //   return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   // });
-
   const [showLegend, setShowLegend] = useState(true);
+  const [overwriteColors, setOverwriteColors] = useState(props.uiState?.get('vis.colors', {}));
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -191,47 +183,12 @@ const PieComponent = (props: PieComponentProps) => {
       props.uiState?.setSilent('vis.colors', null);
       props.uiState?.set('vis.colors', colors);
       props.uiState?.emit('colorChanged');
+      setOverwriteColors(colors);
     },
     [props.uiState?.emit, props.uiState?.get, props.uiState?.set, props.uiState?.setSilent]
   );
 
-  const { visData, visParams, visFormattedData } = props;
-
-  // const config = getConfig(visData, visParams);
-  // const legendPosition = useMemo(() => config.legend.position ?? Position.Right, [
-  //   config.legend.position,
-  // ]);
-  // const timeZone = getTimeZone();
-  // const xDomain =
-  //   config.xAxis.scale.type === ScaleType.Ordinal ? undefined : getXDomain(config.aspects.x.params);
-  // const hasBars = visParams.seriesParams.some(
-  //   ({ type, data: { id: paramId } }) =>
-  //     type === ChartType.Histogram && config.aspects.y.find(({ aggId }) => aggId === paramId)
-  // );
-  // const adjustedXDomain =
-  //   config.xAxis.scale.type === ScaleType.Ordinal
-  //     ? undefined
-  //     : getAdjustedDomain(visData.rows, config.aspects.x, timeZone, xDomain, hasBars);
-  // const legendPosition = useMemo(() => config.legend.position ?? Position.Right, [
-  //   config.legend.position,
-  // ]);
-  // const isDarkMode = getThemeService().useDarkMode();
-  // const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
-
-  // const getSeriesColor = useCallback(
-  //   (series: XYChartSeriesIdentifier) => {
-  //     const seriesName = getSeriesName(series);
-  //     if (!seriesName) {
-  //       return;
-  //     }
-
-  //     const overwriteColors: Record<string, string> = props.uiState?.get('vis.colors', {});
-
-  //     allSeries.push(seriesName);
-  //     return getColorsService().createColorLookupFunction(allSeries, overwriteColors)(seriesName);
-  //   },
-  //   [allSeries, getSeriesName, props.uiState?.get]
-  // );
+  const { visData, visParams } = props;
 
   function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
     if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
@@ -285,67 +242,31 @@ const PieComponent = (props: PieComponentProps) => {
     },
   });
 
+  let layersColumns: Array<Partial<BucketColumns>> = [];
   const bucketColumns: BucketColumns[] = [];
+  let metricColumn: DatatableColumn;
   if (visParams.dimensions.buckets) {
     visParams.dimensions.buckets.forEach((b) => {
       bucketColumns.push({ ...visData.columns[b.accessor], format: b.format });
+      layersColumns = [...bucketColumns];
     });
+    const lastBucketId = layersColumns[layersColumns.length - 1].id;
+    const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
+    metricColumn = visData.columns[matchingIndex + 1];
   } else {
-    bucketColumns.push(visData.columns[0]);
+    metricColumn = visData.columns[0];
+    layersColumns.push({
+      name: metricColumn.name,
+    });
   }
-  // calclulate metric column --> move to utils
-  const lastBucketId = bucketColumns[bucketColumns.length - 1].id;
-  const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
-  const metricColumn = visData.columns[matchingIndex + 1];
 
-  const layers: PartitionLayer[] = bucketColumns.map((col) => {
-    return {
-      groupByRollup: (d: Datum) => d[col.id] ?? EMPTY_SLICE,
-      showAccessor: (d: Datum) => d !== EMPTY_SLICE,
-      nodeLabel: (d: unknown) => {
-        if (col.meta.params) {
-          return getFormatService().deserialize(col.format).convert(d) ?? '';
-        }
-        return String(d);
-      },
-      fillLabel,
-      shape: {
-        fillColor: (d) => {
-          const seriesLayers: SeriesLayer[] = [];
-
-          // Color is determined by round-robin on the index of the innermost slice
-          // This has to be done recursively until we get to the slice index
-          let tempParent: typeof d | typeof d['parent'] = d;
-          while (tempParent.parent && tempParent.depth > 0) {
-            seriesLayers.unshift({
-              name: String(tempParent.parent.children[tempParent.sortIndex][0]),
-              rankAtDepth: tempParent.sortIndex,
-              totalSeriesAtDepth: tempParent.parent.children.length,
-            });
-            tempParent = tempParent.parent;
-          }
-
-          const outputColor = defaultPalette.getColor(seriesLayers, {
-            behindText: visParams.labels.show,
-            maxDepth: bucketColumns.length,
-            totalSeries: visData.rows.length,
-          });
-
-          return outputColor || 'rgba(0,0,0,0)';
-        },
-      },
-    };
-  });
+  const layers = getLayers(layersColumns, visParams, overwriteColors, visData.rows.length);
 
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
-    // customTooltip: getTooltip(
-    //   visData,
-    //   metricFieldFormatter,
-    //   bucketColumns,
-    //   metricColumn
-    // ),
   };
+
+  const legendPosition = visParams.legendPosition || Position.Right;
 
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
@@ -358,8 +279,9 @@ const PieComponent = (props: PieComponentProps) => {
         <Chart size="100%">
           <Settings
             showLegend={showLegend}
-            legendPosition={visParams.legendPosition || Position.Right}
+            legendPosition={legendPosition}
             legendMaxDepth={visParams.nestedLegend ? undefined : 1}
+            legendColorPicker={getColorPicker(legendPosition, setColor)}
             tooltip={tooltip}
             onElementClick={(args) => {
               handleFilterClick(args[0][0] as LayerValue[], bucketColumns, visData);

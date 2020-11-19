@@ -39,7 +39,7 @@ export const pieVisRenderer: ExpressionRenderDefinition<RenderValue> = {
   name: vislibPieName,
   displayName: 'Pie visualization',
   reuseDomNode: true,
-  render: (domNode, { visConfig, visData, visFormattedData }, handlers) => {
+  render: (domNode, { visConfig, visData }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData);
     const isSplitChart = Boolean(visConfig.dimensions.splitRow);
 
@@ -51,7 +51,6 @@ export const pieVisRenderer: ExpressionRenderDefinition<RenderValue> = {
           <PieComponent
             visParams={visConfig}
             visData={visData}
-            visFormattedData={visFormattedData}
             renderComplete={handlers.done}
             fireEvent={handlers.event}
             uiState={handlers.uiState}

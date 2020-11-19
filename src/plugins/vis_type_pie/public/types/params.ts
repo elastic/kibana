@@ -82,6 +82,10 @@ export interface BucketColumns extends DatatableColumn {
   };
 }
 
+export interface EmptyBucket {
+  name: string;
+}
+
 export enum LabelPositions {
   INSIDE = 'inside',
   DEFAULT = 'default',

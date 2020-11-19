@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { vislibSlicesResponseHandler } from './response_handler';
+export { getLayers } from './get_layers';
+export { getColorPicker } from './get_color_picker';

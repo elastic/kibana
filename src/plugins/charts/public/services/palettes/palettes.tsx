@@ -115,9 +115,13 @@ function buildGradient(
 function buildSyncedKibanaPalette(
   colors: ChartsPluginSetup['legacyColors']
 ): Omit<PaletteDefinition, 'title'> {
-  function getColor(series: SeriesLayer[], chartConfiguration: ChartColorConfiguration = {}) {
+  function getColor(
+    series: SeriesLayer[],
+    chartConfiguration: ChartColorConfiguration = {},
+    state?: unknown
+  ) {
     colors.mappedColors.mapKeys([series[0].name]);
-    const outputColor = colors.mappedColors.get(series[0].name);
+    const outputColor = state ?? colors.mappedColors.get(series[0].name);
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
