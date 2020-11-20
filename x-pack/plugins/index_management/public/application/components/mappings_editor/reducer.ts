@@ -482,6 +482,47 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
     }
+    case 'runtimeFieldsList.createField': {
+      return {
+        ...state,
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'creatingField',
+        },
+      };
+    }
+    case 'runtimeFieldsList.editField': {
+      return {
+        ...state,
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'editingField',
+          fieldToEdit: action.value,
+        },
+      };
+    }
+    case 'runtimeField.add': {
+      return {
+        ...state,
+        runtimeFields: {
+          ...state.runtimeFields,
+          [getUniqueId()]: action.value,
+        },
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'idle',
+        },
+      };
+    }
+    case 'runtimeFieldsList.closeRuntimeFieldEditor':
+      return {
+        ...state,
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'idle',
+          fieldToEdit: undefined,
+        },
+      };
     case 'fieldsJsonEditor.update': {
       const nextState = {
         ...state,
