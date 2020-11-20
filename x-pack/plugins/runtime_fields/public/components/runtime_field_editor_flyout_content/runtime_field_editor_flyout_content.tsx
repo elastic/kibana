@@ -95,7 +95,7 @@ export const RuntimeFieldEditorFlyoutContent = ({
     <>
       <EuiFlyoutHeader>
         <EuiTitle size="m" data-test-subj="flyoutTitle">
-          <h2>{i18nTexts.flyoutTitle}</h2>
+          <h2 id="runtimeFieldEditorEditTitle">{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
