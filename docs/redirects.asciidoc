@@ -169,3 +169,8 @@ This content has moved. See <<discover, **Discover**>>.
 == View field data statistics
 
 This content has moved. See <<discover, **Discover**>>.
+
+[role="exclude",id="lens"]
+== Lens
+
+This content has moved. See <<create-panels-with-lens>>.
