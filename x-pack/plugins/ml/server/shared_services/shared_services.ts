@@ -5,11 +5,8 @@
  */
 
 import { IClusterClient, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
-import { SpacesPluginSetup } from '../../../spaces/server';
-// including KibanaRequest from 'kibana/server' causes an error
-// when being used with instanceof
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from '../../.././../../src/core/server/http';
+import { SpacesPluginStart } from '../../../spaces/server';
+import { KibanaRequest } from '../../.././../../src/core/server';
 import { MlLicense } from '../../common/license';
 
 import type { CloudSetup } from '../../../cloud/server';
@@ -61,7 +58,7 @@ type OkCallback = (okParams: OkParams) => any;
 
 export function createSharedServices(
   mlLicense: MlLicense,
-  spacesPlugin: SpacesPluginSetup | undefined,
+  getSpaces: (() => Promise<SpacesPluginStart>) | undefined,
   cloud: CloudSetup,
   authorization: SecurityPluginSetup['authz'] | undefined,
   resolveMlCapabilities: ResolveMlCapabilities,
@@ -84,7 +81,7 @@ export function createSharedServices(
       savedObjectsClient,
       internalSavedObjectsClient,
       authorization,
-      spacesPlugin !== undefined,
+      getSpaces !== undefined,
       isMlReady
     );
 
@@ -119,7 +116,7 @@ export function createSharedServices(
     ...getAnomalyDetectorsProvider(getGuards),
     ...getModulesProvider(getGuards),
     ...getResultsServiceProvider(getGuards),
-    ...getMlSystemProvider(getGuards, mlLicense, spacesPlugin, cloud, resolveMlCapabilities),
+    ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
   };
 }
 
