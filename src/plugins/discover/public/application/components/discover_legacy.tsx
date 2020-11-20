@@ -150,7 +150,6 @@ export function DiscoverLegacy({
   return (
     <I18nProvider>
       <div className="dscAppContainer" data-fetch-counter={fetchCounter}>
-        <h1 className="euiScreenReaderOnly">{savedSearch.title}</h1>
         <TopNavMenu
           appName="discover"
           config={topNavMenu}
@@ -166,7 +165,10 @@ export function DiscoverLegacy({
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
-        <div className="dscApp__frame" ref={scrollableMobile}>
+        <main className="dscApp__frame" ref={scrollableMobile} aria-describedby="savedSearchTitle">
+          <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
+            {savedSearch.title}
+          </h1>
           <DiscoverSidebarResponsive
             columns={state.columns || []}
             fieldCounts={fieldCounts}
@@ -291,9 +293,9 @@ export function DiscoverLegacy({
                           onRemoveColumn={onRemoveColumn}
                           onSort={onSort}
                         />
-                        <a tabIndex={0} id="discoverBottomMarker">
+                        <span tabIndex={-1} id="discoverBottomMarker">
                           &#8203;
-                        </a>
+                        </span>
                         {rows.length === opts.sampleSize && (
                           <div className="dscTable__footer" data-test-subj="discoverDocTableFooter">
                             <FormattedMessage
@@ -305,7 +307,11 @@ export function DiscoverLegacy({
 
                             <EuiButtonEmpty
                               onClick={() => {
-                                // depending on screen size there are different
+                                const skipToBottomBtn = document.getElementById('dscSkipButton');
+                                if (skipToBottomBtn) {
+                                  skipToBottomBtn.focus();
+                                }
+                                // depending on screen size there are different elements to scroll
                                 if (!isMobile() && scrollableDesktop.current) {
                                   scrollableDesktop.current.scrollTo(0, 0);
                                 }
@@ -328,7 +334,7 @@ export function DiscoverLegacy({
               </>
             )}
           </div>
-        </div>
+        </main>
       </div>
     </I18nProvider>
   );
