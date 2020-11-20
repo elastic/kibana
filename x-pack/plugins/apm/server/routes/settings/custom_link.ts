@@ -28,6 +28,7 @@ function isActiveGoldLicense(license: ILicense) {
 
 export const customLinkTransactionRoute = createRoute({
   endpoint: 'GET /api/apm/settings/custom_links/transaction',
+  options: { tags: ['access:apm'] },
   params: t.partial({
     query: filterOptionsRt,
   }),
@@ -42,6 +43,7 @@ export const customLinkTransactionRoute = createRoute({
 
 export const listCustomLinksRoute = createRoute({
   endpoint: 'GET /api/apm/settings/custom_links',
+  options: { tags: ['access:apm'] },
   params: t.partial({
     query: filterOptionsRt,
   }),
@@ -62,9 +64,7 @@ export const createCustomLinkRoute = createRoute({
   params: t.type({
     body: payloadRt,
   }),
-  options: {
-    tags: ['access:apm', 'access:apm_write'],
-  },
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     if (!isActiveGoldLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
