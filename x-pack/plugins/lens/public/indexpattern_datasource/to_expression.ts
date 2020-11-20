@@ -91,7 +91,12 @@ function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPatt
     );
 
     const columnsWithTimeScale = firstDateHistogramColumn
-      ? columnEntries.filter(([, col]) => col.timeScale)
+      ? columnEntries.filter(
+          ([, col]) =>
+            col.timeScale &&
+            operationDefinitionMap[col.operationType].timeScalingMode &&
+            operationDefinitionMap[col.operationType].timeScalingMode !== 'disabled'
+        )
       : [];
     const timeScaleFunctions: ExpressionFunctionAST[] = columnsWithTimeScale.flatMap(
       ([id, col]) => {

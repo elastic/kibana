@@ -5,7 +5,7 @@
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import React from 'react';
+import React, { ChangeEvent, MouseEvent } from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiRange } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
@@ -22,6 +22,10 @@ import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
+import { TimeScaling } from './time_scaling';
+import { EuiSelect } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
+import { DimensionEditor } from './dimension_editor';
 
 jest.mock('../loader');
 jest.mock('../operations');
@@ -111,7 +115,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
   let defaultProps: IndexPatternDimensionEditorProps;
 
   function getStateWithColumns(columns: Record<string, IndexPatternColumn>) {
-    return { ...state, layers: { first: { ...state.layers.first, columns } } };
+    return {
+      ...state,
+      layers: { first: { ...state.layers.first, columns, columnOrder: Object.keys(columns) } },
+    };
   }
 
   beforeEach(() => {
@@ -785,6 +792,143 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
   });
 
+  describe('time scaling', () => {
+    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+      return {
+        ...defaultProps,
+        state: getStateWithColumns({
+          datecolumn: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            operationType: 'date_histogram',
+            sourceField: 'ts',
+            params: {
+              interval: '1d',
+            },
+          },
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+            operationType: 'count',
+            sourceField: 'Records',
+            ...colOverrides,
+          } as IndexPatternColumn,
+        }),
+        columnId: 'col2',
+      };
+    }
+    it('should not show custom options if time scaling is not available', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent
+          {...getProps({
+            operationType: 'avg',
+            sourceField: 'bytes',
+          })}
+        />
+      );
+      expect(wrapper.find('[data-test-subj="indexPattern-time-scaling"]')).toHaveLength(0);
+    });
+
+    it('should show custom options if time scaling is available', () => {
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
+      expect(
+        wrapper
+          .find(TimeScaling)
+          .find('[data-test-subj="indexPattern-time-scaling-popover"]')
+          .exists()
+      ).toBe(true);
+    });
+
+    it('should show current time scaling if set', () => {
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({ timeScale: 'd' })} />);
+      expect(
+        wrapper
+          .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+          .find(EuiSelect)
+          .prop('value')
+      ).toEqual('d');
+    });
+
+    it('should allow to set time scaling initially', () => {
+      const props = getProps({});
+      wrapper = shallow(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find(DimensionEditor)
+        .dive()
+        .find(TimeScaling)
+        .dive()
+        .find('[data-test-subj="indexPattern-time-scaling-enable"]')
+        .prop('onClick')!({} as MouseEvent);
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 'm',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should allow to change time scaling', () => {
+      const props = getProps({ timeScale: 's' });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+        .find(EuiSelect)
+        .prop('onChange')!(({
+        target: { value: 'h' },
+      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 'h',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should allow to remove time scaling', () => {
+      const props = getProps({ timeScale: 's' });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-time-scaling-remove"]')
+        .find(EuiButtonIcon)
+        .prop('onClick')!(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        {} as any
+      );
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: undefined,
+              }),
+            },
+          },
+        },
+      });
+    });
+  });
+
   it('should render invalid field if field reference is broken', () => {
     wrapper = mount(
       <IndexPatternDimensionEditorComponent
@@ -1024,7 +1168,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     act(() => {
       wrapper.find('[data-test-subj="lns-indexPatternDimension-min"]').first().prop('onClick')!(
-        {} as React.MouseEvent<{}, MouseEvent>
+        {} as MouseEvent
       );
     });
 

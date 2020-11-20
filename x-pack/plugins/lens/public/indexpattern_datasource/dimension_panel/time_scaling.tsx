@@ -11,9 +11,13 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
+  EuiText,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { StateSetter } from '../../types';
 import { IndexPatternColumn, operationDefinitionMap } from '../operations';
 import { mergeLayer } from '../state_helpers';
@@ -36,6 +40,7 @@ export function TimeScaling({
   state: IndexPatternPrivateState;
   setState: StateSetter<IndexPatternPrivateState>;
 }) {
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const layer = state.layers[layerId];
   const hasDateHistogram = layer.columnOrder.some(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
@@ -51,46 +56,80 @@ export function TimeScaling({
 
   if (!selectedColumn.timeScale) {
     return (
-      <EuiLink
-        onClick={() => {
-          setState(
-            mergeLayer({
-              state,
-              layerId,
-              newLayer: {
-                ...state.layers[layerId],
-                columns: {
-                  ...state.layers[layerId].columns,
-                  [columnId]: {
-                    ...selectedColumn,
-                    timeScale: DEFAULT_TIME_SCALE,
-                  },
-                },
-              },
-            })
-          );
-        }}
-      >
-        {i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
-          defaultMessage: 'Show as rate',
-        })}
-      </EuiLink>
+      <EuiText textAlign="right">
+        <EuiSpacer size="s" />
+        <EuiPopover
+          ownFocus
+          button={
+            <EuiButtonEmpty
+              size="xs"
+              iconType="arrowDown"
+              iconSide="right"
+              data-test-subj="indexPattern-time-scaling-popover"
+              onClick={() => {
+                setPopoverOpen(true);
+              }}
+            >
+              {i18n.translate('xpack.lens.indexPattern.timeScale.advancedSettings', {
+                defaultMessage: 'Add advanced options',
+              })}
+            </EuiButtonEmpty>
+          }
+          isOpen={popoverOpen}
+          closePopover={() => {
+            setPopoverOpen(false);
+          }}
+        >
+          <EuiText size="s">
+            <EuiLink
+              data-test-subj="indexPattern-time-scaling-enable"
+              color="text"
+              onClick={() => {
+                setState(
+                  mergeLayer({
+                    state,
+                    layerId,
+                    newLayer: {
+                      ...state.layers[layerId],
+                      columns: {
+                        ...state.layers[layerId].columns,
+                        [columnId]: {
+                          ...selectedColumn,
+                          timeScale: DEFAULT_TIME_SCALE,
+                        },
+                      },
+                    },
+                  })
+                );
+              }}
+            >
+              {i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
+                defaultMessage: 'Show as rate',
+              })}
+            </EuiLink>
+          </EuiText>
+        </EuiPopover>
+      </EuiText>
     );
   }
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.timeScale.label', {
-            defaultMessage: 'Normalize by unit',
-          })}
-        >
+    <EuiFormRow
+      display="columnCompressed"
+      fullWidth
+      label={i18n.translate('xpack.lens.indexPattern.timeScale.label', {
+        defaultMessage: 'Normalize by unit',
+      })}
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem>
           <EuiSelect
+            compressed
             options={Object.entries(unitSuffixesLong).map(([unit, text]) => ({
               value: unit,
               text,
             }))}
+            data-test-subj="indexPattern-time-scaling-unit"
             value={selectedColumn.timeScale}
             onChange={(e) => {
               setState(
@@ -111,33 +150,38 @@ export function TimeScaling({
               );
             }}
           />
-        </EuiFormRow>
-      </EuiFlexItem>
-      {selectedOperation.timeScalingMode === 'optional' && (
-        <EuiFlexItem>
-          <EuiButtonIcon
-            onClick={() => {
-              setState(
-                mergeLayer({
-                  state,
-                  layerId,
-                  newLayer: {
-                    ...state.layers[layerId],
-                    columns: {
-                      ...state.layers[layerId].columns,
-                      [columnId]: {
-                        ...selectedColumn,
-                        timeScale: undefined,
+        </EuiFlexItem>
+        {selectedOperation.timeScalingMode === 'optional' && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              data-test-subj="indexPattern-time-scaling-remove"
+              color="danger"
+              aria-label={i18n.translate('xpack.lens.timeScale.removeLabel', {
+                defaultMessage: 'Remove normalizing by unit',
+              })}
+              onClick={() => {
+                setState(
+                  mergeLayer({
+                    state,
+                    layerId,
+                    newLayer: {
+                      ...state.layers[layerId],
+                      columns: {
+                        ...state.layers[layerId].columns,
+                        [columnId]: {
+                          ...selectedColumn,
+                          timeScale: undefined,
+                        },
                       },
                     },
-                  },
-                })
-              );
-            }}
-            iconType="cross"
-          />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+                  })
+                );
+              }}
+              iconType="cross"
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 }
