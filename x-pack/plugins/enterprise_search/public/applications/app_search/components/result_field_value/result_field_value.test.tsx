@@ -19,26 +19,9 @@ describe('ResultFieldValue', () => {
     it('will render a dash', () => {
       expect(wrapper.text()).toEqual('—');
     });
-
-    it('will have the appropriate type class on outer div', () => {
-      expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--string');
-    });
-
-    it('will have an empty class on the outer div', () => {
-      expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--empty');
-    });
-
-    it('will not render an inner div', () => {
-      expect(wrapper.find('div > div').length).toEqual(0);
-    });
   });
 
   describe('when there is only a raw value', () => {
-    it('will have the "raw" class name on the inner div', () => {
-      const wrapper = shallow(<ResultFieldValue raw="foo" type="string" />);
-      expect(wrapper.find('div > div').prop('className')).toEqual('enterpriseSearchResultRaw');
-    });
-
     describe('and the value is a string', () => {
       let wrapper: ShallowWrapper;
       beforeAll(() => {
@@ -49,7 +32,7 @@ describe('ResultFieldValue', () => {
         expect(wrapper.text()).toEqual('foo');
       });
 
-      it('will have the appropriate type class on outer div', () => {
+      it('will have the appropriate type class', () => {
         expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--string');
       });
     });
@@ -64,7 +47,7 @@ describe('ResultFieldValue', () => {
         expect(wrapper.text()).toEqual('["foo", "bar"]');
       });
 
-      it('will have the appropriate type class on outer div', () => {
+      it('will have the appropriate type class', () => {
         expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--string');
       });
     });
@@ -79,7 +62,7 @@ describe('ResultFieldValue', () => {
         expect(wrapper.text()).toEqual('1');
       });
 
-      it('will have the appropriate type class on outer div', () => {
+      it('will have the appropriate type class', () => {
         expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--number');
       });
     });
@@ -94,7 +77,7 @@ describe('ResultFieldValue', () => {
         expect(wrapper.text()).toEqual('[1, 2]');
       });
 
-      it('will have the appropriate type class on outer div', () => {
+      it('will have the appropriate type class', () => {
         expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--number');
       });
     });
@@ -109,7 +92,7 @@ describe('ResultFieldValue', () => {
         expect(wrapper.text()).toEqual('44.6, -110.5');
       });
 
-      it('will have the appropriate type class on outer div', () => {
+      it('will have the appropriate type class', () => {
         expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--location');
       });
     });
@@ -126,7 +109,7 @@ describe('ResultFieldValue', () => {
         expect(wrapper.text()).toEqual('[44.6, -110.5, 44.7, -111.0]');
       });
 
-      it('will have the appropriate type class on outer div', () => {
+      it('will have the appropriate type class', () => {
         expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--location');
       });
     });
@@ -176,17 +159,13 @@ describe('ResultFieldValue', () => {
       );
     });
 
-    it('will have the "snippet" class name on the inner div', () => {
-      expect(wrapper.find('div > div').prop('className')).toEqual('enterpriseSearchResultSnippet');
-    });
-
     it('will render content as html with class names appended to em tags', () => {
-      expect(wrapper.find('div > div').html()).toEqual(
-        '<div class="enterpriseSearchResultSnippet">a <em class="enterpriseSearchResultHighlight" data-highlight="long">long</em> description</div>'
+      expect(wrapper.find('div').html()).toContain(
+        'a <em class="enterpriseSearchResultHighlight">long</em> description'
       );
     });
 
-    it('will have the appropriate type class on outer div', () => {
+    it('will have the appropriate type class', () => {
       expect(wrapper.prop('className')).toContain('enterpriseSearchDataType--string');
     });
   });

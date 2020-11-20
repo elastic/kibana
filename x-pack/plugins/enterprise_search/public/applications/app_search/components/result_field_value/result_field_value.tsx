@@ -24,7 +24,7 @@ const getRawArrayDisplay = (rawArray: Array<string | number>): string => {
 const parseHighlights = (highlight: string): string => {
   return highlight.replace(
     /<em>(.+?)<\/em>/gi,
-    '<em class="enterpriseSearchResultHighlight" data-highlight="$1">$1</em>'
+    '<em class="enterpriseSearchResultHighlight">$1</em>'
   );
 };
 
@@ -46,29 +46,19 @@ interface Props {
 
 export const ResultFieldValue: React.FC<Props> = ({ snippet, raw, type, className }) => {
   const isEmpty = isFieldValueEmpty(type, raw, snippet);
-  const fieldValueClassName = classNames(
-    'enterpriseSearchResultFieldValue',
-    {
-      'enterpriseSearchDataType--empty': isEmpty,
-      [`enterpriseSearchDataType--${type}`]: !!type,
-    },
-    className
-  );
-  const fieldValueNode = snippet ? (
+  if (isEmpty) return <>&mdash;</>;
+  const classes = classNames({ [`enterpriseSearchDataType--${type}`]: !!type }, className);
+  return (
     <div
-      className="enterpriseSearchResultSnippet"
+      className={classes}
       /*
        * Justification for dangerouslySetInnerHTML:
        * The App Search server will return html highlights within fields. This data is sanitized by
        * the App Search server is considered safe for use.
        */
-      dangerouslySetInnerHTML={{ __html: parseHighlights(snippet) }} // eslint-disable-line react/no-danger
-    />
-  ) : (
-    <div className="enterpriseSearchResultRaw">
-      {Array.isArray(raw) ? getRawArrayDisplay(raw) : raw}
+      dangerouslySetInnerHTML={snippet ? { __html: parseHighlights(snippet) } : undefined} // eslint-disable-line react/no-danger
+    >
+      {!!snippet ? null : Array.isArray(raw) ? getRawArrayDisplay(raw) : raw}
     </div>
   );
-
-  return <div className={fieldValueClassName}>{isEmpty ? '\u2014' : fieldValueNode}</div>;
 };

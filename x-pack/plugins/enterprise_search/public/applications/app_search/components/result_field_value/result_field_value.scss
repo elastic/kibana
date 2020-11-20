@@ -20,3 +20,8 @@
     font-family: $euiCodeFontFamily;
   }
 }
+
+.enterpriseSearchResultHighlight {
+  color: $euiColorPrimary;
+  font-weight: $euiFontWeightSemiBold;
+}
