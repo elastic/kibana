@@ -23,9 +23,6 @@ import {
   ESCaseConnector,
   ESCaseAttributes,
   CommentRequest,
-  FieldResponse,
-  Field,
-  CasesConfigurationMapping,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -181,35 +178,3 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
 };
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
-
-export const createDefaultMapping = (fields: FieldResponse): CasesConfigurationMapping[] => {
-  const titleTarget =
-    (
-      fields.find((field: Field) => field.type === 'text' && field.required) ??
-      fields.find((field: Field) => field.type === 'text')
-    )?.id ?? '';
-  const remainingFields = fields.filter((field: Field) => field.id !== titleTarget);
-  const descriptionTarget =
-    (
-      remainingFields.find((field: Field) => field.type === 'textarea' && field.required) ??
-      remainingFields.find((field: Field) => field.type === 'textarea') ??
-      remainingFields.find((field: Field) => field.type === 'text')
-    )?.id ?? '';
-  return [
-    {
-      source: 'title',
-      target: titleTarget,
-      actionType: 'overwrite',
-    },
-    {
-      source: 'description',
-      target: descriptionTarget,
-      actionType: 'overwrite',
-    },
-    {
-      source: 'comments',
-      target: 'comments',
-      actionType: 'append',
-    },
-  ];
-};

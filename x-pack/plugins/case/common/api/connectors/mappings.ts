@@ -51,5 +51,8 @@ const FieldRt = rt.type({
 });
 export type Field = rt.TypeOf<typeof FieldRt>;
 
-export const FieldResponseRt = rt.array(FieldRt);
-export type FieldResponse = rt.TypeOf<typeof FieldResponseRt>;
+const GetFieldsResponseRt = rt.type({
+  fields: rt.array(FieldRt),
+  defaultMappings: rt.array(ConnectorMappingsAttributesRT),
+});
+export type GetFieldsResponse = rt.TypeOf<typeof GetFieldsResponseRt>;

@@ -18,7 +18,7 @@ import {
   ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
   ActionTypeExecutorResult,
-  FieldResponse,
+  Field,
 } from '../../../../case/common/api';
 
 import {
@@ -272,12 +272,12 @@ export const getFields = async (
   connectorId: string,
   connectorType: string,
   signal: AbortSignal
-): Promise<FieldResponse> => {
-  const response = await KibanaServices.get().http.fetch<FieldResponse>(
+): Promise<Field[]> => {
+  const response = await KibanaServices.get().http.fetch<Field[]>(
     `${CASE_CONFIGURE_CONNECTORS_URL}/${connectorId}`,
     {
       query: {
-        connectorType,
+        connector_type: connectorType,
       },
       method: 'GET',
       signal,

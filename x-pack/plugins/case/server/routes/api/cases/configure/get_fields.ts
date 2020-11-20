@@ -27,7 +27,7 @@ export function initCaseConfigureGetFields({ router }: RouteDeps) {
     async (context, request, response) => {
       try {
         if (!context.case) {
-          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+          throw Boom.badRequest('RouteHandlerContext is not registered for cases');
         }
 
         const caseClient = context.case.getCaseClient();
@@ -42,14 +42,14 @@ export function initCaseConfigureGetFields({ router }: RouteDeps) {
           throw Boom.notFound('Action client have not been found');
         }
 
-        const body = await caseClient.getFields({
+        const res = await caseClient.getFields({
           actionsClient,
           connectorId: request.params.connector_id,
           connectorType,
         });
 
         return response.ok({
-          body,
+          body: res.fields,
         });
       } catch (error) {
         return response.customError(wrapError(error));

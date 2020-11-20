@@ -39,6 +39,14 @@ export function initPostCaseConfigure({
     },
     async (context, request, response) => {
       try {
+        if (!context.case) {
+          throw Boom.badRequest('RouteHandlerContext is not registered for cases');
+        }
+        const caseClient = context.case.getCaseClient();
+        const actionsClient = await context.actions?.getActionsClient();
+        if (actionsClient == null) {
+          throw Boom.notFound('Action client have not been found');
+        }
         const client = context.core.savedObjects.client;
         const query = pipe(
           CasesConfigureRequestRt.decode(request.body),
@@ -71,7 +79,6 @@ export function initPostCaseConfigure({
           },
         });
 
-        console.log('hello 222');
         const myConnectorMappings = await connectorMappingsService.find({
           client,
           options: {
@@ -81,28 +88,17 @@ export function initPostCaseConfigure({
             },
           },
         });
-        let connectorMappings;
+        // Create connector mappings if there are none
         if (myConnectorMappings.total === 0) {
-          connectorMappings = await connectorMappingsService.post({
+          const res = await caseClient.getFields({
+            actionsClient,
+            connectorId: query.connector.id,
+            connectorType: query.connector.type,
+          });
+          await connectorMappingsService.post({
             client,
             attributes: {
-              mappings: [
-                {
-                  source: 'title',
-                  target: 'short_description',
-                  action_type: 'overwrite',
-                },
-                {
-                  source: 'description',
-                  target: 'description',
-                  action_type: 'overwrite',
-                },
-                {
-                  source: 'comments',
-                  target: 'comments',
-                  action_type: 'overwrite',
-                },
-              ],
+              mappings: res.defaultMappings,
             },
             references: [
               {
@@ -112,11 +108,7 @@ export function initPostCaseConfigure({
               },
             ],
           });
-        } else {
-          connectorMappings = myConnectorMappings.saved_objects[0];
         }
-        console.log('myConnectorMappings', JSON.stringify(myConnectorMappings));
-        console.log('THE MAPPINGS?!', JSON.stringify(connectorMappings));
 
         return response.ok({
           body: CaseConfigureResponseRt.encode({

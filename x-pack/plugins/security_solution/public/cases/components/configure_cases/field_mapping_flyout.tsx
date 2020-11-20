@@ -20,7 +20,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
-import { FieldResponse } from '../../../../../case/common/api';
+import { Field } from '../../../../../case/common/api';
 import {
   ActionConnector,
   useActionsConnectorsContext,
@@ -51,9 +51,7 @@ const actionTypeOptions: Array<EuiSuperSelectOption<ActionType>> = [
   },
 ];
 
-const getThirdPartyOptions = (
-  thirdPartyFields: FieldResponse
-): Array<EuiSuperSelectOption<string>> =>
+const getThirdPartyOptions = (thirdPartyFields: Field[]): Array<EuiSuperSelectOption<string>> =>
   thirdPartyFields.reduce<Array<EuiSuperSelectOption<string>>>(
     (acc, field) => {
       return [
@@ -74,7 +72,7 @@ const getThirdPartyOptions = (
     ]
   );
 
-export const createDefaultMapping = (fields: FieldResponse): CasesConfigurationMapping[] => {
+export const createDefaultMapping = (fields: Field[]): CasesConfigurationMapping[] => {
   const titleTarget =
     (
       fields.find((field) => field.type === 'text' && field.required) ??

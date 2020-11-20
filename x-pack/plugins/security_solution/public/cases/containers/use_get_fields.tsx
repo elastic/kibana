@@ -9,10 +9,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getFields } from './api';
 import * as i18n from './translations';
-import { FieldResponse } from '../../../../case/common/api';
+import { Field } from '../../../../case/common/api';
 
 interface FieldsState {
-  fields: FieldResponse;
+  fields: Field[];
   isLoading: boolean;
   isError: boolean;
 }
@@ -28,7 +28,7 @@ export interface UseGetFields extends FieldsState {
 }
 
 export const useGetFields = (connectorId: string, connectorType: string): UseGetFields => {
-  const [casesStatusState, setFieldsState] = useState<FieldsState>(initialData);
+  const [fieldsState, setFieldsState] = useState<FieldsState>(initialData);
   const [, dispatchToaster] = useStateToaster();
 
   const fetchFields = useCallback(() => {
@@ -36,7 +36,7 @@ export const useGetFields = (connectorId: string, connectorType: string): UseGet
     const abortCtrl = new AbortController();
     const fetchData = async () => {
       setFieldsState({
-        ...casesStatusState,
+        ...fieldsState,
         isLoading: true,
       });
       try {
@@ -69,7 +69,7 @@ export const useGetFields = (connectorId: string, connectorType: string): UseGet
       abortCtrl.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [casesStatusState]);
+  }, [fieldsState]);
 
   useEffect(() => {
     fetchFields();
@@ -77,7 +77,7 @@ export const useGetFields = (connectorId: string, connectorType: string): UseGet
   }, []);
 
   return {
-    ...casesStatusState,
+    ...fieldsState,
     fetchFields,
   };
 };

@@ -8,11 +8,11 @@ import { KibanaRequest, SavedObjectsClientContract } from '../../../../../src/co
 import { ActionsClient } from '../../../actions/server';
 import {
   CasePostRequest,
-  CasesPatchRequest,
-  CommentRequest,
   CaseResponse,
+  CasesPatchRequest,
   CasesResponse,
-  Field,
+  CommentRequest,
+  GetFieldsResponse,
 } from '../../common/api';
 import {
   CaseConfigureServiceSetup,
@@ -50,6 +50,6 @@ export interface ConfigureFields {
 export interface CaseClient {
   addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
   create: (args: CaseClientCreate) => Promise<CaseResponse>;
+  getFields: (args: ConfigureFields) => Promise<GetFieldsResponse>;
   update: (args: CaseClientUpdate) => Promise<CasesResponse>;
-  getFields: (args: ConfigureFields) => Promise<Field[]>;
 }
