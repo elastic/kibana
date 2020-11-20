@@ -21,17 +21,19 @@ import { FakeRequest, RequestHandlerContext } from 'kibana/server';
 import _ from 'lodash';
 import { first, map } from 'rxjs/operators';
 
-import { Filter, TimeRangeBounds, Query } from 'src/plugins/data/common';
+import { Filter, Query } from 'src/plugins/data/common';
 import { getPanelData } from './vis_data/get_panel_data';
 import { Framework } from '../plugin';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
-import { PanelSchema, TimeseriesVisData } from '../../common/types';
+import { TimeseriesVisData } from '../../common/types';
 
 export interface GetVisDataOptions {
-  timerange: TimeRangeBounds & {
-    timezone: string;
+  timerange: {
+    min: number | string;
+    max: number | string;
+    timezone?: string;
   };
-  panels: PanelSchema[];
+  panels: unknown[];
   filters?: Filter[];
   state?: Record<string, unknown>;
   query?: Query | Query[];

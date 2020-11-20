@@ -30,7 +30,7 @@ export type VisPayload = TypeOf<typeof visPayloadSchema>;
 interface PanelData {
   id: string;
   label: string;
-  data: [number, number];
+  data: Array<[number, number]>;
 }
 
 // series data is not fully typed yet
