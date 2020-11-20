@@ -8,6 +8,7 @@
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 import {
+  PACKAGE_ASSETS_INDEX_NAME,
   agentAssetTypes,
   dataTypes,
   defaultPackages,
@@ -262,6 +263,7 @@ export type PackageInfo = Installable<
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
+  package_assets: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
@@ -289,6 +291,10 @@ export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
 };
 export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
+};
+
+export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
+  type: typeof PACKAGE_ASSETS_INDEX_NAME;
 };
 
 export type RequiredPackage = typeof requiredPackages;

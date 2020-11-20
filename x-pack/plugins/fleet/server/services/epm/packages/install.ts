@@ -380,6 +380,7 @@ export async function createInstallation(options: {
     {
       installed_kibana: [],
       installed_es: [],
+      package_assets: [],
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,

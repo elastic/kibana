@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
+export const PACKAGE_ASSETS_INDEX_NAME = 'epm-packages-assets';
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 export const INDEX_PATTERN_PLACEHOLDER_SUFFIX = '-index_pattern_placeholder';

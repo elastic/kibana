@@ -5,7 +5,12 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { InstallablePackage, InstallSource } from '../../../../common';
+import {
+  InstallablePackage,
+  InstallSource,
+  PackageAssetReference,
+  PACKAGE_ASSETS_INDEX_NAME,
+} from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
@@ -63,13 +68,6 @@ export async function _installPackage({
       installSource,
     });
   }
-
-  await saveArchiveEntriesToES({
-    savedObjectsClient,
-    paths,
-    packageInfo,
-    installSource,
-  });
 
   // kick off `installIndexPatterns` & `installKibanaAssets` as early as possible because they're the longest running operations
   // we don't `await` here because we don't want to delay starting the many other `install*` functions
@@ -170,12 +168,26 @@ export async function _installPackage({
   if (installKibanaAssetsError) throw installKibanaAssetsError;
   await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
 
+  const packageAssetResults = await saveArchiveEntriesToES({
+    callCluster,
+    paths,
+    packageInfo,
+    installSource,
+  });
+  const packageAssetRefs: PackageAssetReference[] = packageAssetResults.items.map((result) => ({
+    id: result.index._id,
+    type: PACKAGE_ASSETS_INDEX_NAME,
+  }));
+
   // update to newly installed version when all assets are successfully installed
   if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
+
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     install_version: pkgVersion,
     install_status: 'installed',
+    package_assets: packageAssetRefs,
   });
+
   return [
     ...installedKibanaAssetsRefs,
     ...installedPipelines,
