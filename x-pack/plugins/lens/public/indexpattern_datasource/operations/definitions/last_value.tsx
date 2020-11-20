@@ -22,16 +22,19 @@ function ofName(name: string) {
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
 function getDateFields(indexPattern: IndexPattern): IndexPatternField[] {
+  const dateFields = indexPattern.fields.filter((field) => field.type === 'date');
   if (indexPattern.timeFieldName) {
-    return [
-      ...indexPattern.fields.filter((field) => field.name === indexPattern.timeFieldName),
-      ...indexPattern.fields.filter(
-        (field) => field.type === 'date' && indexPattern.timeFieldName !== field.name
-      ),
-    ];
-  } else {
-    return indexPattern.fields.filter((field) => field.type === 'date');
+    dateFields.sort(({ name: nameA }, { name: nameB }) => {
+      if (nameA === indexPattern.timeFieldName) {
+        return -1;
+      }
+      if (nameB === indexPattern.timeFieldName) {
+        return 1;
+      }
+      return 0;
+    });
   }
+  return dateFields;
 }
 
 export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColumn {
@@ -85,7 +88,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   buildColumn({ field, previousColumn, indexPattern }) {
     const sortField =
       indexPattern.timeFieldName ||
-      indexPattern.fields.filter((f) => f.type === 'date')[0].name ||
+      indexPattern.fields.find((f) => f.type === 'date')?.name ||
       field.name;
 
     const sortOrder =
