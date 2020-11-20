@@ -21,4 +21,8 @@ import { Subject } from 'rxjs';
 
 export const ACTIVE_CURSOR = 'ACTIVE_CURSOR';
 
-export const eventBus = new Subject();
+interface ActiveCursor {
+  cursor: any;
+}
+
+export const activeCursor$ = new Subject<ActiveCursor>();

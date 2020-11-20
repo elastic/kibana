@@ -34,7 +34,7 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
-import { eventBus, ACTIVE_CURSOR } from '../../lib/active_cursor';
+import { activeCursor$ } from '../../lib/active_cursor';
 import { getUISettings, getChartsSetup } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
@@ -54,7 +54,7 @@ const generateAnnotationData = (values, formatter) =>
 const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
 const handleCursorUpdate = (cursor) => {
-  eventBus.next({ eventName: ACTIVE_CURSOR, cursor });
+  activeCursor$.next({ cursor });
 };
 
 export const TimeSeries = ({
@@ -73,10 +73,9 @@ export const TimeSeries = ({
   const chartRef = useRef();
 
   useEffect(() => {
-    const updateCursor = ({ eventName, cursor }) => {
+    const updateCursor = ({ cursor }) => {
       if (
         chartRef.current &&
-        eventName === ACTIVE_CURSOR &&
         cursor &&
         chartRef.current.chartStore.getState().chartId !== cursor.chartId
       ) {
@@ -84,7 +83,7 @@ export const TimeSeries = ({
       }
     };
 
-    const subscription = eventBus.asObservable().subscribe(updateCursor);
+    const subscription = activeCursor$.subscribe(updateCursor);
 
     return () => {
       subscription.unsubscribe();
