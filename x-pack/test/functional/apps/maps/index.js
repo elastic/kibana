@@ -15,10 +15,6 @@ export default function ({ loadTestFile, getService }) {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('maps/data');
-    });
-
-    // The data in the before() doesn't get changed inside the test, but the kibana index starting point should be the same for each individual test
-    beforeEach(async () => {
       await esArchiver.load('maps/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
@@ -31,7 +27,7 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.unload('maps/kibana');
     });
 
-    describe('', function () {
+    describe('', async function () {
       this.tags('ciGroup9');
       loadTestFile(require.resolve('./documents_source'));
       loadTestFile(require.resolve('./blended_vector_layer'));
