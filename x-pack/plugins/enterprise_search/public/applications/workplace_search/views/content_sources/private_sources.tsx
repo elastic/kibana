@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect } from 'react';
-import noSharedSourcesIcon from 'workplace_search/components/assets/shareCircle.svg';
 
 import { useActions, useValues } from 'kea';
 import { Link } from 'react-router-dom';
@@ -15,6 +14,8 @@ import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@ela
 import { LicensingLogic } from '../../../../applications/shared/licensing';
 
 import { ADD_SOURCE_PATH } from '../../routes';
+
+import noSharedSourcesIcon from '../../assets/share_circle.svg';
 
 import { Loading } from '../../../shared/loading';
 import { ContentSection } from '../../components/shared/content_section';
