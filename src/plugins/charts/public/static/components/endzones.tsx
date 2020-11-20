@@ -39,6 +39,10 @@ interface EndzonesProps {
   domainMax: number;
   groupId?: string;
   hideTooltips?: boolean;
+  /**
+   * used to toggle full bin endzones for multiple non-stacked bars
+   */
+  isFullBin?: boolean;
 }
 
 export const Endzones: FC<EndzonesProps> = ({
@@ -50,6 +54,7 @@ export const Endzones: FC<EndzonesProps> = ({
   domainMax,
   groupId,
   hideTooltips = true,
+  isFullBin = false,
 }) => {
   const rectAnnotationStyle: Partial<RectAnnotationStyle> = {
     stroke: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
@@ -59,19 +64,20 @@ export const Endzones: FC<EndzonesProps> = ({
   };
 
   const rectAnnotations: RectAnnotationDatum[] = [];
-  if (domainStart !== domainMin) {
+
+  if (domainStart > domainMin) {
     rectAnnotations.push({
       coordinates: {
-        x1: domainStart,
+        x1: isFullBin ? domainMin : domainStart,
       },
     });
   }
+
   if (domainEnd - interval < domainMax) {
     rectAnnotations.push({
       coordinates: {
-        x0: domainEnd,
+        x0: isFullBin ? domainMax : domainEnd,
       },
-      details: 'test',
     });
   }
 

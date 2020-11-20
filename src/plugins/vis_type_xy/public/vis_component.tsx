@@ -188,7 +188,8 @@ const VisComponent = (props: VisComponentProps) => {
     config.xAxis.scale.type === ScaleType.Ordinal ? undefined : getXDomain(config.aspects.x.params);
   const hasBars = visParams.seriesParams.some(
     ({ type, data: { id: paramId } }) =>
-      type === ChartType.Histogram && config.aspects.y.find(({ aggId }) => aggId === paramId)
+      type === ChartType.Histogram &&
+      config.aspects.y.find(({ aggId }) => aggId === paramId) !== undefined
   );
   const adjustedXDomain =
     config.xAxis.scale.type === ScaleType.Ordinal
@@ -199,6 +200,21 @@ const VisComponent = (props: VisComponentProps) => {
   ]);
   const isDarkMode = getThemeService().useDarkMode();
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
+  const nonStackedBars = visParams.seriesParams.filter(
+    ({ type, data: { id: paramId }, valueAxis: groupId, mode }) => {
+      const barAspect =
+        type === ChartType.Histogram && config.aspects.y.find(({ aggId }) => aggId === paramId);
+
+      if (!barAspect) {
+        return false;
+      }
+
+      const yAxisScale = config.yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)
+        ?.scale;
+      return !(mode === 'stacked' || yAxisScale?.mode === 'percentage');
+    }
+  );
+  const hasNonStackedBars = nonStackedBars.length > 1;
 
   const getSeriesColor = useCallback(
     (series: XYChartSeriesIdentifier) => {
@@ -247,6 +263,7 @@ const VisComponent = (props: VisComponentProps) => {
         <XYThresholdLine {...config.thresholdLine} />
         <XYCurrentTime enabled={config.showCurrentTime} isDarkMode={isDarkMode} domain={xDomain} />
         <XYEndzones
+          isFullBin={hasNonStackedBars}
           enabled={config.isTimeChart}
           // TODO: remove after https://github.com/elastic/elastic-charts/issues/798
           groupId={config.yAxes[0]?.groupId}
@@ -265,7 +282,8 @@ const VisComponent = (props: VisComponentProps) => {
           visData.rows,
           getSeriesName,
           getSeriesColor,
-          timeZone
+          timeZone,
+          hasNonStackedBars
         )}
       </Chart>
     </div>

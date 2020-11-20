@@ -94,7 +94,8 @@ export const renderAllSeries = (
   data: DatatableRow[],
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
   getSeriesColor: SeriesColorAccessorFn,
-  timeZone: string
+  timeZone: string,
+  hasNonStackedBars: boolean
 ) => {
   const xAccessor = getXAccessor(aspects.x);
 
@@ -143,7 +144,7 @@ export const renderAllSeries = (
               data={data}
               timeZone={timeZone}
               stackAccessors={isStacked ? ['__any_value__'] : undefined}
-              enableHistogramMode={!isStacked ? false : enableHistogramMode}
+              enableHistogramMode={!isStacked && hasNonStackedBars ? false : enableHistogramMode}
               stackMode={stackMode}
               minBarHeight={2}
               displayValueSettings={{

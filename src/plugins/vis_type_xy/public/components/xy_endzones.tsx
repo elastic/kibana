@@ -27,6 +27,7 @@ import { Endzones } from '../../../charts/public';
 interface XYEndzones {
   enabled: boolean;
   isDarkMode: boolean;
+  isFullBin: boolean;
   hideTooltips?: boolean;
   groupId?: string;
   domain?: DomainRange;
@@ -36,6 +37,7 @@ interface XYEndzones {
 export const XYEndzones: FC<XYEndzones> = ({
   enabled,
   isDarkMode,
+  isFullBin,
   hideTooltips,
   groupId,
   domain,
@@ -53,6 +55,7 @@ export const XYEndzones: FC<XYEndzones> = ({
   ) {
     return (
       <Endzones
+        isFullBin={isFullBin}
         isDarkMode={isDarkMode}
         groupId={groupId}
         domainStart={domain.min}
