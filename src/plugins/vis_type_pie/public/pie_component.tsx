@@ -40,6 +40,7 @@ import {
   RenderChangeListener,
   TooltipProps,
   TooltipType,
+  SeriesIdentifier,
 } from '@elastic/charts';
 import { keys } from '@elastic/eui';
 
@@ -53,10 +54,9 @@ import { Datatable, DatatableColumn, IInterpreterRenderHandlers } from '../../ex
 import { ValueClickContext } from '../../embeddable/public';
 
 import { PieVisParams, BucketColumns, LabelPositions, ValueFormats } from './types';
-import { getThemeService, getFormatService } from './services';
-import { getColorPicker, getLayers } from './utils';
-// import { colorSchemas } from 'src/plugins/charts/public';
-// import { ChartType } from '../common';
+import { getThemeService, getFormatService, getDataActions } from './services';
+import { getColorPicker, getLayers, getLegendActions, ClickTriggerEvent } from './utils';
+import { LegendToggle } from './temp';
 
 import './chart.scss';
 
@@ -71,19 +71,8 @@ export interface PieComponentProps {
 export type PieComponentType = typeof PieComponent;
 
 const PieComponent = (props: PieComponentProps) => {
-  /**
-   * Stores all series labels to replicate vislib color map lookup
-   */
-  // const allSeries: Array<string | number> = [];
   const chartTheme = getThemeService().useChartsTheme();
   const chartBaseTheme = getThemeService().useChartsBaseTheme();
-
-  // const [showLegend, setShowLegend] = useState<boolean>(() => {
-  //   // TODO: Check when this bwc can safely be removed
-  //   const bwcLegendStateDefault =
-  //     props.visParams.addLegend == null ? true : props.visParams.addLegend;
-  //   return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
-  // });
   const [showLegend, setShowLegend] = useState(true);
   const [overwriteColors, setOverwriteColors] = useState(props.uiState?.get('vis.colors', {}));
 
@@ -126,39 +115,58 @@ const PieComponent = (props: PieComponentProps) => {
     [props]
   );
 
-  // const getFilterEventData = useCallback(
-  //   (visData: Datatable, xAccessor: string | number | null) => (
-  //     series: XYChartSeriesIdentifier
-  //   ): ClickTriggerEvent | null => {
-  //     if (xAccessor !== null) {
-  //       return getFilterFromSeriesFn(visData)(series);
-  //     }
+  const getFilterEventData = useCallback(
+    (visData: Datatable) => (series: SeriesIdentifier): ClickTriggerEvent | null => {
+      // console.log(series.key);
+      const data = visData.columns.reduce<ValueClickContext['data']['data']>(
+        (acc, { id }, column) => {
+          const value = series.key;
+          const row = visData.rows.findIndex((r) => r[id] === value);
+          if (row > -1) {
+            acc.push({
+              table: visData,
+              column,
+              row,
+              value,
+            });
+          }
 
-  //     return null;
-  //   },
-  //   []
-  // );
+          return acc;
+        },
+        []
+      );
 
-  // const handleFilterAction = useCallback(
-  //   (event: ClickTriggerEvent, negate = false) => {
-  //     props.fireEvent({
-  //       ...event,
-  //       data: {
-  //         ...event.data,
-  //         negate,
-  //       },
-  //     });
-  //   },
-  //   [props]
-  // );
+      return {
+        name: 'filterBucket',
+        data: {
+          negate: false,
+          data,
+        },
+      };
+    },
+    []
+  );
 
-  // const canFilter = async (event: ClickTriggerEvent | null): Promise<boolean> => {
-  //   if (!event) {
-  //     return false;
-  //   }
-  //   const filters = await getDataActions().createFiltersFromValueClickAction(event.data);
-  //   return Boolean(filters.length);
-  // };
+  const handleFilterAction = useCallback(
+    (event: ClickTriggerEvent, negate = false) => {
+      props.fireEvent({
+        ...event,
+        data: {
+          ...event.data,
+          negate,
+        },
+      });
+    },
+    [props]
+  );
+
+  const canFilter = async (event: ClickTriggerEvent | null): Promise<boolean> => {
+    if (!event) {
+      return false;
+    }
+    const filters = await getDataActions().createFiltersFromValueClickAction(event.data);
+    return Boolean(filters.length);
+  };
 
   const toggleLegend = useCallback(() => {
     setShowLegend((value) => {
@@ -266,16 +274,18 @@ const PieComponent = (props: PieComponentProps) => {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
   };
 
-  const legendPosition = visParams.legendPosition || Position.Right;
+  const legendPosition = useMemo(() => visParams.legendPosition ?? Position.Right, [
+    visParams.legendPosition,
+  ]);
 
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
       <div className="pieChart__wrapper">
-        {/* <LegendToggle
-        onClick={toggleLegend}
-        showLegend={showLegend}
-        legendPosition={legendPosition}
-      /> */}
+        <LegendToggle
+          onClick={toggleLegend}
+          showLegend={showLegend}
+          legendPosition={legendPosition}
+        />
         <Chart size="100%">
           <Settings
             showLegend={showLegend}
@@ -286,6 +296,12 @@ const PieComponent = (props: PieComponentProps) => {
             onElementClick={(args) => {
               handleFilterClick(args[0][0] as LayerValue[], bucketColumns, visData);
             }}
+            legendAction={getLegendActions(
+              canFilter,
+              getFilterEventData(visData),
+              handleFilterAction,
+              visParams
+            )}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
             onRenderChange={onRenderChange}

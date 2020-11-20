@@ -24,7 +24,7 @@ import { DataPublicPluginStart } from '../../data/public';
 import { createPieVisFn } from './pie_fn';
 import { pieVisRenderer } from './pie_renderer';
 import { pieVisType } from './vis_type';
-import { setThemeService, setColorsService, setFormatService } from './services';
+import { setThemeService, setColorsService, setFormatService, setDataActions } from './services';
 
 export interface VisTypePieSetupDependencies {
   visualizations: VisualizationsSetup;
@@ -58,5 +58,6 @@ export class VisTypePiePlugin {
 
   start(core: CoreStart, { data }: VisTypePiePluginStartDependencies) {
     setFormatService(data.fieldFormats);
+    setDataActions(data.actions);
   }
 }

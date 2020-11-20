@@ -19,3 +19,4 @@
 
 export { getLayers } from './get_layers';
 export { getColorPicker } from './get_color_picker';
+export { getLegendActions, ClickTriggerEvent } from './get_legend_actions';

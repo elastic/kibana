@@ -18,3 +18,4 @@
  */
 
 export { ColorPicker } from './color_picker';
+export { LegendToggle } from './legend_toggle';
