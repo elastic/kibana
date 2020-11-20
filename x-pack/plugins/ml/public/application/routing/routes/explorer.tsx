@@ -87,6 +87,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
 
+  const explorerAppState = useObservable(explorerService.appState$);
+  const explorerState = useObservable(explorerService.state$);
+
   const refresh = useRefresh();
 
   useEffect(() => {
@@ -156,37 +159,31 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [JSON.stringify(jobIds)]);
 
+  /**
+   * TODO get rid of the intermediate state in explorerService.
+   * URL state should be the only source of truth for related props.
+   */
   useEffect(() => {
-    const viewByFieldName = explorerUrlState?.mlExplorerSwimlane?.viewByFieldName;
-    if (viewByFieldName !== undefined) {
-      explorerService.setViewBySwimlaneFieldName(viewByFieldName);
-    }
-
     const filterData = explorerUrlState?.mlExplorerFilter;
     if (filterData !== undefined) {
       explorerService.setFilterData(filterData);
     }
 
-    const viewByPerPage = explorerUrlState?.mlExplorerSwimlane?.viewByPerPage;
-    if (viewByPerPage) {
+    const { viewByFieldName, viewByFromPage, viewByPerPage } =
+      explorerUrlState?.mlExplorerSwimlane ?? {};
+
+    if (viewByFieldName !== undefined) {
+      explorerService.setViewBySwimlaneFieldName(viewByFieldName);
+    }
+
+    if (viewByPerPage !== undefined) {
       explorerService.setViewByPerPage(viewByPerPage);
     }
 
-    const viewByFromPage = explorerUrlState?.mlExplorerSwimlane?.viewByFromPage;
-    if (viewByFromPage) {
+    if (viewByFromPage !== undefined) {
       explorerService.setViewByFromPage(viewByFromPage);
     }
-  }, [explorerUrlState]);
-
-  const [explorerData, loadExplorerData] = useExplorerData();
-
-  useEffect(() => {
-    if (explorerData !== undefined && Object.keys(explorerData).length > 0) {
-      explorerService.setExplorerData(explorerData);
-    }
-  }, [explorerData]);
-
-  const explorerAppState = useObservable(explorerService.appState$);
+  }, []);
 
   /** Sync URL state with {@link explorerService} state */
   useEffect(() => {
@@ -196,7 +193,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [explorerAppState]);
 
-  const explorerState = useObservable(explorerService.state$);
+  const [explorerData, loadExplorerData] = useExplorerData();
+
+  useEffect(() => {
+    if (explorerData !== undefined && Object.keys(explorerData).length > 0) {
+      explorerService.setExplorerData(explorerData);
+    }
+  }, [explorerData]);
+
   const [showCharts] = useShowCharts();
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();
@@ -208,22 +212,23 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }, [JSON.stringify(selectedCells)]);
 
   const loadExplorerDataConfig =
-    (explorerState !== undefined && {
-      bounds: explorerState.bounds,
-      lastRefresh,
-      influencersFilterQuery: explorerState.influencersFilterQuery,
-      noInfluencersConfigured: explorerState.noInfluencersConfigured,
-      selectedCells,
-      selectedJobs: explorerState.selectedJobs,
-      swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
-      tableInterval: tableInterval.val,
-      tableSeverity: tableSeverity.val,
-      viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
-      swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
-      viewByPerPage: explorerState.viewByPerPage,
-      viewByFromPage: explorerState.viewByFromPage,
-    }) ||
-    undefined;
+    explorerState !== undefined
+      ? {
+          bounds: explorerState.bounds,
+          lastRefresh,
+          influencersFilterQuery: explorerState.influencersFilterQuery,
+          noInfluencersConfigured: explorerState.noInfluencersConfigured,
+          selectedCells,
+          selectedJobs: explorerState.selectedJobs,
+          swimlaneBucketInterval: explorerState.swimlaneBucketInterval,
+          tableInterval: tableInterval.val,
+          tableSeverity: tableSeverity.val,
+          viewBySwimlaneFieldName: explorerState.viewBySwimlaneFieldName,
+          swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
+          viewByPerPage: explorerState.viewByPerPage,
+          viewByFromPage: explorerState.viewByFromPage,
+        }
+      : undefined;
 
   useEffect(() => {
     if (explorerState && explorerState.swimlaneContainerWidth > 0) {

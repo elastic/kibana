@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState, useEffect, useCallback } from 'react';
+import React, { FC, Fragment, useCallback, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
+import { debounce } from 'lodash';
+
 import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
-import { TimeRange, TimeHistoryContract } from 'src/plugins/data/public';
+import { TimeHistoryContract, TimeRange } from 'src/plugins/data/public';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useUrlState } from '../../../util/url_state';
@@ -52,9 +54,9 @@ export const DatePickerWrapper: FC = () => {
     globalState?.refreshInterval ?? timefilter.getRefreshInterval();
 
   const setRefreshInterval = useCallback(
-    (refreshIntervalUpdate: RefreshInterval) => {
+    debounce((refreshIntervalUpdate: RefreshInterval) => {
       setGlobalState('refreshInterval', refreshIntervalUpdate, true);
-    },
+    }, 200),
     [setGlobalState]
   );
 
