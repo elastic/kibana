@@ -23,6 +23,7 @@ import {
   FieldFormatInstanceType,
   IndexPatternsService,
 } from 'src/plugins/data/public';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 jest.mock('brace/mode/groovy', () => ({}));
 
@@ -37,6 +38,7 @@ jest.mock('@elastic/eui', () => ({
   EuiButtonEmpty: 'eui-button-empty',
   EuiCallOut: 'eui-call-out',
   EuiCode: 'eui-code',
+  EuiCodeEditor: 'eui-code-editor',
   EuiConfirmModal: 'eui-confirm-modal',
   EuiFieldNumber: 'eui-field-number',
   EuiFieldText: 'eui-field-text',
@@ -171,6 +173,60 @@ describe('FieldEditor', () => {
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
+  });
+
+  it('should display and update a custom label correctly', async () => {
+    let testField = ({
+      name: 'test',
+      format: new Format(),
+      lang: undefined,
+      type: 'string',
+      customLabel: 'Test',
+    } as unknown) as IndexPatternField;
+    fieldList.push(testField);
+    indexPattern.fields.getByName = (name) => {
+      const flds = {
+        [testField.name]: testField,
+      };
+      return flds[name];
+    };
+    indexPattern.fields = {
+      ...indexPattern.fields,
+      ...{
+        update: (fld) => {
+          testField = (fld as unknown) as IndexPatternField;
+        },
+        add: jest.fn(),
+      },
+    };
+    indexPattern.fieldFormatMap = { test: field };
+    indexPattern.deleteFieldFormat = jest.fn();
+
+    const component = createComponentWithContext<FieldEdiorProps>(
+      FieldEditor,
+      {
+        indexPattern,
+        spec: (testField as unknown) as IndexPatternField,
+        services: {
+          redirectAway: () => {},
+          indexPatternService: ({
+            updateSavedObject: jest.fn(() => Promise.resolve()),
+          } as unknown) as IndexPatternsService,
+        },
+      },
+      mockContext
+    );
+
+    await new Promise((resolve) => process.nextTick(resolve));
+    component.update();
+    const input = findTestSubject(component, 'editorFieldCustomLabel');
+    expect(input.props().value).toBe('Test');
+    input.simulate('change', { target: { value: 'new Test' } });
+    const saveBtn = findTestSubject(component, 'fieldSaveButton');
+
+    await saveBtn.simulate('click');
+    await new Promise((resolve) => process.nextTick(resolve));
+    expect(testField.customLabel).toEqual('new Test');
   });
 
   it('should show deprecated lang warning', async () => {
