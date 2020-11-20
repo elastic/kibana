@@ -112,96 +112,50 @@ Array [
     <div
       class="euiFlexItem"
     >
-      <h1
-        class="euiTitle euiTitle--medium eui-textNoWrap"
-      >
-        TestingHeading
-      </h1>
-    </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRow"
+        class="euiTabs euiTabs--condensed"
+        role="tablist"
+        style="padding-left:16px"
       >
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+        <button
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeSettingsToOverviewLink"
+          role="tab"
+          type="button"
         >
-          <div
-            class="euiPopover euiPopover--anchorDownCenter"
+          <span
+            class="euiTab__content"
           >
-            <div
-              class="euiPopover__anchor"
-            >
-              <button
-                aria-label="Open alert context menu"
-                class="euiButtonEmpty euiButtonEmpty--primary"
-                data-test-subj="xpack.uptime.alertsPopover.toggleButton"
-                type="button"
-              >
-                <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                >
-                  <span
-                    class="euiButtonContent__icon"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Alerts
-                  </span>
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+            Overview
+          </span>
+        </button>
+        <button
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeCertificatesLink"
+          role="tab"
+          type="button"
         >
-          <a
-            class="euiButtonEmpty euiButtonEmpty--primary"
-            data-test-subj="settings-page-link"
-            href="/settings"
-            rel="noreferrer"
+          <span
+            class="euiTab__content"
           >
-            <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonContent__icon"
-                data-euiicon-type="gear"
-              />
-              <span
-                class="euiButtonEmpty__text"
-              >
-                Settings
-              </span>
-            </span>
-          </a>
-        </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+            Certificates
+          </span>
+        </button>
+        <button
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="settings-page-link"
+          role="tab"
+          type="button"
         >
-          <button
-            class="euiButtonEmpty euiButtonEmpty--primary"
-            type="button"
+          <span
+            class="euiTab__content"
           >
-            <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonContent__icon"
-                data-euiicon-type="plusInCircle"
-              />
-              <span
-                class="euiButtonEmpty__text"
-              >
-                Add data
-              </span>
-            </span>
-          </button>
-        </div>
+            Settings
+          </span>
+        </button>
       </div>
     </div>
     <div
@@ -308,7 +262,31 @@ Array [
 }
 
 <div
-    class="euiSpacer euiSpacer--s"
+    class="euiSpacer euiSpacer--m"
+  />,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<h1
+    class="euiTitle euiTitle--medium eui-textNoWrap"
+  >
+    TestingHeading
+  </h1>,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiSpacer euiSpacer--xs"
   />,
 ]
 `;
@@ -425,11 +403,51 @@ Array [
     <div
       class="euiFlexItem"
     >
-      <h1
-        class="euiTitle euiTitle--medium eui-textNoWrap"
+      <div
+        class="euiTabs euiTabs--condensed"
+        role="tablist"
+        style="padding-left:16px"
       >
-        TestingHeading
-      </h1>
+        <button
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeSettingsToOverviewLink"
+          role="tab"
+          type="button"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Overview
+          </span>
+        </button>
+        <button
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeCertificatesLink"
+          role="tab"
+          type="button"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Certificates
+          </span>
+        </button>
+        <button
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="settings-page-link"
+          role="tab"
+          type="button"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Settings
+          </span>
+        </button>
+      </div>
     </div>
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero c0"
@@ -535,7 +553,31 @@ Array [
 }
 
 <div
-    class="euiSpacer euiSpacer--s"
+    class="euiSpacer euiSpacer--m"
+  />,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<h1
+    class="euiTitle euiTitle--medium eui-textNoWrap"
+  >
+    TestingHeading
+  </h1>,
+  @media only screen and (max-width:1024px) and (min-width:868px) {
+
+}
+
+@media only screen and (max-width:880px) {
+
+}
+
+<div
+    class="euiSpacer euiSpacer--xs"
   />,
 ]
 `;
@@ -617,15 +659,63 @@ Array [
     <div
       class="euiFlexItem"
     >
-      <h1
-        class="euiTitle euiTitle--medium eui-textNoWrap"
+      <div
+        class="euiTabs euiTabs--condensed"
+        role="tablist"
+        style="padding-left:16px"
       >
-        TestingHeading
-      </h1>
+        <button
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeSettingsToOverviewLink"
+          role="tab"
+          type="button"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Overview
+          </span>
+        </button>
+        <button
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="uptimeCertificatesLink"
+          role="tab"
+          type="button"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Certificates
+          </span>
+        </button>
+        <button
+          aria-selected="false"
+          class="euiTab"
+          data-test-subj="settings-page-link"
+          role="tab"
+          type="button"
+        >
+          <span
+            class="euiTab__content"
+          >
+            Settings
+          </span>
+        </button>
+      </div>
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--s"
+    class="euiSpacer euiSpacer--m"
+  />,
+  <h1
+    class="euiTitle euiTitle--medium eui-textNoWrap"
+  >
+    TestingHeading
+  </h1>,
+  <div
+    class="euiSpacer euiSpacer--xs"
   />,
 ]
 `;

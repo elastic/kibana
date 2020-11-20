@@ -5,25 +5,13 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiHideFor,
-  EuiShowFor,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useTrackPageview } from '../../../observability/public';
-import { PageHeader } from '../components/common/header/page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { UptimeRefreshContext } from '../contexts';
-import * as labels from './translations';
 import { certificatesSelector, getCertificatesAction } from '../state/certificates/certificates';
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
 
@@ -52,7 +40,7 @@ export const CertificatesPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { lastRefresh, refreshApp } = useContext(UptimeRefreshContext);
+  const { lastRefresh } = useContext(UptimeRefreshContext);
 
   useEffect(() => {
     dispatch(getDynamicSettings());
@@ -72,61 +60,31 @@ export const CertificatesPage: React.FC = () => {
   const { data: certificates } = useSelector(certificatesSelector);
 
   return (
-    <>
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem>
-          <PageHeader datePicker={false} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHideFor sizes={['xs']}>
-            <EuiButton
-              fill
-              iconType="refresh"
-              onClick={() => {
-                refreshApp();
-              }}
-              data-test-subj="superDatePickerApplyTimeButton"
-            >
-              {labels.REFRESH_CERT}
-            </EuiButton>
-          </EuiHideFor>
-          <EuiShowFor sizes={['xs']}>
-            <EuiButtonEmpty
-              iconType="refresh"
-              onClick={() => {
-                refreshApp();
-              }}
-              data-test-subj="superDatePickerApplyTimeButton"
-            />
-          </EuiShowFor>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiPanel>
-        <EuiTitle>
-          <h1 className="eui-textNoWrap">
-            <FormattedMessage
-              id="xpack.uptime.certificates.heading"
-              defaultMessage="TLS Certificates ({total})"
-              values={{
-                total: <span data-test-subj="uptimeCertTotal">{certificates?.total ?? 0}</span>,
-              }}
-            />
-          </h1>
-        </EuiTitle>
+    <EuiPanel>
+      <EuiTitle>
+        <h1 className="eui-textNoWrap">
+          <FormattedMessage
+            id="xpack.uptime.certificates.heading"
+            defaultMessage="TLS Certificates ({total})"
+            values={{
+              total: <span data-test-subj="uptimeCertTotal">{certificates?.total ?? 0}</span>,
+            }}
+          />
+        </h1>
+      </EuiTitle>
 
-        <EuiSpacer size="m" />
-        <CertificateSearch setSearch={setSearch} />
-        <EuiSpacer size="m" />
-        <CertificateList
-          page={page}
-          onChange={(pageVal, sortVal) => {
-            setPage(pageVal);
-            setSort(sortVal);
-            localStorage.setItem(LOCAL_STORAGE_KEY, pageVal.size.toString());
-          }}
-          sort={sort}
-        />
-      </EuiPanel>
-    </>
+      <EuiSpacer size="m" />
+      <CertificateSearch setSearch={setSearch} />
+      <EuiSpacer size="m" />
+      <CertificateList
+        page={page}
+        onChange={(pageVal, sortVal) => {
+          setPage(pageVal);
+          setSort(sortVal);
+          localStorage.setItem(LOCAL_STORAGE_KEY, pageVal.size.toString());
+        }}
+        sort={sort}
+      />
+    </EuiPanel>
   );
 };

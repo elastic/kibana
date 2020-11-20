@@ -16,6 +16,7 @@ import {
 import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
+import { PageHeader } from './components/common/header/page_header';
 
 interface RouteProps {
   path: string;
@@ -72,16 +73,19 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 
 export const PageRouter: FC = () => {
   return (
-    <Switch>
-      {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
-        <Route path={path} key={telemetryId}>
-          <div data-test-subj={dataTestSubj}>
-            <RouteInit title={title} path={path} telemetryId={telemetryId} />
-            <RouteComponent />
-          </div>
-        </Route>
-      ))}
-      <Route component={NotFoundPage} />
-    </Switch>
+    <>
+      <PageHeader />
+      <Switch>
+        {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
+          <Route path={path} key={telemetryId}>
+            <div data-test-subj={dataTestSubj}>
+              <RouteInit title={title} path={path} telemetryId={telemetryId} />
+              <RouteComponent />
+            </div>
+          </Route>
+        ))}
+        <Route component={NotFoundPage} />
+      </Switch>
+    </>
   );
 };

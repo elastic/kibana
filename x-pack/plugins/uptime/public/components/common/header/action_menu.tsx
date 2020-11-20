@@ -29,7 +29,7 @@ export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMoun
           <EuiButtonEmpty
             href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
             color="primary"
-            iconType="plusInCircle"
+            iconType="indexOpen"
           >
             {ADD_DATA_LABEL}
           </EuiButtonEmpty>

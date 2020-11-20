@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { EuiTabs, EuiTab, EuiHorizontalRule } from '@elastic/eui';
+import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
@@ -35,18 +35,13 @@ const tabs = [
 ];
 
 export const PageTabs = () => {
-  const [selectedTabId, setSelectedTabId] = useState('overview');
+  const [selectedTabId, setSelectedTabId] = useState<string | null>(null);
 
   const history = useHistory();
 
   const isOverView = useRouteMatch(OVERVIEW_ROUTE);
   const isSettings = useRouteMatch(SETTINGS_ROUTE);
   const isCerts = useRouteMatch(CERTIFICATES_ROUTE);
-
-  const onSelectedTabChanged = (routeId: string) => {
-    setSelectedTabId(routeId);
-    history.push(routeId);
-  };
 
   useEffect(() => {
     if (isOverView?.isExact) {
@@ -58,17 +53,18 @@ export const PageTabs = () => {
     if (isSettings) {
       setSelectedTabId(SETTINGS_ROUTE);
     }
-  }, [isOverView, isSettings, isCerts]);
+  }, []);
 
   const renderTabs = () => {
-    return tabs.map((tab, index) => (
+    return tabs.map(({ dataTestSubj, name, id }, index) => (
       <EuiTab
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
+        onClick={() => setSelectedTabId(id)}
+        isSelected={id === selectedTabId}
         key={index}
-        data-test-subj={tab.dataTestSubj}
+        data-test-subj={dataTestSubj}
+        href={history.createHref({ pathname: id })}
       >
-        {tab.name}
+        {name}
       </EuiTab>
     ));
   };
