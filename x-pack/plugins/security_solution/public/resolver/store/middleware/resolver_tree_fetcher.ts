@@ -35,9 +35,14 @@ export function ResolverTreeFetcher(
 
     // TODO: Get timeline from selector. @kqualters
     const today = new Date();
-    const dayAgo = new Date();
-    dayAgo.setDate(today.getDate() - 1);
-    const timerange = { from: dayAgo.toISOString(), to: today.toISOString() };
+    const from = new Date();
+    from.setDate(today.getDate() - 2);
+    const to = new Date();
+    to.setDate(today.getDate() + 14);
+    const timerange = {
+      from,
+      to,
+    };
 
     // TODO: Discuss whether or not we want to hardcode a schema like the below in the front end for now or backend....
 

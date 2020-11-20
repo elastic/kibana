@@ -43,16 +43,23 @@ export function CurrentRelatedEventFetcher(
         type: 'appRequestedCurrentRelatedEventData',
       });
 
+      // TODO: Get timeline from selector. @kqualters
+      const today = new Date();
+      const from = new Date();
+      from.setDate(today.getDate() - 2);
+      const to = new Date();
+      to.setDate(today.getDate() + 14);
+      const timerange = {
+        from,
+        to,
+      };
       let result: SafeResolverEvent | null = null;
       try {
         result = await dataAccessLayer.event({
           eventID: currentEventID,
           indexPatterns: ['logs-*'],
           // TODO: fix these
-          timerange: {
-            from: new Date(2020, 10, 1),
-            to: new Date(2020, 10, 30),
-          },
+          timerange,
         });
       } catch (error) {
         api.dispatch({

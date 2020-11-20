@@ -66,15 +66,22 @@ export function NodeDataFetcher(
       },
     });
 
+    // TODO: Get timeline from selector. @kqualters
+    const today = new Date();
+    const from = new Date();
+    from.setDate(today.getDate() - 2);
+    const to = new Date();
+    to.setDate(today.getDate() + 14);
+    const timerange = {
+      from,
+      to,
+    };
+
     let results: SafeResolverEvent[] | undefined;
     try {
       results = await dataAccessLayer.nodeData({
         ids: Array.from(newIDsToRequest),
-        timerange: {
-          // TODO: use the timerange plumbing
-          from: new Date(2020, 11, 1),
-          to: new Date(2020, 11, 30),
-        },
+        timerange,
         indexPatterns: ['logs-*'],
         limit: nodeDataLimit,
       });

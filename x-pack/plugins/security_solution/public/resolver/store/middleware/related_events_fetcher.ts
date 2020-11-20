@@ -39,6 +39,16 @@ export function RelatedEventsFetcher(
       eventCategory: string;
       cursor: string | null;
     }) {
+      // TODO: Get timeline from selector. @kqualters
+      const today = new Date();
+      const from = new Date();
+      from.setDate(today.getDate() - 2);
+      const to = new Date();
+      to.setDate(today.getDate() + 14);
+      const timerange = {
+        from,
+        to,
+      };
       let result: ResolverPaginatedEvents | null = null;
       try {
         if (cursor) {
@@ -47,20 +57,14 @@ export function RelatedEventsFetcher(
             category: eventCategory,
             after: cursor,
             indexPatterns: ['logs-*'],
-            timerange: {
-              from: new Date(2020, 11, 1),
-              to: new Date(2020, 11, 30),
-            },
+            timerange,
           });
         } else {
           result = await dataAccessLayer.eventsWithEntityIDAndCategory({
             entityID: nodeID,
             category: eventCategory,
             indexPatterns: ['logs-*'],
-            timerange: {
-              from: new Date(2020, 10, 1),
-              to: new Date(2020, 10, 30),
-            },
+            timerange,
           });
         }
       } catch (error) {
