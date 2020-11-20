@@ -38,7 +38,11 @@ export const BottomDrawer: React.FC<{
     <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen}>
       <BottomActionTopBar ref={isOpen ? null : measureRef}>
         <EuiFlexItem grow={false}>
-          <ShowHideButton iconType={isOpen ? 'arrowDown' : 'arrowRight'} onClick={onClick}>
+          <ShowHideButton
+            aria-expanded={isOpen}
+            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+            onClick={onClick}
+          >
             {isOpen ? hideHistory : showHistory}
           </ShowHideButton>
         </EuiFlexItem>
