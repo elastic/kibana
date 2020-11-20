@@ -8,8 +8,8 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 
 import React from 'react';
+import { px, unit } from '../../../../../style/variables';
 import { useTheme } from '../../../../../hooks/useTheme';
-import { getEmptySeries } from '../../CustomPlot/getEmptySeries';
 import { SparkPlot } from '../';
 
 type Color =
@@ -25,17 +25,15 @@ type Color =
   | 'euiColorVis9';
 
 export function SparkPlotWithValueLabel({
-  start,
-  end,
   color,
   series,
   valueLabel,
+  compact,
 }: {
-  start: number;
-  end: number;
   color: Color;
   series?: Array<{ x: number; y: number | null }>;
   valueLabel: React.ReactNode;
+  compact?: boolean;
 }) {
   const theme = useTheme();
 
@@ -45,7 +43,8 @@ export function SparkPlotWithValueLabel({
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem grow={false}>
         <SparkPlot
-          series={series ?? getEmptySeries(start, end)[0].data}
+          series={series}
+          width={compact ? px(unit * 3) : px(unit * 4)}
           color={colorValue}
         />
       </EuiFlexItem>
