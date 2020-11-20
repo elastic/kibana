@@ -3,26 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
-import { EuiTitle } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable } from '@elastic/eui';
-import { EuiBasicTableColumn } from '@elastic/eui';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { EuiToolTip } from '@elastic/eui';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
-import { TableLinkFlexItem } from '../table_link_flex_item';
-import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { px, truncate, unit } from '../../../../style/variables';
-import { FetchWrapper } from './fetch_wrapper';
+import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
+import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
+import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { ServiceOverviewTable } from '../service_overview_table';
+import { TableLinkFlexItem } from '../table_link_flex_item';
 
 interface Props {
   serviceName: string;
@@ -108,7 +110,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       render: (_, { last_seen: lastSeen }) => {
         return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
       },
-      width: px(unit * 8),
+      width: px(unit * 9),
     },
     {
       field: 'occurrences',
@@ -133,8 +135,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 },
               }
             )}
-            start={parseFloat(start!)}
-            end={parseFloat(end!)}
           />
         );
       },
@@ -157,7 +157,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     }
 
     return callApmApi({
-      pathname: '/api/apm/services/{serviceName}/error_groups',
+      endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
       params: {
         path: { serviceName },
         query: {
@@ -223,8 +223,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <FetchWrapper hasData={!!items.length} status={status}>
-          <EuiBasicTable
+        <TableFetchWrapper status={status}>
+          <ServiceOverviewTable
             columns={columns}
             items={items}
             pagination={{
@@ -259,7 +259,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               },
             }}
           />
-        </FetchWrapper>
+        </TableFetchWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

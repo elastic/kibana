@@ -13,27 +13,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
 import { SearchBar } from '../../shared/search_bar';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
+import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
 import { TableLinkFlexItem } from './table_link_flex_item';
 
-const rowHeight = 310;
-const latencyChartRowHeight = 230;
-
-const Row = styled(EuiFlexItem)`
-  height: ${rowHeight}px;
-`;
-
-const LatencyChartRow = styled(EuiFlexItem)`
-  height: ${latencyChartRowHeight}px;
-`;
+/**
+ * The height a chart should be if it's next to a table with 5 rows and a title.
+ * Add the height of the pagination row.
+ */
+export const chartHeight = 322;
 
 interface ServiceOverviewProps {
   agentName?: string;
@@ -52,7 +46,7 @@ export function ServiceOverview({
       <SearchBar />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <LatencyChartRow>
+          <EuiFlexItem>
             <EuiPanel>
               <EuiTitle size="xs">
                 <h2>
@@ -65,8 +59,8 @@ export function ServiceOverview({
                 </h2>
               </EuiTitle>
             </EuiPanel>
-          </LatencyChartRow>
-          <Row>
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={4}>
                 <EuiPanel>
@@ -84,39 +78,19 @@ export function ServiceOverview({
               </EuiFlexItem>
               <EuiFlexItem grow={6}>
                 <EuiPanel>
-                  <EuiFlexGroup justifyContent="spaceBetween">
-                    <EuiFlexItem>
-                      <EuiTitle size="xs">
-                        <h2>
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.transactionsTableTitle',
-                            {
-                              defaultMessage: 'Transactions',
-                            }
-                          )}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <TableLinkFlexItem>
-                      <TransactionOverviewLink serviceName={serviceName}>
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.transactionsTableLinkText',
-                          {
-                            defaultMessage: 'View transactions',
-                          }
-                        )}
-                      </TransactionOverviewLink>
-                    </TableLinkFlexItem>
-                  </EuiFlexGroup>
+                  <ServiceOverviewTransactionsTable serviceName={serviceName} />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </Row>
-          <Row>
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
               {!isRumAgentName(agentName) && (
                 <EuiFlexItem grow={4}>
-                  <TransactionErrorRateChart showAnnotations={false} />
+                  <TransactionErrorRateChart
+                    height={chartHeight}
+                    showAnnotations={false}
+                  />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={6}>
@@ -125,8 +99,8 @@ export function ServiceOverview({
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </Row>
-          <Row>
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={4}>
                 <EuiPanel>
@@ -175,8 +149,8 @@ export function ServiceOverview({
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </Row>
-          <Row>
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={4}>
                 <EuiPanel>
@@ -207,7 +181,7 @@ export function ServiceOverview({
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </Row>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPage>
     </ChartsSyncContextProvider>

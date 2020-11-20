@@ -14,20 +14,15 @@ import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eu
 import { CoreStart, AppMountParameters } from 'src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../xpack_legacy/common';
-import {
-  IngestManagerSetupDeps,
-  IngestManagerConfigType,
-  IngestManagerStartDeps,
-} from '../../plugin';
+import { FleetConfigType, FleetStartServices } from '../../plugin';
 import { PAGE_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
 import { IngestManagerOverview, EPMApp, AgentPolicyApp, FleetApp, DataStreamApp } from './sections';
 import {
-  DepsContext,
   ConfigContext,
   useConfig,
-  useCore,
+  useStartServices,
   sendSetup,
   sendGetPermissionsCheck,
   licenseService,
@@ -71,7 +66,7 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
     useBreadcrumbs('base');
     const { agents } = useConfig();
 
-    const { notifications } = useCore();
+    const { notifications } = useStartServices();
 
     const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
     const [permissionsError, setPermissionsError] = useState<string>();
@@ -231,58 +226,48 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
 
 const IngestManagerApp = ({
   basepath,
-  coreStart,
-  setupDeps,
-  startDeps,
+  startServices,
   config,
   history,
   kibanaVersion,
   extensions,
 }: {
   basepath: string;
-  coreStart: CoreStart;
-  setupDeps: IngestManagerSetupDeps;
-  startDeps: IngestManagerStartDeps;
-  config: IngestManagerConfigType;
+  startServices: FleetStartServices;
+  config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
 }) => {
-  const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
+  const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
   return (
-    <coreStart.i18n.Context>
-      <KibanaContextProvider services={{ ...coreStart }}>
-        <DepsContext.Provider value={{ setup: setupDeps, start: startDeps }}>
-          <ConfigContext.Provider value={config}>
-            <KibanaVersionContext.Provider value={kibanaVersion}>
-              <EuiThemeProvider darkMode={isDarkMode}>
-                <UIExtensionsContext.Provider value={extensions}>
-                  <IngestManagerRoutes history={history} basepath={basepath} />
-                </UIExtensionsContext.Provider>
-              </EuiThemeProvider>
-            </KibanaVersionContext.Provider>
-          </ConfigContext.Provider>
-        </DepsContext.Provider>
+    <startServices.i18n.Context>
+      <KibanaContextProvider services={{ ...startServices }}>
+        <ConfigContext.Provider value={config}>
+          <KibanaVersionContext.Provider value={kibanaVersion}>
+            <EuiThemeProvider darkMode={isDarkMode}>
+              <UIExtensionsContext.Provider value={extensions}>
+                <IngestManagerRoutes history={history} basepath={basepath} />
+              </UIExtensionsContext.Provider>
+            </EuiThemeProvider>
+          </KibanaVersionContext.Provider>
+        </ConfigContext.Provider>
       </KibanaContextProvider>
-    </coreStart.i18n.Context>
+    </startServices.i18n.Context>
   );
 };
 
 export function renderApp(
-  coreStart: CoreStart,
+  startServices: FleetStartServices,
   { element, appBasePath, history }: AppMountParameters,
-  setupDeps: IngestManagerSetupDeps,
-  startDeps: IngestManagerStartDeps,
-  config: IngestManagerConfigType,
+  config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage
 ) {
   ReactDOM.render(
     <IngestManagerApp
       basepath={appBasePath}
-      coreStart={coreStart}
-      setupDeps={setupDeps}
-      startDeps={startDeps}
+      startServices={startServices}
       config={config}
       history={history}
       kibanaVersion={kibanaVersion}
@@ -296,7 +281,7 @@ export function renderApp(
   };
 }
 
-export const teardownIngestManager = (coreStart: CoreStart) => {
+export const teardownFleet = (coreStart: CoreStart) => {
   coreStart.chrome.docTitle.reset();
   coreStart.chrome.setBreadcrumbs([]);
   licenseService.stop();
