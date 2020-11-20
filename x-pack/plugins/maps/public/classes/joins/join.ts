@@ -5,6 +5,7 @@
  */
 
 import { Feature, GeoJsonProperties } from 'geojson';
+import { Query } from 'src/plugins/data/public';
 import { ESTermSource } from '../sources/es_term_source';
 import { JoinDescriptor } from '../../../common/descriptor_types';
 import { ITooltipProperty } from '../tooltips/tooltip_property';
@@ -12,29 +13,31 @@ import { IField } from '../fields/field';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
 
 export interface IJoin {
-  destroy: () => void;
+  destroy(): void;
 
-  getRightJoinSource: () => ESTermSource;
+  getRightJoinSource(): ESTermSource;
 
-  toDescriptor: () => JoinDescriptor;
+  toDescriptor(): JoinDescriptor;
 
-  getJoinFields: () => IField[];
+  getJoinFields(): IField[];
 
-  getLeftField: () => IField;
+  getLeftField(): IField;
 
-  getIndexPatternIds: () => string[];
+  getIndexPatternIds(): string[];
 
-  getQueryableIndexPatternIds: () => string[];
+  getQueryableIndexPatternIds(): string[];
 
-  getSourceDataRequestId: () => string;
+  getSourceDataRequestId(): string;
 
-  getSourceMetaDataRequestId: () => string;
+  getSourceMetaDataRequestId(): string;
 
-  getSourceFormattersDataRequestId: () => string;
+  getSourceFormattersDataRequestId(): string;
 
-  getTooltipProperties: (properties: GeoJsonProperties) => Promise<ITooltipProperty[]>;
+  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
 
-  hasCompleteConfig: () => boolean;
+  hasCompleteConfig(): boolean;
 
-  joinPropertiesToFeature: (feature: Feature, propertiesMap?: PropertiesMap) => boolean;
+  joinPropertiesToFeature(feature: Feature, propertiesMap?: PropertiesMap): boolean;
+
+  getWhereQuery(): Query | undefined;
 }

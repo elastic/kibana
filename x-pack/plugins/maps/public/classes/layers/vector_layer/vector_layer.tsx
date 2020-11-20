@@ -453,10 +453,9 @@ export class VectorLayer extends AbstractLayer {
       for (let j = 0; j < joinStates.length; j++) {
         const joinState = joinStates[j];
         const innerJoin = joinState.join;
-        const canJoinOnCurrent = innerJoin.joinPropertiesToFeature(
-          feature,
-          joinState.propertiesMap
-        );
+        const canJoinOnCurrent = joinState.propertiesMap
+          ? innerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap)
+          : false;
         isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
       }
 

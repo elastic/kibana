@@ -67,7 +67,7 @@ export function createLayerInstance(
       const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
       if (vectorLayerDescriptor.joins) {
         vectorLayerDescriptor.joins.forEach((joinDescriptor) => {
-          const join = new InnerJoin(joinDescriptor, source);
+          const join = new InnerJoin(joinDescriptor, source as IVectorSource);
           joins.push(join);
         });
       }
