@@ -15,10 +15,7 @@ import {
   EuiSpacer,
   EuiListGroupItemProps,
   EuiFormLabel,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiToolTip,
-  EuiIcon,
 } from '@elastic/eui';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { OperationSupportMatrix } from './operation_support';
@@ -160,14 +157,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
       let label: EuiListGroupItemProps['label'] = operationPanels[operationType].displayName;
       if (disabledStatus) {
         label = (
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>{operationPanels[operationType].displayName}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip position="top" content={disabledStatus}>
-                <EuiIcon type="questionInCircle" size="m" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiToolTip position="top" content={disabledStatus}>
+            <span>{operationPanels[operationType].displayName}</span>
+          </EuiToolTip>
         );
       } else if (isActive) {
         label = <strong>{operationPanels[operationType].displayName}</strong>;
