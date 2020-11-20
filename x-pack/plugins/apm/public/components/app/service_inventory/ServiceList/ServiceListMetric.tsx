@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { SparkPlotWithValueLabel } from '../../../shared/charts/spark_plot/spark_plot_with_value_label';
 
 export function ServiceListMetric({
@@ -16,14 +15,8 @@ export function ServiceListMetric({
   series?: Array<{ x: number; y: number | null }>;
   valueLabel: React.ReactNode;
 }) {
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
-
   return (
     <SparkPlotWithValueLabel
-      start={new Date(start!).getTime()}
-      end={new Date(end!).getTime()}
       valueLabel={valueLabel}
       series={series}
       color={color}

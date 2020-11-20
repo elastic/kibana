@@ -135,8 +135,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 },
               }
             )}
-            start={new Date(start!).getTime()}
-            end={new Date(end!).getTime()}
           />
         );
       },

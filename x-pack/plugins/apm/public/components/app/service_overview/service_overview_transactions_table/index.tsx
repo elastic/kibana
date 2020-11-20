@@ -186,8 +186,6 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             compact
             series={latency.timeseries ?? undefined}
             valueLabel={asDuration(latency.value)}
-            start={new Date(start!).getTime()}
-            end={new Date(end!).getTime()}
           />
         );
       },
@@ -208,8 +206,6 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             compact
             series={throughput.timeseries ?? undefined}
             valueLabel={asTransactionRate(throughput.value)}
-            start={new Date(start!).getTime()}
-            end={new Date(end!).getTime()}
           />
         );
       },
@@ -230,8 +226,6 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             compact
             series={errorRate.timeseries ?? undefined}
             valueLabel={asPercent(errorRate.value, 1)}
-            start={new Date(start!).getTime()}
-            end={new Date(end!).getTime()}
           />
         );
       },
