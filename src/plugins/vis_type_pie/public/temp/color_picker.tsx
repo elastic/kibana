@@ -22,6 +22,7 @@ import React, { BaseSyntheticEvent } from 'react';
 
 import { EuiButtonEmpty, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { lightenColor } from './lighten_color';
 
 import './color_picker.scss';
 
@@ -89,9 +90,16 @@ interface ColorPickerProps {
   label: string | number | null;
   onChange: (color: string | null, event: BaseSyntheticEvent) => void;
   color: string;
+  maxDepth: number;
 }
 
-export const ColorPicker = ({ onChange, color: selectedColor, id, label }: ColorPickerProps) => (
+export const ColorPicker = ({
+  onChange,
+  color: selectedColor,
+  id,
+  label,
+  maxDepth,
+}: ColorPickerProps) => (
   <I18nProvider>
     <div className="visColorPicker">
       <span id={`${id}ColorPickerDesc`} className="euiScreenReaderOnly">
@@ -124,7 +132,9 @@ export const ColorPicker = ({ onChange, color: selectedColor, id, label }: Color
           />
         ))}
       </div>
-      {legendColors.some((c) => c === selectedColor) && (
+      {legendColors.some(
+        (c) => c === selectedColor || lightenColor(c, maxDepth, maxDepth) === selectedColor
+      ) && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"

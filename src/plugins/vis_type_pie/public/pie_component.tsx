@@ -294,7 +294,7 @@ const PieComponent = (props: PieComponentProps) => {
             showLegend={showLegend}
             legendPosition={legendPosition}
             legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-            legendColorPicker={getColorPicker(legendPosition, setColor)}
+            legendColorPicker={getColorPicker(legendPosition, setColor, layersColumns.length)}
             tooltip={tooltip}
             onElementClick={(args) => {
               handleFilterClick(args[0][0] as LayerValue[], bucketColumns, visData);

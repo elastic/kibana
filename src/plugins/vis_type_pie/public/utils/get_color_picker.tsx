@@ -39,21 +39,22 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
 
 export const getColorPicker = (
   legendPosition: Position,
-  setColor: (newColor: string | null, seriesKey: string | number, event: BaseSyntheticEvent) => void
+  setColor: (
+    newColor: string | null,
+    seriesKey: string | number,
+    event: BaseSyntheticEvent
+  ) => void,
+  maxDepth: number
 ): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
   const seriesName = seriesIdentifier.key;
   const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
     onClose();
-    if (!seriesName) {
-      return;
-    }
     if (newColor) {
       onChange(newColor);
     }
     setColor(newColor, seriesName, event);
   };
   const hexColor = new Color(color).hex();
-
   return (
     <EuiWrappingPopover
       isOpen
@@ -64,7 +65,7 @@ export const getColorPicker = (
       closePopover={onClose}
       panelPaddingSize="s"
     >
-      <ColorPicker color={hexColor} onChange={handlChange} label={seriesName} />
+      <ColorPicker color={hexColor} onChange={handlChange} label={seriesName} maxDepth={maxDepth} />
     </EuiWrappingPopover>
   );
 };
