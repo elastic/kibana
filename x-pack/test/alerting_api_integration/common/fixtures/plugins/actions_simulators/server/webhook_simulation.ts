@@ -10,6 +10,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { constant } from 'fp-ts/lib/function';
 
 export async function initPlugin() {
+  const payloads: string[] = [];
+
   return http.createServer((request, response) => {
     const credentials = pipe(
       fromNullable(request.headers.authorization),
@@ -23,6 +25,14 @@ export async function initPlugin() {
       }),
       getOrElse(constant({ username: '', password: '' }))
     );
+
+    // return the payloads that were posted to be remembered
+    if (request.method === 'GET') {
+      response.statusCode = 200;
+      response.setHeader('Content-Type', 'application/json');
+      response.end(JSON.stringify(payloads, null, 4));
+      return;
+    }
 
     if (request.method === 'POST' || request.method === 'PUT') {
       let data = '';
@@ -46,10 +56,18 @@ export async function initPlugin() {
             response.end('Error');
             return;
         }
+
+        // store a payload that was posted to be remembered
+        const match = data.match(/^payload (.*)$/);
+        if (match) {
+          payloads.push(match[1]);
+          response.statusCode = 200;
+          response.end('ok');
+          return;
+        }
+
         response.statusCode = 400;
-        response.end(
-          `unknown request to webhook simulator [${data ? `content: ${data}` : `no content`}]`
-        );
+        response.end(`unexpected body ${data}`);
         return;
       });
     } else {

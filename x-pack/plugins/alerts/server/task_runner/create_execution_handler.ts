@@ -71,7 +71,9 @@ export function createExecutionHandler({
         return {
           ...action,
           params: transformActionParams({
+            actionsPlugin,
             alertId,
+            actionTypeId: action.actionTypeId,
             alertName,
             spaceId,
             tags,

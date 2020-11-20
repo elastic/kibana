@@ -396,4 +396,37 @@ describe('execute()', () => {
       }
     `);
   });
+
+  test('renders parameter templates as expected', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      to: [],
+      cc: ['{{rogue}}'],
+      bcc: ['jim', '{{rogue}}', 'bob'],
+      subject: '{{rogue}}',
+      message: '{{rogue}}',
+    };
+    const variables = {
+      rogue: '*bold*',
+    };
+    const params = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
+    // Yes, this is tested in the snapshot below, but it's double-escaped there,
+    // so easier to see here that the escaping is correct.
+    expect(params.message).toBe('\\*bold\\*');
+    expect(params).toMatchInlineSnapshot(`
+      Object {
+        "bcc": Array [
+          "jim",
+          "*bold*",
+          "bob",
+        ],
+        "cc": Array [
+          "*bold*",
+        ],
+        "message": "\\\\*bold\\\\*",
+        "subject": "*bold*",
+        "to": Array [],
+      }
+    `);
+  });
 });

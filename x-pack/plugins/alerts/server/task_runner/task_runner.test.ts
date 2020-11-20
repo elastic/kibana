@@ -136,6 +136,9 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
     );
+    taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
+      (actionTypeId, params) => params
+    );
   });
 
   test('successfully executes the task', async () => {

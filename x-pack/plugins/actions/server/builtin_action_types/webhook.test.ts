@@ -373,4 +373,28 @@ describe('execute()', () => {
           }
     `);
   });
+
+  test('renders parameter templates as expected', async () => {
+    const rogue = `double-quote:"; line-break->\n`;
+
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      body: '{"x": "{{rogue}}"}',
+    };
+    const variables = {
+      rogue,
+    };
+    const params = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let paramsObject: any;
+    try {
+      paramsObject = JSON.parse(`${params.body}`);
+    } catch (err) {
+      expect(err).toBe(null); // kinda weird, but test should fail if it can't parse
+    }
+
+    expect(paramsObject.x).toBe(rogue);
+    expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
+  });
 });
