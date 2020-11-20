@@ -25,7 +25,9 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
   ];
 
   useEffect(() => {
-    editAction('level', 'info', index);
+    if (!actionParams?.level) {
+      editAction('level', 'info', index);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

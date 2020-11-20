@@ -13,10 +13,13 @@ import { Plugin } from './plugin';
 // reduce number of such exports to zero and provide everything we want to expose via Setup/Start
 // run-time contracts.
 
+export { addSpaceIdToPath } from '../common';
+
 // end public contract exports
 
-export { SpacesPluginSetup } from './plugin';
-export { SpacesServiceSetup } from './spaces_service';
+export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
+export { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+export { ISpacesClient } from './spaces_client';
 export { Space } from '../common/model/space';
 
 export const config = { schema: ConfigSchema };
