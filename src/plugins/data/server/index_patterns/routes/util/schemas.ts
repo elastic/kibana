@@ -25,13 +25,29 @@ export const serializedFieldFormatSchema = schema.object({
 });
 
 export const fieldSpecSchema = schema.object({
-  name: schema.string(),
-  type: schema.string(),
+  name: schema.string({
+    maxLength: 1_000,
+  }),
+  type: schema.string({
+    maxLength: 1_000,
+  }),
   searchable: schema.boolean(),
   aggregatable: schema.boolean(),
-  count: schema.maybe(schema.number()),
-  script: schema.maybe(schema.string()),
-  lang: schema.maybe(schema.string()),
+  count: schema.maybe(
+    schema.number({
+      min: 0,
+    })
+  ),
+  script: schema.maybe(
+    schema.string({
+      maxLength: 1_000_000,
+    })
+  ),
+  lang: schema.maybe(
+    schema.string({
+      maxLength: 1_000,
+    })
+  ),
   conflictDescriptions: schema.maybe(
     schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
   ),
@@ -54,6 +70,6 @@ export const fieldSpecSchema = schema.object({
     })
   ),
   indexed: schema.maybe(schema.boolean()),
-  customName: schema.maybe(schema.string()),
+  customLabel: schema.maybe(schema.string()),
   shortDotsEnable: schema.maybe(schema.boolean()),
 });
