@@ -6,6 +6,7 @@
 
 import {
   EuiBadge,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderSectionItemButton,
@@ -290,42 +291,58 @@ export function SearchBar({
         <EuiText color="subdued" size="xs">
           <EuiFlexGroup
             alignItems="center"
-            justifyContent="flexEnd"
+            justifyContent="spaceBetween"
             gutterSize="s"
             responsive={false}
             wrap
           >
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail"
-              defaultMessage="{shortcutDescription}{commandDescription}"
-              values={{
-                shortcutDescription: (
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutInstructionDescription"
-                      defaultMessage="Shortcut"
-                    />
-                  </EuiFlexItem>
-                ),
-                commandDescription: (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>
-                      {isMac ? (
-                        <FormattedMessage
-                          id="xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription"
-                          defaultMessage="Command + /"
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription"
-                          defaultMessage="Control + /"
-                        />
-                      )}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                ),
-              }}
-            />
+            <EuiFlexItem>
+              <p style={{ marginBottom: 0 }}>
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.helpText.helpTextPrefix"
+                  defaultMessage="Filter by"
+                />
+                &nbsp;
+                <EuiCode>type:</EuiCode>&nbsp;
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.helpText.helpTextConjunction"
+                  defaultMessage="or"
+                />
+                &nbsp;
+                <EuiCode>tag:</EuiCode>
+              </p>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <p style={{ marginBottom: 0 }}>
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail"
+                  defaultMessage="{shortcutDescription} {commandDescription}"
+                  values={{
+                    shortcutDescription: (
+                      <FormattedMessage
+                        id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutInstructionDescription"
+                        defaultMessage="Shortcut"
+                      />
+                    ),
+                    commandDescription: (
+                      <EuiCode>
+                        {isMac ? (
+                          <FormattedMessage
+                            id="xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription"
+                            defaultMessage="Command + /"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription"
+                            defaultMessage="Control + /"
+                          />
+                        )}
+                      </EuiCode>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiText>
       }
