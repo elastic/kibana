@@ -21,8 +21,8 @@ import { EventData, isEventData } from './metadata';
 
 export interface BaseEvent {
   event: string;
-  timestamp: string;
-  pid: string;
+  timestamp: number;
+  pid: number;
   tags?: string[];
 }
 
@@ -39,7 +39,6 @@ export interface ResponseEvent extends BaseEvent {
 
 export interface OpsEvent extends BaseEvent {
   event: 'ops';
-  pid: string;
   os: {
     load: string[];
   };

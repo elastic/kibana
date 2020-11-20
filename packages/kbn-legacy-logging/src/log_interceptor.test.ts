@@ -17,13 +17,15 @@
  * under the License.
  */
 
+import { ErrorEvent } from './log_events';
 import { LogInterceptor } from './log_interceptor';
 
-function stubClientErrorEvent(errorMeta: Record<string, any>) {
+function stubClientErrorEvent(errorMeta: Record<string, any>): ErrorEvent {
   const error = new Error();
   Object.assign(error, errorMeta);
   return {
     event: 'error',
+    url: '',
     pid: 1234,
     timestamp: Date.now(),
     tags: ['connection', 'client', 'error'],
@@ -53,7 +55,7 @@ describe('server logging LogInterceptor', () => {
     it('does not match if the tags are not in order', () => {
       const interceptor = new LogInterceptor();
       const event = stubEconnresetEvent();
-      event.tags = [...event.tags.slice(1), event.tags[0]];
+      event.tags = [...event.tags!.slice(1), event.tags![0]];
       expect(interceptor.downgradeIfEconnreset(event)).toBe(null);
     });
 
@@ -81,7 +83,7 @@ describe('server logging LogInterceptor', () => {
     it('does not match if the tags are not in order', () => {
       const interceptor = new LogInterceptor();
       const event = stubEpipeEvent();
-      event.tags = [...event.tags.slice(1), event.tags[0]];
+      event.tags = [...event.tags!.slice(1), event.tags![0]];
       expect(interceptor.downgradeIfEpipe(event)).toBe(null);
     });
 
@@ -109,7 +111,7 @@ describe('server logging LogInterceptor', () => {
     it('does not match if the tags are not in order', () => {
       const interceptor = new LogInterceptor();
       const event = stubEcanceledEvent();
-      event.tags = [...event.tags.slice(1), event.tags[0]];
+      event.tags = [...event.tags!.slice(1), event.tags![0]];
       expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
     });
 
