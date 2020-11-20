@@ -47,7 +47,7 @@ export function ServiceInventory() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/services',
+          endpoint: 'GET /api/apm/services',
           params: {
             query: { start, end, uiFilters: JSON.stringify(uiFilters) },
           },
@@ -129,9 +129,9 @@ export function ServiceInventory() {
     <>
       <SearchBar />
       <EuiPage>
-        <Correlations />
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
+            <Correlations />
             <LocalUIFilters {...localFiltersConfig} />
           </EuiFlexItem>
           <EuiFlexItem grow={7}>

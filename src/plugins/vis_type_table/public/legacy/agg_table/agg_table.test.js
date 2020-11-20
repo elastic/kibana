@@ -262,14 +262,12 @@ describe('Table Vis - AggTable Directive', function () {
 
       const $tableScope = $el.isolateScope();
       const aggTable = $tableScope.aggTable;
-      $tableScope.table = {
-        columns: [
-          { id: 'a', name: 'one' },
-          { id: 'b', name: 'two' },
-          { id: 'c', name: 'with double-quotes(")' },
-        ],
-        rows: [{ a: 1, b: 2, c: '"foobar"' }],
-      };
+      $tableScope.rows = [{ a: 1, b: 2, c: '"foobar"' }];
+      $tableScope.formattedColumns = [
+        { id: 'a', title: 'one' },
+        { id: 'b', title: 'two' },
+        { id: 'c', title: 'with double-quotes(")' },
+      ];
 
       expect(aggTable.toCsv()).toBe(
         'one,two,"with double-quotes("")"' + '\r\n' + '1,2,"""foobar"""' + '\r\n'
@@ -455,14 +453,12 @@ describe('Table Vis - AggTable Directive', function () {
       const aggTable = $tableScope.aggTable;
 
       const saveAs = sinon.stub(aggTable, '_saveAs');
-      $tableScope.table = {
-        columns: [
-          { id: 'a', name: 'one' },
-          { id: 'b', name: 'two' },
-          { id: 'c', name: 'with double-quotes(")' },
-        ],
-        rows: [{ a: 1, b: 2, c: '"foobar"' }],
-      };
+      $tableScope.rows = [{ a: 1, b: 2, c: '"foobar"' }];
+      $tableScope.formattedColumns = [
+        { id: 'a', title: 'one' },
+        { id: 'b', title: 'two' },
+        { id: 'c', title: 'with double-quotes(")' },
+      ];
 
       aggTable.csv.filename = 'somefilename.csv';
       aggTable.exportAsCsv();

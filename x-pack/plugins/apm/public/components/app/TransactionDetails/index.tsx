@@ -119,9 +119,9 @@ export function TransactionDetails({
       </ApmHeader>
       <SearchBar />
       <EuiPage>
-        <Correlations />
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
+            <Correlations />
             <LocalUIFilters {...localUIFiltersConfig} />
           </EuiFlexItem>
           <EuiFlexItem grow={7}>
