@@ -29,12 +29,12 @@ describe('ActionContext', () => {
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert [alert-name] group [group] met threshold"`);
-    expect(context.message).toMatchSnapshot(
-      `"alert [alert-name] is active for group '[group]':
+    expect(context.message).toEqual(
+      `alert [alert-name] is active for group '[group]':
 
 - Value: 42
 - Conditions Met: count greater than 4 over 5m
-- Timestamp: 2020-01-01T00:00:00.000Z"`
+- Timestamp: 2020-01-01T00:00:00.000Z`
     );
   });
 
@@ -60,12 +60,12 @@ describe('ActionContext', () => {
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert [alert-name] group [group] met threshold"`);
-    expect(context.message).toMatchSnapshot(
-      `"alert [alert-name] is active for group '[group]':
+    expect(context.message).toEqual(
+      `alert [alert-name] is active for group '[group]':
 
 - Value: 42
 - Conditions Met: avg([aggField]) greater than 4.2 over 5m
-- Timestamp: 2020-01-01T00:00:00.000Z"`
+- Timestamp: 2020-01-01T00:00:00.000Z`
     );
   });
 
@@ -90,12 +90,12 @@ describe('ActionContext', () => {
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(`"alert [alert-name] group [group] met threshold"`);
-    expect(context.message).toMatchSnapshot(
-      `"alert [alert-name] is active for group '[group]':
+    expect(context.message).toEqual(
+      `alert [alert-name] is active for group '[group]':
 
 - Value: 4
 - Conditions Met: count between 4 and 5 over 5m
-- Timestamp: 2020-01-01T00:00:00.000Z"`
+- Timestamp: 2020-01-01T00:00:00.000Z`
     );
   });
 });
