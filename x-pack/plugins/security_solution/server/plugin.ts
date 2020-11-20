@@ -75,6 +75,7 @@ import {
   TelemetryPluginSetup,
 } from '../../../../src/plugins/telemetry/server';
 import { licenseService } from './lib/license/license';
+import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -370,6 +371,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.telemetryEventsSender.start(core, plugins.telemetry);
     this.licensing$ = plugins.licensing.license$;
     licenseService.start(this.licensing$);
+    const policyWatcher = new PolicyWatcher(plugins.fleet?.packagePolicyService);
+    licenseService.getLicenseInformation$()?.subscribe(policyWatcher.watch);
 
     return {};
   }
