@@ -25,6 +25,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./dashboard_to_dashboard_drilldown'));
     loadTestFile(require.resolve('./dashboard_to_url_drilldown'));
     loadTestFile(require.resolve('./explore_data_panel_action'));
+    loadTestFile(require.resolve('./export_csv_action'));
 
     // Disabled for now as it requires xpack.discoverEnhanced.actions.exploreDataInChart.enabled
     // setting set in kibana.yml to work. Once that is enabled by default, we can re-enable this test suite.
