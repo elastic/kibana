@@ -128,6 +128,16 @@ export const searchAfterAndBulkCreate = async ({
                 )}`
               )
             );
+            if (timestampsToSort.length === 1) {
+              // couldn't find @timestamp on any of the given indices, fail the rule
+              throw Error(
+                `The field ${timestamp} was not found in any of the following index patterns ${JSON.stringify(
+                  inputIndexPattern,
+                  null,
+                  2
+                )}`
+              );
+            }
             break;
           } else if (inputIndexPattern.length !== timestampsAndIndices[timestamp].length) {
             // find the full name indices which match one of the index patterns
