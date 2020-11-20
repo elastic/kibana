@@ -93,7 +93,6 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
   UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS,
   UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE,
-  UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE,
   UI_SETTINGS.DOC_HIGHLIGHT,
   UI_SETTINGS.META_FIELDS,
   UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS,
@@ -405,14 +404,12 @@ export class SearchSource {
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
       case 'fields':
-        if (false) {
-        // if (getConfig(UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE)) {
-          // preserve legacy behavior
-          const fields = uniq((data[key] || []).concat(val));
-          return addToRoot(key, fields);
-        }
-        // use new Fields API
+        // uses new Fields API
         return addToBody('fields', val);
+      case 'fieldsFromSource':
+        // preserves legacy behavior
+        const fields = uniq((data[key] || []).concat(val));
+        return addToRoot(key, fields);
       case 'index':
       case 'type':
       case 'highlightAll':
@@ -461,12 +458,9 @@ export class SearchSource {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
 
-    // if (!getConfig(UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE)) {
-    //   return this.flattenWithFieldsApi(searchRequest);
-    // }
-
     searchRequest.body = searchRequest.body || {};
-    const { body, index, fields, query, filters, highlightAll } = searchRequest;
+    const { body, index, fieldsFromSource, query, filters, highlightAll } = searchRequest;
+
     searchRequest.indexType = this.getIndexType(index);
 
     const computedFields = index ? index.getComputedFields() : {};
@@ -488,18 +482,18 @@ export class SearchSource {
       // exclude source fields for this index pattern specified by the user
       const filter = fieldWildcardFilter(body._source.excludes, getConfig(UI_SETTINGS.META_FIELDS));
       body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
-        filter(docvalueField.field)
+        filter(typeof docvalueField === 'string' ? docvalueField : docvalueField.field)
       );
     }
 
     // if we only want to search for certain fields
-    if (fields) {
+    if (fieldsFromSource) {
       // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-      body.docvalue_fields = filterDocvalueFields(body.docvalue_fields, fields);
-      body.script_fields = pick(body.script_fields, fields);
+      body.docvalue_fields = filterDocvalueFields(body.docvalue_fields, fieldsFromSource);
+      body.script_fields = pick(body.script_fields, fieldsFromSource);
 
       // request the remaining fields from both stored_fields and _source
-      const remainingFields = difference(fields, keys(body.script_fields));
+      const remainingFields = difference(fieldsFromSource, keys(body.script_fields));
       body.stored_fields = remainingFields;
       setWith(body, '_source.includes', remainingFields, (nsValue) =>
         isObject(nsValue) ? {} : nsValue

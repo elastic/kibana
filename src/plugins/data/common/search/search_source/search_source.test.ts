@@ -117,7 +117,7 @@ describe('SearchSource', () => {
           docvalueFields: [],
         }),
       } as unknown) as IndexPattern);
-      searchSource.setField('fields', []);
+      searchSource.setField('fieldsFromSource', []);
 
       const request = await searchSource.getSearchRequestBody();
       expect(request).not.toHaveProperty('docvalue_fields');
@@ -194,7 +194,7 @@ describe('SearchSource', () => {
       expect(request.docvalue_fields).toEqual(['@timestamp']);
     });
 
-    describe(`#setField('fields')`, () => {
+    describe(`#setField('fieldsFromSource')`, () => {
       test('filters docvalue fields to only include specified fields', async () => {
         searchSource.setField('index', ({
           ...indexPattern,
@@ -204,7 +204,7 @@ describe('SearchSource', () => {
             docvalueFields: ['@timestamp', 'foo-bar', { field: 'foo-baz' }],
           }),
         } as unknown) as IndexPattern);
-        searchSource.setField('fields', ['@timestamp']);
+        searchSource.setField('fieldsFromSource', ['@timestamp']);
 
         const request = await searchSource.getSearchRequestBody();
         expect(request.docvalue_fields).toEqual(['@timestamp']);
@@ -219,7 +219,7 @@ describe('SearchSource', () => {
             docvalueFields: [],
           }),
         } as unknown) as IndexPattern);
-        searchSource.setField('fields', ['hello']);
+        searchSource.setField('fieldsFromSource', ['hello']);
 
         const request = await searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {} });
@@ -234,7 +234,7 @@ describe('SearchSource', () => {
             docvalueFields: ['@timestamp'],
           }),
         } as unknown) as IndexPattern);
-        searchSource.setField('fields', ['hello', 'world', '@timestamp', 'foo']);
+        searchSource.setField('fieldsFromSource', ['hello', 'world', '@timestamp', 'foo']);
 
         const request = await searchSource.getSearchRequestBody();
         expect(request._source).toEqual({ includes: ['@timestamp', 'foo'] });

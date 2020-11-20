@@ -86,7 +86,14 @@ export interface SearchSourceFields {
   size?: number;
   source?: NameList;
   version?: boolean;
+  /**
+   * Retrieve fields via the search Fields API
+   */
   fields?: NameList;
+  /**
+   * Retreive fields directly from _source (legacy behavior)
+   */
+  fieldsFromSource?: NameList;
   /**
    * {@link IndexPatternService}
    */
