@@ -35,8 +35,6 @@ import { BasePathProxyServer } from '../../core/server/http';
 import { Log } from './log';
 import { Worker } from './worker';
 
-process.env.kbnWorkerType = 'managr';
-
 export type SomeCliArgs = Pick<
   CliArgs,
   | 'quiet'

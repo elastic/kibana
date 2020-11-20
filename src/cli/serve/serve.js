@@ -43,7 +43,7 @@ function canRequire(path) {
 }
 
 const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
-const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
+const DEV_MODE_SUPPORTED = canRequire(CLUSTER_MANAGER_PATH);
 
 const REPL_PATH = resolve(__dirname, '../repl');
 const CAN_REPL = canRequire(REPL_PATH);
@@ -189,7 +189,7 @@ export default function (program) {
       );
   }
 
-  if (CAN_CLUSTER) {
+  if (DEV_MODE_SUPPORTED) {
     command
       .option('--dev', 'Run the server with development mode defaults')
       .option('--open', 'Open a browser window to the base url after the server is started')
@@ -242,7 +242,7 @@ export default function (program) {
         dist: !!opts.dist,
       },
       features: {
-        isClusterModeSupported: CAN_CLUSTER,
+        isCliDevModeSupported: DEV_MODE_SUPPORTED,
         isReplModeSupported: CAN_REPL,
       },
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),

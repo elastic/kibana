@@ -53,7 +53,7 @@ const type = _.memoize(function (t) {
   return color(t)(_.pad(t, 7).slice(0, 7));
 });
 
-const workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType)} ` : '';
+const prefix = process.env.isDevCliChild ? `${type('server')} ` : '';
 
 export default class KbnLoggerStringFormat extends LogFormat {
   format(data) {
@@ -70,6 +70,6 @@ export default class KbnLoggerStringFormat extends LogFormat {
         return s + `[${color(t)(t)}]`;
       }, '');
 
-    return `${workerType}${type(data.type)} [${time}] ${tags} ${msg}`;
+    return `${prefix}${type(data.type)} [${time}] ${tags} ${msg}`;
   }
 }

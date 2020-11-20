@@ -43,7 +43,6 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       runExamples: false,
       ...(options.cliArgs || {}),
     },
-    isDevClusterMaster:
-      options.isDevClusterMaster !== undefined ? options.isDevClusterMaster : false,
+    isDevCliParent: options.isDevCliParent !== undefined ? options.isDevCliParent : false,
   };
 }

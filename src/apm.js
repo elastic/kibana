@@ -30,10 +30,6 @@ let apmConfig;
 const isKibanaDistributable = Boolean(build && build.distributable === true);
 
 module.exports = function (serviceName = name) {
-  if (process.env.kbnWorkerType === 'optmzr') {
-    return;
-  }
-
   apmConfig = loadConfiguration(process.argv, ROOT_DIR, isKibanaDistributable);
   const conf = apmConfig.getConfig(serviceName);
   const apm = require('elastic-apm-node');

@@ -83,7 +83,7 @@ export function createRootWithSettings(
       dist: false,
       ...cliArgs,
     },
-    isDevClusterMaster: false,
+    isDevCliParent: false,
   });
 
   return new Root(

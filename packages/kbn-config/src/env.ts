@@ -26,7 +26,7 @@ import { PackageInfo, EnvironmentMode } from './types';
 export interface EnvOptions {
   configs: string[];
   cliArgs: CliArgs;
-  isDevClusterMaster: boolean;
+  isDevCliParent: boolean;
 }
 
 /** @internal */
@@ -105,7 +105,7 @@ export class Env {
    * Indicates that this Kibana instance is run as development Node Cluster master.
    * @internal
    */
-  public readonly isDevClusterMaster: boolean;
+  public readonly isDevCliParent: boolean;
 
   /**
    * @internal
@@ -123,7 +123,7 @@ export class Env {
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);
-    this.isDevClusterMaster = options.isDevClusterMaster;
+    this.isDevCliParent = options.isDevCliParent;
 
     const isDevMode = this.cliArgs.dev || this.cliArgs.envName === 'development';
     this.mode = Object.freeze<EnvironmentMode>({

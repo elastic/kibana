@@ -88,7 +88,7 @@ export class Worker extends EventEmitter {
 
     this.env = {
       NODE_OPTIONS: process.env.NODE_OPTIONS || '',
-      kbnWorkerType: this.type,
+      isDevCliChild: 'true',
       kbnWorkerArgv: JSON.stringify([...(opts.baseArgv || baseArgv), ...(opts.argv || [])]),
       ELASTIC_APM_SERVICE_NAME: opts.apmServiceName || '',
     };

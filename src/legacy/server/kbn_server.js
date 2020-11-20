@@ -19,7 +19,6 @@
 
 import { constant, once, compact, flatten } from 'lodash';
 
-import { isWorker } from 'cluster';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot, pkg } from '../../core/server/utils';
 import { Config } from './config';
@@ -121,7 +120,7 @@ export default class KbnServer {
 
     const { server, config } = this;
 
-    if (isWorker) {
+    if (process.env.isDevCliChild) {
       // help parent process know when we are ready
       process.send(['WORKER_LISTENING']);
     }

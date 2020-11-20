@@ -18,7 +18,6 @@
  */
 
 import * as chokidar from 'chokidar';
-import { isMaster } from 'cluster';
 import fs from 'fs';
 import { Server } from '@hapi/hapi';
 import { throttle } from 'lodash';
@@ -348,8 +347,8 @@ export class LogRotator {
   }
 
   _sendReloadLogConfigSignal() {
-    if (isMaster) {
-      (process as NodeJS.EventEmitter).emit('SIGHUP');
+    if (!process.env.isDevCliChild) {
+      process.emit('SIGHUP', 'SIGHUP');
       return;
     }
 

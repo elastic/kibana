@@ -18,16 +18,15 @@
  */
 
 import chalk from 'chalk';
-import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
 
 interface KibanaFeatures {
-  // Indicates whether we can run Kibana in a so called cluster mode in which
-  // Kibana is run as a "worker" process together with optimizer "worker" process
-  // that are orchestrated by the "master" process (dev mode only feature).
-  isClusterModeSupported: boolean;
+  // Indicates whether we can run Kibana in dev mode in which Kibana is run as
+  // a child process together with optimizer "worker" processes that are
+  // orchestrated by a parent process (dev mode only feature).
+  isCliDevModeSupported: boolean;
 
   // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
   isReplModeSupported: boolean;
@@ -71,7 +70,7 @@ export async function bootstrap({
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
-    isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
+    isDevCliParent: cliArgs.dev && features.isCliDevModeSupported && !process.env.isDevCliChild,
   });
 
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
