@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
-import Boom from '@hapi/boom';
+import { pick } from 'lodash/fp';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { schema } from '@kbn/config-schema';
+import Boom from '@hapi/boom';
 
 import {
   CommentPatchRequestRt,
@@ -134,8 +135,12 @@ export function initPatchCommentApi({
                 caseId: request.params.case_id,
                 commentId: updatedComment.id,
                 fields: ['comment'],
-                newValue: JSON.stringify(query),
-                oldValue: JSON.stringify(myComment.attributes),
+                newValue: JSON.stringify(queryRestAttributes),
+                oldValue: JSON.stringify(
+                  // We are interested only in ContextBasicRt attributes
+                  // myComment.attribute contains also CommentAttributesBasicRt attributes
+                  pick(Object.keys(queryRestAttributes), myComment.attributes)
+                ),
               }),
             ],
           }),

@@ -54,6 +54,36 @@ describe('PATCH comment', () => {
     );
   });
 
+  it(`Patch an alert`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_COMMENTS_URL,
+      method: 'patch',
+      params: {
+        case_id: 'mock-id-4',
+      },
+      body: {
+        type: CommentType.alert,
+        alertId: 'new-id',
+        index: 'test-index',
+        id: 'mock-comment-4',
+        version: 'WzYsMV0=',
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload.comments[response.payload.comments.length - 1].alertId).toEqual(
+      'new-id'
+    );
+  });
+
   it(`it throws when missing attributes: type user`, async () => {
     const allRequestAttributes = {
       type: CommentType.user,

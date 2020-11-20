@@ -323,7 +323,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
       {
         type: 'cases',
         name: 'associated-cases',
-        id: 'mock-id-3',
+        id: 'mock-id-4',
       },
     ],
     updated_at: '2019-11-25T22:32:30.608Z',

@@ -10,6 +10,8 @@ import {
   CasesFindResponse,
   CommentResponse,
   ConnectorTypes,
+  CommentRequestUserType,
+  CommentRequestAlertType,
 } from '../../../../plugins/case/common/api';
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
@@ -24,12 +26,15 @@ export const postCaseReq: CasePostRequest = {
   },
 };
 
-export const postCommentReq: {
-  comment: string;
-  context: { type: string; savedObjectId: string | null };
-} = {
+export const postCommentUserReq: CommentRequestUserType = {
   comment: 'This is a cool comment',
-  context: { type: 'user', savedObjectId: null },
+  type: 'user',
+};
+
+export const postCommentAlertReq: CommentRequestAlertType = {
+  alertId: 'test-id',
+  index: 'test-index',
+  type: 'alert',
 };
 
 export const postCaseResp = (

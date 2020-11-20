@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -618,7 +619,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const params = {
           subAction: 'addComment',
           subActionParams: {
-            comment: { comment: 'a comment', context: { type: 'user', savedObjectId: null } },
+            comment: { comment: 'a comment', type: 'user' },
           },
         };
 
@@ -637,7 +638,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should respond with a 400 Bad Request when adding a comment to a case without comment', async () => {
+      it('should respond with a 400 Bad Request when missing attributes of type user', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -666,12 +667,143 @@ export default ({ getService }: FtrProviderContext): void => {
           status: 'error',
           actionId: createdActionId,
           message:
-            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment.comment]: expected value of type [string] but got [undefined]',
+            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: expected at least one defined value but got [undefined]',
           retry: false,
         });
       });
 
-      it('should respond with a 400 Bad Request when adding a comment to a case without context', async () => {
+      it('should respond with a 400 Bad Request when missing attributes of type alert', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const comment = { alertId: 'test-id', index: 'test-index', type: 'alert' };
+        const params = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: '123',
+            comment,
+          },
+        };
+
+        for (const attribute of ['alertId', 'index']) {
+          const requestAttributes = omit(attribute, comment);
+          const caseConnector = await supertest
+            .post(`/api/actions/action/${createdActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...params,
+                subActionParams: { ...params.subActionParams, comment: requestAttributes },
+              },
+            })
+            .expect(200);
+
+          expect(caseConnector.body).to.eql({
+            status: 'error',
+            actionId: createdActionId,
+            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.type]: expected value to equal [user]\n - [subActionParams.comment.1.${attribute}]: expected value of type [string] but got [undefined]`,
+            retry: false,
+          });
+        }
+      });
+
+      it('should respond with a 400 Bad Request when adding excess attributes for type user', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const params = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: '123',
+            comment: { comment: 'a comment', type: 'user' },
+          },
+        };
+
+        for (const attribute of ['alertId', 'index']) {
+          const caseConnector = await supertest
+            .post(`/api/actions/action/${createdActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...params,
+                subActionParams: {
+                  ...params.subActionParams,
+                  comment: { ...params.subActionParams.comment, [attribute]: attribute },
+                },
+              },
+            })
+            .expect(200);
+
+          expect(caseConnector.body).to.eql({
+            status: 'error',
+            actionId: createdActionId,
+            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing\n - [subActionParams.comment.1.type]: expected value to equal [alert]`,
+            retry: false,
+          });
+        }
+      });
+
+      it('should respond with a 400 Bad Request when adding excess attributes for type alert', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const params = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: '123',
+            comment: { alertId: 'test-id', index: 'test-index', type: 'alert' },
+          },
+        };
+
+        for (const attribute of ['comment']) {
+          const caseConnector = await supertest
+            .post(`/api/actions/action/${createdActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...params,
+                subActionParams: {
+                  ...params.subActionParams,
+                  comment: { ...params.subActionParams.comment, [attribute]: attribute },
+                },
+              },
+            })
+            .expect(200);
+
+          expect(caseConnector.body).to.eql({
+            status: 'error',
+            actionId: createdActionId,
+            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.type]: expected value to equal [user]\n - [subActionParams.comment.1.${attribute}]: definition for this key is missing`,
+            retry: false,
+          });
+        }
+      });
+
+      it('should respond with a 400 Bad Request when adding a comment to a case without type', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -706,77 +838,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should respond with a 400 Bad Request when adding a comment to a case without type as user and savedObjectId !== null', async () => {
-        const { body: createdAction } = await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A case connector',
-            actionTypeId: '.case',
-            config: {},
-          })
-          .expect(200);
-
-        createdActionId = createdAction.id;
-        const params = {
-          subAction: 'addComment',
-          subActionParams: {
-            caseId: '123',
-            comment: { comment: 'a comment', context: { type: 'user', savedObjectId: 'id' } },
-          },
-        };
-
-        const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
-          .set('kbn-xsrf', 'foo')
-          .send({ params })
-          .expect(200);
-
-        expect(caseConnector.body).to.eql({
-          status: 'error',
-          actionId: createdActionId,
-          message:
-            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment.context.type]: types that failed validation:\n - [subActionParams.comment.context.type.0]: expected value to equal [alert]',
-          retry: false,
-        });
-      });
-
-      it('should respond with a 400 Bad Request when adding a comment to a case without type as alert and savedObjectId === null', async () => {
-        const { body: createdAction } = await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A case connector',
-            actionTypeId: '.case',
-            config: {},
-          })
-          .expect(200);
-
-        createdActionId = createdAction.id;
-        const params = {
-          subAction: 'addComment',
-          subActionParams: {
-            caseId: '123',
-            comment: { comment: 'a comment', context: { type: 'alert', savedObjectId: null } },
-          },
-        };
-
-        const caseConnector = await supertest
-          .post(`/api/actions/action/${createdActionId}/_execute`)
-          .set('kbn-xsrf', 'foo')
-          .send({ params })
-          .expect(200);
-
-        expect(caseConnector.body).to.eql({
-          status: 'error',
-          actionId: createdActionId,
-          message:
-            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment.context.type]: expected value to equal [user]',
-          retry: false,
-        });
-      });
-
-      it('should add a comment', async () => {
+      it('should add a comment of type user', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -799,7 +861,60 @@ export default ({ getService }: FtrProviderContext): void => {
           subAction: 'addComment',
           subActionParams: {
             caseId: caseRes.body.id,
-            comment: { comment: 'a comment', context: { type: 'user', savedObjectId: null } },
+            comment: { comment: 'a comment', type: 'user' },
+          },
+        };
+
+        await supertest
+          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({ params })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`${CASES_URL}/${caseRes.body.id}`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        const data = removeServerGeneratedPropertiesFromCase(body);
+        const comments = removeServerGeneratedPropertiesFromComments(data.comments ?? []);
+        expect({ ...data, comments }).to.eql({
+          ...postCaseResp(caseRes.body.id),
+          comments,
+          totalComment: 1,
+          updated_by: {
+            email: null,
+            full_name: null,
+            username: null,
+          },
+        });
+      });
+
+      it('should add a comment of type alert', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+
+        const caseRes = await supertest
+          .post(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(postCaseReq)
+          .expect(200);
+
+        const params = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: caseRes.body.id,
+            comment: { alertId: 'test-id', index: 'test-index', type: 'alert' },
           },
         };
 

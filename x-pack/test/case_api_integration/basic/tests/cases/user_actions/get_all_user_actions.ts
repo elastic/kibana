@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/case/common/constants';
-import { defaultUser, postCaseReq, postCommentReq } from '../../../../common/lib/mock';
+import { defaultUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   deleteCases,
   deleteCasesUserActions,
@@ -251,7 +251,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq)
+        .send(postCommentUserReq)
         .expect(200);
 
       const { body } = await supertest
@@ -264,7 +264,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body[1].action_field).to.eql(['comment']);
       expect(body[1].action).to.eql('create');
       expect(body[1].old_value).to.eql(null);
-      expect(body[1].new_value).to.eql(postCommentReq.comment);
+      expect(body[1].new_value).to.eql(JSON.stringify(postCommentUserReq));
     });
 
     it(`on update comment, user action: 'update' should be called with actionFields: ['comments']`, async () => {
@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq)
+        .send(postCommentUserReq)
         .expect(200);
 
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
@@ -285,6 +285,7 @@ export default ({ getService }: FtrProviderContext): void => {
         id: patchedCase.comments[0].id,
         version: patchedCase.comments[0].version,
         comment: newComment,
+        type: 'user',
       });
 
       const { body } = await supertest
@@ -296,8 +297,13 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.length).to.eql(3);
       expect(body[2].action_field).to.eql(['comment']);
       expect(body[2].action).to.eql('update');
-      expect(body[2].old_value).to.eql(postCommentReq.comment);
-      expect(body[2].new_value).to.eql(newComment);
+      expect(body[2].old_value).to.eql(JSON.stringify(postCommentUserReq));
+      expect(body[2].new_value).to.eql(
+        JSON.stringify({
+          comment: newComment,
+          type: 'user',
+        })
+      );
     });
 
     it(`on new push to service, user action: 'push-to-service' should be called with actionFields: ['pushed']`, async () => {
