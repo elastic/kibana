@@ -58,7 +58,7 @@ describe('deprecations', () => {
       const { messages } = applyKibanaDeprecations({ index });
       expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Multitenancy by changing 'kibana.index' is no longer supported. See https://ela.st/kbn-remove-legacy-multitenancy for more details",
+        "Multitenancy by changing 'kibana.index' will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details",
       ]
     `);
     });

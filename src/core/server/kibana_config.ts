@@ -27,7 +27,7 @@ const deprecations: ConfigDeprecationProvider = () => [
     const kibana = settings[fromPath];
     if (kibana?.index) {
       log(
-        `Multitenancy by changing 'kibana.index' is no longer supported. See https://ela.st/kbn-remove-legacy-multitenancy for more details`
+        `Multitenancy by changing 'kibana.index' will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`
       );
     }
     return settings;
