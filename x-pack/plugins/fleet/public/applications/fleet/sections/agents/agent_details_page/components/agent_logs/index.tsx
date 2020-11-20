@@ -22,16 +22,11 @@ import { TimeRange, esKuery } from '../../../../../../../../../../../src/plugins
 import { LogStream } from '../../../../../../../../../infra/public';
 import { Agent } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
-import {
-  DATASET_FIELD,
-  AGENT_DATASET,
-  LOG_LEVEL_FIELD,
-  AGENT_ID_FIELD,
-  DEFAULT_DATE_RANGE,
-} from './constants';
+import { AGENT_DATASET, DEFAULT_DATE_RANGE } from './constants';
 import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
+import { buildQuery } from './build_query';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -105,28 +100,17 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
     }
   }, []);
 
-  // Base queries: agent id, dataset, log level
-  const AGENT_QUERY = useMemo(() => {
-    const agentQuery = `${AGENT_ID_FIELD.name}:${agent.id}`;
-    const datasetQuery = selectedDatasets.length
-      ? selectedDatasets.map((dataset) => `${DATASET_FIELD.name}:${dataset}`).join(' or ')
-      : `${DATASET_FIELD.name}:${AGENT_DATASET} or ${DATASET_FIELD.name}:${AGENT_DATASET}.*`;
-    return `${agentQuery} and (${datasetQuery})`;
-  }, [agent.id, selectedDatasets]);
-  const LOG_LEVEL_QUERY = useMemo(
-    () => selectedLogLevels.map((level) => `${LOG_LEVEL_FIELD.name}:${level}`).join(' or '),
-    [selectedLogLevels]
+  // Build final log stream query from agent id, datasets, log levels, and user input
+  const logStreamQuery = useMemo(
+    () =>
+      buildQuery({
+        agentId: agent.id,
+        datasets: selectedDatasets,
+        logLevels: selectedLogLevels,
+        userQuery: query,
+      }),
+    [agent.id, query, selectedDatasets, selectedLogLevels]
   );
-  const BASE_QUERY = useMemo(
-    () => (LOG_LEVEL_QUERY ? `(${AGENT_QUERY}) and (${LOG_LEVEL_QUERY})` : AGENT_QUERY),
-    [AGENT_QUERY, LOG_LEVEL_QUERY]
-  );
-
-  // Final query: base + user queries
-  const LOG_STREAM_QUERY = useMemo(() => (query ? `(${BASE_QUERY}) and (${query})` : BASE_QUERY), [
-    BASE_QUERY,
-    query,
-  ]);
 
   // Generate URL to pass page state to Logs UI
   const viewInLogsUrl = useMemo(
@@ -142,7 +126,7 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
                 streamLive: false,
               }),
               logFilter: encode({
-                expression: LOG_STREAM_QUERY,
+                expression: logStreamQuery,
                 kind: 'kuery',
               }),
             },
@@ -150,7 +134,7 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
           ),
         })
       ),
-    [LOG_STREAM_QUERY, dateRange.endExpression, dateRange.startExpression, http.basePath]
+    [logStreamQuery, dateRange.endExpression, dateRange.startExpression, http.basePath]
   );
 
   return (
@@ -225,7 +209,7 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
             height="100%"
             startTimestamp={dateRange.startTimestamp}
             endTimestamp={dateRange.endTimestamp}
-            query={LOG_STREAM_QUERY}
+            query={logStreamQuery}
           />
         </EuiPanel>
       </EuiFlexItem>

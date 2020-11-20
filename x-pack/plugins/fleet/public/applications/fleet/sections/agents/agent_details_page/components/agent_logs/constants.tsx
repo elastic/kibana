@@ -5,6 +5,7 @@
  */
 export const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
 export const AGENT_DATASET = 'elastic_agent';
+export const AGENT_DATASET_PATTERN = 'elastic_agent.*';
 export const AGENT_ID_FIELD = {
   name: 'elastic_agent.id',
   type: 'string',
