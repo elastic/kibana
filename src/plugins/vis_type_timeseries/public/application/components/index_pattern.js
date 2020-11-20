@@ -72,7 +72,7 @@ export const IndexPattern = ({
   onChange,
   disabled,
   model: _model,
-  allowsMaxBarsOption,
+  allowLevelofDetail,
 }) => {
   const config = getUISettings();
 
@@ -98,7 +98,7 @@ export const IndexPattern = ({
   );
 
   const convertMaxBarsToPercents = (maxBars) => {
-    const rawPercents = (maxBars / 100) * maxBarsUiSettings;
+    const rawPercents = (maxBars / maxBarsUiSettings) * 100;
 
     return Math.round(rawPercents / 10) * 10 || 1;
   };
@@ -259,7 +259,7 @@ export const IndexPattern = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {allowsMaxBarsOption && (
+      {allowLevelofDetail && (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
@@ -322,5 +322,5 @@ IndexPattern.propTypes = {
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
   className: PropTypes.string,
-  allowsMaxBarsOption: PropTypes.bool,
+  allowLevelofDetail: PropTypes.bool,
 };

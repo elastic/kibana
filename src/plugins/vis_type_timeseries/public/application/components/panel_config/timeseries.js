@@ -193,7 +193,7 @@ class TimeseriesPanelConfigUi extends Component {
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
-              allowsMaxBarsOption={true}
+              allowLevelofDetail={true}
             />
 
             <EuiHorizontalRule />
