@@ -18,6 +18,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IndexPatternSpec } from 'src/plugins/data/common';
 import { IRouter } from '../../../../../core/server';
 import { assertIndexPatternsContext } from './util/assert_index_patterns_context';
 import { handleErrors } from './util/handle_errors';
@@ -69,7 +70,7 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
           const ip = ctx.indexPatterns.indexPatterns;
           const body = req.body;
           const indexPattern = await ip.createAndSave(
-            body.index_pattern,
+            body.index_pattern as IndexPatternSpec,
             body.override || false,
             body.skip_field_refresh || false,
             body.make_default || true
