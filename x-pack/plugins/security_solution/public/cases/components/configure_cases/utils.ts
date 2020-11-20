@@ -7,10 +7,10 @@ import { ConnectorTypeFields, ConnectorTypes } from '../../../../../case/common/
 import {
   CaseField,
   ActionType,
-  CasesConfigurationMapping,
   ThirdPartyField,
   ActionConnector,
   CaseConnector,
+  CasesConfigurationMapping,
 } from '../../containers/configure/types';
 
 export const setActionTypeToMapping = (

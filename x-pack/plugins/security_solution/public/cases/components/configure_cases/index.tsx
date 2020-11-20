@@ -76,6 +76,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     connector,
     closureType,
     loading: loadingCaseConfigure,
+    mappings,
     persistLoading,
     persistCaseConfigure,
     setConnector,
@@ -188,7 +189,8 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           handleShowEditFlyout={onClickUpdateConnector}
-          isLoading={isLoadingConnectors}
+          isLoading={isLoadingAny}
+          mappings={mappings}
           onChangeConnector={onChangeConnector}
           onClickUpdateMappings={onClickUpdateMappings}
           selectedConnector={connector}

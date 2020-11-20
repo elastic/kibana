@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
-import { ActionConnector } from '../../containers/configure/types';
+import { ActionConnector, CasesConfigurationMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
@@ -35,6 +35,7 @@ export interface Props {
   disabled: boolean;
   handleShowEditFlyout: () => void;
   isLoading: boolean;
+  mappings: CasesConfigurationMapping[];
   onChangeConnector: (id: string) => void;
   onClickUpdateMappings: () => void;
   selectedConnector: { id: string; type: string };
@@ -45,6 +46,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   disabled,
   handleShowEditFlyout,
   isLoading,
+  mappings,
   onChangeConnector,
   onClickUpdateMappings,
   selectedConnector,
@@ -103,7 +105,8 @@ const ConnectorsComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <Mapping
                   connectorActionTypeId={selectedConnector.type}
-                  mapping={null}
+                  isLoading={isLoading}
+                  mappings={mappings}
                   updateFieldMappingsDisabled={updateConnectorDisabled}
                   setEditFlyoutVisibility={onClickUpdateMappings}
                 />

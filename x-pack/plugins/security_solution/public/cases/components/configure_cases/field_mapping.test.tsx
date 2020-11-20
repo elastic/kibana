@@ -7,18 +7,16 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
-import { createDefaultMapping } from '../../../common/lib/connectors/utils';
-
 import { FieldMapping, FieldMappingProps } from './field_mapping';
-import { mapping } from './__mock__';
+import { mappings } from './__mock__';
 import { FieldMappingRow } from './field_mapping_row';
 import { TestProviders } from '../../../common/mock';
 
 describe('FieldMappingRow', () => {
   let wrapper: ReactWrapper;
   const props: FieldMappingProps = {
-    mapping,
+    isLoading: false,
+    mappings,
     connectorActionTypeId: '.servicenow',
   };
 
@@ -39,7 +37,7 @@ describe('FieldMappingRow', () => {
   });
 
   test('it shows the correct number of FieldMappingRow with default mapping', () => {
-    const newWrapper = mount(<FieldMapping {...props} mapping={null} />, {
+    const newWrapper = mount(<FieldMapping {...props} mappings={[]} />, {
       wrappingComponent: TestProviders,
     });
 
@@ -49,30 +47,14 @@ describe('FieldMappingRow', () => {
   test('it pass the corrects props to mapping row', () => {
     const rows = wrapper.find(FieldMappingRow);
     rows.forEach((row, index) => {
-      expect(row.prop('securitySolutionField')).toEqual(mapping[index].source);
-      expect(row.prop('selectedActionType')).toEqual(mapping[index].actionType);
-      expect(row.prop('selectedThirdParty')).toEqual(mapping[index].target);
-    });
-  });
-
-  test('it pass the default mapping when mapping is null', () => {
-    const newWrapper = mount(<FieldMapping {...props} mapping={null} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    const selectedConnector = connectorsConfiguration['.servicenow'];
-    const defaultMapping = createDefaultMapping(selectedConnector.fields);
-
-    const rows = newWrapper.find(FieldMappingRow);
-    rows.forEach((row, index) => {
-      expect(row.prop('securitySolutionField')).toEqual(defaultMapping[index].source);
-      expect(row.prop('selectedActionType')).toEqual(defaultMapping[index].actionType);
-      expect(row.prop('selectedThirdParty')).toEqual(defaultMapping[index].target);
+      expect(row.prop('securitySolutionField')).toEqual(mappings[index].source);
+      expect(row.prop('selectedActionType')).toEqual(mappings[index].actionType);
+      expect(row.prop('selectedThirdParty')).toEqual(mappings[index].target);
     });
   });
 
   test('it should show zero rows on empty array', () => {
-    const newWrapper = mount(<FieldMapping {...props} mapping={[]} />, {
+    const newWrapper = mount(<FieldMapping {...props} mappings={[]} />, {
       wrappingComponent: TestProviders,
     });
 

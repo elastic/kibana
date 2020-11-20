@@ -12,12 +12,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiTextColor } from
 import * as i18n from './translations';
 
 import { FieldMapping } from './field_mapping';
-import { CasesConfigurationMapping } from '../../containers/configure/types';
 import { connectorsConfiguration } from '../../../common/lib/connectors/config';
+import { CasesConfigurationMapping } from '../../containers/configure/types';
 
 export interface MappingProps {
   connectorActionTypeId: string;
-  mapping: CasesConfigurationMapping[] | null;
+  isLoading: boolean;
+  mappings: CasesConfigurationMapping[];
   setEditFlyoutVisibility: () => void;
   updateFieldMappingsDisabled: boolean;
 }
@@ -28,7 +29,8 @@ const EuiButtonEmptyExtended = styled(EuiButtonEmpty)`
 `;
 const MappingComponent: React.FC<MappingProps> = ({
   connectorActionTypeId,
-  mapping,
+  isLoading,
+  mappings,
   setEditFlyoutVisibility,
   updateFieldMappingsDisabled,
 }) => {
@@ -49,7 +51,7 @@ const MappingComponent: React.FC<MappingProps> = ({
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiButtonEmptyExtended
-              data-test-subj="case-mapping-update-connector-button"
+              data-test-subj="case-mappings-update-connector-button"
               disabled={updateFieldMappingsDisabled}
               onClick={setEditFlyoutVisibility}
             >
@@ -61,8 +63,9 @@ const MappingComponent: React.FC<MappingProps> = ({
       <EuiFlexItem grow={false}>
         <FieldMapping
           connectorActionTypeId={connectorActionTypeId}
-          data-test-subj="case-mapping-field"
-          mapping={mapping}
+          data-test-subj="case-mappings-field"
+          isLoading={isLoading}
+          mappings={mappings}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

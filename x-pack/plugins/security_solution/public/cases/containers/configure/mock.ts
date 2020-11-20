@@ -12,7 +12,7 @@ import {
 } from '../../../../../case/common/api';
 import { CaseConfigure, CasesConfigurationMapping } from './types';
 
-export const mapping: CasesConfigurationMapping[] = [
+export const mappings: CasesConfigurationMapping[] = [
   {
     source: 'title',
     target: 'short_description',
@@ -70,6 +70,7 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
     fields: null,
   },
   closure_type: 'close-by-pushing',
+  mappings: [],
   updated_at: '2020-04-06T14:03:18.657Z',
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
@@ -95,6 +96,7 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
     fields: null,
   },
   closureType: 'close-by-pushing',
+  mappings,
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',

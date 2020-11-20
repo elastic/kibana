@@ -10,27 +10,24 @@ import {
   ActionType,
   CaseConnector,
   CaseField,
-  CasesConfigurationMapping,
   CasesConfigure,
   ClosureType,
   ThirdPartyField,
 } from '../../../../../case/common/api';
 
-export {
-  ActionConnector,
-  ActionType,
-  CaseConnector,
-  CaseField,
-  CasesConfigurationMapping,
-  ClosureType,
-  ThirdPartyField,
-};
+export { ActionConnector, ActionType, CaseConnector, CaseField, ClosureType, ThirdPartyField };
+export interface CasesConfigurationMapping {
+  source: CaseField;
+  target: string;
+  actionType: ActionType;
+}
 
 export interface CaseConfigure {
   createdAt: string;
   createdBy: ElasticUser;
   connector: CasesConfigure['connector'];
   closureType: ClosureType;
+  mappings: CasesConfigurationMapping[];
   updatedAt: string;
   updatedBy: ElasticUser;
   version: string;

@@ -9,7 +9,7 @@ import { UseConnectorsResponse } from '../../../containers/configure/use_connect
 import { connectorsMock } from '../../../containers/configure/mock';
 import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
 import { ConnectorTypes } from '../../../../../../case/common/api';
-export { mapping } from '../../../containers/configure/mock';
+export { mappings } from '../../../containers/configure/mock';
 export const connectors: ActionConnector[] = connectorsMock;
 
 // x - pack / plugins / triggers_actions_ui;
@@ -35,14 +35,14 @@ export const useCaseConfigureResponse: ReturnUseCaseConfigure = {
   },
   firstLoad: false,
   loading: false,
-  mapping: null,
+  mappings: [],
   persistCaseConfigure: jest.fn(),
   persistLoading: false,
   refetchCaseConfigure: jest.fn(),
   setClosureType: jest.fn(),
   setConnector: jest.fn(),
   setCurrentConfiguration: jest.fn(),
-  setMapping: jest.fn(),
+  setMappings: jest.fn(),
   version: '',
 };
 

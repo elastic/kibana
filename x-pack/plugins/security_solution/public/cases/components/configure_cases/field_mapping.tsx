@@ -8,12 +8,11 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { CasesConfigurationMapping } from '../../containers/configure/types';
 import { FieldMappingRowStatic } from './field_mapping_row_static';
 import * as i18n from './translations';
 
 import { connectorsConfiguration } from '../../../common/lib/connectors/config';
-import { createDefaultMapping } from '../../../common/lib/connectors/utils';
+import { CasesConfigurationMapping } from '../../containers/configure/types';
 
 const FieldRowWrapper = styled.div`
   margin: 10px 0;
@@ -22,17 +21,19 @@ const FieldRowWrapper = styled.div`
 
 export interface FieldMappingProps {
   connectorActionTypeId: string;
-  mapping: CasesConfigurationMapping[] | null;
+  isLoading: boolean;
+  mappings: CasesConfigurationMapping[];
 }
 
-const FieldMappingComponent: React.FC<FieldMappingProps> = ({ mapping, connectorActionTypeId }) => {
+const FieldMappingComponent: React.FC<FieldMappingProps> = ({
+  connectorActionTypeId,
+  isLoading,
+  mappings,
+}) => {
   const selectedConnector = useMemo(
     () => connectorsConfiguration[connectorActionTypeId] ?? { fields: {} },
     [connectorActionTypeId]
   );
-  const defaultMapping = useMemo(() => createDefaultMapping(selectedConnector.fields), [
-    selectedConnector.fields,
-  ]);
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -52,11 +53,12 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({ mapping, connector
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <FieldRowWrapper data-test-subj="case-configure-field-mapping-row-wrapper">
-          {(mapping ?? defaultMapping).map((item) => (
+        <FieldRowWrapper data-test-subj="case-configure-field-mappings-row-wrapper">
+          {mappings.map((item) => (
             <FieldMappingRowStatic
               key={`${item.source}`}
               securitySolutionField={item.source}
+              isLoading={isLoading}
               selectedActionType={item.actionType}
               selectedThirdParty={item.target ?? 'not_mapped'}
             />

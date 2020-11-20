@@ -53,9 +53,7 @@ export function initPostCaseConfigure({
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        console.log('hello 111');
         const myCaseConfigure = await caseConfigureService.find({ client });
-        console.log('myCaseConfigure', JSON.stringify(myCaseConfigure));
         if (myCaseConfigure.saved_objects.length > 0) {
           await Promise.all(
             myCaseConfigure.saved_objects.map((cc) =>
@@ -88,6 +86,7 @@ export function initPostCaseConfigure({
             },
           },
         });
+        let theMapping;
         // Create connector mappings if there are none
         if (myConnectorMappings.total === 0) {
           const res = await caseClient.getFields({
@@ -95,7 +94,7 @@ export function initPostCaseConfigure({
             connectorId: query.connector.id,
             connectorType: query.connector.type,
           });
-          await connectorMappingsService.post({
+          theMapping = await connectorMappingsService.post({
             client,
             attributes: {
               mappings: res.defaultMappings,
@@ -108,6 +107,8 @@ export function initPostCaseConfigure({
               },
             ],
           });
+        } else {
+          theMapping = myConnectorMappings.saved_objects[0];
         }
 
         return response.ok({
@@ -115,6 +116,7 @@ export function initPostCaseConfigure({
             ...post.attributes,
             // Reserve for future implementations
             connector: transformESConnectorToCaseConnector(post.attributes.connector),
+            mappings: theMapping ? theMapping.attributes.mappings : [],
             version: post.version ?? '',
           }),
         });

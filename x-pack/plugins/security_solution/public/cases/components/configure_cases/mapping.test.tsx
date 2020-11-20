@@ -9,7 +9,7 @@ import { mount, ReactWrapper } from 'enzyme';
 
 import { TestProviders } from '../../../common/mock';
 import { Mapping, MappingProps } from './mapping';
-import { mapping } from './__mock__';
+import { mappings } from './__mock__';
 
 describe('Mapping', () => {
   let wrapper: ReactWrapper;
@@ -17,7 +17,8 @@ describe('Mapping', () => {
   const setEditFlyoutVisibility = jest.fn();
   const props: MappingProps = {
     connectorActionTypeId: '.servicenow',
-    mapping,
+    isLoading: false,
+    mappings,
     setEditFlyoutVisibility,
     updateFieldMappingsDisabled: false,
   };

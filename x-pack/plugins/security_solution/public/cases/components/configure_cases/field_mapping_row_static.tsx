@@ -5,18 +5,20 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiIcon } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
 import { capitalize } from 'lodash/fp';
 import { CaseField, ActionType, ThirdPartyField } from '../../containers/configure/types';
 
 export interface RowProps {
+  isLoading: boolean;
   securitySolutionField: CaseField;
   selectedActionType: ActionType;
   selectedThirdParty: ThirdPartyField;
 }
 
 const FieldMappingRowComponent: React.FC<RowProps> = ({
+  isLoading,
   securitySolutionField,
   selectedActionType,
   selectedThirdParty,
@@ -42,8 +44,12 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>{selectedThirdPartyCapitalized}</EuiFlexItem>
-      <EuiFlexItem>{selectedActionTypeCapitalized}</EuiFlexItem>
+      <EuiFlexItem>
+        {isLoading ? <EuiLoadingSpinner size="m" /> : selectedThirdPartyCapitalized}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {isLoading ? <EuiLoadingSpinner size="m" /> : selectedActionTypeCapitalized}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

@@ -11,7 +11,7 @@ import {
   ReturnUseCaseConfigure,
   ConnectorConfiguration,
 } from './use_configure';
-import { mapping, caseConfigurationCamelCaseResponseMock } from './mock';
+import { mappings, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
@@ -46,7 +46,7 @@ describe('useConfigure', () => {
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setConnector: result.current.setConnector,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setMappings: result.current.setMappings,
       });
     });
   });
@@ -74,7 +74,7 @@ describe('useConfigure', () => {
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setConnector: result.current.setConnector,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setMappings: result.current.setMappings,
       });
     });
   });
@@ -100,9 +100,9 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(result.current.mapping).toEqual(null);
-      result.current.setMapping(mapping);
-      expect(result.current.mapping).toEqual(mapping);
+      expect(result.current.mappings).toEqual(null);
+      result.current.setMappings(mappings);
+      expect(result.current.mappings).toEqual(mappings);
     });
   });
 
@@ -211,7 +211,7 @@ describe('useConfigure', () => {
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setConnector: result.current.setConnector,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setMappings: result.current.setMappings,
       });
     });
   });
@@ -254,7 +254,7 @@ describe('useConfigure', () => {
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setConnector: result.current.setConnector,
         setClosureType: result.current.setClosureType,
-        setMapping: result.current.setMapping,
+        setMappings: result.current.setMappings,
       });
     });
   });

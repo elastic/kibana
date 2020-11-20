@@ -19,14 +19,15 @@ describe('Connectors', () => {
   const handleShowEditFlyout = jest.fn();
 
   const props: Props = {
-    disabled: false,
-    updateConnectorDisabled: false,
     connectors,
-    selectedConnector: { id: 'none', type: ConnectorTypes.none },
+    disabled: false,
+    handleShowEditFlyout,
     isLoading: false,
+    mappings: [],
     onChangeConnector,
     onClickUpdateMappings: jest.fn(),
-    handleShowEditFlyout,
+    selectedConnector: { id: 'none', type: ConnectorTypes.none },
+    updateConnectorDisabled: false,
   };
 
   beforeAll(() => {

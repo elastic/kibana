@@ -8,7 +8,7 @@ import * as rt from 'io-ts';
 
 import { ActionResult } from '../../../../actions/common';
 import { UserRT } from '../user';
-import { CaseConnectorRt, ESCaseConnector } from '../connectors';
+import { CaseConnectorRt, ConnectorMappingsRt, ESCaseConnector } from '../connectors';
 
 export type ActionConnector = ActionResult;
 
@@ -38,6 +38,7 @@ export const CaseConfigureAttributesRt = rt.intersection([
 
 export const CaseConfigureResponseRt = rt.intersection([
   CaseConfigureAttributesRt,
+  ConnectorMappingsRt,
   rt.type({
     version: rt.string,
   }),

@@ -13,7 +13,7 @@ import {
   displaySuccessToast,
 } from '../../../common/components/toasters';
 import * as i18n from './translations';
-import { CasesConfigurationMapping, ClosureType, CaseConfigure, CaseConnector } from './types';
+import { ClosureType, CaseConfigure, CaseConnector, CasesConfigurationMapping } from './types';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
@@ -24,7 +24,7 @@ export interface State extends ConnectorConfiguration {
   currentConfiguration: ConnectorConfiguration;
   firstLoad: boolean;
   loading: boolean;
-  mapping: CasesConfigurationMapping[] | null;
+  mappings: CasesConfigurationMapping[];
   persistLoading: boolean;
   version: string;
 }
@@ -58,8 +58,8 @@ export type Action =
       closureType: ClosureType;
     }
   | {
-      type: 'setMapping';
-      mapping: CasesConfigurationMapping[];
+      type: 'setMappings';
+      mappings: CasesConfigurationMapping[];
     };
 
 export const configureCasesReducer = (state: State, action: Action) => {
@@ -102,11 +102,10 @@ export const configureCasesReducer = (state: State, action: Action) => {
         closureType: action.closureType,
       };
     }
-    case 'setMapping': {
-      console.log('setMapping', { state, mapping: action.mapping });
+    case 'setMappings': {
       return {
         ...state,
-        mapping: action.mapping,
+        mappings: action.mappings,
       };
     }
     default:
@@ -120,7 +119,7 @@ export interface ReturnUseCaseConfigure extends State {
   setClosureType: (closureType: ClosureType) => void;
   setConnector: (connector: CaseConnector) => void;
   setCurrentConfiguration: (configuration: ConnectorConfiguration) => void;
-  setMapping: (newMapping: CasesConfigurationMapping[]) => void;
+  setMappings: (newMapping: CasesConfigurationMapping[]) => void;
 }
 
 export const initialState: State = {
@@ -142,7 +141,7 @@ export const initialState: State = {
   },
   firstLoad: false,
   loading: true,
-  mapping: null,
+  mappings: [],
   persistLoading: false,
   version: '',
 };
@@ -171,10 +170,10 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     });
   }, []);
 
-  const setMapping = useCallback((newMapping: CasesConfigurationMapping[]) => {
+  const setMappings = useCallback((mappings: CasesConfigurationMapping[]) => {
     dispatch({
-      mapping: newMapping,
-      type: 'setMapping',
+      mappings,
+      type: 'setMappings',
     });
   }, []);
 
@@ -223,6 +222,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
               setClosureType(res.closureType);
             }
             setVersion(res.version);
+            setMappings(res.mappings);
 
             if (!state.firstLoad) {
               setFirstLoad(true);
@@ -286,6 +286,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
               setClosureType(res.closureType);
             }
             setVersion(res.version);
+            setMappings(res.mappings);
             if (setCurrentConfiguration != null) {
               setCurrentConfiguration({
                 closureType: res.closureType,
@@ -331,6 +332,6 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     setCurrentConfiguration,
     setConnector,
     setClosureType,
-    setMapping,
+    setMappings,
   };
 };

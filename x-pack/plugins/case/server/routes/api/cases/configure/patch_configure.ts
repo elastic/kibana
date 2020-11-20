@@ -83,6 +83,7 @@ export function initPatchCaseConfigure({
             updated_by: { email, full_name, username },
           },
         });
+        let theMapping;
         if (connector != null) {
           const myConnectorMappings = await connectorMappingsService.find({
             client,
@@ -100,7 +101,7 @@ export function initPatchCaseConfigure({
               connectorId: connector.id,
               connectorType: connector.type,
             });
-            await connectorMappingsService.post({
+            theMapping = await connectorMappingsService.post({
               client,
               attributes: {
                 mappings: res.defaultMappings,
@@ -113,6 +114,8 @@ export function initPatchCaseConfigure({
                 },
               ],
             });
+          } else {
+            theMapping = myConnectorMappings.saved_objects[0];
           }
         }
 
@@ -123,6 +126,7 @@ export function initPatchCaseConfigure({
             connector: transformESConnectorToCaseConnector(
               patch.attributes.connector ?? myCaseConfigure.saved_objects[0].attributes.connector
             ),
+            mappings: theMapping ? theMapping.attributes.mappings : [],
             version: patch.version ?? '',
           }),
         });
