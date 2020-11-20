@@ -40,7 +40,6 @@ export const useUpdateSavedObject = (type: string) => {
       };
       save();
     },
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [type, kibana.services.savedObjects]
   );
 

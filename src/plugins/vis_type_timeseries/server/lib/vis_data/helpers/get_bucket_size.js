@@ -42,14 +42,18 @@ const calculateBucketData = (timeInterval, capabilities) => {
   }
 
   // Check decimal
-  if (parsedInterval.value % 1 !== 0) {
+  if (parsedInterval && parsedInterval.value % 1 !== 0) {
     if (parsedInterval.unit !== 'ms') {
-      const { value, unit } = convertIntervalToUnit(
+      const converted = convertIntervalToUnit(
         intervalString,
         ASCENDING_UNIT_ORDER[ASCENDING_UNIT_ORDER.indexOf(parsedInterval.unit) - 1]
       );
 
-      intervalString = value + unit;
+      if (converted) {
+        intervalString = converted.value + converted.unit;
+      }
+
+      intervalString = undefined;
     } else {
       intervalString = '1ms';
     }
