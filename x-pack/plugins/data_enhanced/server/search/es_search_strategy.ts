@@ -32,6 +32,7 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
+import { AsyncSearchResponse } from './types';
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -47,9 +48,11 @@ export const enhancedEsSearchStrategyProvider = (
 
     const search = async () => {
       const params = id
-        ? { ...getDefaultAsyncGetParams(), id }
+        ? getDefaultAsyncGetParams()
         : { ...(await getDefaultAsyncSubmitParams(uiSettingsClient, options)), ...request.params };
-      const promise = id ? client.get(params) : client.submit(params);
+      const promise = id
+        ? client.get<AsyncSearchResponse>({ ...params, id })
+        : client.submit<AsyncSearchResponse>(params);
       const { body } = await shimAbortSignal(promise, options.abortSignal);
       return toAsyncKibanaSearchResponse(body);
     };

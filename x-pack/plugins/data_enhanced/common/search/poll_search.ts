@@ -4,20 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from, NEVER, timer } from 'rxjs';
+import { from, NEVER, Observable, timer } from 'rxjs';
 import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
-import type {
-  IEsSearchResponse,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common';
+import type { IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
 import { isErrorResponse, isPartialResponse } from '../../../../../src/plugins/data/common';
 import { AbortError, abortSignalToPromise } from '../../../../../src/plugins/kibana_utils/common';
 import type { IAsyncSearchOptions } from './types';
 
-export function pollSearch<Response extends IKibanaSearchResponse = IEsSearchResponse>(
+export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
   { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
-) {
+): Observable<Response> => {
   const aborted = options?.abortSignal
     ? abortSignalToPromise(options?.abortSignal)
     : { promise: NEVER, cleanup: () => {} };
@@ -27,8 +24,8 @@ export function pollSearch<Response extends IKibanaSearchResponse = IEsSearchRes
     tap((response) => {
       if (isErrorResponse(response)) throw new AbortError();
     }),
-    takeWhile(isPartialResponse, true),
-    takeUntil(aborted.promise),
+    takeWhile<Response>(isPartialResponse, true),
+    takeUntil<Response>(from(aborted.promise)),
     finalize(aborted.cleanup)
   );
-}
+};

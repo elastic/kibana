@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import type { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import type { Search } from '@elastic/elasticsearch/api/requestParams';
-import type { SearchResponse } from 'elasticsearch';
 import type { IUiSettingsClient, SharedGlobalConfig } from 'kibana/server';
 import { UI_SETTINGS } from '../../../common';
 
@@ -50,14 +49,18 @@ export async function getDefaultSearchParams(
  * `TransportRequestPromise` is called, actually performing the cancellation.
  * @internal
  */
-export function shimAbortSignal<T = ApiResponse<SearchResponse<unknown>>>(
-  promise: TransportRequestPromise<T>,
-  signal?: AbortSignal
-) {
+export const shimAbortSignal = <T>(promise: TransportRequestPromise<T>, signal?: AbortSignal) => {
+  if (!signal) return promise;
   const abortHandler = () => {
     promise.abort();
-    signal?.removeEventListener('abort', abortHandler);
+    cleanup();
   };
-  signal?.addEventListener('abort', abortHandler);
-  return promise.then().finally(() => signal?.removeEventListener('abort', abortHandler));
-}
+  const cleanup = () => signal.removeEventListener('abort', abortHandler);
+  if (signal.aborted) {
+    promise.abort();
+  } else {
+    signal.addEventListener('abort', abortHandler);
+    promise.then(cleanup, cleanup);
+  }
+  return promise;
+};

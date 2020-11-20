@@ -12,19 +12,14 @@ import type {
   EqlSearchStrategyResponse,
   IAsyncSearchOptions,
 } from '../../common';
-import {
-  getDefaultSearchParams,
-  SearchUsage,
-  searchUsageObserver,
-  shimAbortSignal,
-} from '../../../../../src/plugins/data/server';
+import { getDefaultSearchParams, shimAbortSignal } from '../../../../../src/plugins/data/server';
 import { pollSearch } from '../../common';
 import { getDefaultAsyncGetParams, getIgnoreThrottled } from './request_utils';
 import { toEqlKibanaSearchResponse } from './response_utils';
+import { EqlSearchResponse } from './types';
 
 export const eqlSearchStrategyProvider = (
-  logger: Logger,
-  usage?: SearchUsage
+  logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   return {
     cancel: async (id, options, { esClient }) => {
@@ -39,7 +34,7 @@ export const eqlSearchStrategyProvider = (
 
       const search = async () => {
         const params = id
-          ? { ...getDefaultAsyncGetParams(), id }
+          ? getDefaultAsyncGetParams()
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
               ...(await getDefaultSearchParams(uiSettingsClient)),
@@ -47,16 +42,16 @@ export const eqlSearchStrategyProvider = (
               ...request.params,
             };
         const promise = id
-          ? client.get(params, request.options)
-          : client.search(params, request.options);
+          ? client.get<EqlSearchResponse>({ ...params, id }, request.options)
+          : client.search<EqlSearchResponse>(
+              params as EqlSearchStrategyRequest['params'],
+              request.options
+            );
         const response = await shimAbortSignal(promise, options.abortSignal);
         return toEqlKibanaSearchResponse(response);
       };
 
-      return pollSearch(search, options).pipe(
-        tap((response) => (id = response.id)),
-        tap(searchUsageObserver(logger, usage))
-      );
+      return pollSearch(search, options).pipe(tap((response) => (id = response.id)));
     },
   };
 };

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { shimAbortSignal } from './shim_abort_signal';
+import { getShardTimeout, getDefaultSearchParams, shimAbortSignal } from './request_utils';
+import { IUiSettingsClient, SharedGlobalConfig } from 'kibana/server';
 
 const createSuccessTransportRequestPromise = (
   body: any,
@@ -30,11 +31,88 @@ const createSuccessTransportRequestPromise = (
 };
 
 describe('request utils', () => {
-  describe('getShardTimeout', () => {});
+  describe('getShardTimeout', () => {
+    test('returns an empty object if the config does not contain a value', () => {
+      const result = getShardTimeout(({
+        elasticsearch: {
+          shardTimeout: {
+            asMilliseconds: jest.fn(),
+          },
+        },
+      } as unknown) as SharedGlobalConfig);
+      expect(result).toEqual({});
+    });
 
-  describe('getDefaultSearchParams', () => {});
+    test('returns an empty object if the config contains 0', () => {
+      const result = getShardTimeout(({
+        elasticsearch: {
+          shardTimeout: {
+            asMilliseconds: jest.fn().mockReturnValue(0),
+          },
+        },
+      } as unknown) as SharedGlobalConfig);
+      expect(result).toEqual({});
+    });
+
+    test('returns a duration if the config >= 0', () => {
+      const result = getShardTimeout(({
+        elasticsearch: {
+          shardTimeout: {
+            asMilliseconds: jest.fn().mockReturnValue(10),
+          },
+        },
+      } as unknown) as SharedGlobalConfig);
+      expect(result).toEqual({ timeout: '10ms' });
+    });
+  });
+
+  describe('getDefaultSearchParams', () => {
+    describe('max_concurrent_shard_requests', () => {
+      test('returns value if > 0', async () => {
+        const result = await getDefaultSearchParams(({
+          get: jest.fn().mockResolvedValue(1),
+        } as unknown) as IUiSettingsClient);
+        expect(result).toHaveProperty('max_concurrent_shard_requests', 1);
+      });
+
+      test('returns undefined if === 0', async () => {
+        const result = await getDefaultSearchParams(({
+          get: jest.fn().mockResolvedValue(0),
+        } as unknown) as IUiSettingsClient);
+        expect(result.max_concurrent_shard_requests).toBe(undefined);
+      });
+
+      test('returns undefined if undefined', async () => {
+        const result = await getDefaultSearchParams(({
+          get: jest.fn(),
+        } as unknown) as IUiSettingsClient);
+        expect(result.max_concurrent_shard_requests).toBe(undefined);
+      });
+    });
+
+    describe('other defaults', () => {
+      test('returns ignore_unavailable and track_total_hits', async () => {
+        const result = await getDefaultSearchParams(({
+          get: jest.fn(),
+        } as unknown) as IUiSettingsClient);
+        expect(result).toHaveProperty('ignore_unavailable', true);
+        expect(result).toHaveProperty('track_total_hits', true);
+      });
+    });
+  });
 
   describe('shimAbortSignal', () => {
+    test('aborts the promise if the signal is already aborted', async () => {
+      const promise = createSuccessTransportRequestPromise({
+        success: true,
+      });
+      const controller = new AbortController();
+      controller.abort();
+      shimAbortSignal(promise, controller.signal);
+
+      expect(promise.abort).toHaveBeenCalled();
+    });
+
     test('aborts the promise if the signal is aborted', () => {
       const promise = createSuccessTransportRequestPromise({
         success: true,
