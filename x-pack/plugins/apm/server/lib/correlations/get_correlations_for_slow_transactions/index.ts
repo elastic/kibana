@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -12,15 +14,10 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { asDuration } from '../../../../common/utils/formatters';
-import { rangeFilter } from '../../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getDurationForPercentile } from './get_duration_for_percentile';
-import {
-  formatAggregationResponse,
-  getSignificantTermsAgg,
-} from './get_significant_terms_agg';
-import { SignificantTermsScoring } from './scoring_rt';
+import { formatTopSignificantTerms } from './format_top_significant_terms';
+import { getChartsForTopSigTerms } from './get_charts_for_top_sig_terms';
 
 export async function getCorrelationsForSlowTransactions({
   serviceName,
@@ -28,13 +25,11 @@ export async function getCorrelationsForSlowTransactions({
   transactionName,
   durationPercentile,
   fieldNames,
-  scoring,
   setup,
 }: {
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  scoring: SignificantTermsScoring;
   durationPercentile: number;
   fieldNames: string[];
   setup: Setup & SetupTimeRange;
@@ -79,16 +74,22 @@ export async function getCorrelationsForSlowTransactions({
           ],
         },
       },
-      aggs: getSignificantTermsAgg({ fieldNames, backgroundFilters, scoring }),
+      aggs: fieldNames.reduce((acc, fieldName) => {
+        return {
+          ...acc,
+          [fieldName]: {
+            significant_terms: {
+              size: 10,
+              field: fieldName,
+              background_filter: { bool: { filter: backgroundFilters } },
+            },
+          },
+        };
+      }, {} as Record<string, { significant_terms: AggregationOptionsByType['significant_terms'] }>),
     },
   };
 
   const response = await apmEventClient.search(params);
-
-  return {
-    message: `Showing significant fields for transactions slower than ${durationPercentile}th percentile (${asDuration(
-      durationForPercentile
-    )})`,
-    response: formatAggregationResponse(response.aggregations),
-  };
+  const topSigTerms = formatTopSignificantTerms(response.aggregations);
+  return getChartsForTopSigTerms({ setup, backgroundFilters, topSigTerms });
 }
