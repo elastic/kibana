@@ -2,7 +2,7 @@
   "type": "index",
   "value": {
     "aliases": {
-      "exceptions-8.0.0": {
+      "exceptionsalert-8.0.0": {
         "is_write_index": false
       },
       "beats": {
@@ -10,7 +10,7 @@
       "siem-read-alias": {
       }
     },
-    "index": "exceptions-8.0.0-2019.08.30-000021",
+    "index": "exceptionsalert-8.0.0-2019.08.30-000021",
     "mappings": {
       "_meta": {
         "beat": "auditbeat",
@@ -3008,8 +3008,8 @@
       "index": {
         "lifecycle": {
           "indexing_complete": "true",
-          "name": "auditbeat-8.0.0",
-          "rollover_alias": "auditbeat-8.0.0"
+          "name": "exceptionsalert-8.0.0",
+          "rollover_alias": "exceptionsalert-8.0.0"
         },
         "mapping": {
           "total_fields": {
