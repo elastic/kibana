@@ -18,17 +18,17 @@ import {
   ORG_SOURCES_PATH,
   SOURCES_PATH,
   getSourcesPath,
-} from 'workplace_search/utils/routePaths';
+} from '../../routes';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { staticSourceData } from './sourceData';
-import { SourcesLogic } from './SourcesLogic';
+import { AppLogic } from '../../app_logic';
+import { staticSourceData } from './source_data';
+import { SourcesLogic } from './sources_logic';
 
-import { AddSource, AddSourceList } from './components/AddSource';
-import { SourceAdded } from './components/SourceAdded';
-import { OrganizationSources } from './OrganizationSources';
-import { PrivateSources } from './PrivateSources';
-import { SourceRouter } from './SourceRouter';
+import { AddSource, AddSourceList } from './components/add_source';
+import { SourceAdded } from './components/source_added';
+import { OrganizationSources } from './organization_sources';
+import { PrivateSources } from './private_sources';
+import { SourceRouter } from './source_router';
 
 export const SourcesRouter: React.FC = () => {
   const { pathname } = useLocation() as Location;

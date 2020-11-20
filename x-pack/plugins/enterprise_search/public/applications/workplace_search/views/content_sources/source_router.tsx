@@ -13,6 +13,7 @@ import { Route, Switch, useHistory, useParams } from 'react-router-dom';
 
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
+import { SidebarNavigation, AppView } from 'workplace_search/components';
 import {
   DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
   ENT_SEARCH_LICENSE_MANAGEMENT,
@@ -25,20 +26,22 @@ import {
   SOURCES_PATH,
   getContentSourcePath as sourcePath,
   getSourcesPath,
-} from 'workplace_search/utils/routePaths';
+} from '../../routes';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { Loading, SidebarNavigation, AppView } from 'workplace_search/components';
-import { CUSTOM_SERVICE_TYPE } from 'workplace_search/constants';
-import { SourceLogic } from './SourceLogic';
+import { AppLogic } from '../../app_logic';
 
-import { DisplaySettingsRouter } from './components/DisplaySettings';
-import { Overview } from './components/Overview';
-import { Schema } from './components/Schema';
-import { SchemaChangeErrors } from './components/Schema/SchemaChangeErrors';
-import { SourceContent } from './components/SourceContent';
-import { SourceInfoCard } from './components/SourceInfoCard';
-import { SourceSettings } from './components/SourceSettings';
+import { Loading } from '../../../shared/loading';
+
+import { CUSTOM_SERVICE_TYPE } from '../../constants';
+import { SourceLogic } from './source_logic';
+
+import { DisplaySettingsRouter } from './components/display_settings';
+import { Overview } from './components/overview';
+import { Schema } from './components/schema';
+import { SchemaChangeErrors } from './components/schema/schema_change_errors';
+import { SourceContent } from './components/source_content';
+import { SourceInfoCard } from './components/source_info_card';
+import { SourceSettings } from './components/source_settings';
 
 export const SourceRouter: React.FC = () => {
   const history = useHistory() as History;

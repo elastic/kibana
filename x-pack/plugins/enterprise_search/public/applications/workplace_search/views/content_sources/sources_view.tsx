@@ -23,13 +23,14 @@ import {
 } from '@elastic/eui';
 
 import FlashMessages from 'shared/components/FlashMessages';
-import { Loading, SourceIcon, AppView } from 'workplace_search/components';
-import {
-  EXTERNAL_IDENTITIES_DOCS_URL,
-  DOCUMENT_PERMISSIONS_DOCS_URL,
-} from 'workplace_search/utils/routePaths';
+import { AppView } from 'workplace_search/components';
 
-import { SourcesLogic } from './SourcesLogic';
+import { Loading } from '../../../shared/loading';
+import { SourceIcon } from '../../components/shared/source_icon';
+
+import { EXTERNAL_IDENTITIES_DOCS_URL, DOCUMENT_PERMISSIONS_DOCS_URL } from '../../routes';
+
+import { SourcesLogic } from './sources_logic';
 
 const POLLING_INTERVAL = 10000;
 

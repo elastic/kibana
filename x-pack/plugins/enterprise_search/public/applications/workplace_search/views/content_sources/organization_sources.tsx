@@ -10,18 +10,17 @@ import { useActions, useValues } from 'kea';
 import { Link, Redirect } from 'react-router-dom';
 
 import { EuiButton } from '@elastic/eui';
-import { ADD_SOURCE_PATH, getSourcesPath } from 'workplace_search/utils/routePaths';
+import { SidebarNavigation } from 'workplace_search/components';
+import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
-import {
-  Loading,
-  ViewContentHeader,
-  SidebarNavigation,
-  SourcesTable,
-  ContentSection,
-} from 'workplace_search/components';
+import { Loading } from '../../../shared/loading';
+import { ContentSection } from '../../components/shared/content_section';
+import { SourcesTable } from '../../components/shared/sources_table';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
 
-import { SourcesView } from 'workplace_search/ContentSources/SourcesView';
-import { SourcesLogic } from './SourcesLogic';
+import { SourcesLogic } from './sources_logic';
+
+import { SourcesView } from './sources_view';
 
 const ORG_LINK_TITLE = 'Add an organization content source';
 const ORG_NAV_TITLE = 'Manage organization content sources';

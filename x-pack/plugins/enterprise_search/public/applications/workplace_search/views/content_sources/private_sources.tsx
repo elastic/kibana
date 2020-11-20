@@ -11,21 +11,19 @@ import { useActions, useValues } from 'kea';
 import { Link } from 'react-router-dom';
 
 import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
-import { ADD_SOURCE_PATH } from 'workplace_search/utils/routePaths';
+import { SidebarNavigation } from 'workplace_search/components';
+import { ADD_SOURCE_PATH } from '../../routes';
 
-import {
-  Loading,
-  ViewContentHeader,
-  SidebarNavigation,
-  SourcesTable,
-  ContentSection,
-} from 'workplace_search/components';
+import { Loading } from '../../../shared/loading';
+import { ContentSection } from '../../components/shared/content_section';
+import { SourcesTable } from '../../components/shared/sources_table';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
 
-import { SidebarLink } from 'workplace_search/types';
+import { SidebarLink } from '../../types';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { SourcesView } from 'workplace_search/ContentSources/SourcesView';
-import { SourcesLogic } from './SourcesLogic';
+import { AppLogic } from '../../app_logic';
+import { SourcesView } from './sources_view';
+import { SourcesLogic } from './sources_logic';
 
 const PRIVATE_LINK_TITLE = 'Add a private content source';
 const PRIVATE_CAN_CREATE_NAV_TITLE = 'Manage private content sources';
