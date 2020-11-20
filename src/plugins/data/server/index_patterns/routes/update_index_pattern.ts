@@ -128,11 +128,7 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           }
 
           if (changeCount < 1) {
-            return res.badRequest({
-              body: JSON.stringify({
-                message: 'Index pattern chagne set is empty.',
-              }),
-            });
+            throw new Error('Index pattern change set is empty.');
           }
 
           await ip.updateSavedObject(indexPattern);
