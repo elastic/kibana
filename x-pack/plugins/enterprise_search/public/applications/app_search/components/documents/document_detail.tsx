@@ -67,8 +67,7 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
     <EuiButton
       color="danger"
       iconType="trash"
-      onClick={(e: React.MouseEvent) => {
-        e.preventDefault();
+      onClick={() => {
         deleteDocument(documentId);
       }}
       data-test-subj="DeleteDocumentButton"

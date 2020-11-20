@@ -95,16 +95,12 @@ describe('DocumentDetail', () => {
     });
   });
 
-  it('will prevent the default action and delete the document when the delete button is pressed', () => {
-    const simulatedEvent = {
-      preventDefault: jest.fn(),
-    };
+  it('will delete the document when the delete button is pressed', () => {
     const wrapper = shallow(<DocumentDetail engineBreadcrumb={['test']} />);
     const button = wrapper.find('[data-test-subj="DeleteDocumentButton"]');
 
-    button.simulate('click', simulatedEvent);
+    button.simulate('click');
 
-    expect(simulatedEvent.preventDefault).toHaveBeenCalled();
     expect(actions.deleteDocument).toHaveBeenCalledWith('1');
   });
 });
