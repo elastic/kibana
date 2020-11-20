@@ -23,6 +23,7 @@ describe('EnginesTable', () => {
         {
           name: 'test-engine',
           created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
+          language: 'English',
           document_count: 99999,
           field_count: 10,
         },
@@ -42,7 +43,8 @@ describe('EnginesTable', () => {
 
     const tableContent = table.text();
     expect(tableContent).toContain('test-engine');
-    expect(tableContent).toContain('January 1, 1970');
+    expect(tableContent).toContain('Jan 1, 1970');
+    expect(tableContent).toContain('English');
     expect(tableContent).toContain('99,999');
     expect(tableContent).toContain('10');
 
