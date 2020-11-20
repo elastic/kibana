@@ -12,12 +12,47 @@ export const cacheHas = (key: string) => cache.has(key);
 export const cacheClear = () => cache.clear();
 export const cacheDelete = (key: string) => cache.delete(key);
 
-const archiveFilelistCache: Map<string, string[]> = new Map();
-export const getArchiveFilelist = (name: string, version: string) =>
-  archiveFilelistCache.get(pkgToPkgKey({ name, version }));
+export const getArchiveFilelist = (keyArgs: SharedKey) =>
+  archiveFilelistCache.get(sharedKey(keyArgs));
 
-export const setArchiveFilelist = (name: string, version: string, paths: string[]) =>
-  archiveFilelistCache.set(pkgToPkgKey({ name, version }), paths);
+export const setArchiveFilelist = (keyArgs: SharedKey, paths: string[]) =>
+  archiveFilelistCache.set(sharedKey(keyArgs), paths);
 
-export const deleteArchiveFilelist = (name: string, version: string) =>
-  archiveFilelistCache.delete(pkgToPkgKey({ name, version }));
+export const deleteArchiveFilelist = (keyArgs: SharedKey) =>
+  archiveFilelistCache.delete(sharedKey(keyArgs));
+
+const packageInfoCache: Map<SharedKeyString, ArchivePackage | RegistryPackage> = new Map();
+const sharedKey = ({ name, version, installSource }: SharedKey) =>
+  `${name}-${version}-${installSource}`;
+
+export const getPackageInfo = (args: SharedKey) => {
+  const packageInfo = packageInfoCache.get(sharedKey(args));
+  if (args.installSource === 'registry') {
+    return packageInfo as RegistryPackage;
+  } else if (args.installSource === 'upload') {
+    return packageInfo as ArchivePackage;
+  } else {
+    throw new Error(`Unknown installSource: ${args.installSource}`);
+  }
+};
+
+export const getArchivePackage = (args: SharedKey) => {
+  const packageInfo = getPackageInfo(args);
+  const paths = getArchiveFilelist(args);
+  return {
+    paths,
+    packageInfo,
+  };
+};
+
+export const setPackageInfo = ({
+  name,
+  version,
+  installSource,
+  packageInfo,
+}: SharedKey & { packageInfo: ArchivePackage | RegistryPackage }) => {
+  const key = sharedKey({ name, version, installSource });
+  return packageInfoCache.set(key, packageInfo);
+};
+
+export const deletePackageInfo = (args: SharedKey) => packageInfoCache.delete(sharedKey(args));
