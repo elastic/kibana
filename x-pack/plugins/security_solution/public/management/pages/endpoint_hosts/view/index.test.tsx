@@ -612,19 +612,19 @@ describe('when on the list page', () => {
     });
 
     it('should include the link to reassignment in Ingest', async () => {
-      coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
+      coreStart.application.getUrlForApp.mockReturnValue('/app/fleet');
       const renderResult = await renderAndWaitForData();
       const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
       expect(linkToReassign).not.toBeNull();
       expect(linkToReassign.textContent).toEqual('Reassign Policy');
       expect(linkToReassign.getAttribute('href')).toEqual(
-        `/app/ingestManager#/fleet/agents/${elasticAgentId}/activity?openReassignFlyout=true`
+        `/app/fleet#/fleet/agents/${elasticAgentId}/activity?openReassignFlyout=true`
       );
     });
 
     describe('when link to reassignment in Ingest is clicked', () => {
       beforeEach(async () => {
-        coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
+        coreStart.application.getUrlForApp.mockReturnValue('/app/fleet');
         const renderResult = await renderAndWaitForData();
         const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
         reactTestingLibrary.act(() => {
@@ -820,8 +820,8 @@ describe('when on the list page', () => {
         switch (appName) {
           case 'securitySolution':
             return '/app/security';
-          case 'ingestManager':
-            return '/app/ingestManager';
+          case 'fleet':
+            return '/app/fleet';
         }
         return appName;
       });
@@ -852,9 +852,7 @@ describe('when on the list page', () => {
       });
 
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
-      expect(agentPolicyLink.getAttribute('href')).toEqual(
-        `/app/ingestManager#/policies/${agentPolicyId}`
-      );
+      expect(agentPolicyLink.getAttribute('href')).toEqual(`/app/fleet#/policies/${agentPolicyId}`);
     });
     it('navigates to the Ingest Agent Details page', async () => {
       const renderResult = await renderAndWaitForData();
@@ -864,9 +862,7 @@ describe('when on the list page', () => {
       });
 
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
-      expect(agentDetailsLink.getAttribute('href')).toEqual(
-        `/app/ingestManager#/fleet/agents/${agentId}`
-      );
+      expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet#/fleet/agents/${agentId}`);
     });
   });
 });
