@@ -82,6 +82,6 @@ export interface IInterpreterRenderHandlers {
   reload: () => void;
   update: (params: any) => void;
   event: (event: any) => void;
-  getMode: () => RenderMode;
+  getRenderMode: () => RenderMode;
   uiState?: PersistedState;
 }

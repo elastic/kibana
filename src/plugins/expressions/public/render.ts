@@ -93,7 +93,7 @@ export class ExpressionRenderHandler {
       event: (data) => {
         this.eventsSubject.next(data);
       },
-      getMode: () => {
+      getRenderMode: () => {
         return renderMode || 'display';
       },
     };

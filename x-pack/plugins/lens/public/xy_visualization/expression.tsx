@@ -216,7 +216,7 @@ export const getXyChartRenderer = (dependencies: {
           histogramBarTarget={dependencies.histogramBarTarget}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
-          renderMode={handlers.getMode()}
+          renderMode={handlers.getRenderMode()}
         />
       </I18nProvider>,
       domNode,

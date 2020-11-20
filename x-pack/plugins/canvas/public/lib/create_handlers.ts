@@ -23,7 +23,7 @@ export const createHandlers = (): RendererHandlers => ({
   getFilter() {
     return '';
   },
-  getMode() {
+  getRenderMode() {
     return 'display';
   },
   onComplete(fn: () => void) {

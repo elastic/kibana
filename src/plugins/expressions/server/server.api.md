@@ -732,7 +732,7 @@ export interface IInterpreterRenderHandlers {
     // Warning: (ae-forgotten-export) The symbol "RenderMode" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    getMode: () => RenderMode;
+    getRenderMode: () => RenderMode;
     // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)

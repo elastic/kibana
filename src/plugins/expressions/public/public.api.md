@@ -913,7 +913,7 @@ export interface IInterpreterRenderHandlers {
     // (undocumented)
     event: (event: any) => void;
     // (undocumented)
-    getMode: () => RenderMode;
+    getRenderMode: () => RenderMode;
     // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)

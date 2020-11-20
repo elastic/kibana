@@ -37,7 +37,7 @@ jest.mock('./services', () => {
   const renderers: Record<string, unknown> = {
     test: {
       render: (el: HTMLElement, value: unknown, handlers: IInterpreterRenderHandlers) => {
-        renderMode = handlers.getMode();
+        renderMode = handlers.getRenderMode();
         handlers.done();
       },
     },
