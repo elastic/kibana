@@ -115,19 +115,13 @@ export async function getPackageInfo(options: {
     Registry.fetchFindLatestPackage(pkgName),
   ]);
 
-  let paths: string[] | undefined;
-  let packageInfo: RegistryPackage | ArchivePackage;
-  try {
-    const getPackageRes = await getPackageFromSource({
-      pkgName,
-      pkgVersion,
-      pkgInstallSource: savedObject?.attributes.install_source,
-    });
-    paths = getPackageRes.paths;
-    packageInfo = getPackageRes.packageInfo;
-  } catch (err) {
-    throw new Error(err);
-  }
+  const getPackageRes = await getPackageFromSource({
+    pkgName,
+    pkgVersion,
+    pkgInstallSource: savedObject?.attributes.install_source,
+  });
+  const paths = getPackageRes.paths;
+  const packageInfo = getPackageRes.packageInfo;
 
   // add properties that aren't (or aren't yet) on the package
   const updated = {
