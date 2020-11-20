@@ -14,7 +14,6 @@ import { Route, Switch, useHistory, useParams } from 'react-router-dom';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import {
-  DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
   ENT_SEARCH_LICENSE_MANAGEMENT,
   REINDEX_JOB_PATH,
   SOURCE_DETAILS_PATH,
@@ -63,38 +62,6 @@ export const SourceRouter: React.FC = () => {
     supportedByLicense,
   } = contentSource;
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
-
-  const overviewLink = {
-    title: 'Overview',
-    path: sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization),
-  };
-  const contentLink = {
-    title: 'Content',
-    path: sourcePath(SOURCE_CONTENT_PATH, sourceId, isOrganization),
-  };
-  const schemaLink = {
-    title: 'Schema',
-    dataTestSubj: 'SchemaLink',
-    path: sourcePath(SOURCE_SCHEMAS_PATH, sourceId, isOrganization),
-  };
-  const displaySettingsLink = {
-    title: 'Display Settings',
-    dataTestSubj: 'DisplaySettingsLink',
-    path: sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization),
-    otherActivePath: sourcePath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, sourceId, isOrganization),
-  };
-  const sourceSettingsLink = {
-    title: 'Source settings',
-    dataTestSubj: 'SourceSettingsLink',
-    path: sourcePath(SOURCE_SETTINGS_PATH, sourceId, isOrganization),
-  };
-
-  let sidebarLinks;
-  if (isCustomSource) {
-    sidebarLinks = [overviewLink, contentLink, schemaLink, displaySettingsLink, sourceSettingsLink];
-  } else {
-    sidebarLinks = [overviewLink, contentLink, sourceSettingsLink];
-  }
 
   const pageHeader = (
     <div>
