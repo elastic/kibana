@@ -20,7 +20,7 @@ import * as i18n from './translations';
 
 const Container = styled.div`
   ${({ theme }) => `
-    margin-top: ${theme.eui.euiSize};
+    margin-top: ${theme.eui?.euiSize ?? '16px'};
   `}
 `;
 
