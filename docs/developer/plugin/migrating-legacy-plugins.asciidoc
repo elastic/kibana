@@ -28,12 +28,12 @@ browser and an entirely different architecture that they use on the
 server.
 
 This means that there are unique sets of challenges for migrating to the
-{kib} Platform depending on whether the legacy plugin code is on the
+{kib} Platform, depending on whether the legacy plugin code is on the
 server or in the browser.
 
 ==== Challenges on the server
 
-The general shape/architecture of legacy server-side code is similar to
+The general architecture of legacy server-side code is similar to
 the {kib} Platform architecture in one important way: most legacy
 server-side plugins define an `init` function where the bulk of their
 business logic begins, and they access both `core` and
@@ -41,10 +41,10 @@ business logic begins, and they access both `core` and
 Rarely does legacy server-side code share stateful services via import
 statements.
 
-While not exactly the same, legacy plugin `init` functions behave
+Although not exactly the same, legacy plugin `init` functions behave
 similarly today as {kib} Platform `setup` functions. `KbnServer` also
-exposes an `afterPluginsInit` method which behaves similarly to `start`.
-There is no corresponding legacy concept of `stop`, however.
+exposes an `afterPluginsInit` method, which behaves similarly to `start`.
+There is no corresponding legacy concept of `stop`.
 
 Despite their similarities, server-side plugins pose a formidable
 challenge: legacy core and plugin functionality is retrieved from either
@@ -110,7 +110,7 @@ must be architected to use the new plugin system. This greatly
 simplifies the plan of action for migrating server-side plugins.
 The main challenge here is to de-couple plugin logic from hapi.js server and request objects.
 
-For migration examples see <<migrating-legacy-plugins-examples>>.
+For migration examples, see <<migrating-legacy-plugins-examples>>.
 
 === Browser-side plan of action
 
@@ -123,11 +123,11 @@ To complicate matters further, a significant amount of the business
 logic in {kib} client-side code exists inside the `ui/public`
 directory (aka ui modules), and all of that must be migrated as well.
 
-Because the usage of angular and `ui/public` modules varies widely between
+Because the usage of Angular and `ui/public` modules varies widely between
 legacy plugins, there is no `one size fits all` solution to migrating
 your browser-side code to the {kib} Platform.
 
-For migration examples see <<migrating-legacy-plugins-examples>>.
+For migration examples, see <<migrating-legacy-plugins-examples>>.
 
 === Frequently asked questions
 
@@ -136,36 +136,36 @@ For migration examples see <<migrating-legacy-plugins-examples>>.
 No. That said, the migration process will require a lot of refactoring,
 and TypeScript will make this dramatically easier and less risky.
 
-Although it's not strictly necessary, we encourage any plugin exposing an extension point to do so
+Although it's not strictly necessary, we encourage any plugin that exposes an extension point to do so
 with first-class type support so downstream plugins that _are_ using
 TypeScript can depend on those types.
 
 ==== How can I avoid passing Core services deeply within my UI component tree?
 
 Some Core services are purely presentational, for example
-`core.overlays.openModal()` where UI
+`core.overlays.openModal()`, where UI
 code does need access to these deeply within your application. However,
 passing these services down as props throughout your application leads
 to lots of boilerplate. To avoid this, you have three options:
 
 [arabic]
 . Use an abstraction layer, like Redux, to decouple your UI code from
-core (*this is the highly preferred option*); or
+core (*this is the highly preferred option*).
 * https://github.com/reduxjs/redux-thunk#injecting-a-custom-argument[redux-thunk]
 and
 https://redux-saga.js.org/docs/api/#createsagamiddlewareoptions[redux-saga]
 already have ways to do this.
 . Use React Context to provide these services to large parts of your
-React tree; or
+React tree.
 . Create a high-order-component that injects core into a React
-component; or
+component.
 * This would be a stateful module that holds a reference to Core, but
 provides it as props to components with a `withCore(MyComponent)`
 interface. This can make testing components simpler. (Note: this module
 cannot be shared across plugin boundaries, see above).
 . Create a global singleton module that gets imported into each module
-that needs it. (Note: this module cannot be shared across plugin
-boundaries, see above).
+that needs it. This module cannot be shared across plugin
+boundaries.
 https://gist.github.com/epixa/06c8eeabd99da3c7545ab295e49acdc3[Example].
 
 If you find that you need many different Core services throughout your
@@ -173,12 +173,12 @@ application, this may be a code smell and could lead to pain down the
 road. For instance, if you need access to an HTTP Client or
 SavedObjectsClient in many places in your React tree, it’s likely that a
 data layer abstraction (like Redux) could make developing your plugin
-much simpler (see option 1).
+much simpler.
 
 Without such an abstraction, you will need to mock out Core services
 throughout your test suite and will couple your UI code very tightly to
 Core. However, if you can contain all of your integration points with
-Core to Redux middleware and/or reducers, you only need to mock Core
+Core to Redux middleware and reducers, you only need to mock Core
 services once and benefit from being able to change those integrations
 with Core in one place rather than many. This will become incredibly
 handy when Core APIs have breaking changes.
@@ -189,12 +189,12 @@ There is no formal notion of `common` code that can safely be imported
 from either client-side or server-side code. However, if a plugin author
 wishes to maintain a set of code in their plugin in a single place and
 then expose it to both server-side and client-side code, they can do so
-by exporting in the index files for both the `server` and `public`
+by exporting the index files for both the `server` and `public`
 directories.
 
 Plugins _should not_ ever import code from deeply inside another plugin
-(eg. `my_plugin/public/components`) or from other top-level directories
-(eg. `my_plugin/common/constants`) as these are not checked for breaking
+(e.g. `my_plugin/public/components`) or from other top-level directories
+(e.g. `my_plugin/common/constants`) as these are not checked for breaking
 changes and are considered unstable and subject to change at any time.
 You can have other top-level directories like `my_plugin/common`, but
 our tooling will not treat these as a stable API, and linter rules will
@@ -207,8 +207,8 @@ client-side code only ever needs to concern themselves with the
 client-side contracts being exposed, and the same can be said for
 server-side contracts on the server.
 
-A plugin author that decides some set of code should diverge from having
-a single `common` definition can now safely change the implementation
+A plugin author, who decides some set of code should diverge from having
+a single `common` definition, can now safely change the implementation
 details without impacting downstream consumers.
 
 ==== How do I find {kib} Platform services?
@@ -291,8 +291,8 @@ CoreStart API Docs]_
 
 ====== Plugins for shared application services
 
-In client code, we have a series of plugins which house shared
-application services which are not technically part of `core`, but are
+In client code, we have a series of plugins that house shared
+application services, which are not technically part of `core`, but are
 often used in {kib} plugins.
 
 This table maps some of the most commonly used legacy items to their {kib}
