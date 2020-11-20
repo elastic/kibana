@@ -36,6 +36,39 @@ export default function (providerContext: FtrProviderContext) {
       expect(apiResponse.item.data).to.eql({ data: 'action_data' });
     });
 
+    it('should return a 200 if this a valid SETTINGS action request', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/fleet/agents/agent1/actions`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          action: {
+            type: 'SETTINGS',
+            data: { log_level: 'debug' },
+          },
+        })
+        .expect(200);
+
+      expect(apiResponse.item.type).to.eql('SETTINGS');
+      expect(apiResponse.item.data).to.eql({ log_level: 'debug' });
+    });
+
+    it('should return a 400 if this a invalid SETTINGS action request', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/fleet/agents/agent1/actions`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          action: {
+            type: 'SETTINGS',
+            data: { log_level: 'thisnotavalidloglevel' },
+          },
+        })
+        .expect(400);
+
+      expect(apiResponse.message).to.match(
+        /\[request body.action\.[0-9]*\.data\.log_level]: types that failed validation/
+      );
+    });
+
     it('should return a 400 when request does not have type information', async () => {
       const { body: apiResponse } = await supertest
         .post(`/api/fleet/agents/agent1/actions`)
@@ -43,12 +76,11 @@ export default function (providerContext: FtrProviderContext) {
         .send({
           action: {
             data: { data: 'action_data' },
-            sent_at: '2020-03-18T19:45:02.620Z',
           },
         })
         .expect(400);
-      expect(apiResponse.message).to.eql(
-        '[request body.action.type]: expected at least one defined value but got [undefined]'
+      expect(apiResponse.message).to.match(
+        /\[request body.action\.[0-9]*\.type]: expected at least one defined value but got \[undefined]/
       );
     });
 
@@ -60,7 +92,6 @@ export default function (providerContext: FtrProviderContext) {
           action: {
             type: 'POLICY_CHANGE',
             data: { data: 'action_data' },
-            sent_at: '2020-03-18T19:45:02.620Z',
           },
         })
         .expect(404);
