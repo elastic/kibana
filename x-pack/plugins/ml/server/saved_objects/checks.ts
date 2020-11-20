@@ -12,6 +12,7 @@ import { JobType, DeleteJobCheckResponse } from '../../common/types/saved_object
 import { Job } from '../../common/types/anomaly_detection_jobs';
 import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
+import { ResolveMlCapabilities } from '../../common/types/capabilities';
 
 interface JobSavedObjectStatus {
   jobId: string;
@@ -159,10 +160,30 @@ export function checksFactory(
     request: KibanaRequest,
     jobType: JobType,
     jobIds: string[],
-    spacesEnabled: boolean
+    spacesEnabled: boolean,
+    resolveMlCapabilities: ResolveMlCapabilities
   ) {
     if (jobType !== 'anomaly-detector' && jobType !== 'data-frame-analytics') {
       throw Boom.badRequest('Job type must be "anomaly-detector" or "data-frame-analytics"');
+    }
+
+    const mlCapabilities = await resolveMlCapabilities(request);
+    if (mlCapabilities === null) {
+      throw Boom.internal('mlCapabilities is not defined');
+    }
+
+    if (
+      mlCapabilities.canDeleteJob === false ||
+      mlCapabilities.canDeleteDataFrameAnalytics === false
+    ) {
+      // user does not have access to delete jobs.
+      return jobIds.reduce((results, jobId) => {
+        results[jobId] = {
+          canDelete: false,
+          canUnTag: false,
+        };
+        return results;
+      }, {} as DeleteJobCheckResponse);
     }
 
     if (spacesEnabled === false) {
