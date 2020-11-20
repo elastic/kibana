@@ -5,9 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
-import { IndexPatternLayer } from '../../types';
+import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { IndexPatternLayer } from '../../../types';
+import { checkForDateHistogram, dateBasedOperationToExpression } from './utils';
+import { OperationDefinition } from '..';
 
 const ofName = (name: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
@@ -53,24 +54,7 @@ export const cumulativeSumOperation: OperationDefinition<
     });
   },
   toExpression: (layer, columnId) => {
-    const currentColumn = (layer.columns[columnId] as unknown) as CumulativeSumIndexPatternColumn;
-    const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
-    const dateColumnIndex = buckets.findIndex(
-      (colId) => layer.columns[colId].operationType === 'date_histogram'
-    )!;
-    buckets.splice(dateColumnIndex, 1);
-
-    return [
-      {
-        type: 'function',
-        function: 'cumulative_sum',
-        arguments: {
-          by: buckets,
-          inputColumnId: [currentColumn.references[0]],
-          outputColumnId: [columnId],
-        },
-      },
-    ];
+    return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
   },
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const metric = layer.columns[referenceIds[0]];
@@ -94,17 +78,6 @@ export const cumulativeSumOperation: OperationDefinition<
     return true;
   },
   getErrorMessage: (layer: IndexPatternLayer) => {
-    const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
-    const hasDateHistogram = buckets.some(
-      (colId) => layer.columns[colId].operationType === 'date_histogram'
-    );
-    if (hasDateHistogram) {
-      return undefined;
-    }
-    return [
-      i18n.translate('xpack.lens.indexPattern.cumulativeSum.dateHistogramErrorMessage', {
-        defaultMessage: 'Needs a date histogram to work',
-      }),
-    ];
+    return checkForDateHistogram(layer);
   },
 };

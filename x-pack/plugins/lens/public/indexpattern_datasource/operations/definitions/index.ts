@@ -23,7 +23,16 @@ import {
   MedianIndexPatternColumn,
 } from './metrics';
 import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
-import { cumulativeSumOperation, CumulativeSumIndexPatternColumn } from './cumulative_sum';
+import {
+  cumulativeSumOperation,
+  CumulativeSumIndexPatternColumn,
+  counterRateOperation,
+  CounterRateIndexPatternColumn,
+  derivativeOperation,
+  DerivativeIndexPatternColumn,
+  movingAverageOperation,
+  MovingAverageIndexPatternColumn,
+} from './calculations';
 import { countOperation, CountIndexPatternColumn } from './count';
 import { StateSetter, OperationMetadata } from '../../../types';
 import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
@@ -54,7 +63,10 @@ export type IndexPatternColumn =
   | SumIndexPatternColumn
   | MedianIndexPatternColumn
   | CountIndexPatternColumn
-  | CumulativeSumIndexPatternColumn;
+  | CumulativeSumIndexPatternColumn
+  | CounterRateIndexPatternColumn
+  | DerivativeIndexPatternColumn
+  | MovingAverageIndexPatternColumn;
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
 
@@ -76,6 +88,9 @@ const internalOperationDefinitions = [
   countOperation,
   rangeOperation,
   cumulativeSumOperation,
+  counterRateOperation,
+  derivativeOperation,
+  movingAverageOperation,
 ];
 
 export { termsOperation } from './terms';
