@@ -13,7 +13,7 @@ import { useTheme } from '../../../hooks/useTheme';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { getTPMTooltipFormatter } from '../../shared/charts/helper/helper';
-import { LineChart } from '../../shared/charts/line_chart';
+import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 
 export function ServiceOverviewThroughputChart({
   height,
@@ -55,7 +55,7 @@ export function ServiceOverviewThroughputChart({
           })}
         </h2>
       </EuiTitle>
-      <LineChart
+      <TimeseriesChart
         id="throughput"
         height={height}
         showAnnotations={false}
