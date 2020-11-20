@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry, warnAndSkipTest } from '../../helpers';
+import { warnAndSkipTest } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -35,9 +35,6 @@ export default function (providerContext: FtrProviderContext) {
   );
 
   describe('EPM - get', () => {
-    before(async () => {
-      skipIfNoDockerRegistry(providerContext);
-    });
     it('returns package info from the registry if it was installed from the registry', async function () {
       if (server.enabled) {
         // this will install through the registry by default
@@ -53,7 +50,7 @@ export default function (providerContext: FtrProviderContext) {
         warnAndSkipTest(this, log);
       }
     });
-    it('returns package info from cache if it was installed by upload', async function () {
+    it('returns correct package info if it was installed by upload', async function () {
       if (server.enabled) {
         const buf = fs.readFileSync(testPkgArchiveZip);
         await supertest
