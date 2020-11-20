@@ -21,7 +21,7 @@ import {
   EuiButtonEmptyProps,
   EuiLinkProps,
 } from '@elastic/eui';
-import sharedSourcesIcon from '../../components/shared/assets/share_circle.svg';
+import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
