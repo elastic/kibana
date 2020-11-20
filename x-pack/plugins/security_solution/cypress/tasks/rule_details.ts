@@ -39,7 +39,6 @@ export const addsException = (exception: Exception) => {
   cy.get(LOADING_SPINNER).should('not.exist');
   cy.get(FIELD_INPUT).should('exist');
   cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
-  cy.get(FIELD_INPUT_RESULT).first().click();
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);
