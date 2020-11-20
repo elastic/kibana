@@ -9,16 +9,16 @@ import {
   getAnomalyScoreSeries,
   getResponseTimeSeries,
   getTpmSeries,
-} from '../chartSelectors';
+} from './chart_selectors';
 import {
   successColor,
   warningColor,
   errorColor,
-} from '../../utils/httpStatusCodeToColor';
+} from '../utils/httpStatusCodeToColor';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ApmTimeSeriesResponse } from '../../../server/lib/transactions/charts/get_timeseries_data/transform';
+import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_timeseries_data/transform';
 
-describe('chartSelectors', () => {
+describe('chart selectors', () => {
   describe('getAnomalyScoreSeries', () => {
     it('should return anomalyScoreSeries', () => {
       const data = [{ x0: 0, x: 10 }];

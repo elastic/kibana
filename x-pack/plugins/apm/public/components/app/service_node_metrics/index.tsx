@@ -22,14 +22,14 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
+import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { px, truncate, unit } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
-import { MetricsChart } from '../../shared/charts/MetricsChart';
+import { MetricsChart } from '../../shared/charts/metrics_chart';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
 const INITIAL_DATA = {
@@ -178,7 +178,12 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
             {data.charts.map((chart) => (
               <EuiFlexItem key={chart.key}>
                 <EuiPanel>
-                  <MetricsChart start={start} end={end} chart={chart} />
+                  <MetricsChart
+                    start={start}
+                    end={end}
+                    chart={chart}
+                    fetchStatus={status}
+                  />
                 </EuiPanel>
               </EuiFlexItem>
             ))}
