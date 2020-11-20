@@ -29,6 +29,7 @@ import { useLinkProps } from '../use_link_props';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { deepObjectEntries } from './deep_object_entries';
 import { useFormattedDate } from './use_formatted_date';
+import * as nodeDataModel from '../../models/node_data';
 
 const eventDetailRequestError = i18n.translate(
   'xpack.securitySolution.resolver.panel.eventDetail.requestError',
@@ -49,13 +50,14 @@ export const EventDetail = memo(function EventDetail({
 }) {
   const isEventLoading = useSelector(selectors.isCurrentRelatedEventLoading);
   const isGraphLoading = useSelector(selectors.isGraphLoading);
+  const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
 
-  const isLoading = isEventLoading || isGraphLoading;
+  const isNodeDataLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
+  const isLoading = isEventLoading || isGraphLoading || isNodeDataLoading;
 
   const event = useSelector(selectors.currentRelatedEventData);
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.graphNodeForId(state)(nodeID)
-  );
+
+  const processEvent = nodeDataModel.firstEvent(nodeData);
   return isLoading ? (
     <StyledPanel>
       <PanelLoading />
@@ -90,7 +92,7 @@ const EventDetailContents = memo(function ({
    * Event type to use in the breadcrumbs
    */
   eventType: string;
-  processEvent: SafeResolverEvent | null;
+  processEvent: SafeResolverEvent | undefined;
 }) {
   const timestamp = eventModel.timestampSafeVersion(event);
   const formattedDate =

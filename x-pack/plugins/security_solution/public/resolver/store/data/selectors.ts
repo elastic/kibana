@@ -94,6 +94,8 @@ export const originID: (state: DataState) => string | undefined = createSelector
 
 /**
  * Nodes that will be displayed as the 'blue' inactive state.
+ * @deprecated
+ * TODO: remove after swapping over tests
  */
 export const inactiveNodes = createSelector(
   resolverGraphResponse,
@@ -111,6 +113,8 @@ export const inactiveNodes = createSelector(
 
 /**
  * A function that given an entity id returns a boolean indicating if the id is in the set of terminated processes.
+ * @deprecated use isNodeTerminated
+ * TODO: maybe delete this, it has tests so need to swap them over
  * TODO: Discuss if we want to keep this in Resolver or let Security Solution provide this logic
  */
 export const isNodeInactive = createSelector(inactiveNodes, function (
@@ -142,32 +146,36 @@ export const nodeDataForID: (
   };
 });
 
-// TODO: show an error when this is true
-export const nodeDataUnableToLoad: (state: DataState) => (id: string) => boolean = createSelector(
+/**
+ * Returns a function that can be called to retrieve the state of the node, running, loading, or terminated.
+ */
+export const getNodeState: (
+  state: DataState
+) => (id: string) => 'running' | 'loading' | 'terminated' = createSelector(
   nodeDataForID,
   (nodeInfo) => {
     return (id: string) => {
       const info = nodeInfo(id);
-      return info?.status === 'error' || (info?.events.length ?? 0) <= 0;
+      if (!info || info.status === 'requested') {
+        return 'loading';
+      }
+      return info.terminated ? 'terminated' : 'running';
     };
   }
 );
 
 /**
- * Returns a function that can be called to determine if the middleware has received a specific node ID's lifecycle
- * events. If the node is still loading or had an error while loading this will return an empty array.
+ * Returns a function that can be called to retrieve whether the node is in the loading state.
  */
-export const nodeDataEventsForID: (
-  state: DataState
-) => (id: string) => SafeResolverEvent[] = createSelector(nodeDataForID, (nodeInfo) => {
-  return (id: string) => {
-    const info = nodeInfo(id);
-    if (!info || info.status !== 'received') {
-      return [];
-    }
-    return info.events;
-  };
-});
+export const isNodeDataLoading: (state: DataState) => (id: string) => boolean = createSelector(
+  nodeDataForID,
+  (nodeInfo) => {
+    return (id: string) => {
+      const info = nodeInfo(id);
+      return !info || info.status === 'requested';
+    };
+  }
+);
 
 /**
  * Process events that will be graphed.
@@ -243,7 +251,7 @@ export function isCurrentRelatedEventLoading(state: DataState) {
  * @param {DataState} state
  * @returns {(ResolverNode | null)} the current related event data for the `event_detail` view
  */
-export function currentRelatedEventData(state: DataState): ResolverNode | null {
+export function currentRelatedEventData(state: DataState): SafeResolverEvent | null {
   return state.currentRelatedEvent.data;
 }
 

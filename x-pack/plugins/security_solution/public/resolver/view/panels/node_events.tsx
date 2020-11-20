@@ -19,13 +19,14 @@ import { ResolverState } from '../../types';
 import { StyledPanel } from '../styles';
 import { PanelLoading } from './panel_loading';
 import { useLinkProps } from '../use_link_props';
+import * as nodeDataModel from '../../models/node_data';
 
 export function NodeEvents({ nodeID }: { nodeID: string }) {
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.graphNodeForId(state)(nodeID)
-  );
+  const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
+  const processEvent = nodeDataModel.firstEvent(nodeData);
   const nodeStats = useSelector((state: ResolverState) => selectors.nodeStats(state)(nodeID));
-  if (processEvent === null || nodeStats === undefined) {
+
+  if (processEvent === undefined || nodeStats === undefined) {
     return (
       <StyledPanel>
         <PanelLoading />

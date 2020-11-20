@@ -25,12 +25,30 @@ export function parentId(node: ResolverNode): string | undefined {
 }
 
 /**
- * Extracts the first non null value from the `@timestamp` field in the node data attribute.
+ * The `@timestamp` for the event, as a `Date` object.
+ * If `@timestamp` couldn't be parsed as a `Date`, returns `undefined`.
  */
-export function nodeDataTimestamp(node: ResolverNode): undefined | number {
-  const nodeData: DataTimestamp = node?.data as DataTimestamp;
+export function timestampAsDate(node: ResolverNode): Date | undefined {
+  const value = nodeDataTimestamp(node);
+  if (value === undefined) {
+    return undefined;
+  }
 
-  return nodeData?.['@timestamp'] ? firstNonNullValue(nodeData?.['@timestamp']) : undefined;
+  const date = new Date(value);
+  // Check if the date is valid
+  if (isFinite(date.getTime())) {
+    return date;
+  } else {
+    return undefined;
+  }
+}
+
+/**
+ * Extracts the first non null value from the `@timestamp` field in the node data attribute.
+ * TODO: shouldn't really be a string here
+ */
+export function nodeDataTimestamp(node: ResolverNode): undefined | number | string {
+  return firstNonNullValue(node?.data['@timestamp']);
 }
 
 /**

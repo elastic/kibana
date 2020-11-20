@@ -59,7 +59,11 @@ export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors
 export const isNodeInactive = composeSelectors(dataStateSelector, dataSelectors.isNodeInactive);
 
 /**
- * Given a nodeID get the indexed node.
+ * Given a nodeID (aka entity_id) get the indexed process event.
+ * Legacy functions take process events instead of nodeID, use this to get
+ * process events for them.
+ *
+ * @deprecated use the nodeData selector instead
  */
 export const graphNodeForId: (
   state: ResolverState
@@ -361,15 +365,12 @@ export const isLoadingMoreNodeEventsInCategory = composeSelectors(
 );
 
 /**
- * Returns an array of events for a specific node ID.
+ * Returns the state of the node, loading, running, or terminated.
  */
-export const nodeDataEventsForID = composeSelectors(
-  dataStateSelector,
-  dataSelectors.nodeDataEventsForID
-);
+export const getNodeState = composeSelectors(dataStateSelector, dataSelectors.getNodeState);
 
 /**
- * Returns an the node data object for a specific node ID.
+ * Returns the node data object for a specific node ID.
  */
 export const nodeDataForID = composeSelectors(dataStateSelector, dataSelectors.nodeDataForID);
 
@@ -398,6 +399,11 @@ export const visibleNodes: (state: ResolverState) => (time: number) => Set<strin
  * Returns the full node data structure.
  */
 export const nodeData = composeSelectors(dataStateSelector, dataSelectors.nodeData);
+
+export const isNodeDataLoading = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isNodeDataLoading
+);
 
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a

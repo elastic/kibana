@@ -241,6 +241,16 @@ export interface NodeEventsInCategoryState {
   error?: boolean;
 }
 
+/**
+ * The visual state of the process cubes in the graph. Loading indicates that we haven't received the node data yet
+ * to determine whether it is a running or terminated process.
+ */
+export type CubeState = 'running' | 'loading' | 'terminated';
+
+/**
+ * Defines the data structure used by the node data middleware. The middleware creates a map of node IDs to this
+ * structure before dispatching the action to the reducer.
+ */
 export interface FetchedNodeData {
   events: SafeResolverEvent[];
   terminated: boolean;
@@ -286,7 +296,7 @@ export interface DataState {
    */
   readonly currentRelatedEvent: {
     loading: boolean;
-    data: ResolverNode | null;
+    data: SafeResolverEvent | null;
   };
 
   readonly graph?: {
@@ -591,6 +601,7 @@ export type ResolverProcessType =
   | 'processTerminated'
   | 'unknownProcessEvent'
   | 'processCausedAlert'
+  | 'processLoading'
   | 'unknownEvent';
 
 export type ResolverStore = Store<ResolverState, ResolverAction>;
@@ -627,11 +638,6 @@ export interface TreeIdSchema {
   id: string;
   parent: string; // TODO: Maybe change this to neighbors or adjacents as a more general purpose graph.
   name: string;
-}
-
-export interface Timerange {
-  from: string;
-  to: string;
 }
 
 /**

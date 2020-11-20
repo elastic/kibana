@@ -20,34 +20,48 @@ import { GeneratedText } from '../generated_text';
 import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
+import * as nodeDataModel from '../../models/node_data';
 import { CubeForProcess } from './cube_for_process';
-import { ResolverNode, SafeResolverEvent } from '../../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { useCubeAssets } from '../use_cube_assets';
 import { ResolverState } from '../../types';
 import { PanelLoading } from './panel_loading';
 import { StyledPanel } from '../styles';
 import { useLinkProps } from '../use_link_props';
 import { useFormattedDate } from './use_formatted_date';
+import { PanelContentError } from './panel_content_error';
 
-// TODO: THIS DOES NOT CURRENTLY WORK. NEED to update this once we have the events data.
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
   top: 0.75em;
 `;
 
+const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.nodeDetail.Error', {
+  defaultMessage: 'Node details were unable to be retrieved',
+});
+
 export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
-  const graphNode = useSelector((state: ResolverState) => selectors.graphNodeForId(state)(nodeID));
-  return (
+  const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
+  const processEvent = nodeDataModel.firstEvent(nodeData);
+  const isNodeDataLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
+
+  return isNodeDataLoading ? (
     <>
-      {graphNode === null ? (
-        <StyledPanel>
-          <PanelLoading />
-        </StyledPanel>
-      ) : (
-        <StyledPanel data-test-subj="resolver:panel:node-detail">
-          <NodeDetailView nodeID={nodeID} graphNode={graphNode} />
-        </StyledPanel>
-      )}
+      <StyledPanel>
+        <PanelLoading />
+      </StyledPanel>
+    </>
+  ) : processEvent ? (
+    <>
+      <StyledPanel data-test-subj="resolver:panel:node-detail">
+        <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
+      </StyledPanel>
+    </>
+  ) : (
+    <>
+      <StyledPanel>
+        <PanelContentError translatedErrorMessage={nodeDetailError} />
+      </StyledPanel>
     </>
   );
 });
@@ -57,20 +71,18 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
  * Created, PID, User/Domain, etc.
  */
 const NodeDetailView = memo(function ({
-  graphNode,
+  processEvent,
   nodeID,
 }: {
-  graphNode: ResolverNode;
+  processEvent: SafeResolverEvent;
   nodeID: string;
 }) {
-  const processName = eventModel.processNameSafeVersion(graphNode);
-  const isNodeInactive = useSelector((state: ResolverState) =>
-    selectors.isNodeInactive(state)(nodeID)
-  );
+  const processName = eventModel.processNameSafeVersion(processEvent);
+  const nodeState = useSelector(selectors.getNodeState)(nodeID);
   const relatedEventTotal = useSelector((state: ResolverState) => {
     return selectors.relatedEventTotalCount(state)(nodeID);
   });
-  const eventTime = eventModel.eventTimestamp(graphNode);
+  const eventTime = eventModel.eventTimestamp(processEvent);
   const dateTime = useFormattedDate(eventTime);
 
   const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
@@ -81,37 +93,37 @@ const NodeDetailView = memo(function ({
 
     const pathEntry = {
       title: 'process.executable',
-      description: processPath(graphNode),
+      description: processPath(processEvent),
     };
 
     const pidEntry = {
       title: 'process.pid',
-      description: processPID(graphNode),
+      description: processPID(processEvent),
     };
 
     const userEntry = {
       title: 'user.name',
-      description: eventModel.userName(graphNode),
+      description: eventModel.userName(processEvent),
     };
 
     const domainEntry = {
       title: 'user.domain',
-      description: eventModel.userDomain(graphNode),
+      description: eventModel.userDomain(processEvent),
     };
 
     const parentPidEntry = {
       title: 'process.parent.pid',
-      description: eventModel.parentPID(graphNode),
+      description: eventModel.parentPID(processEvent),
     };
 
     const md5Entry = {
       title: 'process.hash.md5',
-      description: eventModel.md5HashForProcess(graphNode),
+      description: eventModel.md5HashForProcess(processEvent),
     };
 
     const commandLineEntry = {
       title: 'process.args',
-      description: eventModel.argsForProcess(graphNode),
+      description: eventModel.argsForProcess(processEvent),
     };
 
     // This is the data in {title, description} form for the EuiDescriptionList to display
@@ -141,7 +153,7 @@ const NodeDetailView = memo(function ({
       });
 
     return processDescriptionListData;
-  }, [dateTime, graphNode]);
+  }, [dateTime, processEvent]);
 
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',
@@ -170,7 +182,7 @@ const NodeDetailView = memo(function ({
       },
     ];
   }, [processName, nodesLinkNavProps]);
-  const { descriptionText } = useCubeAssets(isNodeInactive, false);
+  const { descriptionText } = useCubeAssets(nodeState, false);
 
   const nodeDetailNavProps = useLinkProps({
     panelView: 'nodeEvents',
@@ -186,7 +198,7 @@ const NodeDetailView = memo(function ({
         <StyledTitle aria-describedby={titleID}>
           <StyledCubeForProcess
             data-test-subj="resolver:node-detail:title-icon"
-            running={!isNodeInactive}
+            state={nodeState}
           />
           <span data-test-subj="resolver:node-detail:title">
             <GeneratedText>{processName}</GeneratedText>

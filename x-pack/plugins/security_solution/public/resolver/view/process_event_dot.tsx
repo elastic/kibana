@@ -6,13 +6,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import {
-  htmlIdGenerator,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NodeSubMenu } from './styles';
@@ -86,7 +80,6 @@ const UnstyledProcessEventDot = React.memo(
     node,
     nodeID,
     projectionMatrix,
-    isNodeInactive,
     timeAtRender,
   }: {
     /**
@@ -109,10 +102,6 @@ const UnstyledProcessEventDot = React.memo(
      * projectionMatrix which can be used to convert `position` to screen coordinates.
      */
     projectionMatrix: Matrix3;
-    /**
-     * Whether or not to show the node in the inactive state.
-     */
-    isNodeInactive: boolean;
 
     /**
      * The time (unix epoch) at render.
@@ -225,6 +214,11 @@ const UnstyledProcessEventDot = React.memo(
         | null;
     } = React.createRef();
     const colorMap = useColors();
+
+    const isNodeLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
+    const cubeClassName = isNodeLoading ? 'cube loading' : 'cube';
+    // if we can't find it in the nodeData map then assume it is still running
+    const nodeState = useSelector(selectors.getNodeState)(nodeID);
     const {
       backingFill,
       cubeSymbol,
@@ -233,7 +227,7 @@ const UnstyledProcessEventDot = React.memo(
       labelButtonFill,
       strokeColor,
     } = useCubeAssets(
-      isNodeInactive,
+      nodeState,
       /**
        * There is no definition for 'trigger process' yet. return false.
        * TODO: Define what the standard library of cubes will be and allow users to define what data is what color
@@ -278,8 +272,6 @@ const UnstyledProcessEventDot = React.memo(
       selectors.statsTotalForNode(state)(node)
     );
 
-    const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
-
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     /**
      * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
@@ -300,163 +292,155 @@ const UnstyledProcessEventDot = React.memo(
         id={nodeHTMLID(nodeID)}
         tabIndex={-1}
       >
-        {nodeData?.status === 'requested' ? (
-          <div data-test-subj="resolver:graph:node:loading" className="loading-container">
-            <EuiLoadingSpinner size="s" />
-          </div>
-        ) : (
-          // TODO: is this the right way to do this?
-          <>
-            <svg
-              viewBox="-15 -15 90 30"
-              preserveAspectRatio="xMidYMid meet"
-              onClick={
-                (clickEvent) => {
-                  handleFocus();
-                  handleClick(clickEvent);
-                } /* a11y note: this is strictly an alternate to the button, so no tabindex is necessary*/
-              }
-              role="img"
-              aria-labelledby={labelHTMLID}
-              fill="none"
-              style={{
-                display: 'block',
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                top: '0',
-                left: '0',
-                outline: 'transparent',
-                border: 'none',
-                pointerEvents: 'none',
-                zIndex: 30,
+        <svg
+          viewBox="-15 -15 90 30"
+          preserveAspectRatio="xMidYMid meet"
+          onClick={
+            (clickEvent) => {
+              handleFocus();
+              handleClick(clickEvent);
+            } /* a11y note: this is strictly an alternate to the button, so no tabindex is necessary*/
+          }
+          role="img"
+          aria-labelledby={labelHTMLID}
+          fill="none"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            outline: 'transparent',
+            border: 'none',
+            pointerEvents: 'none',
+            zIndex: 30,
+          }}
+        >
+          <StyledOuterGroup>
+            <use
+              xlinkHref={`#${symbolIDs.processCubeActiveBacking}`}
+              fill={backingFill} // Only visible on hover
+              x={-15.35}
+              y={-15.35}
+              stroke={strokeColor}
+              width={markerSize * 1.5}
+              height={markerSize * 1.5}
+              className="backing"
+            />
+            {isOrigin && (
+              <use
+                xlinkHref={`#${symbolIDs.processCubeActiveBacking}`}
+                fill="transparent" // Transparent so we don't double up on the default hover
+                x={-15.35}
+                y={-15.35}
+                stroke={strokeColor}
+                strokeOpacity={0.35}
+                strokeDashoffset={0}
+                width={markerSize * 1.5}
+                height={markerSize * 1.5}
+                className="origin"
+              />
+            )}
+            <use
+              role="presentation"
+              xlinkHref={cubeSymbol}
+              x={markerPositionXOffset}
+              y={markerPositionYOffset}
+              width={markerSize}
+              height={markerSize}
+              opacity="1"
+              className={cubeClassName}
+            >
+              <animateTransform
+                attributeType="XML"
+                attributeName="transform"
+                type="scale"
+                values="1 1; 1 .83; 1 .8; 1 .83; 1 1"
+                dur="0.2s"
+                repeatCount="1"
+                className="squish"
+                ref={animationTarget}
+              />
+            </use>
+          </StyledOuterGroup>
+        </svg>
+        <StyledActionsContainer
+          color={colorMap.full}
+          fontSize={scaledTypeSize}
+          topPct={actionableButtonsTopOffset}
+        >
+          <StyledDescriptionText
+            backgroundColor={colorMap.resolverBackground}
+            color={colorMap.descriptionText}
+            isDisplaying={isShowingDescriptionText}
+            data-test-subj="resolver:node:description"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.resolver.processDescription"
+              defaultMessage="{isEventBeingAnalyzed, select, true {Analyzed Event · {descriptionText}} false {{descriptionText}}}"
+              values={{
+                isEventBeingAnalyzed: isOrigin,
+                descriptionText,
               }}
+            />
+          </StyledDescriptionText>
+          <div
+            className={'euiButton euiButton--small'}
+            id={labelHTMLID}
+            onClick={handleClick}
+            onFocus={handleFocus}
+            tabIndex={-1}
+            style={{
+              backgroundColor: colorMap.resolverBackground,
+              alignSelf: 'flex-start',
+              padding: 0,
+              zIndex: 45,
+            }}
+          >
+            <EuiButton
+              isLoading={isNodeLoading}
+              color={labelButtonFill}
+              fill={isLabelFilled}
+              size="s"
+              style={{
+                maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,
+                maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
+              }}
+              tabIndex={-1}
+              title={nodeModel.nodeName(node)}
+              data-test-subj="resolver:node:primary-button"
+              data-test-resolver-node-id={nodeID}
             >
-              <StyledOuterGroup>
-                <use
-                  xlinkHref={`#${symbolIDs.processCubeActiveBacking}`}
-                  fill={backingFill} // Only visible on hover
-                  x={-15.35}
-                  y={-15.35}
-                  stroke={strokeColor}
-                  width={markerSize * 1.5}
-                  height={markerSize * 1.5}
-                  className="backing"
+              <span className="euiButton__content">
+                <span className="euiButton__text" data-test-subj={'euiButton__text'}>
+                  {nodeModel.nodeName(node)}
+                </span>
+              </span>
+            </EuiButton>
+          </div>
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            gutterSize="xs"
+            style={{
+              alignSelf: 'flex-start',
+              background: colorMap.resolverBackground,
+              display: `${isShowingEventActions ? 'flex' : 'none'}`,
+              margin: '2px 0 0 0',
+              padding: 0,
+            }}
+          >
+            <EuiFlexItem grow={false} className="related-dropdown">
+              {grandTotal !== null && grandTotal > 0 && (
+                <NodeSubMenu
+                  buttonFill={colorMap.resolverBackground}
+                  nodeStats={nodeStats}
+                  nodeID={nodeID}
                 />
-                {isOrigin && (
-                  <use
-                    xlinkHref={`#${symbolIDs.processCubeActiveBacking}`}
-                    fill="transparent" // Transparent so we don't double up on the default hover
-                    x={-15.35}
-                    y={-15.35}
-                    stroke={strokeColor}
-                    strokeOpacity={0.35}
-                    strokeDashoffset={0}
-                    width={markerSize * 1.5}
-                    height={markerSize * 1.5}
-                    className="origin"
-                  />
-                )}
-                <use
-                  role="presentation"
-                  xlinkHref={cubeSymbol}
-                  x={markerPositionXOffset}
-                  y={markerPositionYOffset}
-                  width={markerSize}
-                  height={markerSize}
-                  opacity="1"
-                  className="cube"
-                >
-                  <animateTransform
-                    attributeType="XML"
-                    attributeName="transform"
-                    type="scale"
-                    values="1 1; 1 .83; 1 .8; 1 .83; 1 1"
-                    dur="0.2s"
-                    repeatCount="1"
-                    className="squish"
-                    ref={animationTarget}
-                  />
-                </use>
-              </StyledOuterGroup>
-            </svg>
-            <StyledActionsContainer
-              color={colorMap.full}
-              fontSize={scaledTypeSize}
-              topPct={actionableButtonsTopOffset}
-            >
-              <StyledDescriptionText
-                backgroundColor={colorMap.resolverBackground}
-                color={colorMap.descriptionText}
-                isDisplaying={isShowingDescriptionText}
-                data-test-subj="resolver:node:description"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.resolver.processDescription"
-                  defaultMessage="{isEventBeingAnalyzed, select, true {Analyzed Event · {descriptionText}} false {{descriptionText}}}"
-                  values={{
-                    isEventBeingAnalyzed: isOrigin,
-                    descriptionText,
-                  }}
-                />
-              </StyledDescriptionText>
-              <div
-                className={'euiButton euiButton--small'}
-                id={labelHTMLID}
-                onClick={handleClick}
-                onFocus={handleFocus}
-                tabIndex={-1}
-                style={{
-                  backgroundColor: colorMap.resolverBackground,
-                  alignSelf: 'flex-start',
-                  padding: 0,
-                  zIndex: 45,
-                }}
-              >
-                <EuiButton
-                  color={labelButtonFill}
-                  fill={isLabelFilled}
-                  size="s"
-                  style={{
-                    maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,
-                    maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
-                  }}
-                  tabIndex={-1}
-                  title={nodeModel.nodeName(node)}
-                  data-test-subj="resolver:node:primary-button"
-                  data-test-resolver-node-id={nodeID}
-                >
-                  <span className="euiButton__content">
-                    <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                      {nodeModel.nodeName(node)}
-                    </span>
-                  </span>
-                </EuiButton>
-              </div>
-              <EuiFlexGroup
-                justifyContent="flexStart"
-                gutterSize="xs"
-                style={{
-                  alignSelf: 'flex-start',
-                  background: colorMap.resolverBackground,
-                  display: `${isShowingEventActions ? 'flex' : 'none'}`,
-                  margin: '2px 0 0 0',
-                  padding: 0,
-                }}
-              >
-                <EuiFlexItem grow={false} className="related-dropdown">
-                  {grandTotal !== null && grandTotal > 0 && (
-                    <NodeSubMenu
-                      buttonFill={colorMap.resolverBackground}
-                      nodeStats={nodeStats}
-                      nodeID={nodeID}
-                    />
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </StyledActionsContainer>
-          </>
-        )}
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </StyledActionsContainer>
       </div>
     );
     /* eslint-enable jsx-a11y/click-events-have-key-events */
@@ -515,5 +499,32 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   }
   & .euiSelectableListItem__text {
     color: white;
+  }
+  & .loading {
+    animation-name: pulse;
+    /**
+     * his is a multiple of .6 so it can match up with the EUI button's loading spinner
+     * which is (0.6s). Using .6 here makes it a bit too fast.
+     */
+    animation-duration: 1.8s;
+    animation-delay: 0;
+    animation-direction: normal;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  /**
+   * Animation loading state of the cube.
+   */
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 `;

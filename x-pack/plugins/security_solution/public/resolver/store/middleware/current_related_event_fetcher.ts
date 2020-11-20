@@ -48,9 +48,10 @@ export function CurrentRelatedEventFetcher(
         result = await dataAccessLayer.event({
           eventID: currentEventID,
           indexPatterns: ['logs-*'],
+          // TODO: fix these
           timerange: {
-            from: new Date(2020, 11, 1),
-            to: new Date(2020, 11, 30),
+            from: new Date(2020, 10, 1),
+            to: new Date(2020, 10, 30),
           },
         });
       } catch (error) {

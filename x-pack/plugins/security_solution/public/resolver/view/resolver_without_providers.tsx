@@ -54,7 +54,7 @@ export const ResolverWithoutProviders = React.memo(
     } = useSelector((state: ResolverState) =>
       selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
     );
-    const inactiveNodes = useSelector(selectors.inactiveNodes);
+
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
 
     const ref = useCallback(
@@ -122,7 +122,6 @@ export const ResolverWithoutProviders = React.memo(
                   position={position}
                   projectionMatrix={projectionMatrix}
                   node={graphNode}
-                  isNodeInactive={inactiveNodes.has(nodeId)}
                   timeAtRender={timeAtRender}
                 />
               );

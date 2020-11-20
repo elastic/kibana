@@ -12,6 +12,7 @@ import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
 import { Vector2, AABB } from '../types';
+import { usingGenerator } from '../data_access_layer/mocks/using_generator';
 
 let simulator: Simulator;
 let databaseDocumentID: string;
@@ -206,6 +207,26 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       });
     });
   });
+});
+
+describe('Resolver, when panning or moving the view', () => {
+  beforeEach(async () => {
+    // create a mock data access layer with related events
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = usingGenerator();
+
+    // save a reference to the `_id` supported by the mock data layer
+    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+
+    // create a resolver simulator, using the data access layer and an arbitrary component instance ID
+    simulator = new Simulator({
+      databaseDocumentID,
+      dataAccessLayer,
+      resolverComponentInstanceID,
+      indices: [],
+    });
+  });
+
+  it('');
 });
 
 describe('Resolver, when analyzing a tree that has 2 related registry and 1 related event of all other categories for the origin node', () => {
