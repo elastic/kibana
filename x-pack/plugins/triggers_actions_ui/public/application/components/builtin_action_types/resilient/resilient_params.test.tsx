@@ -11,7 +11,6 @@ import { DocLinksStart } from 'kibana/public';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import { coreMock } from 'src/core/public/mocks';
-import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 const mocks = coreMock.createSetup();
 
@@ -87,7 +86,7 @@ describe('ResilientParamsFields renders', () => {
         errors={{ title: [] }}
         editAction={() => {}}
         index={0}
-        messageVariables={[{ name: AlertProvidedActionVariables.alertId, description: '' }]}
+        messageVariables={[{ name: 'alertId', description: '' }]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         toastNotifications={mocks.notifications.toasts}
         http={mocks.http}
