@@ -26,7 +26,7 @@ export function useServiceMetricCharts(
     (callApmApi) => {
       if (serviceName && start && end && agentName) {
         return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/metrics/charts',
+          endpoint: 'GET /api/apm/services/{serviceName}/metrics/charts',
           params: {
             path: { serviceName },
             query: {
