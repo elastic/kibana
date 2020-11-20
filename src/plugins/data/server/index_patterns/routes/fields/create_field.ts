@@ -56,6 +56,10 @@ export const registerCreateFieldRoute = (router: IRouter) => {
 
           const indexPattern = await ip.get(id);
 
+          if (indexPattern.fields.getByName(field.name)) {
+            throw new Error(`Field [name = ${field.name}] already exists.`);
+          }
+
           indexPattern.fields.add(field);
 
           await ip.updateSavedObject(indexPattern);
