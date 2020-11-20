@@ -6,23 +6,17 @@
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EuiCallOut } from '@elastic/eui';
 
-import {
-  ActionParamsProps,
-  ActionVariable,
-} from '../../../../../../triggers_actions_ui/public/types';
-import { TextAreaWithMessageVariables } from '../../../../../../triggers_actions_ui/public/common';
+import { ActionParamsProps } from '../../../../../../triggers_actions_ui/public/types';
+import { CommentType } from '../../../../../../case/common/api';
 
 import { CaseActionParams } from './types';
 import { ExistingCase } from './existing_case';
 
 import * as i18n from './translations';
-
-const isSome = (messageVariables: ActionVariable[] | undefined, variableName: string) =>
-  !!messageVariables?.find((variable) => variable.name === variableName);
 
 const Container = styled.div`
   ${({ theme }) => `
@@ -40,19 +34,12 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
   http,
   toastNotifications,
 }) => {
-  const isAlert = useMemo(() => isSome(messageVariables, 'alertId'), [messageVariables]);
-  const isDetectionAlert = useMemo(() => isSome(messageVariables, 'context.rule.id'), [
-    messageVariables,
-  ]);
-
   const {
     caseId = null,
     comment = {
-      comment: null,
-      context: {
-        type: isAlert || isDetectionAlert ? 'alert' : 'user',
-        savedObjectId: isDetectionAlert ? '{{context.rule.id}}' : isAlert ? '{{alertId}}' : null,
-      },
+      type: CommentType.alert,
+      alertId: '{{context.rule.id}}',
+      index: '{{context.rule.output_index}}',
     },
   } = actionParams.subActionParams ?? {};
 
@@ -64,11 +51,6 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
       editAction('subActionParams', newProps, index);
     },
     [actionParams.subActionParams, editAction, index]
-  );
-
-  const onEditComment = useCallback(
-    (key, value) => editSubActionProperty(key, { ...comment, comment: value }),
-    [editSubActionProperty, comment]
   );
 
   const onCaseChanged = useCallback(
@@ -88,25 +70,29 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
       editSubActionProperty('caseId', caseId);
     }
 
+    if (!actionParams.subActionParams?.comment) {
+      editSubActionProperty('comment', comment);
+    }
+
+    // We excluded the caseId from the dependency array to avoid an infinity loop
+    if (caseId != null) {
+      setSelectedCase(caseId);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionConnector, actionParams.subAction, index]);
+  }, [
+    actionConnector,
+    index,
+    actionParams.subActionParams?.caseId,
+    actionParams.subActionParams?.comment,
+    comment,
+    actionParams.subAction,
+  ]);
 
   return (
     <>
       <EuiCallOut size="s" title={i18n.CASE_CONNECTOR_CALL_OUT_INFO} iconType="iInCircle" />
       <Container>
         <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
-      </Container>
-      <Container>
-        <TextAreaWithMessageVariables
-          index={index}
-          editAction={onEditComment}
-          messageVariables={messageVariables}
-          paramsProperty={'comment'}
-          inputTargetValue={comment?.comment ?? undefined}
-          label={i18n.CASE_CONNECTOR_COMMENT_LABEL}
-          errors={errors.comment as string[]}
-        />
       </Container>
     </>
   );
