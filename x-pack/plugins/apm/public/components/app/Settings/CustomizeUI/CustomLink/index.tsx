@@ -34,9 +34,9 @@ export function CustomLinkOverview() {
   >();
 
   const { data: customLinks, status, refetch } = useFetcher(
-    (callApmApi) => {
+    async (callApmApi) => {
       if (hasValidLicense) {
-        callApmApi({ pathname: '/api/apm/settings/custom_links' });
+        return callApmApi({ pathname: '/api/apm/settings/custom_links' });
       }
     },
     [hasValidLicense]
