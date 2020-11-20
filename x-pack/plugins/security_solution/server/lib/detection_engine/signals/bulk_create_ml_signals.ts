@@ -6,7 +6,6 @@
 
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
-import { SearchResponse } from 'elasticsearch';
 
 import { Logger } from '../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerts/server';
@@ -15,6 +14,7 @@ import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
+import { SearchResponse } from '../../types';
 
 interface BulkCreateMlSignalsParams {
   actions: RuleAlertAction[];

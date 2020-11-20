@@ -149,8 +149,8 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
 
 export const sampleDocWithSortId = (
   someUuid: string = sampleIdGuid,
-  ip?: string,
-  destIp?: string
+  ip?: string | string[],
+  destIp?: string | string[]
 ): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
@@ -485,8 +485,8 @@ export const repeatedSearchResultsWithSortId = (
   total: number,
   pageSize: number,
   guids: string[],
-  ips?: string[],
-  destIps?: string[]
+  ips?: Array<string | string[]>,
+  destIps?: Array<string | string[]>
 ): SignalSearchResponse => ({
   took: 10,
   timed_out: false,

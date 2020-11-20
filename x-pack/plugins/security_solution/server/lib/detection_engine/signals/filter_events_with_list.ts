@@ -7,7 +7,6 @@ import { get } from 'lodash/fp';
 import { Logger } from 'src/core/server';
 
 import { ListClient } from '../../../../../lists/server';
-import { SignalSearchResponse } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import {
   EntryList,
@@ -17,16 +16,25 @@ import {
 } from '../../../../../lists/common/schemas';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 import { SearchTypes } from '../../../../common/detection_engine/types';
+import { SearchResponse } from '../../types';
 
-interface FilterEventsAgainstList {
-  listClient: ListClient;
-  exceptionsList: ExceptionListItemSchema[];
-  logger: Logger;
-  eventSearchResult: SignalSearchResponse;
-  buildRuleMessage: BuildRuleMessage;
-}
+// narrow unioned type to be single
+const isStringableType = (val: SearchTypes): val is string | number | boolean =>
+  ['string', 'number', 'boolean'].includes(typeof val);
 
-export const createSetToFilterAgainst = async ({
+const isStringableArray = (val: SearchTypes): val is Array<string | number | boolean> => {
+  if (!Array.isArray(val)) {
+    return false;
+  }
+  // TS does not allow .every to be called on val as-is, even though every type in the union
+  // is an array. https://github.com/microsoft/TypeScript/issues/36390
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (val as any[]).every((subVal: string | number | boolean | object) =>
+    isStringableType(subVal)
+  );
+};
+
+export const createSetToFilterAgainst = async <T>({
   events,
   field,
   listId,
@@ -35,7 +43,7 @@ export const createSetToFilterAgainst = async ({
   logger,
   buildRuleMessage,
 }: {
-  events: SignalSearchResponse['hits']['hits'];
+  events: SearchResponse<T>['hits']['hits'];
   field: string;
   listId: string;
   listType: Type;
@@ -43,13 +51,14 @@ export const createSetToFilterAgainst = async ({
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
 }): Promise<Set<SearchTypes>> => {
-  // narrow unioned type to be single
-  const isStringableType = (val: SearchTypes) =>
-    ['string', 'number', 'boolean'].includes(typeof val);
   const valuesFromSearchResultField = events.reduce((acc, searchResultItem) => {
     const valueField = get(field, searchResultItem._source);
-    if (valueField != null && isStringableType(valueField)) {
-      acc.add(valueField.toString());
+    if (valueField != null) {
+      if (isStringableType(valueField)) {
+        acc.add(valueField.toString());
+      } else if (isStringableArray(valueField)) {
+        valueField.forEach((subVal: string | number | boolean) => acc.add(subVal.toString()));
+      }
     }
     return acc;
   }, new Set<string>());
@@ -71,13 +80,19 @@ export const createSetToFilterAgainst = async ({
   return matchedListItemsSet;
 };
 
-export const filterEventsAgainstList = async ({
+export const filterEventsAgainstList = async <T>({
   listClient,
   exceptionsList,
   logger,
   eventSearchResult,
   buildRuleMessage,
-}: FilterEventsAgainstList): Promise<SignalSearchResponse> => {
+}: {
+  listClient: ListClient;
+  exceptionsList: ExceptionListItemSchema[];
+  logger: Logger;
+  eventSearchResult: SearchResponse<T>;
+  buildRuleMessage: BuildRuleMessage;
+}): Promise<SearchResponse<T>> => {
   try {
     if (exceptionsList == null || exceptionsList.length === 0) {
       logger.debug(buildRuleMessage('about to return original search result'));
@@ -108,9 +123,9 @@ export const filterEventsAgainstList = async ({
     });
 
     // now that we have all the exception items which are value lists (whether single entry or have multiple entries)
-    const res = await valueListExceptionItems.reduce<Promise<SignalSearchResponse['hits']['hits']>>(
+    const res = await valueListExceptionItems.reduce<Promise<SearchResponse<T>['hits']['hits']>>(
       async (
-        filteredAccum: Promise<SignalSearchResponse['hits']['hits']>,
+        filteredAccum: Promise<SearchResponse<T>['hits']['hits']>,
         exceptionItem: ExceptionListItemSchema
       ) => {
         // 1. acquire the values from the specified fields to check
@@ -152,15 +167,23 @@ export const filterEventsAgainstList = async ({
           const vals = fieldAndSetTuples.map((tuple) => {
             const eventItem = get(tuple.field, item._source);
             if (tuple.operator === 'included') {
-              // only create a signal if the event is not in the value list
+              // only create a signal if the field value is not in the value list
               if (eventItem != null) {
-                return !tuple.matchedSet.has(eventItem);
+                if (isStringableType(eventItem)) {
+                  return !tuple.matchedSet.has(eventItem);
+                } else if (isStringableArray(eventItem)) {
+                  return !eventItem.some((val) => tuple.matchedSet.has(val));
+                }
               }
               return true;
             } else if (tuple.operator === 'excluded') {
-              // only create a signal if the event is in the value list
+              // only create a signal if the field value is in the value list
               if (eventItem != null) {
-                return tuple.matchedSet.has(eventItem);
+                if (isStringableType(eventItem)) {
+                  return tuple.matchedSet.has(eventItem);
+                } else if (isStringableArray(eventItem)) {
+                  return eventItem.some((val) => tuple.matchedSet.has(val));
+                }
               }
               return true;
             }
@@ -175,10 +198,10 @@ export const filterEventsAgainstList = async ({
         const toReturn = filteredEvents;
         return toReturn;
       },
-      Promise.resolve<SignalSearchResponse['hits']['hits']>(eventSearchResult.hits.hits)
+      Promise.resolve<SearchResponse<T>['hits']['hits']>(eventSearchResult.hits.hits)
     );
 
-    const toReturn: SignalSearchResponse = {
+    const toReturn: SearchResponse<T> = {
       took: eventSearchResult.took,
       timed_out: eventSearchResult.timed_out,
       _shards: eventSearchResult._shards,
