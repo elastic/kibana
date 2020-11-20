@@ -57,12 +57,16 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
 
   const columns: Array<EuiBasicTableColumn<FieldDetails>> = [
     {
-      name: 'Field',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.documentDetail.fieldHeader', {
+        defaultMessage: 'Field',
+      }),
       width: '20%',
       render: (field: FieldDetails) => field.name,
     },
     {
-      name: 'Value',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.documentDetail.valueHeader', {
+        defaultMessage: 'Value',
+      }),
       width: '80%',
       render: ({ value, type }: FieldDetails) => <ResultFieldValue raw={value} type={type} />,
     },
