@@ -31,6 +31,7 @@ const WATCH_NAME = 'elasticsearch_version_mismatch';
 export class ElasticsearchVersionMismatchAlert extends BaseAlert {
   public type = ALERT_ELASTICSEARCH_VERSION_MISMATCH;
   public label = LEGACY_ALERT_DETAILS[ALERT_ELASTICSEARCH_VERSION_MISMATCH].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_ELASTICSEARCH_VERSION_MISMATCH].description;
   public isLegacy = true;
 
   protected actionVariables = [

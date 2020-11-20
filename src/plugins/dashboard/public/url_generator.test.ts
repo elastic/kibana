@@ -121,6 +121,27 @@ describe('dashboard url generator', () => {
     );
   });
 
+  test('searchSessionId', async () => {
+    const generator = createDashboardUrlGenerator(() =>
+      Promise.resolve({
+        appBasePath: APP_BASE_PATH,
+        useHashedUrl: false,
+        savedDashboardLoader: createMockDashboardLoader(),
+      })
+    );
+    const url = await generator.createUrl!({
+      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      refreshInterval: { pause: false, value: 300 },
+      dashboardId: '123',
+      filters: [],
+      query: { query: 'bye', language: 'kuery' },
+      searchSessionId: '__sessionSearchId__',
+    });
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/dashboards#/view/123?_a=(filters:!(),query:(language:kuery,query:bye))&_g=(filters:!(),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&searchSessionId=__sessionSearchId__"`
+    );
+  });
+
   test('if no useHash setting is given, uses the one was start services', async () => {
     const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({

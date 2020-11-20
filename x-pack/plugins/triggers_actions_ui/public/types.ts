@@ -6,12 +6,13 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, DocLinksStart, ToastsSetup } from 'kibana/public';
 import { ComponentType } from 'react';
-import { ActionGroup } from '../../alerts/common';
+import { ActionGroup, AlertActionParam } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
   SanitizedAlert as Alert,
   AlertAction,
+  AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
@@ -21,6 +22,7 @@ import {
 export {
   Alert,
   AlertAction,
+  AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
@@ -50,7 +52,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
 export interface ActionParamsProps<TParams> {
   actionParams: TParams;
   index: number;
-  editAction: (property: string, value: any, index: number) => void;
+  editAction: (key: string, value: AlertActionParam, index: number) => void;
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
@@ -131,7 +133,7 @@ export interface ActionVariable {
 }
 
 export interface ActionVariables {
-  context: ActionVariable[];
+  context?: ActionVariable[];
   state: ActionVariable[];
   params: ActionVariable[];
 }
@@ -164,15 +166,19 @@ export interface AlertTypeParamsExpressionProps<
   alertInterval: string;
   alertThrottle: string;
   setAlertParams: (property: string, value: any) => void;
-  setAlertProperty: (key: string, value: any) => void;
+  setAlertProperty: <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => void;
   errors: IErrorObject;
   alertsContext: AlertsContextValue;
+  defaultActionGroupId: string;
+  actionGroups: ActionGroup[];
 }
 
 export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
   id: string;
   name: string | JSX.Element;
+  description: string;
   iconClass: string;
+  documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (alertParams: AlertParamsType) => ValidationResult;
   alertParamsExpression:
     | React.FunctionComponent<any>

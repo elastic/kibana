@@ -9,10 +9,10 @@ import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public/';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-import { IngestManagerSetup } from '../../../ingest_manager/public';
+import { FleetSetup } from '../../../fleet/public';
 import { PLUGIN } from '../../common/constants';
 import { ExtensionsService } from '../services';
-import { IndexMgmtMetricsType } from '../types';
+import { IndexMgmtMetricsType, StartDependencies } from '../types';
 import { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
@@ -28,14 +28,14 @@ interface InternalServices {
 }
 
 export async function mountManagementSection(
-  coreSetup: CoreSetup,
+  coreSetup: CoreSetup<StartDependencies>,
   usageCollection: UsageCollectionSetup,
   services: InternalServices,
   params: ManagementAppMountParams,
-  ingestManager?: IngestManagerSetup
+  fleet?: FleetSetup
 ) {
   const { element, setBreadcrumbs, history } = params;
-  const [core] = await coreSetup.getStartServices();
+  const [core, startDependencies] = await coreSetup.getStartServices();
   const {
     docLinks,
     fatalErrors,
@@ -44,6 +44,7 @@ export async function mountManagementSection(
     uiSettings,
   } = core;
 
+  const { urlGenerators } = startDependencies.share;
   docTitle.change(PLUGIN.getI18nName(i18n));
 
   breadcrumbService.setup(setBreadcrumbs);
@@ -56,12 +57,13 @@ export async function mountManagementSection(
     },
     plugins: {
       usageCollection,
-      ingestManager,
+      fleet,
     },
     services,
     history,
     setBreadcrumbs,
     uiSettings,
+    urlGenerators,
   };
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

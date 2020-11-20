@@ -5,6 +5,8 @@
  */
 
 import {
+  concurrent_searches,
+  items_per_search,
   ThreatMapping,
   threatMappingEntries,
   ThreatMappingEntries,
@@ -33,7 +35,7 @@ describe('threat_mapping', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should NOT validate an extra entry item', () => {
+    test('it should fail validation with an extra entry item', () => {
       const payload: ThreatMappingEntries & Array<{ extra: string }> = [
         {
           field: 'field.one',
@@ -50,7 +52,7 @@ describe('threat_mapping', () => {
       expect(message.schema).toEqual({});
     });
 
-    test('it should NOT validate a non string', () => {
+    test('it should fail validation with a non string', () => {
       const payload = ([
         {
           field: 5,
@@ -66,7 +68,7 @@ describe('threat_mapping', () => {
       expect(message.schema).toEqual({});
     });
 
-    test('it should NOT validate a wrong type', () => {
+    test('it should fail validation with a wrong type', () => {
       const payload = ([
         {
           field: 'field.one',
@@ -107,7 +109,7 @@ describe('threat_mapping', () => {
     });
   });
 
-  test('it should NOT validate an extra key', () => {
+  test('it should fail validate with an extra key', () => {
     const payload: ThreatMapping & Array<{ extra: string }> = [
       {
         entries: [
@@ -129,7 +131,7 @@ describe('threat_mapping', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate an extra inner entry', () => {
+  test('it should fail validate with an extra inner entry', () => {
     const payload: ThreatMapping & Array<{ entries: Array<{ extra: string }> }> = [
       {
         entries: [
@@ -151,7 +153,7 @@ describe('threat_mapping', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate an extra inner entry with the wrong data type', () => {
+  test('it should fail validate with an extra inner entry with the wrong data type', () => {
     const payload = ([
       {
         entries: [
@@ -170,6 +172,63 @@ describe('threat_mapping', () => {
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "5" supplied to "entries,field"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should fail validate with empty array', () => {
+    const payload: string[] = [];
+
+    const decoded = threat_mapping.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "[]" supplied to "NonEmptyArray<ThreatMap>"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should fail validation when concurrent_searches is < 0', () => {
+    const payload = -1;
+    const decoded = concurrent_searches.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should fail validation when concurrent_searches is 0', () => {
+    const payload = 0;
+    const decoded = concurrent_searches.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should fail validation when items_per_search is 0', () => {
+    const payload = 0;
+    const decoded = items_per_search.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should fail validation when items_per_search is < 0', () => {
+    const payload = -1;
+    const decoded = items_per_search.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "PositiveIntegerGreaterThanZero"',
     ]);
     expect(message.schema).toEqual({});
   });

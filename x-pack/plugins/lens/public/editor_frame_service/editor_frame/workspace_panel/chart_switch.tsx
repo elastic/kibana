@@ -167,7 +167,15 @@ export function ChartSwitch(props: Props) {
               subVisualizationId,
               newVisualization.initialize(
                 props.framePublicAPI,
-                props.visualizationId === newVisualization.id ? props.visualizationState : undefined
+                props.visualizationId === newVisualization.id
+                  ? props.visualizationState
+                  : undefined,
+                props.visualizationId &&
+                  props.visualizationMap[props.visualizationId].getMainPalette
+                  ? props.visualizationMap[props.visualizationId].getMainPalette!(
+                      props.visualizationState
+                    )
+                  : undefined
               )
             );
           },
@@ -304,6 +312,12 @@ function getTopSuggestion(
   newVisualization: Visualization<unknown>,
   subVisualizationId?: string
 ): Suggestion | undefined {
+  const mainPalette =
+    props.visualizationId &&
+    props.visualizationMap[props.visualizationId] &&
+    props.visualizationMap[props.visualizationId].getMainPalette
+      ? props.visualizationMap[props.visualizationId].getMainPalette!(props.visualizationState)
+      : undefined;
   const unfilteredSuggestions = getSuggestions({
     datasourceMap: props.datasourceMap,
     datasourceStates: props.datasourceStates,
@@ -311,6 +325,8 @@ function getTopSuggestion(
     activeVisualizationId: props.visualizationId,
     visualizationState: props.visualizationState,
     subVisualizationId,
+    activeData: props.framePublicAPI.activeData,
+    mainPalette,
   });
   const suggestions = unfilteredSuggestions.filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations

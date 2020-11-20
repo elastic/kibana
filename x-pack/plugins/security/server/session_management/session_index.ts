@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyClusterClient, Logger } from '../../../../../src/core/server';
-import { AuthenticationProvider } from '../../common/types';
-import { ConfigType } from '../config';
+import type { ILegacyClusterClient, Logger } from '../../../../../src/core/server';
+import type { AuthenticationProvider } from '../../common/types';
+import type { ConfigType } from '../config';
 
 export interface SessionIndexOptions {
   readonly clusterClient: ILegacyClusterClient;
   readonly kibanaIndexName: string;
-  readonly config: Pick<ConfigType, 'session'>;
+  readonly config: Pick<ConfigType, 'session' | 'authc'>;
   readonly logger: Logger;
 }
 
@@ -121,12 +121,6 @@ export class SessionIndex {
   private readonly indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
 
   /**
-   * Timeout after which session with the expired idle timeout _may_ be removed from the index
-   * during regular cleanup routine.
-   */
-  private readonly idleIndexCleanupTimeout: number | null;
-
-  /**
    * Promise that tracks session index initialization process. We'll need to get rid of this as soon
    * as Core provides support for plugin statuses (https://github.com/elastic/kibana/issues/41983).
    * With this we won't mark Security as `Green` until index is fully initialized and hence consumers
@@ -134,14 +128,7 @@ export class SessionIndex {
    */
   private indexInitialization?: Promise<void>;
 
-  constructor(private readonly options: Readonly<SessionIndexOptions>) {
-    // This timeout is intentionally larger than the `idleIndexUpdateTimeout` (idleTimeout * 2)
-    // configured in `Session` to be sure that the session value is definitely expired and may be
-    // safely cleaned up.
-    this.idleIndexCleanupTimeout = this.options.config.session.idleTimeout
-      ? this.options.config.session.idleTimeout.asMilliseconds() * 3
-      : null;
-  }
+  constructor(private readonly options: Readonly<SessionIndexOptions>) {}
 
   /**
    * Retrieves session value with the specified ID from the index. If session value isn't found
@@ -353,26 +340,62 @@ export class SessionIndex {
     this.options.logger.debug(`Running cleanup routine.`);
 
     const now = Date.now();
+    const providersSessionConfig = this.options.config.authc.sortedProviders.map((provider) => {
+      return {
+        boolQuery: {
+          bool: {
+            must: [
+              { term: { 'provider.type': provider.type } },
+              { term: { 'provider.name': provider.name } },
+            ],
+          },
+        },
+        ...this.options.config.session.getExpirationTimeouts(provider),
+      };
+    });
 
     // Always try to delete sessions with expired lifespan (even if it's not configured right now).
     const deleteQueries: object[] = [{ range: { lifespanExpiration: { lte: now } } }];
 
-    // If lifespan is configured we should remove any sessions that were created without one.
-    if (this.options.config.session.lifespan) {
-      deleteQueries.push({ bool: { must_not: { exists: { field: 'lifespanExpiration' } } } });
-    }
+    // If session belongs to a not configured provider we should also remove it.
+    deleteQueries.push({
+      bool: {
+        must_not: {
+          bool: {
+            should: providersSessionConfig.map(({ boolQuery }) => boolQuery),
+            minimum_should_match: 1,
+          },
+        },
+      },
+    });
 
-    // If idle timeout is configured we should delete all sessions without specified idle timeout
-    // or if that session hasn't been updated for a while meaning that session is expired.
-    if (this.idleIndexCleanupTimeout) {
-      deleteQueries.push(
-        { range: { idleTimeoutExpiration: { lte: now - this.idleIndexCleanupTimeout } } },
-        { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } }
-      );
-    } else {
-      // Otherwise just delete all expired sessions that were previously created with the idle
-      // timeout.
-      deleteQueries.push({ range: { idleTimeoutExpiration: { lte: now } } });
+    for (const { boolQuery, lifespan, idleTimeout } of providersSessionConfig) {
+      // If lifespan is configured we should remove any sessions that were created without one.
+      if (lifespan) {
+        deleteQueries.push({
+          bool: { ...boolQuery.bool, must_not: { exists: { field: 'lifespanExpiration' } } },
+        });
+      }
+
+      // This timeout is intentionally larger than the timeout used in `Session` to update idle
+      // timeout in the session index (idleTimeout * 2) to be sure that the session value is
+      // definitely expired and may be safely cleaned up.
+      const idleIndexCleanupTimeout = idleTimeout ? idleTimeout.asMilliseconds() * 3 : null;
+      deleteQueries.push({
+        bool: {
+          ...boolQuery.bool,
+          // If idle timeout is configured we should delete all sessions without specified idle timeout
+          // or if that session hasn't been updated for a while meaning that session is expired. Otherwise
+          // just delete all expired sessions that were previously created with the idle timeout.
+          should: idleIndexCleanupTimeout
+            ? [
+                { range: { idleTimeoutExpiration: { lte: now - idleIndexCleanupTimeout } } },
+                { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } },
+              ]
+            : [{ range: { idleTimeoutExpiration: { lte: now } } }],
+          minimum_should_match: 1,
+        },
+      });
     }
 
     try {

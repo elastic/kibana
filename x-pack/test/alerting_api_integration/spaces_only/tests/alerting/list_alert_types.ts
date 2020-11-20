@@ -23,7 +23,10 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         (alertType: any) => alertType.id === 'test.noop'
       );
       expect(fixtureAlertType).to.eql({
-        actionGroups: [{ id: 'default', name: 'Default' }],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'resolved', name: 'Resolved' },
+        ],
         defaultActionGroupId: 'default',
         id: 'test.noop',
         name: 'Test: Noop',

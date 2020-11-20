@@ -208,7 +208,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
   });
 });
 
-describe('Resolver, when analyzing a tree that has two related events for the origin', () => {
+describe('Resolver, when analyzing a tree that has 2 related registry and 1 related event of all other categories for the origin node', () => {
   beforeEach(async () => {
     // create a mock data access layer with related events
     const {
@@ -282,7 +282,21 @@ describe('Resolver, when analyzing a tree that has two related events for the or
         simulator.map(() =>
           simulator.testSubject('resolver:map:node-submenu-item').map((node) => node.text())
         )
-      ).toYieldEqualTo(['2 registry']);
+      ).toYieldEqualTo([
+        '1 authentication',
+        '1 database',
+        '1 driver',
+        '1 file',
+        '1 host',
+        '1 iam',
+        '1 intrusion_detection',
+        '1 malware',
+        '1 network',
+        '1 package',
+        '1 process',
+        '2 registry',
+        '1 web',
+      ]);
     });
   });
 });

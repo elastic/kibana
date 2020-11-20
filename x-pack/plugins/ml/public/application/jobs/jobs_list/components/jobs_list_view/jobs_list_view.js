@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { isEqual } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -34,7 +35,6 @@ import { NodeAvailableWarning } from '../../../../components/node_available_warn
 import { DatePickerWrapper } from '../../../../components/navigation_menu/date_picker_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
-import { isEqual } from 'lodash';
 
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
@@ -57,6 +57,7 @@ export class JobsListView extends Component {
       deletingJobIds: [],
     };
 
+    this.spacesEnabled = props.spacesEnabled ?? false;
     this.updateFunctions = {};
 
     this.showEditJobFlyout = () => {};
@@ -222,8 +223,14 @@ export class JobsListView extends Component {
     this.setState({ selectedJobs });
   }
 
-  setFilters = (filterClauses) => {
+  setFilters = (query) => {
+    const filterClauses = (query && query.ast && query.ast.clauses) || [];
     const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+
+    this.props.onJobsViewStateUpdate({
+      queryText: query?.text,
+    });
+
     this.setState({ filteredJobsSummaryList, filterClauses }, () => {
       this.refreshSelectedJobs();
     });
@@ -246,6 +253,12 @@ export class JobsListView extends Component {
 
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       try {
+        let spaces = {};
+        if (this.props.spacesEnabled && this.props.isManagementTable) {
+          const allSpaces = await ml.savedObjects.jobsSpaces();
+          spaces = allSpaces['anomaly-detector'];
+        }
+
         const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
         const fullJobsList = {};
         const jobsSummaryList = jobs.map((job) => {
@@ -254,6 +267,13 @@ export class JobsListView extends Component {
             delete job.fullJob;
           }
           job.latestTimestampSortValue = job.latestTimestampMs || 0;
+          job.spaceIds =
+            this.props.spacesEnabled &&
+            this.props.isManagementTable &&
+            spaces &&
+            spaces[job.id] !== undefined
+              ? spaces[job.id]
+              : [];
           return job;
         });
         const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
@@ -348,7 +368,10 @@ export class JobsListView extends Component {
         <EuiSpacer size="s" />
         <div className="managementJobsList">
           <div>
-            <JobFilterBar setFilters={this.setFilters} />
+            <JobFilterBar
+              setFilters={this.setFilters}
+              queryText={this.props.jobsViewState.queryText}
+            />
           </div>
           <JobsList
             jobsSummaryList={filteredJobsSummaryList}
@@ -360,6 +383,10 @@ export class JobsListView extends Component {
             loading={loading}
             isManagementTable={true}
             isMlEnabledInSpace={this.props.isMlEnabledInSpace}
+            spacesEnabled={this.props.spacesEnabled}
+            jobsViewState={this.props.jobsViewState}
+            onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
+            refreshJobs={() => this.refreshJobSummaryList(true)}
           />
         </div>
       </div>
@@ -424,7 +451,10 @@ export class JobsListView extends Component {
                   showDeleteJobModal={this.showDeleteJobModal}
                   refreshJobs={() => this.refreshJobSummaryList(true)}
                 />
-                <JobFilterBar setFilters={this.setFilters} />
+                <JobFilterBar
+                  setFilters={this.setFilters}
+                  queryText={this.props.jobsViewState.queryText}
+                />
               </div>
               <JobsList
                 jobsSummaryList={this.state.filteredJobsSummaryList}
@@ -436,6 +466,8 @@ export class JobsListView extends Component {
                 showDeleteJobModal={this.showDeleteJobModal}
                 showStartDatafeedModal={this.showStartDatafeedModal}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
+                jobsViewState={this.props.jobsViewState}
+                onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
                 selectedJobsCount={this.state.selectedJobs.length}
                 loading={loading}
               />

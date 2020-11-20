@@ -161,6 +161,10 @@ export class TimeseriesVisualization extends Component {
     const yAxis = [];
     let mainDomainAdded = false;
 
+    const allSeriesHaveSameFormatters = seriesModel.every(
+      (seriesGroup) => seriesGroup.formatter === seriesModel[0].formatter
+    );
+
     this.showToastNotification = null;
 
     seriesModel.forEach((seriesGroup) => {
@@ -211,7 +215,7 @@ export class TimeseriesVisualization extends Component {
         });
       } else if (!mainDomainAdded) {
         TimeseriesVisualization.addYAxis(yAxis, {
-          tickFormatter: series.length === 1 ? undefined : (val) => val,
+          tickFormatter: allSeriesHaveSameFormatters ? seriesGroupTickFormatter : (val) => val,
           id: yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
           position: model.axis_position,

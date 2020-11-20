@@ -24,13 +24,11 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
-  AbortError,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
   ISessionService,
-  getCombinedSignal,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
@@ -43,6 +41,7 @@ import {
   getHttpError,
 } from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
+import { AbortError, getCombinedAbortSignal } from '../../../kibana_utils/public';
 
 export interface SearchInterceptorDeps {
   http: CoreSetup['http'];
@@ -127,18 +126,25 @@ export class SearchInterceptor {
    */
   protected runSearch(
     request: IKibanaSearchRequest,
-    signal: AbortSignal,
-    strategy?: string
+    options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
-    const body = JSON.stringify(searchRequest);
+    const path = trimEnd(
+      `/internal/search/${options?.strategy ?? ES_SEARCH_STRATEGY}/${id ?? ''}`,
+      '/'
+    );
+    const body = JSON.stringify({
+      sessionId: options?.sessionId,
+      isStored: options?.isStored,
+      isRestore: options?.isRestore,
+      ...searchRequest,
+    });
 
     return this.deps.http.fetch({
       method: 'POST',
       path,
       body,
-      signal,
+      signal: options?.abortSignal,
     });
   }
 
@@ -170,7 +176,9 @@ export class SearchInterceptor {
       ...(abortSignal ? [abortSignal] : []),
     ];
 
-    const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedSignal(signals);
+    const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedAbortSignal(
+      signals
+    );
     const cleanup = () => {
       subscription.unsubscribe();
       combinedSignal.removeEventListener('abort', cleanup);
@@ -218,7 +226,7 @@ export class SearchInterceptor {
    *
    * @param request
    * @options
-   * @returns `Observalbe` emitting the search response or an error.
+   * @returns `Observable` emitting the search response or an error.
    */
   public search(
     request: IKibanaSearchRequest,
@@ -234,7 +242,7 @@ export class SearchInterceptor {
         abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-      return from(this.runSearch(request, combinedSignal, options?.strategy)).pipe(
+      return from(this.runSearch(request, { ...options, abortSignal: combinedSignal })).pipe(
         catchError((e: Error) => {
           return throwError(this.handleSearchError(e, request, timeoutSignal, options));
         }),

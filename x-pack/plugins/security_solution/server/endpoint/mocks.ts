@@ -11,11 +11,11 @@ import { alertsMock } from '../../../alerts/server/mocks';
 import { xpackMocks } from '../../../../mocks';
 import {
   AgentService,
-  IngestManagerStartContract,
+  FleetStartContract,
   ExternalCallback,
   PackageService,
-} from '../../../ingest_manager/server';
-import { createPackagePolicyServiceMock } from '../../../ingest_manager/server/mocks';
+} from '../../../fleet/server';
+import { createPackagePolicyServiceMock } from '../../../fleet/server/mocks';
 import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
@@ -74,8 +74,8 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     alerts: alertsMock.createStart(),
     config,
     registerIngestCallback: jest.fn<
-      ReturnType<IngestManagerStartContract['registerExternalCallback']>,
-      Parameters<IngestManagerStartContract['registerExternalCallback']>
+      ReturnType<FleetStartContract['registerExternalCallback']>,
+      Parameters<FleetStartContract['registerExternalCallback']>
     >(),
   };
 };
@@ -109,9 +109,7 @@ export const createMockAgentService = (): jest.Mocked<AgentService> => {
  * @param indexPattern a string index pattern to return when called by a test
  * @returns the same value as `indexPattern` parameter
  */
-export const createMockIngestManagerStartContract = (
-  indexPattern: string
-): IngestManagerStartContract => {
+export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
   return {
     esIndexPatternService: {
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),

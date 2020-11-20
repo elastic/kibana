@@ -18,3 +18,7 @@ export const TRUSTED_APPS_SUPPORTED_OS_TYPES: readonly string[] = ['macos', 'win
 export const TRUSTED_APPS_LIST_API = '/api/endpoint/trusted_apps';
 export const TRUSTED_APPS_CREATE_API = '/api/endpoint/trusted_apps';
 export const TRUSTED_APPS_DELETE_API = '/api/endpoint/trusted_apps/{id}';
+
+export const BASE_POLICY_RESPONSE_ROUTE = `/api/endpoint/policy_response`;
+export const BASE_POLICY_ROUTE = `/api/endpoint/policy`;
+export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;

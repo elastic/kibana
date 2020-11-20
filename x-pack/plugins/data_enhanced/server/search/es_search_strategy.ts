@@ -11,15 +11,16 @@ import { Observable } from 'rxjs';
 import type { SearchResponse } from 'elasticsearch';
 import type { ApiResponse } from '@elastic/elasticsearch';
 
-import { getShardTimeout, shimHitsTotal, search } from '../../../../../src/plugins/data/server';
+import {
+  getShardTimeout,
+  shimHitsTotal,
+  search,
+  SearchStrategyDependencies,
+} from '../../../../../src/plugins/data/server';
 import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
 import { getDefaultSearchParams, getAsyncOptions } from './get_default_search_params';
 
-import type {
-  SharedGlobalConfig,
-  RequestHandlerContext,
-  Logger,
-} from '../../../../../src/core/server';
+import type { SharedGlobalConfig, Logger } from '../../../../../src/core/server';
 
 import type {
   ISearchStrategy,
@@ -41,21 +42,22 @@ export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
-): ISearchStrategy => {
+): ISearchStrategy<IEnhancedEsSearchRequest> => {
   function asyncSearch(
     request: IEnhancedEsSearchRequest,
     options: ISearchOptions,
-    context: RequestHandlerContext
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const asyncOptions = getAsyncOptions();
-    const client = context.core.elasticsearch.client.asCurrentUser.asyncSearch;
+    const client = esClient.asCurrentUser.asyncSearch;
 
     return doPartialSearch<ApiResponse<IEsRawAsyncSearchResponse>>(
       async () =>
         client.submit(
           utils.toSnakeCase({
-            ...(await getDefaultSearchParams(context.core.uiSettings.client)),
+            ...(await getDefaultSearchParams(uiSettingsClient)),
             batchedReduceSize: 64,
+            keepOnCompletion: !!options.sessionId, // Always return an ID, even if the request completes quickly
             ...asyncOptions,
             ...request.params,
           })
@@ -80,13 +82,11 @@ export const enhancedEsSearchStrategyProvider = (
     );
   }
 
-  const rollupSearch = async function (
+  async function rollupSearch(
     request: IEnhancedEsSearchRequest,
     options: ISearchOptions,
-    context: RequestHandlerContext
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const uiSettingsClient = await context.core.uiSettings.client;
     const config = await config$.pipe(first()).toPromise();
     const { body, index, ...params } = request.params!;
     const method = 'POST';
@@ -97,7 +97,7 @@ export const enhancedEsSearchStrategyProvider = (
       ...params,
     });
 
-    const promise = esClient.transport.request({
+    const promise = esClient.asCurrentUser.transport.request({
       method,
       path,
       body,
@@ -111,26 +111,19 @@ export const enhancedEsSearchStrategyProvider = (
       rawResponse: response,
       ...utils.getTotalLoaded(response._shards),
     };
-  };
+  }
 
   return {
-    search: (
-      request: IEnhancedEsSearchRequest,
-      options: ISearchOptions,
-      context: RequestHandlerContext
-    ) => {
+    search: (request, options, deps) => {
       logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
 
       return request.indexType !== 'rollup'
-        ? asyncSearch(request, options, context)
-        : from(rollupSearch(request, options, context));
+        ? asyncSearch(request, options, deps)
+        : from(rollupSearch(request, options, deps));
     },
-    cancel: async (context: RequestHandlerContext, id: string) => {
+    cancel: async (id, options, { esClient }) => {
       logger.debug(`cancel ${id}`);
-
-      await context.core.elasticsearch.client.asCurrentUser.asyncSearch.delete({
-        id,
-      });
+      await esClient.asCurrentUser.asyncSearch.delete({ id });
     },
   };
 };
