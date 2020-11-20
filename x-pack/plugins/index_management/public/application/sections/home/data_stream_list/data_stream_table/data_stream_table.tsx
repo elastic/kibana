@@ -17,18 +17,16 @@ import {
 } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
-import { DataStream, DataStreamPrivileges } from '../../../../../../common/types';
+import { DataStream } from '../../../../../../common/types';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
 import { isManagedByIngestManager } from '../../../../lib/data_streams';
 import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
-import { DELETE_INDEX_PRIVILEGE } from '../../../../constants';
 
 interface Props {
   dataStreams?: DataStream[];
-  deletePrivileges?: DataStreamPrivileges<typeof DELETE_INDEX_PRIVILEGE>;
   reload: UseRequestResponse['resendRequest'];
   history: ScopedHistory;
   includeStats: boolean;
@@ -41,7 +39,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   history,
   filters,
   includeStats,
-  deletePrivileges,
 }) => {
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
@@ -165,9 +162,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         },
         isPrimary: true,
         'data-test-subj': 'deleteDataStream',
-        available: ({ name }: DataStream) => {
-          return !deletePrivileges || deletePrivileges[name]?.delete_index;
-        },
+        available: ({ privileges: { delete_index: deleteIndex } }: DataStream) => deleteIndex,
       },
     ],
   });
@@ -195,10 +190,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     },
     toolsLeft:
       selection.length > 0 &&
-      (!deletePrivileges ||
-        selection.every(
-          (dataStream: DataStream) => deletePrivileges[dataStream.name]?.delete_index
-        )) ? (
+      selection.every((dataStream: DataStream) => dataStream.privileges.delete_index) ? (
         <EuiButton
           data-test-subj="deleteDataStreamsButton"
           onClick={() => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name))}

@@ -92,7 +92,6 @@ describe('Data Streams tab', () => {
         setLoadDataStreamResponse,
         setLoadTemplateResponse,
         setLoadTemplatesResponse,
-        setLoadDataStreamsPrivilegesResponse,
       } = httpRequestsMockHelpers;
 
       setLoadIndicesResponse([
@@ -110,11 +109,6 @@ describe('Data Streams tab', () => {
       const indexTemplate = fixtures.getTemplate({ name: 'indexTemplate' });
       setLoadTemplatesResponse({ templates: [indexTemplate], legacyTemplates: [] });
       setLoadTemplateResponse(indexTemplate);
-
-      setLoadDataStreamsPrivilegesResponse({
-        dataStream1: { delete_index: true },
-        dataStream2: { delete_index: true },
-      });
 
       testBed = await setup({ history: createMemoryHistory() });
       await act(async () => {
@@ -286,7 +280,6 @@ describe('Data Streams tab', () => {
         setLoadIndicesResponse,
         setLoadDataStreamsResponse,
         setLoadDataStreamResponse,
-        setLoadDataStreamsPrivilegesResponse,
       } = httpRequestsMockHelpers;
 
       setLoadIndicesResponse([
@@ -297,10 +290,6 @@ describe('Data Streams tab', () => {
       const dataStreamPercentSign = createDataStreamPayload({ name: '%dataStream' });
       setLoadDataStreamsResponse([dataStreamPercentSign]);
       setLoadDataStreamResponse(dataStreamPercentSign);
-
-      setLoadDataStreamsPrivilegesResponse({
-        '%dataStream': { delete_index: true },
-      });
 
       testBed = await setup({
         history: createMemoryHistory(),
@@ -462,22 +451,19 @@ describe('Data Streams tab', () => {
   });
 
   describe('delete data stream privileges', () => {
-    const {
-      setLoadDataStreamsResponse,
-      setLoadDataStreamResponse,
-      setLoadDataStreamsPrivilegesResponse,
-    } = httpRequestsMockHelpers;
+    const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
-    const dataStreamWithDelete = createDataStreamPayload({ name: 'dataStreamWithDelete' });
-    const dataStreamNoDelete = createDataStreamPayload({ name: 'dataStreamNoDelete' });
+    const dataStreamWithDelete = createDataStreamPayload({
+      name: 'dataStreamWithDelete',
+      privileges: { delete_index: true },
+    });
+    const dataStreamNoDelete = createDataStreamPayload({
+      name: 'dataStreamNoDelete',
+      privileges: { delete_index: false },
+    });
 
     beforeEach(async () => {
       setLoadDataStreamsResponse([dataStreamWithDelete, dataStreamNoDelete]);
-
-      setLoadDataStreamsPrivilegesResponse({
-        dataStreamWithDelete: { delete_index: true },
-        dataStreamNoDelete: { delete_index: false },
-      });
 
       testBed = await setup({ history: createMemoryHistory() });
       await act(async () => {

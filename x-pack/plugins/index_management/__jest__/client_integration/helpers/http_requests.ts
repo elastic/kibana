@@ -51,17 +51,6 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
-  const setLoadDataStreamsPrivilegesResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? error.body : response;
-
-    server.respondWith('POST', `${API_BASE_PATH}/data_streams_privileges`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
   const setDeleteTemplateResponse = (response: HttpResponse = []) => {
     server.respondWith('POST', `${API_BASE_PATH}/delete_index_templates`, [
       200,
@@ -131,7 +120,6 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setLoadDataStreamsResponse,
     setLoadDataStreamResponse,
     setDeleteDataStreamResponse,
-    setLoadDataStreamsPrivilegesResponse,
     setDeleteTemplateResponse,
     setLoadTemplateResponse,
     setCreateTemplateResponse,

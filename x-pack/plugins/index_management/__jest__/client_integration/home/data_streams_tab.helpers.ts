@@ -232,6 +232,9 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
   indexTemplateName: 'indexTemplate',
   storageSize: '1b',
   maxTimeStamp: 420,
+  privileges: {
+    delete_index: true,
+  },
   ...dataStream,
 });
 

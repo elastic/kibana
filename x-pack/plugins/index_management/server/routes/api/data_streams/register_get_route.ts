@@ -6,122 +6,188 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
+import { ElasticsearchClient } from 'kibana/server';
 import { deserializeDataStream, deserializeDataStreamList } from '../../../../common/lib';
+import { DataStreamFromEs } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-const querySchema = schema.object({
-  includeStats: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
-});
+interface PrivilegesFromEs {
+  username: string;
+  has_all_requested: boolean;
+  cluster: Record<string, boolean>;
+  index: Record<string, Record<string, boolean>>;
+  application: Record<string, boolean>;
+}
 
-export function registerGetAllRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+interface StatsFromEs {
+  data_stream: string;
+  store_size: string;
+  maximum_timestamp: number;
+}
+
+const enhanceDataStreams = ({
+  dataStreams,
+  dataStreamsStats,
+  dataStreamsPrivileges,
+}: {
+  dataStreams: DataStreamFromEs[];
+  dataStreamsStats?: StatsFromEs[];
+  dataStreamsPrivileges?: PrivilegesFromEs;
+}): DataStreamFromEs[] => {
+  return dataStreams.map((dataStream: DataStreamFromEs) => {
+    let enhancedDataStream = { ...dataStream };
+
+    if (dataStreamsStats) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { store_size, maximum_timestamp } = dataStreamsStats.find(
+        ({ data_stream: statsName }: { data_stream: string }) => statsName === dataStream.name
+      )!;
+
+      enhancedDataStream = {
+        ...enhancedDataStream,
+        store_size,
+        maximum_timestamp,
+      };
+    }
+
+    enhancedDataStream = {
+      ...enhancedDataStream,
+      privileges: {
+        delete_index: dataStreamsPrivileges
+          ? dataStreamsPrivileges.index[dataStream.name].delete_index
+          : true,
+      },
+    };
+
+    return enhancedDataStream;
+  });
+};
+
+const getDataStreamsStats = (client: ElasticsearchClient, name = '*') => {
+  return client.transport.request({
+    path: `/_data_stream/${encodeURIComponent(name)}/_stats`,
+    method: 'GET',
+    querystring: {
+      human: true,
+    },
+  });
+};
+
+const getDataStreamsPrivileges = (client: ElasticsearchClient, names: string[]) => {
+  return client.security.hasPrivileges<PrivilegesFromEs>({
+    body: {
+      index: [
+        {
+          names,
+          privileges: ['delete_index'],
+        },
+      ],
+    },
+  });
+};
+
+export function registerGetAllRoute({
+  router,
+  license,
+  lib: { handleEsError },
+  config,
+}: RouteDependencies) {
+  const querySchema = schema.object({
+    includeStats: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
+  });
   router.get(
     { path: addBasePath('/data_streams'), validate: { query: querySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
+    license.guardApiRoute(async (ctx, req, response) => {
+      const { asCurrentUser } = ctx.core.elasticsearch.client;
 
       const includeStats = (req.query as TypeOf<typeof querySchema>).includeStats === 'true';
 
       try {
-        const { data_streams: dataStreams } = await callAsCurrentUser(
-          'dataManagement.getDataStreams'
-        );
+        let {
+          body: { data_streams: dataStreams },
+        } = await asCurrentUser.indices.getDataStream();
+
+        let dataStreamsStats;
+        let dataStreamsPrivileges;
 
         if (includeStats) {
-          const {
-            data_streams: dataStreamsStats,
-          } = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
-            path: '/_data_stream/*/_stats',
-            method: 'GET',
-            query: {
-              human: true,
-            },
-          });
-
-          // Merge stats into data streams.
-          for (let i = 0; i < dataStreams.length; i++) {
-            const dataStream = dataStreams[i];
-
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            const { store_size, maximum_timestamp } = dataStreamsStats.find(
-              ({ data_stream: statsName }: { data_stream: string }) => statsName === dataStream.name
-            );
-
-            dataStreams[i] = {
-              ...dataStream,
-              store_size,
-              maximum_timestamp,
-            };
-          }
+          ({
+            body: { data_streams: dataStreamsStats },
+          } = await getDataStreamsStats(asCurrentUser));
         }
 
-        return res.ok({ body: deserializeDataStreamList(dataStreams) });
+        if (config.isSecurityEnabled() && dataStreams.length > 0) {
+          ({ body: dataStreamsPrivileges } = await getDataStreamsPrivileges(
+            asCurrentUser,
+            dataStreams.map((dataStream: DataStreamFromEs) => dataStream.name)
+          ));
+        }
+
+        dataStreams = enhanceDataStreams({
+          dataStreams,
+          dataStreamsStats,
+          dataStreamsPrivileges,
+        });
+
+        return response.ok({ body: deserializeDataStreamList(dataStreams) });
       } catch (error) {
-        if (isEsError(error)) {
-          return res.customError({
-            statusCode: error.statusCode,
-            body: error,
-          });
-        }
-
-        return res.internalError({ body: error });
+        return handleEsError({ error, response });
       }
     })
   );
 }
 
-export function registerGetOneRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+export function registerGetOneRoute({
+  router,
+  license,
+  lib: { handleEsError },
+  config,
+}: RouteDependencies) {
   const paramsSchema = schema.object({
     name: schema.string(),
   });
-
   router.get(
     {
       path: addBasePath('/data_streams/{name}'),
       validate: { params: paramsSchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    license.guardApiRoute(async (ctx, req, response) => {
       const { name } = req.params as TypeOf<typeof paramsSchema>;
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
+      const { asCurrentUser } = ctx.core.elasticsearch.client;
       try {
         const [
-          { data_streams: dataStream },
-          { data_streams: dataStreamsStats },
+          {
+            body: { data_streams: dataStreams },
+          },
+          {
+            body: { data_streams: dataStreamsStats },
+          },
         ] = await Promise.all([
-          callAsCurrentUser('dataManagement.getDataStream', {
-            name,
-          }),
-          ctx.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
-            path: `/_data_stream/${encodeURIComponent(name)}/_stats`,
-            method: 'GET',
-            query: {
-              human: true,
-            },
-          }),
+          asCurrentUser.indices.getDataStream({ name }),
+          getDataStreamsStats(asCurrentUser, name),
         ]);
 
-        if (dataStream[0]) {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          const { store_size, maximum_timestamp } = dataStreamsStats[0];
-          dataStream[0] = {
-            ...dataStream[0],
-            store_size,
-            maximum_timestamp,
-          };
-          const body = deserializeDataStream(dataStream[0]);
-          return res.ok({ body });
+        if (dataStreams[0]) {
+          let dataStreamsPrivileges;
+          if (config.isSecurityEnabled()) {
+            ({ body: dataStreamsPrivileges } = await getDataStreamsPrivileges(asCurrentUser, [
+              dataStreams[0].name,
+            ]));
+          }
+
+          const enhancedDataStreams = enhanceDataStreams({
+            dataStreams,
+            dataStreamsStats,
+            dataStreamsPrivileges,
+          });
+          const body = deserializeDataStream(enhancedDataStreams[0]);
+          return response.ok({ body });
         }
 
-        return res.notFound();
-      } catch (e) {
-        if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return res.internalError({ body: e });
+        return response.notFound();
+      } catch (error) {
+        handleEsError({ error, response });
       }
     })
   );

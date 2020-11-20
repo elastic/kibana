@@ -16,6 +16,12 @@ interface MetaFieldFromEs {
   managed: boolean;
 }
 
+interface PrivilegesFieldFromEs {
+  delete_index: boolean;
+}
+
+type PrivilegesField = PrivilegesFieldFromEs;
+
 type MetaField = MetaFieldFromEs;
 
 export type HealthFromEs = 'GREEN' | 'YELLOW' | 'RED';
@@ -31,6 +37,7 @@ export interface DataStreamFromEs {
   ilm_policy?: string;
   store_size?: string;
   maximum_timestamp?: number;
+  privileges: PrivilegesFieldFromEs;
 }
 
 export interface DataStreamIndexFromEs {
@@ -51,6 +58,7 @@ export interface DataStream {
   storageSize?: string;
   maxTimeStamp?: number;
   _meta?: MetaField;
+  privileges: PrivilegesField;
 }
 
 export interface DataStreamIndex {

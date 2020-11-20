@@ -77,13 +77,11 @@ const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => 
 interface Props {
   dataStreamName: string;
   onClose: (shouldReload?: boolean) => void;
-  canDelete: boolean;
 }
 
 export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   dataStreamName,
   onClose,
-  canDelete,
 }) => {
   const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
 
@@ -292,7 +290,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
 
-            {!isLoading && !error && canDelete ? (
+            {!isLoading && !error && dataStream?.privileges.delete_index ? (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="danger"
