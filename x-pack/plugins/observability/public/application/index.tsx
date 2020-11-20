@@ -40,6 +40,7 @@ function App() {
           const Wrapper = () => {
             const { core } = usePluginContext();
 
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             const breadcrumb = [observabilityLabelBreadcrumb, ...route.breadcrumb];
             useEffect(() => {
               core.chrome.setBreadcrumbs(breadcrumb);
