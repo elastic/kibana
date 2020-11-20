@@ -9,7 +9,7 @@ import { AlertProvidedActionVariables } from './action_variables';
 
 export const getDefaultsForActionParams = (
   actionTypeId: string,
-  actionGroupId?: string
+  actionGroupId: string
 ): Record<string, unknown> | undefined => {
   switch (actionTypeId) {
     case '.pagerduty':

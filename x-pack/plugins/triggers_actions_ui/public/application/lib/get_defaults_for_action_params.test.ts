@@ -10,7 +10,7 @@ import { getDefaultsForActionParams } from './get_defaults_for_action_params';
 
 describe('getDefaultsForActionParams', () => {
   test('pagerduty defaults', async () => {
-    expect(getDefaultsForActionParams('.pagerduty')).toEqual({
+    expect(getDefaultsForActionParams('.pagerduty', 'test')).toEqual({
       dedupKey: `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
       eventAction: 'trigger',
     });
