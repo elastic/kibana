@@ -45,7 +45,7 @@ async function fetcher({
   transactionType,
 }: Options) {
   const { start, end, apmEventClient } = setup;
-  const { intervalString } = getBucketSize(start, end);
+  const { intervalString } = getBucketSize({ start, end });
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
