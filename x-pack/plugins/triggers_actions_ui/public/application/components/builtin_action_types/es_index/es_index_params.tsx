@@ -7,6 +7,7 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
 import { IndexActionParams } from '.././types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
@@ -32,47 +33,49 @@ export const IndexParamsFields = ({
   };
 
   return (
-    <JsonEditorWithMessageVariables
-      messageVariables={messageVariables}
-      paramsProperty={'documents'}
-      data-test-subj="documentToIndex"
-      inputTargetValue={
-        documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined
-      }
-      label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',
-        {
-          defaultMessage: 'Document to index',
+    <EuiErrorBoundary>
+      <JsonEditorWithMessageVariables
+        messageVariables={messageVariables}
+        paramsProperty={'documents'}
+        data-test-subj="documentToIndex"
+        inputTargetValue={
+          documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined
         }
-      )}
-      aria-label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
-        {
-          defaultMessage: 'Code editor',
+        label={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',
+          {
+            defaultMessage: 'Document to index',
+          }
+        )}
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
+          {
+            defaultMessage: 'Code editor',
+          }
+        )}
+        errors={errors.documents as string[]}
+        onDocumentsChange={onDocumentsChange}
+        helpText={
+          <EuiLink
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/index-action-type.html#index-action-configuration`}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexDocumentHelpLabel"
+              defaultMessage="Index document example."
+            />
+          </EuiLink>
         }
-      )}
-      errors={errors.documents as string[]}
-      onDocumentsChange={onDocumentsChange}
-      helpText={
-        <EuiLink
-          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/index-action-type.html#index-action-configuration`}
-          target="_blank"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexDocumentHelpLabel"
-            defaultMessage="Index document example."
-          />
-        </EuiLink>
-      }
-      onBlur={() => {
-        if (
-          !(documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined)
-        ) {
-          // set document as empty to turn on the validation for non empty valid JSON object
-          onDocumentsChange('{}');
-        }
-      }}
-    />
+        onBlur={() => {
+          if (
+            !(documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined)
+          ) {
+            // set document as empty to turn on the validation for non empty valid JSON object
+            onDocumentsChange('{}');
+          }
+        }}
+      />
+    </EuiErrorBoundary>
   );
 };
 
