@@ -237,7 +237,6 @@ This endpoint returns the updated index pattern object.
 
 Fields allows you to manage fields of an existing index pattern.
 
-
 #### Create a field
 
 Create a field by simply specifying its name, will default to `string` type. Returns
@@ -277,7 +276,6 @@ POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/fiel
     }
 }
 ```
-
 
 #### Upsert a field
 
@@ -320,7 +318,6 @@ PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
 }
 ```
 
-
 #### Fetch a field
 
 Fetch an existing index pattern field by field name.
@@ -335,6 +332,14 @@ Returns the field object.
 {
     "field": {}
 }
+```
+
+#### Delete a field
+
+Delete a field of an index pattern.
+
+```
+DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field/<name>
 ```
 
 

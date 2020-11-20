@@ -22,8 +22,8 @@ import { IRouter } from '../../../../../../core/server';
 import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
 
-export const registerGetFieldRoute = (router: IRouter) => {
-  router.get(
+export const registerDeleteFieldRoute = (router: IRouter) => {
+  router.delete(
     {
       path: '/api/index_patterns/index_pattern/{id}/field/{name}',
       validate: {
@@ -58,13 +58,14 @@ export const registerGetFieldRoute = (router: IRouter) => {
             throw error;
           }
 
+          indexPattern.fields.remove(field);
+
+          await ip.updateSavedObject(indexPattern);
+
           return res.ok({
             headers: {
               'content-type': 'application/json',
             },
-            body: JSON.stringify({
-              field: field.toSpec(),
-            }),
           });
         })
       )
