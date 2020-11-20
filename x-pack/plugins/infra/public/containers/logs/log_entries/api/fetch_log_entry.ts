@@ -29,3 +29,17 @@ export const fetchLogEntry = async (
 
   return decodeOrThrow(logEntrySearchResponsePayloadRT)(response.rawResponse);
 };
+
+// export const fetchLogEntry$ = async (
+//   requestArgs: LogEntrySearchRequestParams,
+//   search: ISearchStart
+// ) => {
+//   const response = await search
+//     .search(
+//       { params: logEntrySearchRequestParamsRT.encode(requestArgs) },
+//       { strategy: LOG_ENTRY_SEARCH_STRATEGY }
+//     )
+//     .toPromise();
+
+//   return decodeOrThrow(logEntrySearchResponsePayloadRT)(response.rawResponse);
+// };

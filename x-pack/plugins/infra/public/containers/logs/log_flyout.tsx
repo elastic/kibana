@@ -6,12 +6,23 @@
 
 import createContainer from 'constate';
 import { isString } from 'lodash';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { pipe } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { UrlStateContainer } from '../../utils/url_state';
+import { useDataSearch, usePipe, useSubscription } from '../../utils/use_data_search_request';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import { fetchLogEntry } from './log_entries/api/fetch_log_entry';
+// import { fetchLogEntry } from './log_entries/api/fetch_log_entry';
 import { useLogSourceContext } from './log_source';
+import { decodeOrThrow } from '../../../common/runtime_types';
+import {
+  LogEntry,
+  LogEntrySearchRequestParams,
+  logEntrySearchRequestParamsRT,
+  logEntrySearchResponsePayloadRT,
+  LOG_ENTRY_SEARCH_STRATEGY,
+} from '../../../common/search_strategies/log_entries/log_entry';
 
 export enum FlyoutVisibility {
   hidden = 'hidden',
@@ -25,34 +36,57 @@ export interface FlyoutOptionsUrlState {
 }
 
 export const useLogFlyout = () => {
-  const { services } = useKibanaContextForPlugin();
+  // const { services } = useKibanaContextForPlugin();
   const { sourceId } = useLogSourceContext();
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
   const [flyoutId, setFlyoutId] = useState<string | null>(null);
   const [surroundingLogsId, setSurroundingLogsId] = useState<string | null>(null);
 
-  const [loadFlyoutItemRequest, loadFlyoutItem] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'creation',
-      createPromise: async () => {
-        if (!flyoutId) {
-          throw new Error('Failed to load log entry: Id not specified.');
-        }
-        return await fetchLogEntry({ sourceId, logEntryId: flyoutId }, services.data.search);
-      },
-    },
-    [sourceId, flyoutId]
-  );
+  // const [loadFlyoutItemRequest, loadFlyoutItem] = useTrackedPromise(
+  //   {
+  //     cancelPreviousOn: 'creation',
+  //     createPromise: async () => {
+  //       if (!flyoutId) {
+  //         throw new Error('Failed to load log entry: Id not specified.');
+  //       }
+  //       return await fetchLogEntry({ sourceId, logEntryId: flyoutId }, services.data.search);
+  //     },
+  //   },
+  //   [sourceId, flyoutId]
+  // );
 
-  const isLoading = useMemo(() => {
-    return loadFlyoutItemRequest.state === 'pending';
-  }, [loadFlyoutItemRequest.state]);
+  // const isLoading = useMemo(() => {
+  //   return loadFlyoutItemRequest.state === 'pending';
+  // }, [loadFlyoutItemRequest.state]);
+
+  const { search: fetchLogEntry, requests$: logEntryRequests$ } = useDataSearch({
+    getRequest: useCallback(() => {
+      return flyoutId
+        ? {
+            params: logEntrySearchRequestParamsRT.encode({ sourceId, logEntryId: flyoutId }),
+            options: { strategy: LOG_ENTRY_SEARCH_STRATEGY },
+          }
+        : null;
+    }, [sourceId, flyoutId]),
+  });
+
+  // const logEntrySearchResponse$ = usePipe(
+  //   rawLogEntrySearchResponse$,
+  //   pipe(
+  //     map((response) => ({
+  //       ...response,
+  //       response: decodeOrThrow(logEntrySearchResponsePayloadRT)(response.rawResponse),
+  //     }))
+  //   )
+  // );
+
+  // const { latestValue, latestError, isComplete } = useSubscription(logEntrySearchResponse$, null);
 
   useEffect(() => {
     if (flyoutId) {
-      loadFlyoutItem();
+      fetchLogEntry();
     }
-  }, [loadFlyoutItem, flyoutId]);
+  }, [fetchLogEntry, flyoutId]);
 
   return {
     flyoutVisible,
@@ -61,11 +95,14 @@ export const useLogFlyout = () => {
     setFlyoutId,
     surroundingLogsId,
     setSurroundingLogsId,
-    isLoading,
-    flyoutItem:
-      loadFlyoutItemRequest.state === 'resolved' ? loadFlyoutItemRequest.value.data : null,
-    flyoutError:
-      loadFlyoutItemRequest.state === 'rejected' ? `${loadFlyoutItemRequest.value}` : null,
+    isLoading: latestValue?.isRunning ?? false,
+    flyoutItem: latestValue?.response.data ?? null,
+    flyoutError: `${latestError}`,
+    // isLoading,
+    // flyoutItem:
+    //   loadFlyoutItemRequest.state === 'resolved' ? loadFlyoutItemRequest.value.data : null,
+    // flyoutError:
+    //   loadFlyoutItemRequest.state === 'rejected' ? `${loadFlyoutItemRequest.value}` : null,
   };
 };
 
