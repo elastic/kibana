@@ -49,10 +49,10 @@ describe('Fleet - buildQuery', () => {
         agentId: 'some-agent-id',
         datasets: ['elastic_agent'],
         logLevels: ['error', 'info', 'warn'],
-        userQuery: 'FLEET_GATEWAY and log.message:*',
+        userQuery: 'FLEET_GATEWAY and input.type:*',
       })
     ).toEqual(
-      '(elastic_agent.id:some-agent-id and (data_stream.dataset:elastic_agent) and (log.level:error or log.level:info or log.level:warn)) and (FLEET_GATEWAY and log.message:*)'
+      '(elastic_agent.id:some-agent-id and (data_stream.dataset:elastic_agent) and (log.level:error or log.level:info or log.level:warn)) and (FLEET_GATEWAY and input.type:*)'
     );
 
     expect(
@@ -60,10 +60,10 @@ describe('Fleet - buildQuery', () => {
         agentId: 'some-agent-id',
         datasets: [],
         logLevels: [],
-        userQuery: 'FLEET_GATEWAY and log.message:*',
+        userQuery: 'FLEET_GATEWAY and input.type:*',
       })
     ).toEqual(
-      '(elastic_agent.id:some-agent-id and (data_stream.dataset:elastic_agent or data_stream.dataset:elastic_agent.*)) and (FLEET_GATEWAY and log.message:*)'
+      '(elastic_agent.id:some-agent-id and (data_stream.dataset:elastic_agent or data_stream.dataset:elastic_agent.*)) and (FLEET_GATEWAY and input.type:*)'
     );
 
     expect(
@@ -71,10 +71,10 @@ describe('Fleet - buildQuery', () => {
         agentId: 'some-agent-id',
         datasets: [],
         logLevels: ['error'],
-        userQuery: 'FLEET_GATEWAY and log.message:*',
+        userQuery: 'FLEET_GATEWAY and input.type:*',
       })
     ).toEqual(
-      '(elastic_agent.id:some-agent-id and (data_stream.dataset:elastic_agent or data_stream.dataset:elastic_agent.*) and (log.level:error)) and (FLEET_GATEWAY and log.message:*)'
+      '(elastic_agent.id:some-agent-id and (data_stream.dataset:elastic_agent or data_stream.dataset:elastic_agent.*) and (log.level:error)) and (FLEET_GATEWAY and input.type:*)'
     );
   });
 });
