@@ -5,4 +5,5 @@
  */
 
 export { sendBulkPayload } from './send_bulk_payload';
+// @ts-ignore
 export { monitoringBulk } from './monitoring_bulk';
