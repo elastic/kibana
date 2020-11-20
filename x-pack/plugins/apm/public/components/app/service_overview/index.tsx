@@ -19,9 +19,9 @@ import { ChartsSyncContextProvider } from '../../../context/charts_sync_context'
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
 import { SearchBar } from '../../shared/search_bar';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
+import { ServiceOverviewTransactionsTable } from './service_overview_transactions_table';
 import { TableLinkFlexItem } from './table_link_flex_item';
 
 /**
@@ -79,30 +79,7 @@ export function ServiceOverview({
               </EuiFlexItem>
               <EuiFlexItem grow={6}>
                 <EuiPanel>
-                  <EuiFlexGroup justifyContent="spaceBetween">
-                    <EuiFlexItem>
-                      <EuiTitle size="xs">
-                        <h2>
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.transactionsTableTitle',
-                            {
-                              defaultMessage: 'Transactions',
-                            }
-                          )}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <TableLinkFlexItem>
-                      <TransactionOverviewLink serviceName={serviceName}>
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.transactionsTableLinkText',
-                          {
-                            defaultMessage: 'View transactions',
-                          }
-                        )}
-                      </TransactionOverviewLink>
-                    </TableLinkFlexItem>
-                  </EuiFlexGroup>
+                  <ServiceOverviewTransactionsTable serviceName={serviceName} />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
