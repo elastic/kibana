@@ -23,12 +23,11 @@ export const getNodes = async (
     snapshotRequest
   );
   const metricsApiResponse = await queryAllData(client, metricsApiRequest);
-  return copyMissingMetrics(
-    transformMetricsApiResponseToSnapshotResponse(
-      metricsApiRequest,
-      snapshotRequest,
-      source,
-      metricsApiResponse
-    )
+  const snapshotResponse = transformMetricsApiResponseToSnapshotResponse(
+    metricsApiRequest,
+    snapshotRequest,
+    source,
+    metricsApiResponse
   );
+  return copyMissingMetrics(snapshotResponse);
 };

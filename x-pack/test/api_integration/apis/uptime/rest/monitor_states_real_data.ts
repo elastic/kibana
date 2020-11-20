@@ -9,7 +9,6 @@ import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { MonitorSummariesResultType } from '../../../../../plugins/uptime/common/runtime_types';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
-import { expectSnapshot } from '../../../../apm_api_integration/common/match_snapshot';
 
 interface ExpectedMonitorStatesPage {
   response: any;

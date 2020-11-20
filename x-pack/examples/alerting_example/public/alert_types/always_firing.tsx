@@ -4,17 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import React, { Fragment, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldNumber,
+  EuiFormRow,
+  EuiPopover,
+  EuiExpression,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertTypeModel } from '../../../../plugins/triggers_actions_ui/public';
-import { DEFAULT_INSTANCES_TO_GENERATE } from '../../common/constants';
-
-interface AlwaysFiringParamsProps {
-  alertParams: { instances?: number };
-  setAlertParams: (property: string, value: any) => void;
-  errors: { [key: string]: string[] };
-}
+import { omit, pick } from 'lodash';
+import {
+  ActionGroupWithCondition,
+  AlertConditions,
+  AlertConditionsGroup,
+  AlertTypeModel,
+  AlertTypeParamsExpressionProps,
+  AlertsContextValue,
+} from '../../../../plugins/triggers_actions_ui/public';
+import {
+  AlwaysFiringParams,
+  AlwaysFiringActionGroupIds,
+  DEFAULT_INSTANCES_TO_GENERATE,
+} from '../../common/constants';
 
 export function getAlertType(): AlertTypeModel {
   return {
@@ -24,7 +38,7 @@ export function getAlertType(): AlertTypeModel {
     iconClass: 'bolt',
     documentationUrl: null,
     alertParamsExpression: AlwaysFiringExpression,
-    validate: (alertParams: AlwaysFiringParamsProps['alertParams']) => {
+    validate: (alertParams: AlwaysFiringParams) => {
       const { instances } = alertParams;
       const validationResult = {
         errors: {
@@ -44,11 +58,30 @@ export function getAlertType(): AlertTypeModel {
   };
 }
 
-export const AlwaysFiringExpression: React.FunctionComponent<AlwaysFiringParamsProps> = ({
-  alertParams,
-  setAlertParams,
-}) => {
-  const { instances = DEFAULT_INSTANCES_TO_GENERATE } = alertParams;
+const DEFAULT_THRESHOLDS: AlwaysFiringParams['thresholds'] = {
+  small: 0,
+  medium: 5000,
+  large: 10000,
+};
+
+export const AlwaysFiringExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
+  AlwaysFiringParams,
+  AlertsContextValue
+>> = ({ alertParams, setAlertParams, actionGroups, defaultActionGroupId }) => {
+  const {
+    instances = DEFAULT_INSTANCES_TO_GENERATE,
+    thresholds = pick(DEFAULT_THRESHOLDS, defaultActionGroupId),
+  } = alertParams;
+
+  const actionGroupsWithConditions = actionGroups.map((actionGroup) =>
+    Number.isInteger(thresholds[actionGroup.id as AlwaysFiringActionGroupIds])
+      ? {
+          ...actionGroup,
+          conditions: thresholds[actionGroup.id as AlwaysFiringActionGroupIds]!,
+        }
+      : actionGroup
+  );
+
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="s" wrap direction="column">
@@ -67,6 +100,88 @@ export const AlwaysFiringExpression: React.FunctionComponent<AlwaysFiringParamsP
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={true}>
+          <AlertConditions
+            headline={'Set different thresholds for randomly generated T-Shirt sizes'}
+            actionGroups={actionGroupsWithConditions}
+            onInitializeConditionsFor={(actionGroup) => {
+              setAlertParams('thresholds', {
+                ...thresholds,
+                ...pick(DEFAULT_THRESHOLDS, actionGroup.id),
+              });
+            }}
+          >
+            <AlertConditionsGroup
+              onResetConditionsFor={(actionGroup) => {
+                setAlertParams('thresholds', omit(thresholds, actionGroup.id));
+              }}
+            >
+              <TShirtSelector
+                setTShirtThreshold={(actionGroup) => {
+                  setAlertParams('thresholds', {
+                    ...thresholds,
+                    [actionGroup.id]: actionGroup.conditions,
+                  });
+                }}
+              />
+            </AlertConditionsGroup>
+          </AlertConditions>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
     </Fragment>
+  );
+};
+
+interface TShirtSelectorProps {
+  actionGroup?: ActionGroupWithCondition<number>;
+  setTShirtThreshold: (actionGroup: ActionGroupWithCondition<number>) => void;
+}
+const TShirtSelector = ({ actionGroup, setTShirtThreshold }: TShirtSelectorProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (!actionGroup) {
+    return null;
+  }
+
+  return (
+    <EuiPopover
+      panelPaddingSize="s"
+      button={
+        <EuiExpression
+          description={'Is Above'}
+          value={actionGroup.conditions}
+          isActive={isOpen}
+          onClick={() => setIsOpen(true)}
+        />
+      }
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      ownFocus
+      anchorPosition="downLeft"
+    >
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false} style={{ width: 150 }}>
+          {'Is Above'}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 100 }}>
+          <EuiFieldNumber
+            compressed
+            value={actionGroup.conditions}
+            onChange={(e) => {
+              const conditions = parseInt(e.target.value, 10);
+              if (e.target.value && !isNaN(conditions)) {
+                setTShirtThreshold({
+                  ...actionGroup,
+                  conditions,
+                });
+              }
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopover>
   );
 };

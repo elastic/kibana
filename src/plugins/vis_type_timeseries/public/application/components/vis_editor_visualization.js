@@ -28,7 +28,7 @@ import {
   isGteInterval,
   AUTO_INTERVAL,
 } from './lib/get_interval';
-import { PANEL_TYPES } from '../../../../../plugins/vis_type_timeseries/common/panel_types';
+import { PANEL_TYPES } from '../../../common/panel_types';
 
 const MIN_CHART_HEIGHT = 300;
 
