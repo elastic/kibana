@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import React, { useContext } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { default as React, default as React, useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { useTrackPageview } from '../..';
 import { Alert } from '../../../../alerts/common';
@@ -35,8 +35,8 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
 }
 
 export function OverviewPage({ routeParams }: Props) {
-  useTrackPageview({ app: 'observability', path: 'overview' });
-  useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
+  useTrackPageview({ app: 'observability-overview', path: 'overview' });
+  useTrackPageview({ app: 'observability-overview', path: 'overview', delay: 15000 });
   const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
 
@@ -66,27 +66,15 @@ export function OverviewPage({ routeParams }: Props) {
     <WithHeaderLayout
       headerColor={theme.eui.euiColorEmptyShade}
       bodyColor={theme.eui.euiPageBackgroundColor}
-      showAddData
-      showGiveFeedback
+      datePicker={
+        <DatePicker
+          rangeFrom={relativeTime.start}
+          rangeTo={relativeTime.end}
+          refreshInterval={refreshInterval}
+          refreshPaused={refreshPaused}
+        />
+      }
     >
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <DatePicker
-            rangeFrom={relativeTime.start}
-            rangeTo={relativeTime.end}
-            refreshInterval={refreshInterval}
-            refreshPaused={refreshPaused}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiHorizontalRule
-        style={{
-          width: 'auto', // full width
-          margin: '24px -24px', // counteract page paddings
-        }}
-      />
-
       <EuiFlexGroup>
         <EuiFlexItem grow={6}>
           {/* Data sections */}

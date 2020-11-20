@@ -16,9 +16,9 @@ import { EuiThemeProvider } from '../../../xpack_legacy/common';
 import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import { Breadcrumbs, routes } from '../routes';
 import { ObservabilityPluginSetupDeps } from '../plugin';
 import { HasDataContextProvider } from '../context/has_data_context';
+import { Breadcrumbs, routes } from '../routes';
 
 const observabilityLabelBreadcrumb = {
   text: i18n.translate('xpack.observability.observability.breadcrumb.', {
@@ -59,14 +59,22 @@ function App() {
 export const renderApp = (
   core: CoreStart,
   plugins: ObservabilityPluginSetupDeps,
-  { element, history }: AppMountParameters
+  appMountParameters: AppMountParameters
 ) => {
+  const { element, history } = appMountParameters;
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
 
+  core.chrome.setHelpExtension({
+    appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
+      defaultMessage: 'Observability',
+    }),
+    links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
+  });
+
   ReactDOM.render(
     <KibanaContextProvider services={{ ...core, ...plugins }}>
-      <PluginContext.Provider value={{ core, plugins }}>
+      <PluginContext.Provider value={{ appMountParameters, core, plugins }}>
         <Router history={history}>
           <EuiThemeProvider darkMode={isDarkMode}>
             <i18nCore.Context>

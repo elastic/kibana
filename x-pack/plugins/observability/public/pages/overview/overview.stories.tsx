@@ -6,7 +6,7 @@
 
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
-import { CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
@@ -40,6 +40,9 @@ const withCore = makeDecorator({
       <MemoryRouter>
         <PluginContext.Provider
           value={{
+            appMountParameters: ({
+              setHeaderActionMenu: () => {},
+            } as unknown) as AppMountParameters,
             core: options as CoreStart,
             plugins: ({
               data: {

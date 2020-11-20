@@ -33,7 +33,11 @@ describe('renderApp', () => {
     } as unknown) as ObservabilityPluginSetupDeps;
     const core = ({
       application: { currentAppId$: new Observable(), navigateToUrl: () => {} },
-      chrome: { docTitle: { change: () => {} }, setBreadcrumbs: () => {} },
+      chrome: {
+        docTitle: { change: () => {} },
+        setBreadcrumbs: () => {},
+        setHelpExtension: () => {},
+      },
       i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
       uiSettings: { get: () => false },
       http: { basePath: { prepend: (path: string) => path } },
@@ -41,6 +45,7 @@ describe('renderApp', () => {
     const params = ({
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
+      setHeaderActionMenu: () => {},
     } as unknown) as AppMountParameters;
 
     expect(() => {

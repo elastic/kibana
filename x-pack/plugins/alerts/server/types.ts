@@ -27,11 +27,11 @@ import {
   AlertInstanceState,
   AlertExecutionStatuses,
   AlertExecutionStatusErrorReasons,
+  AlertsHealth,
 } from '../common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
-export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 declare module 'src/core/server' {
@@ -39,6 +39,7 @@ declare module 'src/core/server' {
     alerting?: {
       getAlertsClient: () => AlertsClient;
       listTypes: AlertTypeRegistry['list'];
+      getFrameworkHealth: () => Promise<AlertsHealth>;
     };
   }
 }
@@ -146,6 +147,7 @@ export interface RawAlert extends SavedObjectAttributes {
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string;
+  updatedAt: string;
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
@@ -170,6 +172,24 @@ export type AlertInfoParams = Pick<
 export interface AlertingPlugin {
   setup: PluginSetupContract;
   start: PluginStartContract;
+}
+
+export interface AlertsConfigType {
+  healthCheck: {
+    interval: string;
+  };
+}
+
+export interface AlertsConfigType {
+  invalidateApiKeysTask: {
+    interval: string;
+    removalDelay: string;
+  };
+}
+
+export interface InvalidatePendingApiKey {
+  apiKeyId: string;
+  createdAt: string;
 }
 
 export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;

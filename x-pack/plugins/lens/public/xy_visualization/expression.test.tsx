@@ -17,6 +17,7 @@ import {
   SeriesNameFn,
   Fit,
 } from '@elastic/charts';
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { xyChart, XYChart } from './expression';
 import { LensMultiTable } from '../types';
 import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
@@ -33,7 +34,7 @@ import {
   gridlinesConfig,
 } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 
@@ -41,6 +42,13 @@ const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
+const paletteService = chartPluginMock.createPaletteRegistry();
+
+const mockPaletteOutput: PaletteOutput = {
+  type: 'palette',
+  name: 'mock',
+  params: {},
+};
 
 const dateHistogramData: LensMultiTable = {
   type: 'lens_multitable',
@@ -195,6 +203,7 @@ const dateHistogramLayer: LayerArgs = {
   splitAccessor: 'splitAccessorId',
   seriesType: 'bar_stacked',
   accessors: ['yAccessorId'],
+  palette: mockPaletteOutput,
 };
 
 const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable => ({
@@ -235,6 +244,7 @@ const sampleLayer: LayerArgs = {
   xScaleType: 'ordinal',
   yScaleType: 'linear',
   isHistogram: false,
+  palette: mockPaletteOutput,
 };
 
 const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
@@ -246,6 +256,7 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     isVisible: false,
     position: Position.Top,
   },
+  valueLabels: 'hide',
   axisTitlesVisibilitySettings: {
     type: 'lens_xy_axisTitlesVisibilityConfig',
     x: true,
@@ -309,6 +320,7 @@ describe('xy_expression', () => {
         xScaleType: 'linear',
         yScaleType: 'linear',
         isHistogram: false,
+        palette: mockPaletteOutput,
       };
 
       const result = layerConfig.fn(null, args, createMockExecutionContext());
@@ -412,6 +424,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -435,6 +448,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -457,6 +471,7 @@ describe('xy_expression', () => {
         xScaleType: 'time',
         yScaleType: 'linear',
         isHistogram: false,
+        palette: mockPaletteOutput,
       };
       const multiLayerArgs = createArgsWithLayers([
         timeSampleLayer,
@@ -486,6 +501,7 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartsThemeService={chartsThemeService}
+            paletteService={paletteService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -522,6 +538,7 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartsThemeService={chartsThemeService}
+            paletteService={paletteService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -559,6 +576,7 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartsThemeService={chartsThemeService}
+            paletteService={paletteService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -597,6 +615,7 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartsThemeService={chartsThemeService}
+            paletteService={paletteService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -642,6 +661,7 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartsThemeService={chartsThemeService}
+            paletteService={paletteService}
             histogramBarTarget={50}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
@@ -677,6 +697,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -694,6 +715,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -714,6 +736,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -734,6 +757,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -759,6 +783,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -782,6 +807,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -810,6 +836,7 @@ describe('xy_expression', () => {
         isHistogram: true,
         seriesType: 'bar_stacked',
         accessors: ['yAccessorId'],
+        palette: mockPaletteOutput,
       };
 
       const numberHistogramData: LensMultiTable = {
@@ -865,6 +892,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -909,12 +937,14 @@ describe('xy_expression', () => {
                 splitAccessor: 'b',
                 accessors: ['d'],
                 columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+                palette: mockPaletteOutput,
               },
             ],
           }}
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -952,6 +982,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -972,6 +1003,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -995,6 +1027,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1027,6 +1060,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1046,6 +1080,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="CEST"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1071,6 +1106,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1090,6 +1126,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1112,6 +1149,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1139,6 +1177,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1160,6 +1199,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1298,9 +1338,24 @@ describe('xy_expression', () => {
         } as XYArgs;
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual('#550000');
-        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual('#FFFF00');
-        expect((component.find(LineSeries).at(2).prop('color') as Function)!()).toEqual('#FEECDF');
+        expect(
+          (component.find(LineSeries).at(0).prop('color') as Function)!({
+            yAccessor: 'a',
+            seriesKeys: ['a'],
+          })
+        ).toEqual('#550000');
+        expect(
+          (component.find(LineSeries).at(1).prop('color') as Function)!({
+            yAccessor: 'b',
+            seriesKeys: ['b'],
+          })
+        ).toEqual('#FFFF00');
+        expect(
+          (component.find(LineSeries).at(2).prop('color') as Function)!({
+            yAccessor: 'c',
+            seriesKeys: ['c'],
+          })
+        ).toEqual('#FEECDF');
       });
       test('color is not applied to chart when splitAccessor is defined or when yConfig is not configured', () => {
         const args = createArgsWithLayers();
@@ -1326,8 +1381,18 @@ describe('xy_expression', () => {
         } as XYArgs;
 
         const component = getRenderedComponent(dataWithoutFormats, newArgs);
-        expect((component.find(LineSeries).at(0).prop('color') as Function)!()).toEqual(null);
-        expect((component.find(LineSeries).at(1).prop('color') as Function)!()).toEqual(null);
+        expect(
+          (component.find(LineSeries).at(0).prop('color') as Function)!({
+            yAccessor: 'a',
+            seriesKeys: ['a'],
+          })
+        ).toEqual('blue');
+        expect(
+          (component.find(LineSeries).at(1).prop('color') as Function)!({
+            yAccessor: 'c',
+            seriesKeys: ['c'],
+          })
+        ).toEqual('blue');
       });
     });
 
@@ -1535,6 +1600,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1554,6 +1620,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1573,6 +1640,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1591,6 +1659,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], accessors: ['a'] }] }}
           formatFactory={getFormatSpy}
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           timeZone="UTC"
           onClickValue={onClickValue}
@@ -1613,6 +1682,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1647,6 +1717,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1679,6 +1750,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1711,6 +1783,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1743,6 +1816,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1794,6 +1868,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        valueLabels: 'hide',
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
@@ -1817,6 +1892,7 @@ describe('xy_expression', () => {
             xScaleType: 'ordinal',
             yScaleType: 'linear',
             isHistogram: false,
+            palette: mockPaletteOutput,
           },
           {
             layerId: 'second',
@@ -1828,6 +1904,7 @@ describe('xy_expression', () => {
             xScaleType: 'ordinal',
             yScaleType: 'linear',
             isHistogram: false,
+            palette: mockPaletteOutput,
           },
         ],
       };
@@ -1839,6 +1916,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1876,6 +1954,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        valueLabels: 'hide',
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
@@ -1899,6 +1978,7 @@ describe('xy_expression', () => {
             xScaleType: 'ordinal',
             yScaleType: 'linear',
             isHistogram: false,
+            palette: mockPaletteOutput,
           },
         ],
       };
@@ -1910,6 +1990,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -1945,6 +2026,7 @@ describe('xy_expression', () => {
         yTitle: '',
         yRightTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+        valueLabels: 'hide',
         tickLabelsVisibilitySettings: {
           type: 'lens_xy_tickLabelsConfig',
           x: true,
@@ -1968,6 +2050,7 @@ describe('xy_expression', () => {
             xScaleType: 'ordinal',
             yScaleType: 'linear',
             isHistogram: false,
+            palette: mockPaletteOutput,
           },
         ],
       };
@@ -1979,6 +2062,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -2002,6 +2086,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -2024,6 +2109,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -2046,6 +2132,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -2080,6 +2167,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -2106,6 +2194,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -2127,6 +2216,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -2153,6 +2243,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
@@ -2185,6 +2276,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartsThemeService={chartsThemeService}
+          paletteService={paletteService}
           histogramBarTarget={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}

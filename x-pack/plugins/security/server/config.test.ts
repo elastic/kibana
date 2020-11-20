@@ -36,6 +36,10 @@ describe('config schema', () => {
                 "hint": undefined,
                 "icon": undefined,
                 "order": 0,
+                "session": Object {
+                  "idleTimeout": undefined,
+                  "lifespan": undefined,
+                },
                 "showInSelector": true,
               },
             },
@@ -54,8 +58,6 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": null,
-          "lifespan": null,
         },
       }
     `);
@@ -82,6 +84,10 @@ describe('config schema', () => {
                 "hint": undefined,
                 "icon": undefined,
                 "order": 0,
+                "session": Object {
+                  "idleTimeout": undefined,
+                  "lifespan": undefined,
+                },
                 "showInSelector": true,
               },
             },
@@ -100,8 +106,6 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": null,
-          "lifespan": null,
         },
       }
     `);
@@ -128,6 +132,10 @@ describe('config schema', () => {
                 "hint": undefined,
                 "icon": undefined,
                 "order": 0,
+                "session": Object {
+                  "idleTimeout": undefined,
+                  "lifespan": undefined,
+                },
                 "showInSelector": true,
               },
             },
@@ -145,8 +153,6 @@ describe('config schema', () => {
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
-          "idleTimeout": null,
-          "lifespan": null,
         },
       }
     `);
@@ -387,6 +393,35 @@ describe('config schema', () => {
                 "enabled": true,
                 "icon": "logoElasticsearch",
                 "order": 0,
+                "session": Object {},
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+
+      it('can be successfully validated with session config overrides', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                basic: { basic1: { order: 0, session: { idleTimeout: 123, lifespan: 546 } } },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "basic": Object {
+              "basic1": Object {
+                "description": "Log in with Elasticsearch",
+                "enabled": true,
+                "icon": "logoElasticsearch",
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": "PT0.123S",
+                  "lifespan": "PT0.546S",
+                },
                 "showInSelector": true,
               },
             },
@@ -439,6 +474,35 @@ describe('config schema', () => {
                 "enabled": true,
                 "icon": "logoElasticsearch",
                 "order": 0,
+                "session": Object {},
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+
+      it('can be successfully validated with session config overrides', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                token: { token1: { order: 0, session: { idleTimeout: 123, lifespan: 546 } } },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "token": Object {
+              "token1": Object {
+                "description": "Log in with Elasticsearch",
+                "enabled": true,
+                "icon": "logoElasticsearch",
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": "PT0.123S",
+                  "lifespan": "PT0.546S",
+                },
                 "showInSelector": true,
               },
             },
@@ -477,6 +541,33 @@ describe('config schema', () => {
               "pki1": Object {
                 "enabled": true,
                 "order": 0,
+                "session": Object {},
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+
+      it('can be successfully validated with session config overrides', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                pki: { pki1: { order: 0, session: { idleTimeout: 123, lifespan: 546 } } },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "pki": Object {
+              "pki1": Object {
+                "enabled": true,
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": "PT0.123S",
+                  "lifespan": "PT0.546S",
+                },
                 "showInSelector": true,
               },
             },
@@ -517,6 +608,33 @@ describe('config schema', () => {
               "kerberos1": Object {
                 "enabled": true,
                 "order": 0,
+                "session": Object {},
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+
+      it('can be successfully validated with session config overrides', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                kerberos: { kerberos1: { order: 0, session: { idleTimeout: 123, lifespan: 546 } } },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "kerberos": Object {
+              "kerberos1": Object {
+                "enabled": true,
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": "PT0.123S",
+                  "lifespan": "PT0.546S",
+                },
                 "showInSelector": true,
               },
             },
@@ -562,12 +680,53 @@ describe('config schema', () => {
                 "enabled": true,
                 "order": 0,
                 "realm": "oidc1",
+                "session": Object {},
                 "showInSelector": true,
               },
               "oidc2": Object {
                 "enabled": true,
                 "order": 1,
                 "realm": "oidc2",
+                "session": Object {},
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+
+      it('can be successfully validated with session config overrides', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                oidc: {
+                  oidc1: { order: 0, realm: 'oidc1', session: { idleTimeout: 123 } },
+                  oidc2: { order: 1, realm: 'oidc2', session: { idleTimeout: 321, lifespan: 546 } },
+                },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "oidc": Object {
+              "oidc1": Object {
+                "enabled": true,
+                "order": 0,
+                "realm": "oidc1",
+                "session": Object {
+                  "idleTimeout": "PT0.123S",
+                },
+                "showInSelector": true,
+              },
+              "oidc2": Object {
+                "enabled": true,
+                "order": 1,
+                "realm": "oidc2",
+                "session": Object {
+                  "idleTimeout": "PT0.321S",
+                  "lifespan": "PT0.546S",
+                },
                 "showInSelector": true,
               },
             },
@@ -617,6 +776,7 @@ describe('config schema', () => {
                 "enabled": true,
                 "order": 0,
                 "realm": "saml1",
+                "session": Object {},
                 "showInSelector": true,
                 "useRelayStateDeepLink": false,
               },
@@ -627,6 +787,7 @@ describe('config schema', () => {
                 },
                 "order": 1,
                 "realm": "saml2",
+                "session": Object {},
                 "showInSelector": true,
                 "useRelayStateDeepLink": false,
               },
@@ -634,6 +795,65 @@ describe('config schema', () => {
                 "enabled": true,
                 "order": 2,
                 "realm": "saml3",
+                "session": Object {},
+                "showInSelector": true,
+                "useRelayStateDeepLink": true,
+              },
+            },
+          }
+        `);
+      });
+
+      it('can be successfully validated with session config overrides', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                saml: {
+                  saml1: { order: 0, realm: 'saml1', session: { idleTimeout: 123 } },
+                  saml2: {
+                    order: 1,
+                    realm: 'saml2',
+                    maxRedirectURLSize: '1kb',
+                    session: { idleTimeout: 321, lifespan: 546 },
+                  },
+                  saml3: { order: 2, realm: 'saml3', useRelayStateDeepLink: true },
+                },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "saml": Object {
+              "saml1": Object {
+                "enabled": true,
+                "order": 0,
+                "realm": "saml1",
+                "session": Object {
+                  "idleTimeout": "PT0.123S",
+                },
+                "showInSelector": true,
+                "useRelayStateDeepLink": false,
+              },
+              "saml2": Object {
+                "enabled": true,
+                "maxRedirectURLSize": ByteSizeValue {
+                  "valueInBytes": 1024,
+                },
+                "order": 1,
+                "realm": "saml2",
+                "session": Object {
+                  "idleTimeout": "PT0.321S",
+                  "lifespan": "PT0.546S",
+                },
+                "showInSelector": true,
+                "useRelayStateDeepLink": false,
+              },
+              "saml3": Object {
+                "enabled": true,
+                "order": 2,
+                "realm": "saml3",
+                "session": Object {},
                 "showInSelector": true,
                 "useRelayStateDeepLink": true,
               },
@@ -701,6 +921,7 @@ describe('config schema', () => {
               "enabled": true,
               "icon": "logoElasticsearch",
               "order": 0,
+              "session": Object {},
               "showInSelector": true,
             },
             "basic2": Object {
@@ -708,6 +929,7 @@ describe('config schema', () => {
               "enabled": false,
               "icon": "logoElasticsearch",
               "order": 1,
+              "session": Object {},
               "showInSelector": true,
             },
           },
@@ -716,6 +938,7 @@ describe('config schema', () => {
               "enabled": false,
               "order": 3,
               "realm": "saml3",
+              "session": Object {},
               "showInSelector": true,
               "useRelayStateDeepLink": false,
             },
@@ -723,6 +946,7 @@ describe('config schema', () => {
               "enabled": true,
               "order": 1,
               "realm": "saml1",
+              "session": Object {},
               "showInSelector": true,
               "useRelayStateDeepLink": false,
             },
@@ -730,6 +954,7 @@ describe('config schema', () => {
               "enabled": true,
               "order": 2,
               "realm": "saml2",
+              "session": Object {},
               "showInSelector": true,
               "useRelayStateDeepLink": false,
             },
@@ -760,12 +985,12 @@ describe('createConfig()', () => {
     expect(config.encryptionKey).toEqual('ab'.repeat(16));
 
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
-                        Array [
-                          Array [
-                            "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml",
-                          ],
-                        ]
-                `);
+      Array [
+        Array [
+          "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.",
+        ],
+      ]
+    `);
   });
 
   it('should log a warning if SSL is not configured', async () => {
@@ -1088,5 +1313,315 @@ describe('createConfig()', () => {
     ).toThrow(
       '[audit]: xpack.security.audit.ignore_filters can only be used with the ECS audit logger. To enable the ECS audit logger, specify where you want to write the audit events using xpack.security.audit.appender.'
     );
+  });
+
+  describe('#getExpirationTimeouts', () => {
+    function createMockConfig(config: Record<string, any> = {}) {
+      return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {
+        isTLSEnabled: false,
+      });
+    }
+
+    it('returns default values if neither global nor provider specific settings are set', async () => {
+      expect(createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
+          Object {
+            "idleTimeout": null,
+            "lifespan": null,
+          }
+        `);
+    });
+
+    it('correctly handles explicitly disabled global settings', async () => {
+      expect(
+        createMockConfig({
+          session: { idleTimeout: null, lifespan: null },
+        }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+
+      expect(
+        createMockConfig({
+          session: { idleTimeout: 0, lifespan: 0 },
+        }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+    });
+
+    it('falls back to the global settings if provider does not override them', async () => {
+      expect(
+        createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts({
+          type: 'basic',
+          name: 'basic1',
+        })
+      ).toMatchInlineSnapshot(`
+          Object {
+            "idleTimeout": "PT0.123S",
+            "lifespan": null,
+          }
+        `);
+
+      expect(
+        createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts({
+          type: 'basic',
+          name: 'basic1',
+        })
+      ).toMatchInlineSnapshot(`
+          Object {
+            "idleTimeout": null,
+            "lifespan": "PT0.456S",
+          }
+        `);
+
+      expect(
+        createMockConfig({
+          session: { idleTimeout: 123, lifespan: 456 },
+        }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
+          Object {
+            "idleTimeout": "PT0.123S",
+            "lifespan": "PT0.456S",
+          }
+        `);
+    });
+
+    it('falls back to the global settings if provider is not known', async () => {
+      expect(
+        createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts({
+          type: 'some type',
+          name: 'some name',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT0.123S",
+          "lifespan": null,
+        }
+      `);
+
+      expect(
+        createMockConfig({ session: { lifespan: 456 } }).session.getExpirationTimeouts({
+          type: 'some type',
+          name: 'some name',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": "PT0.456S",
+        }
+      `);
+
+      expect(
+        createMockConfig({
+          session: { idleTimeout: 123, lifespan: 456 },
+        }).session.getExpirationTimeouts({ type: 'some type', name: 'some name' })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT0.123S",
+          "lifespan": "PT0.456S",
+        }
+      `);
+    });
+
+    it('uses provider overrides if specified (only idle timeout)', async () => {
+      const configWithoutGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: 321 } } },
+            saml: { saml1: { order: 1, realm: 'saml-realm', session: { idleTimeout: 332211 } } },
+          },
+        },
+        session: { idleTimeout: null },
+      });
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT0.321S",
+          "lifespan": null,
+        }
+      `);
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT5M32.211S",
+          "lifespan": null,
+        }
+      `);
+
+      const configWithGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: 321 } } },
+            saml: { saml1: { order: 1, realm: 'saml-realm', session: { idleTimeout: 332211 } } },
+          },
+        },
+        session: { idleTimeout: 123 },
+      });
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT0.321S",
+          "lifespan": null,
+        }
+      `);
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT5M32.211S",
+          "lifespan": null,
+        }
+      `);
+    });
+
+    it('uses provider overrides if specified (only lifespan)', async () => {
+      const configWithoutGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { lifespan: 654 } } },
+            saml: { saml1: { order: 1, realm: 'saml-realm', session: { lifespan: 665544 } } },
+          },
+        },
+        session: { lifespan: null },
+      });
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": "PT0.654S",
+        }
+      `);
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": "PT11M5.544S",
+        }
+      `);
+
+      const configWithGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { lifespan: 654 } } },
+            saml: { saml1: { order: 1, realm: 'saml-realm', session: { idleTimeout: 665544 } } },
+          },
+        },
+        session: { lifespan: 456 },
+      });
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": "PT0.654S",
+        }
+      `);
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT11M5.544S",
+          "lifespan": "PT0.456S",
+        }
+      `);
+    });
+
+    it('uses provider overrides if specified (both idle timeout and lifespan)', async () => {
+      const configWithoutGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: 321, lifespan: 654 } } },
+            saml: {
+              saml1: {
+                order: 1,
+                realm: 'saml-realm',
+                session: { idleTimeout: 332211, lifespan: 665544 },
+              },
+            },
+          },
+        },
+        session: { idleTimeout: null, lifespan: null },
+      });
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT0.321S",
+          "lifespan": "PT0.654S",
+        }
+      `);
+      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT5M32.211S",
+          "lifespan": "PT11M5.544S",
+        }
+      `);
+
+      const configWithGlobal = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: 321, lifespan: 654 } } },
+            saml: {
+              saml1: {
+                order: 1,
+                realm: 'saml-realm',
+                session: { idleTimeout: 332211, lifespan: 665544 },
+              },
+            },
+          },
+        },
+        session: { idleTimeout: 123, lifespan: 456 },
+      });
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT0.321S",
+          "lifespan": "PT0.654S",
+        }
+      `);
+      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT5M32.211S",
+          "lifespan": "PT11M5.544S",
+        }
+      `);
+    });
+
+    it('uses provider overrides if disabled (both idle timeout and lifespan)', async () => {
+      const config = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: null, lifespan: null } } },
+            saml: {
+              saml1: {
+                order: 1,
+                realm: 'saml-realm',
+                session: { idleTimeout: 0, lifespan: 0 },
+              },
+            },
+          },
+        },
+        session: { idleTimeout: 123, lifespan: 456 },
+      });
+      expect(config.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+      expect(config.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+    });
   });
 });

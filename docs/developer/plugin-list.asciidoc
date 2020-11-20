@@ -28,9 +28,7 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
-|{kib-repo}blob/{branch}/src/plugins/apm_oss[apmOss]
-|WARNING: Missing README.
-
+|{kib-repo}blob/{branch}/src/plugins/apm_oss/README.asciidoc[apmOss]
 
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
@@ -128,8 +126,13 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Utilities for building Kibana plugins.
 
 
-|{kib-repo}blob/{branch}/src/plugins/legacy_export[legacyExport]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/legacy_export/README.md[legacyExport]
+|The legacyExport plugin adds support for the legacy saved objects export format.
+
+
+|{kib-repo}blob/{branch}/src/plugins/lens_oss/README.md[lensOss]
+|The lens_oss plugin registers the lens visualization on OSS.
+It is registered as disabled. The x-pack plugin should unregister this.
 
 
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
@@ -140,6 +143,11 @@ management section itself.
 
 |{kib-repo}blob/{branch}/src/plugins/maps_legacy/README.md[mapsLegacy]
 |Internal objects used by the Coordinate, Region, and Vega visualizations.
+
+
+|{kib-repo}blob/{branch}/src/plugins/maps_oss/README.md[mapsOss]
+|The maps_oss plugin registers the maps visualization on OSS.
+It is registered as disabled. The x-pack plugin should unregister this.
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
@@ -156,12 +164,12 @@ Content is fetched from the remote (https://feeds.elastic.co and https://feeds-s
 |Create choropleth maps. Display the results of a term-aggregation as e.g. countries, zip-codes, states.
 
 
-|{kib-repo}blob/{branch}/src/plugins/saved_objects[savedObjects]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/saved_objects/README.md[savedObjects]
+|The savedObjects plugin exposes utilities to manipulate saved objects on the client side.
 
 
-|{kib-repo}blob/{branch}/src/plugins/saved_objects_management[savedObjectsManagement]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/saved_objects_management/README.md[savedObjectsManagement]
+|The savedObjectsManagement plugin manages the Saved Objects management section.
 
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects_tagging_oss/README.md[savedObjectsTaggingOss]
@@ -309,8 +317,8 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 |Experimental Feature
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud[cloud]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
+|The cloud plugin adds cloud specific features to Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/code[code]
@@ -361,12 +369,16 @@ occuring in Kibana, initially just for the Make It Action project - alerts
 and actions.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/features[features]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
+|The features plugin enhance Kibana with a per-feature privilege system.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload/README.md[fileUpload]
 |Backend and core front-end react-components for GeoJson file upload. Only supports the Maps plugin.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
+|Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search/README.md[globalSearch]
@@ -378,8 +390,8 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 |The GlobalSearchBar plugin provides a search interface for navigating Kibana. (It is the UI to the GlobalSearch plugin.)
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/global_search_providers[globalSearchProviders]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/global_search_providers/README.md[globalSearchProviders]
+|The globalSearchProviders plugin provides Kibana default search providers for the GlobalSearch plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/graph/README.md[graph]
@@ -403,10 +415,6 @@ Index Management by running this series of requests in Console:
 |{kib-repo}blob/{branch}/x-pack/plugins/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/ingest_manager/README.md[ingestManager]
-|Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
@@ -469,6 +477,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/rollup/README.md[rollup]
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields/README.md[runtimeFields]
+|Welcome to the home of the runtime field editor and everything related to runtime fields!
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/saved_objects_tagging/README.md[savedObjectsTagging]
@@ -544,6 +556,10 @@ in their infrastructure.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/vis_type_timeseries_enhanced/README.md[visTypeTimeseriesEnhanced]
+|The vis_type_timeseries_enhanced plugin is the x-pack counterpart to the OSS vis_type_timeseries plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]

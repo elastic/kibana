@@ -21,6 +21,7 @@ import { isAbsolute } from 'path';
 
 import { loadTracer } from '../load_tracer';
 import { decorateMochaUi } from './decorate_mocha_ui';
+import { decorateSnapshotUi } from '../snapshots/decorate_snapshot_ui';
 
 /**
  *  Load an array of test files into a mocha instance
@@ -31,7 +32,17 @@ import { decorateMochaUi } from './decorate_mocha_ui';
  *  @param  {String} path
  *  @return {undefined} - mutates mocha, no return value
  */
-export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, updateBaselines }) => {
+export const loadTestFiles = ({
+  mocha,
+  log,
+  lifecycle,
+  providers,
+  paths,
+  updateBaselines,
+  updateSnapshots,
+}) => {
+  decorateSnapshotUi(lifecycle, updateSnapshots);
+
   const innerLoadTestFile = (path) => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');

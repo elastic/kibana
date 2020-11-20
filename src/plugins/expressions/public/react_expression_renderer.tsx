@@ -41,6 +41,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
   onEvent?: (event: ExpressionRendererEvent) => void;
+  onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters) => void;
   /**
    * An observable which can be used to re-run the expression without destroying the component
    */
@@ -71,6 +72,7 @@ export const ReactExpressionRenderer = ({
   renderError,
   expression,
   onEvent,
+  onData$,
   reload$,
   debounce,
   ...expressionLoaderOptions
@@ -132,6 +134,13 @@ export const ReactExpressionRenderer = ({
       subs.push(
         expressionLoaderRef.current.events$.subscribe((event) => {
           onEvent(event);
+        })
+      );
+    }
+    if (onData$) {
+      subs.push(
+        expressionLoaderRef.current.data$.subscribe((newData) => {
+          onData$(newData, expressionLoaderRef.current?.inspect());
         })
       );
     }

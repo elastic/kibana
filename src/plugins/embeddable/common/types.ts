@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SerializableState } from '../../kibana_utils/common';
+import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
 import { Query, TimeRange } from '../../data/common/query';
 import { Filter } from '../../data/common/es_query/filters';
 
@@ -73,3 +73,23 @@ export type EmbeddableInput = {
    */
   searchSessionId?: string;
 };
+
+export interface PanelState<E extends EmbeddableInput & { id: string } = { id: string }> {
+  // The type of embeddable in this panel. Will be used to find the factory in which to
+  // load the embeddable.
+  type: string;
+
+  // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
+  // will be derived from the container's input. **Any state in here will override any state derived from
+  // the container.**
+  explicitInput: Partial<E> & { id: string };
+}
+
+export type EmbeddableStateWithType = EmbeddableInput & { type: string };
+
+export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
+
+export interface CommonEmbeddableStartContract {
+  getEmbeddableFactory: (embeddableFactoryId: string) => any;
+  getEnhancement: (enhancementId: string) => any;
+}

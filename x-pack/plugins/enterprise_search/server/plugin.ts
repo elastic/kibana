@@ -16,6 +16,7 @@ import {
   KibanaRequest,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SpacesPluginStart } from '../../spaces/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -39,22 +40,23 @@ import { registerConfigDataRoute } from './routes/enterprise_search/config_data'
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
-import { registerEnginesRoute } from './routes/app_search/engines';
-import { registerCredentialsRoutes } from './routes/app_search/credentials';
-import { registerSettingsRoutes } from './routes/app_search/settings';
+import { registerAppSearchRoutes } from './routes/app_search';
 
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
-import { registerWSOverviewRoute } from './routes/workplace_search/overview';
-import { registerWSGroupRoutes } from './routes/workplace_search/groups';
+import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
-export interface PluginsSetup {
+interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
 }
 
-export interface IRouteDependencies {
+interface PluginsStart {
+  spaces?: SpacesPluginStart;
+}
+
+export interface RouteDependencies {
   router: IRouter;
   config: ConfigType;
   log: Logger;
@@ -72,7 +74,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public async setup(
-    { capabilities, http, savedObjects, getStartServices }: CoreSetup,
+    { capabilities, http, savedObjects, getStartServices }: CoreSetup<PluginsStart>,
     { usageCollection, security, features }: PluginsSetup
   ) {
     const config = await this.config.pipe(first()).toPromise();
@@ -100,7 +102,9 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register user access to the Enterprise Search plugins
      */
     capabilities.registerSwitcher(async (request: KibanaRequest) => {
-      const dependencies = { config, security, request, log };
+      const [, { spaces }] = await getStartServices();
+
+      const dependencies = { config, security, spaces, request, log };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
       const showEnterpriseSearchOverview = hasAppSearchAccess || hasWorkplaceSearchAccess;
@@ -127,11 +131,8 @@ export class EnterpriseSearchPlugin implements Plugin {
     const dependencies = { router, config, log, enterpriseSearchRequestHandler };
 
     registerConfigDataRoute(dependencies);
-    registerEnginesRoute(dependencies);
-    registerCredentialsRoutes(dependencies);
-    registerSettingsRoutes(dependencies);
-    registerWSOverviewRoute(dependencies);
-    registerWSGroupRoutes(dependencies);
+    registerAppSearchRoutes(dependencies);
+    registerWorkplaceSearchRoutes(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry

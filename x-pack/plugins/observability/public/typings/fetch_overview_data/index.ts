@@ -47,7 +47,7 @@ export type HasData<T extends ObservabilityFetchDataPlugins> = (
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability' | 'stack_monitoring'
+  'observability-overview' | 'stack_monitoring'
 >;
 
 export interface DataHandler<

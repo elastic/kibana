@@ -114,7 +114,7 @@ describe('ValueListsModal', () => {
 
       await waitFor(() => {
         container
-          .find('button[data-test-subj="action-delete-value-list"]')
+          .find('button[data-test-subj="action-delete-value-list-some name"]')
           .first()
           .simulate('click');
       });

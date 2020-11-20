@@ -23,13 +23,14 @@ import { createKibanaSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {
   const httpConfig = await readConfigFile(require.resolve('../../config'));
+  const certificateAuthorities = [readFileSync(CA1_CERT_PATH), readFileSync(CA2_CERT_PATH)];
 
   return {
     testFiles: [require.resolve('./')],
     services: {
       ...httpConfig.get('services'),
       supertest: createKibanaSupertestProvider({
-        certificateAuthorities: [readFileSync(CA1_CERT_PATH), readFileSync(CA2_CERT_PATH)],
+        certificateAuthorities,
       }),
     },
     servers: {
@@ -37,6 +38,7 @@ export default async function ({ readConfigFile }) {
       kibana: {
         ...httpConfig.get('servers.kibana'),
         protocol: 'https',
+        certificateAuthorities,
       },
     },
     junit: {

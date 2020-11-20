@@ -35,7 +35,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/services',
+        endpoint: 'GET /api/apm/settings/agent-configuration/services',
         isCachable: true,
       });
     },
@@ -47,7 +47,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     (callApmApi) => {
       if (newConfig.service.name) {
         return callApmApi({
-          pathname: '/api/apm/settings/agent-configuration/environments',
+          endpoint: 'GET /api/apm/settings/agent-configuration/environments',
           params: {
             query: { serviceName: omitAllOption(newConfig.service.name) },
           },
@@ -67,7 +67,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       }
 
       const { agentName } = await callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/agent_name',
+        endpoint: 'GET /api/apm/settings/agent-configuration/agent_name',
         params: { query: { serviceName } },
       });
 

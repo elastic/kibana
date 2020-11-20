@@ -10,15 +10,24 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import { Visualization, OperationMetadata, VisualizationType } from '../types';
+import {
+  Visualization,
+  OperationMetadata,
+  VisualizationType,
+  AccessorConfig,
+  FramePublicAPI,
+} from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
-import { isHorizontalChart } from './state_helpers';
-import { toExpression, toPreviewExpression } from './to_expression';
+import { getColumnToLabelMap, isHorizontalChart } from './state_helpers';
+import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
+import { ColorAssignments, getColorAssignments } from './color_assignment';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -73,7 +82,13 @@ function getDescription(state?: State) {
   };
 }
 
-export const xyVisualization: Visualization<State> = {
+export const getXyVisualization = ({
+  paletteService,
+  data,
+}: {
+  paletteService: PaletteRegistry;
+  data: DataPublicPluginStart;
+}): Visualization<State> => ({
   id: 'lnsXY',
 
   visualizationTypes,
@@ -140,6 +155,7 @@ export const xyVisualization: Visualization<State> = {
       state || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
+        valueLabels: 'hide',
         preferredSeriesType: defaultSeriesType,
         layers: [
           {
@@ -154,37 +170,49 @@ export const xyVisualization: Visualization<State> = {
     );
   },
 
-  getConfiguration(props) {
-    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
-    const isHorizontal = isHorizontalChart(props.state.layers);
+  getConfiguration({ state, frame, layerId }) {
+    const layer = state.layers.find((l) => l.layerId === layerId);
+    if (!layer) {
+      return { groups: [] };
+    }
+
+    const datasource = frame.datasourceLayers[layer.layerId];
+
+    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+    let mappedAccessors: AccessorConfig[] = sortedAccessors.map((accessor) => ({
+      columnId: accessor,
+    }));
+
+    if (frame.activeData) {
+      const colorAssignments = getColorAssignments(
+        state.layers,
+        { tables: frame.activeData },
+        data.fieldFormats.deserialize
+      );
+      mappedAccessors = getAccessorColorConfig(
+        colorAssignments,
+        frame,
+        layer,
+        sortedAccessors,
+        paletteService
+      );
+    }
+
+    const isHorizontal = isHorizontalChart(state.layers);
     return {
       groups: [
         {
           groupId: 'x',
-          groupLabel: isHorizontal
-            ? i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
-                defaultMessage: 'Vertical axis',
-              })
-            : i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
-                defaultMessage: 'Horizontal axis',
-              }),
-          accessors: layer.xAccessor ? [layer.xAccessor] : [],
+          groupLabel: getAxisName('x', { isHorizontal }),
+          accessors: layer.xAccessor ? [{ columnId: layer.xAccessor }] : [],
           filterOperations: isBucketed,
-          suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
-          required: !layer.seriesType.includes('percentage'),
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
           groupId: 'y',
-          groupLabel: isHorizontal
-            ? i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
-                defaultMessage: 'Horizontal axis',
-              })
-            : i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
-                defaultMessage: 'Vertical axis',
-              }),
-          accessors: layer.accessors,
+          groupLabel: getAxisName('y', { isHorizontal }),
+          accessors: mappedAccessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
           required: true,
@@ -196,15 +224,30 @@ export const xyVisualization: Visualization<State> = {
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Break down by',
           }),
-          accessors: layer.splitAccessor ? [layer.splitAccessor] : [],
+          accessors: layer.splitAccessor
+            ? [
+                {
+                  columnId: layer.splitAccessor,
+                  triggerIcon: 'colorBy',
+                  palette: paletteService
+                    .get(layer.palette?.name || 'default')
+                    .getColors(10, layer.palette?.params),
+                },
+              ]
+            : [],
           filterOperations: isBucketed,
-          suggestedPriority: 0,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           required: layer.seriesType.includes('percentage'),
+          enableDimensionEditor: true,
         },
       ],
     };
+  },
+
+  getMainPalette: (state) => {
+    if (!state || state.layers.length === 0) return;
+    return state.layers[0].palette;
   },
 
   setDimension({ prevState, layerId, columnId, groupId }) {
@@ -239,6 +282,8 @@ export const xyVisualization: Visualization<State> = {
       delete newLayer.xAccessor;
     } else if (newLayer.splitAccessor === columnId) {
       delete newLayer.splitAccessor;
+      // as the palette is associated with the break down by dimension, remove it together with the dimension
+      delete newLayer.palette;
     } else if (newLayer.accessors.includes(columnId)) {
       newLayer.accessors = newLayer.accessors.filter((a) => a !== columnId);
     }
@@ -285,9 +330,164 @@ export const xyVisualization: Visualization<State> = {
     );
   },
 
-  toExpression,
-  toPreviewExpression,
-};
+  toExpression: (state, layers, attributes) =>
+    toExpression(state, layers, paletteService, attributes),
+  toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
+
+  getErrorMessages(state, frame) {
+    // Data error handling below here
+    const hasNoAccessors = ({ accessors }: LayerConfig) =>
+      accessors == null || accessors.length === 0;
+    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: LayerConfig) =>
+      seriesType.includes('percentage') && splitAccessor == null;
+
+    const errors: Array<{
+      shortMessage: string;
+      longMessage: string;
+    }> = [];
+
+    // check if the layers in the state are compatible with this type of chart
+    if (state && state.layers.length > 1) {
+      // Order is important here: Y Axis is fundamental to exist to make it valid
+      const checks: Array<[string, (layer: LayerConfig) => boolean]> = [
+        ['Y', hasNoAccessors],
+        ['Break down', hasNoSplitAccessor],
+      ];
+
+      // filter out those layers with no accessors at all
+      const filteredLayers = state.layers.filter(
+        ({ accessors, xAccessor, splitAccessor }: LayerConfig) =>
+          accessors.length > 0 || xAccessor != null || splitAccessor != null
+      );
+      for (const [dimension, criteria] of checks) {
+        const result = validateLayersForDimension(dimension, filteredLayers, criteria);
+        if (!result.valid) {
+          errors.push(result.payload);
+        }
+      }
+    }
+
+    return errors.length ? errors : undefined;
+  },
+});
+
+function getAccessorColorConfig(
+  colorAssignments: ColorAssignments,
+  frame: FramePublicAPI,
+  layer: LayerConfig,
+  sortedAccessors: string[],
+  paletteService: PaletteRegistry
+): AccessorConfig[] {
+  const layerContainsSplits = Boolean(layer.splitAccessor);
+  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
+  const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
+  return sortedAccessors.map((accessor) => {
+    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+    if (layerContainsSplits) {
+      return {
+        columnId: accessor as string,
+        triggerIcon: 'disabled',
+      };
+    }
+    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
+    const rank = colorAssignments[currentPalette.name].getRank(
+      layer,
+      columnToLabel[accessor] || accessor,
+      accessor
+    );
+    const customColor =
+      currentYConfig?.color ||
+      paletteService.get(currentPalette.name).getColor(
+        [
+          {
+            name: columnToLabel[accessor] || accessor,
+            rankAtDepth: rank,
+            totalSeriesAtDepth: totalSeriesCount,
+          },
+        ],
+        { maxDepth: 1, totalSeries: totalSeriesCount },
+        currentPalette.params
+      );
+    return {
+      columnId: accessor as string,
+      triggerIcon: customColor ? 'color' : 'disabled',
+      color: customColor ? customColor : undefined,
+    };
+  });
+}
+
+function validateLayersForDimension(
+  dimension: string,
+  layers: LayerConfig[],
+  missingCriteria: (layer: LayerConfig) => boolean
+):
+  | { valid: true }
+  | {
+      valid: false;
+      payload: { shortMessage: string; longMessage: string };
+    } {
+  // Multiple layers must be consistent:
+  // * either a dimension is missing in ALL of them
+  // * or should not miss on any
+  if (layers.every(missingCriteria) || !layers.some(missingCriteria)) {
+    return { valid: true };
+  }
+  // otherwise it's an error and it has to be reported
+  const layerMissingAccessors = layers.reduce((missing: number[], layer, i) => {
+    if (missingCriteria(layer)) {
+      missing.push(i);
+    }
+    return missing;
+  }, []);
+
+  return {
+    valid: false,
+    payload: getMessageIdsForDimension(dimension, layerMissingAccessors, isHorizontalChart(layers)),
+  };
+}
+
+function getAxisName(axis: 'x' | 'y', { isHorizontal }: { isHorizontal: boolean }) {
+  const vertical = i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
+    defaultMessage: 'Vertical axis',
+  });
+  const horizontal = i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
+    defaultMessage: 'Horizontal axis',
+  });
+  if (axis === 'x') {
+    return isHorizontal ? vertical : horizontal;
+  }
+  return isHorizontal ? horizontal : vertical;
+}
+
+// i18n ids cannot be dynamically generated, hence the function below
+function getMessageIdsForDimension(dimension: string, layers: number[], isHorizontal: boolean) {
+  const layersList = layers.map((i: number) => i + 1).join(', ');
+  switch (dimension) {
+    case 'Break down':
+      return {
+        shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitShort', {
+          defaultMessage: `Missing {axis}.`,
+          values: { axis: 'Break down by axis' },
+        }),
+        longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitLong', {
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}.`,
+          values: { layers: layers.length, layersList, axis: 'Break down by axis' },
+        }),
+      };
+    case 'Y':
+      return {
+        shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
+          defaultMessage: `Missing {axis}.`,
+          values: { axis: getAxisName('y', { isHorizontal }) },
+        }),
+        longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYLong', {
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}.`,
+          values: { layers: layers.length, layersList, axis: getAxisName('y', { isHorizontal }) },
+        }),
+      };
+  }
+  return { shortMessage: '', longMessage: '' };
+}
 
 function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
   return {

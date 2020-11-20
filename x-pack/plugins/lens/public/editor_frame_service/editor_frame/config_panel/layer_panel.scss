@@ -16,13 +16,33 @@
 
 .lnsLayerPanel__row {
   background: $euiColorLightestShade;
-  padding: $euiSizeS;
+  padding: $euiSizeS 0;
   border-radius: $euiBorderRadius;
 
   // Add margin to the top of the next same panel
   & + & {
-    margin-top: $euiSizeS;
+    margin-top: $euiSize;
   }
+}
+
+.lnsLayerPanel__row--notSupportsMoreColumns {
+  padding-bottom: 0;
+}
+
+.lnsLayerPanel__group {
+  padding: $euiSizeS 0;
+}
+
+.lnsLayerPanel__group:empty {
+  padding: 0;
+}
+
+.lnsLayerPanel__groupLabel {
+  padding: 0 $euiSizeS;
+}
+
+.lnsLayerPanel__error {
+  padding: 0 $euiSizeS;
 }
 
 .lnsLayerPanel__dimension {
@@ -30,15 +50,18 @@
   border-radius: $euiBorderRadius;
   display: flex;
   align-items: center;
-  margin-top: $euiSizeXS;
   overflow: hidden;
-  width: 100%;
   min-height: $euiSizeXXL;
+  position: relative;
 
   // NativeRenderer is messing this up
   > div {
     flex-grow: 1;
   }
+}
+
+.lnsLayerPanel__dimension--empty {
+  margin-top: $euiSizeS;
 
   &:focus,
   &:focus-within {
@@ -46,19 +69,30 @@
   }
 }
 
-.lnsLayerPanel__triggerLink {
+.lnsLayerPanel__dimensionContainer {
+  margin: 0 $euiSizeS $euiSizeS;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.lnsLayerPanel__dimensionRemove {
+  margin-right: $euiSizeS;
+}
+
+.lnsLayerPanel__triggerText {
   width: 100%;
   padding: $euiSizeS;
   min-height: $euiSizeXXL - 2;
   word-break: break-word;
-
-  &:focus {
-    background-color: transparent !important; // sass-lint:disable-line no-important
-    outline: none !important; // sass-lint:disable-line no-important
-  }
 }
 
-.lnsLayerPanel__triggerLinkContent {
+.lnsLayerPanel__triggerTextLabel {
+  transition: background-color $euiAnimSpeedFast ease-in-out;
+}
+
+.lnsLayerPanel__triggerTextContent {
   // Make EUI button content not centered
   justify-content: flex-start;
   padding: 0 !important; // sass-lint:disable-line no-important
@@ -67,4 +101,33 @@
 
 .lnsLayerPanel__styleEditor {
   padding: 0 $euiSizeS $euiSizeS;
+}
+
+.lnsLayerPanel__colorIndicator {
+  margin-left: $euiSizeS;
+}
+
+.lnsLayerPanel__paletteContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.lnsLayerPanel__paletteColor {
+  height: $euiSizeXS;
+}
+
+.lnsLayerPanel__dimensionLink {
+  width: 100%;
+
+  &:focus {
+    background-color: transparent !important; // sass-lint:disable-line no-important
+    outline: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus .lnsLayerPanel__triggerTextLabel,
+  &:focus-within .lnsLayerPanel__triggerTextLabel {
+    background-color: transparentize($euiColorVis1, .9);
+  }
 }
