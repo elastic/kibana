@@ -89,9 +89,9 @@ describe('#isRegistered', () => {
   });
 });
 
-describe('#allowPredefinedID', () => {
+describe('#canSpecifyID', () => {
   it('returns true for unknown types', () => {
-    expect(service.allowPredefinedID('unknown-type')).toBe(true);
+    expect(service.canSpecifyID('unknown-type')).toBe(true);
   });
 
   it('returns true for types registered setting allowPredefinedID to true', () => {
@@ -100,12 +100,22 @@ describe('#allowPredefinedID', () => {
       attributesToEncrypt: new Set(['attr-1']),
       allowPredefinedID: true,
     });
-    expect(service.allowPredefinedID('known-type-1')).toBe(true);
+    expect(service.canSpecifyID('known-type-1')).toBe(true);
+  });
+
+  it('returns true when overwriting a saved object with a version specified even when allowPredefinedID is not set', () => {
+    service.registerType({
+      type: 'known-type-1',
+      attributesToEncrypt: new Set(['attr-1']),
+    });
+    expect(service.canSpecifyID('known-type-1', '2', true)).toBe(true);
+    expect(service.canSpecifyID('known-type-1', '2', false)).toBe(false);
+    expect(service.canSpecifyID('known-type-1', undefined, true)).toBe(false);
   });
 
   it('returns false for types registered without setting allowPredefinedID', () => {
     service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attr-1']) });
-    expect(service.allowPredefinedID('known-type-1')).toBe(false);
+    expect(service.canSpecifyID('known-type-1')).toBe(false);
   });
 
   it('returns false for types registered setting allowPredefinedID to false', () => {
@@ -114,7 +124,7 @@ describe('#allowPredefinedID', () => {
       attributesToEncrypt: new Set(['attr-1']),
       allowPredefinedID: false,
     });
-    expect(service.allowPredefinedID('known-type-1')).toBe(false);
+    expect(service.canSpecifyID('known-type-1')).toBe(false);
   });
 });
 

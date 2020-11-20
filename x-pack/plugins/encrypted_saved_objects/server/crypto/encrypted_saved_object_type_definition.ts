@@ -15,7 +15,7 @@ export class EncryptedSavedObjectAttributesDefinition {
   public readonly attributesToEncrypt: ReadonlySet<string>;
   private readonly attributesToExcludeFromAAD: ReadonlySet<string> | undefined;
   private readonly attributesToStrip: ReadonlySet<string>;
-  public readonly allowPredefinedID?: boolean;
+  public readonly allowPredefinedID: boolean;
 
   constructor(typeRegistration: EncryptedSavedObjectTypeRegistration) {
     const attributesToEncrypt = new Set<string>();
@@ -35,7 +35,7 @@ export class EncryptedSavedObjectAttributesDefinition {
     this.attributesToEncrypt = attributesToEncrypt;
     this.attributesToStrip = attributesToStrip;
     this.attributesToExcludeFromAAD = typeRegistration.attributesToExcludeFromAAD;
-    this.allowPredefinedID = typeRegistration.allowPredefinedID;
+    this.allowPredefinedID = !!typeRegistration.allowPredefinedID;
   }
 
   /**

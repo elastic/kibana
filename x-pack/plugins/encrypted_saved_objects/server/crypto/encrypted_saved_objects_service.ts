@@ -146,16 +146,18 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
-   * Checks whether specified saved object type supports predefined IDs. If the type isn't registered
-   * as an encrypted saved object type, this will return "true".
+   * Checks whether ID can be specified for the provided saved object.
+   *
+   * If the type isn't registered as an encrypted saved object, or when overwriting an existing
+   * saved object with a version specified, this will return "true".
+   *
    * @param type Saved object type.
    */
-  public allowPredefinedID(type: string) {
-    const typeDefinitions = this.typeDefinitions.get(type);
-    if (typeDefinitions === undefined) {
-      return true;
-    }
-    return typeDefinitions.allowPredefinedID === true;
+  public canSpecifyID(type: string, version?: string, overwrite?: boolean) {
+    const typeDefinition = this.typeDefinitions.get(type);
+    return (
+      typeDefinition === undefined || typeDefinition.allowPredefinedID || !!(version && overwrite)
+    );
   }
 
   /**
