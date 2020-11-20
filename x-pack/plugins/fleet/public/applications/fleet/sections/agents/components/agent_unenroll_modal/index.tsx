@@ -144,7 +144,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
           }}
         >
           <EuiCheckbox
-            id="ingestManagerForceUnenrollAgents"
+            id="fleetForceUnenrollAgents"
             label={
               <FormattedMessage
                 id="xpack.fleet.unenrollAgents.forceUnenrollCheckboxLabel"
