@@ -29,7 +29,7 @@ describe('getFiringAlertCount', () => {
           type: '',
           label: '',
           paramDetails: {},
-          rawAlert: { isMock: true as const },
+          rawAlert: {} as any,
           isLegacy: false,
         },
         states: [
@@ -83,7 +83,7 @@ describe('getFiringAlertCount', () => {
           type: '',
           label: '',
           paramDetails: {},
-          rawAlert: { isMock: true as const },
+          rawAlert: {} as any,
           isLegacy: false,
         },
         states: [
