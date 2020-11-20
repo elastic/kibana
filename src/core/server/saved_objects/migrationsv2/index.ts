@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable no-console */
-
 import { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { gt, valid } from 'semver';
 import chalk from 'chalk';
@@ -26,15 +24,17 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { cloneDeep } from 'lodash';
 import { flow } from 'fp-ts/lib/function';
 import * as Actions from './actions';
 import { IndexMapping } from '../mappings';
 import { Logger } from '../../logging';
 import { SavedObjectsMigrationVersion } from '../types';
 import { AliasAction } from './actions';
+import { ControlState, stateActionMachine } from './state_action_machine';
 import { SavedObjectsRawDoc, SavedObjectsSerializer } from '..';
 
-export interface BaseState {
+export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   indexPrefix: string;
   /** Kibana version number */
@@ -46,7 +46,7 @@ export interface BaseState {
   migrationVersionPerType: SavedObjectsMigrationVersion;
   retryCount: number;
   retryDelay: number;
-  log: Array<{ level: 'error' | 'info'; message: string }>;
+  logs: Array<{ level: 'error' | 'info'; message: string }>;
 }
 
 export type InitState = BaseState & {
@@ -153,32 +153,36 @@ export type MarkVersionIndexReady = PostInitState & {
 export type LegacyBaseState = PostInitState & {
   legacy: string;
   source: Option.Some<string>;
+  legacyPreMigrationDoneActions: AliasAction[];
+  /** The mappings read from the legacy index, used to create a new reindex
+   * target index  */
+  legacyReindexTargetMappings: IndexMapping;
 };
 
-export type CloneLegacyState = LegacyBaseState & {
-  /** Prepare a new 'source' index for the migration by cloning the legacy index */
-  controlState: 'CLONE_LEGACY';
-};
-
-export type SetLegacyWriteBlockState = LegacyBaseState & {
+export type LegacySetWriteBlockState = LegacyBaseState & {
   /** Set a write block on the legacy index to prevent any further writes */
-  controlState: 'SET_LEGACY_WRITE_BLOCK';
+  controlState: 'LEGACY_SET_WRITE_BLOCK';
 };
 
-export type PreMigrateLegacyState = LegacyBaseState & {
-  /** Apply the pre-migration script to the legacy clone to prepare it for a migration */
-  controlState: 'PRE_MIGRATE_LEGACY';
+export type LegacyCreateReindexTargetState = LegacyBaseState & {
+  /** Prepare a new 'source' index for the migration by cloning the legacy index */
+  controlState: 'LEGACY_CREATE_REINDEX_TARGET';
 };
 
-export type PreMigrateLegacyWaitForTaskState = LegacyBaseState & {
+export type LegacyReindexState = LegacyBaseState & {
   /** Apply the pre-migration script to the legacy clone to prepare it for a migration */
-  controlState: 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK';
+  controlState: 'LEGACY_REINDEX';
+};
+
+export type LegacyReindexWaitForTaskState = LegacyBaseState & {
+  /** Apply the pre-migration script to the legacy clone to prepare it for a migration */
+  controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK';
   preMigrationUpdateTaskId: string;
 };
 
-export type DeleteLegacyState = LegacyBaseState & {
+export type LegacyDeleteState = LegacyBaseState & {
   /** Delete the legacy index */
-  controlState: 'DELETE_LEGACY';
+  controlState: 'LEGACY_DELETE';
 };
 
 export type State =
@@ -195,11 +199,11 @@ export type State =
   | OutdatedDocumentsTransform
   | OutdatedDocumentsClearScroll
   | MarkVersionIndexReady
-  | CloneLegacyState
-  | SetLegacyWriteBlockState
-  | PreMigrateLegacyState
-  | PreMigrateLegacyWaitForTaskState
-  | DeleteLegacyState;
+  | LegacyCreateReindexTargetState
+  | LegacySetWriteBlockState
+  | LegacyReindexState
+  | LegacyReindexWaitForTaskState
+  | LegacyDeleteState;
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -221,7 +225,7 @@ function indexVersion(indexName?: string) {
  * The current alias e.g. `.kibana`
  * @param state
  */
-const currentAlias = (state: InitState) => state.indexPrefix;
+const currentAlias = (state: State) => state.indexPrefix;
 /**
  * The version alias e.g. `.kibana_7.11.0`
  * @param state
@@ -285,14 +289,18 @@ export type ResponseType<ControlState extends AllActionStates> = Await<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-const delayOrResetRetryState = (state: State, resW: ResponseType<AllActionStates>): State => {
-  const delayRetryState = (error: Error): State => {
+const delayOrResetRetryState = <S extends State>(
+  state: S,
+  resW: ResponseType<AllActionStates>
+): S => {
+  const delayRetryState = (error: Error): S => {
     if (state.retryCount === 5) {
       return {
         ...state,
         controlState: 'FATAL',
         error,
-        log: [
+        logs: [
+          ...state.logs,
           { level: 'error', message: 'Unable to complete action after 5 attempts, terminating.' },
         ],
       };
@@ -304,7 +312,8 @@ const delayOrResetRetryState = (state: State, resW: ResponseType<AllActionStates
         ...state,
         retryCount,
         retryDelay,
-        log: [
+        logs: [
+          ...state.logs,
           {
             level: 'error',
             message:
@@ -313,12 +322,11 @@ const delayOrResetRetryState = (state: State, resW: ResponseType<AllActionStates
                 retryDelay / 1000
               } seconds.`,
           },
-          ...state.log,
         ],
       };
     }
   };
-  const resetRetryState = (): State => {
+  const resetRetryState = (): S => {
     return { ...state, ...{ retryCount: 0, retryDelay: 0 } };
   };
 
@@ -333,7 +341,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   // control state using
   // `const res = resW as ResponseType<typeof stateP.controlState>;`
 
-  let stateP: State = { ...currentState, ...{ log: [] } };
+  let stateP: State = cloneDeep(currentState);
   stateP = delayOrResetRetryState(stateP, resW);
   if (Either.isLeft(resW)) {
     return stateP;
@@ -430,18 +438,37 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           legacyVersion = 'pre' + stateP.kibanaVersion;
         }
 
+        const legacyReindexTarget = `${stateP.indexPrefix}_${legacyVersion}_001`;
+
         const target = versionIndex(stateP);
         stateP = {
           ...stateP,
-          controlState: 'SET_LEGACY_WRITE_BLOCK',
-          source: Option.some(`${stateP.indexPrefix}_${legacyVersion}_001`) as Option.Some<string>,
+          controlState: 'LEGACY_SET_WRITE_BLOCK',
+          source: Option.some(legacyReindexTarget) as Option.Some<string>,
           target,
           targetMappings: mergeMappings(
             stateP.targetMappings,
             indices[legacyIndex(stateP)].mappings
           ),
-          legacy: `.kibana`,
+          legacy: legacyIndex(stateP),
+          legacyReindexTargetMappings: indices[legacyIndex(stateP)].mappings,
+          legacyPreMigrationDoneActions: [
+            { remove_index: { index: legacyIndex(stateP) } },
+            {
+              add: {
+                index: legacyReindexTarget,
+                alias: currentAlias(stateP),
+              },
+            },
+          ],
           versionIndexReadyActions: Option.some([
+            {
+              remove: {
+                index: legacyReindexTarget,
+                alias: currentAlias(stateP),
+                must_exist: true, // TODO: blocked by https://github.com/elastic/elasticsearch/issues/62642
+              },
+            },
             { add: { index: target, alias: currentAlias(stateP) } },
             { add: { index: target, alias: versionAlias(stateP) } },
           ]),
@@ -463,36 +490,72 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
     }
     return stateP;
-  } else if (stateP.controlState === 'SET_LEGACY_WRITE_BLOCK') {
-    return { ...stateP, controlState: 'CLONE_LEGACY' };
-  } else if (stateP.controlState === 'CLONE_LEGACY') {
-    if (stateP.preMigrationScript != null) {
+  } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isLeft(res)) {
+      // Ignore if legacy index doesn't exist, this probably means another
+      // Kibana instance already completed the legacy pre-migration and
+      // deleted it
+      if (res.left.message === 'index_not_found_exception') {
+        return delayOrResetRetryState(stateP, Either.right({}));
+      } else {
+        return stateP;
+      }
+    } else {
+      return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
+    }
+  } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isLeft(res)) {
+      // Ignore if legacy index doesn't exist, this probably means another
+      // Kibana instance already completed the legacy pre-migration and
+      // deleted it
+      if (res.left.message === 'index_not_found_exception') {
+        return delayOrResetRetryState(stateP, Either.right({}));
+      } else {
+        return stateP;
+      }
+    } else {
       return {
         ...stateP,
-        controlState: 'PRE_MIGRATE_LEGACY',
+        controlState: 'LEGACY_REINDEX',
       };
-    } else {
-      return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
     }
-  } else if (stateP.controlState === 'PRE_MIGRATE_LEGACY') {
+  } else if (stateP.controlState === 'LEGACY_REINDEX') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
-      stateP = {
+      return {
         ...stateP,
-        controlState: 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK',
+        controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK',
         preMigrationUpdateTaskId: res.right.taskId,
       };
+    } else {
+      return stateP;
     }
-    return stateP;
-  } else if (stateP.controlState === 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK') {
+  } else if (stateP.controlState === 'LEGACY_REINDEX_WAIT_FOR_TASK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res) && Option.isSome(res.right.failures)) {
       // TODO: ignore index closed error
       return { ...stateP, controlState: 'FATAL' };
     }
-    return { ...stateP, controlState: 'DELETE_LEGACY' };
-  } else if (stateP.controlState === 'DELETE_LEGACY') {
-    return { ...stateP, controlState: 'CLONE_SOURCE_TO_TARGET' };
+    return {
+      ...stateP,
+      controlState: 'LEGACY_DELETE',
+    };
+  } else if (stateP.controlState === 'LEGACY_DELETE') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isLeft(res)) {
+      // Ignore if legacy index doesn't exist, this probably means another
+      // Kibana instance already completed the legacy pre-migration and
+      // deleted it
+      if (res.left.message === 'index_not_found_exception') {
+        return delayOrResetRetryState(stateP, Either.right({}));
+      } else {
+        return stateP;
+      }
+    } else {
+      return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
+    }
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     return { ...stateP, controlState: 'CLONE_SOURCE_TO_TARGET' };
   } else if (stateP.controlState === 'CLONE_SOURCE_TO_TARGET') {
@@ -510,7 +573,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res) && Option.isSome(res.right.failures)) {
-      return { ...stateP, controlState: 'FATAL' };
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        logs: [
+          ...stateP.logs,
+          {
+            level: 'error',
+            message:
+              'Failed to update target mappings: ' + JSON.stringify(res.right.failures.value),
+          },
+        ],
+      };
     }
     const outdatedDocumentsQuery = {
       bool: {
@@ -647,53 +721,16 @@ export const nextActionMap = (
       ),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases(client, state.versionIndexReadyActions.value),
-    CLONE_LEGACY: flow(
-      // Clone legacy index into a new source index, will ignore index exists error
-      (state: CloneLegacyState) => Actions.cloneIndex(client, state.legacy, state.source.value),
-      TaskEither.orElse((error) => {
-        // Ignore if legacy index doesn't exist, this probably means another
-        // Kibana instance already completed the legacy pre-migration and
-        // deleted it
-        if (error.message === 'index_not_found_exception') {
-          return TaskEither.right({ acknowledged: true, shardsAcknowledged: true });
-        } else {
-          return TaskEither.left(error);
-        }
-      })
-    ),
-    SET_LEGACY_WRITE_BLOCK: flow(
-      (state: SetLegacyWriteBlockState) => Actions.setIndexWriteBlock(client, state.legacy),
-      TaskEither.orElse((error) => {
-        // Ignore if legacy index doesn't exist, this probably means another
-        // Kibana instance already completed the legacy pre-migration and
-        // deleted it
-        if (error.message === 'index_not_found_exception') {
-          return TaskEither.right({ acknowledged: true });
-        } else {
-          return TaskEither.left(error);
-        }
-      })
-    ),
-    PRE_MIGRATE_LEGACY: (state: PreMigrateLegacyState) =>
-      // Start an update by query to pre-migrate the source index using the
-      // supplied script.
-      Actions.updateByQuery(client, state.source.value, state.preMigrationScript),
-    PRE_MIGRATE_LEGACY_WAIT_FOR_TASK: (state: PreMigrateLegacyWaitForTaskState) =>
-      // Wait for the preMigrationUpdateTaskId task to complete
+    LEGACY_CREATE_REINDEX_TARGET: (state: LegacyCreateReindexTargetState) =>
+      Actions.createIndex(client, state.source.value, state.legacyReindexTargetMappings),
+    LEGACY_REINDEX: (state: LegacyReindexState) =>
+      Actions.reindex(client, state.legacy, state.source.value, state.preMigrationScript),
+    LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
+      Actions.setIndexWriteBlock(client, state.legacy),
+    LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForTask(client, state.preMigrationUpdateTaskId, '60s'),
-    DELETE_LEGACY: flow(
-      (state: DeleteLegacyState) => Actions.deleteIndex(client, state.legacy),
-      TaskEither.orElse((error) => {
-        // Ignore if legacy index doesn't exist, this probably means another
-        // Kibana instance already completed the legacy pre-migration and
-        // deleted it
-        if (error.message === 'index_not_found_exception') {
-          return TaskEither.right({});
-        } else {
-          return TaskEither.left(error);
-        }
-      })
-    ),
+    LEGACY_DELETE: (state: LegacyDeleteState) =>
+      Actions.updateAliases(client, state.legacyPreMigrationDoneActions),
   };
 };
 
@@ -726,28 +763,6 @@ export const next = (
   }
 };
 
-/**
- * A state-action machine for performing Saved Object Migrations.
- *
- * Based on https://www.microsoft.com/en-us/research/uploads/prod/2016/12/Computation-and-State-Machines.pdf
- *
- * The state-action machine defines it's behaviour in steps. Each step is a
- * transition from a state s_i to the state s_i+1 caused by an action a_i.
- *
- * s_i   -> a_i -> s_i+1
- * s_i+1 -> a_i+1 -> s_i+2
- *
- * Given a state s1, `next(s1)` returns the next action to execute. Actions are
- * asynchronous, once the action resolves, we can use the action response to
- * determine the next state to transition to as defined by the function
- * `model(state, response)`.
- *
- * We can then loosely define a step as:
- * s_i+1 = model(s_i, await next(s_i)())
- *
- * When there are no more actions returned by `next` the state-action machine
- * terminates.
- */
 export async function migrationStateMachine({
   client,
   kibanaVersion,
@@ -768,7 +783,7 @@ export async function migrationStateMachine({
   migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
 }) {
-  let state: State = {
+  const initialState: State = {
     indexPrefix,
     controlState: 'INIT',
     kibanaVersion,
@@ -777,39 +792,34 @@ export async function migrationStateMachine({
     migrationVersionPerType,
     retryCount: 0,
     retryDelay: 0,
-    log: [],
+    logs: [],
   };
 
-  let controlStateStepCounter = 0;
-
-  console.log(chalk.magentaBright('INIT\n'));
-  let nextAction = next(client, transformRawDocs, state);
-
-  while (nextAction != null) {
-    const actionResult = await nextAction();
-
-    console.log(
-      chalk.magentaBright(`${state.controlState}:${state.indexPrefix}`),
-      chalk.cyanBright('RESPONSE\n'),
-      JSON.stringify(actionResult, null, 2)
-    );
-
-    const newState = model(state, actionResult);
-    if (newState.log.length > 0) {
-      newState.log.forEach((log) => console[log.level](log.message));
+  const logStateTransition = (oldState: State, newState: State) => {
+    if (newState.logs.length > oldState.logs.length) {
+      newState.logs.slice(oldState.logs.length).forEach((log) => logger[log.level](log.message));
     }
-    controlStateStepCounter =
-      newState.controlState === state.controlState ? controlStateStepCounter + 1 : 0;
-    if (controlStateStepCounter > 10) {
-      throw new Error("Control state didn't change after 10 steps aborting.");
-    }
-    state = newState;
+
     // @ts-expect-error
-    const { outdatedDocuments, ...logState } = state;
-    console.log(chalk.magentaBright(`${state.controlState}:${state.indexPrefix}` + '\n'), logState);
+    const { logs, outdatedDocuments, ...logState } = newState;
+    logger.info(
+      `${oldState.controlState} -> ${newState.controlState}:${newState.indexPrefix}` +
+        JSON.stringify(logState)
+    );
+  };
 
-    nextAction = next(client, transformRawDocs, state);
-  }
+  const logActionResponse = (state: State, res: unknown) => {
+    logger.info(`${state.controlState} RESPONSE:${state.indexPrefix}` + JSON.stringify(res));
+  };
 
-  console.log(chalk.greenBright('DONE\n'));
+  return await stateActionMachine<State>(
+    initialState,
+    (state) => next(client, transformRawDocs, state),
+    (state, res) => {
+      logActionResponse(state, res);
+      const newState = model(state, res);
+      logStateTransition(state, newState);
+      return newState;
+    }
+  );
 }

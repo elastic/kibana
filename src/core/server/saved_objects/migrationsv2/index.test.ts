@@ -25,7 +25,7 @@ import { ElasticsearchClient } from '../../elasticsearch';
 const initState: State = {
   controlState: 'INIT',
   kibanaVersion: '7.11.0',
-  log: [],
+  logs: [],
   retryCount: 0,
   retryDelay: 0,
   indexPrefix: '.kibana',
@@ -33,12 +33,8 @@ const initState: State = {
   targetMappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
 };
 
-describe('migrations state machine', () => {
-  test.todo("throws if control state doesn't change after 10 steps");
-
-  test.todo('cycles through all steps until next returns null');
-
-  test.todo('returns the final state once all steps are completed');
+describe('migrations v2', () => {
+  test.todo('logs all messages');
 
   describe('model', () => {
     describe('exponential retry delay', () => {

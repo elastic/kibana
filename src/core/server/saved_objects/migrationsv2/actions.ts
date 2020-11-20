@@ -248,12 +248,21 @@ export const waitForTask = (
   timeout: string
 ): TaskEither.TaskEither<ExpectedErrors, WaitForTaskResponse> => () => {
   return client.tasks
-    .get<{ completed: boolean; response: { failures: any[] }; task: { description: string } }>({
+    .get<{
+      completed: boolean;
+      response: { failures: any[] };
+      task: { description: string };
+      error: { type: string; reason: string };
+    }>({
       task_id: taskId,
       wait_for_completion: true,
       timeout,
     })
-    .then(({ body }) => {
+    .then((res) => {
+      const body = res.body;
+      if (res.body.error ?? false) {
+        return Either.left(new EsErrors.ResponseError(res));
+      }
       return Either.right({
         completed: body.completed,
         failures:
@@ -750,70 +759,4 @@ export const bulkIndex = (
       }
     })
     .catch(catchRetryableEsClientErrors);
-};
-
-/**
- * Performs the following steps on a legacy index to prepare the legacy index
- * for a saved object migration:
- *  1. Create a new target index
- *  2. Reindex from legacy to target index
- *  3. Delete the legacy index
- *
- * @remarks
- * This method should be idempotent. Although it will cause some duplicate
- * work, it should safe to call it several times, or from several Kibana
- * instances in parallel.
- * TODO ask es-distrib team: what happens if we reindex `.kibana` into
- * `.kibana_1` and one of the processes deletes `.kibana` and adds a `.kibana`
- * alias?
- *
- * @internalRemarks
- * - Unlike v1 migrations, we don't create an alias that points to the
- *   reindexed target. So after migrating a v6 `.kibana` we'll have
- *   `.kibana_pre6.5_001` but there will be no `.kibana` alias or index. This
- *   is because we have no way to ensure that we don't accidently reindex from
- *   a `.kibana` _alias_ instead of an index.
- * - We apply an reindex script for the task manager index. Because we delete
- *   the original task manager index there is no way to rollback a failed task
- *   manager migration without a snapshot. This is an existing limitation in
- *   our v1 migrations.
- *
- * @param client
- * @param legacyIndex
- * @param targetIndex
- * @param targetAlias
- */
-export const prepareLegacyIndex = (
-  client: ElasticsearchClient,
-  legacyIndex: string,
-  targetIndex: string,
-  preMigrationScript?: string
-) => () => {
-  return pipe(
-    // Clone legacy index into a new target index, will ignore index exists error
-    cloneIndex(client, legacyIndex, targetIndex),
-    TaskEither.orElse((error) => {
-      // Ignore if legacy index doesn't exist, this probably means another
-      // Kibana instance already completed the clone and deleted it
-      if (error.message === 'index_not_found_exception') {
-        return TaskEither.right({});
-      } else {
-        return TaskEither.left(error);
-      }
-    }),
-    // Reindex from legacy to target index, will ignore conflict errors, will
-    // wait for reindex to complete
-    TaskEither.chain(() => reindex(client, legacyIndex, targetIndex, preMigrationScript)),
-    TaskEither.orElse((error) => {
-      // Ignore if legacy index doesn't exist, this probably means another
-      // Kibana instance already deleted it
-      if (error.message === 'index_not_found_exception') {
-        return TaskEither.right({});
-      } else {
-        return TaskEither.left(error);
-      }
-    }),
-    // Delete the legacy index, will ignore index not found errors
-    TaskEither.chain(() => deleteIndex(client, legacyIndex))
-  );
 };
