@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql(['3', '4']);
       });
 
-      it('should filter 3 integer if both are set as exceptions', async () => {
+      it('should filter 3 integer if all 3 are as exceptions', async () => {
         const rule = getRuleForSignalTesting(['integer']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -287,7 +287,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql(['3', '4']);
       });
 
-      it('should filter 3 integer if both are set as exceptions', async () => {
+      it('should filter 3 integer if all 3 are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['integer']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [

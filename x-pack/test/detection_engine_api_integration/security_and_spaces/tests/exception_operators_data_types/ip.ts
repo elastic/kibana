@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ips).to.eql(['127.0.0.3', '127.0.0.4']);
       });
 
-      it('should filter 3 ips if both are set as exceptions', async () => {
+      it('should filter 3 ips if all 3 are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['ip']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -304,7 +304,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ips).to.eql(['127.0.0.3', '127.0.0.4']);
       });
 
-      it('should filter 3 ips if both are set as exceptions', async () => {
+      it('should filter 3 ips if all 3 are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['ip']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [

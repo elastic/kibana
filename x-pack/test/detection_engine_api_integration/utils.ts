@@ -95,11 +95,10 @@ export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryCreateSc
 
 /**
  * This is a typical signal testing rule that is easy for most basic testing of output of signals.
- * It starts out in an enabled false state and it is up to the test writer to enable it when they
- * are done with setups to kick it off. The from is set very far back to test the basics of signal
+ * It starts out in an enabled true state. The from is set very far back to test the basics of signal
  * creation and testing by getting all the signals at once.
  * @param ruleId The optional ruleId which is rule-1 by default.
- * @param enabled Enables the rule on creation or not. Defaulted to false.
+ * @param enabled Enables the rule on creation or not. Defaulted to true.
  */
 export const getRuleForSignalTesting = (
   index: string[],
@@ -120,7 +119,8 @@ export const getRuleForSignalTesting = (
 
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
- * @param ruleId
+ * @param ruleId The rule id
+ * @param enabled Set to tru to enable it, by default it is off
  */
 export const getSimpleRuleUpdate = (ruleId = 'rule-1', enabled = false): UpdateRulesSchema => ({
   name: 'Simple Rule Query',
@@ -136,7 +136,8 @@ export const getSimpleRuleUpdate = (ruleId = 'rule-1', enabled = false): UpdateR
 
 /**
  * This is a representative ML rule payload as expected by the server
- * @param ruleId
+ * @param ruleId The rule id
+ * @param enabled Set to tru to enable it, by default it is off
  */
 export const getSimpleMlRule = (ruleId = 'rule-1', enabled = false): CreateRulesSchema => ({
   name: 'Simple ML Rule',
@@ -150,6 +151,11 @@ export const getSimpleMlRule = (ruleId = 'rule-1', enabled = false): CreateRules
   type: 'machine_learning',
 });
 
+/**
+ * This is a representative ML rule payload as expected by the server for an update
+ * @param ruleId The rule id
+ * @param enabled Set to tru to enable it, by default it is off
+ */
 export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): UpdateRulesSchema => ({
   name: 'Simple ML Rule',
   description: 'Simple Machine Learning Rule',

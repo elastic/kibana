@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await installPrePackagedRules(supertest);
 
         // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
-        // This is to reduce flakiness where it can for a short period of time try to install the same rule the same rule twice.
+        // This is to reduce flakiness where it can for a short period of time try to install the same rule twice.
         await waitFor(async () => {
           const { body } = await supertest
             .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)

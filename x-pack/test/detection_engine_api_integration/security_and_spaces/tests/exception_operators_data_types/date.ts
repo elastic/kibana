@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql(['2020-10-03T05:08:53.000Z', '2020-10-04T05:08:53.000Z']);
       });
 
-      it('should filter 3 dates if both are set as exceptions', async () => {
+      it('should filter 3 dates if all 3 are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['date']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -298,7 +298,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql(['2020-10-03T05:08:53.000Z', '2020-10-04T05:08:53.000Z']);
       });
 
-      it('should filter 3 dates if both are set as exceptions', async () => {
+      it('should filter 3 dates if all 3 are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['date']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [

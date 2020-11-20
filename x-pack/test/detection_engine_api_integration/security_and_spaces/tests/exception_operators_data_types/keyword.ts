@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql(['word four', 'word three']);
       });
 
-      it('should filter 3 keyword if both are set as exceptions', async () => {
+      it('should filter 3 keyword if all 3 are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
@@ -285,7 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql(['word four', 'word three']);
       });
 
-      it('should filter 3 keyword if both are set as exceptions', async () => {
+      it('should filter 3 keyword if all 3 are set as exceptions', async () => {
         const rule = getRuleForSignalTesting(['keyword']);
         const { id } = await createRuleWithExceptionEntries(supertest, rule, [
           [
