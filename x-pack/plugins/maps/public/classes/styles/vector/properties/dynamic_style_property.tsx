@@ -254,11 +254,9 @@ export class DynamicStyleProperty<T>
     // Todo: individual style property classes would need to override this with "smart" behavior
     if (previousFieldDescriptor.name.endsWith(TOP_TERM_PERCENTAGE_SUFFIX)) {
       // Don't support auto-switching for top-term-percentages
-      console.log('cant', previousFieldDescriptor.name);
       return;
     }
 
-    console.log('recitf')
     return {
       origin: previousFieldDescriptor.origin,
       name: currentField.getName(),

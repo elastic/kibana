@@ -447,7 +447,6 @@ export function updateStyleProperties(layerId: string, previousFields: IESAggFie
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    console.log('update style props', layerId, previousFields);
     const targetLayer = getLayerById(layerId, getState());
     if (!targetLayer || !('getFields' in targetLayer)) {
       return;
