@@ -74,7 +74,6 @@ const PieComponent = (props: PieComponentProps) => {
   const chartTheme = getThemeService().useChartsTheme();
   const chartBaseTheme = getThemeService().useChartsBaseTheme();
   const [showLegend, setShowLegend] = useState(true);
-  const [overwriteColors, setOverwriteColors] = useState(props.uiState?.get('vis.colors', {}));
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -190,8 +189,7 @@ const PieComponent = (props: PieComponentProps) => {
       }
       props.uiState?.setSilent('vis.colors', null);
       props.uiState?.set('vis.colors', colors);
-      props.uiState?.emit('colorChanged');
-      setOverwriteColors(colors);
+      props.uiState?.emit('reload');
     },
     [props.uiState]
   );
@@ -268,7 +266,12 @@ const PieComponent = (props: PieComponentProps) => {
     });
   }
 
-  const layers = getLayers(layersColumns, visParams, overwriteColors, visData.rows.length);
+  const layers = getLayers(
+    layersColumns,
+    visParams,
+    props.uiState?.get('vis.colors', {}),
+    visData.rows.length
+  );
 
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,

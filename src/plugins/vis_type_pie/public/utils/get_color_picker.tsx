@@ -18,7 +18,7 @@
  */
 
 import React, { BaseSyntheticEvent } from 'react';
-
+import Color from 'color';
 import { LegendColorPicker, Position } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
 
@@ -52,6 +52,7 @@ export const getColorPicker = (
     }
     setColor(newColor, seriesName, event);
   };
+  const hexColor = new Color(color).hex();
 
   return (
     <EuiWrappingPopover
@@ -63,7 +64,7 @@ export const getColorPicker = (
       closePopover={onClose}
       panelPaddingSize="s"
     >
-      <ColorPicker color={color} onChange={handlChange} label={seriesName} />
+      <ColorPicker color={hexColor} onChange={handlChange} label={seriesName} />
     </EuiWrappingPopover>
   );
 };
