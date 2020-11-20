@@ -5,11 +5,24 @@
  */
 
 import crypto from 'crypto';
+import type { Duration } from 'moment';
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { Logger, config as coreConfig } from '../../../../src/core/server';
+import type { AuthenticationProvider } from '../common/types';
 
 export type ConfigType = ReturnType<typeof createConfig>;
+type RawConfigType = TypeOf<typeof ConfigSchema>;
+
+interface ProvidersCommonConfigType {
+  enabled: Type<boolean>;
+  showInSelector: Type<boolean>;
+  order: Type<number>;
+  description?: Type<string>;
+  hint?: Type<string>;
+  icon?: Type<string>;
+  session?: Type<{ idleTimeout?: Duration | null; lifespan?: Duration | null }>;
+}
 
 const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =>
   schema.conditional(
@@ -21,10 +34,6 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
     schema.never()
   );
 
-type ProvidersCommonConfigType = Record<
-  'enabled' | 'showInSelector' | 'order' | 'description' | 'hint' | 'icon',
-  Type<any>
->;
 function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonConfigType> = {}) {
   return {
     enabled: schema.boolean({ defaultValue: true }),
@@ -34,6 +43,10 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     hint: schema.maybe(schema.string()),
     icon: schema.maybe(schema.string()),
     accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
+    session: schema.object({
+      idleTimeout: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+      lifespan: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+    }),
     ...overrides,
   };
 }
@@ -147,8 +160,8 @@ export const ConfigSchema = schema.object({
     schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
   ),
   session: schema.object({
-    idleTimeout: schema.nullable(schema.duration()),
-    lifespan: schema.nullable(schema.duration()),
+    idleTimeout: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+    lifespan: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
     cleanupInterval: schema.duration({
       defaultValue: '1h',
       validate(value) {
@@ -175,6 +188,7 @@ export const ConfigSchema = schema.object({
             hint: undefined,
             icon: undefined,
             accessAgreement: undefined,
+            session: { idleTimeout: undefined, lifespan: undefined },
           },
         },
         token: undefined,
@@ -225,7 +239,7 @@ export const ConfigSchema = schema.object({
 });
 
 export function createConfig(
-  config: TypeOf<typeof ConfigSchema>,
+  config: RawConfigType,
   logger: Logger,
   { isTLSEnabled }: { isTLSEnabled: boolean }
 ) {
@@ -233,7 +247,7 @@ export function createConfig(
   if (encryptionKey === undefined) {
     logger.warn(
       'Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on ' +
-        'restart, please set xpack.security.encryptionKey in kibana.yml'
+        'restart, please set xpack.security.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
     );
 
     encryptionKey = crypto.randomBytes(16).toString('hex');
@@ -314,7 +328,33 @@ export function createConfig(
       sortedProviders: Object.freeze(sortedProviders),
       http: config.authc.http,
     },
+    session: getSessionConfig(config.session, providers),
     encryptionKey,
     secureCookies,
+  };
+}
+
+function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
+  return {
+    cleanupInterval: session.cleanupInterval,
+    getExpirationTimeouts({ type, name }: AuthenticationProvider) {
+      // Both idle timeout and lifespan from the provider specific session config can have three
+      // possible types of values: `Duration`, `null` and `undefined`. The `undefined` type means that
+      // provider doesn't override session config and we should fall back to the global one instead.
+      const providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
+
+      const [idleTimeout, lifespan] = [
+        [session.idleTimeout, providerSessionConfig?.idleTimeout],
+        [session.lifespan, providerSessionConfig?.lifespan],
+      ].map(([globalTimeout, providerTimeout]) => {
+        const timeout = providerTimeout === undefined ? globalTimeout ?? null : providerTimeout;
+        return timeout && timeout.asMilliseconds() > 0 ? timeout : null;
+      });
+
+      return {
+        idleTimeout,
+        lifespan,
+      };
+    },
   };
 }

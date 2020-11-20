@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useEffect, useState, useReducer, useCallback } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import createContainer from 'constate';
 import { pick, throttle } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
@@ -146,15 +147,20 @@ const useFetchEntriesEffect = (
   props: LogEntriesProps
 ) => {
   const { services } = useKibanaContextForPlugin();
+  const isMounted = useMountedState();
   const [prevParams, cachePrevParams] = useState<LogEntriesProps | undefined>();
   const [startedStreaming, setStartedStreaming] = useState(false);
+  const dispatchIfMounted = useCallback((action) => (isMounted() ? dispatch(action) : undefined), [
+    dispatch,
+    isMounted,
+  ]);
 
   const runFetchNewEntriesRequest = async (overrides: Partial<LogEntriesProps> = {}) => {
     if (!props.startTimestamp || !props.endTimestamp) {
       return;
     }
 
-    dispatch({ type: Action.FetchingNewEntries });
+    dispatchIfMounted({ type: Action.FetchingNewEntries });
 
     try {
       const commonFetchArgs: LogEntriesBaseRequest = {
@@ -175,13 +181,15 @@ const useFetchEntriesEffect = (
           };
 
       const { data: payload } = await fetchLogEntries(fetchArgs, services.http.fetch);
-      dispatch({ type: Action.ReceiveNewEntries, payload });
+      dispatchIfMounted({ type: Action.ReceiveNewEntries, payload });
 
       // Move position to the bottom if it's the first load.
       // Do it in the next tick to allow the `dispatch` to fire
       if (!props.timeKey && payload.bottomCursor) {
         setTimeout(() => {
-          props.jumpToTargetPosition(payload.bottomCursor!);
+          if (isMounted()) {
+            props.jumpToTargetPosition(payload.bottomCursor!);
+          }
         });
       } else if (
         props.timeKey &&
@@ -192,7 +200,7 @@ const useFetchEntriesEffect = (
         props.jumpToTargetPosition(payload.topCursor);
       }
     } catch (e) {
-      dispatch({ type: Action.ErrorOnNewEntries });
+      dispatchIfMounted({ type: Action.ErrorOnNewEntries });
     }
   };
 
@@ -210,7 +218,7 @@ const useFetchEntriesEffect = (
       return;
     }
 
-    dispatch({ type: Action.FetchingMoreEntries });
+    dispatchIfMounted({ type: Action.FetchingMoreEntries });
 
     try {
       const commonFetchArgs: LogEntriesBaseRequest = {
@@ -232,14 +240,14 @@ const useFetchEntriesEffect = (
 
       const { data: payload } = await fetchLogEntries(fetchArgs, services.http.fetch);
 
-      dispatch({
+      dispatchIfMounted({
         type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,
         payload,
       });
 
       return payload.bottomCursor;
     } catch (e) {
-      dispatch({ type: Action.ErrorOnMoreEntries });
+      dispatchIfMounted({ type: Action.ErrorOnMoreEntries });
     }
   };
 
@@ -322,7 +330,7 @@ const useFetchEntriesEffect = (
       after: props.endTimestamp > prevParams.endTimestamp,
     };
 
-    dispatch({ type: Action.ExpandRange, payload: shouldExpand });
+    dispatchIfMounted({ type: Action.ExpandRange, payload: shouldExpand });
   };
 
   const expandRangeEffectDependencies = [
@@ -359,16 +367,16 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
     case Action.ReceiveNewEntries:
       return {
         ...prevState,
-        ...action.payload,
+        entries: action.payload.entries,
+        topCursor: action.payload.topCursor,
+        bottomCursor: action.payload.bottomCursor,
         centerCursor: getCenterCursor(action.payload.entries),
         lastLoadedTime: new Date(),
         isReloading: false,
-
-        // Be optimistic. If any of the before/after requests comes empty, set
-        // the corresponding flag to `false`
-        hasMoreBeforeStart: true,
-        hasMoreAfterEnd: true,
+        hasMoreBeforeStart: action.payload.hasMoreBefore ?? prevState.hasMoreBeforeStart,
+        hasMoreAfterEnd: action.payload.hasMoreAfter ?? prevState.hasMoreAfterEnd,
       };
+
     case Action.ReceiveEntriesBefore: {
       const newEntries = action.payload.entries;
       const prevEntries = cleanDuplicateItems(prevState.entries, newEntries);
@@ -377,7 +385,7 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       const update = {
         entries,
         isLoadingMore: false,
-        hasMoreBeforeStart: newEntries.length > 0,
+        hasMoreBeforeStart: action.payload.hasMoreBefore ?? prevState.hasMoreBeforeStart,
         // Keep the previous cursor if request comes empty, to easily extend the range.
         topCursor: newEntries.length > 0 ? action.payload.topCursor : prevState.topCursor,
         centerCursor: getCenterCursor(entries),
@@ -394,7 +402,7 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       const update = {
         entries,
         isLoadingMore: false,
-        hasMoreAfterEnd: newEntries.length > 0,
+        hasMoreAfterEnd: action.payload.hasMoreAfter ?? prevState.hasMoreAfterEnd,
         // Keep the previous cursor if request comes empty, to easily extend the range.
         bottomCursor: newEntries.length > 0 ? action.payload.bottomCursor : prevState.bottomCursor,
         centerCursor: getCenterCursor(entries),
@@ -411,6 +419,8 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
         topCursor: null,
         bottomCursor: null,
         centerCursor: null,
+        // Assume there are more pages on both ends unless proven wrong by the
+        // API with an explicit `false` response.
         hasMoreBeforeStart: true,
         hasMoreAfterEnd: true,
       };

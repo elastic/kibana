@@ -10,11 +10,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
-import {
-  AgentService,
-  IngestManagerStartContract,
-  PackageService,
-} from '../../../ingest_manager/server';
+import { AgentService, FleetStartContract, PackageService } from '../../../fleet/server';
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
@@ -24,7 +20,7 @@ import {
   metadataQueryStrategyV1,
   metadataQueryStrategyV2,
 } from './routes/metadata/support/query_strategies';
-import { ElasticsearchAssetType } from '../../../ingest_manager/common/types/models';
+import { ElasticsearchAssetType } from '../../../fleet/common/types/models';
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
@@ -70,7 +66,7 @@ export const createMetadataService = (packageService: PackageService): MetadataS
 };
 
 export type EndpointAppContextServiceStartContract = Partial<
-  Pick<IngestManagerStartContract, 'agentService' | 'packageService'>
+  Pick<FleetStartContract, 'agentService' | 'packageService'>
 > & {
   logger: Logger;
   manifestManager?: ManifestManager;
@@ -78,7 +74,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   security: SecurityPluginSetup;
   alerts: AlertsPluginStartContract;
   config: ConfigType;
-  registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
+  registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
 };
 

@@ -7,7 +7,7 @@
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { EditorFrame } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
@@ -601,7 +601,8 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      // validation requires to calls this getConfiguration API
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -680,7 +681,8 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      // validation requires to calls this getConfiguration API
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -1193,7 +1195,8 @@ describe('editor_frame', () => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      // validation requires to calls this getConfiguration API
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(4);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,

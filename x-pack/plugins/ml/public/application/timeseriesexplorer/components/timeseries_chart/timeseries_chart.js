@@ -10,7 +10,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isEqual, reduce, each, get } from 'lodash';
 import d3 from 'd3';
@@ -21,7 +21,6 @@ import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../../common/util/anomaly_utils';
-import { annotation$ } from '../../../services/annotations_service';
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -51,6 +50,7 @@ import {
   unhighlightFocusChartAnnotation,
   ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
+import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -740,7 +740,8 @@ class TimeseriesChartIntl extends Component {
       this.focusXScale,
       showAnnotations,
       showFocusChartTooltip,
-      hideFocusChartTooltip
+      hideFocusChartTooltip,
+      this.props.annotationUpdatesService
     );
 
     // disable brushing (creation of annotations) when annotations aren't shown
@@ -1475,6 +1476,22 @@ class TimeseriesChartIntl extends Component {
         });
       }
 
+      if (marker.metricFunction) {
+        tooltipData.push({
+          label: i18n.translate(
+            'xpack.ml.timeSeriesExplorer.timeSeriesChart.metricActualPlotFunctionLabel',
+            {
+              defaultMessage: 'function',
+            }
+          ),
+          value: marker.metricFunction,
+          seriesIdentifier: {
+            key: seriesKey,
+          },
+          valueAccessor: 'metric_function',
+        });
+      }
+
       if (modelPlotEnabled === false) {
         // Show actual/typical when available except for rare detectors.
         // Rare detectors always have 1 as actual and the probability as typical.
@@ -1782,9 +1799,17 @@ class TimeseriesChartIntl extends Component {
 }
 
 export const TimeseriesChart = (props) => {
-  const annotationProp = useObservable(annotation$);
+  const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
+  const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
+
   if (annotationProp === undefined) {
     return null;
   }
-  return <TimeseriesChartIntl annotation={annotationProp} {...props} />;
+  return (
+    <TimeseriesChartIntl
+      annotation={annotationProp}
+      {...props}
+      annotationUpdatesService={annotationUpdatesService}
+    />
+  );
 };
