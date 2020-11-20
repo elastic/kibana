@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 import { Link } from 'react-router-dom';
 
 import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
-import { SidebarNavigation } from 'workplace_search/components';
+
 import { ADD_SOURCE_PATH } from '../../routes';
 
 import { Loading } from '../../../shared/loading';
@@ -19,11 +19,20 @@ import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
-import { SidebarLink } from '../../types';
-
 import { AppLogic } from '../../app_logic';
 import { SourcesView } from './sources_view';
 import { SourcesLogic } from './sources_logic';
+
+// TODO: Remove this after links in Kibana sidenav
+interface SidebarLink {
+  title: string;
+  path?: string;
+  disabled?: boolean;
+  iconType?: string;
+  otherActivePath?: string;
+  dataTestSubj?: string;
+  onClick?(): void;
+}
 
 const PRIVATE_LINK_TITLE = 'Add a private content source';
 const PRIVATE_CAN_CREATE_NAV_TITLE = 'Manage private content sources';
@@ -164,11 +173,7 @@ export const PrivateSources: React.FC = () => {
     ? PRIVATE_CAN_CREATE_NAV_DESCRIPTION
     : PRIVATE_VIEW_ONLY_NAV_DESCRIPTION;
   return (
-    <SourcesView
-      sidebar={
-        <SidebarNavigation title={navTitle} description={navDescription} links={sidebarLinks} />
-      }
-    >
+    <SourcesView>
       {hasPrivateSources && !minimumPlatinumLicense && licenseCallout}
       {canAddSources && sourcesHeader}
       {canCreatePersonalSources && privateSources}

@@ -10,7 +10,6 @@ import { useActions, useValues } from 'kea';
 import { Link, Redirect } from 'react-router-dom';
 
 import { EuiButton } from '@elastic/eui';
-import { SidebarNavigation } from 'workplace_search/components';
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import { Loading } from '../../../shared/loading';
@@ -52,7 +51,7 @@ export const OrganizationSources: React.FC = () => {
   const sectionDescription = '';
 
   return (
-    <SourcesView sidebar={<SidebarNavigation title={navTitle} description={navDescription} />}>
+    <SourcesView>
       <ViewContentHeader
         title={headerTitle}
         action={

@@ -13,7 +13,6 @@ import { Route, Switch, useHistory, useParams } from 'react-router-dom';
 
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
-import { SidebarNavigation, AppView } from 'workplace_search/components';
 import {
   DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
   ENT_SEARCH_LICENSE_MANAGEMENT,
@@ -103,6 +102,7 @@ export const SourceRouter: React.FC = () => {
     sidebarLinks = [overviewLink, contentLink, sourceSettingsLink];
   }
 
+  /** TODO: Replace this in Kibana
   const sidebar = (
     <SidebarNavigation
       title={
@@ -124,6 +124,7 @@ export const SourceRouter: React.FC = () => {
       isFederatedSource={isFederatedSource}
     />
   );
+  */
 
   const callout = (
     <>
@@ -141,7 +142,7 @@ export const SourceRouter: React.FC = () => {
   );
 
   return (
-    <AppView sidebar={sidebar}>
+    <>
       {!supportedByLicense && callout}
       <Switch>
         <Route
@@ -178,6 +179,6 @@ export const SourceRouter: React.FC = () => {
           component={SourceSettings}
         />
       </Switch>
-    </AppView>
+    </>
   );
 };

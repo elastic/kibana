@@ -22,8 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import FlashMessages from 'shared/components/FlashMessages';
-import { AppView } from 'workplace_search/components';
+import { FlashMessagesLogic } from '../../../shared/flash_messages';
 
 import { Loading } from '../../../shared/loading';
 import { SourceIcon } from '../../components/shared/source_icon';
@@ -36,25 +35,21 @@ const POLLING_INTERVAL = 10000;
 
 interface SourcesViewProps {
   children: React.ReactNode;
-  sidebar: React.ReactNode;
 }
 
-export const SourcesView: React.FC<SourcesViewProps> = ({ children, sidebar }) => {
-  const {
-    initializeSources,
-    pollForSourceStatusChanges,
-    resetFlashMessages,
-    resetPermissionsModal,
-  } = useActions(SourcesLogic);
+export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
+  const { initializeSources, pollForSourceStatusChanges, resetPermissionsModal } = useActions(
+    SourcesLogic
+  );
 
-  const { dataLoading, flashMessages, permissionsModal } = useValues(SourcesLogic);
+  const { dataLoading, permissionsModal } = useValues(SourcesLogic);
 
   useEffect(() => {
     initializeSources();
     const pollingInterval = window.setInterval(pollForSourceStatusChanges, POLLING_INTERVAL);
 
     return () => {
-      resetFlashMessages();
+      FlashMessagesLogic.actions.clearFlashMessages();
       clearInterval(pollingInterval);
     };
   }, []);
@@ -111,8 +106,7 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children, sidebar }) =
   );
 
   return (
-    <AppView sidebar={sidebar}>
-      {!!flashMessages && <FlashMessages {...flashMessages} />}
+    <>
       {!!permissionsModal && permissionsModal.additionalConfiguration && (
         <PermissionsModal
           addedSourceName={permissionsModal.addedSourceName}
@@ -120,6 +114,6 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children, sidebar }) =
         />
       )}
       {children}
-    </AppView>
+    </>
   );
 };
