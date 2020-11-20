@@ -16,6 +16,7 @@ import {
   waitForAlertsIndexToBeCreated,
 } from '../tasks/alerts';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/common';
 import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
@@ -46,6 +47,7 @@ describe('Exceptions', () => {
       esArchiverUnload('auditbeat_for_exceptions');
       esArchiverUnload('auditbeat_for_exceptions2');
       esArchiverUnload('auditbeat_for_exceptions3');
+      removeSignalsIndex();
     });
 
     it('Creates an exception and deletes it', () => {
@@ -143,6 +145,7 @@ describe('Exceptions', () => {
       esArchiverUnload('auditbeat_for_exceptions_from_alert');
       esArchiverUnload('auditbeat_for_exceptions_from_alert2');
       esArchiverUnload('auditbeat_for_exceptions_from_alert3');
+      removeSignalsIndex();
     });
 
     it('Creates an exception and deletes it', () => {
