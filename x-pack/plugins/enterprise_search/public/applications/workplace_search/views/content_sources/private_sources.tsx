@@ -37,11 +37,11 @@ interface SidebarLink {
 }
 
 const PRIVATE_LINK_TITLE = 'Add a private content source';
-const PRIVATE_CAN_CREATE_NAV_TITLE = 'Manage private content sources';
-const PRIVATE_VIEW_ONLY_NAV_TITLE = 'Review Group Sources';
-const PRIVATE_VIEW_ONLY_NAV_DESCRIPTION =
+const PRIVATE_CAN_CREATE_PAGE_TITLE = 'Manage private content sources';
+const PRIVATE_VIEW_ONLY_PAGE_TITLE = 'Review Group Sources';
+const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION =
   'Review the status of all sources shared with your Group.';
-const PRIVATE_CAN_CREATE_NAV_DESCRIPTION =
+const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION =
   'Review the status of all connected private sources, and manage private sources for your account.';
 const PRIVATE_HEADER_TITLE = 'My private content sources';
 const PRIVATE_HEADER_DESCRIPTION = 'Private content sources are available only to you.';
@@ -169,14 +169,19 @@ export const PrivateSources: React.FC = () => {
     </>
   );
 
-  const navTitle = canCreatePersonalSources
-    ? PRIVATE_CAN_CREATE_NAV_TITLE
-    : PRIVATE_VIEW_ONLY_NAV_TITLE;
-  const navDescription = canCreatePersonalSources
-    ? PRIVATE_CAN_CREATE_NAV_DESCRIPTION
-    : PRIVATE_VIEW_ONLY_NAV_DESCRIPTION;
+  const PAGE_TITLE = canCreatePersonalSources
+    ? PRIVATE_CAN_CREATE_PAGE_TITLE
+    : PRIVATE_VIEW_ONLY_PAGE_TITLE;
+  const PAGE_DESCRIPTION = canCreatePersonalSources
+    ? PRIVATE_CAN_CREATE_PAGE_DESCRIPTION
+    : PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION;
+
+  const pageHeader = <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />;
+
   return (
     <SourcesView>
+      {/* TODO: Figure out with design how to make this look better w/o 2 ViewContentHeaders */}
+      {pageHeader}
       {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
       {canAddSources && sourcesHeader}
       {canCreatePersonalSources && privateSources}

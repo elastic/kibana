@@ -22,8 +22,8 @@ import { SourcesLogic } from './sources_logic';
 import { SourcesView } from './sources_view';
 
 const ORG_LINK_TITLE = 'Add an organization content source';
-const ORG_NAV_TITLE = 'Manage organization content sources';
-const ORG_NAV_DESCRIPTION =
+const ORG_PAGE_TITLE = 'Manage organization content sources';
+const ORG_PAGE_DESCRIPTION =
   'Organization sources are available to the entire organization and can be shared to specific user groups. By default, newly created organization sources are added to the Default group.';
 const ORG_HEADER_TITLE = 'Organization sources';
 const ORG_HEADER_DESCRIPTION =
@@ -43,8 +43,6 @@ export const OrganizationSources: React.FC = () => {
   if (contentSources.length === 0) return <Redirect to={getSourcesPath(ADD_SOURCE_PATH, true)} />;
 
   const linkTitle = ORG_LINK_TITLE;
-  const navTitle = ORG_NAV_TITLE;
-  const navDescription = ORG_NAV_DESCRIPTION;
   const headerTitle = ORG_HEADER_TITLE;
   const headerDescription = ORG_HEADER_DESCRIPTION;
   const sectionTitle = '';
@@ -52,6 +50,8 @@ export const OrganizationSources: React.FC = () => {
 
   return (
     <SourcesView>
+      {/* TODO: Figure out with design how to make this look better w/o 2 ViewContentHeaders */}
+      <ViewContentHeader title={ORG_PAGE_TITLE} description={ORG_PAGE_DESCRIPTION} />
       <ViewContentHeader
         title={headerTitle}
         action={
