@@ -39,6 +39,7 @@ import {
 } from '../../../../src/core/server/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const KIBANA_VERSION = '99.9.9';
 function getLogMock() {
   return {
     debug() {},
@@ -156,6 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '1.9.0' },
           bar: { mynum: 68 },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
         {
           id: 'bar:o',
@@ -163,14 +165,22 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '1.9.0' },
           bar: { mynum: 6 },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
-        { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' }, references: [] },
+        {
+          id: 'baz:u',
+          type: 'baz',
+          baz: { title: 'Terrific!' },
+          references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
+        },
         {
           id: 'foo:a',
           type: 'foo',
           migrationVersion: { foo: '1.0.0' },
           foo: { name: 'FOO A' },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
         {
           id: 'foo:e',
@@ -178,6 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '1.0.0' },
           foo: { name: 'FOOEY' },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
       ]);
     });
@@ -227,6 +238,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '1.9.0' },
           bar: { mynum: 68 },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
         {
           id: 'bar:o',
@@ -234,6 +246,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '1.9.0' },
           bar: { mynum: 6 },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
         {
           id: 'foo:a',
@@ -241,6 +254,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '1.0.0' },
           foo: { name: 'FOO A' },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
         {
           id: 'foo:e',
@@ -248,6 +262,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '1.0.0' },
           foo: { name: 'FOOEY' },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
       ]);
 
@@ -259,6 +274,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '2.3.4' },
           bar: { mynum: 68, name: 'NAME i' },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
         {
           id: 'bar:o',
@@ -266,6 +282,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { bar: '2.3.4' },
           bar: { mynum: 6, name: 'NAME o' },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
         {
           id: 'foo:a',
@@ -273,6 +290,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '2.0.1' },
           foo: { name: 'FOO Av2' },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
         {
           id: 'foo:e',
@@ -280,6 +298,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '2.0.1' },
           foo: { name: 'FOOEYv2' },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
       ]);
     });
@@ -338,6 +357,7 @@ export default ({ getService }: FtrProviderContext) => {
           migrationVersion: { foo: '1.0.0' },
           foo: { name: 'LOTR' },
           references: [],
+          referencesMigrationVersion: KIBANA_VERSION, // this field is omitted from saved objects, but we fetched the raw document here
         },
       ]);
     });
@@ -395,7 +415,7 @@ async function migrateIndex({
   types.forEach((type) => typeRegistry.registerType(type));
 
   const documentMigrator = new DocumentMigrator({
-    kibanaVersion: '99.9.9',
+    kibanaVersion: KIBANA_VERSION,
     typeRegistry,
     log: getLogMock(),
   });
@@ -404,6 +424,7 @@ async function migrateIndex({
     client: createMigrationEsClient(esClient, getLogMock()),
     documentMigrator,
     index,
+    kibanaVersion: KIBANA_VERSION,
     obsoleteIndexTemplatePattern,
     mappingProperties,
     batchSize: 10,

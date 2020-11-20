@@ -28,6 +28,7 @@ import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
+const kibanaVersion = '25.2.3';
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
@@ -51,7 +52,7 @@ beforeEach(() => {
 describe('DocumentMigrator', () => {
   function testOpts() {
     return {
-      kibanaVersion: '25.2.3',
+      kibanaVersion,
       typeRegistry: createRegistry(),
       log: mockLogger,
     };
@@ -202,6 +203,7 @@ describe('DocumentMigrator', () => {
         type: 'user',
         attributes: { name: 'Chris' },
         migrationVersion: { user: '1.2.3' },
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
@@ -252,6 +254,7 @@ describe('DocumentMigrator', () => {
         attributes: { name: 'Tyler' },
         migrationVersion: { acl: '2.3.5' },
         acl: 'admins-only, sucka!',
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
@@ -289,10 +292,11 @@ describe('DocumentMigrator', () => {
         id: 'me',
         type: 'user',
         attributes: { name: 'Tyler' },
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
-    it('assumes documents w/ undefined migrationVersion are up to date', () => {
+    it('assumes documents w/ undefined migrationVersion and correct referencesMigrationVersion are up to date', () => {
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry(
@@ -321,6 +325,7 @@ describe('DocumentMigrator', () => {
         type: 'user',
         attributes: { name: 'Tyler' },
         bbb: 'Shazm',
+        referencesMigrationVersion: kibanaVersion,
       } as SavedObjectUnsanitizedDoc);
       expect(actual).toEqual({
         id: 'me',
@@ -331,6 +336,7 @@ describe('DocumentMigrator', () => {
           user: '1.0.0',
           bbb: '2.3.4',
         },
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
@@ -357,6 +363,7 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { name: 'Callie', b: 'B', c: 'C' },
         migrationVersion: { dog: '2.0.1' },
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
@@ -423,6 +430,7 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { name: 'Callie', a: 1, b: 2, c: 3 },
         migrationVersion: { dog: '10.0.1' },
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
@@ -456,6 +464,7 @@ describe('DocumentMigrator', () => {
         attributes: { name: 'Callie' },
         animal: 'Animal: Doggie',
         migrationVersion: { animal: '1.0.0', dog: '2.2.4' },
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
@@ -482,6 +491,7 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { title: 'Title: Name: Callie' },
         migrationVersion: { dog: '1.0.2' },
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
@@ -514,6 +524,7 @@ describe('DocumentMigrator', () => {
         type: 'cat',
         attributes: { name: 'Kitty Callie' },
         migrationVersion: { dog: '2.2.4', cat: '1.0.0' },
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
@@ -590,6 +601,7 @@ describe('DocumentMigrator', () => {
         type: 'cat',
         attributes: { name: 'Shiny' },
         migrationVersion: { cat: '3.0.0' },
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
@@ -614,6 +626,7 @@ describe('DocumentMigrator', () => {
         type: 'cat',
         attributes: { name: 'Boo' },
         migrationVersion: { cat: '1.0.0', foo: '5.6.7' },
+        referencesMigrationVersion: kibanaVersion,
       });
     });
 
@@ -693,6 +706,14 @@ describe('DocumentMigrator', () => {
               '3.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
               '2.0.0': (doc: SavedObjectUnsanitizedDoc) => doc,
             },
+          },
+          {
+            name: 'ccc',
+            namespaceType: 'multiple',
+            migrations: {
+              '9.0.0': (doc: SavedObjectUnsanitizedDoc) => doc,
+            },
+            convertToMultiNamespaceTypeVersion: '11.0.0', // this results in reference transforms getting added to other types, but does not increase the migrationVersion of those types
           }
         ),
       });
@@ -700,11 +721,12 @@ describe('DocumentMigrator', () => {
       expect(migrationVersion).toEqual({
         aaa: '10.4.0',
         bbb: '3.2.3',
+        ccc: '11.0.0',
       });
     });
 
     describe('conversion to multi-namespace type', () => {
-      it('assumes documents w/ undefined migrationVersion are up to date', () => {
+      it('assumes documents w/ undefined migrationVersion and correct referencesMigrationVersion are up to date', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
           typeRegistry: createRegistry(
@@ -716,6 +738,7 @@ describe('DocumentMigrator', () => {
           id: 'mischievous',
           type: 'dog',
           attributes: { name: 'Ann' },
+          referencesMigrationVersion: kibanaVersion,
         } as SavedObjectUnsanitizedDoc;
         const actual = migrator.migrateAndConvert(obj);
         expect(actual).toEqual({
@@ -723,32 +746,81 @@ describe('DocumentMigrator', () => {
           type: 'dog',
           attributes: { name: 'Ann' },
           migrationVersion: { dog: '1.0.0' },
+          referencesMigrationVersion: kibanaVersion,
           // there is no 'namespaces' field because no transforms were applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
         });
       });
 
-      it('skips conversion transforms when using `migrate`', () => {
+      it('skips reference transforms and conversion transforms when using `migrate`', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
-          typeRegistry: createRegistry({
-            name: 'dog',
-            namespaceType: 'multiple',
-            convertToMultiNamespaceTypeVersion: '1.0.0',
-          }),
+          typeRegistry: createRegistry(
+            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' },
+            { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+          ),
         });
         const obj = {
           id: 'cowardly',
           type: 'dog',
           attributes: { name: 'Leslie' },
           migrationVersion: {},
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+          namespace: 'foo-namespace',
         };
         const actual = migrator.migrate(obj);
+        expect(mockUuidv5).not.toHaveBeenCalled();
         expect(actual).toEqual({
           id: 'cowardly',
           type: 'dog',
           attributes: { name: 'Leslie' },
           migrationVersion: { dog: '1.0.0' },
-          // there is no 'namespaces' field because no transforms were applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+          referencesMigrationVersion: kibanaVersion,
+          namespace: 'foo-namespace',
+          // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
+        });
+      });
+
+      describe('correctly applies reference transforms', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            { name: 'dog', namespaceType: 'single' },
+            { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+          ),
+        });
+        const obj = {
+          id: 'bad',
+          type: 'dog',
+          attributes: { name: 'Sweet Peach' },
+          migrationVersion: {},
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+        };
+
+        it('in the default space', () => {
+          const actual = migrator.migrateAndConvert(obj);
+          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(actual).toEqual({
+            id: 'bad',
+            type: 'dog',
+            attributes: { name: 'Sweet Peach' },
+            references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
+            referencesMigrationVersion: kibanaVersion,
+          });
+        });
+
+        it('in a non-default space', () => {
+          const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
+          expect(mockUuidv5).toHaveBeenCalledTimes(1);
+          expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:toy:favorite', 'DNSUUID');
+          expect(actual).toEqual({
+            id: 'bad',
+            type: 'dog',
+            attributes: { name: 'Sweet Peach' },
+            references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
+            referencesMigrationVersion: kibanaVersion,
+            namespace: 'foo-namespace',
+          });
         });
       });
 
@@ -776,6 +848,7 @@ describe('DocumentMigrator', () => {
             type: 'dog',
             attributes: { name: 'Wally' },
             migrationVersion: { dog: '1.0.0' },
+            referencesMigrationVersion: kibanaVersion,
             namespaces: ['default'],
           });
         });
@@ -789,8 +862,109 @@ describe('DocumentMigrator', () => {
             type: 'dog',
             attributes: { name: 'Wally' },
             migrationVersion: { dog: '1.0.0' },
+            referencesMigrationVersion: kibanaVersion,
             namespaces: ['foo-namespace'],
             originId: 'loud',
+          });
+        });
+      });
+
+      describe('correctly applies reference and conversion transforms', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' },
+            { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+          ),
+        });
+        const obj = {
+          id: 'cute',
+          type: 'dog',
+          attributes: { name: 'Too' },
+          migrationVersion: {},
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+        };
+
+        it('in the default space', () => {
+          const actual = migrator.migrateAndConvert(obj);
+          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(actual).toEqual({
+            id: 'cute',
+            type: 'dog',
+            attributes: { name: 'Too' },
+            migrationVersion: { dog: '1.0.0' },
+            references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
+            referencesMigrationVersion: kibanaVersion,
+            namespaces: ['default'],
+          });
+        });
+
+        it('in a non-default space', () => {
+          const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
+          expect(mockUuidv5).toHaveBeenCalledTimes(2);
+          expect(mockUuidv5).toHaveBeenNthCalledWith(1, 'foo-namespace:toy:favorite', 'DNSUUID');
+          expect(mockUuidv5).toHaveBeenNthCalledWith(2, 'foo-namespace:dog:cute', 'DNSUUID');
+          expect(actual).toEqual({
+            id: 'uuidv5',
+            type: 'dog',
+            attributes: { name: 'Too' },
+            migrationVersion: { dog: '1.0.0' },
+            references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
+            referencesMigrationVersion: kibanaVersion,
+            namespaces: ['foo-namespace'],
+            originId: 'cute',
+          });
+        });
+      });
+
+      describe('correctly applies reference and migration transforms', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            {
+              name: 'dog',
+              namespaceType: 'single',
+              migrations: {
+                '1.0.0': setAttr('migrationVersion.dog', '2.0.0'),
+                '2.0.0': (doc) => doc, // noop
+              },
+            },
+            { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+          ),
+        });
+        const obj = {
+          id: 'sleepy',
+          type: 'dog',
+          attributes: { name: 'Patches' },
+          migrationVersion: {},
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+        };
+
+        it('in the default space', () => {
+          const actual = migrator.migrateAndConvert(obj);
+          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(actual).toEqual({
+            id: 'sleepy',
+            type: 'dog',
+            attributes: { name: 'Patches' },
+            migrationVersion: { dog: '2.0.0' },
+            references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
+            referencesMigrationVersion: kibanaVersion,
+          });
+        });
+
+        it('in a non-default space', () => {
+          const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
+          expect(mockUuidv5).toHaveBeenCalledTimes(1);
+          expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:toy:favorite', 'DNSUUID');
+          expect(actual).toEqual({
+            id: 'sleepy',
+            type: 'dog',
+            attributes: { name: 'Patches' },
+            migrationVersion: { dog: '2.0.0' },
+            references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
+            referencesMigrationVersion: kibanaVersion,
+            namespace: 'foo-namespace',
           });
         });
       });
@@ -823,6 +997,7 @@ describe('DocumentMigrator', () => {
             type: 'dog',
             attributes: { name: 'Remy' },
             migrationVersion: { dog: '2.0.0' },
+            referencesMigrationVersion: kibanaVersion,
             namespaces: ['default'],
           });
         });
@@ -836,8 +1011,65 @@ describe('DocumentMigrator', () => {
             type: 'dog',
             attributes: { name: 'Remy' },
             migrationVersion: { dog: '2.0.0' },
+            referencesMigrationVersion: kibanaVersion,
             namespaces: ['foo-namespace'],
             originId: 'hungry',
+          });
+        });
+      });
+
+      describe('correctly applies reference, conversion, and migration transforms', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            {
+              name: 'dog',
+              namespaceType: 'multiple',
+              migrations: {
+                '1.0.0': setAttr('migrationVersion.dog', '2.0.0'),
+                '2.0.0': (doc) => doc, // noop
+              },
+              convertToMultiNamespaceTypeVersion: '1.0.0',
+            },
+            { name: 'toy', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+          ),
+        });
+        const obj = {
+          id: 'pretty',
+          type: 'dog',
+          attributes: { name: 'Sasha' },
+          migrationVersion: {},
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+        };
+
+        it('in the default space', () => {
+          const actual = migrator.migrateAndConvert(obj);
+          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(actual).toEqual({
+            id: 'pretty',
+            type: 'dog',
+            attributes: { name: 'Sasha' },
+            migrationVersion: { dog: '2.0.0' },
+            references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
+            referencesMigrationVersion: kibanaVersion,
+            namespaces: ['default'],
+          });
+        });
+
+        it('in a non-default space', () => {
+          const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
+          expect(mockUuidv5).toHaveBeenCalledTimes(2);
+          expect(mockUuidv5).toHaveBeenNthCalledWith(1, 'foo-namespace:toy:favorite', 'DNSUUID');
+          expect(mockUuidv5).toHaveBeenNthCalledWith(2, 'foo-namespace:dog:pretty', 'DNSUUID');
+          expect(actual).toEqual({
+            id: 'uuidv5',
+            type: 'dog',
+            attributes: { name: 'Sasha' },
+            migrationVersion: { dog: '2.0.0' },
+            references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
+            referencesMigrationVersion: kibanaVersion,
+            namespaces: ['foo-namespace'],
+            originId: 'pretty',
           });
         });
       });

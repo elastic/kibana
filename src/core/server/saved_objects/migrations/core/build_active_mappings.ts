@@ -164,6 +164,9 @@ function defaultMapping(): IndexMapping {
           },
         },
       },
+      referencesMigrationVersion: {
+        type: 'keyword',
+      },
     },
   };
 }

@@ -93,7 +93,8 @@ interface DocumentMigratorOptions {
 
 interface ActiveMigrations {
   [type: string]: {
-    latestVersion: string;
+    latestVersion?: string;
+    latestReferenceVersion?: string;
     transforms: Transform[];
   };
 }
@@ -101,7 +102,7 @@ interface ActiveMigrations {
 interface Transform {
   version: string;
   transform: (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
-  transformType: 'migrate' | 'convert';
+  transformType: 'migrate' | 'convert' | 'reference';
 }
 
 /**
@@ -147,7 +148,13 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   public get migrationVersion(): SavedObjectsMigrationVersion {
-    return _.mapValues(this.migrations, ({ latestVersion }) => latestVersion);
+    return Object.entries(this.migrations).reduce((acc, [prop, { latestVersion }]) => {
+      // some migration objects won't have a latestVersion (they only contain reference transforms that are applied from other types)
+      if (latestVersion) {
+        return { ...acc, [prop]: latestVersion };
+      }
+      return acc;
+    }, {});
   }
 
   /**
@@ -269,39 +276,43 @@ function buildActiveMigrations(
   typeRegistry: ISavedObjectTypeRegistry,
   log: Logger
 ): ActiveMigrations {
-  return typeRegistry
-    .getAllTypes()
-    .filter(
-      (type) =>
-        (type.migrations && Object.keys(type.migrations).length > 0) ||
-        type.convertToMultiNamespaceTypeVersion
-    )
-    .reduce((migrations, type) => {
-      const migrationTransforms = Object.entries(type.migrations!).map<Transform>(
-        ([version, transform]) => ({
-          version,
-          transform: wrapWithTry(version, type.name, transform, log),
-          transformType: 'migrate',
-        })
-      );
-      const conversionTransforms = getConversionTransforms(type);
-      const transforms = [...migrationTransforms, ...conversionTransforms].sort(
-        transformComparator
-      );
-      return {
-        ...migrations,
-        [type.name]: {
-          latestVersion: _.last(transforms)!.version,
-          transforms,
-        },
-      };
-    }, {} as ActiveMigrations);
+  const referenceTransforms = getReferenceTransforms(typeRegistry);
+
+  return typeRegistry.getAllTypes().reduce((migrations, type) => {
+    const migrationTransforms = Object.entries(type.migrations ?? {}).map<Transform>(
+      ([version, transform]) => ({
+        version,
+        transform: wrapWithTry(version, type.name, transform, log),
+        transformType: 'migrate',
+      })
+    );
+    const conversionTransforms = getConversionTransforms(type);
+    const transforms = [
+      ...referenceTransforms,
+      ...conversionTransforms,
+      ...migrationTransforms,
+    ].sort(transformComparator);
+
+    if (!transforms.length) {
+      return migrations;
+    }
+    return {
+      ...migrations,
+      [type.name]: {
+        latestVersion: _.last(transforms.filter((x) => x.transformType !== 'reference'))?.version,
+        latestReferenceVersion: _.last(transforms.filter((x) => x.transformType === 'reference'))
+          ?.version,
+        transforms,
+      },
+    };
+  }, {} as ActiveMigrations);
 }
 
 /**
  * Creates a function which migrates and validates any document that is passed to it.
  */
 function buildDocumentTransform({
+  kibanaVersion,
   migrations,
 }: {
   kibanaVersion: string;
@@ -313,8 +324,8 @@ function buildDocumentTransform({
   ) {
     const { convertTypes = false } = options;
     const result = doc.migrationVersion
-      ? applyMigrations(doc, migrations, convertTypes)
-      : markAsUpToDate(doc, migrations);
+      ? applyMigrations(doc, migrations, kibanaVersion, convertTypes)
+      : markAsUpToDate(doc, migrations, kibanaVersion);
 
     // In order to keep tests a bit more stable, we won't
     // tack on an empy migrationVersion to docs that have
@@ -330,12 +341,15 @@ function buildDocumentTransform({
 function applyMigrations(
   doc: SavedObjectUnsanitizedDoc,
   migrations: ActiveMigrations,
+  kibanaVersion: string,
   convertTypes: boolean
 ) {
   while (true) {
     const prop = nextUnmigratedProp(doc, migrations);
     if (!prop) {
-      return doc;
+      // regardless of whether or not any reference transform was applied, update the referencesMigrationVersion
+      // this is needed to ensure that newly created documents have an up-to-date referencesMigrationVersion field
+      return { ...doc, referencesMigrationVersion: kibanaVersion };
     }
     doc = migrateProp(doc, prop, migrations, convertTypes);
   }
@@ -361,13 +375,18 @@ function propVersion(doc: SavedObjectUnsanitizedDoc | ActiveMigrations, prop: st
 /**
  * Sets the doc's migrationVersion to be the most recent version
  */
-function markAsUpToDate(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
+function markAsUpToDate(
+  doc: SavedObjectUnsanitizedDoc,
+  migrations: ActiveMigrations,
+  kibanaVersion: string
+) {
   return {
     ...doc,
     migrationVersion: props(doc).reduce((acc, prop) => {
       const version = propVersion(migrations, prop);
       return version ? set(acc, prop, version) : acc;
     }, {}),
+    referencesMigrationVersion: kibanaVersion,
   };
 }
 
@@ -410,9 +429,43 @@ function getConversionTransforms(type: SavedObjectsType): Transform[] {
 }
 
 /**
- * Transforms are sorted in ascending order by version. One version may contain multiple transforms; 'convert' transforms always run first,
- * and 'migrate' transforms always run last. This is because 'migrate' transforms are defined by the consumer, and may change the object
- * type or migrationVersion which resets the migration loop and could cause any remaining transforms for this version to be skipped.
+ * Returns all applicable reference transforms for all object types.
+ */
+function getReferenceTransforms(typeRegistry: ISavedObjectTypeRegistry): Transform[] {
+  const transformMap = typeRegistry
+    .getAllTypes()
+    .filter((type) => type.convertToMultiNamespaceTypeVersion)
+    .reduce((acc, { convertToMultiNamespaceTypeVersion: key, name }) => {
+      const val = acc.get(key!) ?? new Set();
+      return acc.set(key!, val.add(name));
+    }, new Map<string, Set<string>>());
+
+  return Array.from(transformMap, ([key, val]) => ({
+    version: key,
+    transform: (doc) => {
+      const { namespace, references } = doc;
+      if (namespace && references?.length) {
+        return {
+          ...doc,
+          references: references.map(({ type, id, ...attrs }) => ({
+            ...attrs,
+            type,
+            id: val.has(type) ? uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS) : id,
+          })),
+        };
+      }
+      return doc;
+    },
+    transformType: 'reference',
+  }));
+}
+
+/**
+ * Transforms are sorted in ascending order by version. One version may contain multiple transforms; 'reference' transforms always run
+ * first, 'convert' transforms always run second, and 'migrate' transforms always run last. This is because:
+ *  1. 'convert' transforms get rid of the `namespace` field, which must be present for 'reference' transforms to function correctly.
+ *  2. 'migrate' transforms are defined by the consumer, and may change the object type or migrationVersion which resets the migration loop
+ *     and could cause any remaining transforms for this version to be skipped.
  */
 function transformComparator(a: Transform, b: Transform) {
   const semver = Semver.compare(a.version, b.version);
@@ -422,6 +475,10 @@ function transformComparator(a: Transform, b: Transform) {
     if (a.transformType === 'migrate') {
       return 1;
     } else if (b.transformType === 'migrate') {
+      return -1;
+    } else if (a.transformType === 'convert') {
+      return 1;
+    } else if (b.transformType === 'convert') {
       return -1;
     }
   }
@@ -461,6 +518,23 @@ function wrapWithTry(
   };
 }
 
+function getHasPendingReferenceTransform(
+  doc: SavedObjectUnsanitizedDoc,
+  migrations: ActiveMigrations,
+  prop: string
+) {
+  if (!migrations[prop]) {
+    return false;
+  }
+
+  const { latestReferenceVersion } = migrations[prop];
+  const { referencesMigrationVersion } = doc;
+  return (
+    latestReferenceVersion &&
+    (!referencesMigrationVersion || Semver.gt(latestReferenceVersion, referencesMigrationVersion))
+  );
+}
+
 /**
  * Finds the first unmigrated property in the specified document.
  */
@@ -468,10 +542,7 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
   return props(doc).find((p) => {
     const latestVersion = propVersion(migrations, p);
     const docVersion = propVersion(doc, p);
-
-    if (latestVersion === docVersion) {
-      return false;
-    }
+    const hasPendingReferenceTransform = getHasPendingReferenceTransform(doc, migrations, p);
 
     // We verify that the version is not greater than the version supported by Kibana.
     // If we didn't, this would cause an infinite loop, as we'd be unable to migrate the property
@@ -486,7 +557,7 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
       );
     }
 
-    return true;
+    return (latestVersion && latestVersion !== docVersion) || hasPendingReferenceTransform;
   });
 }
 
@@ -510,11 +581,16 @@ function migrateProp(
     }
 
     if (transformType === 'migrate' || convertTypes) {
-      // migrate transforms are always applied, but conversion transforms are only applied when Kibana is upgraded
+      // migrate transforms are always applied, but conversion transforms and reference transforms are only applied when Kibana is upgraded
       doc = transform(doc);
     }
-    migrationVersion = updateMigrationVersion(doc, migrationVersion, prop, version);
-    doc.migrationVersion = _.clone(migrationVersion);
+    if (transformType === 'reference') {
+      // regardless of whether or not the reference transform was applied, increment the version
+      doc.referencesMigrationVersion = version;
+    } else {
+      migrationVersion = updateMigrationVersion(doc, migrationVersion, prop, version);
+      doc.migrationVersion = _.clone(migrationVersion);
+    }
 
     if (doc.type !== originalType) {
       // the transform function changed the object's type; break out of the loop
@@ -534,9 +610,14 @@ function applicableTransforms(
   prop: string
 ) {
   const minVersion = propVersion(doc, prop);
+  const minReferenceVersion = doc.referencesMigrationVersion || '0.0.0';
   const { transforms } = migrations[prop];
   return minVersion
-    ? transforms.filter(({ version }) => Semver.gt(version, minVersion))
+    ? transforms.filter(({ version, transformType }) =>
+        transformType === 'reference'
+          ? Semver.gt(version, minReferenceVersion)
+          : Semver.gt(version, minVersion)
+      )
     : transforms;
 }
 

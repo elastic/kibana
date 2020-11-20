@@ -1683,7 +1683,7 @@ export class SavedObjectsRepository {
     if (this._registry.isSingleNamespace(type)) {
       savedObject.namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
     }
-    return omit(savedObject, 'namespace') as SavedObject<T>;
+    return omit(savedObject, ['namespace', 'referencesMigrationVersion']) as SavedObject<T>;
   }
 
   /**

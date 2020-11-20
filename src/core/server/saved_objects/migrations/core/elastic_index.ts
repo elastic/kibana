@@ -158,6 +158,7 @@ export async function migrationsUpToDate(
   client: MigrationEsClient,
   index: string,
   migrationVersion: SavedObjectsMigrationVersion,
+  kibanaVersion: string,
   retryCount: number = 10
 ): Promise<boolean> {
   try {
@@ -176,18 +177,29 @@ export async function migrationsUpToDate(
       body: {
         query: {
           bool: {
-            should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
-              bool: {
-                must: [
-                  { exists: { field: type } },
-                  {
-                    bool: {
-                      must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+            should: [
+              ...Object.entries(migrationVersion).map(([type, latestVersion]) => ({
+                bool: {
+                  must: [
+                    { exists: { field: type } },
+                    {
+                      bool: {
+                        must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+                      },
+                    },
+                  ],
+                },
+              })),
+              {
+                bool: {
+                  must_not: {
+                    term: {
+                      referencesMigrationVersion: kibanaVersion,
                     },
                   },
-                ],
+                },
               },
-            })),
+            ],
           },
         },
       },
@@ -205,7 +217,7 @@ export async function migrationsUpToDate(
 
     await new Promise((r) => setTimeout(r, 1000));
 
-    return await migrationsUpToDate(client, index, migrationVersion, retryCount - 1);
+    return await migrationsUpToDate(client, index, migrationVersion, kibanaVersion, retryCount - 1);
   }
 }
 

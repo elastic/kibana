@@ -60,6 +60,7 @@ export class KibanaMigrator {
   private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
+  private readonly kibanaVersion: string;
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
@@ -83,6 +84,7 @@ export class KibanaMigrator {
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaConfig = kibanaConfig;
+    this.kibanaVersion = kibanaVersion;
     this.savedObjectsConfig = savedObjectsConfig;
     this.typeRegistry = typeRegistry;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
@@ -156,6 +158,7 @@ export class KibanaMigrator {
         client: this.client,
         documentMigrator: this.documentMigrator,
         index,
+        kibanaVersion: this.kibanaVersion,
         log: this.log,
         mappingProperties: indexMap[index].typeMappings,
         pollInterval: this.savedObjectsConfig.pollInterval,

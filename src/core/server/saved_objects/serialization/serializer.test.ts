@@ -142,6 +142,27 @@ describe('#rawToSavedObject', () => {
     expect(expected).toEqual(actual);
   });
 
+  test('if specified it copies the _source.referencesMigrationVersion property to referencesMigrationVersion', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+        referencesMigrationVersion: '1.2.3',
+      },
+    });
+    expect(actual).toHaveProperty('referencesMigrationVersion', '1.2.3');
+  });
+
+  test(`if _source.referencesMigrationVersion is unspecified it doesn't set referencesMigrationVersion`, () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+      },
+    });
+    expect(actual).not.toHaveProperty('referencesMigrationVersion');
+  });
+
   test(`if version is unspecified it doesn't set version`, () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'foo:bar',
@@ -299,6 +320,7 @@ describe('#rawToSavedObject', () => {
           foo: '1.2.3',
           bar: '9.8.7',
         },
+        referencesMigrationVersion: '4.5.6',
         namespace: 'foo-namespace',
         updated_at: String(new Date()),
         references: [],
@@ -544,6 +566,25 @@ describe('#savedObjectToRaw', () => {
     } as any);
 
     expect(actual._source).not.toHaveProperty('migrationVersion');
+  });
+
+  test('it copies the referencesMigrationVersion property to _source.referencesMigrationVersion', () => {
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: '',
+      attributes: {},
+      referencesMigrationVersion: '1.2.3',
+    } as any);
+
+    expect(actual._source).toHaveProperty('referencesMigrationVersion', '1.2.3');
+  });
+
+  test(`if unspecified it doesn't add referencesMigrationVersion property to _source`, () => {
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: '',
+      attributes: {},
+    } as any);
+
+    expect(actual._source).not.toHaveProperty('referencesMigrationVersion');
   });
 
   test('it decodes the version property to _seq_no and _primary_term', () => {

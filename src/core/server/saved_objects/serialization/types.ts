@@ -55,6 +55,7 @@ interface SavedObjectDoc<T = unknown> {
   namespace?: string;
   namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
+  referencesMigrationVersion?: string;
   version?: string;
   updated_at?: string;
   originId?: string;

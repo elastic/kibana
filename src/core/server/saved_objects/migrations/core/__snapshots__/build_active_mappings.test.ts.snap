@@ -11,6 +11,7 @@ Object {
       "namespaces": "2f4316de49999235636386fe51dc06c1",
       "originId": "2f4316de49999235636386fe51dc06c1",
       "references": "7997cf5a56cc02bdc9c93361bde732b0",
+      "referencesMigrationVersion": "2f4316de49999235636386fe51dc06c1",
       "type": "2f4316de49999235636386fe51dc06c1",
       "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
     },
@@ -50,6 +51,9 @@ Object {
       },
       "type": "nested",
     },
+    "referencesMigrationVersion": Object {
+      "type": "keyword",
+    },
     "type": Object {
       "type": "keyword",
     },
@@ -70,6 +74,7 @@ Object {
       "namespaces": "2f4316de49999235636386fe51dc06c1",
       "originId": "2f4316de49999235636386fe51dc06c1",
       "references": "7997cf5a56cc02bdc9c93361bde732b0",
+      "referencesMigrationVersion": "2f4316de49999235636386fe51dc06c1",
       "secondType": "72d57924f415fbadb3ee293b67d233ab",
       "thirdType": "510f1f0adb69830cf8a1c5ce2923ed82",
       "type": "2f4316de49999235636386fe51dc06c1",
@@ -112,6 +117,9 @@ Object {
         },
       },
       "type": "nested",
+    },
+    "referencesMigrationVersion": Object {
+      "type": "keyword",
     },
     "secondType": Object {
       "dynamic": false,

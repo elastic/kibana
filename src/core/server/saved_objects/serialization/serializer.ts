@@ -72,7 +72,15 @@ export class SavedObjectsSerializer {
   ): SavedObjectSanitizedDoc {
     const { flexible = false } = options;
     const { _id, _source, _seq_no, _primary_term } = doc;
-    const { type, namespace, namespaces, originId } = _source;
+    const {
+      type,
+      namespace,
+      namespaces,
+      originId,
+      migrationVersion,
+      references,
+      referencesMigrationVersion,
+    } = _source;
 
     const version =
       _seq_no != null || _primary_term != null
@@ -88,8 +96,9 @@ export class SavedObjectsSerializer {
       ...(includeNamespaces && { namespaces }),
       ...(originId && { originId }),
       attributes: _source[type],
-      references: _source.references || [],
-      ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
+      references: references || [],
+      ...(migrationVersion && { migrationVersion }),
+      ...(referencesMigrationVersion && { referencesMigrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
       ...(version && { version }),
     };
@@ -113,6 +122,7 @@ export class SavedObjectsSerializer {
       updated_at,
       version,
       references,
+      referencesMigrationVersion,
     } = savedObj;
     const source = {
       [type]: attributes,
@@ -122,6 +132,7 @@ export class SavedObjectsSerializer {
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
       ...(originId && { originId }),
       ...(migrationVersion && { migrationVersion }),
+      ...(referencesMigrationVersion && { referencesMigrationVersion }),
       ...(updated_at && { updated_at }),
     };
 
