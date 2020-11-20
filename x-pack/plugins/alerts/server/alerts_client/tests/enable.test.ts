@@ -13,7 +13,7 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
-import { getBeforeSetup } from './lib';
+import { getBeforeSetup, setGlobalDate } from './lib';
 import { InvalidatePendingApiKey } from '../../types';
 
 const taskManager = taskManagerMock.createStart();
@@ -45,6 +45,8 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
 });
+
+setGlobalDate();
 
 describe('enable()', () => {
   let alertsClient: AlertsClient;
@@ -186,6 +188,7 @@ describe('enable()', () => {
         meta: {
           versionApiKeyLastmodified: kibanaVersion,
         },
+        updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         apiKey: null,
         apiKeyOwner: null,
@@ -292,6 +295,7 @@ describe('enable()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [
           {
             group: 'default',

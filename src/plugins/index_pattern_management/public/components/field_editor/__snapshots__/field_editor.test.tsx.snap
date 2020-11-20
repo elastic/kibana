@@ -54,15 +54,15 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
-          id="indexPatternManagement.customNameHelpText"
+          defaultMessage="Set a custom label to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          id="indexPatternManagement.labelHelpText"
           values={Object {}}
         />
       }
-      label="Custom name"
+      label="Custom label"
     >
       <eui-field-text
-        data-test-subj="editorFieldCustomName"
+        data-test-subj="editorFieldCustomLabel"
         onChange={[Function]}
         value=""
       />
@@ -294,15 +294,15 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
-          id="indexPatternManagement.customNameHelpText"
+          defaultMessage="Set a custom label to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          id="indexPatternManagement.labelHelpText"
           values={Object {}}
         />
       }
-      label="Custom name"
+      label="Custom label"
     >
       <eui-field-text
-        data-test-subj="editorFieldCustomName"
+        data-test-subj="editorFieldCustomLabel"
         onChange={[Function]}
         placeholder="test"
         value=""
@@ -586,15 +586,15 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
-          id="indexPatternManagement.customNameHelpText"
+          defaultMessage="Set a custom label to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          id="indexPatternManagement.labelHelpText"
           values={Object {}}
         />
       }
-      label="Custom name"
+      label="Custom label"
     >
       <eui-field-text
-        data-test-subj="editorFieldCustomName"
+        data-test-subj="editorFieldCustomLabel"
         onChange={[Function]}
         placeholder="foobar"
         value=""
@@ -827,15 +827,15 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
-          id="indexPatternManagement.customNameHelpText"
+          defaultMessage="Set a custom label to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          id="indexPatternManagement.labelHelpText"
           values={Object {}}
         />
       }
-      label="Custom name"
+      label="Custom label"
     >
       <eui-field-text
-        data-test-subj="editorFieldCustomName"
+        data-test-subj="editorFieldCustomLabel"
         onChange={[Function]}
         placeholder="test"
         value=""
@@ -1200,15 +1200,15 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     <eui-form-row
       helpText={
         <FormattedMessage
-          defaultMessage="Set a custom name to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom name and will use the original field name."
-          id="indexPatternManagement.customNameHelpText"
+          defaultMessage="Set a custom label to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          id="indexPatternManagement.labelHelpText"
           values={Object {}}
         />
       }
-      label="Custom name"
+      label="Custom label"
     >
       <eui-field-text
-        data-test-subj="editorFieldCustomName"
+        data-test-subj="editorFieldCustomLabel"
         onChange={[Function]}
         placeholder="foobar"
         value=""
