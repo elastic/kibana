@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { isEmpty } from 'lodash/fp';
 import { EuiFormRow } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
@@ -30,7 +31,6 @@ export const ConnectorSelector = ({
   isLoading = false,
 }: ConnectorSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
   return isEdit ? (
     <EuiFormRow
       data-test-subj={dataTestSubj}
@@ -47,7 +47,7 @@ export const ConnectorSelector = ({
         disabled={disabled}
         isLoading={isLoading}
         onChange={field.setValue}
-        selectedConnector={(field.value as string) ?? 'none'}
+        selectedConnector={isEmpty(field.value) ? 'none' : (field.value as string)}
       />
     </EuiFormRow>
   ) : null;

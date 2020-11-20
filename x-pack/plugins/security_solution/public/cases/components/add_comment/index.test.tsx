@@ -13,7 +13,6 @@ import { getFormMock } from '../__mock__/form';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
 import { CommentRequest, CommentType } from '../../../../../case/common/api';
-import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
 import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
@@ -28,20 +27,16 @@ jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data'
 );
 
-jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../containers/use_post_comment');
 
 const useFormMock = useForm as jest.Mock;
 const useFormDataMock = useFormData as jest.Mock;
 
-const useInsertTimelineMock = useInsertTimeline as jest.Mock;
 const usePostCommentMock = usePostComment as jest.Mock;
 
 const onCommentSaving = jest.fn();
 const onCommentPosted = jest.fn();
 const postComment = jest.fn();
-const handleCursorChange = jest.fn();
-const handleOnTimelineChange = jest.fn();
 
 const addCommentProps = {
   caseId: '1234',
@@ -50,15 +45,6 @@ const addCommentProps = {
   onCommentSaving,
   onCommentPosted,
   showLoading: false,
-};
-
-const defaultInsertTimeline = {
-  cursorPosition: {
-    start: 0,
-    end: 0,
-  },
-  handleCursorChange,
-  handleOnTimelineChange,
 };
 
 const defaultPostCommment = {
@@ -77,7 +63,6 @@ describe('AddComment ', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    useInsertTimelineMock.mockImplementation(() => defaultInsertTimeline);
     usePostCommentMock.mockImplementation(() => defaultPostCommment);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
     useFormDataMock.mockImplementation(() => [{ comment: sampleData.comment }]);

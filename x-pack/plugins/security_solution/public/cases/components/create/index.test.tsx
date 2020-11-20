@@ -30,7 +30,6 @@ jest.mock('@elastic/eui', () => {
     EuiFieldText: () => <input />,
   };
 });
-jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../containers/use_post_case');
 
 jest.mock(
@@ -57,17 +56,6 @@ const useFormDataMock = useFormData as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 
 const postCase = jest.fn();
-const handleCursorChange = jest.fn();
-const handleOnTimelineChange = jest.fn();
-
-const defaultInsertTimeline = {
-  cursorPosition: {
-    start: 0,
-    end: 0,
-  },
-  handleCursorChange,
-  handleOnTimelineChange,
-};
 
 const sampleTags = ['coke', 'pepsi'];
 const sampleData = {
