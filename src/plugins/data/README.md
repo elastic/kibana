@@ -350,7 +350,7 @@ there is no existing field with the specified name, returns a `404 Not Found` er
 You can specify any field properties, except `name` which is specified in the URL path.
 
 ```
-POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field/{name}
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field/<name>
 {
     "field": {
         "type": "",
