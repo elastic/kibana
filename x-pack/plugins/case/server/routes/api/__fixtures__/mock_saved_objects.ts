@@ -297,6 +297,38 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     updated_at: '2019-11-25T22:32:30.608Z',
     version: 'WzYsMV0=',
   },
+  {
+    type: 'cases-comment',
+    id: 'mock-comment-4',
+    attributes: {
+      type: CommentType.alert,
+      index: 'test-index',
+      alertId: 'test-id',
+      created_at: '2019-11-25T22:32:30.608Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      updated_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+    },
+    references: [
+      {
+        type: 'cases',
+        name: 'associated-cases',
+        id: 'mock-id-4',
+      },
+    ],
+    updated_at: '2019-11-25T22:32:30.608Z',
+    version: 'WzYsMV0=',
+  },
 ];
 
 export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> = [
