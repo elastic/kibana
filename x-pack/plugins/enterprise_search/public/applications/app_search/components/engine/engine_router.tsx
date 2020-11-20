@@ -32,8 +32,8 @@ import {
   // ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { ENGINES_TITLE } from '../engines';
+import { OVERVIEW_TITLE } from '../engine_overview';
 import {
-  OVERVIEW_TITLE,
   ANALYTICS_TITLE,
   // DOCUMENTS_TITLE,
   // SCHEMA_TITLE,
@@ -47,6 +47,7 @@ import {
 } from './constants';
 
 import { Loading } from '../../../shared/loading';
+import { EngineOverview } from '../engine_overview';
 
 import { EngineLogic } from './';
 import { DocumentDetail, Documents } from '../documents';
@@ -108,7 +109,7 @@ export const EngineRouter: React.FC = () => {
       </Route>
       <Route>
         <SetPageChrome trail={[...engineBreadcrumb, OVERVIEW_TITLE]} />
-        <div data-test-subj="EngineOverviewTODO">Overview</div>
+        <EngineOverview />
       </Route>
     </Switch>
   );
