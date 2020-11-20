@@ -27,7 +27,7 @@ import {
   ActionTypeIndex,
   ActionConnector,
   ActionType,
-  ActionVariable,
+  ActionVariables,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
@@ -36,7 +36,7 @@ import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
-import { ActionGroup } from '../../../../../alerts/common';
+import { ActionGroup, AlertActionParam } from '../../../../../alerts/common';
 
 export interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -45,13 +45,13 @@ export interface ActionAccordionFormProps {
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setAlertProperty: (actions: AlertAction[]) => void;
-  setActionParamsProperty: (key: string, value: any, index: number) => void;
+  setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
   http: HttpSetup;
   actionTypeRegistry: ActionTypeRegistryContract;
   toastNotifications: ToastsSetup;
   docLinks: DocLinksStart;
   actionTypes?: ActionType[];
-  messageVariables?: ActionVariable[];
+  messageVariables?: ActionVariables;
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;

@@ -4,82 +4,75 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import url from 'url';
-import { useParams } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import { EuiTitle, EuiListGroup } from '@elastic/eui';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import React, { useState } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiPortal,
+  EuiCode,
+  EuiLink,
+  EuiCallOut,
+  EuiButton,
+} from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import { enableCorrelations } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-
-const SESSION_STORAGE_KEY = 'apm.debug.show_correlations';
+import { LatencyCorrelations } from './LatencyCorrelations';
+import { ErrorCorrelations } from './ErrorCorrelations';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { createHref } from '../../shared/Links/url_helpers';
 
 export function Correlations() {
-  const location = useLocation();
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
-  const { core } = useApmPluginContext();
-  const { transactionName, transactionType, start, end } = urlParams;
-
-  if (
-    !location.search.includes('&_show_correlations') &&
-    sessionStorage.getItem(SESSION_STORAGE_KEY) !== 'true'
-  ) {
+  const { uiSettings } = useApmPluginContext().core;
+  const { urlParams } = useUrlParams();
+  const history = useHistory();
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  if (!uiSettings.get(enableCorrelations)) {
     return null;
   }
 
-  sessionStorage.setItem(SESSION_STORAGE_KEY, 'true');
-
-  const query = {
-    serviceName,
-    transactionName,
-    transactionType,
-    start,
-    end,
-    uiFilters: JSON.stringify(uiFilters),
-    fieldNames:
-      'user.username,user.id,host.ip,user_agent.name,kubernetes.pod.uuid,url.domain,container.id,service.node.name',
-  };
-
-  const listItems = [
-    {
-      label: 'Show correlations between two ranges',
-      href: url.format({
-        query: {
-          ...query,
-          gap: 24,
-        },
-        pathname: core.http.basePath.prepend(`/api/apm/correlations/ranges`),
-      }),
-      isDisabled: false,
-      iconType: 'tokenRange',
-      size: 's' as const,
-    },
-
-    {
-      label: 'Show correlations for slow transactions',
-      href: url.format({
-        query: {
-          ...query,
-          durationPercentile: 95,
-        },
-        pathname: core.http.basePath.prepend(
-          `/api/apm/correlations/slow_durations`
-        ),
-      }),
-      isDisabled: false,
-      iconType: 'clock',
-      size: 's' as const,
-    },
-  ];
-
   return (
     <>
-      <EuiTitle size="m">
-        <h2>Correlations</h2>
-      </EuiTitle>
+      <EuiButton
+        onClick={() => {
+          setIsFlyoutVisible(true);
+        }}
+      >
+        View correlations
+      </EuiButton>
 
-      <EuiListGroup listItems={listItems} />
+      {isFlyoutVisible && (
+        <EuiPortal>
+          <EuiFlyout
+            size="l"
+            ownFocus
+            onClose={() => setIsFlyoutVisible(false)}
+          >
+            <EuiFlyoutHeader hasBorder aria-labelledby="correlations-flyout">
+              <EuiTitle>
+                <h2 id="correlations-flyout">Correlations</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              {urlParams.kuery ? (
+                <EuiCallOut size="m">
+                  <span>Filtering by</span>
+                  <EuiCode>{urlParams.kuery}</EuiCode>
+                  <EuiLink href={createHref(history, { query: { kuery: '' } })}>
+                    <EuiButtonEmpty iconType="cross">Clear</EuiButtonEmpty>
+                  </EuiLink>
+                </EuiCallOut>
+              ) : null}
+
+              <LatencyCorrelations />
+              <ErrorCorrelations />
+            </EuiFlyoutBody>
+          </EuiFlyout>
+        </EuiPortal>
+      )}
     </>
   );
 }

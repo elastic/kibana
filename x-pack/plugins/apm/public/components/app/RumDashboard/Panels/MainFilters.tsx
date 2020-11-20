@@ -22,7 +22,7 @@ export function MainFilters() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/services',
+          endpoint: 'GET /api/apm/rum-client/services',
           params: {
             query: {
               start,

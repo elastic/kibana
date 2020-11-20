@@ -72,8 +72,7 @@ async function saveApmIndices({
   apmIndices: Record<string, string>;
 }) {
   await callApmApi({
-    method: 'POST',
-    pathname: '/api/apm/settings/apm-indices/save',
+    endpoint: 'POST /api/apm/settings/apm-indices/save',
     params: {
       body: apmIndices,
     },
@@ -94,7 +93,7 @@ export function ApmIndices() {
   const { data = INITIAL_STATE, status, refetch } = useFetcher(
     (_callApmApi) =>
       _callApmApi({
-        pathname: `/api/apm/settings/apm-index-settings`,
+        endpoint: `GET /api/apm/settings/apm-index-settings`,
       }),
     []
   );
