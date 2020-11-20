@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useCallback, useReducer, useState } from 'react';
+import React, { Fragment, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { useAlertsContext } from '../../context/alerts_context';
 import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
-import { alertReducer } from './alert_reducer';
+import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
@@ -34,15 +34,14 @@ interface AlertEditProps {
 }
 
 export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
-  const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
+  const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
+    alert: initialAlert,
+  });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] = useState<boolean>(
     false
   );
-  const setAlert = (key: string, value: any) => {
-    dispatch({ command: { type: 'setAlert' }, payload: { key, value } });
-  };
 
   const {
     reloadAlerts,
@@ -52,12 +51,6 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
     actionTypeRegistry,
     docLinks,
   } = useAlertsContext();
-
-  const closeFlyout = useCallback(() => {
-    onClose();
-    setAlert('alert', initialAlert);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onClose]);
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
 
@@ -105,7 +98,7 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
   return (
     <EuiPortal>
       <EuiFlyout
-        onClose={closeFlyout}
+        onClose={() => onClose()}
         aria-labelledby="flyoutAlertEditTitle"
         size="m"
         maxWidth={620}
@@ -155,7 +148,7 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj="cancelSaveEditedAlertButton"
-                    onClick={closeFlyout}
+                    onClick={() => onClose()}
                   >
                     {i18n.translate(
                       'xpack.triggersActionsUI.sections.alertEdit.cancelButtonLabel',
@@ -179,7 +172,7 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
                       const savedAlert = await onSaveAlert();
                       setIsSaving(false);
                       if (savedAlert) {
-                        closeFlyout();
+                        onClose();
                         if (reloadAlerts) {
                           reloadAlerts();
                         }
