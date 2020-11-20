@@ -28,8 +28,15 @@ export const EVENT_DETAILS_PLACEHOLDER = i18n.translate(
 );
 
 export const EVENT_DETAILS = i18n.translate(
-  'xpack.securitySolution.timeline.expandableEvent.titleLabel',
+  'xpack.securitySolution.timeline.expandableEvent.eventTitleLabel',
   {
     defaultMessage: 'Event details',
+  }
+);
+
+export const ALERT_DETAILS = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.alertTitleLabel',
+  {
+    defaultMessage: 'Alert details',
   }
 );

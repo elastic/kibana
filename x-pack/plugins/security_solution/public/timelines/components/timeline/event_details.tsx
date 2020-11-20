@@ -16,10 +16,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
-import {
-  ExpandableEvent,
-  ExpandableEventTitle,
-} from '../../../timelines/components/timeline/expandable_event';
+import { ExpandableEvent } from '../../../timelines/components/timeline/expandable_event';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 interface EventDetailsProps {
@@ -41,7 +38,6 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
 
   return (
     <>
-      <ExpandableEventTitle />
       <EuiSpacer />
       <ExpandableEvent
         browserFields={browserFields}

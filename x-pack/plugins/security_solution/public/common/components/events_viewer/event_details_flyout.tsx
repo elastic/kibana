@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -13,10 +13,7 @@ import { useDispatch } from 'react-redux';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { BrowserFields, DocValueFields } from '../../containers/source';
-import {
-  ExpandableEvent,
-  ExpandableEventTitle,
-} from '../../../timelines/components/timeline/expandable_event';
+import { ExpandableEvent } from '../../../timelines/components/timeline/expandable_event';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 const StyledEuiFlyout = styled(EuiFlyout)`
@@ -56,18 +53,13 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
 
   return (
     <StyledEuiFlyout size="s" onClose={handleClearSelection}>
-      <EuiFlyoutHeader hasBorder>
-        <ExpandableEventTitle />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <ExpandableEvent
-          browserFields={browserFields}
-          docValueFields={docValueFields}
-          event={expandedEvent}
-          timelineId={timelineId}
-          toggleColumn={toggleColumn}
-        />
-      </EuiFlyoutBody>
+      <ExpandableEvent
+        browserFields={browserFields}
+        docValueFields={docValueFields}
+        event={expandedEvent}
+        timelineId={timelineId}
+        toggleColumn={toggleColumn}
+      />
     </StyledEuiFlyout>
   );
 };
