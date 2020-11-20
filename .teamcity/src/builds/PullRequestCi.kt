@@ -9,7 +9,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.pullRequests
 import vcs.Kibana
 
 object PullRequestCi : BuildType({
-  id = AbsoluteId("Kibana_PullRequest_CI_7.x")
+  id("PullRequest_CI")
   name = "Pull Request CI"
   type = Type.COMPOSITE
 
