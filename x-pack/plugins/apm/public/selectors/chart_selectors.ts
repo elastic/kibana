@@ -18,7 +18,7 @@ import {
   TimeSeries,
 } from '../../typings/timeseries';
 import { IUrlParams } from '../context/UrlParamsContext/types';
-import { getEmptySeries } from '../components/shared/charts/CustomPlot/getEmptySeries';
+import { getEmptySeries } from '../components/shared/charts/helper/get_empty_series';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 import { asDecimal, asDuration, tpmUnit } from '../../common/utils/formatters';
 

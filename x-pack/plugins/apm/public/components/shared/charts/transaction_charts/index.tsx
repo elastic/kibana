@@ -23,10 +23,9 @@ import { ChartsSyncContextProvider } from '../../../../context/charts_sync_conte
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { ITransactionChartData } from '../../../../selectors/chartSelectors';
+import { ITransactionChartData } from '../../../../selectors/chart_selectors';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
-import { getTPMTooltipFormatter } from '../helper/helper';
-import { LineChart } from '../line_chart';
+import { TimeseriesChart } from '../timeseries_chart';
 import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 import { getResponseTimeTickFormatter } from './helper';
 import { MLHeader } from './ml_header';
@@ -70,7 +69,7 @@ export function TransactionCharts({
                   )}
                 </LicenseContext.Consumer>
               </EuiFlexGroup>
-              <LineChart
+              <TimeseriesChart
                 fetchStatus={fetchStatus}
                 id="transactionDuration"
                 timeseries={responseTimeSeries || []}
@@ -89,7 +88,7 @@ export function TransactionCharts({
               <EuiTitle size="xs">
                 <span>{tpmLabel(transactionType)}</span>
               </EuiTitle>
-              <LineChart
+              <TimeseriesChart
                 fetchStatus={fetchStatus}
                 id="requestPerMinutes"
                 timeseries={tpmSeries || []}
