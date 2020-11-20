@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResolvedActionGroup } from '../../../../alerts/common';
+import { AlertActionParam, ResolvedActionGroup } from '../../../../alerts/common';
 import { AlertProvidedActionVariables } from './action_variables';
 
 export const getDefaultsForActionParams = (
   actionTypeId: string,
   actionGroupId: string
-): Record<string, unknown> | undefined => {
+): Record<string, AlertActionParam> | undefined => {
   switch (actionTypeId) {
     case '.pagerduty':
       const pagerDutyDefaults = {
