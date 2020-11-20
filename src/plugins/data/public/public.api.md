@@ -398,6 +398,11 @@ export const connectToQueryState: <S extends QueryState>({ timefilter: { timefil
 // @public (undocumented)
 export const createSavedQueryService: (savedObjectsClient: SavedObjectsClientContract) => SavedQueryService;
 
+// Warning: (ae-missing-release-tag) "CSV_MIME_TYPE" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const CSV_MIME_TYPE = "text/plain;charset=utf-8";
+
 // Warning: (ae-missing-release-tag) "CustomFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -678,7 +683,10 @@ export type ExistsFilter = Filter & {
 // Warning: (ae-missing-release-tag) "exportAsCSVs" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export function exportAsCSVs(filename: string, datatables: Record<string, Datatable_3> | undefined, { asString, ...options }: CSVOptions): Record<string, string> | undefined;
+export function exportAsCSVs(filename: string, datatables: Record<string, Datatable_3> | undefined, options: CSVOptions): Record<string, {
+    content: string;
+    type: string;
+}> | undefined;
 
 // Warning: (ae-missing-release-tag) "ExpressionFunctionKibana" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
