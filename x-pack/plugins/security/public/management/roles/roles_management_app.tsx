@@ -13,6 +13,7 @@ import { RegisterManagementAppArgs } from '../../../../../../src/plugins/managem
 import { SecurityLicense } from '../../../common/licensing';
 import { PluginStartDependencies } from '../../plugin';
 import { DocumentationLinksService } from './documentation_links';
+import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
   fatalErrors: FatalErrorsSetup;
@@ -70,7 +71,7 @@ export const rolesManagementApp = Object.freeze({
 
           // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
           // See https://github.com/elastic/kibana/issues/82440
-          const decodedRoleName = roleName ? decodeURIComponent(roleName) : undefined;
+          const decodedRoleName = roleName ? tryDecodeURIComponent(roleName) : undefined;
 
           setBreadcrumbs([
             ...rolesBreadcrumbs,

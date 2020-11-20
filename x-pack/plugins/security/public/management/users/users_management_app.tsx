@@ -12,6 +12,7 @@ import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { AuthenticationServiceSetup } from '../../authentication';
 import { PluginStartDependencies } from '../../plugin';
+import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
   authc: AuthenticationServiceSetup;
@@ -68,7 +69,7 @@ export const usersManagementApp = Object.freeze({
 
           // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
           // See https://github.com/elastic/kibana/issues/82440
-          const decodedUsername = username ? decodeURIComponent(username) : undefined;
+          const decodedUsername = username ? tryDecodeURIComponent(username) : undefined;
 
           setBreadcrumbs([
             ...usersBreadcrumbs,

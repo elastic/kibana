@@ -12,6 +12,7 @@ import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
 import { DocumentationLinksService } from './documentation_links';
+import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
@@ -72,7 +73,7 @@ export const roleMappingsManagementApp = Object.freeze({
 
           // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
           // See https://github.com/elastic/kibana/issues/82440
-          const decodedName = name ? decodeURIComponent(name) : undefined;
+          const decodedName = name ? tryDecodeURIComponent(name) : undefined;
 
           setBreadcrumbs([
             ...roleMappingsBreadcrumbs,
