@@ -77,6 +77,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(dataStreams).to.eql([
           {
             name: testDataStreamName,
+            privileges: {
+              delete_index: true,
+            },
             timeStampField: { name: '@timestamp' },
             indices: [
               {
@@ -105,6 +108,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(dataStreams.length).to.be(1);
         expect(dataStreamWithoutStorageSize).to.eql({
           name: testDataStreamName,
+          privileges: {
+            delete_index: true,
+          },
           timeStampField: { name: '@timestamp' },
           indices: [
             {
@@ -132,6 +138,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(dataStreamWithoutStorageSize).to.eql({
           name: testDataStreamName,
+          privileges: {
+            delete_index: true,
+          },
           timeStampField: { name: '@timestamp' },
           indices: [
             {
