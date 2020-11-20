@@ -60,8 +60,7 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     });
 
     describe('Correlations', function () {
-      loadTestFile(require.resolve('./correlations/slow_durations'));
-      loadTestFile(require.resolve('./correlations/ranges'));
+      loadTestFile(require.resolve('./correlations/slow_transactions'));
     });
   });
 }
