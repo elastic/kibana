@@ -59,9 +59,6 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           index_pattern: indexPatternUpdateSchema,
         }),
       },
-      options: {
-        xsrfRequired: false,
-      },
     },
     router.handleLegacyErrors(
       handleErrors(

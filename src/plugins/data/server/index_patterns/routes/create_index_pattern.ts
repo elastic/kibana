@@ -62,9 +62,6 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
           index_pattern: indexPatternSpecSchema,
         }),
       },
-      options: {
-        xsrfRequired: false,
-      },
     },
     router.handleLegacyErrors(
       handleErrors(

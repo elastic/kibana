@@ -37,9 +37,6 @@ export const registerDeleteIndexPatternRoute = (router: IRouter) => {
           { unknowns: 'allow' }
         ),
       },
-      options: {
-        xsrfRequired: false,
-      },
     },
     router.handleLegacyErrors(
       handleErrors(
