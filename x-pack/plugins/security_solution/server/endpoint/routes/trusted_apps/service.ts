@@ -15,7 +15,7 @@ import {
   PostTrustedAppCreateResponse,
 } from '../../../../common/endpoint/types';
 
-import { exceptionItemToTrustedAppItem, newTrustedAppItemToExceptionItem } from './utils';
+import { exceptionItemToTrustedAppItem, newTrustedAppItemToExceptionItem } from './mapping';
 
 export const deleteTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
