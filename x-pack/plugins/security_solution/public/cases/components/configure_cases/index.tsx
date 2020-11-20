@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
 import { EuiCallOut } from '@elastic/eui';
@@ -150,22 +150,31 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     }
   }, [connectors, connector, isLoadingConnectors]);
 
-  const ConnectorAddFlyout = triggersActionsUi.getAddConnectorFlyout({
-    consumer: 'case',
-    onClose: onCloseAddFlyout,
-    actionTypes,
-    reloadConnectors,
-  });
+  const ConnectorAddFlyout = useMemo(
+    () =>
+      triggersActionsUi.getAddConnectorFlyout({
+        consumer: 'case',
+        onClose: onCloseAddFlyout,
+        actionTypes,
+        reloadConnectors,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  const ConnectorEditFlyout =
-    editedConnectorItem && editFlyoutVisible
-      ? triggersActionsUi.getEditConnectorFlyout({
-          initialConnector: editedConnectorItem,
-          consumer: 'case',
-          onClose: onCloseEditFlyout,
-          reloadConnectors,
-        })
-      : null;
+  const ConnectorEditFlyout = useMemo(
+    () =>
+      editedConnectorItem && editFlyoutVisible
+        ? triggersActionsUi.getEditConnectorFlyout({
+            initialConnector: editedConnectorItem,
+            consumer: 'case',
+            onClose: onCloseEditFlyout,
+            reloadConnectors,
+          })
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [connector.id, editFlyoutVisible]
+  );
 
   return (
     <FormWrapper>

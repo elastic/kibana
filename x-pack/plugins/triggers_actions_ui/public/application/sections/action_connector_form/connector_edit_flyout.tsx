@@ -289,6 +289,7 @@ export const ConnectorEditFlyout = ({
             onExecutAction={onExecutAction}
             isExecutingAction={isExecutingAction}
             executionResult={testExecutionResult}
+            actionTypeRegistry={actionTypeRegistry}
           />
         )}
       </EuiFlyoutBody>

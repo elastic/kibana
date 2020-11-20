@@ -11,9 +11,7 @@ import { ActionConnector, ValidationResult } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
-import { useKibana } from '../../../common/lib/kibana';
 jest.mock('../../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const mockedActionParamsFields = lazy(async () => ({
   default() {
@@ -59,14 +57,10 @@ const actionType = {
   actionConnectorFields: null,
   actionParamsFields: mockedActionParamsFields,
 };
+const actionTypeRegistry = actionTypeRegistryMock.create();
+actionTypeRegistry.get.mockReturnValue(actionType);
 
 describe('test_connector_form', () => {
-  beforeAll(async () => {
-    const actionTypeRegistry = actionTypeRegistryMock.create();
-    actionTypeRegistry.get.mockReturnValue(actionType);
-    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-  });
-
   it('renders initially as the action form and execute button and no result', async () => {
     const connector = {
       actionTypeId: actionType.id,
@@ -86,6 +80,7 @@ describe('test_connector_form', () => {
             status: 'ok',
           })}
           executionResult={none}
+          actionTypeRegistry={actionTypeRegistry}
         />
       </I18nProvider>
     );
@@ -119,6 +114,7 @@ describe('test_connector_form', () => {
             actionId: '',
             status: 'ok',
           })}
+          actionTypeRegistry={actionTypeRegistry}
         />
       </I18nProvider>
     );
@@ -150,6 +146,7 @@ describe('test_connector_form', () => {
             status: 'error',
             message: 'Error Message',
           })}
+          actionTypeRegistry={actionTypeRegistry}
         />
       </I18nProvider>
     );
