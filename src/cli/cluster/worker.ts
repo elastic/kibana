@@ -56,7 +56,6 @@ export class Worker extends EventEmitter {
   private readonly clusterBinder: BinderFor;
   private readonly processBinder: BinderFor;
 
-  private type: string;
   private title: string;
   private log: any;
   private forkBinder: BinderFor | null = null;
@@ -76,7 +75,6 @@ export class Worker extends EventEmitter {
     super();
 
     this.log = opts.log;
-    this.type = opts.type;
     this.title = opts.title || opts.type;
     this.watch = opts.watch !== false;
     this.startCount = 0;
