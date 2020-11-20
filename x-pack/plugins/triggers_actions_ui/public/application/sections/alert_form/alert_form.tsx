@@ -34,14 +34,14 @@ import {
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { capitalize } from 'lodash';
+import { capitalize, isObject } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
 } from '../../../../../alerts/common/parse_duration';
 import { loadAlertTypes } from '../../lib/alert_api';
-import { AlertReducerAction } from './alert_reducer';
+import { AlertReducerAction, InitialAlert } from './alert_reducer';
 import {
   AlertTypeModel,
   Alert,
@@ -49,18 +49,19 @@ import {
   AlertAction,
   AlertTypeIndex,
   AlertType,
+  ValidationResult,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
 import { ActionForm } from '../action_connector_form';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { AlertActionParam, ALERTS_FEATURE_ID } from '../../../../../alerts/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './alert_form.scss';
 
 const ENTER_KEY = 13;
 
-export function validateBaseProperties(alertObject: Alert) {
+export function validateBaseProperties(alertObject: InitialAlert): ValidationResult {
   const validationResult = { errors: {} };
   const errors = {
     name: new Array<string>(),
@@ -93,12 +94,25 @@ export function validateBaseProperties(alertObject: Alert) {
   return validationResult;
 }
 
+const hasErrors: (errors: IErrorObject) => boolean = (errors) =>
+  !!Object.values(errors).find((errorList) => {
+    if (isObject(errorList)) return hasErrors(errorList as IErrorObject);
+    return errorList.length >= 1;
+  });
+
+export function isValidAlert(
+  alertObject: InitialAlert | Alert,
+  validationResult: IErrorObject
+): alertObject is Alert {
+  return !hasErrors(validationResult);
+}
+
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
 
 interface AlertFormProps {
-  alert: Alert;
+  alert: InitialAlert;
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
   canChangeTrigger?: boolean; // to hide Change trigger button
@@ -204,10 +218,13 @@ export const AlertForm = ({
 
   useEffect(() => {
     setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
-  }, [alert, alertTypeRegistry]);
+    if (alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)) {
+      setDefaultActionGroupId(alertTypesIndex.get(alert.alertTypeId)!.defaultActionGroupId);
+    }
+  }, [alert, alert.alertTypeId, alertTypesIndex, alertTypeRegistry]);
 
   const setAlertProperty = useCallback(
-    (key: string, value: any) => {
+    <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
       dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
     },
     [dispatch]
@@ -226,12 +243,16 @@ export const AlertForm = ({
     dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });
   };
 
-  const setActionProperty = (key: string, value: any, index: number) => {
+  const setActionProperty = <Key extends keyof AlertAction>(
+    key: Key,
+    value: AlertAction[Key] | null,
+    index: number
+  ) => {
     dispatch({ command: { type: 'setAlertActionProperty' }, payload: { key, value, index } });
   };
 
   const setActionParamsProperty = useCallback(
-    (key: string, value: any, index: number) => {
+    (key: string, value: AlertActionParam, index: number) => {
       dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
     },
     [dispatch]
@@ -437,7 +458,10 @@ export const AlertForm = ({
         </EuiFlexGroup>
       )}
       <EuiHorizontalRule />
-      {AlertParamsExpressionComponent ? (
+      {AlertParamsExpressionComponent &&
+      defaultActionGroupId &&
+      alert.alertTypeId &&
+      alertTypesIndex?.has(alert.alertTypeId) ? (
         <EuiErrorBoundary>
           <Suspense fallback={<CenterJustifiedSpinner />}>
             <AlertParamsExpressionComponent
@@ -448,6 +472,8 @@ export const AlertForm = ({
               setAlertParams={setAlertParams}
               setAlertProperty={setAlertProperty}
               alertsContext={alertsContext}
+              defaultActionGroupId={defaultActionGroupId}
+              actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -455,6 +481,7 @@ export const AlertForm = ({
       {canShowActions &&
       defaultActionGroupId &&
       alertTypeModel &&
+      alert.alertTypeId &&
       alertTypesIndex?.has(alert.alertTypeId) ? (
         <ActionForm
           actions={alert.actions}

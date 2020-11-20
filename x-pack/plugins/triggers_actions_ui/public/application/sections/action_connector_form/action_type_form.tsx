@@ -26,7 +26,7 @@ import {
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { ResolvedActionGroup } from '../../../../../alerts/common';
+import { AlertActionParam, ResolvedActionGroup } from '../../../../../alerts/common';
 import {
   IErrorObject,
   AlertAction,
@@ -51,7 +51,7 @@ export type ActionTypeFormProps = {
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
-  setActionParamsProperty: (key: string, value: any, index: number) => void;
+  setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
 } & Pick<
