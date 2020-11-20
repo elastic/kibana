@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
 import { DataPublicPluginStart, exportAsCSVs } from '../../../../../../src/plugins/data/public';
+import { downloadMultipleAs } from '../../../../../../src/plugins/share/public';
 import { Adapters, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import { CoreStart } from '../../../../../../src/core/public';
@@ -123,12 +124,14 @@ export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPO
     );
 
     if (datatables) {
-      return exportAsCSVs(context?.embeddable?.getTitle()!, datatables, {
+      const content = exportAsCSVs(context?.embeddable?.getTitle()!, datatables, {
         csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
         quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
         formatFactory,
-        asString: context.asString,
       });
+      if (content) {
+        return downloadMultipleAs(content);
+      }
     }
   };
 
