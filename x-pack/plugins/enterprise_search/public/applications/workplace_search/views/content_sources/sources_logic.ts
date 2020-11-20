@@ -8,6 +8,8 @@ import { cloneDeep, findIndex } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { HttpLogic } from '../../../shared/http';
 
 import {
@@ -208,10 +210,25 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       }
     },
     setAddedSource: ({ addedSourceName, additionalConfiguration }) => {
+      const successfullyConnectedMessage = i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceConnected',
+        {
+          defaultMessage: 'Successfully connected {sourceName}.',
+          values: { sourceName: addedSourceName },
+        }
+      );
+
+      const additionalConfigurationMessage = i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.additionalConfigurationNeeded',
+        {
+          defaultMessage: 'This source requires additional configuration.',
+        }
+      );
+
       setSuccessMessage(
         [
-          `Successfully connected ${addedSourceName}.`,
-          additionalConfiguration ? 'This source requires additional configuration.' : '',
+          successfullyConnectedMessage,
+          additionalConfiguration ? additionalConfigurationMessage : '',
         ].join(' ')
       );
     },

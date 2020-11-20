@@ -23,7 +23,7 @@ import { i18nTexts } from '../i18n_texts';
 const { emptyField, numberGreaterThanField } = fieldValidators;
 
 const serializers = {
-  stringToNumber: (v: string): any => (v ? parseInt(v, 10) : undefined),
+  stringToNumber: (v: string): any => (v != null ? parseInt(v, 10) : undefined),
 };
 
 export const schema: FormSchema<FormInternal> = {

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IngestManagerConfigType } from '..';
+import { FleetConfigType } from '..';
 
-export const getIsFleetEnabled = (config: IngestManagerConfigType) => {
+export const getIsFleetEnabled = (config: FleetConfigType) => {
   return config.agents.enabled;
 };
