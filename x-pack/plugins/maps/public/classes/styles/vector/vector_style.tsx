@@ -8,14 +8,8 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { Map as MbMap, FeatureIdentifier } from 'mapbox-gl';
 import { FeatureCollection } from 'geojson';
-// @ts-expect-error
-import { VectorStyleEditor } from './components/vector_style_editor';
-import {
-  getDefaultProperties,
-  getDefaultStaticProperties,
-  LINE_STYLES,
-  POLYGON_STYLES,
-} from './vector_style_defaults';
+import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
+import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
 import {
   GEO_JSON_TYPE,
   FIELD_ORIGIN,
@@ -76,7 +70,6 @@ import { IDynamicStyleProperty } from './properties/dynamic_style_property';
 import { IField } from '../../fields/field';
 import { IVectorLayer } from '../../layers/vector_layer/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
-import { ILayer } from '../../layers/layer';
 import { createStyleFieldsHelper } from './style_fields_helper';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
@@ -163,16 +156,19 @@ export class VectorStyle implements IVectorStyle {
   private readonly _labelBorderColorStyleProperty: StaticColorProperty | DynamicColorProperty;
   private readonly _labelBorderSizeStyleProperty: LabelBorderSizeProperty;
 
-  static createDescriptor(properties = {}, isTimeAware = true) {
+  static createDescriptor(
+    properties: Partial<VectorStylePropertiesDescriptor> = {},
+    isTimeAware = true
+  ) {
     return {
       type: LAYER_STYLE_TYPE.VECTOR,
-      properties: { ...getDefaultProperties(), ...properties },
+      properties: { ...getDefaultStaticProperties(), ...properties },
       isTimeAware,
     };
   }
 
   static createDefaultStyleProperties(mapColors: string[]) {
-    return getDefaultProperties(mapColors);
+    return getDefaultStaticProperties(mapColors);
   }
 
   constructor(
@@ -192,7 +188,7 @@ export class VectorStyle implements IVectorStyle {
     this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
 
     this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
-      this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS]!.options,
+      this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
       VECTOR_STYLES.SYMBOLIZE_AS
     );
     this._lineColorStyleProperty = this._makeColorProperty(
@@ -237,7 +233,7 @@ export class VectorStyle implements IVectorStyle {
       VECTOR_STYLES.LABEL_BORDER_COLOR
     );
     this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
-      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE]!.options,
+      this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
       VECTOR_STYLES.LABEL_BORDER_SIZE,
       this._labelSizeStyleProperty
     );
@@ -270,16 +266,10 @@ export class VectorStyle implements IVectorStyle {
       : (this._lineWidthStyleProperty as StaticSizeProperty).getOptions().size !== 0;
   }
 
-  renderEditor({
-    layer,
-    onStyleDescriptorChange,
-  }: {
-    layer: ILayer;
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
-  }) {
+  renderEditor(onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void) {
     const rawProperties = this.getRawProperties();
-    const handlePropertyChange = (propertyName: VECTOR_STYLES, settings: any) => {
-      rawProperties[propertyName] = settings; // override single property, but preserve the rest
+    const handlePropertyChange = (propertyName: VECTOR_STYLES, stylePropertyDescriptor: any) => {
+      rawProperties[propertyName] = stylePropertyDescriptor; // override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware());
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
@@ -293,9 +283,8 @@ export class VectorStyle implements IVectorStyle {
       return dynamicStyleProp.isFieldMetaEnabled();
     });
 
-    const styleProperties: VectorStylePropertiesDescriptor = {};
+    const styleProperties: StyleProperties = {};
     this.getAllStyleProperties().forEach((styleProperty) => {
-      // @ts-expect-error
       styleProperties[styleProperty.getStyleName()] = styleProperty;
     });
 
@@ -303,7 +292,7 @@ export class VectorStyle implements IVectorStyle {
       <VectorStyleEditor
         handlePropertyChange={handlePropertyChange}
         styleProperties={styleProperties}
-        layer={layer}
+        layer={this._layer}
         isPointsOnly={this._getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         onIsTimeAwareChange={onIsTimeAwareChange}
@@ -376,7 +365,7 @@ export class VectorStyle implements IVectorStyle {
       updatedProperties[key] = {
         type: DynamicStyleProperty.type,
         options: {
-          ...originalProperties[key]!.options,
+          ...originalProperties[key].options,
         },
       } as any;
       // @ts-expect-error

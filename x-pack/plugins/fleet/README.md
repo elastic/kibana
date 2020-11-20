@@ -1,4 +1,4 @@
-# Ingest Manager
+# Fleet
 
 ## Plugin
 
@@ -45,6 +45,8 @@ One common development workflow is:
 
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
 ](https://github.com/elastic/kibana/blob/master/style_guides/architecture_style_guide.md#file-and-folder-structure). We also follow the pattern of developing feature branches under your personal fork of Kibana.
+
+Note: The plugin was previously named Ingest Manager it's possible that some variables are still named with that old plugin name.
 
 ### Tests
 
