@@ -69,7 +69,7 @@ export function getDisplayedColumns(
       name: column,
       displayName: isShortDots ? shortenDottedString(column) : column,
       isSortable: field && field.sortable ? true : false,
-      isRemoveable: column !== '_source' || columns.length > 1,
+      isRemoveable: (column !== '_source' && column !== 'fields') || columns.length > 1,
       colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
       colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
     };

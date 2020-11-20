@@ -1049,11 +1049,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
+    const { indexPattern, useNewFieldsApi } = $scope;
     if (uiCapabilities.discover.save) {
-      const { indexPattern } = $scope;
       popularizeField(indexPattern, columnName, indexPatterns);
     }
-    const columns = columnActions.removeColumn($scope.state.columns, columnName);
+    const columns = columnActions.removeColumn($scope.state.columns, columnName, useNewFieldsApi);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const sort = $scope.state.sort.length
       ? $scope.state.sort.filter((subArr) => subArr[0] !== columnName)
