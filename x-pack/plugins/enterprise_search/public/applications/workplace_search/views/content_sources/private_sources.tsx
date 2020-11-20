@@ -12,6 +12,8 @@ import { Link } from 'react-router-dom';
 
 import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 
+import { LicensingLogic } from '../../../../applications/shared/licensing';
+
 import { ADD_SOURCE_PATH } from '../../routes';
 
 import { Loading } from '../../../shared/loading';
@@ -46,6 +48,7 @@ const PRIVATE_HEADER_DESCRIPTION = 'Private content sources are available only t
 const PRIVATE_SHARED_SOURCES_TITLE = 'Shared content sources';
 
 export const PrivateSources: React.FC = () => {
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { initializeSources, setSourceSearchability, resetSourcesState } = useActions(SourcesLogic);
 
   useEffect(() => {
@@ -58,7 +61,7 @@ export const PrivateSources: React.FC = () => {
   );
 
   const {
-    fpAccount: { canCreatePersonalSources, groups, minimumPlatinumLicense },
+    account: { canCreatePersonalSources, groups },
   } = useValues(AppLogic);
 
   if (dataLoading) return <Loading />;
@@ -174,7 +177,7 @@ export const PrivateSources: React.FC = () => {
     : PRIVATE_VIEW_ONLY_NAV_DESCRIPTION;
   return (
     <SourcesView>
-      {hasPrivateSources && !minimumPlatinumLicense && licenseCallout}
+      {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
       {canAddSources && sourcesHeader}
       {canCreatePersonalSources && privateSources}
       {contentSources.length > 0 ? sharedSources : sharedSourcesEmptyState}

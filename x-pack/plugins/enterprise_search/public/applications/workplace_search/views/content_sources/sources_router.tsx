@@ -10,6 +10,8 @@ import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 
+import { LicensingLogic } from '../../../../applications/shared/licensing';
+
 import {
   ADD_SOURCE_PATH,
   SOURCE_ADDED_PATH,
@@ -32,9 +34,10 @@ import { SourceRouter } from './source_router';
 
 export const SourcesRouter: React.FC = () => {
   const { pathname } = useLocation() as Location;
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { resetSourcesState } = useActions(SourcesLogic);
   const {
-    fpAccount: { canCreatePersonalSources, minimumPlatinumLicense },
+    account: { canCreatePersonalSources },
   } = useValues(AppLogic);
 
   /**
@@ -57,7 +60,7 @@ export const SourcesRouter: React.FC = () => {
           exact
           path={getSourcesPath(addPath, isOrgRoute)}
           render={() =>
-            !minimumPlatinumLicense && accountContextOnly ? (
+            !hasPlatinumLicense && accountContextOnly ? (
               <Redirect exact from={ADD_SOURCE_PATH} to={ORG_SOURCES_PATH} />
             ) : (
               <AddSource sourceIndex={i} />
