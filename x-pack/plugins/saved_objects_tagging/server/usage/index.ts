@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { sendBulkPayload } from './send_bulk_payload';
-export { monitoringBulk } from './monitoring_bulk';
+export { createTagUsageCollector } from './tag_usage_collector';

@@ -5,10 +5,10 @@
  */
 
 import React, { ReactNode } from 'react';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { ErrorStatePrompt } from '../../../shared/ErrorStatePrompt';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { ErrorStatePrompt } from '../ErrorStatePrompt';
 
-export function FetchWrapper({
+export function TableFetchWrapper({
   status,
   children,
 }: {
