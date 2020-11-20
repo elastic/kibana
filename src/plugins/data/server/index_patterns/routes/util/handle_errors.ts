@@ -18,6 +18,7 @@
  */
 
 import { RequestHandler, RouteMethod } from 'src/core/server';
+import { ErrorIndexPatternNotFound } from '../../error';
 
 interface ErrorResponseBody {
   message: string;
@@ -54,7 +55,8 @@ export const handleErrors = <A, B, C, D extends RouteMethod>(
         body.attributes = (error as ErrorWithData).data;
       }
 
-      const is404 = (error as any)?.output?.statusCode === 404;
+      const is404 =
+        (error as ErrorIndexPatternNotFound).is404 || (error as any)?.output?.statusCode === 404;
 
       if (is404) {
         return response.notFound({

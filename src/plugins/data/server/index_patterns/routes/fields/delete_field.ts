@@ -19,6 +19,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../../core/server';
+import { ErrorIndexPatternNotFound } from '../../error';
 import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
 
@@ -53,9 +54,9 @@ export const registerDeleteFieldRoute = (router: IRouter) => {
           const field = indexPattern.fields.getByName(name);
 
           if (!field) {
-            const error = new Error(`Field [indexPattern.id = ${id}, field = ${name}] not found.`);
-            (error as any).output = { statusCode: 404 };
-            throw error;
+            throw new ErrorIndexPatternNotFound(
+              `Field [indexPattern.id = ${id}, field = ${name}] not found.`
+            );
           }
 
           indexPattern.fields.remove(field);
