@@ -10,10 +10,16 @@ import { IndexPatternLayer } from '../../../types';
 import { checkForDateHistogram, dateBasedOperationToExpression } from './utils';
 import { OperationDefinition } from '..';
 
-const ofName = (name: string) => {
+const ofName = (name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
-    defaultMessage: 'Cumulative sum of {name}',
-    values: { name },
+    defaultMessage: 'Cumulative sum rate of {name}',
+    values: {
+      name:
+        name ??
+        i18n.translate('xpack.lens.indexPattern.incompleteOperation', {
+          defaultMessage: '(incomplete)',
+        }),
+    },
   });
 };
 
@@ -48,10 +54,8 @@ export const cumulativeSumOperation: OperationDefinition<
       scale: 'ratio',
     };
   },
-  getDefaultLabel: () => {
-    return i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
-      defaultMessage: 'Cumulative sum',
-    });
+  getDefaultLabel: (column, indexPattern, columns) => {
+    return ofName(columns[column.references[0]]?.label);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
@@ -59,7 +63,7 @@ export const cumulativeSumOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const metric = layer.columns[referenceIds[0]];
     return {
-      label: ofName(metric.label),
+      label: ofName(metric?.label),
       dataType: 'number',
       operationType: 'cumulative_sum',
       isBucketed: false,

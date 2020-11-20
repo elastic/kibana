@@ -10,10 +10,16 @@ import { IndexPatternLayer } from '../../../types';
 import { checkForDateHistogram, dateBasedOperationToExpression, hasDateField } from './utils';
 import { OperationDefinition } from '..';
 
-const ofName = (name: string) => {
+const ofName = (name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.derivativeOf', {
     defaultMessage: 'Derivative of {name}',
-    values: { name },
+    values: {
+      name:
+        name ??
+        i18n.translate('xpack.lens.indexPattern.incompleteOperation', {
+          defaultMessage: '(incomplete)',
+        }),
+    },
   });
 };
 
@@ -47,10 +53,8 @@ export const derivativeOperation: OperationDefinition<
       scale: 'ratio',
     };
   },
-  getDefaultLabel: () => {
-    return i18n.translate('xpack.lens.indexPattern.derivative', {
-      defaultMessage: 'Derivative',
-    });
+  getDefaultLabel: (column, indexPattern, columns) => {
+    return ofName(columns[column.references[0]]?.label);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
@@ -58,7 +62,7 @@ export const derivativeOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const metric = layer.columns[referenceIds[0]];
     return {
-      label: ofName(metric.label),
+      label: ofName(metric?.label),
       dataType: 'number',
       operationType: 'derivative',
       isBucketed: false,

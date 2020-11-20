@@ -16,10 +16,16 @@ import { updateColumnParam } from '../../layer_helpers';
 import { useDebounceWithOptions } from '../helpers';
 import type { OperationDefinition, ParamEditorProps } from '..';
 
-const ofName = (name: string) => {
+const ofName = (name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.movingAverageOf', {
     defaultMessage: 'Moving average of {name}',
-    values: { name },
+    values: {
+      name:
+        name ??
+        i18n.translate('xpack.lens.indexPattern.incompleteOperation', {
+          defaultMessage: '(incomplete)',
+        }),
+    },
   });
 };
 
@@ -56,10 +62,8 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
     };
   },
-  getDefaultLabel: () => {
-    return i18n.translate('xpack.lens.indexPattern.movingAverage', {
-      defaultMessage: 'Moving Average',
-    });
+  getDefaultLabel: (column, indexPattern, columns) => {
+    return ofName(columns[column.references[0]]?.label);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'moving_average', {
@@ -69,7 +73,7 @@ export const movingAverageOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const metric = layer.columns[referenceIds[0]];
     return {
-      label: ofName(metric.label),
+      label: ofName(metric?.label),
       dataType: 'number',
       operationType: 'moving_average',
       isBucketed: false,

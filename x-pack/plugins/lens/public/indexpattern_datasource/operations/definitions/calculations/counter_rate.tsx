@@ -10,10 +10,16 @@ import { IndexPatternLayer } from '../../../types';
 import { checkForDateHistogram, dateBasedOperationToExpression, hasDateField } from './utils';
 import { OperationDefinition } from '..';
 
-const ofName = (name: string) => {
+const ofName = (name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
     defaultMessage: 'Counter rate of {name}',
-    values: { name },
+    values: {
+      name:
+        name ??
+        i18n.translate('xpack.lens.indexPattern.incompleteOperation', {
+          defaultMessage: '(incomplete)',
+        }),
+    },
   });
 };
 
@@ -59,7 +65,7 @@ export const counterRateOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const metric = layer.columns[referenceIds[0]];
     return {
-      label: ofName(metric.label),
+      label: ofName(metric?.label),
       dataType: 'number',
       operationType: 'counter_rate',
       isBucketed: false,
