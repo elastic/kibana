@@ -182,6 +182,16 @@ export const setup = async () => {
 
   const setFreeze = createFormToggleAction('freezeSwitch');
 
+  const setSearchableSnapshot = (phase: Phases) => async (value: string) => {
+    await createFormToggleAction(`searchableSnapshotField-${phase}.searchableSnapshotToggle`)(true);
+    act(() => {
+      find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
+        { label: value },
+      ]);
+    });
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
@@ -196,6 +206,7 @@ export const setup = async () => {
         setForcemergeSegments: setForcemergeSegmentsCount('hot'),
         setBestCompression: setBestCompression('hot'),
         setIndexPriority: setIndexPriority('hot'),
+        setSearchableSnapshot: setSearchableSnapshot('hot'),
       },
       warm: {
         enable: enable('warm'),
@@ -220,6 +231,7 @@ export const setup = async () => {
         setReplicas: setReplicas('cold'),
         setFreeze,
         setIndexPriority: setIndexPriority('cold'),
+        setSearchableSnapshot: setSearchableSnapshot('cold'),
       },
       delete: {
         enable: enable('delete'),

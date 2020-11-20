@@ -64,6 +64,7 @@ export interface SerializedHotPhase extends SerializedPhase {
      */
     searchable_snapshot?: {
       snapshot_repository: string;
+      force_merge_index?: boolean;
     };
   };
 }
@@ -95,6 +96,7 @@ export interface SerializedColdPhase extends SerializedPhase {
      */
     searchable_snapshot?: {
       snapshot_repository: string;
+      force_merge_index?: boolean;
     };
   };
 }

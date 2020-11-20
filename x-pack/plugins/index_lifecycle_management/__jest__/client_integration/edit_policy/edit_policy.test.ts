@@ -118,6 +118,7 @@ describe('<EditPolicy />', () => {
         await actions.hot.setMaxAge('123', 'h');
         await actions.hot.toggleForceMerge(true);
         await actions.hot.setForcemergeSegments('123');
+        await actions.hot.setSearchableSnapshot('my-repo');
         await actions.hot.setBestCompression(true);
         await actions.hot.setIndexPriority('123');
 
@@ -138,6 +139,9 @@ describe('<EditPolicy />', () => {
                     "max_age": "123h",
                     "max_docs": 123,
                     "max_size": "123mb",
+                  },
+                  "searchable_snapshot": Object {
+                    "snapshot_repository": "my-repo",
                   },
                   "set_priority": Object {
                     "priority": 123,

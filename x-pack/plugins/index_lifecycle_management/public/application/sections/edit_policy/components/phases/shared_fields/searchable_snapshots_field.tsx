@@ -107,7 +107,9 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
 
   return (
     <DescribedFormField
+      data-test-subj={`searchableSnapshotField-${phase}`}
       switchProps={{
+        'data-test-subj': 'searchableSnapshotToggle',
         label: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
           { defaultMessage: 'Use searchable snapshot' }
@@ -138,9 +140,21 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
       <div className="ilmSearchableSnapshotField">
         {phase === 'hot' && isUsingSearchableSnapshotInHotPhase && (
           <>
-            <EuiCallOut title="Some actions have been disabled" iconType="questionInCircle">
-              Force merge, shrink, freeze and searchable snapshots are not allowed when this action
-              is enabled in the hot phase.
+            <EuiCallOut
+              data-test-subj="searchableSnapshotFieldsDisabledCallout"
+              title={i18n.translate(
+                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutTitle',
+                { defaultMessage: 'Some actions have been disabled' }
+              )}
+              iconType="questionInCircle"
+            >
+              {i18n.translate(
+                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutTitle',
+                {
+                  defaultMessage:
+                    'Force merge, shrink, freeze and searchable snapshots are not allowed when this action is enabled in the hot phase.',
+                }
+              )}
             </EuiCallOut>
             <EuiSpacer size="s" />
           </>
@@ -167,7 +181,7 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
                 }
                 fullWidth={false}
                 euiFieldProps={{
-                  'data-test-subj': 'snapshotPolicyCombobox',
+                  'data-test-subj': 'searchableSnapshotCombobox',
                   options: repos.map((repo) => ({ label: repo, value: repo })),
                   singleSelection: { asPlainText: true },
                   isLoading,
