@@ -23,7 +23,7 @@ import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import _, { get, isUndefined, assign, includes, pick } from 'lodash';
 import { Metric } from '../../../visualizations/views/metric';
-import { getLastValue } from '../../../../../../../plugins/vis_type_timeseries/common/get_last_value';
+import { getLastValue } from '../../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
 function getColors(props) {

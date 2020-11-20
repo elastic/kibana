@@ -196,6 +196,7 @@ describe('create()', () => {
       createdAt: '2019-02-12T21:01:22.479Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
       mutedInstanceIds: [],
       actions: [
@@ -330,6 +331,7 @@ describe('create()', () => {
           "foo",
         ],
         "throttle": null,
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -418,6 +420,7 @@ describe('create()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -555,6 +558,7 @@ describe('create()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -631,6 +635,7 @@ describe('create()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -971,6 +976,7 @@ describe('create()', () => {
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
@@ -1092,6 +1098,7 @@ describe('create()', () => {
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: false,
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
