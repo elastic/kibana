@@ -185,7 +185,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const appStateHandler = useCallback(
     (action: string, payload?: any) => {
-      const isInitUpdate = timeSeriesExplorerUrlState?.mlTimeSeriesExplorer === undefined;
+      /**
+       * Empty zoom indicates that chart hasn't been rendered yet,
+       * hence any updates prior that should replace the URL state.
+       */
+      const isInitUpdate = timeSeriesExplorerUrlState?.mlTimeSeriesExplorer?.zoom === undefined;
 
       const mlTimeSeriesExplorer: TimeSeriesExplorerAppState['mlTimeSeriesExplorer'] =
         timeSeriesExplorerUrlState?.mlTimeSeriesExplorer !== undefined
