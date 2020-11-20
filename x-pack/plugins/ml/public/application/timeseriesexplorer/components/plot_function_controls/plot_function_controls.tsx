@@ -73,12 +73,7 @@ export const PlotByFunctionControls = ({
       return;
     }
     const selectedJob = mlJobService.getJob(selectedJobId);
-    if (
-      // set if only entity controls are picked
-      selectedEntities !== undefined &&
-      functionDescription === undefined &&
-      isMetricDetector(selectedJob, selectedDetectorIndex)
-    ) {
+    if (functionDescription === undefined && isMetricDetector(selectedJob, selectedDetectorIndex)) {
       const detector = selectedJob.analysis_config.detectors[selectedDetectorIndex];
       if (detector?.function === ML_JOB_AGGREGATION.METRIC) {
         getFunctionDescriptionToPlot(
