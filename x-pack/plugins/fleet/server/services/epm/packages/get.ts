@@ -139,7 +139,10 @@ export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
   pkgInstallSource?: InstallSource;
-}): Promise<{ paths: string[] | undefined; packageInfo: RegistryPackage | ArchivePackage }> {
+}): Promise<{
+  paths: string[] | undefined;
+  packageInfo: RegistryPackage | ArchivePackage;
+}> {
   const { pkgName, pkgVersion, pkgInstallSource } = options;
   // TODO: Check package storage before checking registry
   let res;
@@ -147,14 +150,16 @@ export async function getPackageFromSource(options: {
     res = getArchivePackage({
       name: pkgName,
       version: pkgVersion,
-      installSource: pkgInstallSource,
     });
-    if (!res.packageInfo)
-      throw new Error(`installed package ${pkgName}-${pkgVersion} does not exist in cache`);
   } else {
     res = await Registry.getRegistryPackage(pkgName, pkgVersion);
   }
-  return res;
+  if (!res.packageInfo || !res.paths)
+    throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
+  return {
+    paths: res.paths,
+    packageInfo: res.packageInfo,
+  };
 }
 
 export async function getInstallationObject(options: {
