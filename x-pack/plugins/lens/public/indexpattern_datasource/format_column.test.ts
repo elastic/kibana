@@ -74,6 +74,15 @@ describe('format_column', () => {
   });
 
   describe('parent format', () => {
+    it('should ignore parent format if it is not specifying an id', () => {
+      const result = fn(datatable, {
+        columnId: 'test',
+        format: '',
+        parentFormat: JSON.stringify({ some: 'key' }),
+      });
+      expect(result.columns[0].meta.params).toEqual(datatable.columns[0].meta.params);
+    });
+
     it('set parent format with params', () => {
       const result = fn(datatable, {
         columnId: 'test',
