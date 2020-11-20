@@ -1447,11 +1447,6 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                   <div
                     className="euiPopover euiPopover--anchorUpRight"
                     id="settings"
-                    onKeyDown={[Function]}
-                    onMouseDown={[Function]}
-                    onMouseUp={[Function]}
-                    onTouchEnd={[Function]}
-                    onTouchStart={[Function]}
                   >
                     <div
                       className="euiPopover__anchor"
@@ -2929,11 +2924,6 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                   <div
                     className="euiPopover euiPopover--anchorUpRight"
                     id="settings"
-                    onKeyDown={[Function]}
-                    onMouseDown={[Function]}
-                    onMouseUp={[Function]}
-                    onTouchEnd={[Function]}
-                    onTouchStart={[Function]}
                   >
                     <div
                       className="euiPopover__anchor"
@@ -3226,11 +3216,6 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                   <div
                     className="euiPopover euiPopover--anchorUpRight"
                     id="settings"
-                    onKeyDown={[Function]}
-                    onMouseDown={[Function]}
-                    onMouseUp={[Function]}
-                    onTouchEnd={[Function]}
-                    onTouchStart={[Function]}
                   >
                     <div
                       className="euiPopover__anchor"

@@ -32,7 +32,7 @@ describe('AddFilterButton component', () => {
         hasArrow={true}
         id="singlePanel"
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
@@ -96,7 +96,7 @@ describe('AddFilterButton component', () => {
         hasArrow={true}
         id="singlePanel"
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
@@ -147,7 +147,7 @@ describe('AddFilterButton component', () => {
         hasArrow={true}
         id="singlePanel"
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel

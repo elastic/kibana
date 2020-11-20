@@ -12,7 +12,7 @@ const Wrapper = styled.div`
     margin-top: ${theme.eui.euiSizeS};
 
     .siemSubtitle__item {
-      color: ${theme.eui.textColors.subdued};
+      color: ${theme.eui.euiTextSubduedColor};
       font-size: ${theme.eui.euiFontSizeXS};
       line-height: ${theme.eui.euiLineHeight};
 

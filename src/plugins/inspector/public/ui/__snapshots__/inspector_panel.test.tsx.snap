@@ -244,81 +244,71 @@ exports[`InspectorPanel should render as expected 1`] = `
                     panelPaddingSize="none"
                     repositionOnScroll={true}
                   >
-                    <EuiOutsideClickDetector
-                      isDisabled={true}
-                      onOutsideClick={[Function]}
+                    <div
+                      className="euiPopover euiPopover--anchorDownRight"
+                      id="inspectorViewChooser"
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownRight"
-                        id="inspectorViewChooser"
-                        onKeyDown={[Function]}
-                        onMouseDown={[Function]}
-                        onMouseUp={[Function]}
-                        onTouchEnd={[Function]}
-                        onTouchStart={[Function]}
+                        className="euiPopover__anchor"
                       >
-                        <div
-                          className="euiPopover__anchor"
+                        <EuiButtonEmpty
+                          data-test-subj="inspectorViewChooser"
+                          iconSide="right"
+                          iconType="arrowDown"
+                          onClick={[Function]}
+                          size="s"
                         >
-                          <EuiButtonEmpty
+                          <button
+                            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
                             data-test-subj="inspectorViewChooser"
-                            iconSide="right"
-                            iconType="arrowDown"
                             onClick={[Function]}
-                            size="s"
+                            type="button"
                           >
-                            <button
-                              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
-                              data-test-subj="inspectorViewChooser"
-                              onClick={[Function]}
-                              type="button"
-                            >
-                              <EuiButtonContent
-                                className="euiButtonEmpty__content"
-                                iconSide="right"
-                                iconType="arrowDown"
-                                textProps={
-                                  Object {
-                                    "className": "euiButtonEmpty__text",
-                                  }
+                            <EuiButtonContent
+                              className="euiButtonEmpty__content"
+                              iconSide="right"
+                              iconType="arrowDown"
+                              textProps={
+                                Object {
+                                  "className": "euiButtonEmpty__text",
                                 }
+                              }
+                            >
+                              <span
+                                className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                               >
-                                <span
-                                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                <EuiIcon
+                                  className="euiButtonContent__icon"
+                                  size="m"
+                                  type="arrowDown"
                                 >
-                                  <EuiIcon
-                                    className="euiButtonContent__icon"
-                                    size="m"
-                                    type="arrowDown"
-                                  >
-                                    <span
-                                      className="euiButtonContent__icon"
-                                      data-euiicon-type="arrowDown"
-                                      size="m"
-                                    />
-                                  </EuiIcon>
                                   <span
-                                    className="euiButtonEmpty__text"
-                                  >
-                                    <FormattedMessage
-                                      defaultMessage="View: {viewName}"
-                                      id="inspector.view"
-                                      values={
-                                        Object {
-                                          "viewName": "View 1",
-                                        }
+                                    className="euiButtonContent__icon"
+                                    data-euiicon-type="arrowDown"
+                                    size="m"
+                                  />
+                                </EuiIcon>
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="View: {viewName}"
+                                    id="inspector.view"
+                                    values={
+                                      Object {
+                                        "viewName": "View 1",
                                       }
-                                    >
-                                      View: View 1
-                                    </FormattedMessage>
-                                  </span>
+                                    }
+                                  >
+                                    View: View 1
+                                  </FormattedMessage>
                                 </span>
-                              </EuiButtonContent>
-                            </button>
-                          </EuiButtonEmpty>
-                        </div>
+                              </span>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonEmpty>
                       </div>
-                    </EuiOutsideClickDetector>
+                    </div>
                   </EuiPopover>
                 </InspectorViewChooser>
               </div>

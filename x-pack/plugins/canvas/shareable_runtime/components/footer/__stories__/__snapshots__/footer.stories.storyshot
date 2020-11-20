@@ -1400,11 +1400,6 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                 <div
                   className="euiPopover euiPopover--anchorUpRight"
                   id="settings"
-                  onKeyDown={[Function]}
-                  onMouseDown={[Function]}
-                  onMouseUp={[Function]}
-                  onTouchEnd={[Function]}
-                  onTouchStart={[Function]}
                 >
                   <div
                     className="euiPopover__anchor"
@@ -1651,11 +1646,6 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                 <div
                   className="euiPopover euiPopover--anchorUpRight"
                   id="settings"
-                  onKeyDown={[Function]}
-                  onMouseDown={[Function]}
-                  onMouseUp={[Function]}
-                  onTouchEnd={[Function]}
-                  onTouchStart={[Function]}
                 >
                   <div
                     className="euiPopover__anchor"

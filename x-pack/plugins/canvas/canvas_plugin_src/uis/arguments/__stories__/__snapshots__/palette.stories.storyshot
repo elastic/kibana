@@ -35,14 +35,126 @@ exports[`Storyshots arguments/Palette default 1`] = `
             id="generated-id"
           >
             Select an option: 
-            <div
-              className="euiColorPalettePicker__itemGradient"
-              style={
-                Object {
-                  "background": "linear-gradient(to right, #882E72 0%, #882E72 7%, #B178A6 7%, #B178A6 14%, #D6C1DE 14%, #D6C1DE 21%, #1965B0 21%, #1965B0 28%, #5289C7 28%, #5289C7 35%, #7BAFDE 35%, #7BAFDE 42%, #4EB265 42%, #4EB265 50%, #90C987 50%, #90C987 57%, #CAE0AB 57%, #CAE0AB 64%, #F7EE55 64%, #F7EE55 71%, #F6C141 71%, #F6C141 78%, #F1932D 78%, #F1932D 85%, #E8601C 85%, #E8601C 92%, #DC050C 92%, #DC050C 100%)",
-                }
-              }
-            />
+            <span
+              className="euiColorPaletteDisplay euiColorPaletteDisplay--sizeSmall"
+            >
+              <span
+                className="euiColorPaletteDisplayFixed__bleedArea"
+              >
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#882E72",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#B178A6",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#D6C1DE",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#1965B0",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#5289C7",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#7BAFDE",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#4EB265",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#90C987",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#CAE0AB",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#F7EE55",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#F6C141",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#F1932D",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#E8601C",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#DC050C",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+              </span>
+            </span>
             , is selected
           </span>
           <button
@@ -54,14 +166,126 @@ exports[`Storyshots arguments/Palette default 1`] = `
             readOnly={false}
             type="button"
           >
-            <div
-              className="euiColorPalettePicker__itemGradient"
-              style={
-                Object {
-                  "background": "linear-gradient(to right, #882E72 0%, #882E72 7%, #B178A6 7%, #B178A6 14%, #D6C1DE 14%, #D6C1DE 21%, #1965B0 21%, #1965B0 28%, #5289C7 28%, #5289C7 35%, #7BAFDE 35%, #7BAFDE 42%, #4EB265 42%, #4EB265 50%, #90C987 50%, #90C987 57%, #CAE0AB 57%, #CAE0AB 64%, #F7EE55 64%, #F7EE55 71%, #F6C141 71%, #F6C141 78%, #F1932D 78%, #F1932D 85%, #E8601C 85%, #E8601C 92%, #DC050C 92%, #DC050C 100%)",
-                }
-              }
-            />
+            <span
+              className="euiColorPaletteDisplay euiColorPaletteDisplay--sizeSmall"
+            >
+              <span
+                className="euiColorPaletteDisplayFixed__bleedArea"
+              >
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#882E72",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#B178A6",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#D6C1DE",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#1965B0",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#5289C7",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#7BAFDE",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#4EB265",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#90C987",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#CAE0AB",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#F7EE55",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#F6C141",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#F1932D",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#E8601C",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+                <span
+                  style={
+                    Object {
+                      "backgroundColor": "#DC050C",
+                      "width": "7.142857142857143%",
+                    }
+                  }
+                />
+              </span>
+            </span>
           </button>
           <div
             className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"

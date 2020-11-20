@@ -345,63 +345,53 @@ exports[`extend index management ilm summary extension should return extension w
             hasArrow={true}
             id="stackPopover"
             isOpen={false}
-            ownFocus={false}
+            ownFocus={true}
             panelPaddingSize="m"
           >
-            <EuiOutsideClickDetector
-              isDisabled={true}
-              onOutsideClick={[Function]}
+            <div
+              className="euiPopover euiPopover--anchorDownCenter"
+              id="stackPopover"
             >
               <div
-                className="euiPopover euiPopover--anchorDownCenter"
-                id="stackPopover"
-                onKeyDown={[Function]}
-                onMouseDown={[Function]}
-                onMouseUp={[Function]}
-                onTouchEnd={[Function]}
-                onTouchStart={[Function]}
+                className="euiPopover__anchor"
               >
-                <div
-                  className="euiPopover__anchor"
+                <EuiButtonEmpty
+                  onClick={[Function]}
                 >
-                  <EuiButtonEmpty
+                  <button
+                    className="euiButtonEmpty euiButtonEmpty--primary"
                     onClick={[Function]}
+                    type="button"
                   >
-                    <button
-                      className="euiButtonEmpty euiButtonEmpty--primary"
-                      onClick={[Function]}
-                      type="button"
-                    >
-                      <EuiButtonContent
-                        className="euiButtonEmpty__content"
-                        iconSide="left"
-                        textProps={
-                          Object {
-                            "className": "euiButtonEmpty__text",
-                          }
+                    <EuiButtonContent
+                      className="euiButtonEmpty__content"
+                      iconSide="left"
+                      textProps={
+                        Object {
+                          "className": "euiButtonEmpty__text",
                         }
+                      }
+                    >
+                      <span
+                        className="euiButtonContent euiButtonEmpty__content"
                       >
                         <span
-                          className="euiButtonContent euiButtonEmpty__content"
+                          className="euiButtonEmpty__text"
                         >
-                          <span
-                            className="euiButtonEmpty__text"
+                          <FormattedMessage
+                            defaultMessage="Stack trace"
+                            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
+                            values={Object {}}
                           >
-                            <FormattedMessage
-                              defaultMessage="Stack trace"
-                              id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
-                              values={Object {}}
-                            >
-                              Stack trace
-                            </FormattedMessage>
-                          </span>
+                            Stack trace
+                          </FormattedMessage>
                         </span>
-                      </EuiButtonContent>
-                    </button>
-                  </EuiButtonEmpty>
-                </div>
+                      </span>
+                    </EuiButtonContent>
+                  </button>
+                </EuiButtonEmpty>
               </div>
-            </EuiOutsideClickDetector>
+            </div>
           </EuiPopover>
         </div>
       </EuiText>
@@ -594,45 +584,35 @@ exports[`extend index management ilm summary extension should return extension w
                     id="phaseExecutionPopover"
                     isOpen={false}
                     key="phaseExecutionPopover"
-                    ownFocus={false}
+                    ownFocus={true}
                     panelPaddingSize="m"
                   >
-                    <EuiOutsideClickDetector
-                      isDisabled={true}
-                      onOutsideClick={[Function]}
+                    <div
+                      className="euiPopover euiPopover--anchorDownCenter"
+                      id="phaseExecutionPopover"
                     >
                       <div
-                        className="euiPopover euiPopover--anchorDownCenter"
-                        id="phaseExecutionPopover"
-                        onKeyDown={[Function]}
-                        onMouseDown={[Function]}
-                        onMouseUp={[Function]}
-                        onTouchEnd={[Function]}
-                        onTouchStart={[Function]}
+                        className="euiPopover__anchor"
                       >
-                        <div
-                          className="euiPopover__anchor"
+                        <EuiLink
+                          onClick={[Function]}
                         >
-                          <EuiLink
+                          <button
+                            className="euiLink euiLink--primary"
                             onClick={[Function]}
+                            type="button"
                           >
-                            <button
-                              className="euiLink euiLink--primary"
-                              onClick={[Function]}
-                              type="button"
+                            <FormattedMessage
+                              defaultMessage="Show definition"
+                              id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                              values={Object {}}
                             >
-                              <FormattedMessage
-                                defaultMessage="Show definition"
-                                id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
-                                values={Object {}}
-                              >
-                                Show definition
-                              </FormattedMessage>
-                            </button>
-                          </EuiLink>
-                        </div>
+                              Show definition
+                            </FormattedMessage>
+                          </button>
+                        </EuiLink>
                       </div>
-                    </EuiOutsideClickDetector>
+                    </div>
                   </EuiPopover>
                 </dd>
               </EuiDescriptionListDescription>

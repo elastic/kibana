@@ -121,7 +121,6 @@ export class InspectorViewChooser extends Component<Props, State> {
     return (
       <EuiPopover
         id="inspectorViewChooser"
-        ownFocus
         button={triggerButton}
         isOpen={this.state.isSelectorOpen}
         closePopover={this.closeSelector}

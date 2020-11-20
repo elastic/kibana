@@ -52,43 +52,33 @@ describe('StepScreenshotDisplayProps', () => {
         display="inlineBlock"
         hasArrow={true}
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="m"
       >
-        <EuiOutsideClickDetector
-          isDisabled={true}
-          onOutsideClick={[Function]}
+        <div
+          className="euiPopover euiPopover--anchorRightCenter"
         >
           <div
-            className="euiPopover euiPopover--anchorRightCenter"
-            onKeyDown={[Function]}
-            onMouseDown={[Function]}
-            onMouseUp={[Function]}
-            onTouchEnd={[Function]}
-            onTouchStart={[Function]}
+            className="euiPopover__anchor"
           >
-            <div
-              className="euiPopover__anchor"
-            >
-              <input
-                alt="Screenshot for step with name \\"STEP_NAME\\""
-                onClick={[Function]}
-                onMouseEnter={[Function]}
-                onMouseLeave={[Function]}
-                src="/api/uptime/journey/screenshot/check_group/1"
-                style={
-                  Object {
-                    "height": 180,
-                    "objectFit": "cover",
-                    "objectPosition": "center top",
-                    "width": 320,
-                  }
+            <input
+              alt="Screenshot for step with name \\"STEP_NAME\\""
+              onClick={[Function]}
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              src="/api/uptime/journey/screenshot/check_group/1"
+              style={
+                Object {
+                  "height": 180,
+                  "objectFit": "cover",
+                  "objectPosition": "center top",
+                  "width": 320,
                 }
-                type="image"
-              />
-            </div>
+              }
+              type="image"
+            />
           </div>
-        </EuiOutsideClickDetector>
+        </div>
       </EuiPopover>
     `);
   });
@@ -125,43 +115,33 @@ describe('StepScreenshotDisplayProps', () => {
         display="inlineBlock"
         hasArrow={true}
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="m"
       >
-        <EuiOutsideClickDetector
-          isDisabled={true}
-          onOutsideClick={[Function]}
+        <div
+          className="euiPopover euiPopover--anchorRightCenter"
         >
           <div
-            className="euiPopover euiPopover--anchorRightCenter"
-            onKeyDown={[Function]}
-            onMouseDown={[Function]}
-            onMouseUp={[Function]}
-            onTouchEnd={[Function]}
-            onTouchStart={[Function]}
+            className="euiPopover__anchor"
           >
-            <div
-              className="euiPopover__anchor"
-            >
-              <input
-                alt="Screenshot"
-                onClick={[Function]}
-                onMouseEnter={[Function]}
-                onMouseLeave={[Function]}
-                src="/api/uptime/journey/screenshot/check_group/1"
-                style={
-                  Object {
-                    "height": 180,
-                    "objectFit": "cover",
-                    "objectPosition": "center top",
-                    "width": 320,
-                  }
+            <input
+              alt="Screenshot"
+              onClick={[Function]}
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              src="/api/uptime/journey/screenshot/check_group/1"
+              style={
+                Object {
+                  "height": 180,
+                  "objectFit": "cover",
+                  "objectPosition": "center top",
+                  "width": 320,
                 }
-                type="image"
-              />
-            </div>
+              }
+              type="image"
+            />
           </div>
-        </EuiOutsideClickDetector>
+        </div>
       </EuiPopover>
     `);
   });

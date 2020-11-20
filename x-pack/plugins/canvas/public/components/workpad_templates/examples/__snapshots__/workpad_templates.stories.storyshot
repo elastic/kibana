@@ -53,11 +53,6 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
         <div
           className="euiPopover euiPopover--anchorDownCenter"
           id="field_value_selection_0"
-          onKeyDown={[Function]}
-          onMouseDown={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchStart={[Function]}
         >
           <div
             className="euiPopover__anchor"
@@ -117,11 +112,6 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
             >
               <div
                 className="euiPopover euiPopover--anchorDownRight"
-                onKeyDown={[Function]}
-                onMouseDown={[Function]}
-                onMouseUp={[Function]}
-                onTouchEnd={[Function]}
-                onTouchStart={[Function]}
               >
                 <div
                   className="euiPopover__anchor"

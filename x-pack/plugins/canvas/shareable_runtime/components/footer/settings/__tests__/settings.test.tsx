@@ -56,7 +56,9 @@ describe('<Settings />', () => {
     expect(portal(wrapper).exists()).toEqual(true);
     expect(popover(wrapper).prop('isOpen')).toEqual(true);
     expect(menuItems(wrapper).length).toEqual(2);
-    expect(portal(wrapper).text()).toEqual('SettingsAuto PlayToolbar');
+    expect(portal(wrapper).text()).toEqual(
+      'You are in a dialog. To close this dialog, hit escape.SettingsAuto PlayToolbar'
+    );
     trigger(wrapper).simulate('click');
     expect(popover(wrapper).prop('isOpen')).toEqual(false);
   });

@@ -186,7 +186,6 @@ export function openContextMenu(
       closePopover={onClose}
       panelPaddingSize="none"
       anchorPosition="downRight"
-      ownFocus={true}
     >
       <EuiContextMenu
         initialPanelId="mainMenu"

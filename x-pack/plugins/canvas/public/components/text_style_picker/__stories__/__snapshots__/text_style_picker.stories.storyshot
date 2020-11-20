@@ -216,11 +216,6 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
         <div
           className="euiPopover euiPopover--anchorDownCenter"
           id="color-picker-popover"
-          onKeyDown={[Function]}
-          onMouseDown={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchStart={[Function]}
         >
           <div
             className="euiPopover__anchor"
@@ -694,11 +689,6 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
         <div
           className="euiPopover euiPopover--anchorDownCenter"
           id="color-picker-popover"
-          onKeyDown={[Function]}
-          onMouseDown={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchStart={[Function]}
         >
           <div
             className="euiPopover__anchor"

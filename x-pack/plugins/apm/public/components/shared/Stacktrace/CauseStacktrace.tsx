@@ -22,7 +22,7 @@ const CausedByContainer = styled('h5')`
 `;
 
 const CausedByHeading = styled('span')`
-  color: ${({ theme }) => theme.eui.textColors.subdued};
+  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   display: block;
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightBold};

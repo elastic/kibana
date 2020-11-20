@@ -8,6 +8,10 @@ import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { useListKeys } from './use_list_keys';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
 describe('use_list_keys', () => {
   function ListingComponent({ items }: { items: object[] }) {
     const getListKey = useListKeys(items);

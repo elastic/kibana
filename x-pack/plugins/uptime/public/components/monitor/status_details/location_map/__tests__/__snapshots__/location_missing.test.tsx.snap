@@ -75,7 +75,7 @@ exports[`LocationMissingWarning component shallow render correctly against snaps
       hasArrow={true}
       id="popover"
       isOpen={false}
-      ownFocus={false}
+      ownFocus={true}
       panelPaddingSize="m"
     >
       <EuiText

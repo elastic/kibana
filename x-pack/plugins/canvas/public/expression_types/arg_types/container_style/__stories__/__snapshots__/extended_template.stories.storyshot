@@ -436,11 +436,6 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
             <div
               className="euiPopover euiPopover--anchorUpCenter"
               id="color-picker-popover"
-              onKeyDown={[Function]}
-              onMouseDown={[Function]}
-              onMouseUp={[Function]}
-              onTouchEnd={[Function]}
-              onTouchStart={[Function]}
             >
               <div
                 className="euiPopover__anchor"
@@ -905,11 +900,6 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
           <div
             className="euiPopover euiPopover--anchorUpCenter"
             id="color-picker-popover"
-            onKeyDown={[Function]}
-            onMouseDown={[Function]}
-            onMouseUp={[Function]}
-            onTouchEnd={[Function]}
-            onTouchStart={[Function]}
           >
             <div
               className="euiPopover__anchor"
@@ -1386,11 +1376,6 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
             <div
               className="euiPopover euiPopover--anchorUpCenter"
               id="color-picker-popover"
-              onKeyDown={[Function]}
-              onMouseDown={[Function]}
-              onMouseUp={[Function]}
-              onTouchEnd={[Function]}
-              onTouchStart={[Function]}
             >
               <div
                 className="euiPopover__anchor"

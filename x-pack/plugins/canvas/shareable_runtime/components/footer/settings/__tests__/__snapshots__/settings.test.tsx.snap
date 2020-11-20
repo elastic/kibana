@@ -6,16 +6,24 @@ exports[`<Settings /> can navigate Autoplay Settings 1`] = `
     data-eui="EuiFocusTrap"
   >
     <div
-      aria-live="assertive"
+      aria-describedby="generated-id"
+      aria-live="off"
       aria-modal="true"
       class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPopover__panel euiPopover__panel--top"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
+      tabindex="0"
     >
       <div
         class="euiPopover__panelArrow euiPopover__panelArrow--top"
         style="left: 10px; top: 0px;"
       />
+      <p
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        You are in a dialog. To close this dialog, hit escape.
+      </p>
       <div>
         <div
           class="euiContextMenu"
@@ -96,16 +104,24 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
     data-eui="EuiFocusTrap"
   >
     <div
-      aria-live="assertive"
+      aria-describedby="generated-id"
+      aria-live="off"
       aria-modal="true"
       class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
+      tabindex="0"
     >
       <div
         class="euiPopover__panelArrow euiPopover__panelArrow--top"
         style="left: 10px; top: 0px;"
       />
+      <p
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        You are in a dialog. To close this dialog, hit escape.
+      </p>
       <div>
         <div
           class="euiContextMenu"
@@ -338,16 +354,24 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 1`] =
     data-eui="EuiFocusTrap"
   >
     <div
-      aria-live="assertive"
+      aria-describedby="generated-id"
+      aria-live="off"
       aria-modal="true"
       class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPopover__panel euiPopover__panel--top"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
+      tabindex="0"
     >
       <div
         class="euiPopover__panelArrow euiPopover__panelArrow--top"
         style="left: 10px; top: 0px;"
       />
+      <p
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        You are in a dialog. To close this dialog, hit escape.
+      </p>
       <div>
         <div
           class="euiContextMenu"
@@ -428,16 +452,24 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
     data-eui="EuiFocusTrap"
   >
     <div
-      aria-live="assertive"
+      aria-describedby="generated-id"
+      aria-live="off"
       aria-modal="true"
       class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPopover__panel euiPopover__panel--top euiPopover__panel-isOpen"
       role="dialog"
       style="top: -16px; left: -22px; z-index: 2000;"
+      tabindex="0"
     >
       <div
         class="euiPopover__panelArrow euiPopover__panelArrow--top"
         style="left: 10px; top: 0px;"
       />
+      <p
+        class="euiScreenReaderOnly"
+        id="generated-id"
+      >
+        You are in a dialog. To close this dialog, hit escape.
+      </p>
       <div>
         <div
           class="euiContextMenu"
@@ -600,4 +632,4 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
 </div>
 `;
 
-exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] = `"<div><div data-eui=\\"EuiFocusTrap\\"><div class=\\"euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPopover__panel euiPopover__panel--top\\" aria-live=\\"assertive\\" role=\\"dialog\\" aria-modal=\\"true\\" style=\\"top: -16px; left: -22px; z-index: 2000;\\"><div class=\\"euiPopover__panelArrow euiPopover__panelArrow--top\\" style=\\"left: 10px; top: 0px;\\"></div><div><div class=\\"euiContextMenu\\" style=\\"height: 0px;\\"><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft\\" tabindex=\\"0\\"><div class=\\"euiContextMenuPanelTitle\\"><span class=\\"euiContextMenu__itemLayout\\">Settings</span></div><div><div><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"play\\" class=\\"euiContextMenu__icon\\"></span><span class=\\"euiContextMenuItem__text\\">Auto Play</span><span data-euiicon-type=\\"arrowRight\\" class=\\"euiContextMenu__arrow\\"></span></span></button><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"boxesHorizontal\\" class=\\"euiContextMenu__icon\\"></span><span class=\\"euiContextMenuItem__text\\">Toolbar</span><span data-euiicon-type=\\"arrowRight\\" class=\\"euiContextMenu__arrow\\"></span></span></button></div></div></div><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft\\" tabindex=\\"0\\"><button class=\\"euiContextMenuPanelTitle\\" type=\\"button\\" data-test-subj=\\"contextMenuPanelTitleButton\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"arrowLeft\\" class=\\"euiContextMenu__icon\\"></span><span class=\\"euiContextMenu__text\\">Toolbar</span></span></button><div><div><div style=\\"padding: 16px;\\"><div class=\\"euiFormRow\\" id=\\"generated-id-row\\"><div class=\\"euiFormRow__fieldWrapper\\"><div class=\\"euiSwitch\\"><button id=\\"generated-id\\" aria-checked=\\"true\\" class=\\"euiSwitch__button\\" role=\\"switch\\" type=\\"button\\" aria-labelledby=\\"generated-id\\" data-test-subj=\\"hideToolbarSwitch\\" name=\\"toolbarHide\\" aria-describedby=\\"generated-id-help\\"><span class=\\"euiSwitch__body\\"><span class=\\"euiSwitch__thumb\\"></span><span class=\\"euiSwitch__track\\"><span data-euiicon-type=\\"cross\\" class=\\"euiSwitch__icon\\"></span><span data-euiicon-type=\\"check\\" class=\\"euiSwitch__icon euiSwitch__icon--checked\\"></span></span></span></button><span class=\\"euiSwitch__label\\" id=\\"generated-id\\">Hide Toolbar</span></div><div class=\\"euiFormHelpText euiFormRow__text\\" id=\\"generated-id-help\\">Hide the toolbar when the mouse is not within the Canvas?</div></div></div></div></div></div></div></div></div></div></div></div>"`;
+exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] = `"<div><div data-eui=\\"EuiFocusTrap\\"><div class=\\"euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPopover__panel euiPopover__panel--top\\" tabindex=\\"0\\" aria-live=\\"off\\" role=\\"dialog\\" aria-modal=\\"true\\" aria-describedby=\\"generated-id\\" style=\\"top: -16px; left: -22px; z-index: 2000;\\"><div class=\\"euiPopover__panelArrow euiPopover__panelArrow--top\\" style=\\"left: 10px; top: 0px;\\"></div><p id=\\"generated-id\\" class=\\"euiScreenReaderOnly\\">You are in a dialog. To close this dialog, hit escape.</p><div><div class=\\"euiContextMenu\\" style=\\"height: 0px;\\"><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txOutLeft\\" tabindex=\\"0\\"><div class=\\"euiContextMenuPanelTitle\\"><span class=\\"euiContextMenu__itemLayout\\">Settings</span></div><div><div><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"play\\" class=\\"euiContextMenu__icon\\"></span><span class=\\"euiContextMenuItem__text\\">Auto Play</span><span data-euiicon-type=\\"arrowRight\\" class=\\"euiContextMenu__arrow\\"></span></span></button><button class=\\"euiContextMenuItem\\" type=\\"button\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"boxesHorizontal\\" class=\\"euiContextMenu__icon\\"></span><span class=\\"euiContextMenuItem__text\\">Toolbar</span><span data-euiicon-type=\\"arrowRight\\" class=\\"euiContextMenu__arrow\\"></span></span></button></div></div></div><div class=\\"euiContextMenuPanel euiContextMenu__panel euiContextMenuPanel-txInLeft\\" tabindex=\\"0\\"><button class=\\"euiContextMenuPanelTitle\\" type=\\"button\\" data-test-subj=\\"contextMenuPanelTitleButton\\"><span class=\\"euiContextMenu__itemLayout\\"><span data-euiicon-type=\\"arrowLeft\\" class=\\"euiContextMenu__icon\\"></span><span class=\\"euiContextMenu__text\\">Toolbar</span></span></button><div><div><div style=\\"padding: 16px;\\"><div class=\\"euiFormRow\\" id=\\"generated-id-row\\"><div class=\\"euiFormRow__fieldWrapper\\"><div class=\\"euiSwitch\\"><button id=\\"generated-id\\" aria-checked=\\"true\\" class=\\"euiSwitch__button\\" role=\\"switch\\" type=\\"button\\" aria-labelledby=\\"generated-id\\" data-test-subj=\\"hideToolbarSwitch\\" name=\\"toolbarHide\\" aria-describedby=\\"generated-id-help\\"><span class=\\"euiSwitch__body\\"><span class=\\"euiSwitch__thumb\\"></span><span class=\\"euiSwitch__track\\"><span data-euiicon-type=\\"cross\\" class=\\"euiSwitch__icon\\"></span><span data-euiicon-type=\\"check\\" class=\\"euiSwitch__icon euiSwitch__icon--checked\\"></span></span></span></button><span class=\\"euiSwitch__label\\" id=\\"generated-id\\">Hide Toolbar</span></div><div class=\\"euiFormHelpText euiFormRow__text\\" id=\\"generated-id-help\\">Hide the toolbar when the mouse is not within the Canvas?</div></div></div></div></div></div></div></div></div></div></div></div>"`;

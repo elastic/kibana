@@ -22,7 +22,7 @@ exports[`Should render cancel button when drawing 1`] = `
       hasArrow={true}
       id="toolsControlPopover"
       isOpen={false}
-      ownFocus={false}
+      ownFocus={true}
       panelPaddingSize="none"
     >
       <EuiContextMenu
@@ -147,7 +147,7 @@ exports[`renders 1`] = `
   hasArrow={true}
   id="toolsControlPopover"
   isOpen={false}
-  ownFocus={false}
+  ownFocus={true}
   panelPaddingSize="none"
 >
   <EuiContextMenu

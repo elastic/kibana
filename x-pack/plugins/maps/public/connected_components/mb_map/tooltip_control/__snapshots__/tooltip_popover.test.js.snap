@@ -19,7 +19,7 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
   hasArrow={true}
   id="mapTooltip"
   isOpen={true}
-  ownFocus={false}
+  ownFocus={true}
   panelPaddingSize="m"
   style={
     Object {
@@ -83,7 +83,7 @@ exports[`TooltipPopover render should render tooltip popover with custom tooltip
   hasArrow={true}
   id="mapTooltip"
   isOpen={true}
-  ownFocus={false}
+  ownFocus={true}
   panelPaddingSize="m"
   style={
     Object {

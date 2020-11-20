@@ -101,7 +101,7 @@ describe('ResolveAllConflicts', () => {
         hasArrow={true}
         id="resolveAllConflictsVisibilityPopover"
         isOpen={false}
-        ownFocus={false}
+        ownFocus={true}
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel

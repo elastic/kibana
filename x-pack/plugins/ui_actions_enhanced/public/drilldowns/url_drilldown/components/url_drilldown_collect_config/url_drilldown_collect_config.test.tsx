@@ -8,6 +8,10 @@ import { Demo } from './test_samples/demo';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
 test('configure valid URL template', () => {
   const screen = render(<Demo />);
 

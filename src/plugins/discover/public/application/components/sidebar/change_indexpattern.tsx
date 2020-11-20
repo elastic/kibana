@@ -78,7 +78,6 @@ export function ChangeIndexPattern({
       anchorClassName="eui-textTruncate"
       display="block"
       panelPaddingSize="s"
-      ownFocus
     >
       <div style={{ width: 320 }}>
         <EuiPopoverTitle>
