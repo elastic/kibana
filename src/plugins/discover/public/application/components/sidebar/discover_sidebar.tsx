@@ -32,7 +32,7 @@ import { groupFields } from './lib/group_fields';
 import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
-import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
+import { getIndexPatternFieldList } from '../../helpers/get_index_pattern_field_list';
 import { getServices } from '../../../kibana_services';
 
 export interface DiscoverSidebarProps {
@@ -73,6 +73,14 @@ export interface DiscoverSidebarProps {
    * Callback function to select another index pattern
    */
   setIndexPattern: (id: string) => void;
+  /**
+   * If on, fields are read from the fields API, not from source
+   */
+  useNewFieldsApi?: boolean;
+  /**
+   * Callback to execute once the selection to show/hide unmapped fields changes
+   */
+  onShowUnmappedFieldsChange: (value: boolean) => void;
 }
 
 export function DiscoverSidebar({
@@ -85,6 +93,8 @@ export function DiscoverSidebar({
   onRemoveField,
   selectedIndexPattern,
   setIndexPattern,
+  useNewFieldsApi,
+  onShowUnmappedFieldsChange,
 }: DiscoverSidebarProps) {
   const [showFields, setShowFields] = useState(false);
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
@@ -159,6 +169,8 @@ export function DiscoverSidebar({
               onChange={onChangeFieldSearch}
               value={fieldFilterState.name}
               types={fieldTypes}
+              useNewFieldsApi={useNewFieldsApi}
+              onShowUnmappedFieldsChange={onShowUnmappedFieldsChange}
             />
           </form>
         </div>

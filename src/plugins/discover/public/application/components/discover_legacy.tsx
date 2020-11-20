@@ -88,6 +88,8 @@ export interface DiscoverLegacyProps {
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   updateSavedQueryId: (savedQueryId?: string) => void;
   vis?: Vis;
+  useNewFieldsApi?: boolean;
+  onShowUnmappedFieldsChange: (value: boolean) => void;
 }
 
 export function DiscoverLegacy({
@@ -120,6 +122,8 @@ export function DiscoverLegacy({
   updateQuery,
   updateSavedQueryId,
   vis,
+  useNewFieldsApi,
+  onShowUnmappedFieldsChange,
 }: DiscoverLegacyProps) {
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const { TopNavMenu } = getServices().navigation.ui;
@@ -190,6 +194,8 @@ export function DiscoverLegacy({
                     onRemoveField={onRemoveColumn}
                     selectedIndexPattern={searchSource && searchSource.getField('index')}
                     setIndexPattern={setIndexPattern}
+                    useNewFieldsApi={useNewFieldsApi}
+                    onShowUnmappedFieldsChange={onShowUnmappedFieldsChange}
                   />
                 </div>
               )}

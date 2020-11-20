@@ -29,7 +29,8 @@ export function getSwitchIndexPatternAppState(
   nextIndexPattern: IndexPattern,
   currentColumns: string[],
   currentSort: SortPairArr[],
-  modifyColumns: boolean = true
+  modifyColumns: boolean = true,
+  useNewFieldsApi: boolean = false
 ) {
   const nextColumns = modifyColumns
     ? currentColumns.filter(
@@ -38,9 +39,11 @@ export function getSwitchIndexPatternAppState(
       )
     : currentColumns;
   const nextSort = getSortArray(currentSort, nextIndexPattern);
+  const defaultColumns = useNewFieldsApi ? [] : ['_source'];
+  const columns = nextColumns.length ? nextColumns : defaultColumns;
   return {
     index: nextIndexPattern.id,
-    columns: nextColumns.length ? nextColumns : ['_source'],
+    columns,
     sort: nextSort,
   };
 }

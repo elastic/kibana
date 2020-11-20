@@ -82,6 +82,8 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
+import { UI_SETTINGS } from '../../../../data/common';
+import { getIndexPatternFieldList } from '../helpers/get_index_pattern_field_list';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -199,6 +201,14 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
+  $scope.useNewFieldsApi = !$scope.searchSource.dependencies?.getConfig(
+    UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE
+  );
+  $scope.showUnmappedFields = false;
+  $scope.onShowUnmappedFieldsChange = (val) => {
+    $scope.showUnmappedFields = val;
+  };
+  const FIRST_N_COLUMNS_FROM_FIELDS_RESPONSE = 3;
   //used for functional testing
   $scope.fetchCounter = 0;
 
@@ -291,7 +301,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         nextIndexPattern,
         $scope.state.columns,
         $scope.state.sort,
-        config.get(MODIFY_COLUMNS_ON_SWITCH)
+        config.get(MODIFY_COLUMNS_ON_SWITCH),
+        $scope.useNewFieldsApi
       );
       await replaceUrlAppState(nextAppState);
       $route.reload();
@@ -594,15 +605,27 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     };
   };
 
+  function getDefaultColumns() {
+    const { columns } = savedSearch;
+    if ($scope.useNewFieldsApi) {
+      const indexOfSource = columns.indexOf('_source');
+      if (indexOfSource === -1) {
+        return columns;
+      }
+      return columns.splice(indexOfSource, 1);
+    } else if (columns.length > 0) {
+      return columns;
+    }
+    return config.get(DEFAULT_COLUMNS_SETTING).slice();
+  }
+
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
+    const columns = getDefaultColumns();
     return {
       query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
-      columns:
-        savedSearch.columns.length > 0
-          ? savedSearch.columns
-          : config.get(DEFAULT_COLUMNS_SETTING).slice(),
+      columns,
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
@@ -884,7 +907,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     }
 
     $scope.hits = resp.hits.total;
-    $scope.rows = resp.hits.hits;
+    $scope.rows = resp.hits.hits.map((hit) => {
+      return { ...hit };
+    });
 
     // if we haven't counted yet, reset the counts
     const counts = ($scope.fieldCounts = $scope.fieldCounts || {});
@@ -895,6 +920,19 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         counts[fieldName] = (counts[fieldName] || 0) + 1;
       });
     });
+
+    if ($scope.useNewFieldsApi) {
+      // get some columns to display
+      const allColumns = getIndexPatternFieldList($scope.indexPattern, counts).map(
+        (el) => el.displayName
+      );
+      const columns = allColumns
+        .filter((el) => !el.startsWith('_'))
+        .slice(0, FIRST_N_COLUMNS_FROM_FIELDS_RESPONSE);
+      if ($scope.state.columns.length === 0) {
+        setAppState({ columns });
+      }
+    }
 
     $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
@@ -958,7 +996,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   };
 
   $scope.updateDataSource = () => {
-    const { indexPattern, searchSource } = $scope;
+    const { indexPattern, searchSource, useNewFieldsApi } = $scope;
     searchSource
       .setField('index', $scope.indexPattern)
       .setField('size', $scope.opts.sampleSize)
@@ -972,6 +1010,10 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       )
       .setField('query', data.query.queryString.getQuery() || null)
       .setField('filter', filterManager.getFilters());
+    if (useNewFieldsApi) {
+      searchSource.setField('fields', ['*']);
+      searchSource.setField('source', false);
+    }
     return Promise.resolve();
   };
 
@@ -995,8 +1037,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   };
 
   $scope.addColumn = function addColumn(columnName) {
+    const { indexPattern } = $scope;
     if (uiCapabilities.discover.save) {
-      const { indexPattern } = $scope;
       popularizeField(indexPattern, columnName, indexPatterns);
     }
     const columns = columnActions.addColumn($scope.state.columns, columnName);

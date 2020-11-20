@@ -60,13 +60,29 @@ export interface Props {
    * types for the type filter
    */
   types: string[];
+
+  /**
+   * If true, fields are read from the fields API, not from _source
+   */
+  useNewFieldsApi?: boolean;
+
+  /**
+   * Callback to execute once the selection to show/hide unmapped fields changes
+   */
+  onShowUnmappedFieldsChange: (value: boolean) => void;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ onChange, value, types }: Props) {
+export function DiscoverFieldSearch({
+  onChange,
+  value,
+  types,
+  useNewFieldsApi,
+  onShowUnmappedFieldsChange,
+}: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -92,6 +108,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     aggregatable: 'any',
     type: 'any',
     missing: true,
+    unmapped: false,
   });
 
   if (typeof value !== 'string') {
@@ -159,6 +176,14 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   const handleMissingChange = (e: EuiSwitchEvent) => {
     const missingValue = e.target.checked;
     handleValueChange('missing', missingValue);
+  };
+
+  const handleUnmappedChange = (e: EuiSwitchEvent) => {
+    const showUnmappedValue = e.target.checked;
+    const updatedValues = { ...values };
+    updatedValues.unmapped = showUnmappedValue;
+    setValues(updatedValues);
+    onShowUnmappedFieldsChange(showUnmappedValue);
   };
 
   const buttonContent = (
@@ -283,7 +308,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
               })}
             </EuiPopoverTitle>
             {selectionPanel}
-            <EuiPopoverFooter>
+            <EuiPopoverFooter paddingSize="s">
               <EuiSwitch
                 label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
                   defaultMessage: 'Hide missing fields',
@@ -292,6 +317,17 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
                 onChange={handleMissingChange}
                 data-test-subj="missingSwitch"
               />
+              {!!useNewFieldsApi && (
+                <EuiSwitch
+                  className={'dscSidebarItem__fieldPopoverPanel__unmappedSwitch'}
+                  label={i18n.translate('discover.fieldChooser.filter.showUnmappedFields', {
+                    defaultMessage: 'Show unmapped fields',
+                  })}
+                  checked={values.unmapped}
+                  onChange={handleUnmappedChange}
+                  data-test-subj="unmappedSwitch"
+                />
+              )}
             </EuiPopoverFooter>
           </EuiPopover>
         </EuiOutsideClickDetector>
