@@ -229,8 +229,12 @@ export function savedObjectsRoutes(
    * @apiGroup JobSavedObjects
    *
    * @api {get} /api/ml/saved_objects/delete_job_check Check whether user can delete a job
-   * @apiName JobsSpaces
-   * @apiDescription List all jobs and their spaces
+   * @apiName DeleteJobCheck
+   * @apiDescription Check the users ability to delete jobs. Returns whether they are able
+   *                 to fully delete the job and whether they are able to remove it from
+   *                 the current space.
+   *
+   * @apiSchema (body) jobIdsSchema (params) jobTypeSchema
    *
    */
   router.post(

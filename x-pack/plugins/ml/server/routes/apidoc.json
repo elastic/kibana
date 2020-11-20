@@ -149,6 +149,7 @@
     "AssignJobsToSpaces",
     "RemoveJobsFromSpaces",
     "JobsSpaces",
+    "DeleteJobCheck",
 
     "TrainedModels",
     "GetTrainedModel",
