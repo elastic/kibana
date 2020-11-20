@@ -192,7 +192,7 @@ export interface CrumbInfo {
  * A type containing all things to actually be rendered to the DOM.
  */
 export interface VisibleEntites {
-  graphNodePositions: NodePositions;
+  processNodePositions: NodePositions;
   connectingEdgeLineSegments: EdgeLineSegment[];
 }
 
@@ -602,7 +602,7 @@ export interface IsometricTaxiLayout {
   /**
    * A map of events to position. Each event represents its own node.
    */
-  graphNodePositions: Map<ResolverNode, Vector2>;
+  processNodePositions: Map<ResolverNode, Vector2>;
 
   /**
    * A map of edge-line segments, which graphically connect nodes.

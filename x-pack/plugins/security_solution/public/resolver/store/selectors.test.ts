@@ -116,7 +116,7 @@ describe('resolver selectors', () => {
 
           // find the position of the second child
           const secondChild = selectors.processEventForID(state())(secondChildID);
-          const positionOfSecondChild = layout.graphNodePositions.get(
+          const positionOfSecondChild = layout.processNodePositions.get(
             secondChild as SafeResolverEvent
           )!;
 
@@ -136,7 +136,7 @@ describe('resolver selectors', () => {
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)
-              .graphNodePositions.has(origin as SafeResolverEvent)
+              .processNodePositions.has(origin as SafeResolverEvent)
           ).toBe(true);
         });
         it('the first child should be in view', () => {
@@ -144,7 +144,7 @@ describe('resolver selectors', () => {
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)
-              .graphNodePositions.has(firstChild as SafeResolverEvent)
+              .processNodePositions.has(firstChild as SafeResolverEvent)
           ).toBe(true);
         });
         it('the second child should not be in view', () => {
@@ -152,7 +152,7 @@ describe('resolver selectors', () => {
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)
-              .graphNodePositions.has(secondChild as SafeResolverEvent)
+              .processNodePositions.has(secondChild as SafeResolverEvent)
           ).toBe(false);
         });
         it('should return nothing as the flowto for the first child', () => {

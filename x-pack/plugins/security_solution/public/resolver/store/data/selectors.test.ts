@@ -458,7 +458,7 @@ describe('data state', () => {
         Object {
           "ariaLevels": Map {},
           "edgeLineSegments": Array [],
-          "graphNodePositions": Map {},
+          "processNodePositions": Map {},
         }
       `);
     });

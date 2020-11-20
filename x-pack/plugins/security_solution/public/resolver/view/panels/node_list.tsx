@@ -88,9 +88,9 @@ export const NodeList = memo(() => {
 
   const processTableView: ProcessTableView[] = useSelector(
     useCallback((state: ResolverState) => {
-      const { graphNodePositions } = selectors.layout(state);
+      const { processNodePositions } = selectors.layout(state);
       const view: ProcessTableView[] = [];
-      for (const graphNode of graphNodePositions.keys()) {
+      for (const graphNode of processNodePositions.keys()) {
         const name = nodeModel.nodeName(graphNode);
         const nodeID = nodeModel.nodeID(graphNode);
         if (nodeID !== undefined) {

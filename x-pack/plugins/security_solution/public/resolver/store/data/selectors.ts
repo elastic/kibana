@@ -436,7 +436,7 @@ export const ariaFlowtoCandidate: (
 
 const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = createSelector(
   layout,
-  function ({ graphNodePositions, edgeLineSegments }) {
+  function ({ processNodePositions, edgeLineSegments }) {
     const spatialIndex: rbush<IndexedEntity> = new rbush();
     const nodeToIndex: IndexedGraphNode[] = [];
     const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
@@ -446,7 +446,7 @@ const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = creat
     const graphNodeViewWidth = 720;
     const graphNodeViewHeight = 240;
     const lineSegmentPadding = 30;
-    for (const [graphNode, position] of graphNodePositions) {
+    for (const [graphNode, position] of processNodePositions) {
       const [nodeX, nodeY] = position;
       const indexedEvent: IndexedGraphNode = {
         minX: nodeX - 0.5 * graphNodeViewWidth,
@@ -512,7 +512,7 @@ export const nodesAndEdgelines: (
       .filter((entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine')
       .map((node) => node.entity);
     return {
-      graphNodePositions: visibleProcessNodePositions,
+      processNodePositions: visibleProcessNodePositions,
       connectingEdgeLineSegments,
     };
   }, aaBBEqualityCheck);

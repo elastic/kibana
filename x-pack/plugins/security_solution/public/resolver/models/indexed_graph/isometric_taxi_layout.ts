@@ -75,7 +75,7 @@ export function isometricTaxiLayoutFactory(indexedGraph: IndexedGraph): Isometri
   }
 
   return {
-    graphNodePositions: transformedPositions,
+    processNodePositions: transformedPositions,
     edgeLineSegments: transformedEdgeLineSegments,
     ariaLevels: ariaLevels(indexedGraph),
   };
@@ -495,7 +495,7 @@ const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
 export function nodePosition(model: IsometricTaxiLayout, nodeID: string): Vector2 | undefined {
   // Find the indexed object matching the nodeID
   // NB: this is O(n) now, but we will be indexing the nodeIDs in the future.
-  for (const [candidateKey, candidatePosition] of model.graphNodePositions.entries()) {
+  for (const [candidateKey, candidatePosition] of model.processNodePositions.entries()) {
     if (nodeModel.nodeID(candidateKey) === nodeID) {
       return candidatePosition;
     }
@@ -512,8 +512,8 @@ export function nodePosition(model: IsometricTaxiLayout, nodeID: string): Vector
  */
 export function translated(model: IsometricTaxiLayout, translation: Vector2): IsometricTaxiLayout {
   return {
-    graphNodePositions: new Map(
-      [...model.graphNodePositions.entries()].map(([node, position]) => [
+    processNodePositions: new Map(
+      [...model.processNodePositions.entries()].map(([node, position]) => [
         node,
         vector2.add(position, translation),
       ])

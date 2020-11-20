@@ -72,8 +72,8 @@ export function NodeDataFetcher(
         ids: Array.from(newIDsToRequest),
         timerange: {
           // TODO: use the timerange plumbing
-          from: new Date(2020, 10, 1),
-          to: new Date(2020, 10, 30),
+          from: new Date(2020, 11, 1),
+          to: new Date(2020, 11, 30),
         },
         indexPatterns: ['logs-*'],
         limit: nodeDataLimit,

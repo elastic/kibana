@@ -261,12 +261,12 @@ export const ariaFlowtoNodeID: (
   (visibleNodesAndEdgeLinesAtTime, ariaFlowtoCandidate) => {
     return defaultMemoize((time: number) => {
       // get the visible nodes at `time`
-      const { graphNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
+      const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
 
       // get a `Set` containing their node IDs
       const nodesVisibleAtTime: Set<string> = new Set();
       // NB: in practice, any event that has been graphed is guaranteed to have an entity_id
-      for (const visibleNode of graphNodePositions.keys()) {
+      for (const visibleNode of processNodePositions.keys()) {
         const nodeID = nodeModel.nodeID(visibleNode);
         if (nodeID !== undefined) {
           nodesVisibleAtTime.add(nodeID);
@@ -384,7 +384,7 @@ export const visibleNodes: (state: ResolverState) => (time: number) => Set<strin
 
       const nodes: Set<string> = new Set();
       for (const node of processNodePositions.keys()) {
-        const id = entityIDSafeVersion(node);
+        const id = nodeModel.nodeID(node);
         if (id !== undefined) {
           nodes.add(id);
         }
