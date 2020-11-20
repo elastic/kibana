@@ -26,6 +26,7 @@ import { registerDeleteIndexPatternRoute } from './routes/delete_index_pattern';
 import { registerUpdateIndexPatternRoute } from './routes/update_index_pattern';
 import { registerCreateFieldRoute } from './routes/fields/create_field';
 import { registerPutFieldRoute } from './routes/fields/put_field';
+import { registerGetFieldRoute } from './routes/fields/get_field';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const parseMetaFields = (metaFields: string | string[]) => {
@@ -46,6 +47,7 @@ export function registerRoutes(http: HttpServiceSetup) {
   registerUpdateIndexPatternRoute(router);
   registerCreateFieldRoute(router);
   registerPutFieldRoute(router);
+  registerGetFieldRoute(router);
 
   router.get(
     {

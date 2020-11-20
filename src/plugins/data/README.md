@@ -68,7 +68,7 @@ Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
 - Fields API
   - Create a field &mdash; `POST /api/index_patterns/index_pattern/{id}/field`
   - Upsert a field &mdash; `PUT /api/index_patterns/index_pattern/{id}/field`
-  - Read a new field &mdash; `GET /api/index_patterns/index_pattern/{id}/field/{name}`
+  - Fetch a field &mdash; `GET /api/index_patterns/index_pattern/{id}/field/{name}`
   - Update a an existing field &mdash; `POST /api/index_patterns/index_pattern/{id}/field/{name}`
   - Remove a field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/field/{name}`
 
@@ -317,6 +317,23 @@ PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
         "customLabel": "",
         "shortDotsEnable": false
     }
+}
+```
+
+
+#### Fetch a field
+
+Fetch an existing index pattern field by field name.
+
+```
+GET /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field/<name>
+```
+
+Returns the field object.
+
+```json
+{
+    "field": {}
 }
 ```
 
