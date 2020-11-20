@@ -5,6 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { AppDeps } from './app';
 
 const AppContext = createContext<AppDeps | null>(null);
@@ -16,7 +17,11 @@ export const AppContextProvider = ({
   appDeps: AppDeps | null;
   children: React.ReactNode;
 }) => {
-  return appDeps ? <AppContext.Provider value={appDeps}>{children}</AppContext.Provider> : null;
+  return appDeps ? (
+    <KibanaContextProvider services={appDeps}>
+      <AppContext.Provider value={appDeps}>{children}</AppContext.Provider>
+    </KibanaContextProvider>
+  ) : null;
 };
 
 export const useAppDependencies = (): AppDeps => {
