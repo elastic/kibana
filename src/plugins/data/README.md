@@ -67,9 +67,9 @@ Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
   - `typeMeta`
 - Fields API
   - Create a field &mdash; `POST /api/index_patterns/index_pattern/{id}/field`
+  - Upsert a field &mdash; `PUT /api/index_patterns/index_pattern/{id}/field`
   - Read a new field &mdash; `GET /api/index_patterns/index_pattern/{id}/field/{name}`
   - Update a an existing field &mdash; `POST /api/index_patterns/index_pattern/{id}/field/{name}`
-  - Upsert a field &mdash; `PUT /api/index_patterns/index_pattern/{id}/field/{name}`
   - Remove a field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/field/{name}`
 
 #### Create an index pattern
@@ -240,7 +240,8 @@ Fields allows you to manage fields of an existing index pattern.
 
 #### Create a field
 
-Create a field by simply specifying its name, will default to `string` type.
+Create a field by simply specifying its name, will default to `string` type. Returns
+an error if a field with the provided name already exists.
 
 ```
 POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
@@ -255,6 +256,48 @@ Create a field by specifying all field properties.
 
 ```
 POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
+{
+    "field": {
+        "name": "",
+        "type": "",
+        "searchable": false,
+        "aggregatable": false,
+        "count": 0,
+        "script": "",
+        "scripted": false,
+        "lang": "",
+        "conflictDescriptions": {},
+        "format": {},
+        "esTypes": [],
+        "readFromDocValues": false,
+        "subType": {},
+        "indexed": false,
+        "customLabel": "",
+        "shortDotsEnable": false
+    }
+}
+```
+
+
+#### Upsert a field
+
+Creates a new field or updates an existing one, if one already exists with the same name.
+
+Create a field by simply specifying its name.
+
+```
+PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
+{
+    "field": {
+        "name": "my_field"
+    }
+}
+```
+
+Create a field by specifying all field properties.
+
+```
+PUT /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
 {
     "field": {
         "name": "",
