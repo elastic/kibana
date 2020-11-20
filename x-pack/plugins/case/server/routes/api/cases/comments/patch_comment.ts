@@ -11,16 +11,11 @@ import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
-import {
-  CommentPatchRequestRt,
-  CaseResponseRt,
-  throwErrors,
-  decodeComment,
-} from '../../../../../common/api';
+import { CommentPatchRequestRt, CaseResponseRt, throwErrors } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError, flattenCaseSavedObject } from '../../utils';
+import { escapeHatch, wrapError, flattenCaseSavedObject, decodeComment } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
 export function initPatchCommentApi({
@@ -49,7 +44,7 @@ export function initPatchCommentApi({
         );
 
         const { id: queryCommentId, version: queryCommentVersion, ...queryRestAttributes } = query;
-        decodeComment(queryRestAttributes.type, queryRestAttributes);
+        decodeComment(queryRestAttributes);
 
         const myCase = await caseService.getCase({
           client,

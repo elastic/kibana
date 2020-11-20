@@ -9,15 +9,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
+import { decodeComment, flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
 
-import {
-  throwErrors,
-  CaseResponseRt,
-  CommentRequestRt,
-  CaseResponse,
-  decodeComment,
-} from '../../../common/api';
+import { throwErrors, CaseResponseRt, CommentRequestRt, CaseResponse } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
 import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
@@ -38,7 +32,7 @@ export const addComment = ({
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  decodeComment(comment.type, comment);
+  decodeComment(comment);
 
   const myCase = await caseService.getCase({
     client: savedObjectsClient,

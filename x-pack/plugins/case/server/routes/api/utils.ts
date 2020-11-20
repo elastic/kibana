@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom, { boomify, isBoom } from '@hapi/boom';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { schema } from '@kbn/config-schema';
-import { boomify, isBoom } from '@hapi/boom';
 import {
   CustomHttpResponseOptions,
   ResponseError,
@@ -23,6 +26,13 @@ import {
   ESCaseConnector,
   ESCaseAttributes,
   CommentRequest,
+  ContextTypeUserRt,
+  ContextTypeAlertRt,
+  CommentRequestUserType,
+  CommentRequestAlertType,
+  CommentType,
+  excess,
+  throwErrors,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -176,3 +186,19 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
 };
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
+
+const isUserContext = (context: CommentRequest): context is CommentRequestUserType => {
+  return context.type === CommentType.user;
+};
+
+const isAlertContext = (context: CommentRequest): context is CommentRequestAlertType => {
+  return context.type === CommentType.alert;
+};
+
+export const decodeComment = (comment: CommentRequest) => {
+  if (isUserContext(comment)) {
+    pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(Boom.badRequest), identity));
+  } else if (isAlertContext(comment)) {
+    pipe(excess(ContextTypeAlertRt).decode(comment), fold(throwErrors(Boom.badRequest), identity));
+  }
+};
