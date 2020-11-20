@@ -59,6 +59,13 @@ export interface SortDirectionNumeric {
 
 export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
 
+interface SearchField {
+  [key: string]: SearchFieldValue;
+}
+
+// @internal
+export type SearchFieldValue = string | SearchField;
+
 /**
  * search source fields
  */
@@ -89,9 +96,11 @@ export interface SearchSourceFields {
   /**
    * Retrieve fields via the search Fields API
    */
-  fields?: NameList;
+  fields?: SearchFieldValue[];
   /**
    * Retreive fields directly from _source (legacy behavior)
+   *
+   * @deprecated It is recommended to use `fields` wherever possible.
    */
   fieldsFromSource?: NameList;
   /**
