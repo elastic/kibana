@@ -17,6 +17,7 @@ import { response } from './mock_data/ux.mock';
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
     pathname: '/observability/overview/',
+    search: '',
   }),
 }));
 

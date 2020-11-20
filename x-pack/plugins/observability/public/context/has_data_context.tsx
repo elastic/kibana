@@ -36,7 +36,7 @@ const apps: DataContextApps[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics',
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
   const { core } = usePluginContext();
   const [forceUpdate, setForceUpdate] = useState('');
-  const { absStart, absEnd } = useTimeRange();
+  const { absoluteStart, absoluteEnd } = useTimeRange();
 
   const [hasData, setHasData] = useState<HasDataContextValue['hasData']>({});
 
@@ -46,7 +46,9 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
         try {
           if (app !== 'alert') {
             const params =
-              app === 'ux' ? { absoluteTime: { start: absStart, end: absEnd } } : undefined;
+              app === 'ux'
+                ? { absoluteTime: { start: absoluteStart, end: absoluteEnd } }
+                : undefined;
 
             const result = await getDataHandler(app)?.hasData(params);
             setHasData((prevState) => ({

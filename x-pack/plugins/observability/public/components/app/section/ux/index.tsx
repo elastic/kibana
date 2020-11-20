@@ -20,7 +20,7 @@ interface Props {
 
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasData } = useHasData();
-  const { rangeFrom, rangeTo, absStart, absEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
   const uxHasDataResponse = (hasData.ux?.hasData as UXHasDataResponse) || {};
   const serviceName = uxHasDataResponse.serviceName as string;
 
@@ -28,8 +28,8 @@ export function UXSection({ bucketSize }: Props) {
     () => {
       if (serviceName && bucketSize) {
         return getDataHandler('ux')?.fetchData({
-          absoluteTime: { start: absStart, end: absEnd },
-          relativeTime: { start: rangeFrom, end: rangeTo },
+          absoluteTime: { start: absoluteStart, end: absoluteEnd },
+          relativeTime: { start: relativeStart, end: relativeEnd },
           serviceName,
           bucketSize,
         });
@@ -37,7 +37,7 @@ export function UXSection({ bucketSize }: Props) {
     },
     // Absolute times shouldn't be used here, since it would refetch on every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, rangeFrom, rangeTo, forceUpdate, serviceName]
+    [bucketSize, relativeStart, relativeEnd, forceUpdate, serviceName]
   );
 
   if (!uxHasDataResponse?.hasData) {

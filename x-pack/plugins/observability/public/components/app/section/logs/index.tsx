@@ -47,29 +47,29 @@ export function LogsSection({ bucketSize }: Props) {
   const history = useHistory();
   const chartTheme = useChartTheme();
   const { forceUpdate, hasData } = useHasData();
-  const { rangeFrom, rangeTo, absStart, absEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
   const { data, status } = useFetcher(
     () => {
       if (bucketSize) {
         return getDataHandler('infra_logs')?.fetchData({
-          absoluteTime: { start: absStart, end: absEnd },
-          relativeTime: { start: rangeFrom, end: rangeTo },
+          absoluteTime: { start: absoluteStart, end: absoluteEnd },
+          relativeTime: { start: relativeStart, end: relativeEnd },
           bucketSize,
         });
       }
     },
     // Absolute times shouldn't be used here, since it would refetch on every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, rangeFrom, rangeTo, forceUpdate]
+    [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
   if (!hasData.infra_logs?.hasData) {
     return null;
   }
 
-  const min = moment.utc(absStart).valueOf();
-  const max = moment.utc(absEnd).valueOf();
+  const min = moment.utc(absoluteStart).valueOf();
+  const max = moment.utc(absoluteEnd).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 

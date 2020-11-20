@@ -49,21 +49,21 @@ const StyledProgress = styled.div<{ color?: string }>`
 export function MetricsSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
   const { forceUpdate, hasData } = useHasData();
-  const { rangeFrom, rangeTo, absStart, absEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
   const { data, status } = useFetcher(
     () => {
       if (bucketSize) {
         return getDataHandler('infra_metrics')?.fetchData({
-          absoluteTime: { start: absStart, end: absEnd },
-          relativeTime: { start: rangeFrom, end: rangeTo },
+          absoluteTime: { start: absoluteStart, end: absoluteEnd },
+          relativeTime: { start: relativeStart, end: relativeEnd },
           bucketSize,
         });
       }
     },
     // Absolute times shouldn't be used here, since it would refetch on every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, rangeFrom, rangeTo, forceUpdate]
+    [bucketSize, relativeStart, relativeEnd, forceUpdate]
   );
 
   if (!hasData.infra_metrics?.hasData) {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { default as React, default as React, useContext } from 'react';
+import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { useTrackPageview } from '../..';
 import { Alert } from '../../../../alerts/common';
@@ -13,7 +13,7 @@ import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
-import { DatePicker } from '../../components/shared/data_picker';
+import { DatePicker } from '../../components/shared/date_picker';
 import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -40,10 +40,10 @@ export function OverviewPage({ routeParams }: Props) {
   const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
 
-  const { rangeFrom, rangeTo, absStart, absEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
-  const relativeTime = { start: rangeFrom, end: rangeTo };
-  const absoluteTime = { start: absStart, end: absEnd };
+  const relativeTime = { start: relativeStart, end: relativeEnd };
+  const absoluteTime = { start: absoluteStart, end: absoluteEnd };
 
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 

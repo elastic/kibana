@@ -6,13 +6,14 @@
 
 import { useTimeRange } from './use_time_range';
 import * as pluginContext from './use_plugin_context';
-import { CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 import { ObservabilityPluginSetupDeps } from '../plugin';
 import * as kibanaUISettings from './use_kibana_ui_settings';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
     pathname: '/observability/overview/',
+    search: '',
   }),
 }));
 
@@ -20,6 +21,7 @@ describe('useTimeRange', () => {
   beforeAll(() => {
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       core: {} as CoreStart,
+      appMountParameters: {} as AppMountParameters,
       plugins: ({
         data: {
           query: {
@@ -44,14 +46,14 @@ describe('useTimeRange', () => {
   describe('when range from and to are not provided', () => {
     describe('when data plugin has time set', () => {
       it('returns ranges and absolute times from data plugin', () => {
-        const rangeFrom = '2020-10-08T06:00:00.000Z';
-        const rangeTo = '2020-10-08T07:00:00.000Z';
+        const relativeStart = '2020-10-08T06:00:00.000Z';
+        const relativeEnd = '2020-10-08T07:00:00.000Z';
         const timeRange = useTimeRange();
         expect(timeRange).toEqual({
-          rangeFrom,
-          rangeTo,
-          absStart: new Date(rangeFrom).valueOf(),
-          absEnd: new Date(rangeTo).valueOf(),
+          relativeStart,
+          relativeEnd,
+          absoluteStart: new Date(relativeStart).valueOf(),
+          absoluteEnd: new Date(relativeEnd).valueOf(),
         });
       });
     });
@@ -59,6 +61,7 @@ describe('useTimeRange', () => {
       beforeAll(() => {
         jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
           core: {} as CoreStart,
+          appMountParameters: {} as AppMountParameters,
           plugins: ({
             data: {
               query: {
@@ -76,14 +79,14 @@ describe('useTimeRange', () => {
         }));
       });
       it('returns ranges and absolute times from kibana default settings', () => {
-        const rangeFrom = '2020-10-08T05:00:00.000Z';
-        const rangeTo = '2020-10-08T06:00:00.000Z';
+        const relativeStart = '2020-10-08T05:00:00.000Z';
+        const relativeEnd = '2020-10-08T06:00:00.000Z';
         const timeRange = useTimeRange();
         expect(timeRange).toEqual({
-          rangeFrom,
-          rangeTo,
-          absStart: new Date(rangeFrom).valueOf(),
-          absEnd: new Date(rangeTo).valueOf(),
+          relativeStart,
+          relativeEnd,
+          absoluteStart: new Date(relativeStart).valueOf(),
+          absoluteEnd: new Date(relativeEnd).valueOf(),
         });
       });
     });
