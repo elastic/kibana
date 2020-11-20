@@ -148,13 +148,10 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
               )}
               iconType="questionInCircle"
             >
-              {i18n.translate(
-                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutTitle',
-                {
-                  defaultMessage:
-                    'Force merge, shrink, freeze and searchable snapshots are not allowed when this action is enabled in the hot phase.',
-                }
-              )}
+              {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody', {
+                defaultMessage:
+                  'Force merge, shrink, freeze and searchable snapshots are not allowed when this action is enabled in the hot phase.',
+              })}
             </EuiCallOut>
             <EuiSpacer size="s" />
           </>

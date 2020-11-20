@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiSpacer } from '@elastic/eui';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
 
