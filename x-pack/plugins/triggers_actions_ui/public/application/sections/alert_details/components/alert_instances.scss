@@ -1,0 +1,14 @@
+// Add truncation to heath status
+
+.actionsInstanceList__health {
+  width: 100%;
+
+  .euiFlexItem:last-of-type {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    width: 85%;
+  }
+}

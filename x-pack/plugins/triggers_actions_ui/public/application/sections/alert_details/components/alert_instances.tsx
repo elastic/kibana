@@ -24,6 +24,7 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import './alert_instances.scss';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -62,11 +63,10 @@ export const alertInstancesTableColumns = (
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
       { defaultMessage: 'Status' }
     ),
-    width: '20%',
-    truncateText: true,
+    width: '18%',
     render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
       return (
-        <EuiHealth color={value.healthColor}>
+        <EuiHealth color={value.healthColor} className="actionsInstanceList__health">
           {value.label}
           {value.actionGroup ? ` (${value.actionGroup})` : ``}
         </EuiHealth>
