@@ -84,7 +84,7 @@ function buildCSV(
  * @param datatables - data (as a dictionary of Datatable) to be translated into CSVs. It can contain multiple tables.
  * @param options - set of options for the exporter
  *
- * @returns A dictionary of files to download: the key is the filename (w/o extension) and the
+ * @returns A dictionary of files to download: the key is the filename and the value the CSV string
  */
 export function exportAsCSVs(
   filename: string,

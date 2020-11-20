@@ -7,7 +7,10 @@
 <b>Signature:</b>
 
 ```typescript
-export declare function exportAsCSVs(filename: string, datatables: Record<string, Datatable> | undefined, { asString, ...options }: CSVOptions): Record<string, string> | undefined;
+export declare function exportAsCSVs(filename: string, datatables: Record<string, Datatable> | undefined, options: CSVOptions): Record<string, {
+    content: string;
+    type: string;
+}> | undefined;
 ```
 
 ## Parameters
@@ -16,11 +19,14 @@ export declare function exportAsCSVs(filename: string, datatables: Record<string
 |  --- | --- | --- |
 |  filename | <code>string</code> | filename to use (either as is, or as prefix for multiple CSVs) for the files to download |
 |  datatables | <code>Record&lt;string, Datatable&gt; &#124; undefined</code> | data (as a dictionary of Datatable) to be translated into CSVs. It can contain multiple tables. |
-|  { asString, ...options } | <code>CSVOptions</code> |  |
+|  options | <code>CSVOptions</code> | set of options for the exporter |
 
 <b>Returns:</b>
 
-`Record<string, string> | undefined`
+`Record<string, {
+    content: string;
+    type: string;
+}> | undefined`
 
-undefined (download) - Record<!-- -->&lt;<!-- -->string, string<!-- -->&gt; (only for testing)
+A dictionary of files to download: the key is the filename and the value the CSV string
 
