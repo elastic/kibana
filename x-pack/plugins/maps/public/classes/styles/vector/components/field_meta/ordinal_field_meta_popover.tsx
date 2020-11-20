@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import _ from 'lodash';
 import React, { ChangeEvent, Fragment, MouseEvent } from 'react';
 import {
+  EuiFieldNumber,
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
@@ -24,6 +24,9 @@ import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 import { STEP_FUNCTION, VECTOR_STYLES } from '../../../../../../common/constants';
+import { PercentilesForm } from './percentiles_form';
+
+const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 const easingTitle = i18n.translate('xpack.maps.styles.dataDomainOptions.easingTitle', {
   defaultMessage: `Easing between min and max`,
@@ -61,7 +64,7 @@ const STEP_FUNCTION_OPTIONS = [
           <p className="euiTextColor--subdued">
             <FormattedMessage
               id="xpack.maps.styles.dataDomainOptions.percentilesDescription"
-              defaultMessage="Use percentiles to divide style range into bands, values are mapped into style bands"
+              defaultMessage="Use percentiles to divide style into bands, values are mapped into style bands"
             />
           </p>
         </EuiText>
@@ -70,13 +73,13 @@ const STEP_FUNCTION_OPTIONS = [
   },
 ];
 
-type Props = {
+interface Props {
   fieldMetaOptions: FieldMetaOptions;
   styleName: VECTOR_STYLES;
   onChange: (updatedOptions: unknown) => void;
   switchDisabled: boolean;
   stepFunction: STEP_FUNCTION;
-};
+}
 
 export function OrdinalFieldMetaPopover(props: Props) {
   function onIsEnabledChange(event: EuiSwitchEvent) {
@@ -107,7 +110,7 @@ export function OrdinalFieldMetaPopover(props: Props) {
               isEnabled: true,
               percentiles: props.fieldMetaOptions.percentiles
                 ? props.fieldMetaOptions.percentiles
-                : [50, 75, 90, 95, 99],
+                : DEFAULT_PERCENTILES,
             },
           }
         : {
@@ -195,7 +198,25 @@ export function OrdinalFieldMetaPopover(props: Props) {
   }
 
   function renderPercentilesForm() {
-    return null;
+    function onPercentilesChange(percentiles: number[]) {
+      props.onChange({
+        fieldMetaOptions: {
+          ...props.fieldMetaOptions,
+          percentiles: percentiles.sort(),
+        },
+      });
+    }
+
+    return (
+      <PercentilesForm
+        initialPercentiles={
+          props.fieldMetaOptions.percentiles
+            ? props.fieldMetaOptions.percentiles
+            : DEFAULT_PERCENTILES
+        }
+        onChange={onPercentilesChange}
+      />
+    );
   }
 
   return (
@@ -203,7 +224,7 @@ export function OrdinalFieldMetaPopover(props: Props) {
       <Fragment>
         <EuiFormRow
           label={i18n.translate('xpack.maps.styles.dataDomainOptions.stepFunctionLabel', {
-            defaultMessage: 'Data fitting',
+            defaultMessage: 'Fitting',
           })}
           helpText={i18n.translate(
             'xpack.maps.styles.dataDomainOptions.stepFunctionTooltipContent',
