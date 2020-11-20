@@ -299,7 +299,7 @@ export async function enrichHostMetadata(
         true
       );
     const endpointPolicy = ((agentPolicy?.package_policies || []) as PackagePolicy[]).find(
-      (x: PackagePolicy) => x.package?.name === 'endpoint'
+      (policy: PackagePolicy) => policy.package?.name === 'endpoint'
     );
 
     policyInfo = {
