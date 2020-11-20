@@ -37,6 +37,7 @@ const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 interface Props {
   addFilters: ((filters: Filter[]) => Promise<void>) | null;
+  backgroundColor: string;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
@@ -243,7 +244,10 @@ export class MapContainer extends Component<Props, State> {
         data-title={this.props.title}
         data-description={this.props.description}
       >
-        <EuiFlexItem className="mapMapWrapper">
+        <EuiFlexItem
+          className="mapMapWrapper"
+          style={{ backgroundColor: this.props.backgroundColor }}
+        >
           <MBMap
             addFilters={addFilters}
             getFilterActions={getFilterActions}

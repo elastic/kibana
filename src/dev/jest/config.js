@@ -27,6 +27,7 @@ export default {
     '<rootDir>/src/legacy/server',
     '<rootDir>/src/cli',
     '<rootDir>/src/cli_keystore',
+    '<rootDir>/src/cli_encryption_keys',
     '<rootDir>/src/cli_plugin',
     '<rootDir>/packages/kbn-test/target/functional_test_runner',
     '<rootDir>/src/dev',
