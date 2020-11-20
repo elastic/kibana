@@ -24,8 +24,8 @@ export interface IStyleProperty<T> {
   getStyleName(): VECTOR_STYLES;
   getOptions(): T;
   renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
-  renderFieldMetaPopover(
-    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
+  renderDataMappingPopover(
+    onChange: (updatedOptions: Partial<T>) => void
   ): ReactElement<any> | null;
   getDisplayStyleName(): string;
 }
@@ -75,8 +75,8 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
     return null;
   }
 
-  renderFieldMetaPopover(
-    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
+  renderDataMappingPopover(
+    onChange: (updatedOptions: Partial<T>) => void
   ): ReactElement<any> | null {
     return null;
   }

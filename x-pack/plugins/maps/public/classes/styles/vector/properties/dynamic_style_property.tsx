@@ -14,6 +14,7 @@ import {
   FIELD_ORIGIN,
   MB_LOOKUP_FUNCTION,
   SOURCE_META_DATA_REQUEST_ID,
+  STEP_FUNCTION,
   STYLE_TYPE,
   VECTOR_STYLES,
   RawValue,
@@ -328,7 +329,7 @@ export class DynamicStyleProperty<T>
     }
   }
 
-  renderFieldMetaPopover(onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void) {
+  renderDataMappingPopover(onChange: (updatedOptions: Partial<T>) => void) {
     if (!this.supportsFieldMeta()) {
       return null;
     }
@@ -338,15 +339,20 @@ export class DynamicStyleProperty<T>
     return this.isCategorical() ? (
       <CategoricalFieldMetaPopover
         fieldMetaOptions={this.getFieldMetaOptions()}
-        onChange={onFieldMetaOptionsChange}
+        onChange={onChange}
         switchDisabled={switchDisabled}
       />
     ) : (
       <OrdinalFieldMetaPopover
         fieldMetaOptions={this.getFieldMetaOptions()}
         styleName={this.getStyleName()}
-        onChange={onFieldMetaOptionsChange}
+        onChange={onChange}
         switchDisabled={switchDisabled}
+        stepFunction={
+          `stepFunction` in this._options
+            ? this._options.stepFunction
+            : STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX
+        }
       />
     );
   }

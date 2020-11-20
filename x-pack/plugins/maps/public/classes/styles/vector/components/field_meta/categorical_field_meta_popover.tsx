@@ -13,15 +13,17 @@ import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 
 type Props = {
   fieldMetaOptions: FieldMetaOptions;
-  onChange: (fieldMetaOptions: FieldMetaOptions) => void;
+  onChange: (updatedOptions: unknown) => void;
   switchDisabled: boolean;
 };
 
 export function CategoricalFieldMetaPopover(props: Props) {
   const onIsEnabledChange = (event: EuiSwitchEvent) => {
     props.onChange({
-      ...props.fieldMetaOptions,
-      isEnabled: event.target.checked,
+      fieldMetaOptions: {
+        ...props.fieldMetaOptions,
+        isEnabled: event.target.checked,
+      },
     });
   };
 
@@ -30,7 +32,7 @@ export function CategoricalFieldMetaPopover(props: Props) {
       <EuiFormRow display="columnCompressedSwitch">
         <EuiSwitch
           label={i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.categoricalLabel', {
-            defaultMessage: 'Get categories from indices',
+            defaultMessage: 'Get categories from data set',
           })}
           checked={props.fieldMetaOptions.isEnabled}
           onChange={onIsEnabledChange}

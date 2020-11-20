@@ -44,7 +44,7 @@ export class FieldMetaPopover extends Component<Props, State> {
       >
         <FormattedMessage
           id="xpack.maps.styles.fieldMetaOptions.popoverToggle"
-          defaultMessage="Data domain options"
+          defaultMessage="Data mapping"
         />
       </EuiButtonEmpty>
     );

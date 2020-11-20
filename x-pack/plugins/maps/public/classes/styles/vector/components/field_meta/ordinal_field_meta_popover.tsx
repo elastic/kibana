@@ -7,66 +7,127 @@
 
 import _ from 'lodash';
 import React, { ChangeEvent, Fragment, MouseEvent } from 'react';
-import { EuiFormRow, EuiIcon, EuiRange, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiRange,
+  EuiSuperSelect,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
-import { VECTOR_STYLES } from '../../../../../../common/constants';
+import { STEP_FUNCTION, VECTOR_STYLES } from '../../../../../../common/constants';
 
-/* function getStepFunctionSelect(styleName: VECTOR_STYLES) {
-  switch (styleName) {
-    case VECTOR_STYLES.FILL_COLOR:
-    case VECTOR_STYLES.LINE_COLOR:
-    case VECTOR_STYLES.LINE_WIDTH:
-    case VECTOR_STYLES.ICON_SIZE:
-      return i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.sizeLabel', {
-        defaultMessage: 'Calculate symbol size range from indices',
-      });
-    default:
-      return null;
-  }
-}*/
+const easingTitle = i18n.translate('xpack.maps.styles.dataDomainOptions.easingTitle', {
+  defaultMessage: `Easing between min and max`,
+});
+
+const percentilesTitle = i18n.translate('xpack.maps.styles.dataDomainOptions.percentilesTitle', {
+  defaultMessage: `Percentiles`,
+});
+
+const STEP_FUNCTION_OPTIONS = [
+  {
+    value: STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX,
+    inputDisplay: easingTitle,
+    dropdownDisplay: (
+      <Fragment>
+        <strong>{easingTitle}</strong>
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">
+            <FormattedMessage
+              id="xpack.maps.styles.dataDomainOptions.easingDescription"
+              defaultMessage="Values are fit from the data domain to the style on a linear scale"
+            />
+          </p>
+        </EuiText>
+      </Fragment>
+    ),
+  },
+  {
+    value: STEP_FUNCTION.PERCENTILES,
+    inputDisplay: percentilesTitle,
+    dropdownDisplay: (
+      <Fragment>
+        <strong>{percentilesTitle}</strong>
+        <EuiText size="s" color="subdued">
+          <p className="euiTextColor--subdued">
+            <FormattedMessage
+              id="xpack.maps.styles.dataDomainOptions.percentilesDescription"
+              defaultMessage="Use percentiles to divide style range into bands, values are mapped into style bands"
+            />
+          </p>
+        </EuiText>
+      </Fragment>
+    ),
+  },
+];
 
 type Props = {
   fieldMetaOptions: FieldMetaOptions;
   styleName: VECTOR_STYLES;
-  onChange: (fieldMetaOptions: FieldMetaOptions) => void;
+  onChange: (updatedOptions: unknown) => void;
   switchDisabled: boolean;
+  stepFunction: STEP_FUNCTION;
 };
 
 export function OrdinalFieldMetaPopover(props: Props) {
-  const onIsEnabledChange = (event: EuiSwitchEvent) => {
+  function onIsEnabledChange(event: EuiSwitchEvent) {
     props.onChange({
-      ...props.fieldMetaOptions,
-      isEnabled: event.target.checked,
+      fieldMetaOptions: {
+        ...props.fieldMetaOptions,
+        isEnabled: event.target.checked,
+      },
     });
-  };
+  }
 
-  const onSigmaChange = (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
+  function onSigmaChange(event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) {
     props.onChange({
-      ...props.fieldMetaOptions,
-      sigma: parseInt(event.currentTarget.value, 10),
+      fieldMetaOptions: {
+        ...props.fieldMetaOptions,
+        sigma: parseInt(event.currentTarget.value, 10),
+      },
     });
-  };
+  }
 
-  function renderSigmaInput() {
-    if (!props.fieldMetaOptions.isEnabled) {
-      return null;
-    }
+  function onStepFunctionChange(value: STEP_FUNCTION) {
+    const updatedOptions =
+      value === STEP_FUNCTION.PERCENTILES
+        ? {
+            stepFunction: value,
+            fieldMetaOptions: {
+              ...props.fieldMetaOptions,
+              isEnabled: true,
+              percentiles: props.fieldMetaOptions.percentiles
+                ? props.fieldMetaOptions.percentiles
+                : [50, 75, 90, 95, 99],
+            },
+          }
+        : {
+            stepFunction: value,
+          };
+    props.onChange(updatedOptions);
+  }
 
-    return (
+  function renderEasingForm() {
+    const sigmaInput = props.fieldMetaOptions.isEnabled ? (
       <EuiFormRow
         label={
           <EuiToolTip
             anchorClassName="eui-alignMiddle"
-            content={i18n.translate('xpack.maps.styles.fieldMetaOptions.sigmaTooltipContent', {
-              defaultMessage: `The min and max from elasticsearch are clamped to a standard deviation range from the median.
-              Set Sigma to a smaller value to minimize outliers by moving the min and max closer to the median.`,
+            content={i18n.translate('xpack.maps.styles.dataDomainOptions.sigmaTooltipContent', {
+              defaultMessage: `Set sigma to a smaller value to minimize outliers by moving the min and max closer to the median.`,
             })}
           >
             <span>
-              {i18n.translate('xpack.maps.styles.fieldMetaOptions.sigmaLabel', {
+              {i18n.translate('xpack.maps.styles.dataDomainOptions.sigmaLabel', {
                 defaultMessage: 'Sigma',
               })}{' '}
               <EuiIcon type="questionInCircle" color="subdued" />
@@ -86,17 +147,15 @@ export function OrdinalFieldMetaPopover(props: Props) {
           compressed
         />
       </EuiFormRow>
-    );
-  }
+    ) : null;
 
-  return (
-    <FieldMetaPopover>
+    return (
       <Fragment>
         <EuiFormRow display="columnCompressedSwitch">
           <>
             <EuiSwitch
-              label={i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabledSwitchLabel', {
-                defaultMessage: 'Get min and max from elasticsearch',
+              label={i18n.translate('xpack.maps.styles.dataDomainOptions.isEnabledSwitchLabel', {
+                defaultMessage: 'Get min and max from data distribution',
               })}
               checked={props.fieldMetaOptions.isEnabled}
               onChange={onIsEnabledChange}
@@ -104,21 +163,69 @@ export function OrdinalFieldMetaPopover(props: Props) {
               disabled={props.switchDisabled}
             />{' '}
             <EuiToolTip
-              content={i18n.translate(
-                'xpack.maps.styles.fieldMetaOptions.isEnabledTooltipContent',
-                {
-                  defaultMessage: `When disabled, min and max are calculated with data from the local layer.
-                The min and max are re-calculated when layer data changes.
-                As a result, styling bands might be inconsistent as users pan, zoom, and filter the map.`,
-                }
-              )}
+              content={
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.maps.styles.dataDomainOptions.isEnabled.local"
+                      defaultMessage={`When disabled, min and max are calculated from local data.
+                      Min and max are re-calculated when layer data changes.
+                      Style bands might be inconsistent as users pan, zoom, and filter the map.`}
+                    />
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.maps.styles.dataDomainOptions.isEnabled.server"
+                      defaultMessage={`When enabled, min and max are calculated for the entire data set.
+                      Style bands are consistent as users pan, zoom, and filter the map.
+                      Min and max are clamped to the standard deviation (sigma) from the median to minimize outliers.`}
+                    />
+                  </p>
+                </EuiText>
+              }
             >
               <EuiIcon type="questionInCircle" color="subdued" />
             </EuiToolTip>
           </>
         </EuiFormRow>
 
-        {renderSigmaInput()}
+        {sigmaInput}
+      </Fragment>
+    );
+  }
+
+  function renderPercentilesForm() {
+    return null;
+  }
+
+  return (
+    <FieldMetaPopover>
+      <Fragment>
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.styles.dataDomainOptions.stepFunctionLabel', {
+            defaultMessage: 'Data fitting',
+          })}
+          helpText={i18n.translate(
+            'xpack.maps.styles.dataDomainOptions.stepFunctionTooltipContent',
+            {
+              defaultMessage: `Specify how values are fit from the data domain to the style`,
+            }
+          )}
+        >
+          <EuiSuperSelect
+            options={STEP_FUNCTION_OPTIONS}
+            valueOfSelected={props.stepFunction}
+            onChange={onStepFunctionChange}
+            itemLayoutAlign="top"
+            hasDividers
+          />
+        </EuiFormRow>
+
+        <EuiHorizontalRule />
+
+        {props.stepFunction === STEP_FUNCTION.PERCENTILES
+          ? renderPercentilesForm()
+          : renderEasingForm()}
       </Fragment>
     </FieldMetaPopover>
   );
