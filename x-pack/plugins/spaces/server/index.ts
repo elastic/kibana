@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
-import { ConfigSchema } from './config';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
+import { ConfigSchema, spacesConfigDeprecationProvider } from './config';
 import { Plugin } from './plugin';
 
 // These exports are part of public Spaces plugin contract, any change in signature of exported
@@ -22,6 +22,9 @@ export { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 export { ISpacesClient } from './spaces_client';
 export { Space } from '../common/model/space';
 
-export const config = { schema: ConfigSchema };
+export const config: PluginConfigDescriptor = {
+  schema: ConfigSchema,
+  deprecations: spacesConfigDeprecationProvider,
+};
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new Plugin(initializerContext);
