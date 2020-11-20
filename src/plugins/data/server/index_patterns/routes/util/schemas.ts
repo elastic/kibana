@@ -24,7 +24,7 @@ export const serializedFieldFormatSchema = schema.object({
   params: schema.maybe(schema.any()),
 });
 
-export const fieldSpecSchema = schema.object({
+export const fieldSpecSchemaFields = {
   name: schema.string({
     maxLength: 1_000,
   }),
@@ -73,4 +73,6 @@ export const fieldSpecSchema = schema.object({
   indexed: schema.maybe(schema.boolean()),
   customLabel: schema.maybe(schema.string()),
   shortDotsEnable: schema.maybe(schema.boolean()),
-});
+};
+
+export const fieldSpecSchema = schema.object(fieldSpecSchemaFields);

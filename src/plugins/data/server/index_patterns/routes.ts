@@ -28,6 +28,7 @@ import { registerCreateFieldRoute } from './routes/fields/create_field';
 import { registerPutFieldRoute } from './routes/fields/put_field';
 import { registerGetFieldRoute } from './routes/fields/get_field';
 import { registerDeleteFieldRoute } from './routes/fields/delete_field';
+import { registerUpdateFieldRoute } from './routes/fields/update_field';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const parseMetaFields = (metaFields: string | string[]) => {
@@ -50,6 +51,7 @@ export function registerRoutes(http: HttpServiceSetup) {
   registerPutFieldRoute(router);
   registerGetFieldRoute(router);
   registerDeleteFieldRoute(router);
+  registerUpdateFieldRoute(router);
 
   router.get(
     {

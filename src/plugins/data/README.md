@@ -69,8 +69,8 @@ Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
   - Create a field &mdash; `POST /api/index_patterns/index_pattern/{id}/field`
   - Upsert a field &mdash; `PUT /api/index_patterns/index_pattern/{id}/field`
   - Fetch a field &mdash; `GET /api/index_patterns/index_pattern/{id}/field/{name}`
-  - Update a an existing field &mdash; `POST /api/index_patterns/index_pattern/{id}/field/{name}`
   - Remove a field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/field/{name}`
+  - Update a an existing field &mdash; `POST /api/index_patterns/index_pattern/{id}/field/{name}`
 
 #### Create an index pattern
 
@@ -340,6 +340,36 @@ Delete a field of an index pattern.
 
 ```
 DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field/<name>
+```
+
+#### Update a an existing field
+
+Updates an exiting field by mergin provided properties with the existing ones. If
+there is no existing field with the specified name, returns a `404 Not Found` error.
+
+You can specify any field properties, except `name` which is specified in the URL path.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field/{name}
+{
+    "field": {
+        "type": "",
+        "searchable": false,
+        "aggregatable": false,
+        "count": 0,
+        "script": "",
+        "scripted": false,
+        "lang": "",
+        "conflictDescriptions": {},
+        "format": {},
+        "esTypes": [],
+        "readFromDocValues": false,
+        "subType": {},
+        "indexed": false,
+        "customLabel": "",
+        "shortDotsEnable": false
+    }
+}
 ```
 
 
