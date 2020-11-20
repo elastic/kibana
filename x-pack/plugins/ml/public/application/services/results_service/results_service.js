@@ -12,6 +12,7 @@ import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
   SWIM_LANE_DEFAULT_PAGE_SIZE,
 } from '../../explorer/explorer_constants';
+import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
@@ -285,7 +286,7 @@ export function resultsServiceProvider(mlApiServices) {
                       influencerFieldValues: {
                         terms: {
                           field: 'influencer_field_value',
-                          size: maxFieldValues,
+                          size: !!maxFieldValues ? maxFieldValues : ANOMALY_SWIM_LANE_HARD_LIMIT,
                           order: {
                             maxAnomalyScore: 'desc',
                           },
@@ -415,7 +416,7 @@ export function resultsServiceProvider(mlApiServices) {
                   influencerFieldValues: {
                     terms: {
                       field: 'influencer_field_value',
-                      size: maxResults !== undefined ? maxResults : 2,
+                      size: !!maxResults ? maxResults : 2,
                       order: {
                         maxAnomalyScore: 'desc',
                       },
@@ -1293,7 +1294,14 @@ export function resultsServiceProvider(mlApiServices) {
     // criteria, time range, and aggregation interval.
     // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
     // 'fieldValue' properties.
-    getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, intervalMs) {
+    getRecordMaxScoreByTime(
+      jobId,
+      criteriaFields,
+      earliestMs,
+      latestMs,
+      intervalMs,
+      actualPlotFunctionIfMetric
+    ) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -1321,7 +1329,18 @@ export function resultsServiceProvider(mlApiServices) {
             },
           });
         });
+        if (actualPlotFunctionIfMetric !== undefined) {
+          const mlFunctionToPlotIfMetric =
+            actualPlotFunctionIfMetric !== undefined
+              ? aggregationTypeTransform.toML(actualPlotFunctionIfMetric)
+              : actualPlotFunctionIfMetric;
 
+          mustCriteria.push({
+            term: {
+              function_description: mlFunctionToPlotIfMetric,
+            },
+          });
+        }
         mlApiServices.results
           .anomalySearch(
             {

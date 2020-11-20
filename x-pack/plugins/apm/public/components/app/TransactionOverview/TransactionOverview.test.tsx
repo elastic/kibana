@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  fireEvent,
-  getByText,
-  queryByLabelText,
-  render,
-} from '@testing-library/react';
+import { fireEvent, getByText, queryByLabelText } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { CoreStart } from 'kibana/public';
 import React from 'react';
@@ -20,7 +15,10 @@ import { UrlParamsProvider } from '../../../context/UrlParamsContext';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import * as useFetcherHook from '../../../hooks/useFetcher';
 import * as useServiceTransactionTypesHook from '../../../hooks/useServiceTransactionTypes';
-import { disableConsoleWarning } from '../../../utils/testHelpers';
+import {
+  disableConsoleWarning,
+  renderWithTheme,
+} from '../../../utils/testHelpers';
 import { fromQuery } from '../../shared/Links/url_helpers';
 import { TransactionOverview } from './';
 
@@ -54,7 +52,7 @@ function setup({
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
-  return render(
+  return renderWithTheme(
     <KibanaReactContext.Provider>
       <MockApmPluginContextWrapper>
         <Router history={history}>
@@ -121,14 +119,18 @@ describe('TransactionOverview', () => {
         },
       });
 
-      expect(history.location.search).toEqual('?transactionType=secondType');
+      expect(history.location.search).toEqual(
+        '?transactionType=secondType&rangeFrom=now-15m&rangeTo=now'
+      );
       expect(getByText(container, 'firstType')).toBeInTheDocument();
       expect(getByText(container, 'secondType')).toBeInTheDocument();
 
       fireEvent.click(getByText(container, 'firstType'));
 
       expect(history.push).toHaveBeenCalled();
-      expect(history.location.search).toEqual('?transactionType=firstType');
+      expect(history.location.search).toEqual(
+        '?transactionType=firstType&rangeFrom=now-15m&rangeTo=now'
+      );
     });
   });
 

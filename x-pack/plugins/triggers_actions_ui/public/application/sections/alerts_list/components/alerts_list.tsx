@@ -83,7 +83,7 @@ export const AlertsList: React.FunctionComponent = () => {
     uiSettings,
     docLinks,
     charts,
-    dataPlugin,
+    data,
     kibanaFeatures,
   } = useAppDependencies();
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
@@ -668,10 +668,11 @@ export const AlertsList: React.FunctionComponent = () => {
           uiSettings,
           docLinks,
           charts,
-          dataFieldsFormats: dataPlugin.fieldFormats,
+          dataFieldsFormats: data.fieldFormats,
           capabilities,
-          dataUi: dataPlugin.ui,
-          dataIndexPatterns: dataPlugin.indexPatterns,
+          dataUi: data.ui,
+          dataIndexPatterns: data.indexPatterns,
+          kibanaFeatures,
         }}
       >
         <AlertAdd

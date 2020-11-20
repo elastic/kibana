@@ -108,7 +108,13 @@ test('Clone adds a new embeddable', async () => {
   );
   expect(newPanelId).toBeDefined();
   const newPanel = container.getInput().panels[newPanelId!];
-  expect(newPanel.type).toEqual(embeddable.type);
+  expect(newPanel.type).toEqual('placeholder');
+  // let the placeholder load
+  await dashboard.untilEmbeddableLoaded(newPanelId!);
+  await new Promise((r) => process.nextTick(r)); // Allow the current loop of the event loop to run to completion
+  // now wait for the full embeddable to replace it
+  const loadedPanel = await dashboard.untilEmbeddableLoaded(newPanelId!);
+  expect(loadedPanel.type).toEqual(embeddable.type);
 });
 
 test('Clones an embeddable without a saved object ID', async () => {

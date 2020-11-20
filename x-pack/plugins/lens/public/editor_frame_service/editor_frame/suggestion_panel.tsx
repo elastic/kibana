@@ -23,7 +23,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import { DataPublicPluginStart, ExecutionContextSearch } from 'src/plugins/data/public';
 import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
@@ -33,7 +33,6 @@ import {
 } from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { validateDatasourceAndVisualization } from './state_helpers';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
@@ -188,6 +187,7 @@ export function SuggestionPanel({
         visualizationMap,
         activeVisualizationId: currentVisualizationId,
         visualizationState: currentVisualizationState,
+        activeData: frame.activeData,
       })
         .filter((suggestion) => !suggestion.hide)
         .filter(
@@ -273,6 +273,7 @@ export function SuggestionPanel({
     return (props: ReactExpressionRendererProps) => (
       <ExpressionRendererComponent {...props} searchContext={context} reload$={autoRefreshFetch$} />
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plugins.data.query.timefilter.timefilter, context]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);

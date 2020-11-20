@@ -35,9 +35,9 @@ import {
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { Agent, EsAssetReference } from '../../../../../ingest_manager/common/types/models';
+import { Agent, EsAssetReference } from '../../../../../fleet/common/types/models';
 import { createV1SearchResponse } from './support/test_support';
-import { PackageService } from '../../../../../ingest_manager/server/services';
+import { PackageService } from '../../../../../fleet/server/services';
 
 describe('test endpoint route v1', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -50,7 +50,7 @@ describe('test endpoint route v1', () => {
   let routeHandler: RequestHandler<any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeConfig: RouteConfig<any, any, any, any>;
-  // tests assume that ingestManager is enabled, and thus agentService is available
+  // tests assume that fleet is enabled, and thus agentService is available
   let mockAgentService: Required<
     ReturnType<typeof createMockEndpointAppContextServiceStartContract>
   >['agentService'];

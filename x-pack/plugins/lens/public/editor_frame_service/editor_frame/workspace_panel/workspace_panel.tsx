@@ -20,7 +20,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import {
+  DataPublicPluginStart,
+  ExecutionContextSearch,
+  TimefilterContract,
+} from 'src/plugins/data/public';
 import {
   ExpressionRendererEvent,
   ExpressionRenderError,
@@ -44,12 +48,9 @@ import {
   VisualizeFieldContext,
 } from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
-import {
-  DataPublicPluginStart,
-  TimefilterContract,
-} from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
+import { LensInspectorAdapters } from '../../types';
 import { getOriginalRequestErrorMessage } from '../../error_helper';
 import { validateDatasourceAndVisualization } from '../state_helpers';
 
@@ -296,6 +297,7 @@ export function WorkspacePanel({
         expression={expression}
         framePublicAPI={framePublicAPI}
         timefilter={plugins.data.query.timefilter.timefilter}
+        dispatch={dispatch}
         onEvent={onEvent}
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError }}
@@ -339,11 +341,13 @@ export const InnerVisualizationWrapper = ({
   setLocalState,
   localState,
   ExpressionRendererComponent,
+  dispatch,
 }: {
   expression: Ast | null | undefined;
   framePublicAPI: FramePublicAPI;
   timefilter: TimefilterContract;
   onEvent: (event: ExpressionRendererEvent) => void;
+  dispatch: (action: Action) => void;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationError?: Array<{ shortMessage: string; longMessage: string }>;
@@ -369,7 +373,19 @@ export const InnerVisualizationWrapper = ({
     ]
   );
 
-  if (localState.configurationValidationError) {
+  const onData$ = useCallback(
+    (data: unknown, inspectorAdapters?: LensInspectorAdapters) => {
+      if (inspectorAdapters && inspectorAdapters.tables) {
+        dispatch({
+          type: 'UPDATE_ACTIVE_DATA',
+          tables: inspectorAdapters.tables,
+        });
+      }
+    },
+    [dispatch]
+  );
+
+  if (localState.configurationValidationError?.length) {
     let showExtraErrors = null;
     if (localState.configurationValidationError.length > 1) {
       if (localState.expandError) {
@@ -429,7 +445,7 @@ export const InnerVisualizationWrapper = ({
     );
   }
 
-  if (localState.expressionBuildError) {
+  if (localState.expressionBuildError?.length) {
     return (
       <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
         <EuiFlexItem>
@@ -455,6 +471,7 @@ export const InnerVisualizationWrapper = ({
         searchContext={context}
         reload$={autoRefreshFetch$}
         onEvent={onEvent}
+        onData$={onData$}
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
 

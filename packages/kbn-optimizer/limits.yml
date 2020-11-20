@@ -36,7 +36,7 @@ pageLoadAssetSize:
   indexManagement: 140608
   indexPatternManagement: 154222
   infra: 197873
-  ingestManager: 415829
+  fleet: 415829
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -45,6 +45,7 @@ pageLoadAssetSize:
   kibanaReact: 161921
   kibanaUtils: 198829
   lens: 96624
+  lensOss: 19341
   licenseManagement: 41817
   licensing: 39008
   lists: 183665
@@ -53,6 +54,7 @@ pageLoadAssetSize:
   maps: 183610
   mapsLegacy: 116817
   mapsLegacyLicensing: 20214
+  mapsOss: 19284
   ml: 82187
   monitoring: 50000
   navigation: 37269
@@ -100,3 +102,5 @@ pageLoadAssetSize:
   visualizations: 295025
   visualize: 57431
   watcher: 43598
+  runtimeFields: 41752
+  stackAlerts: 29684
