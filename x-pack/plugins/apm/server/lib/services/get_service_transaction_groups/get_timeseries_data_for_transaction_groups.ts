@@ -47,7 +47,7 @@ export async function getTimeseriesDataForTransactionGroups({
   size: number;
   numBuckets: number;
 }) {
-  const { intervalString } = getBucketSize(start, end, numBuckets);
+  const { intervalString } = getBucketSize({ start, end, numBuckets });
 
   const timeseriesResponse = await apmEventClient.search({
     apm: {

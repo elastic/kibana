@@ -267,6 +267,9 @@ export const serviceTransactionGroupsRoute = createRoute({
       }),
     ]),
   }),
+  options: {
+    tags: ['access:apm'],
+  },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
