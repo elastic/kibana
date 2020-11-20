@@ -31,7 +31,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
 
   describe('create_rules', () => {
@@ -59,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
         await esArchiver.unload('auditbeat/hosts');
       });
 
