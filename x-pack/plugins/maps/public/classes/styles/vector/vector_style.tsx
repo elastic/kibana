@@ -82,9 +82,9 @@ export interface IVectorStyle extends IStyle {
   getSourceFieldNames(): string[];
   getStyleMeta(): StyleMeta;
   getDescriptorWithUpdatedStyleProps(
-    nextFields: IESAggField[],
+    nextFields: IField[],
     mapColors: string[],
-    oldFields: IESAggField[]
+    oldFields: IField[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
   isTimeAware: () => boolean;
@@ -173,20 +173,20 @@ export class VectorStyle implements IVectorStyle {
   }
 
   static async getDescriptorWithUpdatedFields(
-    currentFields: IESAggField[],
+    currentFields: IField[],
     styleFieldsHelper: StyleFieldsHelper,
     originalProperties: VectorStylePropertiesDescriptor,
-    previousFields: IESAggField[],
+    previousFields: IField[],
     mapColors: string[],
     isTimeAware: boolean,
-    dynamicStyleProperties: Array<IDynamicStyleProperty<IStyleProperty<unknown>>>
+    dynamicStyleProperties: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>
   ) {
     // remove style-props that have a valid field config
     // theoretically possible with re-order, but not in practice
     const invalidStyleProps = dynamicStyleProperties.filter((styleProp) => {
       const matchingField = currentFields.find((field) => {
         const f = styleProp.getField();
-        return f && field.isEqual(f);
+        return f && f.isEqual(f);
       });
       return !matchingField;
     });
@@ -209,10 +209,13 @@ export class VectorStyle implements IVectorStyle {
           invalidStyleProp.getStyleName()
         );
         if (isFieldDataTypeCompatible) {
-          newFieldDescriptor = await invalidStyleProp.rectifyFieldDescriptor(currentField, {
-            origin: previousField.getOrigin(),
-            name: previousField.getName(),
-          });
+          newFieldDescriptor = await invalidStyleProp.rectifyFieldDescriptor(
+            currentField as IESAggField,
+            {
+              origin: previousField.getOrigin(),
+              name: previousField.getName(),
+            }
+          );
 
           if (newFieldDescriptor) {
             hasChanges = true;
@@ -220,8 +223,10 @@ export class VectorStyle implements IVectorStyle {
           }
         }
 
-        const originalStyleProp = originalProperties[invalidStyleProp.getStyleName()];
-        originalStyleProp!.options!.field = newFieldDescriptor;
+        if (invalidStyleProp.getStyleName() !== VECTOR_STYLES.SYMBOLIZE_AS) {
+          const originalStyleProp = originalProperties[invalidStyleProp.getStyleName()];
+          originalStyleProp!.options!.field = newFieldDescriptor;
+        }
       }
       // });
     }
@@ -399,15 +404,13 @@ export class VectorStyle implements IVectorStyle {
    * can then use to update store state via dispatch.
    */
   async getDescriptorWithUpdatedStyleProps(
-    currentFields: IESAggField[],
+    currentFields: IField[],
     mapColors: string[],
-    previousFields: IESAggField[]
+    previousFields: IField[]
   ) {
     const styleFieldsHelper = await createStyleFieldsHelper(currentFields);
     const originalProperties = this.getRawProperties();
-    const dynamicStyleProperties: DynamicStyleProperty = this.getAllStyleProperties().filter((p) =>
-      p.isDynamic()
-    ) as DynamicStyleProperty;
+    const dynamicStyleProperties = this.getDynamicPropertiesArray();
 
     if (previousFields.length === currentFields.length) {
       // Change in metrics
@@ -436,7 +439,7 @@ export class VectorStyle implements IVectorStyle {
     return LAYER_STYLE_TYPE.VECTOR;
   }
 
-  getAllStyleProperties() {
+  getAllStyleProperties(): Array<IStyleProperty<StylePropertyOptions>> {
     return [
       this._symbolizeAsStyleProperty,
       this._iconStyleProperty,
@@ -587,7 +590,7 @@ export class VectorStyle implements IVectorStyle {
     return this._descriptor.properties || {};
   }
 
-  getDynamicPropertiesArray() {
+  getDynamicPropertiesArray(): Array<IDynamicStyleProperty<DynamicStylePropertyOptions>> {
     const styleProperties = this.getAllStyleProperties();
     return styleProperties.filter(
       (styleProperty) => styleProperty.isDynamic() && styleProperty.isComplete()
