@@ -222,10 +222,10 @@ export const statsTotalForNode = composeSelectors(
  * animated. So in order to get the currently visible entities, we need to pass in time.
  */
 export const visibleNodesAndEdgeLines = createSelector(nodesAndEdgelines, boundingBox, function (
-  /* eslint-disable no-shadow */
+  /* eslint-disable @typescript-eslint/no-shadow */
   nodesAndEdgelines,
   boundingBox
-  /* eslint-enable no-shadow */
+  /* eslint-enable @typescript-eslint/no-shadow */
 ) {
   // `boundingBox` and `nodesAndEdgelines` are each memoized.
   return (time: number) => nodesAndEdgelines(boundingBox(time));
@@ -359,6 +359,45 @@ export const isLoadingMoreNodeEventsInCategory = composeSelectors(
   dataStateSelector,
   dataSelectors.isLoadingMoreNodeEventsInCategory
 );
+
+/**
+ * Returns an array of events for a specific node ID.
+ */
+export const nodeDataEventsForID = composeSelectors(
+  dataStateSelector,
+  dataSelectors.nodeDataEventsForID
+);
+
+/**
+ * Returns an the node data object for a specific node ID.
+ */
+export const nodeDataForID = composeSelectors(dataStateSelector, dataSelectors.nodeDataForID);
+
+/**
+ * Returns a Set of node IDs representing the visible nodes in the view.
+ */
+export const visibleNodes: (state: ResolverState) => (time: number) => Set<string> = createSelector(
+  visibleNodesAndEdgeLines,
+  function (visibleNodesAndEdgeLinesAtTime) {
+    return defaultMemoize((time: number) => {
+      const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
+
+      const nodes: Set<string> = new Set();
+      for (const node of processNodePositions.keys()) {
+        const id = entityIDSafeVersion(node);
+        if (id !== undefined) {
+          nodes.add(id);
+        }
+      }
+      return nodes;
+    });
+  }
+);
+
+/**
+ * Returns the full node data structure.
+ */
+export const nodeData = composeSelectors(dataStateSelector, dataSelectors.nodeData);
 
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a

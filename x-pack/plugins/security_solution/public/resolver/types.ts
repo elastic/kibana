@@ -5,7 +5,7 @@
  */
 
 /* eslint-disable no-duplicate-imports */
-
+import type React from 'react';
 import { Store } from 'redux';
 import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
@@ -18,7 +18,6 @@ import {
   SafeResolverEvent,
   ResolverPaginatedEvents,
   ResolverGraph,
-  ResolverNode,
 } from '../../common/endpoint/types';
 
 /**
@@ -242,6 +241,29 @@ export interface NodeEventsInCategoryState {
   error?: boolean;
 }
 
+export interface FetchedNodeData {
+  events: SafeResolverEvent[];
+  terminated: boolean;
+}
+
+/**
+ * NodeData contains information about a node in the resolver graph. For Endpoint
+ * graphs, the events will be process lifecycle events.
+ */
+export interface NodeData {
+  events: SafeResolverEvent[];
+  /**
+   * An indication of the current state for retrieving the data.
+   */
+  status: 'requested' | 'received' | 'error';
+  terminated: boolean;
+}
+
+/**
+ * Convenience type for map of node ID to it's data.
+ */
+export type IDToNodeInfo = Map<string, NodeData>;
+
 /**
  * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
@@ -315,6 +337,14 @@ export interface DataState {
    * The `search` part of the URL.
    */
   readonly locationSearch?: string;
+
+  /**
+   * The additional data for each node in the graph. For an Endpoint graph the data will be
+   * process lifecycle events.
+   *
+   * If a node ID exists in the map it means that node came into view in the graph.
+   */
+  readonly nodeData?: IDToNodeInfo;
 }
 
 /**
@@ -591,17 +621,25 @@ export interface IsometricTaxiLayout {
  * and which parameter to use to define the edge or relationship. Currently keyed off by parent
  * as those are the existing relationships.
  * @export
- * @interface GraphRequestIdSchema
+ * @interface TreeIdSchema
  */
-export interface GraphRequestIdSchema {
+export interface TreeIdSchema {
   id: string;
   parent: string; // TODO: Maybe change this to neighbors or adjacents as a more general purpose graph.
   name: string;
 }
 
-export interface GraphRequestTimerange {
+export interface Timerange {
   from: string;
   to: string;
+}
+
+/**
+ * Defines the type for bounding a search by a time box.
+ */
+export interface Timerange {
+  from: Date;
+  to: Date;
 }
 
 /**
@@ -614,30 +652,70 @@ export interface DataAccessLayer {
   /**
    * Fetch related events for an entity ID
    */
-  relatedEvents: (entityID: string) => Promise<ResolverRelatedEvents>;
+  relatedEvents: ({
+    entityID,
+    timerange,
+    indexPatterns,
+  }: {
+    entityID: string;
+    timerange: Timerange;
+    indexPatterns: string[];
+  }) => Promise<ResolverRelatedEvents>;
 
   /**
    * Return events that have `process.entity_id` that includes `entityID` and that have
    * a `event.category` that includes `category`.
    */
-  eventsWithEntityIDAndCategory: (
-    entityID: string,
-    category: string,
-    after?: string
-  ) => Promise<ResolverPaginatedEvents>;
+  eventsWithEntityIDAndCategory: ({
+    entityID,
+    category,
+    after,
+    timerange,
+    indexPatterns,
+  }: {
+    entityID: string;
+    category: string;
+    after?: string;
+    timerange: Timerange;
+    indexPatterns: string[];
+  }) => Promise<ResolverPaginatedEvents>;
+
+  /**
+   * Retrieves the node data for a set of node IDs. This is specifically for Endpoint graphs. It
+   * only returns process lifecycle events.
+   */
+  nodeData({
+    ids,
+    timerange,
+    indexPatterns,
+    limit,
+  }: {
+    ids: string[];
+    timerange: Timerange;
+    indexPatterns: string[];
+    limit: number;
+  }): Promise<SafeResolverEvent[]>;
 
   /**
    * Return up to one event that has an `event.id` that includes `eventID`.
    */
-  event: (eventID: string) => Promise<SafeResolverEvent | null>;
+  event: ({
+    eventID,
+    timerange,
+    indexPatterns,
+  }: {
+    eventID: string;
+    timerange: Timerange;
+    indexPatterns: string[];
+  }) => Promise<SafeResolverEvent | null>;
 
   /**
    * Fetch a ResolverTree for a given id
    */
   resolverGraph: (
     dataId: string,
-    schema: GraphRequestIdSchema,
-    timerange: GraphRequestTimerange,
+    schema: TreeIdSchema,
+    timerange: Timerange,
     indices: string[]
   ) => Promise<ResolverNode[]>;
 

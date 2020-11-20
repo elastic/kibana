@@ -6,26 +6,52 @@
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { ApiResponse } from '@elastic/elasticsearch';
-import { esKuery } from '../../../../../../../../src/plugins/data/server';
+import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { PaginationBuilder } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
+
+interface Timerange {
+  from: string;
+  to: string;
+}
 
 /**
  * Builds a query for retrieving events.
  */
 export class EventsQuery {
-  constructor(
-    private readonly pagination: PaginationBuilder,
-    private readonly indexPattern: string | string[]
-  ) {}
+  private readonly pagination: PaginationBuilder;
+  private readonly indexPatterns: string | string[];
+  private readonly timerange: Timerange;
+  constructor({
+    pagination,
+    indexPatterns,
+    timerange,
+  }: {
+    pagination: PaginationBuilder;
+    indexPatterns: string | string[];
+    timerange: Timerange;
+  }) {
+    this.pagination = pagination;
+    this.indexPatterns = indexPatterns;
+    this.timerange = timerange;
+  }
 
-  private query(kqlQuery: JsonObject[]): JsonObject {
+  private query(filters: JsonObject[]): JsonObject {
     return {
       query: {
         bool: {
           filter: [
-            ...kqlQuery,
+            ...filters,
+            {
+              range: {
+                '@timestamp': {
+                  gte: this.timerange.from,
+                  lte: this.timerange.to,
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
             {
               term: { 'event.kind': 'event' },
             },
@@ -36,27 +62,35 @@ export class EventsQuery {
     };
   }
 
-  private buildSearch(kql: JsonObject[]) {
+  private buildSearch(filters: JsonObject[]) {
     return {
-      body: this.query(kql),
-      index: this.indexPattern,
+      body: this.query(filters),
+      index: this.indexPatterns,
     };
+  }
+
+  private static buildFilters(filter: string | undefined): JsonObject[] {
+    if (filter === undefined) {
+      return [];
+    }
+
+    return [parseFilterQuery(filter)];
   }
 
   /**
    * Searches ES for the specified events and format the response.
    *
    * @param client a client for searching ES
-   * @param kql an optional kql string for filtering the results
+   * @param filter an optional string representation of a raw Elasticsearch clause for filtering the results
    */
-  async search(client: IScopedClusterClient, kql?: string): Promise<SafeResolverEvent[]> {
-    const kqlQuery: JsonObject[] = [];
-    if (kql) {
-      kqlQuery.push(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kql)));
-    }
+  async search(
+    client: IScopedClusterClient,
+    filter: string | undefined
+  ): Promise<SafeResolverEvent[]> {
+    const parsedFilters = EventsQuery.buildFilters(filter);
     const response: ApiResponse<SearchResponse<
       SafeResolverEvent
-    >> = await client.asCurrentUser.search(this.buildSearch(kqlQuery));
+    >> = await client.asCurrentUser.search(this.buildSearch(parsedFilters));
     return response.body.hits.hits.map((hit) => hit._source);
   }
 }

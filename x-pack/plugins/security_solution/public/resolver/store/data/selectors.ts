@@ -17,6 +17,8 @@ import {
   VisibleEntites,
   TreeFetcherParameters,
   IsometricTaxiLayout,
+  IDToNodeInfo,
+  NodeData,
 } from '../../types';
 import * as indexedGraphModel from '../../models/indexed_graph';
 import * as nodeModel from '../../../../common/endpoint/models/node';
@@ -30,6 +32,7 @@ import {
 import * as resolverGraphModel from '../../models/resolver_graph';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
 import * as isometricTaxiLayoutModel from '../../models/indexed_graph/isometric_taxi_layout'; // TODO replace with indexed
+import * as aabbModel from '../../models/aabb';
 import * as vector2 from '../../models/vector2';
 import { isTerminatedProcess } from '../../models/process_event';
 
@@ -111,9 +114,8 @@ export const inactiveNodes = createSelector(
  * TODO: Discuss if we want to keep this in Resolver or let Security Solution provide this logic
  */
 export const isNodeInactive = createSelector(inactiveNodes, function (
-  /* eslint-disable no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   inactiveNodes
-  /* eslint-enable no-shadow */
 ) {
   return (nodeId: string) => {
     return inactiveNodes.has(nodeId);
@@ -121,7 +123,54 @@ export const isNodeInactive = createSelector(inactiveNodes, function (
 });
 
 /**
- * Map of nodeIds to the node
+ * Returns a data structure for accessing events for specific nodes in a graph. For Endpoint graphs these nodes will be
+ * process lifecycle events.
+ */
+export const nodeData = (state: DataState): IDToNodeInfo | undefined => {
+  return state.nodeData;
+};
+
+/**
+ * Returns a function that can be called to retrieve the node data for a specific node ID.
+ */
+export const nodeDataForID: (
+  state: DataState
+) => (id: string) => NodeData | undefined = createSelector(nodeData, (nodeInfo) => {
+  return (id: string) => {
+    const info = nodeInfo?.get(id);
+    return info;
+  };
+});
+
+// TODO: show an error when this is true
+export const nodeDataUnableToLoad: (state: DataState) => (id: string) => boolean = createSelector(
+  nodeDataForID,
+  (nodeInfo) => {
+    return (id: string) => {
+      const info = nodeInfo(id);
+      return info?.status === 'error' || (info?.events.length ?? 0) <= 0;
+    };
+  }
+);
+
+/**
+ * Returns a function that can be called to determine if the middleware has received a specific node ID's lifecycle
+ * events. If the node is still loading or had an error while loading this will return an empty array.
+ */
+export const nodeDataEventsForID: (
+  state: DataState
+) => (id: string) => SafeResolverEvent[] = createSelector(nodeDataForID, (nodeInfo) => {
+  return (id: string) => {
+    const info = nodeInfo(id);
+    if (!info || info.status !== 'received') {
+      return [];
+    }
+    return info.events;
+  };
+});
+
+/**
+ * Process events that will be graphed.
  */
 export const graphableNodes = createSelector(resolverGraphResponse, function (graphResponse?) {
   // Keep track of the last process event (in array order) for each entity ID
@@ -140,9 +189,8 @@ export const graphableNodes = createSelector(resolverGraphResponse, function (gr
 });
 
 export const graph = createSelector(graphableNodes, originID, function indexedGraph(
-  /* eslint-disable no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   graphableNodes,
-  /* eslint-enable no-shadow */
   originId
 ) {
   return indexedGraphModel.factory(graphableNodes, originId);
@@ -261,28 +309,23 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   graph,
   originID,
-  function processNodePositionsAndEdgeLineSegments(
-    /* eslint-disable no-shadow */
-    indexedGraph,
-    originID
-    /* eslint-enable no-shadow */
-  ) {
+  function processNodePositionsAndEdgeLineSegments(indexedGraph, originId) {
     // use the isometric taxi layout as a base
     const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedGraph);
-    if (!originID) {
+    if (!originId) {
       // no data has loaded.
       return taxiLayout;
     }
 
     // find the origin node
-    const originNode = indexedGraphModel.graphNode(indexedGraph, originID);
+    const originNode = indexedGraphModel.graphNode(indexedGraph, originId);
     if (originNode === null) {
       // If a tree is returned that has no process events for the origin, this can happen.
       return taxiLayout;
     }
 
     // Find the position of the origin, we'll center the map on it intrinsically
-    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, originID);
+    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, originId);
     // adjust the position of everything so that the origin node is at `(0, 0)`
     if (originPosition === undefined) {
       // not sure how this could happen.
@@ -472,8 +515,22 @@ export const nodesAndEdgelines: (
       graphNodePositions: visibleProcessNodePositions,
       connectingEdgeLineSegments,
     };
-  });
+  }, aaBBEqualityCheck);
 });
+
+function isAABBType(value: unknown): value is AABB {
+  const castValue = value as AABB;
+  return castValue.maximum !== undefined && castValue.minimum !== undefined;
+}
+
+function aaBBEqualityCheck<T>(a: T, b: T, index: number): boolean {
+  if (isAABBType(a) && isAABBType(b)) {
+    return aabbModel.isEqual(a, b);
+  } else {
+    // this is equivalent to the default equality check for defaultMemoize
+    return a === b;
+  }
+}
 
 /**
  * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.
@@ -553,7 +610,7 @@ export const relatedEventCountOfTypeForNode: (
 export const panelViewAndParameters = createSelector(
   (state: DataState) => state.locationSearch,
   resolverComponentInstanceID,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   (locationSearch, resolverComponentInstanceID) => {
     return panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID({
       locationSearch,
@@ -573,7 +630,7 @@ export const nodeEventsInCategory = (state: DataState) => {
 export const lastRelatedEventResponseContainsCursor = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function (nodeEventsInCategory, panelViewAndParameters) {
     if (
       nodeEventsInCategory !== undefined &&
@@ -592,7 +649,7 @@ export const lastRelatedEventResponseContainsCursor = createSelector(
 export const hadErrorLoadingNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function (nodeEventsInCategory, panelViewAndParameters) {
     if (
       nodeEventsInCategory !== undefined &&
@@ -611,7 +668,7 @@ export const hadErrorLoadingNodeEventsInCategory = createSelector(
 export const isLoadingNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function (nodeEventsInCategory, panelViewAndParameters) {
     const { panelView } = panelViewAndParameters;
     return panelView === 'nodeEventsInCategory' && nodeEventsInCategory === undefined;
@@ -621,7 +678,7 @@ export const isLoadingNodeEventsInCategory = createSelector(
 export const isLoadingMoreNodeEventsInCategory = createSelector(
   (state: DataState) => state.nodeEventsInCategory,
   panelViewAndParameters,
-  /* eslint-disable-next-line no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function (nodeEventsInCategory, panelViewAndParameters) {
     if (
       nodeEventsInCategory !== undefined &&

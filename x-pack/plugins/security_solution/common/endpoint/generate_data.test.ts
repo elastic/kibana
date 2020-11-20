@@ -277,6 +277,8 @@ describe('data generator', () => {
       for (const event of tree.allEvents) {
         const currentEventTime = new Date(timestampSafeVersion(event) ?? startOfEpoch);
         expect(currentEventTime).not.toEqual(startOfEpoch);
+        expect(tree.startTime.getTime()).toBeLessThanOrEqual(currentEventTime.getTime());
+        expect(tree.endTime.getTime()).toBeGreaterThanOrEqual(currentEventTime.getTime());
         if (currentEventTime < startTime) {
           startTime = currentEventTime;
         }

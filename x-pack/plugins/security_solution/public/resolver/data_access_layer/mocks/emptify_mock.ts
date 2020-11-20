@@ -19,7 +19,8 @@ type EmptiableRequests =
   | 'resolverTree'
   | 'entities'
   | 'eventsWithEntityIDAndCategory'
-  | 'event';
+  | 'event'
+  | 'nodeData';
 
 interface Metadata<T> {
   /**
@@ -58,7 +59,7 @@ export function emptifyMock<T>(
       async relatedEvents(...args): Promise<ResolverRelatedEvents> {
         return dataShouldBeEmpty.includes('relatedEvents')
           ? Promise.resolve({
-              entityID: args[0],
+              entityID: args[0].entityID,
               events: [],
               nextEvent: null,
             })
@@ -77,6 +78,10 @@ export function emptifyMock<T>(
               nextEvent: null,
             }
           : dataAccessLayer.eventsWithEntityIDAndCategory(...args);
+      },
+
+      async nodeData(...args): Promise<SafeResolverEvent[]> {
+        return dataShouldBeEmpty.includes('nodeData') ? [] : dataAccessLayer.nodeData(...args);
       },
 
       async event(...args): Promise<SafeResolverEvent | null> {

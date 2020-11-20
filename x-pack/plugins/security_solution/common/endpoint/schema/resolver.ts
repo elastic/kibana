@@ -63,11 +63,14 @@ export const validateEvents = {
     limit: schema.number({ defaultValue: 1000, min: 1, max: 10000 }),
     afterEvent: schema.maybe(schema.string()),
   }),
-  body: schema.nullable(
-    schema.object({
-      filter: schema.maybe(schema.string()),
-    })
-  ),
+  body: schema.object({
+    timerange: schema.object({
+      from: schema.string(),
+      to: schema.string(),
+    }),
+    indexPatterns: schema.arrayOf(schema.string()),
+    filter: schema.maybe(schema.string()),
+  }),
 };
 
 /**

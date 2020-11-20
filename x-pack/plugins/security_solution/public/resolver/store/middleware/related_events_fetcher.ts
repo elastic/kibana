@@ -42,13 +42,26 @@ export function RelatedEventsFetcher(
       let result: ResolverPaginatedEvents | null = null;
       try {
         if (cursor) {
-          result = await dataAccessLayer.eventsWithEntityIDAndCategory(
-            nodeID,
-            eventCategory,
-            cursor
-          );
+          result = await dataAccessLayer.eventsWithEntityIDAndCategory({
+            entityID: nodeID,
+            category: eventCategory,
+            after: cursor,
+            indexPatterns: ['logs-*'],
+            timerange: {
+              from: new Date(2020, 11, 1),
+              to: new Date(2020, 11, 30),
+            },
+          });
         } else {
-          result = await dataAccessLayer.eventsWithEntityIDAndCategory(nodeID, eventCategory);
+          result = await dataAccessLayer.eventsWithEntityIDAndCategory({
+            entityID: nodeID,
+            category: eventCategory,
+            indexPatterns: ['logs-*'],
+            timerange: {
+              from: new Date(2020, 10, 1),
+              to: new Date(2020, 10, 30),
+            },
+          });
         }
       } catch (error) {
         api.dispatch({

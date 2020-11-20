@@ -6,7 +6,6 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
-import { eventsIndexPattern } from '../../../../common/endpoint/constants';
 import { validateEvents } from '../../../../common/endpoint/schema/resolver';
 import { EventsQuery } from './queries/events';
 import { createEvents } from './utils/node';
@@ -31,11 +30,12 @@ export function handleEvents(
     } = req;
     try {
       const client = context.core.elasticsearch.client;
-      const query = new EventsQuery(
-        PaginationBuilder.createBuilder(limit, afterEvent),
-        eventsIndexPattern
-      );
-      const results = await query.search(client, body?.filter);
+      const query = new EventsQuery({
+        pagination: PaginationBuilder.createBuilder(limit, afterEvent),
+        indexPatterns: body.indexPatterns,
+        timerange: body.timerange,
+      });
+      const results = await query.search(client, body.filter);
 
       return res.ok({
         body: createEvents(results, PaginationBuilder.buildCursorRequestLimit(limit, results)),

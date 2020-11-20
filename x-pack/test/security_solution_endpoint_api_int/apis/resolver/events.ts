@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { eventIDSafeVersion } from '../../../../plugins/security_solution/common/endpoint/models/event';
+import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
+import {
+  eventIDSafeVersion,
+  parentEntityIDSafeVersion,
+  timestampAsDateSafeVersion,
+} from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { ResolverPaginatedEvents } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -41,23 +47,42 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('event route', () => {
+    let entityIDFilterArray: JsonObject[] | undefined;
     let entityIDFilter: string | undefined;
     before(async () => {
       resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree
       tree = resolverTrees.trees[0];
-      entityIDFilter = `process.entity_id:"${tree.origin.id}" and not event.category:"process"`;
+      entityIDFilterArray = [
+        { term: { 'process.entity_id': tree.origin.id } },
+        { bool: { must_not: { term: { 'event.category': 'process' } } } },
+      ];
+      entityIDFilter = JSON.stringify({
+        bool: {
+          filter: entityIDFilterArray,
+        },
+      });
     });
     after(async () => {
       await resolver.deleteData(resolverTrees);
     });
 
     it('should filter events by event.id', async () => {
+      const filter = JSON.stringify({
+        bool: {
+          filter: [{ term: { 'event.id': tree.origin.relatedEvents[0]?.event?.id } }],
+        },
+      });
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          filter: `event.id:"${tree.origin.relatedEvents[0]?.event?.id}"`,
+          filter,
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
         })
         .expect(200);
       expect(body.events.length).to.eql(1);
@@ -66,11 +91,21 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should not find any events when given an invalid entity id', async () => {
+      const filter = JSON.stringify({
+        bool: {
+          filter: [{ term: { 'process.entity_id': '5555' } }],
+        },
+      });
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          filter: 'process.entity_id:"5555"',
+          filter,
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
         })
         .expect(200);
       expect(body.nextEvent).to.eql(null);
@@ -83,6 +118,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
         })
         .expect(200);
       expect(body.events.length).to.eql(4);
@@ -91,12 +131,24 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should allow for the events to be filtered', async () => {
-      const filter = `event.category:"${RelatedEventCategory.Driver}" and ${entityIDFilter}`;
+      const filter = JSON.stringify({
+        bool: {
+          filter: [
+            { term: { 'event.category': RelatedEventCategory.Driver } },
+            ...(entityIDFilterArray ?? []),
+          ],
+        },
+      });
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
         .set('kbn-xsrf', 'xxx')
         .send({
           filter,
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
         })
         .expect(200);
       expect(body.events.length).to.eql(2);
@@ -113,6 +165,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
         })
         .expect(200);
       expect(body.events.length).to.eql(2);
@@ -124,6 +181,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
         })
         .expect(200));
       expect(body.events.length).to.eql(2);
@@ -135,6 +197,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
         })
         .expect(200));
       expect(body.events).to.be.empty();
@@ -147,6 +214,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
         })
         .expect(200);
       expect(body.events.length).to.eql(4);
@@ -160,6 +232,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
         })
         .expect(200);
       expect(body.events.length).to.eql(4);
@@ -170,6 +247,123 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.events[i].event?.category).to.equal(relatedEvents[i].event?.category);
         expect(eventIDSafeVersion(body.events[i])).to.equal(relatedEvents[i].event?.id);
       }
+    });
+
+    it('should only return data within the specified timerange', async () => {
+      const from =
+        timestampAsDateSafeVersion(tree.origin.relatedEvents[0])?.toISOString() ??
+        new Date(0).toISOString();
+      const to = from;
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from,
+            to,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(1);
+      expect(tree.origin.relatedEvents[0]?.event?.id).to.eql(body.events[0].event?.id);
+      expect(body.nextEvent).to.eql(null);
+    });
+
+    it('should not find events when using an incorrect index pattern', async () => {
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: entityIDFilter,
+          indexPatterns: ['metrics-*'],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(0);
+      expect(body.nextEvent).to.eql(null);
+    });
+
+    it('should retrieve lifecycle events for multiple ids', async () => {
+      const originParentID = parentEntityIDSafeVersion(tree.origin.lifecycle[0]) ?? '';
+      expect(originParentID).to.not.be('');
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: JSON.stringify({
+            bool: {
+              filter: [
+                { terms: { 'process.entity_id': [tree.origin.id, originParentID] } },
+                { term: { 'event.category': 'process' } },
+              ],
+            },
+          }),
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      // 2 lifecycle events for the origin and 2 for the origin's parent
+      expect(body.events.length).to.eql(4);
+      expect(body.nextEvent).to.eql(null);
+    });
+
+    it('should paginate lifecycle events for multiple ids', async () => {
+      const originParentID = parentEntityIDSafeVersion(tree.origin.lifecycle[0]) ?? '';
+      expect(originParentID).to.not.be('');
+      let { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .query({ limit: 2 })
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: JSON.stringify({
+            bool: {
+              filter: [
+                { terms: { 'process.entity_id': [tree.origin.id, originParentID] } },
+                { term: { 'event.category': 'process' } },
+              ],
+            },
+          }),
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(2);
+      expect(body.nextEvent).not.to.eql(null);
+
+      ({ body } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .query({ limit: 3, afterEvent: body.nextEvent })
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: JSON.stringify({
+            bool: {
+              filter: [
+                { terms: { 'process.entity_id': [tree.origin.id, originParentID] } },
+                { term: { 'event.category': 'process' } },
+              ],
+            },
+          }),
+          indexPatterns: [eventsIndexPattern],
+          timerange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200));
+
+      expect(body.events.length).to.eql(2);
+      expect(body.nextEvent).to.eql(null);
     });
   });
 }

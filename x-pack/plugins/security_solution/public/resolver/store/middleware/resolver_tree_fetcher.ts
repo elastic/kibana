@@ -10,7 +10,7 @@ import {
   ResolverNode,
   ResolverGraph,
 } from '../../../../common/endpoint/types';
-import { ResolverState, DataAccessLayer, GraphRequestIdSchema } from '../../types';
+import { ResolverState, DataAccessLayer, TreeIdSchema } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 
