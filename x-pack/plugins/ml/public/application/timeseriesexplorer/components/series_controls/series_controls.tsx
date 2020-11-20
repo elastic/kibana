@@ -317,7 +317,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
           selectedEntities={selectedEntities}
           functionDescription={functionDescription}
           setFunctionDescription={setFunctionDescription}
-          numEntityControls={entityControls.length}
+          entityControlsCnt={entityControls.length}
         />
 
         {children}

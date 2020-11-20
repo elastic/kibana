@@ -38,14 +38,14 @@ export const PlotByFunctionControls = ({
   selectedDetectorIndex,
   selectedJobId,
   selectedEntities,
-  numEntityControls,
+  entityControlsCnt,
 }: {
   functionDescription: undefined | string;
   setFunctionDescription: (func: string) => void;
   selectedDetectorIndex: number;
   selectedJobId: string;
   selectedEntities: Record<string, any>;
-  numEntityControls: number;
+  entityControlsCnt: number;
 }) => {
   const toastNotificationService = useToastNotificationService();
 
@@ -75,8 +75,10 @@ export const PlotByFunctionControls = ({
       return;
     }
     const selectedJob = mlJobService.getJob(selectedJobId);
+    // if no controls, it's okay to fetch
+    // if there are series controls, only fetch if user has selected something
     const validEntities =
-      numEntityControls === 0 || (numEntityControls > 0 && selectedEntities !== undefined);
+      entityControlsCnt === 0 || (entityControlsCnt > 0 && selectedEntities !== undefined);
     if (
       validEntities &&
       functionDescription === undefined &&
@@ -98,6 +100,7 @@ export const PlotByFunctionControls = ({
     selectedEntities,
     selectedJobId,
     functionDescription,
+    entityControlsCnt,
   ]);
 
   if (functionDescription === undefined) return null;
