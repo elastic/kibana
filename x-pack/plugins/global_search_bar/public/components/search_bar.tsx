@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiBadge,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
