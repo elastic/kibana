@@ -4,62 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ArchivePackage, AssetParts } from '../../../../common/types';
+import { AssetParts, InstallSource } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 import {
-  cacheGet,
-  cacheSet,
-  cacheDelete,
+  SharedKey,
+  getArchiveEntry,
+  setArchiveEntry,
+  deleteArchiveEntry,
   getArchiveFilelist,
   setArchiveFilelist,
   deleteArchiveFilelist,
+  deletePackageInfo,
 } from './cache';
-import { ArchiveEntry, getBufferExtractor } from '../registry/extract';
-import { parseAndVerifyArchiveEntries } from './validation';
+import { getBufferExtractor } from './extract';
 
 export * from './cache';
+export { getBufferExtractor, untarBuffer, unzipBuffer } from './extract';
+export { parseAndVerifyArchiveBuffer as parseAndVerifyArchiveEntries } from './validation';
 
-export async function getArchivePackage({
-  archiveBuffer,
+export interface ArchiveEntry {
+  path: string;
+  buffer?: Buffer;
+}
+
+export async function unpackBufferToCache({
+  name,
+  version,
   contentType,
+  archiveBuffer,
+  installSource,
 }: {
-  archiveBuffer: Buffer;
+  name: string;
+  version: string;
   contentType: string;
-}): Promise<{ paths: string[]; archivePackageInfo: ArchivePackage }> {
-  const entries = await unpackArchiveEntries(archiveBuffer, contentType);
-  const { archivePackageInfo } = await parseAndVerifyArchiveEntries(entries);
-  const paths = addEntriesToMemoryStore(entries);
-
-  setArchiveFilelist(archivePackageInfo.name, archivePackageInfo.version, paths);
-
-  return {
-    paths,
-    archivePackageInfo,
-  };
-}
-
-export async function unpackArchiveToCache(
-  archiveBuffer: Buffer,
-  contentType: string
-): Promise<string[]> {
-  const entries = await unpackArchiveEntries(archiveBuffer, contentType);
-  return addEntriesToMemoryStore(entries);
-}
-
-function addEntriesToMemoryStore(entries: ArchiveEntry[]) {
+  archiveBuffer: Buffer;
+  installSource: InstallSource;
+}): Promise<string[]> {
+  const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
   entries.forEach((entry) => {
     const { path, buffer } = entry;
     if (buffer) {
-      cacheSet(path, buffer);
+      setArchiveEntry(path, buffer);
       paths.push(path);
     }
   });
+  setArchiveFilelist({ name, version, installSource }, paths);
 
   return paths;
 }
 
-export async function unpackArchiveEntries(
+export async function unpackBufferEntries(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<ArchiveEntry[]> {
@@ -90,16 +85,18 @@ export async function unpackArchiveEntries(
   return entries;
 }
 
-export const deletePackageCache = (name: string, version: string) => {
+export const deletePackageCache = ({ name, version, installSource }: SharedKey) => {
   // get cached archive filelist
-  const paths = getArchiveFilelist(name, version);
+  const paths = getArchiveFilelist({ name, version, installSource });
 
   // delete cached archive filelist
-  deleteArchiveFilelist(name, version);
+  deleteArchiveFilelist({ name, version, installSource });
 
   // delete cached archive files
-  // this has been populated in unpackArchiveToCache()
-  paths?.forEach((path) => cacheDelete(path));
+  // this has been populated in unpackBufferToCache()
+  paths?.forEach(deleteArchiveEntry);
+
+  deletePackageInfo({ name, version, installSource });
 };
 
 export function getPathParts(path: string): AssetParts {
@@ -133,7 +130,7 @@ export function getPathParts(path: string): AssetParts {
 }
 
 export function getAsset(key: string) {
-  const buffer = cacheGet(key);
+  const buffer = getArchiveEntry(key);
   if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
 
   return buffer;

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
 import { getDistributionMax } from './get_distribution_max';
@@ -18,9 +17,6 @@ function getBucketSize(max: number) {
   );
 }
 
-export type TransactionDistributionAPIResponse = PromiseReturnType<
-  typeof getTransactionDistribution
->;
 export async function getTransactionDistribution({
   serviceName,
   transactionName,
