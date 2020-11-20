@@ -20,7 +20,7 @@ import { useTransactionOverviewHref } from '../../shared/Links/apm/TransactionOv
 import { MainTabs } from '../../shared/main_tabs';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { ServiceMap } from '../ServiceMap';
-import { ServiceMetrics } from '../ServiceMetrics';
+import { ServiceMetrics } from '../service_metrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../TransactionOverview';
