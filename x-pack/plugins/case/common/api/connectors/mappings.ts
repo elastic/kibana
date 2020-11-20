@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as rt from 'io-ts';
+import { ServiceConnectorBasicCaseParamsRt } from '../cases';
+import { ElasticUser } from '../../../../security_solution/public/cases/containers/types';
+import { ExecutorSubActionPushParams } from '../../../../actions/server/builtin_action_types/jira/types';
+import { CaseConnectorMapping } from '../../../../security_solution/public/cases/containers/configure/types';
 
 const ActionTypeRT = rt.union([
   rt.literal('append'),
@@ -40,9 +44,58 @@ const FieldRt = rt.type({
   type: FieldTypeRT,
 });
 export type Field = rt.TypeOf<typeof FieldRt>;
-
+export const ConnectorRequestParamsRt = rt.type({
+  connector_id: rt.string,
+});
+export const GetFieldsRequestQueryRt = rt.type({
+  connector_type: rt.string,
+});
 const GetFieldsResponseRt = rt.type({
   fields: rt.array(FieldRt),
   defaultMappings: rt.array(ConnectorMappingsAttributesRT),
 });
 export type GetFieldsResponse = rt.TypeOf<typeof GetFieldsResponseRt>;
+
+/////////////////////////////////////////////////////////////////////////////
+
+export const PostPushRequestRt = rt.type({
+  mappings: rt.array(ConnectorMappingsAttributesRT),
+  params: ServiceConnectorBasicCaseParamsRt,
+});
+
+export type ExternalServiceParams = Record<string, unknown>;
+
+export interface PipedField {
+  key: string;
+  value: string;
+  actionType: string;
+  pipes: string[];
+}
+export interface PrepareFieldsForTransformArgs {
+  externalCase: Record<string, string>;
+  mappings: CaseConnectorMapping[];
+  defaultPipes?: string[];
+}
+export interface EntityInformation {
+  createdAt: string;
+  createdBy: ElasticUser;
+  updatedAt: string;
+  updatedBy: ElasticUser;
+}
+export interface TransformerArgs {
+  value: string;
+  date?: string;
+  user?: string;
+  previousValue?: string;
+}
+
+export type Transformer = (args: TransformerArgs) => TransformerArgs;
+export interface TransformFieldsArgs<P, S> {
+  params: P;
+  fields: PipedField[];
+  currentIncident?: S;
+}
+export type Incident = Pick<
+  ExecutorSubActionPushParams,
+  'description' | 'priority' | 'labels' | 'issueType' | 'parent'
+> & { summary: string };

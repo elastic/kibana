@@ -4,24 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import { RouteDeps } from '../../types';
-import { wrapError } from '../../utils';
+import { escapeHatch, wrapError } from '../../utils';
 
 import { CASE_CONFIGURE_CONNECTOR_DETAILS_URL } from '../../../../../common/constants';
+import {
+  ConnectorRequestParamsRt,
+  GetFieldsRequestQueryRt,
+  throwErrors,
+} from '../../../../../common/api';
 
 export function initCaseConfigureGetFields({ router }: RouteDeps) {
   router.get(
     {
       path: CASE_CONFIGURE_CONNECTOR_DETAILS_URL,
       validate: {
-        params: schema.object({
-          connector_id: schema.string(),
-        }),
-        query: schema.object({
-          connector_type: schema.string(),
-        }),
+        params: escapeHatch,
+        query: escapeHatch,
       },
     },
     async (context, request, response) => {
@@ -29,10 +32,18 @@ export function initCaseConfigureGetFields({ router }: RouteDeps) {
         if (!context.case) {
           throw Boom.badRequest('RouteHandlerContext is not registered for cases');
         }
+        const query = pipe(
+          GetFieldsRequestQueryRt.decode(request.query),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+        const params = pipe(
+          ConnectorRequestParamsRt.decode(query.params),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
 
         const caseClient = context.case.getCaseClient();
 
-        const connectorType = request.query.connector_type;
+        const connectorType = query.connector_type;
         if (connectorType == null) {
           throw Boom.illegal('no connectorType value provided');
         }
@@ -44,7 +55,7 @@ export function initCaseConfigureGetFields({ router }: RouteDeps) {
 
         const res = await caseClient.getFields({
           actionsClient,
-          connectorId: request.params.connector_id,
+          connectorId: params.connector_id,
           connectorType,
         });
 
