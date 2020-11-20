@@ -6,21 +6,20 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { SavedObjectsClientContract } from 'src/core/public';
-
 import { App, AppDeps } from './app';
-import { setSavedObjectsClient } from '../common/lib/index_threshold_api';
+import { setSavedObjectsClient } from '../common/lib/data_apis';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;
-  savedObjects: SavedObjectsClientContract;
   I18nContext: any;
 }
 
 export const boot = (bootDeps: BootDeps) => {
-  const { I18nContext, element, savedObjects, ...appDeps } = bootDeps;
+  const { I18nContext, element, ...appDeps } = bootDeps;
 
-  setSavedObjectsClient(savedObjects);
+  if (appDeps.savedObjects) {
+    setSavedObjectsClient(appDeps.savedObjects.client);
+  }
 
   render(
     <I18nContext>

@@ -5,7 +5,7 @@
  */
 
 /* eslint-disable no-duplicate-imports */
-
+import type React from 'react';
 import { Store } from 'redux';
 import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';

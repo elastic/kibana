@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { FieldRuleEditor } from './field_rule_editor';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { FieldRule } from '../../model';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 
 function assertField(wrapper: ReactWrapper<any, any, any>, index: number, field: string) {

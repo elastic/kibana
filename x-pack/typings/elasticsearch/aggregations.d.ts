@@ -204,6 +204,8 @@ type SubAggregationResponseOf<
 
 interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOptionsMap, TDocument> {
   terms: {
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
     buckets: Array<
       {
         doc_count: number;
@@ -352,6 +354,7 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
     bg_count: number;
     buckets: Array<
       {
+        score: number;
         bg_count: number;
         doc_count: number;
         key: string | number;

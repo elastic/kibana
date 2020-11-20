@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
+import { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
 import {
   GetInfoResponse,
   InstallPackageResponse,
@@ -103,15 +103,21 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
   try {
     const { pkgName, pkgVersion, filePath } = request.params;
     const registryResponse = await getFile(`/package/${pkgName}/${pkgVersion}/${filePath}`);
-    const contentType = registryResponse.headers.get('Content-Type');
-    const customResponseObj: CustomHttpResponseOptions<typeof registryResponse.body> = {
+
+    const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
+    const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
+      const value = registryResponse.headers.get(knownHeader);
+      if (value !== null) {
+        headers[knownHeader] = value;
+      }
+      return headers;
+    }, {} as ResponseHeaders);
+
+    return response.custom({
       body: registryResponse.body,
       statusCode: registryResponse.status,
-    };
-    if (contentType !== null) {
-      customResponseObj.headers = { 'Content-Type': contentType };
-    }
-    return response.custom(customResponseObj);
+      headers: proxiedHeaders,
+    });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

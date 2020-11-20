@@ -21,7 +21,7 @@ import { EuiCallOut } from '@elastic/eui';
 import testSubjSelector from '@kbn/test-subj-selector';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 
 import { FatalErrorsScreen } from './fatal_errors_screen';
 
