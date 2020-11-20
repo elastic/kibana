@@ -34,6 +34,7 @@ export function useCamera(): {
   const sideEffectors = useContext(SideEffectContext);
 
   const [ref, setRef] = useState<null | HTMLDivElement>(null);
+  const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
 
   /**
    * The position of a thing, as a `Vector2`, is multiplied by the projection matrix
@@ -84,6 +85,7 @@ export function useCamera(): {
 
   const handleMouseDown = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
+      setIsMouseDown(true);
       const maybeCoordinates = relativeCoordinatesFromMouseEvent(event);
       if (maybeCoordinates !== null) {
         dispatch({
@@ -98,7 +100,7 @@ export function useCamera(): {
   const handleMouseMove = useCallback(
     (event: MouseEvent) => {
       const maybeCoordinates = relativeCoordinatesFromMouseEvent(event);
-      if (maybeCoordinates) {
+      if (maybeCoordinates && isMouseDown) {
         dispatch({
           type: 'userMovedPointer',
           payload: {
@@ -108,10 +110,11 @@ export function useCamera(): {
         });
       }
     },
-    [dispatch, relativeCoordinatesFromMouseEvent, sideEffectors]
+    [dispatch, relativeCoordinatesFromMouseEvent, sideEffectors, isMouseDown]
   );
 
   const handleMouseUp = useCallback(() => {
+    setIsMouseDown(false);
     if (userIsPanning) {
       dispatch({
         type: 'userStoppedPanning',
@@ -255,13 +258,13 @@ export function useCamera(): {
   );
 
   useEffect(() => {
-    if (elementBoundingClientRect !== null) {
+    if (elementBoundingClientRect?.width && elementBoundingClientRect?.height) {
       dispatch({
         type: 'userSetRasterSize',
         payload: [elementBoundingClientRect.width, elementBoundingClientRect.height],
       });
     }
-  }, [dispatch, elementBoundingClientRect]);
+  }, [dispatch, elementBoundingClientRect?.width, elementBoundingClientRect?.height]);
 
   return {
     ref: refCallback,
