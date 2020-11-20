@@ -39,13 +39,5 @@ export default {
     '<rootDir>/test/functional/services/remote',
     '<rootDir>/src/dev/code_coverage/ingest_coverage',
   ],
-  collectCoverageFrom: [
-    '**/*.{js,mjs,jsx,ts,tsx}',
-    '!**/{__test__,__snapshots__,__examples__,mocks,tests,test_helpers,integration_tests,types}/**/*',
-    '!**/*mock*.ts',
-    '!**/*.test.ts',
-    '!**/*.d.ts',
-    '!**/index.{js,ts}',
-  ],
   testRunner: 'jasmine2',
 };
