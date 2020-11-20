@@ -15,7 +15,12 @@ import {
 } from '../../../../common/endpoint/types';
 
 import { EndpointAppContext } from '../../types';
-import { createTrustedApp, deleteTrustedApp, getTrustedAppsList } from './service';
+import {
+  createTrustedApp,
+  deleteTrustedApp,
+  getTrustedAppsList,
+  MissingTrustedAppException,
+} from './service';
 
 const exceptionListClientFromContext = (context: RequestHandlerContext): ExceptionListClient => {
   const exceptionLists = context.lists?.getExceptionListClient();
@@ -34,16 +39,16 @@ export const getTrustedAppsDeleteRouteHandler = (
 
   return async (context, req, res) => {
     try {
-      const response = await deleteTrustedApp(exceptionListClientFromContext(context), req.params);
-
-      if (response === null) {
-        return res.notFound({ body: `trusted app id [${req.params.id}] not found` });
-      }
+      await deleteTrustedApp(exceptionListClientFromContext(context), req.params);
 
       return res.ok();
     } catch (error) {
-      logger.error(error);
-      return res.internalError({ body: error });
+      if (error instanceof MissingTrustedAppException) {
+        return res.notFound({ body: `trusted app id [${req.params.id}] not found` });
+      } else {
+        logger.error(error);
+        return res.internalError({ body: error });
+      }
     }
   };
 };

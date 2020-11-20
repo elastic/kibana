@@ -20,15 +20,23 @@ import {
   newTrustedAppToCreateExceptionListItemOptions,
 } from './mapping';
 
+export class MissingTrustedAppException {
+  constructor(public id: string) {}
+}
+
 export const deleteTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
   { id }: DeleteTrustedAppsRequestParams
 ) => {
-  await exceptionsListClient.deleteExceptionListItem({
+  const exceptionListItem = await exceptionsListClient.deleteExceptionListItem({
     id,
     itemId: undefined,
     namespaceType: 'agnostic',
   });
+
+  if (!exceptionListItem) {
+    throw new MissingTrustedAppException(id);
+  }
 };
 
 export const getTrustedAppsList = async (
