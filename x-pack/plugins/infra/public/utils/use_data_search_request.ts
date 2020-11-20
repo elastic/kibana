@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { of, Observable, OperatorFunction, PartialObserver, Subject } from 'rxjs';
-import { concatMap, map, switchMap } from 'rxjs/operators';
+import { useCallback, useEffect, useState } from 'react';
+import { Observable, OperatorFunction, Subject } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -25,6 +25,17 @@ interface DataSearchRequest<
   abortController: AbortController;
 }
 
+interface DataSearchResponse<
+  RequestParams,
+  Response,
+  Request extends IKibanaSearchRequest<RequestParams>
+> {
+  request: Request;
+  options: ISearchOptions;
+  response: IKibanaSearchResponse<Response>;
+  abortController: AbortController;
+}
+
 export const useDataSearch = <
   RequestFactoryArgs extends any[],
   RequestParams,
@@ -32,23 +43,16 @@ export const useDataSearch = <
   Request extends IKibanaSearchRequest<RequestParams>
 >({
   getRequest,
-}: // responseOperator,
-{
+}: {
   getRequest: (...args: RequestFactoryArgs) => { request: Request; options: ISearchOptions } | null;
-  // getRequestOptions: (...args: any[]) => ISearchOptions;
-  // responseOperator?: OperatorFunction<IKibanaSearchResponse<RawResult>, IKibanaSearchResponse<Result>>;
-  // subscriber: PartialObserver<RawResult>;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const latestAbortController = useRef<AbortController | undefined>();
   const [request$] = useState(() => new Subject<{ request: Request; options: ISearchOptions }>());
-  // const [latestResult, setLatestResult] = useState<RawResult>()
   const [requests$] = useState<Observable<DataSearchRequest<RequestParams, RawResponse, Request>>>(
     () =>
       request$.pipe(
         map(({ request, options }) => {
           const abortController = new AbortController();
-          latestAbortController.current = abortController;
 
           return {
             abortController,
@@ -69,8 +73,6 @@ export const useDataSearch = <
       )
   );
 
-  // const [latestValue, latestError, isComplete] = useSubscription(response$, null);
-
   const search = useCallback(
     (...args: RequestFactoryArgs) => {
       const request = getRequest(...args);
@@ -82,26 +84,11 @@ export const useDataSearch = <
     [getRequest, request$]
   );
 
-  const cancel = useCallback(() => {
-    latestAbortController.current?.abort();
-  }, [latestAbortController]);
-
   return {
     requests$,
     search,
-    cancel,
   };
 };
-
-// export const useDataSearchResponse = <RawResponse, Response, InitialResponse = Response>(
-//   response$: Observable<IKibanaSearchResponse<RawResponse>>,
-//   operator: OperatorFunction<RawResponse, Response>,
-//   initialValue: InitialResponse
-// ) => {
-//   const { latestValue, latestError, isComplete } = useSubscription(response$, {
-//     rawResponse: initialValue,
-//   } as IKibanaSearchResponse<InitialResponse>);
-// };
 
 const tapUnsubscribe = (onUnsubscribe: () => void) => <T>(source$: Observable<T>) => {
   return new Observable<T>((subscriber) => {
@@ -120,7 +107,7 @@ const tapUnsubscribe = (onUnsubscribe: () => void) => <T>(source$: Observable<T>
 
 export const useSubscription = <Value, InitialValue>(
   source$: Observable<Value>,
-  initialValue: InitialValue
+  initialValue: InitialValue | (() => InitialValue)
 ) => {
   const [latestValue, setLatestValue] = useState<Value | InitialValue>(initialValue);
   const [latestError, setLatestError] = useState<unknown>(null);
@@ -146,37 +133,48 @@ export const useSubscription = <Value, InitialValue>(
 export const useLatestDataSearchRequest = <
   RequestParams,
   RawResponse,
+  ProcessedResponse,
   Request extends IKibanaSearchRequest<RequestParams>
 >(
   requests$: Observable<DataSearchRequest<RequestParams, RawResponse, Request>>,
-  operator: OperatorFunction<DataSearchRequest<RequestParams, RawResponse, Request>, Foo>
+  operator: OperatorFunction<
+    DataSearchRequest<RequestParams, RawResponse, Request>,
+    DataSearchRequest<RequestParams, ProcessedResponse, Request>
+  >
 ) => {
-  const [latestResponse$] = useState(() => {
-    return requests$.pipe(
-      switchMap((request) => {
-        return request.response$;
+  const [latestResponse$, setLatestResponse$] = useState<
+    Observable<DataSearchResponse<RequestParams, ProcessedResponse, Request>>
+  >(() =>
+    requests$.pipe(
+      operator,
+      switchMap(({ abortController, options, request, response$ }) => {
+        return response$.pipe(map((response) => ({ abortController, options, request, response })));
       })
-    );
-  });
-};
-
-export const usePipe = <SourceValue, SinkValue>(
-  source$: Observable<SourceValue>,
-  operator: OperatorFunction<SourceValue, SinkValue>
-): Observable<SinkValue> => {
-  const latestOperator = useLatest(operator);
-
-  const [sink$] = useState(() =>
-    source$.pipe(concatMap((value) => of(value).pipe(latestOperator.current)))
+    )
   );
 
-  return sink$;
-};
+  useEffect(() => {
+    setLatestResponse$(
+      requests$.pipe(
+        operator,
+        switchMap(({ abortController, options, request, response$ }) => {
+          return response$.pipe(
+            map((response) => ({ abortController, options, request, response }))
+          );
+        })
+      )
+    );
+  }, [requests$, operator]);
 
-const useLatest = <T>(value: T): { readonly current: T } => {
-  const ref = useRef(value);
-  ref.current = value;
-  return ref;
-};
+  const { latestValue } = useSubscription(latestResponse$, null);
 
-const identity = <Value>(value: Value) => value;
+  const cancel = useCallback(() => {
+    latestValue?.abortController.abort();
+  }, [latestValue]);
+
+  return {
+    data: latestValue?.response,
+    isRunning: latestValue?.response.isRunning ?? false,
+    cancel,
+  };
+};
