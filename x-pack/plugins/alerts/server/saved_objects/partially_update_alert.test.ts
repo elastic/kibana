@@ -95,6 +95,7 @@ const DefaultAttributes = {
   muteAll: true,
   mutedInstanceIds: ['muted-instance-id-1', 'muted-instance-id-2'],
   updatedBy: 'someone',
+  updatedAt: '2019-02-12T21:01:22.479Z',
 };
 
 const InvalidAttributes = { ...DefaultAttributes, foo: 'bar' };

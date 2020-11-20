@@ -10,6 +10,8 @@ import { CURRENT_MAJOR_VERSION } from '../../../common/version';
 
 export const SETUP_GUIDE_PATH = '/setup_guide';
 
+export const NOT_FOUND_PATH = '/404';
+
 export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
 
@@ -21,6 +23,7 @@ export const PRIVATE_SOURCES_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#source
 export const EXTERNAL_IDENTITIES_DOCS_URL = `${DOCS_PREFIX}/workplace-search-external-identities-api.html`;
 export const SECURITY_DOCS_URL = `${DOCS_PREFIX}/workplace-search-security.html`;
 export const SMTP_DOCS_URL = `${DOCS_PREFIX}/workplace-search-smtp-mailer.html`;
+export const BOX_DOCS_URL = `${DOCS_PREFIX}/workplace-search-box-connector.html`;
 export const CONFLUENCE_DOCS_URL = `${DOCS_PREFIX}/workplace-search-confluence-cloud-connector.html`;
 export const CONFLUENCE_SERVER_DOCS_URL = `${DOCS_PREFIX}/workplace-search-confluence-server-connector.html`;
 export const DROPBOX_DOCS_URL = `${DOCS_PREFIX}/workplace-search-dropbox-connector.html`;
@@ -59,6 +62,7 @@ export const ORG_SOURCES_PATH = `${ORG_PATH}${SOURCES_PATH}`;
 
 export const SOURCE_ADDED_PATH = `${SOURCES_PATH}/added`;
 export const ADD_SOURCE_PATH = `${SOURCES_PATH}/add`;
+export const ADD_BOX_PATH = `${SOURCES_PATH}/add/box`;
 export const ADD_CONFLUENCE_PATH = `${SOURCES_PATH}/add/confluence-cloud`;
 export const ADD_CONFLUENCE_SERVER_PATH = `${SOURCES_PATH}/add/confluence-server`;
 export const ADD_DROPBOX_PATH = `${SOURCES_PATH}/add/dropbox`;
@@ -93,6 +97,7 @@ export const ORG_SETTINGS_PATH = `${ORG_PATH}/settings`;
 export const ORG_SETTINGS_CUSTOMIZE_PATH = `${ORG_SETTINGS_PATH}/customize`;
 export const ORG_SETTINGS_CONNECTORS_PATH = `${ORG_SETTINGS_PATH}/connectors`;
 export const ORG_SETTINGS_OAUTH_APPLICATION_PATH = `${ORG_SETTINGS_PATH}/oauth`;
+export const EDIT_BOX_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/box/edit`;
 export const EDIT_CONFLUENCE_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/confluence-cloud/edit`;
 export const EDIT_CONFLUENCE_SERVER_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/confluence-server/edit`;
 export const EDIT_DROPBOX_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/dropbox/edit`;
@@ -119,3 +124,5 @@ export const getContentSourcePath = (
 export const getGroupPath = (groupId: string) => generatePath(GROUP_PATH, { groupId });
 export const getGroupSourcePrioritizationPath = (groupId: string) =>
   `${GROUPS_PATH}/${groupId}/source_prioritization`;
+export const getSourcesPath = (path: string, isOrganization: boolean) =>
+  isOrganization ? `${ORG_PATH}${path}` : path;
