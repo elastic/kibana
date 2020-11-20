@@ -6,11 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { memoize, isNumber } from 'lodash';
+import { memoize } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { asDecimal, asDecimalOrInteger, asInteger } from './formatters';
 import { TimeUnit } from './datetime';
 import { Maybe } from '../../../typings/common';
+import { isFiniteNumber } from '../is_finite_number';
 
 interface FormatterOptions {
   defaultValue?: string;
@@ -99,7 +100,7 @@ function convertTo({
   microseconds: Maybe<number>;
   defaultValue?: string;
 }): ConvertedDuration {
-  if (microseconds == null) {
+  if (!isFiniteNumber(microseconds)) {
     return { value: defaultValue, formatted: defaultValue };
   }
 
@@ -144,7 +145,7 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
 );
 
 export function asTransactionRate(value: Maybe<number>) {
-  if (!isNumber(value)) {
+  if (!isFiniteNumber(value)) {
     return NOT_AVAILABLE_LABEL;
   }
 
@@ -173,7 +174,7 @@ export function asDuration(
   value: Maybe<number>,
   { defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) {
-  if (value == null) {
+  if (!isFiniteNumber(value)) {
     return defaultValue;
   }
 

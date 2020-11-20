@@ -6,14 +6,11 @@
 
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getTimeseriesDataForTransactionGroups } from './get_timeseries_data_for_transaction_groups';
-import { getTransactionGroupsForPage } from './get_transaction_groups_for_page';
+import {
+  getTransactionGroupsForPage,
+  ServiceOverviewTransactionGroupSortField,
+} from './get_transaction_groups_for_page';
 import { mergeTransactionGroupData } from './merge_transaction_group_data';
-
-export type ServiceOverviewTransactionGroupSortField =
-  | 'latency'
-  | 'traffic'
-  | 'errorRate'
-  | 'impact';
 
 export async function getServiceTransactionGroups({
   serviceName,

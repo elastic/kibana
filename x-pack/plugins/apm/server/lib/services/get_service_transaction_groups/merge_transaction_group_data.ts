@@ -56,9 +56,9 @@ export function mergeTransactionGroupData({
               y: point.avg_latency.value,
             }),
           },
-          traffic: {
-            ...prev.traffic,
-            timeseries: prev.traffic.timeseries.concat({
+          throughput: {
+            ...prev.throughput,
+            timeseries: prev.throughput.timeseries.concat({
               x: point.key,
               y: point.transaction_count.value / deltaAsMinutes,
             }),
@@ -83,8 +83,8 @@ export function mergeTransactionGroupData({
           value: transactionGroup.latency,
           timeseries: [] as Array<{ x: number; y: number | null }>,
         },
-        traffic: {
-          value: transactionGroup.traffic,
+        throughput: {
+          value: transactionGroup.throughput,
           timeseries: [] as Array<{ x: number; y: number }>,
         },
         errorRate: {

@@ -254,7 +254,7 @@ export const serviceTransactionGroupsRoute = createRoute({
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         sortField: t.union([
           t.literal('latency'),
-          t.literal('traffic'),
+          t.literal('throughput'),
           t.literal('errorRate'),
           t.literal('impact'),
         ]),

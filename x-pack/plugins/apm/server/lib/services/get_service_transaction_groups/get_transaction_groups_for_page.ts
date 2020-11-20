@@ -19,7 +19,12 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
-import { ServiceOverviewTransactionGroupSortField } from '.';
+
+export type ServiceOverviewTransactionGroupSortField =
+  | 'latency'
+  | 'throughput'
+  | 'errorRate'
+  | 'impact';
 
 export type TransactionGroupWithoutTimeseriesData = ValuesType<
   PromiseReturnType<typeof getTransactionGroupsForPage>['transactionGroups']
@@ -124,13 +129,13 @@ export async function getTransactionGroupsForPage({
       return {
         name: bucket.key as string,
         latency: bucket.avg_latency.value,
-        traffic: bucket.transaction_count.value,
+        throughput: bucket.transaction_count.value,
         errorRate,
       };
     }) ?? [];
 
   const totalDurationValues = transactionGroups.map(
-    (group) => (group.latency ?? 0) * group.traffic
+    (group) => (group.latency ?? 0) * group.throughput
   );
 
   const minTotalDuration = Math.min(...totalDurationValues);
@@ -139,7 +144,7 @@ export async function getTransactionGroupsForPage({
   const transactionGroupsWithImpact = transactionGroups.map((group) => ({
     ...group,
     impact:
-      (((group.latency ?? 0) * group.traffic - minTotalDuration) /
+      (((group.latency ?? 0) * group.throughput - minTotalDuration) /
         (maxTotalDuration - minTotalDuration)) *
       100,
   }));

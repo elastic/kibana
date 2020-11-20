@@ -45,7 +45,7 @@ interface Props {
   serviceName: string;
 }
 
-type SortField = 'latency' | 'traffic' | 'errorRate' | 'impact';
+type SortField = 'latency' | 'throughput' | 'errorRate' | 'impact';
 type SortDirection = 'asc' | 'desc';
 
 const PAGE_SIZE = 5;
@@ -193,21 +193,21 @@ export function ServiceOverviewTransactionsTable(props: Props) {
       },
     },
     {
-      field: 'traffic',
+      field: 'throughput',
       name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnTraffic',
+        'xpack.apm.serviceOverview.transactionsTableColumnTroughput',
         {
           defaultMessage: 'Traffic',
         }
       ),
       width: px(unit * 10),
-      render: (_, { traffic }) => {
+      render: (_, { throughput }) => {
         return (
           <SparkPlotWithValueLabel
             color="euiColorVis0"
             compact
-            series={traffic.timeseries ?? undefined}
-            valueLabel={asTransactionRate(traffic.value)}
+            series={throughput.timeseries ?? undefined}
+            valueLabel={asTransactionRate(throughput.value)}
             start={new Date(start!).getTime()}
             end={new Date(end!).getTime()}
           />

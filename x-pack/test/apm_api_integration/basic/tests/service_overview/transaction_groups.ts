@@ -95,7 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const firstItem = response.body.transactionGroups[0];
 
         expectSnapshot(
-          pick(firstItem, 'name', 'latency.value', 'traffic.value', 'errorRate.value', 'impact')
+          pick(firstItem, 'name', 'latency.value', 'throughput.value', 'errorRate.value', 'impact')
         ).toMatchInline(`
           Object {
             "errorRate": Object {
@@ -106,7 +106,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "value": 996636.214285714,
             },
             "name": "DispatcherServlet#doGet",
-            "traffic": Object {
+            "throughput": Object {
               "value": 28,
             },
           }
@@ -117,7 +117,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).toMatchInline(`15`);
 
         expectSnapshot(
-          firstItem.traffic.timeseries.filter(({ y }: any) => y > 0).length
+          firstItem.throughput.timeseries.filter(({ y }: any) => y > 0).length
         ).toMatchInline(`15`);
 
         expectSnapshot(
