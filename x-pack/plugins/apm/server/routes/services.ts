@@ -25,6 +25,7 @@ export const servicesRoute = createRoute({
   params: t.type({
     query: t.intersection([uiFiltersRt, rangeRt]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -50,6 +51,7 @@ export const serviceAgentNameRoute = createRoute({
     }),
     query: rangeRt,
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
@@ -73,6 +75,7 @@ export const serviceTransactionTypesRoute = createRoute({
     }),
     query: rangeRt,
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
@@ -96,6 +99,7 @@ export const serviceNodeMetadataRoute = createRoute({
     }),
     query: t.intersection([uiFiltersRt, rangeRt]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName, serviceNodeName } = context.params.path;
@@ -116,6 +120,7 @@ export const serviceAnnotationsRoute = createRoute({
       }),
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
@@ -220,6 +225,7 @@ export const serviceErrorGroupsRoute = createRoute({
       }),
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
