@@ -8,7 +8,7 @@ import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 
-import { CommentRequestUserType, CommentType } from '../../../../../case/common/api';
+import { CommentType } from '../../../../../case/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
@@ -16,7 +16,7 @@ import { useInsertTimeline } from '../../../timelines/components/timeline/insert
 import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
 
 import * as i18n from './translations';
-import { schema } from './schema';
+import { schema, AddCommentFormSchema } from './schema';
 import { useTimelineClick } from '../../../common/utils/timeline/use_timeline_click';
 
 const MySpinner = styled(EuiLoadingSpinner)`
@@ -25,9 +25,8 @@ const MySpinner = styled(EuiLoadingSpinner)`
   left: 50%;
 `;
 
-const initialCommentValue: CommentRequestUserType = {
+const initialCommentValue: AddCommentFormSchema = {
   comment: '',
-  type: CommentType.user,
 };
 
 export interface AddCommentRefObject {
@@ -47,7 +46,7 @@ export const AddComment = React.memo(
     ({ caseId, disabled, showLoading = true, onCommentPosted, onCommentSaving }, ref) => {
       const { isLoading, postComment } = usePostComment(caseId);
 
-      const { form } = useForm<CommentRequestUserType>({
+      const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
         options: { stripEmptyFields: false },
         schema,
@@ -82,7 +81,7 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          postComment({ ...data }, onCommentPosted);
+          postComment({ ...data, type: CommentType.user }, onCommentPosted);
           reset();
         }
       }, [onCommentPosted, onCommentSaving, postComment, reset, submit]);

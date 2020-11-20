@@ -10,7 +10,11 @@ import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;
 
-export const schema: FormSchema<CommentRequestUserType> = {
+export interface AddCommentFormSchema {
+  comment: CommentRequestUserType['comment'];
+}
+
+export const schema: FormSchema<AddCommentFormSchema> = {
   comment: {
     type: FIELD_TYPES.TEXTAREA,
     validations: [
