@@ -1290,6 +1290,7 @@ export class EndpointDocGenerator {
             { id: 'logs-endpoint.events.security', type: 'index_template' },
             { id: 'metrics-endpoint.telemetry', type: 'index_template' },
           ] as EsAssetReference[],
+          package_assets: [],
           es_index_patterns: {
             alerts: 'logs-endpoint.alerts-*',
             events: 'events-endpoint-*',

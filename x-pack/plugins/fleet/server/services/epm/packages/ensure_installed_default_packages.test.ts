@@ -43,6 +43,7 @@ const mockInstallation: SavedObject<Installation> = {
     id: 'test-pkg',
     installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
+    package_assets: [],
     es_index_patterns: { pattern: 'pattern-name' },
     name: 'test package',
     version: '1.0.0',
