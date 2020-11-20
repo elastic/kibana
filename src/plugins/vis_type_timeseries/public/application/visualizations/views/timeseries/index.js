@@ -74,11 +74,7 @@ export const TimeSeries = ({
 
   useEffect(() => {
     const updateCursor = ({ cursor }) => {
-      if (
-        chartRef.current &&
-        cursor &&
-        chartRef.current.chartStore.getState().chartId !== cursor.chartId
-      ) {
+      if (chartRef.current && cursor) {
         chartRef.current.dispatchExternalPointerEvent(cursor);
       }
     };
