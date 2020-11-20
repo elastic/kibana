@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertMessage, AlertState } from '../../../common/types/alerts';
+import { AlertMessage, AlertState, CommonAlertState } from '../../../common/types/alerts';
 import {
   ALERT_CPU_USAGE,
   ALERT_LOGSTASH_VERSION_MISMATCH,
@@ -30,7 +30,8 @@ jest.mock('../../legacy_shims', () => ({
 }));
 
 jest.mock('./get_formatted_date_for_alert_state', () => ({
-  getFormattedDateForAlertState: () => 'DATE',
+  getFormattedDateForAlertState: (alertState: CommonAlertState) =>
+    `triggered:${alertState.state.ui.triggeredMS}`,
 }));
 
 describe('getAlertPanelsByNode', () => {

@@ -320,21 +320,22 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
 
   // Merge the nodes data with the setup data if enabled
   const nodes = props.nodes || [];
-  // We want to create a seamless experience for the user by merging in the setup data
-  // and the node data from monitoring indices in the likely scenario where some nodes
-  // are using MB collection and some are using no collection
-  const nodesByUuid = nodes.reduce(
-    (byUuid, node) => ({
-      ...byUuid,
-      [node.id || node.resolver]: node,
-    }),
-    {}
-  );
+
   if (
     setupMode &&
     setupMode.enabled &&
     isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
   ) {
+    // We want to create a seamless experience for the user by merging in the setup data
+    // and the node data from monitoring indices in the likely scenario where some nodes
+    // are using MB collection and some are using no collection
+    const nodesByUuid = nodes.reduce(
+      (byUuid, node) => ({
+        ...byUuid,
+        [node.id || node.resolver]: node,
+      }),
+      {}
+    );
     nodes.push(
       ...Object.entries(setupMode.data.byUuid).reduce((nodes, [nodeUuid, instance]) => {
         if (!nodesByUuid[nodeUuid] && instance.node) {

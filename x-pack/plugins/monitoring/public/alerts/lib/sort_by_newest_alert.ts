@@ -10,5 +10,5 @@ export function sortByNewestAlert(a: CommonAlertState, b: CommonAlertState) {
   if (a.state.ui.triggeredMS === b.state.ui.triggeredMS) {
     return 0;
   }
-  return a.state.ui.triggeredMS > b.state.ui.triggeredMS ? 1 : -1;
+  return a.state.ui.triggeredMS < b.state.ui.triggeredMS ? 1 : -1;
 }

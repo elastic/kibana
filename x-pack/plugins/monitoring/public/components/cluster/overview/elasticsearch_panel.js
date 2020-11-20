@@ -241,7 +241,7 @@ export function ElasticsearchPanel(props) {
     const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsBadge alerts={alertsList} viewMoreUrl={goToNodes()} />
+        <AlertsBadge alerts={alertsList} />
       </EuiFlexItem>
     );
   }
@@ -251,7 +251,7 @@ export function ElasticsearchPanel(props) {
     const alertsList = OVERVIEW_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     overviewAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsBadge alerts={alertsList} debug={true} />
+        <AlertsBadge alerts={alertsList} />
       </EuiFlexItem>
     );
   }

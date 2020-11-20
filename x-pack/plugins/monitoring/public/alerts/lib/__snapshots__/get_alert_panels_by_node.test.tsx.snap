@@ -44,7 +44,7 @@ Array [
           <EuiText
             size="s"
           >
-            DATE
+            triggered:0
           </EuiText>
           <EuiText
             size="s"
@@ -70,7 +70,7 @@ Array [
           <EuiText
             size="s"
           >
-            DATE
+            triggered:0
           </EuiText>
           <EuiText
             size="s"
@@ -209,7 +209,7 @@ Array [
           <EuiText
             size="s"
           >
-            DATE
+            triggered:0
           </EuiText>
           <EuiText
             size="s"
@@ -229,7 +229,7 @@ Array [
           <EuiText
             size="s"
           >
-            DATE
+            triggered:0
           </EuiText>
           <EuiText
             size="s"
@@ -249,7 +249,7 @@ Array [
           <EuiText
             size="s"
           >
-            DATE
+            triggered:0
           </EuiText>
           <EuiText
             size="s"
@@ -275,7 +275,7 @@ Array [
           <EuiText
             size="s"
           >
-            DATE
+            triggered:0
           </EuiText>
           <EuiText
             size="s"
@@ -295,7 +295,7 @@ Array [
           <EuiText
             size="s"
           >
-            DATE
+            triggered:0
           </EuiText>
           <EuiText
             size="s"

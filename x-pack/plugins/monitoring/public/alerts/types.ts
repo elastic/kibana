@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { CommonAlertState, CommonAlertStatus } from '../../common/types/alerts';
+import { CommonAlertStatus } from '../../common/types/alerts';
 
 export interface AlertsByName {
   [name: string]: CommonAlertStatus;
-}
-
-export interface AlertStatusAndState {
-  alert: CommonAlertStatus;
-  alertState: CommonAlertState;
 }
 
 export interface PanelItem {

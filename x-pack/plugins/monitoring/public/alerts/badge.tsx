@@ -27,7 +27,7 @@ import {
 
 export const numberOfAlertsLabel = (count: number) => `${count} alert${count > 1 ? 's' : ''}`;
 
-const MAX_TO_SHOW_IN_LIST = 8;
+const MAX_TO_SHOW_BY_CATEGORY = 8;
 
 const PANEL_TITLE = i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
   defaultMessage: 'Alerts',
@@ -59,7 +59,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const alertsContext = React.useContext(AlertsContext);
   const alertCount = inSetupMode ? alerts.length : getFiringAlertCount(alerts, stateFilter);
   const [showByNode, setShowByNode] = React.useState(
-    !inSetupMode && alertCount > MAX_TO_SHOW_IN_LIST
+    !inSetupMode && alertCount > MAX_TO_SHOW_BY_CATEGORY
   );
 
   React.useEffect(() => {

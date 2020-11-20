@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertMessage, AlertState } from '../../../common/types/alerts';
+import { AlertMessage, AlertState, CommonAlertState } from '../../../common/types/alerts';
 import {
   ALERTS,
   ALERT_CPU_USAGE,
@@ -32,7 +32,8 @@ jest.mock('../../legacy_shims', () => ({
 }));
 
 jest.mock('./get_formatted_date_for_alert_state', () => ({
-  getFormattedDateForAlertState: () => 'DATE',
+  getFormattedDateForAlertState: (alertState: CommonAlertState) =>
+    `triggered:${alertState.state.ui.triggeredMS}`,
 }));
 
 function getAllAlerts() {
@@ -74,7 +75,10 @@ describe('getAlertPanelsByCategory', () => {
         meta: {},
         state: {
           cluster,
-          ui,
+          ui: {
+            ...ui,
+            triggeredMS: fi,
+          },
           stackProduct: 'elasticsearch',
           stackProductUuid: `es${fi}`,
           stackProductName: `es_name_${fi}`,
@@ -88,7 +92,10 @@ describe('getAlertPanelsByCategory', () => {
         meta: {},
         state: {
           cluster,
-          ui,
+          ui: {
+            ...ui,
+            triggeredMS: nfi,
+          },
           stackProduct: 'elasticsearch',
           stackProductUuid: `es${nfi}`,
           stackProductName: `es_name_${nfi}`,
