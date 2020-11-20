@@ -7,12 +7,16 @@
 .enterpriseSearchDataType {
   &--number,
   &--float {
-    color: $euiColorDanger;
+    color: $euiColorAccentText;
     font-family: $euiCodeFontFamily;
   }
 
   &--location {
-    color: $euiColorSecondary;
+    color: $euiColorSuccessText;
+    font-family: $euiCodeFontFamily;
+  }
+
+  &--date {
     font-family: $euiCodeFontFamily;
   }
 }
