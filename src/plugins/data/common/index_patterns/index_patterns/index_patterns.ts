@@ -36,6 +36,7 @@ import {
   GetFieldsOptions,
   IndexPatternSpec,
   IndexPatternAttributes,
+  FieldAttrs,
   FieldSpec,
   IndexPatternFieldMap,
 } from '../types';
@@ -254,7 +255,11 @@ export class IndexPatternsService {
     try {
       const fields = await this.getFieldsForIndexPattern(indexPattern);
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
-      indexPattern.fields.replaceAll([...fields, ...scripted]);
+      const fieldAttrs = indexPattern.getFieldAttrs();
+      const fieldsWithSavedAttrs = Object.values(
+        this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
+      );
+      indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -280,12 +285,13 @@ export class IndexPatternsService {
     fields: IndexPatternFieldMap,
     id: string,
     title: string,
-    options: GetFieldsOptions
+    options: GetFieldsOptions,
+    fieldAttrs: FieldAttrs = {}
   ) => {
     const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
-      const newFields = await this.getFieldsForWildcard(options);
-      return this.fieldArrayToMap([...newFields, ...scriptdFields]);
+      const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
+      return this.fieldArrayToMap([...newFields, ...scriptdFields], fieldAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -306,9 +312,9 @@ export class IndexPatternsService {
    * Converts field array to map
    * @param fields
    */
-  fieldArrayToMap = (fields: FieldSpec[]) =>
+  fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
-      collector[field.name] = field;
+      collector[field.name] = { ...field, customLabel: fieldAttrs?.[field.name]?.customLabel };
       return collector;
     }, {});
 
@@ -330,6 +336,7 @@ export class IndexPatternsService {
         fieldFormatMap,
         typeMeta,
         type,
+        fieldAttrs,
       },
     } = savedObject;
 
@@ -337,6 +344,7 @@ export class IndexPatternsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
 
     return {
       id,
@@ -345,24 +353,15 @@ export class IndexPatternsService {
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
-      fields: this.fieldArrayToMap(parsedFields),
+      fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
       typeMeta: parsedTypeMeta,
       type,
       fieldFormats: parsedFieldFormatMap,
+      fieldAttrs: parsedFieldAttrs,
     };
   };
 
-  /**
-   * Get an index pattern by id. Cache optimized
-   * @param id
-   */
-
-  get = async (id: string): Promise<IndexPattern> => {
-    const cache = indexPatternCache.get(id);
-    if (cache) {
-      return cache;
-    }
-
+  private getSavedObjectAndInit = async (id: string): Promise<IndexPattern> => {
     const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
       savedObjectType,
       id
@@ -374,17 +373,26 @@ export class IndexPatternsService {
 
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta } = spec;
+    spec.fieldAttrs = savedObject.attributes.fieldAttrs
+      ? JSON.parse(savedObject.attributes.fieldAttrs)
+      : {};
 
     const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
     let isSaveRequired = isFieldRefreshRequired;
     try {
       spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
-            pattern: title as string,
-            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-            type,
-            rollupIndex: typeMeta?.params?.rollupIndex,
-          })
+        ? await this.refreshFieldSpecMap(
+            spec.fields || {},
+            id,
+            spec.title as string,
+            {
+              pattern: title as string,
+              metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+              type,
+              rollupIndex: typeMeta?.params?.rollupIndex,
+            },
+            spec.fieldAttrs
+          )
         : spec.fields;
     } catch (err) {
       isSaveRequired = false;
@@ -409,7 +417,6 @@ export class IndexPatternsService {
       : {};
 
     const indexPattern = await this.create(spec, true);
-    indexPatternCache.set(id, indexPattern);
     if (isSaveRequired) {
       try {
         this.updateSavedObject(indexPattern);
@@ -458,6 +465,23 @@ export class IndexPatternsService {
       })
       .then(() => this);
   }
+
+  /**
+   * Get an index pattern by id. Cache optimized
+   * @param id
+   */
+
+  get = async (id: string): Promise<IndexPattern> => {
+    const indexPatternPromise =
+      indexPatternCache.get(id) || indexPatternCache.set(id, this.getSavedObjectAndInit(id));
+
+    // don't cache failed requests
+    indexPatternPromise.catch(() => {
+      indexPatternCache.clear(id);
+    });
+
+    return indexPatternPromise;
+  };
 
   /**
    * Create a new index pattern instance
@@ -517,7 +541,7 @@ export class IndexPatternsService {
       id: indexPattern.id,
     });
     indexPattern.id = response.id;
-    indexPatternCache.set(indexPattern.id, indexPattern);
+    indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
     return indexPattern;
   }
 

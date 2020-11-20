@@ -17,6 +17,9 @@ jest.mock('../../../shared/flash_messages', () => ({
 }));
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
 
+import { Loading } from '../../../shared/loading';
+import { EngineOverview } from '../engine_overview';
+
 import { EngineRouter } from './';
 
 describe('EngineRouter', () => {
@@ -59,17 +62,17 @@ describe('EngineRouter', () => {
     );
   });
 
-  it('does not render if async data is still loading', () => {
+  it('renders a loading component if async data is still loading', () => {
     setMockValues({ ...values, dataLoading: true });
     const wrapper = shallow(<EngineRouter />);
-    expect(wrapper.isEmptyRender()).toBe(true);
+    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('renders a default engine overview', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="EngineOverviewTODO"]')).toHaveLength(1);
+    expect(wrapper.find(EngineOverview)).toHaveLength(1);
   });
 
   it('renders an analytics view', () => {

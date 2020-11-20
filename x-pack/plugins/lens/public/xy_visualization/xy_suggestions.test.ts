@@ -15,12 +15,14 @@ import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { PaletteOutput } from 'src/plugins/charts/public';
 
 jest.mock('../id_generator');
 
 const xyVisualization = getXyVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
+  data: dataPluginMock.createStartContract(),
 });
 
 describe('xy_suggestions', () => {
@@ -186,15 +188,15 @@ describe('xy_suggestions', () => {
     expect(suggestions).toHaveLength(visualizationTypes.length);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',
-      'line',
-      'area_percentage_stacked',
-      'area_stacked',
-      'area',
-      'bar_horizontal_percentage_stacked',
-      'bar_horizontal_stacked',
-      'bar_percentage_stacked',
-      'bar_horizontal',
       'bar',
+      'bar_horizontal',
+      'bar_percentage_stacked',
+      'bar_horizontal_stacked',
+      'bar_horizontal_percentage_stacked',
+      'area',
+      'area_stacked',
+      'area_percentage_stacked',
+      'line',
     ]);
   });
 
@@ -226,15 +228,15 @@ describe('xy_suggestions', () => {
     ]);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',
-      'line',
-      'area_percentage_stacked',
-      'area_stacked',
-      'area',
-      'bar_horizontal_percentage_stacked',
-      'bar_horizontal_stacked',
-      'bar_percentage_stacked',
-      'bar_horizontal',
       'bar',
+      'bar_horizontal',
+      'bar_percentage_stacked',
+      'bar_horizontal_stacked',
+      'bar_horizontal_percentage_stacked',
+      'area',
+      'area_stacked',
+      'area_percentage_stacked',
+      'line',
     ]);
   });
 

@@ -6,15 +6,19 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 import { EventsCheckbox } from './checkbox';
 import { OS } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { selectedWindowsEvents, totalWindowsEvents } from '../../../store/policy_details/selectors';
-import { ConfigForm } from '../config_form';
+import { ConfigForm, ConfigFormHeading } from '../../components/config_form';
 import { setIn, getIn } from '../../../models/policy_details_config';
 import { UIPolicyConfig, Immutable } from '../../../../../../../common/endpoint/types';
+import {
+  COLLECTIONS_ENABLED_MESSAGE,
+  EVENTS_FORM_TYPE_LABEL,
+  EVENTS_HEADING,
+} from './translations';
 
 export const WindowsEvents = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedWindowsEvents);
@@ -99,14 +103,7 @@ export const WindowsEvents = React.memo(() => {
     ];
     return (
       <>
-        <EuiTitle size="xxs">
-          <h5>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyDetailsConfig.eventingEvents"
-              defaultMessage="Events"
-            />
-          </h5>
-        </EuiTitle>
+        <ConfigFormHeading>{EVENTS_HEADING}</ConfigFormHeading>
         <EuiSpacer size="s" />
         {items.map((item, index) => {
           return (
@@ -125,31 +122,16 @@ export const WindowsEvents = React.memo(() => {
     );
   }, []);
 
-  const collectionsEnabled = useMemo(() => {
-    return (
-      <EuiText size="s" color="subdued">
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled"
-          defaultMessage="{selected} / {total} event collections enabled"
-          values={{ selected, total }}
-        />
-      </EuiText>
-    );
-  }, [selected, total]);
-
   return (
     <ConfigForm
-      type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
-        defaultMessage: 'Event Collection',
-      })}
-      description={i18n.translate('xpack.securitySolution.endpoint.policy.details.windowsLabel', {
-        defaultMessage: 'Windows',
-      })}
-      supportedOss={i18n.translate('xpack.securitySolution.endpoint.policy.details.windows', {
-        defaultMessage: 'Windows',
-      })}
+      type={EVENTS_FORM_TYPE_LABEL}
+      supportedOss={['windows']}
       dataTestSubj="windowsEventingForm"
-      rightCorner={collectionsEnabled}
+      rightCorner={
+        <EuiText size="s" color="subdued">
+          {COLLECTIONS_ENABLED_MESSAGE(selected, total)}
+        </EuiText>
+      }
     >
       {checkboxes}
     </ConfigForm>

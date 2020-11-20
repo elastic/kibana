@@ -9,6 +9,7 @@ import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
 import { ServerLogActionParams } from '.././types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
+import { resolvedActionGroupMessage } from '../../../constants';
 
 export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
   ServerLogActionParams
@@ -24,12 +25,25 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
   ];
 
   useEffect(() => {
-    editAction('level', 'info', index);
-    if (!message && defaultMessage && defaultMessage.length > 0) {
-      editAction('message', defaultMessage, index);
+    if (!actionParams?.level) {
+      editAction('level', 'info', index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (defaultMessage === resolvedActionGroupMessage) {
+      editAction('message', defaultMessage, index);
+    } else if (
+      (!message || message === resolvedActionGroupMessage) &&
+      defaultMessage &&
+      defaultMessage.length > 0
+    ) {
+      editAction('message', defaultMessage, index);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultMessage]);
 
   return (
     <Fragment>

@@ -45,6 +45,8 @@ export async function runFpm(
     }
   };
 
+  const envFolder = type === 'rpm' ? 'sysconfig' : 'default';
+
   const args = [
     // Force output even if it will overwrite an existing file
     '--force',
@@ -114,6 +116,8 @@ export async function runFpm(
     '--template-value',
     `logDir=/var/log/kibana`,
     '--template-value',
+    `pidDir=/run/kibana`,
+    '--template-value',
     `envFile=/etc/default/kibana`,
     // config and data directories are copied to /usr/share and /var/lib
     // below, so exclude them from the main package source located in
@@ -122,6 +126,8 @@ export async function runFpm(
     `usr/share/kibana/config`,
     '--exclude',
     `usr/share/kibana/data`,
+    '--exclude',
+    'run/kibana/.gitempty',
 
     // flags specific to the package we are building, supplied by tasks below
     ...pkgSpecificFlags,
@@ -139,6 +145,11 @@ export async function runFpm(
     // copy package configurations
     `${resolveWithTrailingSlash(__dirname, 'service_templates/sysv/')}=/`,
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/')}=/`,
+
+    `${resolveWithTrailingSlash(
+      __dirname,
+      'service_templates/env/kibana'
+    )}=/etc/${envFolder}/kibana`,
   ];
 
   log.debug('calling fpm with args:', args);

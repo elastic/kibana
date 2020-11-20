@@ -14,11 +14,7 @@ import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eu
 import { CoreStart, AppMountParameters } from 'src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../xpack_legacy/common';
-import {
-  IngestManagerSetupDeps,
-  IngestManagerConfigType,
-  IngestManagerStartDeps,
-} from '../../plugin';
+import { FleetSetupDeps, FleetConfigType, FleetStartDeps } from '../../plugin';
 import { PAGE_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
@@ -36,6 +32,8 @@ import {
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { FleetStatusProvider, useBreadcrumbs } from './hooks';
 import { IntraAppStateProvider } from './hooks/use_intra_app_state';
+import { UIExtensionsStorage } from './types';
+import { UIExtensionsContext } from './hooks/use_ui_extension';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -235,14 +233,16 @@ const IngestManagerApp = ({
   config,
   history,
   kibanaVersion,
+  extensions,
 }: {
   basepath: string;
   coreStart: CoreStart;
-  setupDeps: IngestManagerSetupDeps;
-  startDeps: IngestManagerStartDeps;
-  config: IngestManagerConfigType;
+  setupDeps: FleetSetupDeps;
+  startDeps: FleetStartDeps;
+  config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
+  extensions: UIExtensionsStorage;
 }) => {
   const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
   return (
@@ -252,7 +252,9 @@ const IngestManagerApp = ({
           <ConfigContext.Provider value={config}>
             <KibanaVersionContext.Provider value={kibanaVersion}>
               <EuiThemeProvider darkMode={isDarkMode}>
-                <IngestManagerRoutes history={history} basepath={basepath} />
+                <UIExtensionsContext.Provider value={extensions}>
+                  <IngestManagerRoutes history={history} basepath={basepath} />
+                </UIExtensionsContext.Provider>
               </EuiThemeProvider>
             </KibanaVersionContext.Provider>
           </ConfigContext.Provider>
@@ -265,10 +267,11 @@ const IngestManagerApp = ({
 export function renderApp(
   coreStart: CoreStart,
   { element, appBasePath, history }: AppMountParameters,
-  setupDeps: IngestManagerSetupDeps,
-  startDeps: IngestManagerStartDeps,
-  config: IngestManagerConfigType,
-  kibanaVersion: string
+  setupDeps: FleetSetupDeps,
+  startDeps: FleetStartDeps,
+  config: FleetConfigType,
+  kibanaVersion: string,
+  extensions: UIExtensionsStorage
 ) {
   ReactDOM.render(
     <IngestManagerApp
@@ -279,6 +282,7 @@ export function renderApp(
       config={config}
       history={history}
       kibanaVersion={kibanaVersion}
+      extensions={extensions}
     />,
     element
   );
@@ -288,7 +292,7 @@ export function renderApp(
   };
 }
 
-export const teardownIngestManager = (coreStart: CoreStart) => {
+export const teardownFleet = (coreStart: CoreStart) => {
   coreStart.chrome.docTitle.reset();
   coreStart.chrome.setBreadcrumbs([]);
   licenseService.stop();

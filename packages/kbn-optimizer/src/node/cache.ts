@@ -18,12 +18,20 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 // @ts-expect-error no types available
 import * as LmdbStore from 'lmdb-store';
 import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/dev-utils';
 
-const CACHE_DIR = Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH);
+const LMDB_PKG = JSON.parse(
+  Fs.readFileSync(Path.resolve(REPO_ROOT, 'node_modules/lmdb-store/package.json'), 'utf8')
+);
+const CACHE_DIR = Path.resolve(
+  REPO_ROOT,
+  `data/node_auto_transpilation_cache/lmdb-${LMDB_PKG.version}/${UPSTREAM_BRANCH}`
+);
+
 const reportError = () => {
   // right now I'm not sure we need to worry about errors, the cache isn't actually
   // necessary, and if the cache is broken it should just rebuild on the next restart
@@ -38,10 +46,15 @@ const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
 interface Lmdb<T> {
+  name: string;
   get(key: string): T | undefined;
   put(key: string, value: T, version?: number, ifVersion?: number): Promise<boolean>;
   remove(key: string, ifVersion?: number): Promise<boolean>;
-  openDB<T>(options: { name: string; encoding: 'msgpack' | 'string' | 'json' | 'binary' }): Lmdb<T>;
+  removeSync(key: string): void;
+  openDB<T2>(options: {
+    name: string;
+    encoding: 'msgpack' | 'string' | 'json' | 'binary';
+  }): Lmdb<T2>;
   getRange(options?: {
     start?: T;
     end?: T;
@@ -92,7 +105,7 @@ export class Cache {
   }
 
   getMtime(path: string) {
-    return this.mtimes.get(this.getKey(path));
+    return this.safeGet(this.mtimes, this.getKey(path));
   }
 
   getCode(path: string) {
@@ -103,11 +116,11 @@ export class Cache {
     // touched in a long time (currently 30 days)
     this.atimes.put(key, GLOBAL_ATIME).catch(reportError);
 
-    return this.codes.get(key);
+    return this.safeGet(this.codes, key);
   }
 
   getSourceMap(path: string) {
-    return this.sourceMaps.get(this.getKey(path));
+    return this.safeGet(this.sourceMaps, this.getKey(path));
   }
 
   update(path: string, file: { mtime: string; code: string; map: any }) {
@@ -123,6 +136,17 @@ export class Cache {
 
   private getKey(path: string) {
     return `${this.prefix}${path}`;
+  }
+
+  private safeGet<V>(db: Lmdb<V>, key: string) {
+    try {
+      return db.get(key);
+    } catch (error) {
+      process.stderr.write(
+        `failed to read node transpilation [${db.name}] cache for [${key}]: ${error.stack}\n`
+      );
+      db.removeSync(key);
+    }
   }
 
   private async pruneOldKeys() {

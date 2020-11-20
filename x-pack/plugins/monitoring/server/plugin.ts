@@ -20,8 +20,6 @@ import {
   CoreStart,
   CustomHttpResponseOptions,
   ResponseError,
-  IClusterClient,
-  SavedObjectsServiceStart,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
@@ -41,7 +39,7 @@ import { initInfraSource } from './lib/logs/init_infra_source';
 import { mbSafeQuery } from './lib/mb_safe_query';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
-import { registerMonitoringCollection } from './telemetry_collection';
+import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import { LicenseService } from './license_service';
 import { AlertsFactory } from './alerts';
 import {
@@ -77,8 +75,6 @@ export class Plugin {
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
   private bulkUploader: IBulkUploader = {} as IBulkUploader;
-  private telemetryElasticsearchClient: IClusterClient | undefined;
-  private telemetrySavedObjectsService: SavedObjectsServiceStart | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -148,19 +144,6 @@ export class Plugin {
       plugins.alerts?.registerType(alert.getAlertType());
     }
 
-    // Initialize telemetry
-    if (plugins.telemetryCollectionManager) {
-      registerMonitoringCollection({
-        telemetryCollectionManager: plugins.telemetryCollectionManager,
-        esCluster: this.cluster,
-        esClientGetter: () => this.telemetryElasticsearchClient,
-        soServiceGetter: () => this.telemetrySavedObjectsService,
-        customContext: {
-          maxBucketSize: config.ui.max_bucket_size,
-        },
-      });
-    }
-
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
       core.savedObjects.registerType({
@@ -176,7 +159,12 @@ export class Plugin {
         },
       });
 
-      registerCollectors(plugins.usageCollection, config, cluster.callAsInternalUser);
+      registerCollectors(plugins.usageCollection, config, cluster);
+      registerMonitoringTelemetryCollection(
+        plugins.usageCollection,
+        cluster,
+        config.ui.max_bucket_size
+      );
     }
 
     // Always create the bulk uploader
@@ -256,16 +244,7 @@ export class Plugin {
     };
   }
 
-  start({ elasticsearch, savedObjects }: CoreStart) {
-    // TODO: For the telemetry plugin to work, we need to provide the new ES client.
-    // The new client should be inititalized with a similar config to `this.cluster` but, since we're not using
-    // the new client in Monitoring Telemetry collection yet, setting the local client allows progress for now.
-    // The usage collector `fetch` method has been refactored to accept a `collectorFetchContext` object,
-    // exposing both es clients and the saved objects client.
-    // We will update the client in a follow up PR.
-    this.telemetryElasticsearchClient = elasticsearch.client;
-    this.telemetrySavedObjectsService = savedObjects;
-  }
+  start() {}
 
   stop() {
     if (this.cluster) {
