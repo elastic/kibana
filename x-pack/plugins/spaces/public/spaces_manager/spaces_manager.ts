@@ -115,7 +115,16 @@ export class SpacesManager {
   public async getShareSavedObjectPermissions(
     type: string
   ): Promise<{ shareToAllSpaces: boolean }> {
-    return this.http.get('/internal/spaces/_share_saved_object_permissions', { query: { type } });
+    return this.http
+      .get('/internal/security/_share_saved_object_permissions', { query: { type } })
+      .catch((err) => {
+        const isNotFound = err?.body?.statusCode === 404;
+        if (isNotFound) {
+          // security is not enabled
+          return { shareToAllSpaces: true };
+        }
+        throw err;
+      });
   }
 
   public async shareSavedObjectAdd(object: SavedObject, spaces: string[]): Promise<void> {
