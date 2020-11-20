@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BulkUploader } from './bulk_uploader';
+import { BulkUploader, BulkUploaderOptions } from './bulk_uploader';
+
+export type InitBulkUploaderOptions = Omit<BulkUploaderOptions, 'interval'>;
 
 /**
  * Initialize different types of Kibana Monitoring
@@ -15,7 +17,7 @@ import { BulkUploader } from './bulk_uploader';
  * @param {Object} kbnServer manager of Kibana services - see `src/legacy/server/kbn_server` in Kibana core
  * @param {Object} server HapiJS server instance
  */
-export function initBulkUploader({ config, ...params }) {
+export function initBulkUploader({ config, ...params }: InitBulkUploaderOptions) {
   const interval = config.kibana.collection.interval;
   return new BulkUploader({
     interval,
