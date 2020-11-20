@@ -158,7 +158,6 @@ export class Embeddable
       this.savedVis &&
       (containerState as LensByReferenceInput).savedObjectId !== this.savedVis.savedObjectId
     ) {
-      console.log('woah nelly');
       this.initializeSavedVis(containerState).then(() =>
         this.onContainerStateChanged(containerState)
       );
