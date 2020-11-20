@@ -4,31 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subject } from 'rxjs';
-import { bufferTime, filter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined } from 'lodash';
 import { SearchResponse, Client } from 'elasticsearch';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, LegacyClusterClient } from 'src/core/server';
-import { EsContext } from '.';
-import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
-import { FindOptionsType } from '../event_log_client';
 
-export const EVENT_BUFFER_TIME = 1000; // milliseconds
-export const EVENT_BUFFER_LENGTH = 100;
+import { IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
+import { FindOptionsType } from '../event_log_client';
 
 export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
-export interface Doc {
-  index: string;
-  body: IEvent;
-}
-
 export interface ConstructorOpts {
   logger: Logger;
   clusterClientPromise: Promise<EsClusterClient>;
-  context: EsContext;
 }
 
 export interface QueryEventsBySavedObjectResult {
@@ -41,67 +30,14 @@ export interface QueryEventsBySavedObjectResult {
 export class ClusterClientAdapter {
   private readonly logger: Logger;
   private readonly clusterClientPromise: Promise<EsClusterClient>;
-  private readonly docBuffer$: Subject<Doc>;
-  private readonly context: EsContext;
-  private readonly docsBufferedFlushed: Promise<void>;
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
     this.clusterClientPromise = opts.clusterClientPromise;
-    this.context = opts.context;
-    this.docBuffer$ = new Subject<Doc>();
-
-    // buffer event log docs for time / buffer length, ignore empty
-    // buffers, then index the buffered docs; kick things off with a
-    // promise on the observable, which we'll wait on in shutdown
-    this.docsBufferedFlushed = this.docBuffer$
-      .pipe(
-        bufferTime(EVENT_BUFFER_TIME, null, EVENT_BUFFER_LENGTH),
-        filter((docs) => docs.length > 0),
-        switchMap(async (docs) => await this.indexDocuments(docs))
-      )
-      .toPromise();
   }
 
-  // This will be called at plugin stop() time; the assumption is any plugins
-  // depending on the event_log will already be stopped, and so will not be
-  // writing more event docs.  We complete the docBuffer$ observable,
-  // and wait for the docsBufffered$ observable to complete via it's promise,
-  // and so should end up writing all events out that pass through, before
-  // Kibana shuts down (cleanly).
-  public async shutdown(): Promise<void> {
-    this.docBuffer$.complete();
-    await this.docsBufferedFlushed;
-  }
-
-  public indexDocument(doc: Doc): void {
-    this.docBuffer$.next(doc);
-  }
-
-  async indexDocuments(docs: Doc[]): Promise<void> {
-    // If es initialization failed, don't try to index.
-    // Also, don't log here, we log the failure case in plugin startup
-    // instead, otherwise we'd be spamming the log (if done here)
-    if (!(await this.context.waitTillReady())) {
-      return;
-    }
-
-    const bulkBody: Array<Record<string, unknown>> = [];
-
-    for (const doc of docs) {
-      if (doc.body === undefined) continue;
-
-      bulkBody.push({ create: { _index: doc.index } });
-      bulkBody.push(doc.body);
-    }
-
-    try {
-      await this.callEs<ReturnType<Client['bulk']>>('bulk', { body: bulkBody });
-    } catch (err) {
-      this.logger.error(
-        `error writing bulk events: "${err.message}"; docs: ${JSON.stringify(bulkBody)}`
-      );
-    }
+  public async indexDocument(doc: unknown): Promise<void> {
+    await this.callEs<ReturnType<Client['index']>>('index', doc);
   }
 
   public async doesIlmPolicyExist(policyName: string): Promise<boolean> {
