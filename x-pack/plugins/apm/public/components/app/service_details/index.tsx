@@ -8,7 +8,7 @@ import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { ApmHeader } from '../../shared/ApmHeader';
-import { ServiceDetailTabs } from './ServiceDetailTabs';
+import { ServiceDetailTabs } from './service_detail_tabs';
 
 interface Props extends RouteComponentProps<{ serviceName: string }> {
   tab: React.ComponentProps<typeof ServiceDetailTabs>['tab'];
