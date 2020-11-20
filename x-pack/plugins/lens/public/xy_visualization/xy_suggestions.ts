@@ -63,6 +63,13 @@ export function getSuggestions({
     });
   }
 
+  if (incompleteTable && state && !subVisualizationId) {
+    // reject incomplete configurations if the sub visualization isn't specifically requested
+    // this allows to switch chart types via switcher with incomplete configurations, but won't
+    // cause incomplete suggestions getting auto applied on dropped fields
+    return [];
+  }
+
   const suggestions = getSuggestionForColumns(
     table,
     keptLayerIds,
@@ -104,7 +111,7 @@ function getSuggestionForColumns(
   } else if (buckets.length === 0) {
     const [yValues, [xValue, splitBy]] = partition(
       prioritizeColumns(values),
-      (col) => col.operation.dataType === 'number'
+      (col) => col.operation.dataType === 'number' && !col.operation.isBucketed
     );
     return getSuggestionsForLayer({
       layerId: table.layerId,

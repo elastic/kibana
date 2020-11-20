@@ -105,11 +105,37 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           changeType: 'unchanged',
         },
-      ] as TableSuggestion[]).map((table) =>
-        expect(
-          getSuggestions({ table, keptLayerIds: [] }).every((suggestion) => suggestion.hide)
-        ).toEqual(true)
-      )
+      ] as TableSuggestion[]).map((table) => {
+        const suggestions = getSuggestions({ table, keptLayerIds: [] });
+        expect(suggestions.every((suggestion) => suggestion.hide)).toEqual(true);
+        expect(suggestions).toHaveLength(10);
+      })
+    );
+  });
+
+  test('rejects incomplete configurations if there is a state already but no sub visualization id', () => {
+    expect(
+      ([
+        {
+          isMultiRow: true,
+          columns: [dateCol('a')],
+          layerId: 'first',
+          changeType: 'reduced',
+        },
+        {
+          isMultiRow: false,
+          columns: [numCol('bar')],
+          layerId: 'first',
+          changeType: 'reduced',
+        },
+      ] as TableSuggestion[]).map((table) => {
+        const suggestions = getSuggestions({
+          table,
+          keptLayerIds: [],
+          state: {} as XYState,
+        });
+        expect(suggestions).toHaveLength(0);
+      })
     );
   });
 

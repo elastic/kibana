@@ -7,6 +7,7 @@
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { DataType } from '../types';
 import { suggestions } from './suggestions';
+import { PieVisualizationState } from './types';
 
 describe('suggestions', () => {
   describe('pie', () => {
@@ -36,6 +37,33 @@ describe('suggestions', () => {
           },
           state: undefined,
           keptLayerIds: ['second'],
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should reject when currently active and unchanged data', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [],
+            changeType: 'unchanged',
+          },
+          state: {
+            shape: 'pie',
+            layers: [
+              {
+                layerId: 'first',
+                groups: [],
+                metric: 'a',
+                numberDisplay: 'hidden',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+              },
+            ],
+          },
+          keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
     });
@@ -185,34 +213,7 @@ describe('suggestions', () => {
       ).toHaveLength(0);
     });
 
-    it('should hide when currently active and unchanged data', () => {
-      expect(
-        suggestions({
-          table: {
-            layerId: 'first',
-            isMultiRow: true,
-            columns: [],
-            changeType: 'unchanged',
-          },
-          state: {
-            shape: 'pie',
-            layers: [
-              {
-                layerId: 'first',
-                groups: [],
-                metric: 'a',
-                numberDisplay: 'hidden',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
-              },
-            ],
-          },
-          keptLayerIds: ['first'],
-        }).every((s) => s.hide)
-      ).toEqual(true);
-    });
-
-    it('should hide suggestions when there are no buckets', () => {
+    it('should reject if there are no buckets and it is not a specific chart type switch', () => {
       expect(
         suggestions({
           table: {
@@ -226,13 +227,13 @@ describe('suggestions', () => {
             ],
             changeType: 'initial',
           },
-          state: undefined,
+          state: {} as PieVisualizationState,
           keptLayerIds: ['first'],
-        }).every((s) => s.hide)
-      ).toEqual(true);
+        })
+      ).toHaveLength(0);
     });
 
-    it('should hide suggestions when there are no metrics', () => {
+    it('should reject if there are no metrics and it is not a specific chart type switch', () => {
       expect(
         suggestions({
           table: {
@@ -246,10 +247,50 @@ describe('suggestions', () => {
             ],
             changeType: 'initial',
           },
-          state: undefined,
+          state: {} as PieVisualizationState,
           keptLayerIds: ['first'],
-        }).every((s) => s.hide)
-      ).toEqual(true);
+        })
+      ).toHaveLength(0);
+    });
+
+    it('should hide suggestions when there are no buckets', () => {
+      const currentSuggestions = suggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'c',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: undefined,
+        keptLayerIds: ['first'],
+      });
+      expect(currentSuggestions).toHaveLength(3);
+      expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
+    });
+
+    it('should hide suggestions when there are no metrics', () => {
+      const currentSuggestions = suggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'c',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: true },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: undefined,
+        keptLayerIds: ['first'],
+      });
+      expect(currentSuggestions).toHaveLength(3);
+      expect(currentSuggestions.every((s) => s.hide)).toEqual(true);
     });
 
     it('should suggest a donut chart as initial state when only one bucket', () => {
@@ -405,7 +446,7 @@ describe('suggestions', () => {
   });
 
   describe('treemap', () => {
-    it('should hide when currently active and unchanged data', () => {
+    it('should reject when currently active and unchanged data', () => {
       expect(
         suggestions({
           table: {
@@ -429,8 +470,8 @@ describe('suggestions', () => {
             ],
           },
           keptLayerIds: ['first'],
-        }).every((s) => s.hide)
-      ).toEqual(true);
+        })
+      ).toHaveLength(0);
     });
 
     it('should reject when there are too many buckets being added', () => {
