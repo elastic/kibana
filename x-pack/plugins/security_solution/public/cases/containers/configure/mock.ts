@@ -10,9 +10,9 @@ import {
   CasesConfigureRequest,
   ConnectorTypes,
 } from '../../../../../case/common/api';
-import { CaseConfigure, CasesConfigurationMapping } from './types';
+import { CaseConfigure, CaseConnectorMapping } from './types';
 
-export const mappings: CasesConfigurationMapping[] = [
+export const mappings: CaseConnectorMapping[] = [
   {
     source: 'title',
     target: 'short_description',

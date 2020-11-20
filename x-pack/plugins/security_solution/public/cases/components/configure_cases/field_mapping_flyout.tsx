@@ -25,7 +25,7 @@ import {
   ActionConnector,
   useActionsConnectorsContext,
 } from '../../../../../triggers_actions_ui/public';
-import { ActionType, CaseField, CasesConfigurationMapping } from '../../containers/configure/types';
+import { ActionType, CaseField, CaseConnectorMapping } from '../../containers/configure/types';
 import { useGetFields } from '../../containers/use_get_fields';
 import { FieldMappingRow } from './field_mapping_row_new';
 import { setActionTypeToMapping } from './utils';
@@ -72,7 +72,7 @@ const getThirdPartyOptions = (thirdPartyFields: Field[]): Array<EuiSuperSelectOp
     ]
   );
 
-export const createDefaultMapping = (fields: Field[]): CasesConfigurationMapping[] => {
+export const createDefaultMapping = (fields: Field[]): CaseConnectorMapping[] => {
   const titleTarget =
     (
       fields.find((field) => field.type === 'text' && field.required) ??
@@ -104,7 +104,7 @@ export const createDefaultMapping = (fields: Field[]): CasesConfigurationMapping
   ];
 };
 
-const loadingFieldsDefault: CasesConfigurationMapping[] = [
+const loadingFieldsDefault: CaseConnectorMapping[] = [
   {
     source: 'title',
     target: 'not_mapped',
@@ -124,8 +124,8 @@ const loadingFieldsDefault: CasesConfigurationMapping[] = [
 export const setThirdPartyToMapping = (
   caseField: CaseField,
   newThirdPartyField: string,
-  mapping: CasesConfigurationMapping[]
-): CasesConfigurationMapping[] =>
+  mapping: CaseConnectorMapping[]
+): CaseConnectorMapping[] =>
   mapping.map((item) => {
     if (item.source !== caseField && item.target === newThirdPartyField) {
       return { ...item, target: 'not_mapped' };
@@ -145,7 +145,7 @@ interface ValidateFields {
 }
 export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [newMapping, setNewMapping] = useState<CasesConfigurationMapping[]>([]);
+  const [newMapping, setNewMapping] = useState<CaseConnectorMapping[]>([]);
   const { actionTypeRegistry } = useActionsConnectorsContext();
   const { fields, isLoading: isFieldsLoading } = useGetFields(connector.id, connector.actionTypeId);
   const actionTypeModel = useMemo(() => actionTypeRegistry.get(connector.actionTypeId), [

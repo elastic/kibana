@@ -6,7 +6,7 @@
 
 import { mappings } from './__mock__';
 import { setActionTypeToMapping, setThirdPartyToMapping } from './utils';
-import { CasesConfigurationMapping } from '../../containers/configure/types';
+import { CaseConnectorMapping } from '../../containers/configure/types';
 
 describe('FieldMappingRow', () => {
   test('it should change the action type', () => {
@@ -32,7 +32,7 @@ describe('FieldMappingRow', () => {
   });
 
   test('it should not change other fields when there is not a conflict', () => {
-    const tempMapping: CasesConfigurationMapping[] = [
+    const tempMapping: CaseConnectorMapping[] = [
       {
         source: 'title',
         target: 'short_description',

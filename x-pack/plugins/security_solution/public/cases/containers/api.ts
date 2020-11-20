@@ -5,36 +5,36 @@
  */
 
 import {
-  CaseResponse,
-  CasesResponse,
-  CasesFindResponse,
+  ActionTypeExecutorResult,
+  CaseExternalServiceRequest,
   CasePatchRequest,
   CasePostRequest,
+  CaseResponse,
+  CasesFindResponse,
+  CasesResponse,
   CasesStatusResponse,
-  CommentRequest,
-  User,
   CaseUserActionsResponse,
-  CaseExternalServiceRequest,
+  CommentRequest,
+  Field,
   ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
-  ActionTypeExecutorResult,
-  Field,
+  User,
 } from '../../../../case/common/api';
 
 import {
-  CASE_STATUS_URL,
-  CASES_URL,
-  CASE_TAGS_URL,
-  CASE_REPORTERS_URL,
   ACTION_TYPES_URL,
   ACTION_URL,
   CASE_CONFIGURE_CONNECTORS_URL,
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
+  CASES_URL,
 } from '../../../../case/common/constants';
 
 import {
+  getCaseCommentsUrl,
   getCaseDetailsUrl,
   getCaseUserActionUrl,
-  getCaseCommentsUrl,
 } from '../../../../case/common/api/helpers';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -63,6 +63,13 @@ import {
 } from './utils';
 
 import * as i18n from './translations';
+import { CaseConnectorMapping, Incident } from './configure/types';
+import { prepareFieldsForTransformation, transformFields } from './configure/utils';
+import {
+  ExternalServiceParams,
+  PushToServiceApiParams,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../actions/server/builtin_action_types/jira/types';
 
 export const getCase = async (
   caseId: string,
@@ -237,13 +244,97 @@ export const pushCase = async (
   );
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
+export const getIncident = async (
+  connectorId: string,
+  externalId: string,
+  signal: AbortSignal
+): Promise<ServiceConnectorCaseResponse> => {
+  // TO DO STEPH formatting here
+
+  const response = await KibanaServices.get().http.fetch<
+    ActionTypeExecutorResult<ReturnType<typeof decodeServiceConnectorCaseResponse>>
+  >(`${ACTION_URL}/action/${connectorId}/_execute`, {
+    method: 'POST',
+    body: JSON.stringify({
+      params: { subAction: 'getIncident', subActionParams: { externalId } },
+    }),
+    signal,
+  });
+
+  if (response.status === 'error') {
+    throw new Error(response.serviceMessage ?? response.message ?? i18n.ERROR_PUSH_TO_SERVICE);
+  }
+
+  return decodeServiceConnectorCaseResponse(response.data);
+};
+const formatMappings = async (
+  connectorId: string,
+  mapping: CaseConnectorMapping[],
+  params: PushToServiceApiParams,
+  signal: AbortSignal
+) => {
+  const { externalId } = params;
+  const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
+  let currentIncident: ExternalServiceParams | undefined;
+
+  if (externalId) {
+    try {
+      currentIncident = await getIncident(connectorId, externalId, signal);
+    } catch (ex) {
+      throw new Error(
+        `Retrieving Incident by id ${externalId} from Jira failed with exception: ${ex}`
+      );
+    }
+  }
+
+  let incident; // : Incident;
+  if (mapping) {
+    const fields = prepareFieldsForTransformation({
+      externalCase: params.externalObject,
+      mappings: mapping,
+      defaultPipes,
+    });
+
+    const transformedFields = transformFields<
+      PushToServiceApiParams,
+      ExternalServiceParams,
+      Incident
+    >({
+      params,
+      fields,
+      currentIncident,
+    });
+
+    const { priority, labels, issueType, parent } = params;
+    incident = {
+      summary: transformedFields.summary,
+      description: transformedFields.description,
+      priority,
+      labels,
+      issueType,
+      parent,
+    };
+  } else {
+    const { title, description, priority, labels, issueType, parent } = params;
+    incident = { summary: title, description, priority, labels, issueType, parent };
+  }
+};
 
 export const pushToService = async (
   connectorId: string,
   casePushParams: ServiceConnectorCaseParams,
+  mappings: CaseConnectorMapping[],
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
   // TO DO STEPH formatting here
+
+  const myMappings = await formatMappings(
+    connectorId,
+    mappings,
+    { ...casePushParams, externalObject: {} },
+    signal
+  );
+  console.log('my mappings');
   const response = await KibanaServices.get().http.fetch<
     ActionTypeExecutorResult<ReturnType<typeof decodeServiceConnectorCaseResponse>>
   >(`${ACTION_URL}/action/${connectorId}/_execute`, {

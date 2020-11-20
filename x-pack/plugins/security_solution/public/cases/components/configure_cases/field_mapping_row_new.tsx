@@ -14,11 +14,11 @@ import {
 } from '@elastic/eui';
 
 import { capitalize } from 'lodash/fp';
-import { CaseField, ActionType, CasesConfigurationMapping } from '../../containers/configure/types';
+import { CaseField, ActionType, CaseConnectorMapping } from '../../containers/configure/types';
 import * as i18n from './translations';
 
 export interface FieldMappings {
-  [key: string]: CasesConfigurationMapping;
+  [key: string]: CaseConnectorMapping;
 }
 
 export interface RowProps {

@@ -20,7 +20,10 @@ import {
 
 const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
 
-const getIncidentHandler = async ({ externalService, params }: GetIncidentApiHandlerArgs) => {};
+const getIncidentHandler = async ({ externalService, params }: GetIncidentApiHandlerArgs) => {
+  const res = await externalService.getIncident(params.externalId);
+  return res;
+};
 
 const getIssueTypesHandler = async ({ externalService }: GetIssueTypesHandlerArgs) => {
   const res = await externalService.getIssueTypes();

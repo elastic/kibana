@@ -27,6 +27,7 @@ import {
   ExecutorSubActionGetIssueTypesParams,
   ExecutorSubActionGetIssuesParams,
   ExecutorSubActionGetIssueParams,
+  ExecutorSubActionGetIncidentParams,
 } from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
@@ -38,6 +39,7 @@ interface GetActionTypeParams {
 
 const supportedSubActions: string[] = [
   'getFields',
+  'getIncident',
   'pushToService',
   'issueTypes',
   'fieldsByIssueType',
@@ -104,6 +106,17 @@ async function executor(
     const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
+  }
+
+  if (subAction === 'getIncident') {
+    const getIncidentParams = subActionParams as ExecutorSubActionGetIncidentParams;
+    const res = await api.getIncident({
+      externalService,
+      params: getIncidentParams,
+    });
+    if (res != null) {
+      data = res;
+    }
   }
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;

@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
-import { ActionConnector, CasesConfigurationMapping } from '../../containers/configure/types';
+import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
@@ -35,7 +35,7 @@ export interface Props {
   disabled: boolean;
   handleShowEditFlyout: () => void;
   isLoading: boolean;
-  mappings: CasesConfigurationMapping[];
+  mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
   onClickUpdateMappings: () => void;
   selectedConnector: { id: string; type: string };

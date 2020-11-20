@@ -13,7 +13,7 @@ import {
   displaySuccessToast,
 } from '../../../common/components/toasters';
 import * as i18n from './translations';
-import { ClosureType, CaseConfigure, CaseConnector, CasesConfigurationMapping } from './types';
+import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
@@ -24,7 +24,7 @@ export interface State extends ConnectorConfiguration {
   currentConfiguration: ConnectorConfiguration;
   firstLoad: boolean;
   loading: boolean;
-  mappings: CasesConfigurationMapping[];
+  mappings: CaseConnectorMapping[];
   persistLoading: boolean;
   version: string;
 }
@@ -59,7 +59,7 @@ export type Action =
     }
   | {
       type: 'setMappings';
-      mappings: CasesConfigurationMapping[];
+      mappings: CaseConnectorMapping[];
     };
 
 export const configureCasesReducer = (state: State, action: Action) => {
@@ -119,7 +119,7 @@ export interface ReturnUseCaseConfigure extends State {
   setClosureType: (closureType: ClosureType) => void;
   setConnector: (connector: CaseConnector) => void;
   setCurrentConfiguration: (configuration: ConnectorConfiguration) => void;
-  setMappings: (newMapping: CasesConfigurationMapping[]) => void;
+  setMappings: (newMapping: CaseConnectorMapping[]) => void;
 }
 
 export const initialState: State = {
@@ -170,7 +170,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     });
   }, []);
 
-  const setMappings = useCallback((mappings: CasesConfigurationMapping[]) => {
+  const setMappings = useCallback((mappings: CaseConnectorMapping[]) => {
     dispatch({
       mappings,
       type: 'setMappings',

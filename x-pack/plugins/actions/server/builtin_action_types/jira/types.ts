@@ -212,7 +212,7 @@ export interface GetIssueHandlerArgs {
 
 export interface ExternalServiceApi {
   getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
-  getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
+  getIncident: (id: GetIncidentApiHandlerArgs) => Promise<ExternalServiceParams | undefined>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   issueTypes: (args: GetIssueTypesHandlerArgs) => Promise<GetIssueTypesResponse>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
@@ -228,7 +228,8 @@ export type JiraExecutorResultData =
   | GetIssueTypesResponse
   | GetFieldsByIssueTypeResponse
   | GetIssuesResponse
-  | GetIssueResponse;
+  | GetIssueResponse
+  | ExternalServiceParams;
 
 export interface Fields {
   [key: string]: string | string[] | { name: string } | { key: string } | { id: string };
