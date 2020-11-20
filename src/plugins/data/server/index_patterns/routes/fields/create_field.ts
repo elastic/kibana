@@ -64,7 +64,7 @@ export const registerCreateFieldRoute = (router: IRouter) => {
           }
 
           const fieldObject = indexPattern.fields.getByName(field.name);
-          if (!fieldObject) throw new Error(`Could not create field [name = ${field.name}].`);
+          if (!fieldObject) throw new Error(`Could not create a field [name = ${field.name}].`);
 
           return res.ok({
             headers: {

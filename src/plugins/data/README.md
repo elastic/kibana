@@ -52,10 +52,25 @@ Coming soon.
 
 Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
 
-- `POST /api/index_patterns/index_pattern` &mdash; create an index pattern
-- `GET /api/index_patterns/index_pattern/{id}` &mdash; fetch an index pattern by `{id}`
-- `DELETE /api/index_patterns/index_pattern/{id}` &mdash; delete an index pattern by `{id}`
-- `POST /api/index_patterns/index_pattern/{id}` &mdash; partially update index pattern by `{id}`
+- Create an index pattern &mdash; `POST /api/index_patterns/index_pattern`
+- Fetch an index pattern by `{id}` &mdash; `GET /api/index_patterns/index_pattern/{id}`
+- Delete an index pattern by `{id}` &mdash; `DELETE /api/index_patterns/index_pattern/{id}`
+- Partially update an index pattern by `{id}` &mdash; `POST /api/index_patterns/index_pattern/{id}`
+  - `title`
+  - `timeFieldName`
+  - `intervalName`
+  - `fields`
+    - Optionally refresh fields.
+  - `sourceFilters`
+  - `fieldFormatMap`
+  - `type`
+  - `typeMeta`
+- Fields API
+  - Create a field &mdash; `POST /api/index_patterns/index_pattern/{id}/field`
+  - Read a new field &mdash; `GET /api/index_patterns/index_pattern/{id}/field/{name}`
+  - Update a an existing field &mdash; `POST /api/index_patterns/index_pattern/{id}/field/{name}`
+  - Upsert a field &mdash; `PUT /api/index_patterns/index_pattern/{id}/field/{name}`
+  - Remove a field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/field/{name}`
 
 #### Create an index pattern
 
@@ -161,7 +176,7 @@ DELETE /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 Returns an '200 OK` response with empty body on success.
 
 
-### Partially update index pattern
+### Partially update an index pattern by ID
 
 Update part of an index pattern. Only provided fields will be updated on the
 index pattern, missing fields will stay as they are persisted.
@@ -213,6 +228,51 @@ This endpoint returns the updated index pattern object.
 {
     "index_pattern": {
 
+    }
+}
+```
+
+
+### Fields API
+
+Fields allows you to manage fields of an existing index pattern.
+
+
+#### Create a field
+
+Create a field by simply specifying its name, will default to `string` type.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
+{
+    "field": {
+        "name": "my_field"
+    }
+}
+```
+
+Create a field by specifying all field properties.
+
+```
+POST /api/index_patterns/index_pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/field
+{
+    "field": {
+        "name": "",
+        "type": "",
+        "searchable": false,
+        "aggregatable": false,
+        "count": 0,
+        "script": "",
+        "scripted": false,
+        "lang": "",
+        "conflictDescriptions": {},
+        "format": {},
+        "esTypes": [],
+        "readFromDocValues": false,
+        "subType": {},
+        "indexed": false,
+        "customLabel": "",
+        "shortDotsEnable": false
     }
 }
 ```

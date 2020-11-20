@@ -29,10 +29,11 @@ export const fieldSpecSchema = schema.object({
     maxLength: 1_000,
   }),
   type: schema.string({
+    defaultValue: 'string',
     maxLength: 1_000,
   }),
-  searchable: schema.boolean(),
-  aggregatable: schema.boolean(),
+  searchable: schema.boolean({ defaultValue: false }),
+  aggregatable: schema.boolean({ defaultValue: false }),
   count: schema.maybe(
     schema.number({
       min: 0,
