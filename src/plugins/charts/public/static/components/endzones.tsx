@@ -37,7 +37,6 @@ interface EndzonesProps {
   interval: number;
   domainMin: number;
   domainMax: number;
-  groupId?: string;
   hideTooltips?: boolean;
   /**
    * used to toggle full bin endzones for multiple non-stacked bars
@@ -52,7 +51,6 @@ export const Endzones: FC<EndzonesProps> = ({
   interval,
   domainMin,
   domainMax,
-  groupId,
   hideTooltips = true,
   isFullBin = false,
 }) => {
@@ -84,7 +82,6 @@ export const Endzones: FC<EndzonesProps> = ({
   return (
     <RectAnnotation
       id="__endzones__"
-      groupId={groupId}
       hideTooltips={hideTooltips}
       customTooltipDetails={Prompt}
       zIndex={2}

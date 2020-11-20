@@ -78,7 +78,7 @@ const VisComponent = (props: VisComponentProps) => {
   /**
    * Stores all series labels to replicate vislib color map lookup
    */
-  const allSeries: Array<string | number> = [];
+  const allSeries: Array<string | number> = useMemo(() => [], []);
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     // TODO: Check when this bwc can safely be removed
     const bwcLegendStateDefault =
@@ -157,10 +157,12 @@ const VisComponent = (props: VisComponentProps) => {
   const toggleLegend = useCallback(() => {
     setShowLegend((value) => {
       const newValue = !value;
-      props.uiState?.set('vis.legendOpen', newValue);
+      if (props.uiState?.set) {
+        props.uiState.set('vis.legendOpen', newValue);
+      }
       return newValue;
     });
-  }, [props.uiState?.set]);
+  }, [props.uiState]);
 
   const setColor = useCallback(
     (newColor: string | null, seriesLabel: string | number, event: BaseSyntheticEvent) => {
@@ -174,11 +176,14 @@ const VisComponent = (props: VisComponentProps) => {
       } else {
         colors[seriesLabel] = newColor;
       }
-      props.uiState?.setSilent('vis.colors', null);
-      props.uiState?.set('vis.colors', colors);
-      props.uiState?.emit('colorChanged');
+
+      if (props.uiState?.set) {
+        props.uiState.setSilent('vis.colors', null);
+        props.uiState.set('vis.colors', colors);
+        props.uiState.emit('colorChanged');
+      }
     },
-    [props.uiState?.emit, props.uiState?.get, props.uiState?.set, props.uiState?.setSilent]
+    [props.uiState]
   );
 
   const { visData, visParams } = props;
@@ -223,12 +228,14 @@ const VisComponent = (props: VisComponentProps) => {
         return;
       }
 
-      const overwriteColors: Record<string, string> = props.uiState?.get('vis.colors', {});
+      const overwriteColors: Record<string, string> = props.uiState?.get
+        ? props.uiState.get('vis.colors', {})
+        : {};
 
       allSeries.push(seriesName);
       return getColorsService().createColorLookupFunction(allSeries, overwriteColors)(seriesName);
     },
-    [allSeries, getSeriesName, props.uiState?.get]
+    [allSeries, getSeriesName, props.uiState]
   );
 
   return (
@@ -265,8 +272,6 @@ const VisComponent = (props: VisComponentProps) => {
         <XYEndzones
           isFullBin={hasNonStackedBars}
           enabled={config.isTimeChart}
-          // TODO: remove after https://github.com/elastic/elastic-charts/issues/798
-          groupId={config.yAxes[0]?.groupId}
           isDarkMode={isDarkMode}
           domain={xDomain}
           hideTooltips={!config.detailedTooltip}

@@ -29,7 +29,6 @@ interface XYEndzones {
   isDarkMode: boolean;
   isFullBin: boolean;
   hideTooltips?: boolean;
-  groupId?: string;
   domain?: DomainRange;
   adjustedDomain?: DomainRange;
 }
@@ -39,7 +38,6 @@ export const XYEndzones: FC<XYEndzones> = ({
   isDarkMode,
   isFullBin,
   hideTooltips,
-  groupId,
   domain,
   adjustedDomain,
 }) => {
@@ -57,7 +55,6 @@ export const XYEndzones: FC<XYEndzones> = ({
       <Endzones
         isFullBin={isFullBin}
         isDarkMode={isDarkMode}
-        groupId={groupId}
         domainStart={domain.min}
         domainEnd={domain.max}
         interval={domain.minInterval}

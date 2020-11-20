@@ -38,7 +38,7 @@ export const XYAxis: FC<XYAxisPros> = ({
 }) => {
   return (
     <Axis
-      id={id}
+      id={`${id}__axis`}
       groupId={groupId}
       hide={!show}
       title={title}
