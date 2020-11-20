@@ -111,13 +111,23 @@ const getChangesFromAppStateForContainerState = ({
     differences.filters = appStateDashboardInput.filters;
   }
 
-  Object.keys(_.omit(containerInput, ['filters', 'searchSessionId'])).forEach((key) => {
+  Object.keys(
+    _.omit(containerInput, ['filters', 'searchSessionId', 'lastReloadRequestTime'])
+  ).forEach((key) => {
     const containerValue = (containerInput as { [key: string]: unknown })[key];
     const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[key];
     if (!_.isEqual(containerValue, appStateValue)) {
       (differences as { [key: string]: unknown })[key] = appStateValue;
     }
   });
+
+  // last reload request time can be undefined without causing a refresh
+  if (
+    appStateDashboardInput.lastReloadRequestTime &&
+    containerInput.lastReloadRequestTime !== appStateDashboardInput.lastReloadRequestTime
+  ) {
+    differences.lastReloadRequestTime = appStateDashboardInput.lastReloadRequestTime;
+  }
 
   // cloneDeep hack is needed, as there are multiple place, where container's input mutated,
   // but values from appStateValue are deeply frozen, as they can't be mutated directly
@@ -138,7 +148,7 @@ const getDashboardContainerInput = ({
   incomingEmbeddable?: EmbeddablePackageState;
   lastReloadRequestTime?: number;
   isEmbeddedExternally: boolean;
-  searchSessionId: string;
+  searchSessionId?: string;
   query: QueryStart;
 }): DashboardContainerInput => {
   const embeddablesMap: {
@@ -334,6 +344,7 @@ export function DashboardApp({
   } = useKibana<DashboardAppServices>().services;
 
   const [state, setState] = useState<DashboardAppComponentState>({});
+  const [lastReloadTime, setLastReloadTime] = useState(0);
 
   const refreshDashboardContainer = useCallback(
     (lastReloadRequestTime?: number) => {
@@ -345,7 +356,6 @@ export function DashboardApp({
         appStateDashboardInput: getDashboardContainerInput({
           dashboardStateManager: state.dashboardStateManager,
           isEmbeddedExternally: Boolean(embedSettings),
-          searchSessionId: data.search.session.start(),
           lastReloadRequestTime,
           dashboardCapabilities,
           query: data.query,
@@ -359,6 +369,7 @@ export function DashboardApp({
 
         state.dashboardContainer.updateInput({
           ...changes,
+          searchSessionId: data.search.session.start(),
         });
       }
     },
@@ -660,9 +671,9 @@ export function DashboardApp({
       })
     );
     subscriptions.add(
-      merge(timeFilter.getRefreshIntervalUpdate$(), timeFilter.getTimeUpdate$()).subscribe(() =>
-        refreshDashboardContainer()
-      )
+      merge(
+        ...[timeFilter.getRefreshIntervalUpdate$(), timeFilter.getTimeUpdate$()]
+      ).subscribe(() => refreshDashboardContainer())
     );
     dashboardStateManager.registerChangeListener(() => {
       // we aren't checking dirty state because there are changes the container needs to know about
@@ -776,6 +787,11 @@ export function DashboardApp({
     };
   }, [state.dashboardStateManager, state.dashboardContainer, onAppLeave]);
 
+  // Refresh the dashboard container when lastReloadTime changes
+  useEffect(() => {
+    refreshDashboardContainer(lastReloadTime);
+  }, [lastReloadTime, refreshDashboardContainer]);
+
   return (
     <div className="app-container dshAppContainer">
       {isActiveState(state) && (
@@ -796,7 +812,7 @@ export function DashboardApp({
               // The user can still request a reload in the query bar, even if the
               // query is the same, and in that case, we have to explicitly ask for
               // a reload, since no state changes will cause it.
-              refreshDashboardContainer(new Date().getTime());
+              setLastReloadTime(() => new Date().getTime());
             }
           }}
         />
