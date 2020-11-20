@@ -17,7 +17,7 @@ import {
   IContextProvider,
   RequestHandler,
 } from 'src/core/server';
-import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
+import { SpacesPluginStart } from '../../spaces/server';
 
 import {
   IEventLogConfig,
@@ -41,8 +41,8 @@ const ACTIONS = {
   stopping: 'stopping',
 };
 
-interface PluginSetupDeps {
-  spaces?: SpacesPluginSetup;
+interface PluginStartDeps {
+  spaces?: SpacesPluginStart;
 }
 
 export class Plugin implements CorePlugin<IEventLogService, IEventLogClientService> {
@@ -53,7 +53,6 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   private eventLogger?: IEventLogger;
   private globalConfig$: Observable<SharedGlobalConfig>;
   private eventLogClientService?: EventLogClientService;
-  private spacesService?: SpacesServiceSetup;
   private savedObjectProviderRegistry: SavedObjectProviderRegistry;
 
   constructor(private readonly context: PluginInitializerContext) {
@@ -63,14 +62,13 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     this.savedObjectProviderRegistry = new SavedObjectProviderRegistry();
   }
 
-  async setup(core: CoreSetup, { spaces }: PluginSetupDeps): Promise<IEventLogService> {
+  async setup(core: CoreSetup): Promise<IEventLogService> {
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const kibanaIndex = globalConfig.kibana.index;
 
     this.systemLogger.debug('setting up plugin');
 
     const config = await this.config$.pipe(first()).toPromise();
-    this.spacesService = spaces?.spacesService;
 
     this.esContext = createEsContext({
       logger: this.systemLogger,
@@ -105,7 +103,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     return this.eventLogService;
   }
 
-  async start(core: CoreStart): Promise<IEventLogClientService> {
+  async start(core: CoreStart, { spaces }: PluginStartDeps): Promise<IEventLogClientService> {
     this.systemLogger.debug('starting plugin');
 
     if (!this.esContext) throw new Error('esContext not initialized');
@@ -131,7 +129,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     this.eventLogClientService = new EventLogClientService({
       esContext: this.esContext,
       savedObjectProviderRegistry: this.savedObjectProviderRegistry,
-      spacesService: this.spacesService,
+      spacesService: spaces?.spacesService,
     });
     return this.eventLogClientService;
   }
