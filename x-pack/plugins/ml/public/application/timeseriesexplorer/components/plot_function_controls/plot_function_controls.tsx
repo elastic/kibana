@@ -38,12 +38,14 @@ export const PlotByFunctionControls = ({
   selectedDetectorIndex,
   selectedJobId,
   selectedEntities,
+  numEntityControls,
 }: {
   functionDescription: undefined | string;
   setFunctionDescription: (func: string) => void;
   selectedDetectorIndex: number;
   selectedJobId: string;
   selectedEntities: Record<string, any>;
+  numEntityControls: number;
 }) => {
   const toastNotificationService = useToastNotificationService();
 
@@ -73,7 +75,13 @@ export const PlotByFunctionControls = ({
       return;
     }
     const selectedJob = mlJobService.getJob(selectedJobId);
-    if (functionDescription === undefined && isMetricDetector(selectedJob, selectedDetectorIndex)) {
+    const validEntities =
+      numEntityControls === 0 || (numEntityControls > 0 && selectedEntities !== undefined);
+    if (
+      validEntities &&
+      functionDescription === undefined &&
+      isMetricDetector(selectedJob, selectedDetectorIndex)
+    ) {
       const detector = selectedJob.analysis_config.detectors[selectedDetectorIndex];
       if (detector?.function === ML_JOB_AGGREGATION.METRIC) {
         getFunctionDescriptionToPlot(

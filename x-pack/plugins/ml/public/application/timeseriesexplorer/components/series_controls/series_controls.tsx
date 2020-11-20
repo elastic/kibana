@@ -28,6 +28,7 @@ import { useStorage } from '../../../contexts/ml/use_storage';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
+import { PlotByFunctionControls } from '../plot_function_controls';
 
 function getEntityControlOptions(fieldValues: FieldDefinition['values']): ComboBoxOption[] {
   if (!Array.isArray(fieldValues)) {
@@ -67,6 +68,8 @@ interface SeriesControlsProps {
   bounds: any;
   appStateHandler: Function;
   selectedEntities: Record<string, any>;
+  functionDescription: string;
+  setFunctionDescription: (func: string) => void;
 }
 
 /**
@@ -79,6 +82,8 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
   appStateHandler,
   children,
   selectedEntities,
+  functionDescription,
+  setFunctionDescription,
 }) => {
   const {
     services: {
@@ -306,6 +311,15 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
             />
           );
         })}
+        <PlotByFunctionControls
+          selectedJobId={selectedJobId}
+          selectedDetectorIndex={selectedDetectorIndex}
+          selectedEntities={selectedEntities}
+          functionDescription={functionDescription}
+          setFunctionDescription={setFunctionDescription}
+          numEntityControls={entityControls.length}
+        />
+
         {children}
       </EuiFlexGroup>
     </div>
