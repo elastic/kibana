@@ -10,14 +10,13 @@ import React from 'react';
 import styled from 'styled-components';
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   asPercent,
   asDecimal,
   asMillisecondDuration,
 } from '../../../../../common/utils/formatters';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, px, truncate, unit } from '../../../../style/variables';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
@@ -27,12 +26,14 @@ import { AgentIcon } from '../../../shared/AgentIcon';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
 
+type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
+type Items = ServiceListAPIResponse['items'];
+
 interface Props {
-  items: ServiceListAPIResponse['items'];
+  items: Items;
   noItemsMessage?: React.ReactNode;
 }
-
-type ServiceListItem = ValuesType<Props['items']>;
+type ServiceListItem = ValuesType<Items>;
 
 function formatNumber(value: number) {
   if (value === 0) {
