@@ -108,10 +108,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       editAction('subAction', 'pushToService', index);
     }
     if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
-      editSubActionProperty(
-        'savedObjectId',
-        `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`
-      );
+      editSubActionProperty('savedObjectId', `${AlertProvidedActionVariables.alertId}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector, savedObjectId]);

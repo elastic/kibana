@@ -74,10 +74,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
       editAction('subAction', 'pushToService', index);
     }
     if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
-      editSubActionProperty(
-        'savedObjectId',
-        `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`
-      );
+      editSubActionProperty('savedObjectId', `${AlertProvidedActionVariables.alertId}`);
     }
     if (!urgency) {
       editSubActionProperty('urgency', '3');

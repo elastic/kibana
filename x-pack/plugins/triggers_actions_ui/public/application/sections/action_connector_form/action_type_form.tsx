@@ -39,6 +39,7 @@ import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
 import { resolvedActionGroupMessage } from '../../constants';
+import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -110,6 +111,12 @@ export const ActionTypeForm = ({
         ? resolvedActionGroupMessage
         : defaultActionMessage;
     setAvailableDefaultActionMessage(res);
+    const paramsDefaults = getDefaultsForActionParams(actionItem.actionTypeId, actionItem.group);
+    if (paramsDefaults) {
+      for (const [key, paramValue] of Object.entries(paramsDefaults)) {
+        setActionParamsProperty(key, paramValue, index);
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem.group]);
 

@@ -9,7 +9,6 @@ import { EventActionOptions, SeverityActionOptions } from '.././types';
 import PagerDutyParamsFields from './pagerduty_params';
 import { DocLinksStart } from 'kibana/public';
 import { coreMock } from 'src/core/public/mocks';
-import { ResolvedActionGroup } from '../../../../../../alerts/common';
 
 describe('PagerDutyParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -53,30 +52,5 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyAddVariableButton"]').length > 0).toBeTruthy();
-  });
-
-  test('dedupKey field is set default as {{alertId}}:{{alertInstanceId}} if not defined', async () => {
-    const mocks = coreMock.createSetup();
-    const actionParams = {
-      summary: '2323',
-      group: ResolvedActionGroup.id,
-    };
-
-    const wrapper = mountWithIntl(
-      <PagerDutyParamsFields
-        actionParams={actionParams}
-        errors={{ summary: [], timestamp: [], dedupKey: [] }}
-        editAction={() => {}}
-        index={0}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="dedupKeyInput"]').first().props().defaultValue
-    ).toStrictEqual('{{alertId}}:{{alertInstanceId}}');
   });
 });

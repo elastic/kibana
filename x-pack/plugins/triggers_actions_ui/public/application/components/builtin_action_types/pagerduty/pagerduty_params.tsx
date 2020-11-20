@@ -3,14 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { PagerDutyActionParams } from '.././types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
-import { AlertProvidedActionVariables } from '../../../lib/action_variables';
-import { ResolvedActionGroup } from '../../../../../../alerts/common';
 
 const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({
   actionParams,
@@ -98,15 +96,6 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   ];
 
   const isDedupeKeyRequired = eventAction !== 'trigger';
-
-  useEffect(() => {
-    editAction(
-      'dedupKey',
-      `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
-      index
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <Fragment>
@@ -205,7 +194,6 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               messageVariables={messageVariables}
               paramsProperty={'dedupKey'}
               inputTargetValue={dedupKey}
-              defaultValue={`{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`}
             />
           </EuiFormRow>
         </EuiFlexItem>
