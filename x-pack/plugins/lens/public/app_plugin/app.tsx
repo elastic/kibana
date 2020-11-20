@@ -120,13 +120,11 @@ export function App({
         injectFilterReferences(lastKnownDoc.state?.filters || [], lastKnownDoc.references),
         esFilters.isFilterPinned
       );
-      // do not save the activeData content
-      const { activeData, ...stateWithoutActiveData } = lastKnownDoc.state ?? {};
       return pinnedFilters?.length
         ? {
             ...lastKnownDoc,
             state: {
-              ...stateWithoutActiveData,
+              ...lastKnownDoc.state,
               filters: appFilters,
             },
           }
@@ -478,6 +476,9 @@ export function App({
   const { TopNavMenu } = navigation.ui;
 
   const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
+  const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
+    defaultMessage: 'unsaved',
+  });
   const topNavConfig = getLensTopNavConfig({
     showSaveAndReturn: Boolean(
       state.isLinkedToOriginatingApp &&
@@ -485,22 +486,18 @@ export function App({
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
     enableExportToCSV: Boolean(
-      lastKnownDoc?.state?.activeData && Object.keys(lastKnownDoc.state.activeData).length
+      state.isSaveable && state.activeData && Object.keys(state.activeData).length
     ),
     isByValueMode: getIsByValueMode(),
     showCancel: Boolean(state.isLinkedToOriginatingApp),
     savingPermitted,
     actions: {
       exportToCSV: () => {
-        const content = exportAsCSVs(
-          lastKnownDoc?.title || 'unsaved',
-          lastKnownDoc?.state?.activeData,
-          {
-            csvSeparator: uiSettings.get('csv:separator', ','),
-            quoteValues: uiSettings.get('csv:quoteValues', true),
-            formatFactory: data.fieldFormats.deserialize,
-          }
-        );
+        const content = exportAsCSVs(lastKnownDoc?.title || unsavedTitle, state.activeData, {
+          csvSeparator: uiSettings.get('csv:separator', ','),
+          quoteValues: uiSettings.get('csv:quoteValues', true),
+          formatFactory: data.fieldFormats.deserialize,
+        });
         if (content) {
           downloadMultipleAs(content);
         }
@@ -626,12 +623,15 @@ export function App({
               onError,
               showNoDataPopover,
               initialContext,
-              onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
+              onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
                 if (isSaveable !== state.isSaveable) {
                   setState((s) => ({ ...s, isSaveable }));
                 }
                 if (!_.isEqual(state.persistedDoc, doc)) {
                   setState((s) => ({ ...s, lastKnownDoc: doc }));
+                }
+                if (!_.isEqual(state.activeData, activeData)) {
+                  setState((s) => ({ ...s, activeData }));
                 }
 
                 // Update the cached index patterns if the user made a change to any of them
