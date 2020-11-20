@@ -33,6 +33,7 @@ export const storedPackagePoliciesToAgentInputs = (
           acc[key] = value;
           return acc;
         }, {} as { [k: string]: any }),
+        ...(input.compiled_input || {}),
         streams: input.streams
           .filter((stream) => stream.enabled)
           .map((stream) => {

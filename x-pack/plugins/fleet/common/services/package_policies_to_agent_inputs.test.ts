@@ -100,7 +100,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     ).toEqual([]);
   });
 
-  it('returns agent inputs', () => {
+  it('returns agent inputs with streams', () => {
     expect(
       storedPackagePoliciesToAgentInputs([
         {
@@ -139,6 +139,47 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
             data_stream: { dataset: 'bar', type: 'logs' },
           },
         ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs without streams', () => {
+    expect(
+      storedPackagePoliciesToAgentInputs([
+        {
+          ...mockPackagePolicy,
+          package: {
+            name: 'mock-package',
+            title: 'Mock package',
+            version: '0.0.0',
+          },
+          inputs: [
+            {
+              ...mockInput,
+              compiled_input: {
+                inputVar: 'input-value',
+              },
+              streams: [],
+            },
+          ],
+        },
+      ])
+    ).toEqual([
+      {
+        id: 'some-uuid',
+        name: 'mock-package-policy',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock-package',
+            version: '0.0.0',
+          },
+        },
+        inputVar: 'input-value',
+        streams: [],
       },
     ]);
   });

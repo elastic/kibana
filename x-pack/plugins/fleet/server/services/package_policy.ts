@@ -407,7 +407,6 @@ async function _compilePackagePolicyInput(
   pkgInfo: PackageInfo,
   input: PackagePolicyInput
 ) {
-  console.log('jen in _compilePackagePolicyInput');
   if (!input.enabled || !pkgInfo.policy_templates?.[0].inputs) {
     return undefined;
   }
@@ -419,11 +418,8 @@ async function _compilePackagePolicyInput(
   }
 
   if (!packageInput.template_path) {
-    console.log('jen in _compilePackagePolicyInput, no template path');
     return undefined;
   }
-
-  console.log('jen in _compilePackagePolicyInput, found input and template path');
 
   const [pkgInputTemplate] = await getAssetsData(registryPkgInfo, (path: string) =>
     path.endsWith(`/agent/input/${packageInput.template_path!}`)
@@ -433,10 +429,6 @@ async function _compilePackagePolicyInput(
     throw new Error(`Unable to load input template at /agent/input/${packageInput.template_path!}`);
   }
 
-  console.log(
-    'jen in _compilePackagePolicyInput, compiling input with',
-    pkgInputTemplate.buffer.toString()
-  );
   return compileTemplate(
     // Populate template variables from input vars
     Object.assign({}, input.vars),
