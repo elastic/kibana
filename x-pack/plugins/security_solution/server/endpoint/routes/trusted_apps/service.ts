@@ -15,7 +15,10 @@ import {
   PostTrustedAppCreateResponse,
 } from '../../../../common/endpoint/types';
 
-import { exceptionItemToTrustedAppItem, newTrustedAppItemToExceptionItem } from './mapping';
+import {
+  exceptionListItemToTrustedApp,
+  newTrustedAppToCreateExceptionListItemOptions,
+} from './mapping';
 
 export const deleteTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
@@ -46,7 +49,7 @@ export const getTrustedAppsList = async (
   });
 
   return {
-    data: results?.data.map(exceptionItemToTrustedAppItem) ?? [],
+    data: results?.data.map(exceptionListItemToTrustedApp) ?? [],
     total: results?.total ?? 0,
     page: results?.page ?? 1,
     per_page: results?.per_page ?? perPage!,
@@ -61,8 +64,8 @@ export const createTrustedApp = async (
   await exceptionsListClient.createTrustedAppsList();
 
   const createdTrustedAppExceptionItem = await exceptionsListClient.createExceptionListItem(
-    newTrustedAppItemToExceptionItem(newTrustedApp)
+    newTrustedAppToCreateExceptionListItemOptions(newTrustedApp)
   );
 
-  return { data: exceptionItemToTrustedAppItem(createdTrustedAppExceptionItem) };
+  return { data: exceptionListItemToTrustedApp(createdTrustedAppExceptionItem) };
 };

@@ -12,9 +12,10 @@ import {
   EntryMatch,
   EntryNested,
   ExceptionListItemSchema,
+  NestedEntriesArray,
 } from '../../../../../lists/common/shared_exports';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { CreateExceptionListItemOptions } from '../../../../../lists/server';
 import {
   ConditionEntryField,
   ConditionEntry,
@@ -22,9 +23,6 @@ import {
   OperatingSystem,
   TrustedApp,
 } from '../../../../common/endpoint/types';
-import { NestedEntriesArray } from '../../../../../lists/common/schemas/types';
-
-type NewExceptionItem = Parameters<ExceptionListClient['createExceptionListItem']>[0];
 
 type ConditionEntriesMap = { [K in ConditionEntryField]?: ConditionEntry<K> };
 type Mapping<T extends string, U> = { [K in T]: U };
@@ -88,7 +86,7 @@ const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEntriesMa
  * Map an ExceptionListItem to a TrustedApp item
  * @param exceptionListItem
  */
-export const exceptionItemToTrustedAppItem = (
+export const exceptionListItemToTrustedApp = (
   exceptionListItem: ExceptionListItemSchema
 ): TrustedApp => {
   if (exceptionListItem.os_types[0]) {
@@ -142,7 +140,7 @@ const createEntryNested = (field: string, entries: NestedEntriesArray): EntryNes
   return { field, entries, type: 'nested' };
 };
 
-export const conditionEntriesToEntries = (
+const conditionEntriesToEntries = (
   conditionEntries: Array<ConditionEntry<ConditionEntryField>>
 ): EntriesArray => {
   return conditionEntries.map((conditionEntry) => {
@@ -162,12 +160,15 @@ export const conditionEntriesToEntries = (
   });
 };
 
-export const newTrustedAppItemToExceptionItem = ({
+/**
+ * Map NewTrustedApp to CreateExceptionListItemOptions.
+ */
+export const newTrustedAppToCreateExceptionListItemOptions = ({
   os,
   entries,
   name,
   description = '',
-}: NewTrustedApp): NewExceptionItem => {
+}: NewTrustedApp): CreateExceptionListItemOptions => {
   return {
     comments: [],
     description,
