@@ -17,20 +17,25 @@
  * under the License.
  */
 
-import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
 import {
-  CollectorOptions,
+  loggingSystemMock,
+  pluginInitializerContextConfigMock,
+} from '../../../../../core/server/mocks';
+import {
+  Collector,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 import { createCollectorFetchContextMock } from '../../../../usage_collection/server/mocks';
 import { registerKibanaUsageCollector } from './';
 
+const logger = loggingSystemMock.createLogger();
+
 describe('telemetry_kibana', () => {
-  let collector: CollectorOptions;
+  let collector: Collector<unknown, unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
-    collector = config;
+    collector = new Collector(logger, config);
     return createUsageCollectionSetupMock().makeUsageCollector(config);
   });
 
