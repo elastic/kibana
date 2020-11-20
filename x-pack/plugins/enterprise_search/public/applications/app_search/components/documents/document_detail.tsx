@@ -34,14 +34,6 @@ const DOCUMENT_DETAIL_TITLE = (documentId: string) =>
     defaultMessage: 'Document: {documentId}',
     values: { documentId },
   });
-
-const DELETE_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.documentDetail.deleteButton',
-  {
-    defaultMessage: 'Delete',
-  }
-);
-
 interface Props {
   engineBreadcrumb: string[];
 }
@@ -62,19 +54,6 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
   if (dataLoading) {
     return <Loading />;
   }
-
-  const deleteDocumentButton = (
-    <EuiButton
-      color="danger"
-      iconType="trash"
-      onClick={() => {
-        deleteDocument(documentId);
-      }}
-      data-test-subj="DeleteDocumentButton"
-    >
-      {DELETE_BUTTON}
-    </EuiButton>
-  );
 
   const columns: Array<EuiBasicTableColumn<FieldDetails>> = [
     {
@@ -101,9 +80,16 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
           </EuiTitle>
         </EuiPageHeaderSection>
         <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{deleteDocumentButton}</h1>
-          </EuiTitle>
+          <EuiButton
+            color="danger"
+            iconType="trash"
+            onClick={() => deleteDocument(documentId)}
+            data-test-subj="DeleteDocumentButton"
+          >
+            {i18n.translate('xpack.enterpriseSearch.appSearch.documentDetail.deleteButton', {
+              defaultMessage: 'Delete',
+            })}
+          </EuiButton>
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiPageContent>
