@@ -6,21 +6,19 @@
 
 import * as t from 'io-ts';
 import { rangeRt } from './default_api_types';
-import { getCorrelationsForSlowTransactions } from '../lib/transaction_groups/correlations/get_correlations_for_slow_transactions';
-import { getCorrelationsForRanges } from '../lib/transaction_groups/correlations/get_correlations_for_ranges';
-import { scoringRt } from '../lib/transaction_groups/correlations/scoring_rt';
+import { getCorrelationsForSlowTransactions } from '../lib/correlations/get_correlations_for_slow_transactions';
+import { getCorrelationsForFailedTransactions } from '../lib/correlations/get_correlations_for_failed_transactions';
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
 
 export const correlationsForSlowTransactionsRoute = createRoute({
-  endpoint: 'GET /api/apm/correlations/slow_durations',
+  endpoint: 'GET /api/apm/correlations/slow_transactions',
   params: t.type({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
-        scoring: scoringRt,
       }),
       t.type({
         durationPercentile: t.string,
@@ -39,7 +37,6 @@ export const correlationsForSlowTransactionsRoute = createRoute({
       transactionName,
       durationPercentile,
       fieldNames,
-      scoring = 'percentage',
     } = context.params.query;
 
     return getCorrelationsForSlowTransactions({
@@ -48,22 +45,19 @@ export const correlationsForSlowTransactionsRoute = createRoute({
       transactionName,
       durationPercentile: parseInt(durationPercentile, 10),
       fieldNames: fieldNames.split(','),
-      scoring,
       setup,
     });
   },
 });
 
-export const correlationsForRangesRoute = createRoute({
-  endpoint: 'GET /api/apm/correlations/ranges',
+export const correlationsForFailedTransactionsRoute = createRoute({
+  endpoint: 'GET /api/apm/correlations/failed_transactions',
   params: t.type({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
-        scoring: scoringRt,
-        gap: t.string,
       }),
       t.type({
         fieldNames: t.string,
@@ -75,27 +69,18 @@ export const correlationsForRangesRoute = createRoute({
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-
     const {
       serviceName,
       transactionType,
       transactionName,
-      scoring = 'percentage',
-      gap,
+
       fieldNames,
     } = context.params.query;
 
-    const gapBetweenRanges = parseInt(gap || '0', 10) * 3600 * 1000;
-    if (gapBetweenRanges < 0) {
-      throw new Error('gap must be 0 or positive');
-    }
-
-    return getCorrelationsForRanges({
+    return getCorrelationsForFailedTransactions({
       serviceName,
       transactionType,
       transactionName,
-      scoring,
-      gapBetweenRanges,
       fieldNames: fieldNames.split(','),
       setup,
     });
