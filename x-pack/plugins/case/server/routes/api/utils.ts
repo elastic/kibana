@@ -202,3 +202,17 @@ export const decodeComment = (comment: CommentRequest) => {
     pipe(excess(ContextTypeAlertRt).decode(comment), fold(throwErrors(Boom.badRequest), identity));
   }
 };
+
+export const getCommentContextFromAttributes = (
+  attributes: CommentAttributes
+): CommentRequestUserType | CommentRequestAlertType =>
+  isUserContext(attributes)
+    ? {
+        type: CommentType.user,
+        comment: attributes.comment,
+      }
+    : {
+        type: CommentType.alert,
+        alertId: attributes.alertId,
+        index: attributes.index,
+      };
