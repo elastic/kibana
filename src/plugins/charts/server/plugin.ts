@@ -47,7 +47,8 @@ export class ChartsServerPlugin implements Plugin<object, object> {
           message: i18n.translate(
             'charts.advancedSettings.visualization.colorMappingTextDeprecation',
             {
-              defaultMessage: 'This setting is deprecated.',
+              defaultMessage:
+                'This setting is deprecated and will not be supported as of 8.0. Maps values to specific colors in Visualize charts and TSVB. This setting does not apply to Lens.',
             }
           ),
           docLinksKey: 'visualizationSettings',

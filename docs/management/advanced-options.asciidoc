@@ -454,7 +454,8 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-colormapping]]`visualization:colorMapping`::
-**Deprecated**
+**This setting is deprecated and will not be supported as of 8.0.
+Maps values to specific colors in Visualize charts and TSVB. This setting does not apply to Lens.**
 Maps values to specified colors in visualizations.
 
 [[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
