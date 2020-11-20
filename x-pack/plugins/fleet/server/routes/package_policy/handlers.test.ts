@@ -22,7 +22,7 @@ jest.mock('../../services/package_policy', (): {
 } => {
   return {
     packagePolicyService: {
-      assignPackageStream: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
+      compilePackagePolicyInputs: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
       buildPackagePolicyFromPackage: jest.fn(),
       bulkCreate: jest.fn(),
       create: jest.fn((soClient, callCluster, newData) =>

@@ -24,7 +24,7 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
 
 export const createPackagePolicyServiceMock = () => {
   return {
-    assignPackageStream: jest.fn(),
+    compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
