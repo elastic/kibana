@@ -17,7 +17,7 @@ import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform
 import { Maybe } from '../../../../../typings/common';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { LineChart } from '../line_chart';
+import { TimeseriesChart } from '../timeseries_chart';
 
 function getYTickFormatter(chart: GenericMetricsChart) {
   switch (chart.yUnit) {
@@ -59,7 +59,7 @@ export function MetricsChart({ chart, fetchStatus }: Props) {
       <EuiTitle size="xs">
         <span>{chart.title}</span>
       </EuiTitle>
-      <LineChart
+      <TimeseriesChart
         fetchStatus={fetchStatus}
         id={chart.key}
         timeseries={chart.series}
