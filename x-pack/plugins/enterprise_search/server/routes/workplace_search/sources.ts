@@ -200,10 +200,8 @@ export function registerAccountSourceSettingsRoute({
       path: '/api/workplace_search/account/sources/{id}/settings',
       validate: {
         body: schema.object({
-          query: schema.object({
-            content_source: schema.object({
-              name: schema.string(),
-            }),
+          content_source: schema.object({
+            name: schema.string(),
           }),
         }),
         params: schema.object({
@@ -372,7 +370,7 @@ export function registerOrgCreateSourceRoute({
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
           organizations: schema.maybe(schema.arrayOf(schema.string())),
-          indexPermissions: schema.boolean(),
+          indexPermissions: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -462,10 +460,8 @@ export function registerOrgSourceSettingsRoute({
       path: '/api/workplace_search/org/sources/{id}/settings',
       validate: {
         body: schema.object({
-          query: schema.object({
-            content_source: schema.object({
-              name: schema.string(),
-            }),
+          content_source: schema.object({
+            name: schema.string(),
           }),
         }),
         params: schema.object({

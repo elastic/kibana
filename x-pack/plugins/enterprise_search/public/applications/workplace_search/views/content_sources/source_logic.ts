@@ -601,7 +601,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       try {
         const response = await HttpLogic.values.http.post(route, {
-          body: JSON.stringify({ params }),
+          body: JSON.stringify({ ...params }),
         });
         actions.setCustomSourceData(response);
         successCallback();

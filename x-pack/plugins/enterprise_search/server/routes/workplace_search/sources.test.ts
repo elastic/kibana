@@ -328,10 +328,8 @@ describe('sources routes', () => {
       const mockRequest = {
         params: { id: '123' },
         body: {
-          query: {
-            content_source: {
-              name: 'foo',
-            },
+          content_source: {
+            name: 'foo',
           },
         },
       };
@@ -732,10 +730,8 @@ describe('sources routes', () => {
       const mockRequest = {
         params: { id: '123' },
         body: {
-          query: {
-            content_source: {
-              name: 'foo',
-            },
+          content_source: {
+            name: 'foo',
           },
         },
       };
