@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "noUnusedLocals": true,
+    "alwaysStrict": true,
+    "resolveJsonModule": true,
+    "module": "commonjs",
+    "noImplicitAny": true,
+  }
+}

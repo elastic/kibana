@@ -1,0 +1,9 @@
+{
+  "name": "kbn-alert-load",
+  "version": "2.0.0",
+  "description": "command-line utility for doing kibana alerting load tests",
+  "main": "kbn-alert-load.js",
+  "bin": {
+    "kbn-alert-load": "kbn-alert-load.js"
+  }
+}
