@@ -103,4 +103,10 @@ describe('DocumentDetail', () => {
 
     expect(actions.deleteDocument).toHaveBeenCalledWith('1');
   });
+
+  it('correctly decodes document IDs', () => {
+    (useParams as jest.Mock).mockReturnValueOnce({ documentId: 'hello%20world%20%26%3F!' });
+    const wrapper = shallow(<DocumentDetail engineBreadcrumb={['test']} />);
+    expect(wrapper.find('h1').text()).toEqual('Document: hello world &?!');
+  });
 });
