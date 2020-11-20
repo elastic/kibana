@@ -25,6 +25,7 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
 
     describe('Service overview', function () {
       loadTestFile(require.resolve('./service_overview/error_groups'));
+      loadTestFile(require.resolve('./service_overview/transaction_groups'));
     });
 
     describe('Settings', function () {
@@ -60,8 +61,7 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
     });
 
     describe('Correlations', function () {
-      loadTestFile(require.resolve('./correlations/slow_durations'));
-      loadTestFile(require.resolve('./correlations/ranges'));
+      loadTestFile(require.resolve('./correlations/slow_transactions'));
     });
   });
 }
