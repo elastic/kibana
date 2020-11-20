@@ -488,6 +488,11 @@ export class TimeSeriesExplorer extends React.Component {
                 );
                 this.previousSelectedForecastId = this.props.selectedForecastId;
               }
+
+              this.contextChartSelected({
+                from: focusRange[0],
+                to: focusRange[1],
+              });
             }
 
             this.setState(stateUpdate);
