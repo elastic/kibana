@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { useContext } from 'react';
+import React, { useContext, useCallback } from 'react';
 import {
   htmlIdGenerator,
   EuiFieldText,
@@ -28,17 +28,18 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiRange,
+  EuiIconTip,
   EuiText,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
-import { createNumberHandler } from './lib/create_number_handler';
 import { YesNo } from './yes_no';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/timerange_data_modes';
 import { PANEL_TYPES } from '../../../common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
@@ -77,7 +78,6 @@ export const IndexPattern = ({
 
   const handleSelectChange = createSelectHandler(onChange);
   const handleTextChange = createTextHandler(onChange);
-  const handleNumberChange = createNumberHandler(onChange);
 
   const timeFieldName = `${prefix}time_field`;
   const indexPatternName = `${prefix}index_pattern`;
@@ -86,6 +86,22 @@ export const IndexPattern = ({
   const dropBucketName = `${prefix}drop_last_bucket`;
   const updateControlValidity = useContext(FormValidationContext);
   const uiRestrictions = get(useContext(VisDataContext), 'uiRestrictions');
+  const maxBarsUiSettings = config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
+
+  const handleMaxBarsChange = useCallback(
+    ({ target }) => {
+      onChange({
+        [maxBarsName]: Math.round(maxBarsUiSettings * target.value * 0.01) || 1,
+      });
+    },
+    [onChange, maxBarsName, maxBarsUiSettings]
+  );
+
+  const convertMaxBarsToPercents = (maxBars) => {
+    const rawPercents = (maxBars / 100) * maxBarsUiSettings;
+
+    return Math.round(rawPercents / 10) * 10 || 1;
+  };
 
   const timeRangeOptions = [
     {
@@ -109,7 +125,7 @@ export const IndexPattern = ({
     [indexPatternName]: '*',
     [intervalName]: AUTO_INTERVAL,
     [dropBucketName]: 1,
-    [maxBarsName]: '',
+    [maxBarsName]: config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
     [TIME_RANGE_MODE_KEY]: timeRangeOptions[0].value,
   };
 
@@ -226,33 +242,6 @@ export const IndexPattern = ({
             />
           </EuiFormRow>
         </EuiFlexItem>
-        {allowsMaxBarsOption && (
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              id={htmlId('maxBars')}
-              label={i18n.translate('visTypeTimeseries.indexPattern.maxBars', {
-                defaultMessage: 'Max bars',
-              })}
-            >
-              <EuiRange
-                id={htmlIdGenerator()()}
-                value={model[maxBarsName] || ''}
-                onChange={handleNumberChange(maxBarsName)}
-                showInput="inputWithPopover"
-                showLabels={true}
-                disabled={
-                  disabled ||
-                  isEntireTimeRangeActive(model, isTimeSeries) ||
-                  !(model[intervalName] === AUTO_INTERVAL || !model[intervalName])
-                }
-                min={1}
-                placeholder={config.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)}
-                max={config.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)}
-                aria-label="An example of EuiDualRange with showInput prop"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('dropLastBucket')}
@@ -270,6 +259,53 @@ export const IndexPattern = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {allowsMaxBarsOption && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('detailLevel')}
+              label={
+                <>
+                  <FormattedMessage
+                    id="visTypeTimeseries.indexPattern.detailLevel"
+                    defaultMessage="Level of detail %"
+                  />{' '}
+                  <EuiIconTip
+                    position="right"
+                    content={
+                      <FormattedMessage
+                        id="visTypeTimeseries.indexPattern.detailLevelHelpText"
+                        defaultMessage="Intervals will be selected automatically based on the current timeframe and configuration property {histogramMaxBars}.
+A detail level of 100% means that the maximum number of bars can never be greater than the Advanced Setting's {histogramMaxBars}"
+                        values={{ histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS }}
+                      />
+                    }
+                    type="questionInCircle"
+                  />
+                </>
+              }
+            >
+              <EuiRange
+                id={htmlIdGenerator()()}
+                value={convertMaxBarsToPercents(model[maxBarsName])}
+                onChange={handleMaxBarsChange}
+                disabled={
+                  disabled ||
+                  isEntireTimeRangeActive(model, isTimeSeries) ||
+                  !(model[intervalName] === AUTO_INTERVAL || !model[intervalName])
+                }
+                showTicks
+                min={0}
+                max={100}
+                step={10}
+                aria-label={i18n.translate('visTypeTimeseries.indexPattern.detailLevelAriaLabel', {
+                  defaultMessage: 'Level of detail',
+                })}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </div>
   );
 };
