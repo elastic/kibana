@@ -127,7 +127,7 @@ export function ServiceOverview({
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={4}>
-                <TransactionBreakdownChart />
+                <TransactionBreakdownChart showAnnotations={false} />
               </EuiFlexItem>
               <EuiFlexItem grow={6}>
                 <EuiPanel>

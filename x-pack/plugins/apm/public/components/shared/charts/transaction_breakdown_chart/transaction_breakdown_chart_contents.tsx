@@ -31,12 +31,14 @@ import { onBrushEnd } from '../../charts/helper/helper';
 interface Props {
   fetchStatus: FETCH_STATUS;
   height?: number;
+  showAnnotations: boolean;
   timeseries?: TimeSeries[];
 }
 
 export function TransactionBreakdownChartContents({
   fetchStatus,
   height = unit * 16,
+  showAnnotations,
   timeseries,
 }: Props) {
   const history = useHistory();
@@ -88,7 +90,7 @@ export function TransactionBreakdownChartContents({
           tickFormat={(y: number) => asPercent(y ?? 0, 1)}
         />
 
-        <Annotations />
+        {showAnnotations && <Annotations />}
 
         {timeseries?.length ? (
           timeseries.map((serie) => {

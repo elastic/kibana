@@ -9,7 +9,13 @@ import React from 'react';
 import { useTransactionBreakdown } from '../../../../hooks/use_transaction_breakdown';
 import { TransactionBreakdownChartContents } from './transaction_breakdown_chart_contents';
 
-export function TransactionBreakdownChart({ height }: { height?: number }) {
+export function TransactionBreakdownChart({
+  height,
+  showAnnotations = true,
+}: {
+  height?: number;
+  showAnnotations?: boolean;
+}) {
   const { data, status } = useTransactionBreakdown();
   const { timeseries } = data;
 
@@ -29,6 +35,7 @@ export function TransactionBreakdownChart({ height }: { height?: number }) {
           <TransactionBreakdownChartContents
             fetchStatus={status}
             height={height}
+            showAnnotations={showAnnotations}
             timeseries={timeseries}
           />
         </EuiFlexItem>
