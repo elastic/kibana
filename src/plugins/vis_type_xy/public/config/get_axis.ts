@@ -36,16 +36,24 @@ import {
   AxisType,
   XScaleType,
   YScaleType,
+  SeriesParam,
 } from '../types';
 
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
   { categoryLines, valueAxis }: Grid,
   { params, format, formatter, title: fallbackTitle = '', aggType }: Aspect,
+  seriesParams: SeriesParam[],
   isDateHistogram = false
 ): AxisConfig<S> {
   const isCategoryAxis = type === AxisType.Category;
-  const groupId = isCategoryAxis ? axis.id : undefined;
+  // Hide unassigned axis, not supported in elastic charts
+  // TODO: refactor when disallowing unassigned axes
+  // https://github.com/elastic/kibana/issues/82752
+  const show =
+    (isCategoryAxis || seriesParams.some(({ valueAxis: id }) => id === axis.id)) && axis.show;
+  const groupId = axis.id;
+
   const grid = isCategoryAxis
     ? {
         show: categoryLines,
@@ -71,6 +79,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
 
   return {
     ...axis,
+    show,
     groupId,
     title,
     ticks,

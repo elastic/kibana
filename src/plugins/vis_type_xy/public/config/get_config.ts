@@ -18,6 +18,7 @@
  */
 
 import { Datatable } from '../../../expressions/public';
+import { BUCKET_TYPES } from '../../../data/public';
 
 import { DateHistogramParams, VisConfig, VisParams, XScaleType, YScaleType } from '../types';
 import { getThresholdLine } from './get_threshold_line';
@@ -38,30 +39,21 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     detailedTooltip,
     isVislibVis,
   } = params;
-  const enableHistogramMode = ['date_histogram', 'histogram'].includes(
-    params.dimensions.x?.aggType ?? ''
-  );
+  const enableHistogramMode =
+    params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM ||
+    params.dimensions.x?.aggType === BUCKET_TYPES.HISTOGRAM;
   const aspects = getAspects(table.columns, params.dimensions);
   const xAxis = getAxis<XScaleType>(
     params.categoryAxes[0],
     params.grid,
     aspects.x,
-    params.dimensions.x?.aggType === 'date_histogram'
+    params.seriesParams,
+    params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM
   );
   const tooltip = getTooltip(aspects, params, xAxis.ticks?.formatter);
-  const fallbackGroupId = params.seriesParams.find(({ valueAxis }) =>
-    params.valueAxes.some(({ id }) => valueAxis === id)
-  )?.valueAxis;
-  const yAxes = params.valueAxes
-    .map((a) => getAxis<YScaleType>(a, params.grid, aspects.y[0]))
-    .map(({ groupId, ...rest }) => ({
-      ...rest,
-      // TODO: refactor when disallowiing unassigned axes
-      // https://github.com/elastic/kibana/issues/82752
-      groupId: params.seriesParams.some(({ valueAxis }) => valueAxis === groupId)
-        ? groupId
-        : fallbackGroupId,
-    }));
+  const yAxes = params.valueAxes.map((a) =>
+    getAxis<YScaleType>(a, params.grid, aspects.y[0], params.seriesParams)
+  );
   const isTimeChart = (aspects.x.params as DateHistogramParams).date ?? false;
 
   return {

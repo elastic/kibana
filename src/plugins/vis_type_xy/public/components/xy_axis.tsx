@@ -35,21 +35,19 @@ export const XYAxis: FC<XYAxisPros> = ({
   ticks,
   domain,
   style,
-}) => {
-  return (
-    <Axis
-      id={`${id}__axis`}
-      groupId={groupId}
-      hide={!show}
-      title={title}
-      style={style}
-      domain={domain}
-      position={position}
-      showGridLines={grid?.show}
-      tickFormat={ticks?.formatter}
-      labelFormat={ticks?.labelFormatter}
-      showOverlappingLabels={ticks?.showOverlappingLabels}
-      showDuplicatedTicks={ticks?.showDuplicates}
-    />
-  );
-};
+}) => (
+  <Axis
+    id={`${id}__axis`}
+    groupId={groupId}
+    hide={!show}
+    title={title}
+    style={style}
+    domain={domain}
+    position={position}
+    showGridLines={grid?.show}
+    tickFormat={ticks?.formatter}
+    labelFormat={ticks?.labelFormatter}
+    showOverlappingLabels={ticks?.showOverlappingLabels}
+    showDuplicatedTicks={ticks?.showDuplicates}
+  />
+);

@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { BasicOptions, SwitchOption } from '../../../../../../charts/public';
+import { BUCKET_TYPES } from '../../../../../../data/public';
 
 import { VisParams } from '../../../../types';
 import { GridPanel } from './grid_panel';
@@ -48,7 +49,7 @@ export function PointSeriesOptions(
         ({ type, data: { id: paramId } }) =>
           type === ChartType.Histogram && aggs.aggs.find(({ id }) => id === paramId)?.enabled
       ),
-    [stateParams.seriesParams, aggs.aggs]
+    [stateParams.seriesParams]
   );
 
   return (
@@ -67,7 +68,7 @@ export function PointSeriesOptions(
         <BasicOptions {...props} />
 
         {vis.data.aggs!.aggs.some(
-          (agg) => agg.schema === 'segment' && agg.type.name === 'date_histogram'
+          (agg) => agg.schema === 'segment' && agg.type.name === BUCKET_TYPES.DATE_HISTOGRAM
         ) ? (
           <SwitchOption
             data-test-subj="addTimeMarker"
