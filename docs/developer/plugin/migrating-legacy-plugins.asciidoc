@@ -140,48 +140,47 @@ Although it's not strictly necessary, we encourage any plugin that exposes an ex
 with first-class type support so downstream plugins that _are_ using
 TypeScript can depend on those types.
 
-==== How can I avoid passing Core services deeply within my UI component tree?
+==== How can I avoid passing core services deeply within my UI component tree?
 
-Some Core services are purely presentational, for example
+Some core services are purely presentational, for example
 `core.overlays.openModal()`, where UI
 code does need access to these deeply within your application. However,
 passing these services down as props throughout your application leads
 to lots of boilerplate. To avoid this, you have three options:
 
-[arabic]
-. Use an abstraction layer, like Redux, to decouple your UI code from
+* Use an abstraction layer, like Redux, to decouple your UI code from
 core (*this is the highly preferred option*).
 * https://github.com/reduxjs/redux-thunk#injecting-a-custom-argument[redux-thunk]
 and
 https://redux-saga.js.org/docs/api/#createsagamiddlewareoptions[redux-saga]
 already have ways to do this.
-. Use React Context to provide these services to large parts of your
+* Use React Context to provide these services to large parts of your
 React tree.
-. Create a high-order-component that injects core into a React
+* Create a high-order-component that injects core into a React
 component.
-* This would be a stateful module that holds a reference to Core, but
+* This would be a stateful module that holds a reference to core, but
 provides it as props to components with a `withCore(MyComponent)`
 interface. This can make testing components simpler. (Note: this module
 cannot be shared across plugin boundaries, see above).
-. Create a global singleton module that gets imported into each module
+* Create a global singleton module that gets imported into each module
 that needs it. This module cannot be shared across plugin
 boundaries.
 https://gist.github.com/epixa/06c8eeabd99da3c7545ab295e49acdc3[Example].
 
-If you find that you need many different Core services throughout your
-application, this may be a code smell and could lead to pain down the
+If you find that you need many different core services throughout your
+application, this might indicate a problem in your code and could lead to pain down the
 road. For instance, if you need access to an HTTP Client or
 SavedObjectsClient in many places in your React tree, it’s likely that a
 data layer abstraction (like Redux) could make developing your plugin
 much simpler.
 
-Without such an abstraction, you will need to mock out Core services
+Without such an abstraction, you will need to mock out core services
 throughout your test suite and will couple your UI code very tightly to
-Core. However, if you can contain all of your integration points with
-Core to Redux middleware and reducers, you only need to mock Core
+core. However, if you can contain all of your integration points with
+core to Redux middleware and reducers, you only need to mock core
 services once and benefit from being able to change those integrations
-with Core in one place rather than many. This will become incredibly
-handy when Core APIs have breaking changes.
+with core in one place rather than many. This will become incredibly
+handy when core APIs have breaking changes.
 
 ==== How is the 'common' code shared on both the client and the server?
 
@@ -378,8 +377,7 @@ a static code
 ====== Core services
 
 In server code, `core` can be accessed from either `server.newPlatform`
-or `kbnServer.newPlatform`. There are not currently very many services
-available on the server-side:
+or `kbnServer.newPlatform`:
 
 [width="100%",cols="17, 83",options="header"]
 |===
