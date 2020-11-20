@@ -74,7 +74,9 @@ describe('LoginForm', () => {
           loginAssistanceMessage=""
           selector={{
             enabled: false,
-            providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+            providers: [
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+            ],
           }}
         />
       )
@@ -91,7 +93,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -111,7 +113,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -132,7 +134,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -164,7 +166,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -197,7 +199,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic1', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -239,7 +241,7 @@ describe('LoginForm', () => {
         loginHelp="**some help**"
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -278,14 +280,22 @@ describe('LoginForm', () => {
                 usesLoginForm: true,
                 hint: 'Basic hint',
                 icon: 'logoElastic',
+                showInSelector: true,
               },
-              { type: 'saml', name: 'saml1', description: 'Log in w/SAML', usesLoginForm: false },
+              {
+                type: 'saml',
+                name: 'saml1',
+                description: 'Log in w/SAML',
+                usesLoginForm: false,
+                showInSelector: true,
+              },
               {
                 type: 'pki',
                 name: 'pki1',
                 description: 'Log in w/PKI',
                 hint: 'PKI hint',
                 usesLoginForm: false,
+                showInSelector: true,
               },
             ],
           }}
@@ -326,8 +336,15 @@ describe('LoginForm', () => {
                 description: 'Login w/SAML',
                 hint: 'SAML hint',
                 usesLoginForm: false,
+                showInSelector: true,
               },
-              { type: 'pki', name: 'pki1', icon: 'some-icon', usesLoginForm: false },
+              {
+                type: 'pki',
+                name: 'pki1',
+                icon: 'some-icon',
+                usesLoginForm: false,
+                showInSelector: true,
+              },
             ],
           }}
         />
@@ -369,9 +386,21 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', description: 'Login w/SAML', usesLoginForm: false },
-              { type: 'pki', name: 'pki1', description: 'Login w/PKI', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              {
+                type: 'saml',
+                name: 'saml1',
+                description: 'Login w/SAML',
+                usesLoginForm: false,
+                showInSelector: true,
+              },
+              {
+                type: 'pki',
+                name: 'pki1',
+                description: 'Login w/PKI',
+                usesLoginForm: false,
+                showInSelector: true,
+              },
             ],
           }}
         />
@@ -414,8 +443,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />
@@ -462,8 +491,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />
@@ -505,8 +534,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />
@@ -534,8 +563,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />
@@ -571,8 +600,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />
@@ -622,8 +651,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic1', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />
@@ -634,7 +663,7 @@ describe('LoginForm', () => {
       expect(findTestSubject(wrapper, 'loginAssistanceMessage').text()).toEqual('Need assistance?');
     });
 
-    it('automatically logs in if provider suggested by the auth provider hint does not need login form', async () => {
+    it('automatically logs in if provider suggested by the auth provider hint is displayed in the selector', async () => {
       const currentURL = `https://some-host/login?next=${encodeURIComponent(
         '/some-base-path/app/kibana#/home?_g=()'
       )}`;
@@ -654,8 +683,52 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic1', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+            ],
+          }}
+        />
+      );
+
+      expectAutoLoginOverlay(wrapper);
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
+        body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
+      });
+
+      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
+      expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+      expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
+    });
+
+    it('automatically logs in if provider suggested by the auth provider hint is not displayed in the selector', async () => {
+      const currentURL = `https://some-host/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStartMock.http.post.mockResolvedValue({
+        location: 'https://external-idp/login?optional-arg=2#optional-hash',
+      });
+
+      window.location.href = currentURL;
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginHelp={'**Hey this is a login help message**'}
+          loginAssistanceMessage="Need assistance?"
+          authProviderHint="saml1"
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: false },
             ],
           }}
         />
@@ -698,8 +771,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic1', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />

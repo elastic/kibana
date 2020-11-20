@@ -283,9 +283,10 @@ export class LoginForm extends Component<Props, State> {
   };
 
   private renderSelector = () => {
+    const providers = this.props.selector.providers.filter((provider) => provider.showInSelector);
     return (
       <EuiPanel data-test-subj="loginSelector" paddingSize="none">
-        {this.props.selector.providers.map((provider) => (
+        {providers.map((provider) => (
           <button
             key={provider.name}
             data-test-subj={`loginCard-${provider.type}/${provider.name}`}
@@ -542,7 +543,9 @@ export class LoginForm extends Component<Props, State> {
   private showLoginSelector() {
     return (
       this.props.selector.enabled &&
-      this.props.selector.providers.some((provider) => !provider.usesLoginForm)
+      this.props.selector.providers.some(
+        (provider) => !provider.usesLoginForm && provider.showInSelector
+      )
     );
   }
 }
