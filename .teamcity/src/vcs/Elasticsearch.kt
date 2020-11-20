@@ -3,7 +3,7 @@ package vcs
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 
 object Elasticsearch : GitVcsRoot({
-  id("elasticsearch_7.x")
+  id("elasticsearch_7x")
 
   name = "elasticsearch / 7.x"
   url = "https://github.com/elastic/elasticsearch.git"
