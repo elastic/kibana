@@ -187,7 +187,7 @@ export function registerGetOneRoute({
 
         return response.notFound();
       } catch (error) {
-        handleEsError({ error, response });
+        return handleEsError({ error, response });
       }
     })
   );
