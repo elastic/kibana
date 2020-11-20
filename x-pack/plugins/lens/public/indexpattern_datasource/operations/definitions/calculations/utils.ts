@@ -37,7 +37,8 @@ export function hasDateField(indexPattern: IndexPattern) {
 export function dateBasedOperationToExpression(
   layer: IndexPatternLayer,
   columnId: string,
-  functionName: string
+  functionName: string,
+  additionalArgs: Record<string, unknown[]> = {}
 ): ExpressionFunctionAST[] {
   const currentColumn = (layer.columns[columnId] as unknown) as ReferenceBasedIndexPatternColumn;
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
@@ -54,6 +55,7 @@ export function dateBasedOperationToExpression(
         by: buckets,
         inputColumnId: [currentColumn.references[0]],
         outputColumnId: [columnId],
+        ...additionalArgs,
       },
     },
   ];
