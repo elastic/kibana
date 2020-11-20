@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -20,9 +21,10 @@ import { useLoadSnapshotRepositories } from '../../../../../services/api';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { useSearchableSnapshotState } from '../../../form';
-import { i18nTexts } from '../../../i18n_texts';
 
 import { FieldLoadingError, DescribedFormField } from '../../';
+
+import './_searchable_snapshot_field.scss';
 
 interface Props {
   phase: 'hot' | 'cold';
@@ -38,12 +40,8 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
 
   let calloutContent: React.ReactNode | undefined;
 
-  const hideFieldControls = isUsingSearchableSnapshotInHotPhase && phase !== 'hot';
-
   if (!isLoading) {
-    if (hideFieldControls) {
-      calloutContent = null;
-    } else if (error) {
+    if (error) {
       calloutContent = (
         <FieldLoadingError
           resendRequest={resendRequest}
@@ -70,49 +68,45 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
       );
     } else if (repos.length === 0) {
       calloutContent = (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            data-test-subj="noSnapshotRepositoriesCallout"
-            iconType="help"
-            color="warning"
-            title={
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundTitle"
-                defaultMessage="No snapshot repositories found"
-              />
-            }
-          >
+        <EuiCallOut
+          data-test-subj="noSnapshotRepositoriesCallout"
+          iconType="help"
+          color="warning"
+          title={
             <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundMessage"
-              defaultMessage="{link} to use searchable snapshots."
-              values={{
-                link: (
-                  <EuiLink
-                    href={getUrlForApp('management', {
-                      path: `data/snapshot_restore/add_repository`,
-                    })}
-                    target="_blank"
-                  >
-                    {i18n.translate(
-                      'xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedLink',
-                      {
-                        defaultMessage: 'Create a snapshot repository',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
+              id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundTitle"
+              defaultMessage="No snapshot repositories found"
             />
-          </EuiCallOut>
-        </>
+          }
+        >
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundMessage"
+            defaultMessage="{link} to use searchable snapshots."
+            values={{
+              link: (
+                <EuiLink
+                  href={getUrlForApp('management', {
+                    path: `data/snapshot_restore/add_repository`,
+                  })}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
+                    {
+                      defaultMessage: 'Create a snapshot repository',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiCallOut>
       );
     }
   }
 
   return (
     <DescribedFormField
-      hideSwitch={hideFieldControls}
       switchProps={{
         label: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
@@ -141,21 +135,22 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
       }
       fullWidth
     >
-      {hideFieldControls ? (
-        <EuiCallOut
-          color="warning"
-          iconType="alert"
-          title={
-            i18nTexts.editPolicy.searchableSnapshotInHotPhase.searchableSnapshotDisallowed
-              .calloutTitle
-          }
-        >
-          {
-            i18nTexts.editPolicy.searchableSnapshotInHotPhase.searchableSnapshotDisallowed
-              .calloutBody
-          }
-        </EuiCallOut>
-      ) : (
+      <div className="ilmSearchableSnapshotField">
+        {phase === 'hot' && isUsingSearchableSnapshotInHotPhase && (
+          <>
+            <EuiCallOut title="Some actions have been disabled" iconType="questionInCircle">
+              Force merge, shrink, freeze and searchable snapshots are not allowed when this action
+              is enabled in the hot phase.
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {calloutContent && (
+          <>
+            {calloutContent}
+            <EuiSpacer size="s" />
+          </>
+        )}
         <UseField<string> path={searchableSnapshotPath}>
           {(field) => {
             const singleSelectionArray: [selectedSnapshot?: string] = field.value
@@ -192,8 +187,7 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
             );
           }}
         </UseField>
-      )}
-      {calloutContent}
+      </div>
     </DescribedFormField>
   );
 };

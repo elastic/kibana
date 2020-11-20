@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
-import { EuiDescribedFormGroup, EuiTextColor, EuiCallOut } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiTextColor } from '@elastic/eui';
 
 import { Phases } from '../../../../../../../common/types';
 
@@ -28,15 +28,6 @@ import {
 } from '../shared_fields';
 
 const i18nTexts = {
-  freezeDisabled: {
-    calloutTitle: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeDisabledCalloutTitle', {
-      defaultMessage: 'Freeze disabled',
-    }),
-    calloutBody: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeDisabledCalloutBody', {
-      defaultMessage:
-        'To use freeze in this phase you must disable searchable snapshot in the hot phase.',
-    }),
-  },
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.dataTier.description', {
       defaultMessage:
@@ -107,7 +98,7 @@ export const ColdPhase: FunctionComponent = () => {
         </EuiDescribedFormGroup>
         {enabled && (
           <>
-            <SearchableSnapshotsField phase="cold" />
+            {!isUsingSearchableSnapshotInHotPhase && <SearchableSnapshotsField phase="cold" />}
             {/* Data tier allocation section */}
             <DataTierAllocationField
               description={i18nTexts.dataTierAllocation.description}
@@ -153,36 +144,28 @@ export const ColdPhase: FunctionComponent = () => {
               />
             </DescribedFormField>
             {/* Freeze section */}
-            <EuiDescribedFormGroup
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
-                    defaultMessage="Freeze"
-                  />
-                </h3>
-              }
-              description={
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
-                    defaultMessage="Make the index read-only and minimize its memory footprint."
-                  />{' '}
-                  <LearnMoreLink docPath="frozen-indices.html" />
-                </EuiTextColor>
-              }
-              fullWidth
-              titleSize="xs"
-            >
-              {isUsingSearchableSnapshotInHotPhase ? (
-                <EuiCallOut
-                  color="warning"
-                  iconType="alert"
-                  title={i18nTexts.freezeDisabled.calloutTitle}
-                >
-                  {i18nTexts.freezeDisabled.calloutBody}
-                </EuiCallOut>
-              ) : (
+            {!isUsingSearchableSnapshotInHotPhase && (
+              <EuiDescribedFormGroup
+                title={
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeText"
+                      defaultMessage="Freeze"
+                    />
+                  </h3>
+                }
+                description={
+                  <EuiTextColor color="subdued">
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
+                      defaultMessage="Make the index read-only and minimize its memory footprint."
+                    />{' '}
+                    <LearnMoreLink docPath="frozen-indices.html" />
+                  </EuiTextColor>
+                }
+                fullWidth
+                titleSize="xs"
+              >
                 <UseField
                   path="_meta.cold.freezeEnabled"
                   component={ToggleField}
@@ -192,8 +175,8 @@ export const ColdPhase: FunctionComponent = () => {
                     },
                   }}
                 />
-              )}
-            </EuiDescribedFormGroup>
+              </EuiDescribedFormGroup>
+            )}
             <SetPriorityInput phase={coldProperty} />
           </>
         )}

@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiDescribedFormGroup,
-  EuiCallOut,
 } from '@elastic/eui';
 
 import { useFormData, UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
@@ -39,15 +38,6 @@ const i18nTexts = {
   shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {
     defaultMessage: 'Shrink index',
   }),
-  shrinkDisabled: {
-    calloutTitle: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkDisabledCalloutTitle', {
-      defaultMessage: 'Shrink disabled',
-    }),
-    calloutBody: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkDisabledCalloutBody', {
-      defaultMessage:
-        'To use shrink in this phase you must disable searchable snapshot in the hot phase.',
-    }),
-  },
   dataTierAllocation: {
     description: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.dataTier.description', {
       defaultMessage: 'Move data to nodes optimized for less-frequent, read-only access.',
@@ -184,44 +174,35 @@ export const WarmPhase: FunctionComponent = () => {
                 }}
               />
             </DescribedFormField>
-            <DescribedFormField
-              title={
-                <h3>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkText"
-                    defaultMessage="Shrink"
-                  />
-                </h3>
-              }
-              description={
-                <EuiTextColor color="subdued">
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkIndexExplanationText"
-                    defaultMessage="Shrink the index into a new index with fewer primary shards."
-                  />{' '}
-                  <LearnMoreLink docPath="indices-shrink-index.html#indices-shrink-index" />
-                </EuiTextColor>
-              }
-              titleSize="xs"
-              hideSwitch={isUsingSearchableSnapshotInHotPhase}
-              switchProps={{
-                'aria-controls': 'shrinkContent',
-                'data-test-subj': 'shrinkSwitch',
-                label: i18nTexts.shrinkLabel,
-                'aria-label': i18nTexts.shrinkLabel,
-                initialValue: Boolean(policy.phases.warm?.actions?.shrink),
-              }}
-              fullWidth
-            >
-              {isUsingSearchableSnapshotInHotPhase ? (
-                <EuiCallOut
-                  color="warning"
-                  iconType="alert"
-                  title={i18nTexts.shrinkDisabled.calloutTitle}
-                >
-                  {i18nTexts.shrinkDisabled.calloutBody}
-                </EuiCallOut>
-              ) : (
+            {!isUsingSearchableSnapshotInHotPhase && (
+              <DescribedFormField
+                title={
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkText"
+                      defaultMessage="Shrink"
+                    />
+                  </h3>
+                }
+                description={
+                  <EuiTextColor color="subdued">
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkIndexExplanationText"
+                      defaultMessage="Shrink the index into a new index with fewer primary shards."
+                    />{' '}
+                    <LearnMoreLink docPath="indices-shrink-index.html#indices-shrink-index" />
+                  </EuiTextColor>
+                }
+                titleSize="xs"
+                switchProps={{
+                  'aria-controls': 'shrinkContent',
+                  'data-test-subj': 'shrinkSwitch',
+                  label: i18nTexts.shrinkLabel,
+                  'aria-label': i18nTexts.shrinkLabel,
+                  initialValue: Boolean(policy.phases.warm?.actions?.shrink),
+                }}
+                fullWidth
+              >
                 <div id="shrinkContent" aria-live="polite" role="region">
                   <EuiSpacer />
                   <EuiFlexGroup>
@@ -240,10 +221,10 @@ export const WarmPhase: FunctionComponent = () => {
                   </EuiFlexGroup>
                   <EuiSpacer />
                 </div>
-              )}
-            </DescribedFormField>
+              </DescribedFormField>
+            )}
 
-            <Forcemerge phase="warm" />
+            {!isUsingSearchableSnapshotInHotPhase && <Forcemerge phase="warm" />}
 
             <SetPriorityInput phase="warm" />
           </Fragment>

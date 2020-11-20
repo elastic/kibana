@@ -137,6 +137,7 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
 
   return (
     <>
+      {calloutContent}
       <UseField<string> path={waitForSnapshotFormField}>
         {(field) => {
           const singleSelectionArray: [selectedSnapshot?: string] = field.value
@@ -172,7 +173,6 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
           );
         }}
       </UseField>
-      {calloutContent}
     </>
   );
 };

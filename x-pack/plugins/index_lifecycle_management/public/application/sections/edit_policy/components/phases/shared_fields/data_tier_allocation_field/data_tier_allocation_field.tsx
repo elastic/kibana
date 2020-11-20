@@ -28,6 +28,8 @@ import {
   CloudDataTierCallout,
 } from './components';
 
+import './_data_tier_allocation.scss';
+
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.common.dataTier.title', {
     defaultMessage: 'Data allocation',
@@ -114,21 +116,19 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
             description={description}
             fullWidth
           >
-            <EuiFormRow>
-              <>
-                <DataTierAllocation
-                  hasNodeAttributes={hasNodeAttrs}
-                  phase={phase}
-                  nodes={nodesByAttributes}
-                  disableDataTierOption={Boolean(
-                    isCloudEnabled && !hasDataNodeRoles && isUsingDeprecatedDataRoleConfig
-                  )}
-                />
+            <div className="ilmDataTierAllocationField">
+              <DataTierAllocation
+                hasNodeAttributes={hasNodeAttrs}
+                phase={phase}
+                nodes={nodesByAttributes}
+                disableDataTierOption={Boolean(
+                  isCloudEnabled && !hasDataNodeRoles && isUsingDeprecatedDataRoleConfig
+                )}
+              />
 
-                {/* Data tier related warnings and call-to-action notices */}
-                {renderNotice()}
-              </>
-            </EuiFormRow>
+              {/* Data tier related warnings and call-to-action notices */}
+              {renderNotice()}
+            </div>
           </EuiDescribedFormGroup>
         );
       }}
