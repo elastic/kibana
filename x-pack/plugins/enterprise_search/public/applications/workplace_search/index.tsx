@@ -45,6 +45,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
 
   // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
   const isOrganization = !pathname.match(personalSourceUrlRegex);
+  setContext(isOrganization);
 
   useEffect(() => {
     if (!hasInitialized) {
@@ -52,10 +53,6 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       renderHeaderActions(WorkplaceSearchHeaderActions);
     }
   }, [hasInitialized]);
-
-  useEffect(() => {
-    setContext(isOrganization);
-  }, [isOrganization]);
 
   return (
     <Switch>

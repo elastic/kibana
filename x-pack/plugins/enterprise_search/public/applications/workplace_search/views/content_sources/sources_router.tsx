@@ -16,8 +16,7 @@ import {
   ADD_SOURCE_PATH,
   SOURCE_ADDED_PATH,
   SOURCE_DETAILS_PATH,
-  ORG_PATH,
-  ORG_SOURCES_PATH,
+  PERSONAL_SOURCES_PATH,
   SOURCES_PATH,
   getSourcesPath,
 } from '../../routes';
@@ -38,6 +37,7 @@ export const SourcesRouter: React.FC = () => {
   const { resetSourcesState } = useActions(SourcesLogic);
   const {
     account: { canCreatePersonalSources },
+    isOrganization,
   } = useValues(AppLogic);
 
   /**
@@ -48,8 +48,6 @@ export const SourcesRouter: React.FC = () => {
     resetSourcesState();
   }, [pathname]);
 
-  const isOrgRoute = pathname.includes(ORG_PATH);
-
   return (
     <Switch>
       <Route exact path={SOURCES_PATH} component={PrivateSources} />
@@ -58,7 +56,7 @@ export const SourcesRouter: React.FC = () => {
         <Route
           key={i}
           exact
-          path={getSourcesPath(addPath, isOrgRoute)}
+          path={getSourcesPath(addPath, isOrganization)}
           render={() =>
             !hasPlatinumLicense && accountContextOnly ? (
               <Redirect exact from={ADD_SOURCE_PATH} to={ORG_SOURCES_PATH} />
@@ -72,7 +70,7 @@ export const SourcesRouter: React.FC = () => {
         <Route
           key={i}
           exact
-          path={`${getSourcesPath(addPath, isOrgRoute)}/connect`}
+          path={`${getSourcesPath(addPath, isOrganization)}/connect`}
           render={() => <AddSource connect sourceIndex={i} />}
         />
       ))}
@@ -80,7 +78,7 @@ export const SourcesRouter: React.FC = () => {
         <Route
           key={i}
           exact
-          path={`${getSourcesPath(addPath, isOrgRoute)}/re-authenticate`}
+          path={`${getSourcesPath(addPath, isOrganization)}/re-authenticate`}
           render={() => <AddSource reAuthenticate sourceIndex={i} />}
         />
       ))}
@@ -90,7 +88,7 @@ export const SourcesRouter: React.FC = () => {
             <Route
               key={i}
               exact
-              path={`${getSourcesPath(addPath, isOrgRoute)}/configure`}
+              path={`${getSourcesPath(addPath, isOrganization)}/configure`}
               render={() => <AddSource configure sourceIndex={i} />}
             />
           );
@@ -101,8 +99,12 @@ export const SourcesRouter: React.FC = () => {
         <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
       )}
       <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)} component={AddSourceList} /> :
-      <Route path={getSourcesPath(SOURCE_ADDED_PATH, isOrgRoute)} exact component={SourceAdded} />
-      <Route path={getSourcesPath(SOURCE_DETAILS_PATH, isOrgRoute)} component={SourceRouter} />
+      <Route
+        path={getSourcesPath(SOURCE_ADDED_PATH, isOrganization)}
+        exact
+        component={SourceAdded}
+      />
+      <Route path={getSourcesPath(SOURCE_DETAILS_PATH, isOrganization)} component={SourceRouter} />
     </Switch>
   );
 };
