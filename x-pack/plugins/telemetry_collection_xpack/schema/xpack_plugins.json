@@ -3165,6 +3165,16 @@
                   "type": "integer"
                 }
               }
+            },
+            "map": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
