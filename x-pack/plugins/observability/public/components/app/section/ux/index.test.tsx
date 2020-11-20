@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
@@ -36,6 +36,7 @@ describe('UXSection', () => {
         uiSettings: { get: jest.fn() },
         http: { basePath: { prepend: jest.fn() } },
       } as unknown) as CoreStart,
+      appMountParameters: {} as AppMountParameters,
       plugins: ({
         data: {
           query: {

@@ -16,8 +16,8 @@ import { HasDataContextProvider } from './has_data_context';
 import * as pluginContext from '../hooks/use_plugin_context';
 import { PluginContextValue } from './plugin_context';
 
-const rangeFrom = '2020-10-08T06:00:00.000Z';
-const rangeTo = '2020-10-08T07:00:00.000Z';
+const relativeStart = '2020-10-08T06:00:00.000Z';
+const relativeEnd = '2020-10-08T07:00:00.000Z';
 
 function wrapper({ children }: { children: React.ReactElement }) {
   return <HasDataContextProvider>{children}</HasDataContextProvider>;
@@ -47,16 +47,16 @@ describe('HasDataContextProvider', () => {
   beforeAll(() => {
     jest.spyOn(routeParams, 'useRouteParams').mockImplementation(() => ({
       query: {
-        from: rangeFrom,
-        to: rangeTo,
+        from: relativeStart,
+        to: relativeEnd,
       },
       path: {},
     }));
     jest.spyOn(timeRange, 'useTimeRange').mockImplementation(() => ({
-      rangeFrom,
-      rangeTo,
-      absStart: new Date(rangeFrom).valueOf(),
-      absEnd: new Date(rangeTo).valueOf(),
+      relativeStart,
+      relativeEnd,
+      absoluteStart: new Date(relativeStart).valueOf(),
+      absoluteEnd: new Date(relativeEnd).valueOf(),
     }));
     jest.spyOn(pluginContext, 'usePluginContext').mockReturnValue({
       core: ({ http: { get: jest.fn() } } as unknown) as CoreStart,
