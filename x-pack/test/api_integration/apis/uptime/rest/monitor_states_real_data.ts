@@ -90,6 +90,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('will fetch monitor state data for the given down filters', async () => {
+      const statusFilter = 'down';
+      const size = 2;
+      const { body } = await supertest.get(
+        `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&statusFilter=${statusFilter}&pageSize=${size}`
+      );
+
+      expectSnapshot(body).toMatch();
+    });
+
     it('can navigate forward and backward using pagination', async () => {
       const expectedResultsCount = 100;
       const size = 10;

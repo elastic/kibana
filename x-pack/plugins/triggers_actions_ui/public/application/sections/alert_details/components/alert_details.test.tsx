@@ -42,7 +42,7 @@ jest.mock('../../../app_context', () => ({
     toastNotifications: mockes.notifications.toasts,
     docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     uiSettings: mockes.uiSettings,
-    dataPlugin: jest.fn(),
+    data: jest.fn(),
     charts: jest.fn(),
   })),
 }));
