@@ -3,20 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import Mustache from 'mustache';
 import React from 'react';
 import styled from 'styled-components';
+import {
+  SectionLinks,
+  SectionLink,
+} from '../../../../../../observability/public';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { px, truncate, units } from '../../../../style/variables';
-
-const ListItem = styled.li`
-  margin-top: ${px(units.half)};
-  &:first-of-type {
-    margin-top: 0;
-  }
-`;
+import { px, truncate, unit, units } from '../../../../style/variables';
 
 const TruncateText = styled(EuiText)`
   font-weight: 500;
@@ -32,24 +29,28 @@ export function CustomLinkList({
   transaction: Transaction;
 }) {
   return (
-    <ul>
+    <SectionLinks style={{ maxHeight: px(unit * 10), overflowY: 'auto' }}>
       {customLinks.map((link) => {
-        let href = link.url;
-        try {
-          href = Mustache.render(link.url, transaction);
-        } catch (e) {
-          // ignores any error that happens
-        }
+        const href = getHref(link, transaction);
         return (
-          <ListItem role="listitem" key={link.id}>
-            <TruncateText size="s">
-              <EuiLink href={href} target="_blank" external={true}>
-                {link.label}
-              </EuiLink>
-            </TruncateText>
-          </ListItem>
+          <TruncateText size="s" key={link.id}>
+            <SectionLink
+              label={link.label}
+              role="listitem"
+              href={href}
+              target="_blank"
+            />
+          </TruncateText>
         );
       })}
-    </ul>
+    </SectionLinks>
   );
+}
+
+function getHref(link: CustomLink, transaction: Transaction) {
+  try {
+    return Mustache.render(link.url, transaction);
+  } catch (e) {
+    return link.url;
+  }
 }

@@ -12,7 +12,7 @@ import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../utils/testHelpers';
-import { ManageCustomLink } from './ManageCustomLink';
+import { CustomLinkToolbar } from './CustomLinkToolbar';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -22,9 +22,9 @@ function Wrapper({ children }: { children?: ReactNode }) {
   );
 }
 
-describe('ManageCustomLink', () => {
+describe('CustomLinkToolbar', () => {
   it('renders with create button', () => {
-    const component = render(<ManageCustomLink onClickCreate={jest.fn()} />, {
+    const component = render(<CustomLinkToolbar onClickCreate={jest.fn()} />, {
       wrapper: Wrapper,
     });
     expect(
@@ -35,7 +35,7 @@ describe('ManageCustomLink', () => {
 
   it('renders without create button', () => {
     const component = render(
-      <ManageCustomLink onClickCreate={jest.fn()} showCreateButton={false} />,
+      <CustomLinkToolbar onClickCreate={jest.fn()} showCreateButton={false} />,
       { wrapper: Wrapper }
     );
     expect(
@@ -47,7 +47,7 @@ describe('ManageCustomLink', () => {
   it('opens flyout to create new custom link', () => {
     const handleCreateCustomLinkClickMock = jest.fn();
     const { getByText } = render(
-      <ManageCustomLink onClickCreate={handleCreateCustomLinkClickMock} />,
+      <CustomLinkToolbar onClickCreate={handleCreateCustomLinkClickMock} />,
       { wrapper: Wrapper }
     );
     expect(handleCreateCustomLinkClickMock).not.toHaveBeenCalled();

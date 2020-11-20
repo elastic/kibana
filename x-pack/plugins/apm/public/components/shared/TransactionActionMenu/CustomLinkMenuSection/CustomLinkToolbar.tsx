@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { APMLink } from '../../Links/apm/APMLink';
 
-export function ManageCustomLink({
+export function CustomLinkToolbar({
   onClickCreate,
   showCreateButton = true,
 }: {

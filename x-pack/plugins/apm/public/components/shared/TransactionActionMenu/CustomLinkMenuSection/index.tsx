@@ -13,13 +13,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import {
   ActionMenuDivider,
+  Section,
   SectionSubtitle,
+  SectionTitle,
 } from '../../../../../../observability/public';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { CustomLinkList } from './CustomLinkList';
-import { ManageCustomLink } from './ManageCustomLink';
+import { CustomLinkToolbar } from './CustomLinkToolbar';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
 import { LoadingStatePrompt } from '../../LoadingStatePrompt';
 import { px } from '../../../../style/variables';
@@ -80,48 +82,53 @@ export function CustomLinkMenuSection({
       )}
 
       <ActionMenuDivider />
-      <EuiFlexGroup>
-        <EuiFlexItem style={{ justifyContent: 'center' }}>
-          <EuiText size={'s'} grow={false}>
-            <h5>
+
+      <Section>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <SectionTitle>
               {i18n.translate(
                 'xpack.apm.transactionActionMenu.customLink.section',
                 {
                   defaultMessage: 'Custom Links',
                 }
               )}
-            </h5>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <ManageCustomLink
-            onClickCreate={() => setIsCreateEditFlyoutOpen(true)}
-            showCreateButton={customLinks.length > 0}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <SectionSubtitle>
-        {i18n.translate('xpack.apm.transactionActionMenu.customLink.subtitle', {
-          defaultMessage: 'Links will open in a new window.',
-        })}
-      </SectionSubtitle>
-      <CustomLinkList
-        customLinks={
-          showAllLinks
-            ? customLinks
-            : customLinks.slice(0, DEFAULT_LINKS_TO_SHOW)
-        }
-        transaction={transaction}
-      />
-      <EuiSpacer size="s" />
-      <BottomSection
-        status={status}
-        customLinks={customLinks}
-        showAllLinks={showAllLinks}
-        toggleShowAll={() => setShowAllLinks((show) => !show)}
-        onClickCreate={() => setIsCreateEditFlyoutOpen(true)}
-      />
+            </SectionTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <CustomLinkToolbar
+              onClickCreate={() => setIsCreateEditFlyoutOpen(true)}
+              showCreateButton={customLinks.length > 0}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+        <SectionSubtitle>
+          {i18n.translate(
+            'xpack.apm.transactionActionMenu.customLink.subtitle',
+            {
+              defaultMessage: 'Links will open in a new window.',
+            }
+          )}
+        </SectionSubtitle>
+        <CustomLinkList
+          customLinks={
+            showAllLinks
+              ? customLinks
+              : customLinks.slice(0, DEFAULT_LINKS_TO_SHOW)
+          }
+          transaction={transaction}
+        />
+        <EuiSpacer size="s" />
+        <BottomSection
+          status={status}
+          customLinks={customLinks}
+          showAllLinks={showAllLinks}
+          toggleShowAll={() => setShowAllLinks((show) => !show)}
+          onClickCreate={() => setIsCreateEditFlyoutOpen(true)}
+        />
+      </Section>
     </>
   );
 }
@@ -146,48 +153,52 @@ function BottomSection({
   // render empty prompt if there are no custom links
   if (isEmpty(customLinks)) {
     return (
-      <>
-        <EuiText size="xs" grow={false} style={{ width: px(300) }}>
-          {i18n.translate('xpack.apm.customLink.empty', {
-            defaultMessage:
-              'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.',
-          })}
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiButtonEmpty
-          iconType="plusInCircle"
-          size="xs"
-          onClick={onClickCreate}
-        >
-          {i18n.translate('xpack.apm.customLink.buttom.create', {
-            defaultMessage: 'Create custom link',
-          })}
-        </EuiButtonEmpty>
-      </>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText size="xs" grow={false} style={{ width: px(300) }}>
+            {i18n.translate('xpack.apm.customLink.empty', {
+              defaultMessage:
+                'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.',
+            })}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            iconType="plusInCircle"
+            size="xs"
+            onClick={onClickCreate}
+          >
+            {i18n.translate('xpack.apm.customLink.buttom.create', {
+              defaultMessage: 'Create custom link',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
   // render button to toggle "Show all" / "Show fewer"
   if (customLinks.length > DEFAULT_LINKS_TO_SHOW) {
     return (
-      <EuiFlexItem>
-        <EuiButtonEmpty
-          iconType={showAllLinks ? 'arrowUp' : 'arrowDown'}
-          onClick={toggleShowAll}
-        >
-          <EuiText size="s">
-            {showAllLinks
-              ? i18n.translate(
-                  'xpack.apm.transactionActionMenu.customLink.showFewer',
-                  { defaultMessage: 'Show fewer' }
-                )
-              : i18n.translate(
-                  'xpack.apm.transactionActionMenu.customLink.showAll',
-                  { defaultMessage: 'Show all' }
-                )}
-          </EuiText>
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            iconType={showAllLinks ? 'arrowUp' : 'arrowDown'}
+            onClick={toggleShowAll}
+          >
+            <EuiText size="s">
+              {showAllLinks
+                ? i18n.translate(
+                    'xpack.apm.transactionActionMenu.customLink.showFewer',
+                    { defaultMessage: 'Show fewer' }
+                  )
+                : i18n.translate(
+                    'xpack.apm.transactionActionMenu.customLink.showAll',
+                    { defaultMessage: 'Show all' }
+                  )}
+            </EuiText>
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
