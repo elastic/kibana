@@ -138,15 +138,27 @@ export const nodeDataForID: (
   };
 });
 
-export const isNodeTerminated: (
+/**
+ * Returns a function that can be called to retrieve the state of the node, running, loading, or terminated.
+ */
+export const getNodeState: (
   state: DataState
-) => (id: string) => boolean | undefined = createSelector(nodeDataForID, (nodeInfo) => {
-  return (id: string) => {
-    const info = nodeInfo(id);
-    return !info ? undefined : info.terminated;
-  };
-});
+) => (id: string) => 'running' | 'loading' | 'terminated' = createSelector(
+  nodeDataForID,
+  (nodeInfo) => {
+    return (id: string) => {
+      const info = nodeInfo(id);
+      if (!info || info.status === 'requested') {
+        return 'loading';
+      }
+      return info.terminated ? 'terminated' : 'running';
+    };
+  }
+);
 
+/**
+ * Returns a function that can be called to retrieve whether the node is in the loading state.
+ */
 export const isNodeDataLoading: (state: DataState) => (id: string) => boolean = createSelector(
   nodeDataForID,
   (nodeInfo) => {

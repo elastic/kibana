@@ -141,7 +141,7 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
   const isOrigin = useSelector((state: ResolverState) => {
     return selectors.originID(state) === nodeID;
   });
-  const isTerminated = useSelector(selectors.isNodeTerminated)(nodeID);
+  const nodeState = useSelector(selectors.getNodeState)(nodeID);
   const { descriptionText } = useColors();
   const linkProps = useLinkProps({ panelView: 'nodeDetail', panelParameters: { nodeID } });
   const dispatch: (action: ResolverAction) => void = useDispatch();
@@ -173,7 +173,7 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
       ) : (
         <StyledButtonTextContainer>
           <CubeForProcess
-            running={!isTerminated}
+            state={nodeState}
             isOrigin={isOrigin}
             data-test-subj="resolver:node-list:node-link:icon"
           />

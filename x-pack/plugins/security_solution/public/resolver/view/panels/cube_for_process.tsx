@@ -17,25 +17,27 @@ interface StyledSVGCube {
 }
 import { useCubeAssets } from '../use_cube_assets';
 import { useSymbolIDs } from '../use_symbol_ids';
+import { CubeState } from '../../types';
 
 /**
  * Icon representing a process node.
  */
 export const CubeForProcess = memo(function ({
   className,
-  running,
+  state,
   isOrigin,
   'data-test-subj': dataTestSubj,
 }: {
   'data-test-subj'?: string;
   /**
-   * True if the process represented by the node is still running.
+   * 'running' if the process represented by the node is still running.
+   * 'loading' if the process represented
    */
-  running: boolean;
+  state: CubeState;
   isOrigin?: boolean;
   className?: string;
 }) {
-  const { cubeSymbol, strokeColor } = useCubeAssets(!running, false);
+  const { cubeSymbol, strokeColor } = useCubeAssets(state, false);
   const { processCubeActiveBacking } = useSymbolIDs();
 
   return (
@@ -49,8 +51,9 @@ export const CubeForProcess = memo(function ({
     >
       <desc>
         {i18n.translate('xpack.securitySolution.resolver.node_icon', {
-          defaultMessage: '{running, select, true {Running Process} false {Terminated Process}}',
-          values: { running },
+          defaultMessage:
+            '{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process}}',
+          values: { state },
         })}
       </desc>
       {isOrigin && (

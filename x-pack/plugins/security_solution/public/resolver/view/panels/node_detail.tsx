@@ -78,7 +78,7 @@ const NodeDetailView = memo(function ({
   nodeID: string;
 }) {
   const processName = eventModel.processNameSafeVersion(processEvent);
-  const isProcessTerminated = useSelector(selectors.isNodeTerminated)(nodeID);
+  const nodeState = useSelector(selectors.getNodeState)(nodeID);
   const relatedEventTotal = useSelector((state: ResolverState) => {
     return selectors.relatedEventTotalCount(state)(nodeID);
   });
@@ -182,7 +182,7 @@ const NodeDetailView = memo(function ({
       },
     ];
   }, [processName, nodesLinkNavProps]);
-  const { descriptionText } = useCubeAssets(isProcessTerminated ?? false, false);
+  const { descriptionText } = useCubeAssets(nodeState, false);
 
   const nodeDetailNavProps = useLinkProps({
     panelView: 'nodeEvents',
@@ -198,7 +198,7 @@ const NodeDetailView = memo(function ({
         <StyledTitle aria-describedby={titleID}>
           <StyledCubeForProcess
             data-test-subj="resolver:node-detail:title-icon"
-            running={!isProcessTerminated}
+            state={nodeState}
           />
           <span data-test-subj="resolver:node-detail:title">
             <GeneratedText>{processName}</GeneratedText>

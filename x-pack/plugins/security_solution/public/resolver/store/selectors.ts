@@ -385,12 +385,12 @@ export const isLoadingMoreNodeEventsInCategory = composeSelectors(
 );
 
 /**
- * TODO:
+ * Returns the state of the node, loading, running, or terminated.
  */
-export const isNodeTerminated = composeSelectors(dataStateSelector, dataSelectors.isNodeTerminated);
+export const getNodeState = composeSelectors(dataStateSelector, dataSelectors.getNodeState);
 
 /**
- * Returns an the node data object for a specific node ID.
+ * Returns the node data object for a specific node ID.
  */
 export const nodeDataForID = composeSelectors(dataStateSelector, dataSelectors.nodeDataForID);
 

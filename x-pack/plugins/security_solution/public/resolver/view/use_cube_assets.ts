@@ -10,7 +10,7 @@ import { ButtonColor } from '@elastic/eui';
 import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
 import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
 import { useMemo } from 'react';
-import { ResolverProcessType } from '../types';
+import { ResolverProcessType, CubeState } from '../types';
 import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 import { useSymbolIDs } from './use_symbol_ids';
 import { useColors } from './use_colors';
@@ -18,10 +18,7 @@ import { useColors } from './use_colors';
 /**
  * Provides colors and HTML IDs used to render the 'cube' graphic that accompanies nodes.
  */
-export function useCubeAssets(
-  isProcessTerminated: boolean,
-  isProcessTrigger: boolean
-): NodeStyleConfig {
+export function useCubeAssets(cubeType: CubeState, isProcessTrigger: boolean): NodeStyleConfig {
   const SymbolIds = useSymbolIDs();
   const isDarkMode = useUiSetting('theme:darkMode');
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
@@ -37,6 +34,17 @@ export function useCubeAssets(
           defaultMessage: 'Running Process',
         }),
         isLabelFilled: true,
+        labelButtonFill: 'primary',
+        strokeColor: theme.euiColorPrimary,
+      },
+      loadingCube: {
+        backingFill: colorMap.processBackingFill,
+        cubeSymbol: `#${SymbolIds.loadingCube}`,
+        descriptionFill: colorMap.descriptionText,
+        descriptionText: i18n.translate('xpack.securitySolution.endpoint.resolver.loadingProcess', {
+          defaultMessage: 'Loading Process',
+        }),
+        isLabelFilled: false,
         labelButtonFill: 'primary',
         strokeColor: theme.euiColorPrimary,
       },
@@ -83,16 +91,20 @@ export function useCubeAssets(
     [SymbolIds, colorMap, theme]
   );
 
-  if (isProcessTerminated) {
+  if (cubeType === 'terminated') {
     if (isProcessTrigger) {
       return nodeAssets.terminatedTriggerCube;
     } else {
       return nodeAssets[processTypeToCube.processTerminated];
     }
-  } else if (isProcessTrigger) {
-    return nodeAssets[processTypeToCube.processCausedAlert];
+  } else if (cubeType === 'running') {
+    if (isProcessTrigger) {
+      return nodeAssets[processTypeToCube.processCausedAlert];
+    } else {
+      return nodeAssets[processTypeToCube.processRan];
+    }
   } else {
-    return nodeAssets[processTypeToCube.processRan];
+    return nodeAssets[processTypeToCube.processLoading];
   }
 }
 
@@ -102,6 +114,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
   processTerminated: 'terminatedProcessCube',
   unknownProcessEvent: 'runningProcessCube',
   processCausedAlert: 'runningTriggerCube',
+  processLoading: 'loadingCube',
   unknownEvent: 'runningProcessCube',
 };
 interface NodeStyleMap {
@@ -109,6 +122,7 @@ interface NodeStyleMap {
   runningTriggerCube: NodeStyleConfig;
   terminatedProcessCube: NodeStyleConfig;
   terminatedTriggerCube: NodeStyleConfig;
+  loadingCube: NodeStyleConfig;
 }
 interface NodeStyleConfig {
   backingFill: string;

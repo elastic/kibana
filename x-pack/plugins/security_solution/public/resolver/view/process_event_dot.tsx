@@ -214,9 +214,10 @@ const UnstyledProcessEventDot = React.memo(
     } = React.createRef();
     const colorMap = useColors();
 
+    const isNodeLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
+    const cubeClassName = isNodeLoading ? 'cube loading' : 'cube';
     // if we can't find it in the nodeData map then assume it is still running
-    const isProcessTerminated = useSelector(selectors.isNodeTerminated)(nodeID) ?? false;
-
+    const nodeState = useSelector(selectors.getNodeState)(nodeID);
     const {
       backingFill,
       cubeSymbol,
@@ -225,7 +226,7 @@ const UnstyledProcessEventDot = React.memo(
       labelButtonFill,
       strokeColor,
     } = useCubeAssets(
-      isProcessTerminated,
+      nodeState,
       /**
        * There is no definition for 'trigger process' yet. return false.
        */ false
@@ -347,7 +348,7 @@ const UnstyledProcessEventDot = React.memo(
               width={markerSize}
               height={markerSize}
               opacity="1"
-              className="cube"
+              className={cubeClassName}
             >
               <animateTransform
                 attributeType="XML"
@@ -396,6 +397,7 @@ const UnstyledProcessEventDot = React.memo(
             }}
           >
             <EuiButton
+              isLoading={isNodeLoading}
               color={labelButtonFill}
               fill={isLabelFilled}
               size="s"
@@ -495,5 +497,32 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   }
   & .euiSelectableListItem__text {
     color: white;
+  }
+  & .loading {
+    animation-name: pulse;
+    /**
+     * his is a multiple of .6 so it can match up with the EUI button's loading spinner
+     * which is (0.6s). Using .6 here makes it a bit too fast.
+     */
+    animation-duration: 1.8s;
+    animation-delay: 0;
+    animation-direction: normal;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  /**
+   * Animation loading state of the cube.
+   */
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 `;
