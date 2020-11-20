@@ -17,6 +17,24 @@ import {
 
 export const ID = '.index-threshold';
 
+enum Comparator {
+  GT = '>',
+  LT = '<',
+  GT_OR_EQ = '>=',
+  LT_OR_EQ = '<=',
+  BETWEEN = 'between',
+  NOT_BETWEEN = 'notBetween',
+}
+
+const humanReadableComparators = new Map<string, string>([
+  [Comparator.LT, 'less than'],
+  [Comparator.LT_OR_EQ, 'less than or equal to'],
+  [Comparator.GT_OR_EQ, 'greater than or equal to'],
+  [Comparator.GT, 'greater than'],
+  [Comparator.BETWEEN, 'between'],
+  [Comparator.NOT_BETWEEN, 'not between'],
+]);
+
 const ActionGroupId = 'threshold met';
 const ComparatorFns = getComparatorFns();
 export const ComparatorFnNames = new Set(ComparatorFns.keys());
@@ -172,7 +190,9 @@ export function getAlertType(
       if (!met) continue;
 
       const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
-      const humanFn = `${agg} ${params.thresholdComparator} ${params.threshold.join(',')}`;
+      const humanFn = `${agg} is ${getHumanReadableComparator(
+        params.thresholdComparator
+      )} ${params.threshold.join(' and ')}`;
 
       const baseContext: BaseActionContext = {
         date,
@@ -201,12 +221,13 @@ type ComparatorFn = (value: number, threshold: number[]) => boolean;
 
 function getComparatorFns(): Map<string, ComparatorFn> {
   const fns: Record<string, ComparatorFn> = {
-    '<': (value: number, threshold: number[]) => value < threshold[0],
-    '<=': (value: number, threshold: number[]) => value <= threshold[0],
-    '>=': (value: number, threshold: number[]) => value >= threshold[0],
-    '>': (value: number, threshold: number[]) => value > threshold[0],
-    between: (value: number, threshold: number[]) => value >= threshold[0] && value <= threshold[1],
-    notBetween: (value: number, threshold: number[]) =>
+    [Comparator.LT]: (value: number, threshold: number[]) => value < threshold[0],
+    [Comparator.LT_OR_EQ]: (value: number, threshold: number[]) => value <= threshold[0],
+    [Comparator.GT_OR_EQ]: (value: number, threshold: number[]) => value >= threshold[0],
+    [Comparator.GT]: (value: number, threshold: number[]) => value > threshold[0],
+    [Comparator.BETWEEN]: (value: number, threshold: number[]) =>
+      value >= threshold[0] && value <= threshold[1],
+    [Comparator.NOT_BETWEEN]: (value: number, threshold: number[]) =>
       value < threshold[0] || value > threshold[1],
   };
 
@@ -216,4 +237,10 @@ function getComparatorFns(): Map<string, ComparatorFn> {
   }
 
   return result;
+}
+
+function getHumanReadableComparator(comparator: string) {
+  return humanReadableComparators.has(comparator)
+    ? humanReadableComparators.get(comparator)
+    : comparator;
 }

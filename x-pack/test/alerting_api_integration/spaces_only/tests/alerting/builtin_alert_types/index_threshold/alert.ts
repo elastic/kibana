@@ -26,8 +26,6 @@ const ALERT_INTERVALS_TO_WRITE = 5;
 const ALERT_INTERVAL_SECONDS = 3;
 const ALERT_INTERVAL_MILLIS = ALERT_INTERVAL_SECONDS * 1000;
 
-const DefaultActionMessage = `alert {{alertName}} group {{context.group}} value {{context.value}} exceeded threshold {{context.function}} over {{params.timeWindowSize}}{{params.timeWindowUnit}} on {{context.date}}`;
-
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -93,7 +91,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(group).to.be('all documents');
 
         // we'll check title and message in this test, but not subsequent ones
-        expect(title).to.be('alert always fire group all documents exceeded threshold');
+        expect(title).to.be('alert always fire group all documents met threshold');
 
         const messagePattern = /alert always fire group all documents value \d+ exceeded threshold count &gt; -1 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
         expect(message).to.match(messagePattern);
@@ -345,7 +343,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 name: '{{{alertName}}}',
                 value: '{{{context.value}}}',
                 title: '{{{context.title}}}',
-                message: DefaultActionMessage,
+                message: '{{{context.message}}}',
               },
               date: '{{{context.date}}}',
               // TODO: I wanted to write the alert value here, but how?
