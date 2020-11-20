@@ -27,7 +27,7 @@ export function TraceLink({ match }: RouteComponentProps<{ traceId: string }>) {
     (callApmApi) => {
       if (traceId) {
         return callApmApi({
-          pathname: '/api/apm/transaction/{traceId}',
+          endpoint: 'GET /api/apm/transaction/{traceId}',
           params: {
             path: {
               traceId,

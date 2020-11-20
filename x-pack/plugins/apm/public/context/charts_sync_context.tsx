@@ -34,7 +34,7 @@ export function LegacyChartsSyncContextProvider({
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/annotation/search',
+          endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
           params: {
             path: {
               serviceName,

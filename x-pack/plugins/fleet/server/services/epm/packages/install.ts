@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import semver from 'semver';
+import semverGt from 'semver/functions/gt';
+import semverLt from 'semver/functions/lt';
 import Boom from '@hapi/boom';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
@@ -27,6 +28,7 @@ import {
   KibanaAssetType,
 } from '../../../types';
 import * as Registry from '../registry';
+import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
 import {
   getInstallation,
   getInstallationObject,
@@ -42,7 +44,6 @@ import {
 } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { appContextService } from '../../app_context';
-import { getArchivePackage } from '../archive';
 import { _installPackage } from './_install_package';
 
 export async function installLatestPackage(options: {
@@ -185,7 +186,7 @@ export async function upgradePackage({
   latestPkg,
   pkgToUpgrade,
 }: UpgradePackageParams): Promise<BulkInstallResponse> {
-  if (!installedPkg || semver.gt(latestPkg.version, installedPkg.attributes.version)) {
+  if (!installedPkg || semverGt(latestPkg.version, installedPkg.attributes.version)) {
     const pkgkey = Registry.pkgToPkgKey({
       name: latestPkg.name,
       version: latestPkg.version,
@@ -244,29 +245,26 @@ async function installPackageFromRegistry({
 }: InstallRegistryPackageParams): Promise<AssetReference[]> {
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
-  // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
-  // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
-  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
   // get the currently installed package
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-
   const installType = getInstallType({ pkgVersion, installedPkg });
-
   // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
   const installOutOfDateVersionOk =
     installType === 'reinstall' || installType === 'reupdate' || installType === 'rollback';
-  if (semver.lt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
+
+  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+  if (semverLt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
 
-  const { paths, registryPackageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
+  const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
   return _installPackage({
     savedObjectsClient,
     callCluster,
     installedPkg,
     paths,
-    packageInfo: registryPackageInfo,
+    packageInfo,
     installType,
     installSource: 'registry',
   });
@@ -289,27 +287,44 @@ async function installPackageByUpload({
   archiveBuffer,
   contentType,
 }: InstallUploadedArchiveParams): Promise<AssetReference[]> {
-  const { paths, archivePackageInfo } = await getArchivePackage({ archiveBuffer, contentType });
+  const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
 
   const installedPkg = await getInstallationObject({
     savedObjectsClient,
-    pkgName: archivePackageInfo.name,
+    pkgName: packageInfo.name,
   });
-  const installType = getInstallType({ pkgVersion: archivePackageInfo.version, installedPkg });
+
+  const installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
   if (installType !== 'install') {
     throw new PackageOperationNotSupportedError(
-      `Package upload only supports fresh installations. Package ${archivePackageInfo.name} is already installed, please uninstall first.`
+      `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
     );
   }
+
+  const installSource = 'upload';
+  const paths = await unpackBufferToCache({
+    name: packageInfo.name,
+    version: packageInfo.version,
+    installSource,
+    archiveBuffer,
+    contentType,
+  });
+
+  setPackageInfo({
+    name: packageInfo.name,
+    version: packageInfo.version,
+    installSource,
+    packageInfo,
+  });
 
   return _installPackage({
     savedObjectsClient,
     callCluster,
     installedPkg,
     paths,
-    packageInfo: archivePackageInfo,
+    packageInfo,
     installType,
-    installSource: 'upload',
+    installSource,
   });
 }
 

@@ -18,8 +18,7 @@ import { useLicense } from '../../../../hooks/useLicense';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 export type AnomalyDetectionApiResponse = APIReturnType<
-  '/api/apm/settings/anomaly-detection',
-  'GET'
+  'GET /api/apm/settings/anomaly-detection'
 >;
 
 const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
@@ -38,7 +37,9 @@ export function AnomalyDetection() {
   const { refetch, data = DEFAULT_VALUE, status } = useFetcher(
     (callApmApi) => {
       if (canGetJobs) {
-        return callApmApi({ pathname: `/api/apm/settings/anomaly-detection` });
+        return callApmApi({
+          endpoint: `GET /api/apm/settings/anomaly-detection`,
+        });
       }
     },
     [canGetJobs],
