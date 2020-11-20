@@ -18,7 +18,6 @@ export interface EsContext {
   esNames: EsNames;
   esAdapter: IClusterClientAdapter;
   initialize(): void;
-  shutdown(): Promise<void>;
   waitTillReady(): Promise<boolean>;
   initialized: boolean;
 }
@@ -53,7 +52,6 @@ class EsContextImpl implements EsContext {
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
       clusterClientPromise: params.clusterClientPromise,
-      context: this,
     });
   }
 
@@ -74,10 +72,6 @@ class EsContextImpl implements EsContext {
         this.readySignal.signal(false);
       }
     });
-  }
-
-  async shutdown() {
-    await this.esAdapter.shutdown();
   }
 
   // waits till the ES initialization is done, returns true if it was successful,
