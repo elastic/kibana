@@ -9,7 +9,7 @@ import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
 import { DataPublicPluginStart, exportAsCSVs } from '../../../../../../src/plugins/data/public';
 import { downloadMultipleAs } from '../../../../../../src/plugins/share/public';
 import { Adapters, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { Action } from '../../../../../../src/plugins/ui_actions/public';
+import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
 import { CoreStart } from '../../../../../../src/core/public';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
@@ -29,7 +29,7 @@ export interface ExportContext {
  * This is "Export CSV" action which appears in the context
  * menu of a dashboard panel.
  */
-export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPORT_CSV> {
+export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
   public readonly id = ACTION_EXPORT_CSV;
 
   public readonly type = ACTION_EXPORT_CSV;
@@ -67,7 +67,7 @@ export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPO
       return this.params.data.fieldFormats.deserialize;
     }
 
-    if (type === 'visualize') {
+    if (type === 'visualization') {
       return (() => ({
         convert: (item: { raw: string; formatted: string }) => item.formatted,
       })) as FormatFactory;
@@ -89,7 +89,7 @@ export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPO
       return;
     }
     // Visualize
-    if (type === 'visualize') {
+    if (type === 'visualization') {
       const datatable = await adapters.data.tabular();
       datatable.columns = datatable.columns.map(({ field, ...rest }: { field: string }) => ({
         id: field,
@@ -102,6 +102,7 @@ export class ExportCSVAction implements Action<ExportContext, typeof ACTION_EXPO
     if (type === 'lens') {
       return adapters;
     }
+
     // Make a last attempt to duck type the adapter (useful for testing)
     if (this.hasDatatableContent(adapters)) {
       return adapters;
