@@ -43,14 +43,14 @@ const filterUndefined = <T>(list: Array<T | undefined>): T[] => {
   return list.filter((item: T | undefined): item is T => item !== undefined);
 };
 
-const createConditionEntry = <T extends ConditionEntryField>(
+export const createConditionEntry = <T extends ConditionEntryField>(
   field: T,
   value: string
 ): ConditionEntry<T> => {
   return { field, value, type: 'match', operator: 'included' };
 };
 
-const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEntriesMap => {
+export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEntriesMap => {
   return entries.reduce((result, entry) => {
     if (entry.field.startsWith('process.hash') && entry.type === 'match') {
       return {
@@ -132,15 +132,15 @@ const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {
   }
 };
 
-const createEntryMatch = (field: string, value: string): EntryMatch => {
+export const createEntryMatch = (field: string, value: string): EntryMatch => {
   return { field, value, type: 'match', operator: 'included' };
 };
 
-const createEntryNested = (field: string, entries: NestedEntriesArray): EntryNested => {
+export const createEntryNested = (field: string, entries: NestedEntriesArray): EntryNested => {
   return { field, entries, type: 'nested' };
 };
 
-const conditionEntriesToEntries = (
+export const conditionEntriesToEntries = (
   conditionEntries: Array<ConditionEntry<ConditionEntryField>>
 ): EntriesArray => {
   return conditionEntries.map((conditionEntry) => {
