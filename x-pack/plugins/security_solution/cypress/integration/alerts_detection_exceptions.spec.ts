@@ -34,7 +34,7 @@ import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-const numberOfauditbeatExceptionsAlerts = 2;
+const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = 2;
 
 describe('Exceptions', () => {
   context('From rule', () => {
@@ -71,7 +71,7 @@ describe('Exceptions', () => {
         .then((numberOfInitialAlertsText) => {
           cy.wrap(parseInt(numberOfInitialAlertsText, 10)).should(
             'eql',
-            numberOfauditbeatExceptionsAlerts
+            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
           );
         });
 
@@ -100,7 +100,7 @@ describe('Exceptions', () => {
         .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
           cy.wrap(parseInt(numberOfClosedAlertsAfterCreatingExceptionText, 10)).should(
             'eql',
-            numberOfauditbeatExceptionsAlerts
+            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
           );
         });
 
@@ -129,7 +129,7 @@ describe('Exceptions', () => {
         .then((numberOfAlertsAfterRemovingExceptionsText) => {
           cy.wrap(parseInt(numberOfAlertsAfterRemovingExceptionsText, 10)).should(
             'eql',
-            numberOfauditbeatExceptionsAlerts
+            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
           );
         });
     });
@@ -169,7 +169,7 @@ describe('Exceptions', () => {
         .then((numberOfInitialAlertsText) => {
           cy.wrap(parseInt(numberOfInitialAlertsText, 10)).should(
             'eql',
-            numberOfauditbeatExceptionsAlerts
+            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
           );
         });
 
@@ -194,7 +194,7 @@ describe('Exceptions', () => {
         .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
           cy.wrap(parseInt(numberOfClosedAlertsAfterCreatingExceptionText, 10)).should(
             'eql',
-            numberOfauditbeatExceptionsAlerts
+            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
           );
         });
 
@@ -222,7 +222,7 @@ describe('Exceptions', () => {
         .then((numberOfAlertsAfterRemovingExceptionsText) => {
           cy.wrap(parseInt(numberOfAlertsAfterRemovingExceptionsText, 10)).should(
             'eql',
-            numberOfauditbeatExceptionsAlerts
+            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
           );
         });
     });
