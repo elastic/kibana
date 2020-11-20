@@ -27,11 +27,15 @@ const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
+const dbName = (db: LmdbStore.Database) =>
+  // @ts-expect-error db.name is not a documented/typed property
+  db.name;
+
 export class Cache {
-  private readonly codes: LmdbStore.RootDatabase;
-  private readonly atimes: LmdbStore.Database;
-  private readonly mtimes: LmdbStore.Database;
-  private readonly sourceMaps: LmdbStore.Database;
+  private readonly codes: LmdbStore.RootDatabase<string, string>;
+  private readonly atimes: LmdbStore.Database<string, string>;
+  private readonly mtimes: LmdbStore.Database<string, string>;
+  private readonly sourceMaps: LmdbStore.Database<string, string>;
   private readonly prefix: string;
   private readonly log?: Writable;
   private readonly timer: NodeJS.Timer;
@@ -77,12 +81,12 @@ export class Cache {
   }
 
   getMtime(path: string) {
-    return this.safeGet<string>(this.mtimes, this.getKey(path));
+    return this.safeGet(this.mtimes, this.getKey(path));
   }
 
   getCode(path: string) {
     const key = this.getKey(path);
-    const code = this.safeGet<string>(this.codes, key);
+    const code = this.safeGet(this.codes, key);
 
     if (code !== undefined) {
       // when we use a file from the cache set the "atime" of that cache entry
@@ -95,7 +99,7 @@ export class Cache {
   }
 
   getSourceMap(path: string) {
-    const map = this.safeGet<any>(this.sourceMaps, this.getKey(path));
+    const map = this.safeGet(this.sourceMaps, this.getKey(path));
     if (typeof map === 'string') {
       return JSON.parse(map);
     }
@@ -120,9 +124,9 @@ export class Cache {
     return `${this.prefix}${path}`;
   }
 
-  private safeGet<V>(db: LmdbStore.Database, key: string) {
+  private safeGet<V>(db: LmdbStore.Database<V, string>, key: string) {
     try {
-      const value = db.get(key) as V | undefined;
+      const value = db.get(key);
       this.debug(value === undefined ? 'MISS' : 'HIT', db, key);
       return value;
     } catch (error) {
@@ -130,7 +134,7 @@ export class Cache {
     }
   }
 
-  private async safePut<V>(db: LmdbStore.Database, key: string, value: V) {
+  private async safePut<V>(db: LmdbStore.Database<V, string>, key: string, value: V) {
     try {
       await db.put(key, value);
       this.debug('PUT', db, key);
@@ -139,18 +143,18 @@ export class Cache {
     }
   }
 
-  private debug(type: string, db: any, key: string) {
+  private debug(type: string, db: LmdbStore.Database, key: LmdbStore.Key) {
     if (this.log) {
-      this.log.write(`${type}   [${db.name}]   ${key}\n`);
+      this.log.write(`${type}   [${dbName(db)}]   ${String(key)}\n`);
     }
   }
 
-  private logError(type: 'GET' | 'PUT', db: LmdbStore.Database, key: string, error: Error) {
-    // @ts-expect-error name is not a documented/typed property
-    const name = db.name;
-    this.debug(`ERROR/${type}`, db, `${key}: ${error.stack}`);
+  private logError(type: 'GET' | 'PUT', db: LmdbStore.Database, key: LmdbStore.Key, error: Error) {
+    this.debug(`ERROR/${type}`, db, `${String(key)}: ${error.stack}`);
     process.stderr.write(
-      chalk.red(`[@kbn/optimizer/node] ${type} error [${name}/${key}]: ${error.stack}\n`)
+      chalk.red(
+        `[@kbn/optimizer/node] ${type} error [${dbName(db)}/${String(key)}]: ${error.stack}\n`
+      )
     );
   }
 
@@ -159,8 +163,8 @@ export class Cache {
       const ATIME_LIMIT = Date.now() - 30 * DAY;
       const BATCH_SIZE = 1000;
 
-      const validKeys: LmdbStore.Key[] = [];
-      const invalidKeys: LmdbStore.Key[] = [];
+      const validKeys: string[] = [];
+      const invalidKeys: string[] = [];
 
       // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
       for (const { key, value } of this.atimes.getRange()) {
