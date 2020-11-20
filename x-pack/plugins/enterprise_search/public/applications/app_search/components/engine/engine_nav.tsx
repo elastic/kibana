@@ -28,8 +28,8 @@ import {
 } from '../../routes';
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
 import { ENGINES_TITLE } from '../engines';
+import { OVERVIEW_TITLE } from '../engine_overview';
 import {
-  OVERVIEW_TITLE,
   ANALYTICS_TITLE,
   DOCUMENTS_TITLE,
   SCHEMA_TITLE,
