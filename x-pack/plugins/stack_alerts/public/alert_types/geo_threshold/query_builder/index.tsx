@@ -326,7 +326,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
                 }
                 fullWidth
                 onChange={(e) => setAlertParams('trackingEvent', e.target.value)}
-                options={[conditionOptions[0]]} // TODO: Make all options avab. before merge
+                options={conditionOptions}
               />
             </div>
           </EuiFormRow>

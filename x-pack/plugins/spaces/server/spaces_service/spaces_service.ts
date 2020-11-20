@@ -4,133 +4,128 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { map, take } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs';
-import { Legacy } from 'kibana';
-import { Logger, KibanaRequest, CoreSetup } from '../../../../../src/core/server';
-import { SecurityPluginSetup } from '../../../security/server';
-import { SpacesClient } from '../lib/spaces_client';
-import { ConfigType } from '../config';
-import { getSpaceIdFromPath, addSpaceIdToPath } from '../../common/lib/spaces_url_parser';
+import type { KibanaRequest, IBasePath } from 'src/core/server';
+import { SpacesClientServiceStart } from '../spaces_client';
+import { getSpaceIdFromPath } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
-import { Space } from '../../common/model/space';
-import { SpacesAuditLogger } from '../lib/audit_logger';
-
-type RequestFacade = KibanaRequest | Legacy.Request;
+import { Space } from '..';
 
 export interface SpacesServiceSetup {
-  scopedClient(request: RequestFacade): Promise<SpacesClient>;
+  /**
+   * Retrieves the space id associated with the provided request.
+   * @param request
+   *
+   * @deprecated Use `getSpaceId` from the `SpacesServiceStart` contract instead.
+   */
+  getSpaceId(request: KibanaRequest): string;
 
-  getSpaceId(request: RequestFacade): string;
-
-  getBasePath(spaceId: string): string;
-
-  isInDefaultSpace(request: RequestFacade): boolean;
-
+  /**
+   * Converts the provided space id into the corresponding Saved Objects `namespace` id.
+   * @param spaceId
+   *
+   * @deprecated use `spaceIdToNamespace` from the `SpacesServiceStart` contract instead.
+   */
   spaceIdToNamespace(spaceId: string): string | undefined;
 
+  /**
+   * Converts the provided namespace into the corresponding space id.
+   * @param namespace
+   *
+   * @deprecated use `namespaceToSpaceId` from the `SpacesServiceStart` contract instead.
+   */
   namespaceToSpaceId(namespace: string | undefined): string;
-
-  getActiveSpace(request: RequestFacade): Promise<Space>;
 }
 
-interface SpacesServiceDeps {
-  http: CoreSetup['http'];
-  getStartServices: CoreSetup['getStartServices'];
-  authorization: SecurityPluginSetup['authz'] | null;
-  config$: Observable<ConfigType>;
-  auditLogger: SpacesAuditLogger;
+export interface SpacesServiceStart {
+  /**
+   * Creates a scoped instance of the SpacesClient.
+   */
+  createSpacesClient: SpacesClientServiceStart['createSpacesClient'];
+
+  /**
+   * Retrieves the space id associated with the provided request.
+   * @param request
+   */
+  getSpaceId(request: KibanaRequest): string;
+
+  /**
+   * Indicates if the provided request is executing within the context of the `default` space.
+   * @param request
+   */
+  isInDefaultSpace(request: KibanaRequest): boolean;
+
+  /**
+   * Retrieves the Space associated with the provided request.
+   * @param request
+   */
+  getActiveSpace(request: KibanaRequest): Promise<Space>;
+
+  /**
+   * Converts the provided space id into the corresponding Saved Objects `namespace` id.
+   * @param spaceId
+   */
+  spaceIdToNamespace(spaceId: string): string | undefined;
+
+  /**
+   * Converts the provided namespace into the corresponding space id.
+   * @param namespace
+   */
+  namespaceToSpaceId(namespace: string | undefined): string;
+}
+
+interface SpacesServiceSetupDeps {
+  basePath: IBasePath;
+}
+
+interface SpacesServiceStartDeps {
+  basePath: IBasePath;
+  spacesClientService: SpacesClientServiceStart;
 }
 
 export class SpacesService {
-  private configSubscription$?: Subscription;
-
-  constructor(private readonly log: Logger) {}
-
-  public async setup({
-    http,
-    getStartServices,
-    authorization,
-    config$,
-    auditLogger,
-  }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
-    const getSpaceId = (request: RequestFacade) => {
-      // Currently utilized by reporting
-      const isFakeRequest = typeof (request as any).getBasePath === 'function';
-
-      const basePath = isFakeRequest
-        ? (request as Record<string, any>).getBasePath()
-        : http.basePath.get(request);
-
-      const { spaceId } = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
-
-      return spaceId;
-    };
-
-    const internalRepositoryPromise = getStartServices().then(([coreStart]) =>
-      coreStart.savedObjects.createInternalRepository(['space'])
-    );
-
-    const getScopedClient = async (request: KibanaRequest) => {
-      const [coreStart] = await getStartServices();
-      const internalRepository = await internalRepositoryPromise;
-
-      return config$
-        .pipe(
-          take(1),
-          map((config) => {
-            const callWithRequestRepository = coreStart.savedObjects.createScopedRepository(
-              request,
-              ['space']
-            );
-
-            return new SpacesClient(
-              auditLogger,
-              (message: string) => {
-                this.log.debug(message);
-              },
-              authorization,
-              callWithRequestRepository,
-              config,
-              internalRepository,
-              request
-            );
-          })
-        )
-        .toPromise();
-    };
-
+  public setup({ basePath }: SpacesServiceSetupDeps): SpacesServiceSetup {
     return {
-      getSpaceId,
-      getBasePath: (spaceId: string) => {
-        if (!spaceId) {
-          throw new TypeError(`spaceId is required to retrieve base path`);
-        }
-        return addSpaceIdToPath(http.basePath.serverBasePath, spaceId);
-      },
-      isInDefaultSpace: (request: RequestFacade) => {
-        const spaceId = getSpaceId(request);
-
-        return spaceId === DEFAULT_SPACE_ID;
+      getSpaceId: (request: KibanaRequest) => {
+        return this.getSpaceId(request, basePath);
       },
       spaceIdToNamespace,
       namespaceToSpaceId,
-      scopedClient: getScopedClient,
-      getActiveSpace: async (request: RequestFacade) => {
-        const spaceId = getSpaceId(request);
-        const spacesClient = await getScopedClient(
-          request instanceof KibanaRequest ? request : KibanaRequest.from(request)
-        );
-        return spacesClient.get(spaceId);
-      },
     };
   }
 
-  public async stop() {
-    if (this.configSubscription$) {
-      this.configSubscription$.unsubscribe();
-      this.configSubscription$ = undefined;
-    }
+  public start({ basePath, spacesClientService }: SpacesServiceStartDeps) {
+    return {
+      getSpaceId: (request: KibanaRequest) => {
+        return this.getSpaceId(request, basePath);
+      },
+
+      getActiveSpace: (request: KibanaRequest) => {
+        const spaceId = this.getSpaceId(request, basePath);
+        return spacesClientService.createSpacesClient(request).get(spaceId);
+      },
+
+      isInDefaultSpace: (request: KibanaRequest) => {
+        const spaceId = this.getSpaceId(request, basePath);
+
+        return spaceId === DEFAULT_SPACE_ID;
+      },
+
+      createSpacesClient: (request: KibanaRequest) =>
+        spacesClientService.createSpacesClient(request),
+
+      spaceIdToNamespace,
+      namespaceToSpaceId,
+    };
+  }
+
+  public stop() {}
+
+  private getSpaceId(request: KibanaRequest, basePathService: IBasePath) {
+    const basePath = basePathService.get(request);
+
+    const { spaceId } = getSpaceIdFromPath(basePath, basePathService.serverBasePath);
+
+    return spaceId;
   }
 }
