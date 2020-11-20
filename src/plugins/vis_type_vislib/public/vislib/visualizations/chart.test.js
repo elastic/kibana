@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import { setHTMLElementClientSizes, setSVGElementGetBBox } from '../../../../../test_utils/public';
+import { setHTMLElementClientSizes, setSVGElementGetBBox } from '@kbn/test/jest';
 import { Chart } from './_chart';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';

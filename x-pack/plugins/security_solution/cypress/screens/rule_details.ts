@@ -87,3 +87,6 @@ export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
 
 export const getDetails = (title: string) =>
   cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
+
+export const removeExternalLinkText = (str: string) =>
+  str.replace(/\(opens in a new tab or window\)/g, '');
