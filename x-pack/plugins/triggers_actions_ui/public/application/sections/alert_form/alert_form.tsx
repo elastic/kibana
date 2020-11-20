@@ -30,6 +30,7 @@ import {
   EuiLink,
   EuiText,
   EuiNotificationBadge,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -437,17 +438,19 @@ export const AlertForm = ({
       )}
       <EuiHorizontalRule />
       {AlertParamsExpressionComponent ? (
-        <Suspense fallback={<CenterJustifiedSpinner />}>
-          <AlertParamsExpressionComponent
-            alertParams={alert.params}
-            alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
-            alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
-            errors={errors}
-            setAlertParams={setAlertParams}
-            setAlertProperty={setAlertProperty}
-            alertsContext={alertsContext}
-          />
-        </Suspense>
+        <EuiErrorBoundary>
+          <Suspense fallback={<CenterJustifiedSpinner />}>
+            <AlertParamsExpressionComponent
+              alertParams={alert.params}
+              alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+              alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
+              errors={errors}
+              setAlertParams={setAlertParams}
+              setAlertProperty={setAlertProperty}
+              alertsContext={alertsContext}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
       ) : null}
       {canShowActions &&
       defaultActionGroupId &&
