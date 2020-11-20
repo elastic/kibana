@@ -33,8 +33,8 @@ import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { IngestManagerStartContract, ExternalCallback } from '../../fleet/server';
+import { ILicense, LicensingPluginStart } from '../../licensing/server';
+import { FleetStartContract, ExternalCallback } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -74,13 +74,13 @@ import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
 } from '../../../../src/plugins/telemetry/server';
+import { licenseService } from './lib/license/license';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
-  licensing: LicensingPluginSetup;
   lists?: ListPluginSetup;
   ml?: MlSetup;
   security?: SecuritySetup;
@@ -93,7 +93,8 @@ export interface SetupPlugins {
 export interface StartPlugins {
   alerts: AlertPluginStartContract;
   data: DataPluginStart;
-  ingestManager?: IngestManagerStartContract;
+  fleet?: FleetStartContract;
+  licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
 }
@@ -125,6 +126,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
+  private licensing$!: Observable<ILicense>;
 
   private manifestTask: ManifestTask | undefined;
   private exceptionsCache: LRU<string, Buffer>;
@@ -324,27 +326,27 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     let registerIngestCallback: ((...args: ExternalCallback) => void) | undefined;
 
     const exceptionListsStartEnabled = () => {
-      return this.lists && plugins.taskManager && plugins.ingestManager;
+      return this.lists && plugins.taskManager && plugins.fleet;
     };
 
     if (exceptionListsStartEnabled()) {
       const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = new ArtifactClient(savedObjectsClient);
 
-      registerIngestCallback = plugins.ingestManager!.registerExternalCallback;
+      registerIngestCallback = plugins.fleet!.registerExternalCallback;
       manifestManager = new ManifestManager({
         savedObjectsClient,
         artifactClient,
         exceptionListClient,
-        packagePolicyService: plugins.ingestManager!.packagePolicyService,
+        packagePolicyService: plugins.fleet!.packagePolicyService,
         logger: this.logger,
         cache: this.exceptionsCache,
       });
     }
 
     this.endpointAppContextService.start({
-      agentService: plugins.ingestManager?.agentService,
-      packageService: plugins.ingestManager?.packageService,
+      agentService: plugins.fleet?.agentService,
+      packageService: plugins.fleet?.packageService,
       appClientFactory: this.appClientFactory,
       security: this.setupPlugins!.security!,
       alerts: plugins.alerts,
@@ -364,6 +366,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     this.telemetryEventsSender.start(core, plugins.telemetry);
+    this.licensing$ = plugins.licensing.license$;
+    licenseService.start(this.licensing$);
 
     return {};
   }
@@ -372,5 +376,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('Stopping plugin');
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
+    licenseService.stop();
   }
 }
