@@ -45,8 +45,7 @@ import { openTimeline } from '../tasks/timelines';
 
 import { OVERVIEW_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/79389
-describe.skip('Timelines', () => {
+describe('Timelines', () => {
   before(() => {
     cy.route2('PATCH', '/api/timeline').as('timeline');
   });
