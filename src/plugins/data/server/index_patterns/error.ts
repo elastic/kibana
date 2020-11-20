@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 export class ErrorIndexPatternNotFound extends Error {
   public readonly is404 = true;
 
@@ -24,5 +26,11 @@ export class ErrorIndexPatternNotFound extends Error {
     super(message);
 
     Object.setPrototypeOf(this, ErrorIndexPatternNotFound.prototype);
+  }
+}
+
+export class ErrorIndexPatternFieldNotFound extends ErrorIndexPatternNotFound {
+  constructor(indexPatternId: string, fieldName: string) {
+    super(`Field [index_pattern = ${indexPatternId}, field = ${fieldName}] not found.`);
   }
 }
