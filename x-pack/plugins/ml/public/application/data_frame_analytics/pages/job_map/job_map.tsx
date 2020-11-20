@@ -95,6 +95,29 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
     );
   };
 
+  const updateElements = (nodeId: string, destIndexNode?: string) => {
+    // Remove job element
+    const filteredElements = elements.filter((e: any) => {
+      // Filter out job node and related edges. If target index deleted filter that out, too.
+      const condition =
+        e.data.id !== nodeId && e.data.target !== nodeId && e.data.source !== nodeId;
+
+      if (destIndexNode !== undefined) {
+        // Filter out destination index node for that job
+        return (
+          condition &&
+          e.data.id !== destIndexNode &&
+          e.data.target !== destIndexNode &&
+          e.data.source !== destIndexNode
+        );
+      }
+
+      return condition;
+    });
+
+    setElements(filteredElements);
+  };
+
   const getData = async (idToUse: string, treatAsRoot: boolean, type?: string) => {
     // Pass in treatAsRoot flag - endpoint will take job or index to grab jobs created from it
     // TODO: update analyticsMap return type here
@@ -165,6 +188,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
             getNodeData={getDataWrapper}
             analyticsId={analyticsId}
             modelId={modelId}
+            updateElements={updateElements}
           />
         </Cytoscape>
       </div>

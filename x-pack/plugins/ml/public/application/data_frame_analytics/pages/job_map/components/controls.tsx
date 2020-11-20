@@ -9,6 +9,7 @@ import cytoscape from 'cytoscape';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiCodeBlock,
   EuiDescriptionList,
@@ -25,13 +26,18 @@ import { EuiDescriptionListProps } from '@elastic/eui/src/components/description
 import { CytoscapeContext } from './cytoscape';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
-// import { DeleteButton } from './delete_button'; // TODO: add delete functionality in followup
+import { checkPermission } from '../../../../capabilities/check_capabilities';
+import {
+  useDeleteAction,
+  DeleteActionModal,
+} from '../../analytics_management/components/action_delete';
 
 interface Props {
   analyticsId?: string;
-  modelId?: string;
   details: any;
   getNodeData: any;
+  modelId?: string;
+  updateElements: any;
 }
 
 function getListItems(details: object): EuiDescriptionListProps['listItems'] {
@@ -57,9 +63,18 @@ function getListItems(details: object): EuiDescriptionListProps['listItems'] {
   });
 }
 
-export const Controls: FC<Props> = ({ analyticsId, modelId, details, getNodeData }) => {
+export const Controls: FC<Props> = ({
+  analyticsId,
+  details,
+  getNodeData,
+  modelId,
+  updateElements,
+}) => {
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
   const [selectedNode, setSelectedNode] = useState<cytoscape.NodeSingular | undefined>();
+  const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
+  const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
+  const { deleteItem, deleteTargetIndex, isModalVisible, openModal } = deleteAction;
 
   const cy = useContext(CytoscapeContext);
   const deselect = useCallback(() => {
@@ -93,6 +108,20 @@ export const Controls: FC<Props> = ({ analyticsId, modelId, details, getNodeData
       }
     };
   }, [cy, deselect]);
+
+  useEffect(() => {
+    // Update elements and close the flyout
+    if (isModalVisible === false && deleteItem === true) {
+      let destIndexNode;
+      if (deleteTargetIndex === true) {
+        const jobDetails = details[nodeId];
+        const destIndex = jobDetails.dest.index;
+        destIndexNode = `${destIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
+      }
+      updateElements(nodeId, destIndexNode);
+      setShowFlyout(false);
+    }
+  }, [isModalVisible, deleteItem]);
 
   if (showFlyout === false) {
     return null;
@@ -157,12 +186,27 @@ export const Controls: FC<Props> = ({ analyticsId, modelId, details, getNodeData
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>{nodeDataButton}</EuiFlexItem>
-            {/* <EuiFlexItem grow={false}>
-              <DeleteButton id={nodeLabel} type={nodeType} />
-            </EuiFlexItem> */}
+            {nodeType === JOB_MAP_NODE_TYPES.ANALYTICS && (
+              <EuiButton
+                onClick={() => {
+                  // @ts-ignore // TODO: update endpoint to return stats
+                  openModal({ config: details[nodeId], stats: { state: 'stopped' } });
+                }}
+                iconType="trash"
+                color="danger"
+                size="s"
+              >
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsMap.flyout.deleteJobButton"
+                  defaultMessage="Delete job"
+                />
+              </EuiButton>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>
+      <EuiFlexItem grow={false}>{nodeDataButton}</EuiFlexItem>
+      {isModalVisible && <DeleteActionModal {...deleteAction} />}
     </EuiPortal>
   );
 };

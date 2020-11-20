@@ -76,7 +76,7 @@ export function Cytoscape({ children, elements, height, style, width }: Cytoscap
   const dataHandler = useCallback<cytoscape.EventHandler>(
     (event) => {
       if (cy && height > 0) {
-        cy.layout(getLayoutOptions(width, height)).run();
+        setTimeout(() => cy.layout(getLayoutOptions(width, height)).run(), 0);
       }
     },
     [cy, height, width]

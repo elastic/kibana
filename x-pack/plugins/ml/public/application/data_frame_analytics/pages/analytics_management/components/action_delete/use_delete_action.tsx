@@ -34,6 +34,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const [item, setItem] = useState<DataFrameAnalyticsListRow>();
 
   const [isModalVisible, setModalVisible] = useState(false);
+  const [deleteItem, setDeleteItem] = useState(false);
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<boolean>(true);
   const [deleteIndexPattern, setDeleteIndexPattern] = useState<boolean>(true);
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
@@ -111,18 +112,20 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const closeModal = () => setModalVisible(false);
   const deleteAndCloseModal = () => {
+    setDeleteItem(true);
     setModalVisible(false);
 
     if (item !== undefined) {
       if ((userCanDeleteIndex && deleteTargetIndex) || (userCanDeleteIndex && deleteIndexPattern)) {
         deleteAnalyticsAndDestIndex(
-          item,
+          item.config,
+          item.stats,
           deleteTargetIndex,
           indexPatternExists && deleteIndexPattern,
           toastNotificationService
         );
       } else {
-        deleteAnalytics(item, toastNotificationService);
+        deleteAnalytics(item.config, item.stats, toastNotificationService);
       }
     }
   };
@@ -159,6 +162,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
     deleteAndCloseModal,
     deleteTargetIndex,
     deleteIndexPattern,
+    deleteItem,
     indexPatternExists,
     isModalVisible,
     item,
