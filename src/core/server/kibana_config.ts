@@ -25,7 +25,7 @@ export type KibanaConfigType = TypeOf<typeof config.schema>;
 const deprecations: ConfigDeprecationProvider = () => [
   (settings, fromPath, log) => {
     const kibana = settings[fromPath];
-    if (kibana.index) {
+    if (kibana?.index) {
       log(
         `Multitenancy by changing 'kibana.index' is no longer supported. See https://ela.st/kbn-remove-legacy-multitenancy for more details`
       );
