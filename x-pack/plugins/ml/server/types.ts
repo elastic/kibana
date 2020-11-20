@@ -32,7 +32,7 @@ export interface SystemRouteDeps {
 }
 
 export interface SavedObjectsRouteDeps {
-  spacesPlugin?: SpacesPluginSetup;
+  getSpaces?: () => Promise<SpacesPluginStart>;
   resolveMlCapabilities: ResolveMlCapabilities;
 }
 

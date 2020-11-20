@@ -179,7 +179,7 @@ export class MlServerPlugin
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit, this.version);
     savedObjectsRoutes(routeInit, {
-      spacesPlugin: plugins.spaces,
+      getSpaces,
       resolveMlCapabilities,
     });
     systemRoutes(routeInit, {

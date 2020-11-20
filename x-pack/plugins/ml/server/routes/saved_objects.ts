@@ -15,7 +15,7 @@ import { jobIdsSchema } from './schemas/job_service_schema';
  */
 export function savedObjectsRoutes(
   { router, routeGuard }: RouteInitialization,
-  { spacesPlugin }: SavedObjectsRouteDeps
+  { getSpaces }: SavedObjectsRouteDeps
 ) {
   /**
    * @apiGroup JobSavedObjects
@@ -250,7 +250,7 @@ export function savedObjectsRoutes(
         const { jobIds }: { jobIds: string[] } = request.body;
 
         const { deleteJobsCheck } = checksFactory(client, jobSavedObjectService);
-        const body = await deleteJobsCheck(request, jobType, jobIds, spacesPlugin !== undefined);
+        const body = await deleteJobsCheck(request, jobType, jobIds, getSpaces !== undefined);
 
         return response.ok({
           body,
