@@ -22,7 +22,6 @@ import {
   SOURCE_SCHEMAS_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
   SOURCE_SETTINGS_PATH,
-  SOURCES_PATH,
   getContentSourcePath as sourcePath,
   getSourcesPath,
 } from '../../routes';
@@ -48,11 +47,6 @@ export const SourceRouter: React.FC = () => {
   const { initializeSource } = useActions(SourceLogic);
   const { contentSource, dataLoading } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
-
-  const breadcrumbs = {
-    topLevelPath: getSourcesPath(SOURCES_PATH, isOrganization),
-    topLevelName: '← All content sources',
-  };
 
   useEffect(() => {
     initializeSource(sourceId, history);
@@ -102,29 +96,20 @@ export const SourceRouter: React.FC = () => {
     sidebarLinks = [overviewLink, contentLink, sourceSettingsLink];
   }
 
-  /** TODO: Replace this in Kibana
-  const sidebar = (
-    <SidebarNavigation
-      title={
-        <span className="eui-textOverflowWrap" title={name}>
-          {name}
-        </span>
-      }
-      titleCssClass="content-source-title"
-      breadcrumbs={breadcrumbs}
-      headerChildren={
+  const pageHeader = (
+    <div>
+      <span className="eui-textOverflowWrap" title={name}>
+        {name}
+
         <SourceInfoCard
           sourceName={serviceName}
           sourceType={serviceType}
           dateCreated={moment(createdAt).format('MMMM D, YYYY')}
           isFederatedSource={isFederatedSource}
         />
-      }
-      links={sidebarLinks}
-      isFederatedSource={isFederatedSource}
-    />
+      </span>
+    </div>
   );
-  */
 
   const callout = (
     <>
@@ -144,6 +129,8 @@ export const SourceRouter: React.FC = () => {
   return (
     <>
       {!supportedByLicense && callout}
+      {/* TODO: Figure out with design how to make this look better */}
+      {pageHeader}
       <Switch>
         <Route
           exact
