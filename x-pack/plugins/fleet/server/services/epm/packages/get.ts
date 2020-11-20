@@ -84,26 +84,6 @@ export async function getPackageSavedObjects(
   });
 }
 
-export async function getPackageKeysByStatus(
-  savedObjectsClient: SavedObjectsClientContract,
-  status: ValueOf<InstallationStatus>
-) {
-  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
-  return allPackages.reduce<Array<{ pkgName: string; pkgVersion: string }>>((acc, pkg) => {
-    if (pkg.status === status) {
-      if (pkg.status === installationStatuses.Installed) {
-        // if we're looking for installed packages grab the version from the saved object because `getPackages` will
-        // return the latest package information from the registry
-        acc.push({ pkgName: pkg.name, pkgVersion: pkg.savedObject.attributes.version });
-      } else {
-        acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
-      }
-    }
-
-    return acc;
-  }, []);
-}
-
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
