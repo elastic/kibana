@@ -20,6 +20,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { EuiFormRow, EuiRadio, EuiIconTip, EuiComboBox, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { SavedObjectDashboard } from '../../../../plugins/dashboard/public';
 import { SavedObjectsClientContract } from '../../../../core/public';
@@ -83,16 +85,19 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
         label={
           <>
             <span>
-              {i18n.translate('savedObjects.saveModalDashboard.addToDashboardLabel', {
-                defaultMessage: 'Add to dashboard',
-              })}
+              <FormattedMessage
+                id="savedObjects.saveModalDashboard.addToDashboardLabel"
+                defaultMessage="Add to dashboard"
+              />
             </span>
             <EuiIconTip
               type="iInCircle"
-              content={i18n.translate('savedObjects.saveModalDashboard.dashboardInfoTooltip', {
-                defaultMessage:
-                  'Items added to a dashboard will not appear in the library and must be edited from the dashboard.',
-              })}
+              content={
+                <FormattedMessage
+                  id="savedObjects.saveModalDashboard.dashboardInfoTooltip"
+                  defaultMessage="Items added to a dashboard will not appear in the library and must be edited from the dashboard."
+                />
+              }
             />
           </>
         }

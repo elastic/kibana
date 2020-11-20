@@ -136,8 +136,8 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         <form onSubmit={this.onFormSubmit}>
           <EuiModal
             data-test-subj="savedObjectSaveModal"
-            className={`kbnSavedObjectSaveModal ${
-              hasColumns ? 'kbnSavedObjectsSaveModal--wide' : ''
+            className={`kbnSavedObjectSaveModal${
+              hasColumns ? ' kbnSavedObjectsSaveModal--wide' : ''
             }`}
             onClose={this.props.onClose}
           >

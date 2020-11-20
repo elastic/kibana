@@ -19,9 +19,10 @@
 
 import './visualize_listing.scss';
 
-import React, { useCallback, useRef, useMemo, useEffect } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import React, { useCallback, useRef, useMemo, useEffect, MouseEvent } from 'react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import useUnmount from 'react-use/lib/useUnmount';
 import useMount from 'react-use/lib/useMount';
 
@@ -153,24 +154,32 @@ export const VisualizeListing = () => {
 
   const calloutMessage = (
     <>
-      Building a dashboard? Create new content directly from the{' '}
-      <a href="#">Dashboard application</a> using a new integrated workflow.
+      <FormattedMessage
+        id="visualize.visualizeListingDashboardFlowDescription"
+        defaultMessage="Building a dashboard? Create new content directly from the {dashboardApp} using a new integrated workflow."
+        values={{
+          dashboardApp: (
+            <EuiLink
+              className="visListingCallout__link"
+              onClick={(event: MouseEvent) => {
+                event.preventDefault();
+                application.navigateToUrl(application.getUrlForApp('dashboards'));
+              }}
+            >
+              <FormattedMessage
+                id="visualize.visualizeListingDashboardAppName"
+                defaultMessage="Dashboard application"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
     </>
   );
 
   return (
     <>
-      <div
-        style={{
-          maxWidth: 1000,
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          width: '100%',
-          paddingTop: 16,
-          paddingLeft: 16,
-          paddingRight: 16,
-        }}
-      >
+      <div className="visListingCallout">
         <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
       </div>
       <TableListView
