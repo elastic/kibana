@@ -247,6 +247,18 @@ describe('getOperationTypesForField', () => {
                 "type": "fullReference",
               },
               Object {
+                "operationType": "counter_rate",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "derivative",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "moving_average",
+                "type": "fullReference",
+              },
+              Object {
                 "field": "bytes",
                 "operationType": "sum",
                 "type": "field",

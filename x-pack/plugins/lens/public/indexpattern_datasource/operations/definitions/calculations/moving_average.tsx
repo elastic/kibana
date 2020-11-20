@@ -12,9 +12,9 @@ import { EuiFieldNumber } from '@elastic/eui';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import { checkForDateHistogram, dateBasedOperationToExpression, hasDateField } from './utils';
-import { updateColumnParam } from '../..';
+import { updateColumnParam } from '../../layer_helpers';
 import { useDebounceWithOptions } from '../helpers';
-import { OperationDefinition, ParamEditorProps } from '..';
+import type { OperationDefinition, ParamEditorProps } from '..';
 
 const ofName = (name: string) => {
   return i18n.translate('xpack.lens.indexPattern.movingAverageOf', {
