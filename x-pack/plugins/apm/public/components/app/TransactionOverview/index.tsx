@@ -123,10 +123,11 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   return (
     <>
       <SearchBar />
-      <Correlations />
+
       <EuiPage>
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
+            <Correlations />
             <LocalUIFilters {...localFiltersConfig}>
               <TransactionTypeFilter
                 transactionTypes={serviceTransactionTypes}
