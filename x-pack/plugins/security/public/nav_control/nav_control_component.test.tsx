@@ -175,7 +175,7 @@ describe('SecurityNavControl', () => {
     wrapper.find(EuiHeaderSectionItemButton).simulate('click');
 
     expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(1);
-    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(1);
 
     expect(findTestSubject(wrapper, 'logoutLink').text()).toBe('Log in');

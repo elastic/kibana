@@ -903,7 +903,7 @@ describe('config schema', () => {
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
            - [credentials.0.password]: expected value of type [string] but got [undefined]
-           - [credentials.1.apiKey]: expected value of type [string] but got [undefined]"
+           - [credentials.1.apiKey]: expected at least one defined value but got [undefined]"
         `);
 
         expect(() =>
@@ -919,7 +919,7 @@ describe('config schema', () => {
           - [authc.providers.0]: expected value of type [array] but got [Object]
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
            - [credentials.0.username]: expected value of type [string] but got [undefined]
-           - [credentials.1.apiKey]: expected value of type [string] but got [undefined]"
+           - [credentials.1.apiKey]: expected at least one defined value but got [undefined]"
         `);
       });
 
@@ -957,6 +957,46 @@ describe('config schema', () => {
               },
             },
           }
+        `);
+      });
+
+      it('requires both `id` and `key` in extend `apiKey` format credentials', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: { anonymous1: { order: 0, credentials: { apiKey: { id: 'some-id' } } } },
+              },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
+           - [credentials.0.username]: expected value of type [string] but got [undefined]
+           - [credentials.1.apiKey]: types that failed validation:
+            - [credentials.apiKey.0.key]: expected value of type [string] but got [undefined]
+            - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
+        `);
+
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: {
+                  anonymous1: { order: 0, credentials: { apiKey: { key: 'some-key' } } },
+                },
+              },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
+           - [credentials.0.username]: expected value of type [string] but got [undefined]
+           - [credentials.1.apiKey]: types that failed validation:
+            - [credentials.apiKey.0.id]: expected value of type [string] but got [undefined]
+            - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
         `);
       });
 
@@ -1002,7 +1042,7 @@ describe('config schema', () => {
                 anonymous: {
                   anonymous1: {
                     order: 0,
-                    credentials: { apiKey: 'some-API-key', username: 'some-user' },
+                    credentials: { apiKey: { id: 'some-id', key: 'some-key' } },
                   },
                 },
               },
@@ -1013,8 +1053,10 @@ describe('config schema', () => {
             "anonymous": Object {
               "anonymous1": Object {
                 "credentials": Object {
-                  "apiKey": "some-API-key",
-                  "username": "some-user",
+                  "apiKey": Object {
+                    "id": "some-id",
+                    "key": "some-key",
+                  },
                 },
                 "description": "Continue as Guest",
                 "enabled": true,

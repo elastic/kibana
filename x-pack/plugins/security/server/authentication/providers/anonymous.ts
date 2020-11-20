@@ -23,11 +23,10 @@ interface UsernameAndPasswordCredentials {
 }
 
 /**
- * Credentials that are based on the Elasticsearch API key with the optional username override.
+ * Credentials that are based on the Elasticsearch API key.
  */
 interface APIKeyCredentials {
-  username?: string;
-  apiKey: string;
+  apiKey: { id: string; key: string } | string;
 }
 
 /**
@@ -47,8 +46,7 @@ function canStartNewSession(request: KibanaRequest) {
 function isAPIKeyCredentials(
   credentials: UsernameAndPasswordCredentials | APIKeyCredentials
 ): credentials is APIKeyCredentials {
-  const apiKey = ((credentials as unknown) as Record<string, any>).apiKey;
-  return typeof apiKey === 'string' && !!apiKey;
+  return !!(credentials as APIKeyCredentials).apiKey;
 }
 
 /**
@@ -61,9 +59,9 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
   static readonly type = 'anonymous';
 
   /**
-   * Specifies credentials that should be used to authenticate anonymous user.
+   * Defines HTTP authorization header that should be used to authenticate request.
    */
-  private readonly credentials: Readonly<UsernameAndPasswordCredentials | APIKeyCredentials>;
+  private readonly httpAuthorizationHeader: HTTPAuthorizationHeader;
 
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
@@ -73,10 +71,32 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
   ) {
     super(options);
 
-    if (!anonymousOptions || !anonymousOptions.credentials) {
+    const credentials = anonymousOptions?.credentials;
+    if (!credentials) {
       throw new Error('Credentials must be specified');
     }
-    this.credentials = anonymousOptions.credentials;
+
+    if (isAPIKeyCredentials(credentials)) {
+      this.logger.debug('Anonymous requests will be authenticated via API key.');
+      this.httpAuthorizationHeader = new HTTPAuthorizationHeader(
+        'ApiKey',
+        typeof credentials.apiKey === 'string'
+          ? credentials.apiKey
+          : new BasicHTTPAuthorizationHeaderCredentials(
+              credentials.apiKey.id,
+              credentials.apiKey.key
+            ).toString()
+      );
+    } else {
+      this.logger.debug('Anonymous requests will be authenticated via username and password.');
+      this.httpAuthorizationHeader = new HTTPAuthorizationHeader(
+        'Basic',
+        new BasicHTTPAuthorizationHeaderCredentials(
+          credentials.username,
+          credentials.password
+        ).toString()
+      );
+    }
   }
 
   /**
@@ -86,12 +106,7 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
    */
   public async login(request: KibanaRequest, state?: unknown) {
     this.logger.debug('Trying to perform a login.');
-
-    // If authentication succeeded we should return some state to create a session, that will reuse for all subsequent
-    // requests and anonymous user interactions with the Kibana.
-    return isAPIKeyCredentials(this.credentials)
-      ? await this.authenticateViaAPIKey(request, this.credentials, state)
-      : await this.authenticateViaUsernameAndPassword(request, this.credentials, state);
+    return this.authenticateViaAuthorizationHeader(request, state);
   }
 
   /**
@@ -110,9 +125,7 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
     }
 
     if (state || canStartNewSession(request)) {
-      return isAPIKeyCredentials(this.credentials)
-        ? await this.authenticateViaAPIKey(request, this.credentials, state)
-        : await this.authenticateViaUsernameAndPassword(request, this.credentials, state);
+      return this.authenticateViaAuthorizationHeader(request, state);
     }
 
     return AuthenticationResult.notHandled();
@@ -142,75 +155,25 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
    * HTTP header that provider attaches to all successfully authenticated requests to Elasticsearch.
    */
   public getHTTPAuthenticationScheme() {
-    return isAPIKeyCredentials(this.credentials) ? 'apikey' : 'basic';
+    return this.httpAuthorizationHeader.scheme.toLowerCase();
   }
 
   /**
-   * Tries to authenticate user request via configured username and password.
+   * Tries to authenticate user request via configured credentials encoded into `Authorization` header.
    * @param request Request instance.
-   * @param credentials Credentials based on the username and password.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaUsernameAndPassword(
-    request: KibanaRequest,
-    { username, password }: UsernameAndPasswordCredentials,
-    state?: unknown
-  ) {
-    this.logger.debug('Trying to authenticate request via anonymous username and password.');
-
-    try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader(
-          'Basic',
-          new BasicHTTPAuthorizationHeaderCredentials(username, password).toString()
-        ).toString(),
-      };
-
-      const user = await this.getUser(request, authHeaders);
-      this.logger.debug(
-        `Request to ${request.url.pathname}${request.url.search} has been authenticated.`
-      );
-      return AuthenticationResult.succeeded(user, {
-        authHeaders,
-        // Create session only if it doesn't exist yet, otherwise keep it unchanged.
-        state: state ? undefined : {},
-      });
-    } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate request via anonymous username and password: ${err.message}`
-      );
-      return AuthenticationResult.failed(err);
-    }
-  }
-
-  /**
-   * Tries to authenticate user in via configured api key.
-   * @param request Request instance.
-   * @param credentials Credentials based on the API key.
-   * @param state State value previously stored by the provider.
-   */
-  private async authenticateViaAPIKey(
-    request: KibanaRequest,
-    { apiKey, username }: APIKeyCredentials,
-    state?: unknown
-  ) {
-    this.logger.debug('Trying to authenticate request via API key.');
-
-    const authHeaders = {
-      authorization: new HTTPAuthorizationHeader('ApiKey', apiKey).toString(),
-    };
+  private async authenticateViaAuthorizationHeader(request: KibanaRequest, state?: unknown) {
+    const authHeaders = { authorization: this.httpAuthorizationHeader.toString() };
     try {
       const user = await this.getUser(request, authHeaders);
       this.logger.debug(
         `Request to ${request.url.pathname}${request.url.search} has been authenticated.`
       );
-      return AuthenticationResult.succeeded(username ? { ...user, username } : user, {
-        authHeaders,
-        // Create session only if it doesn't exist yet, otherwise keep it unchanged.
-        state: state ? undefined : {},
-      });
+      // Create session only if it doesn't exist yet, otherwise keep it unchanged.
+      return AuthenticationResult.succeeded(user, { authHeaders, state: state ? undefined : {} });
     } catch (err) {
-      this.logger.debug(`Failed to authenticate request via API key: ${err.message}`);
+      this.logger.debug(`Failed to authenticate request : ${err.message}`);
       return AuthenticationResult.failed(err);
     }
   }

@@ -22,21 +22,38 @@ function expectPageMode(wrapper: ReactWrapper, mode: PageMode) {
           ['loginForm', true],
           ['loginSelector', false],
           ['loginHelp', false],
+          ['autoLoginOverlay', false],
         ]
       : mode === PageMode.Selector
       ? [
           ['loginForm', false],
           ['loginSelector', true],
           ['loginHelp', false],
+          ['autoLoginOverlay', false],
         ]
       : [
           ['loginForm', false],
           ['loginSelector', false],
           ['loginHelp', true],
+          ['autoLoginOverlay', false],
         ];
   for (const [selector, exists] of assertions) {
     expect(findTestSubject(wrapper, selector).exists()).toBe(exists);
   }
+}
+
+function expectAutoLoginOverlay(wrapper: ReactWrapper) {
+  // Everything should be hidden except for the overlay
+  for (const selector of [
+    'loginForm',
+    'loginSelector',
+    'loginHelp',
+    'loginHelpLink',
+    'loginAssistanceMessage',
+  ]) {
+    expect(findTestSubject(wrapper, selector).exists()).toBe(false);
+  }
+  expect(findTestSubject(wrapper, 'autoLoginOverlay').exists()).toBe(true);
 }
 
 describe('LoginForm', () => {
@@ -589,6 +606,126 @@ describe('LoginForm', () => {
 
       expect(coreStartMock.http.post).not.toHaveBeenCalled();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('auto login', () => {
+    it('automatically switches to the Login Form mode if provider suggested by the auth provider hint needs it', () => {
+      const coreStartMock = coreMock.createStart();
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginHelp={'**Hey this is a login help message**'}
+          loginAssistanceMessage="Need assistance?"
+          authProviderHint="basic1"
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'basic', name: 'basic1', usesLoginForm: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false },
+            ],
+          }}
+        />
+      );
+
+      expectPageMode(wrapper, PageMode.Form);
+      expect(findTestSubject(wrapper, 'loginHelpLink').text()).toEqual('Need help?');
+      expect(findTestSubject(wrapper, 'loginAssistanceMessage').text()).toEqual('Need assistance?');
+    });
+
+    it('automatically logs in if provider suggested by the auth provider hint does not need login form', async () => {
+      const currentURL = `https://some-host/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStartMock.http.post.mockResolvedValue({
+        location: 'https://external-idp/login?optional-arg=2#optional-hash',
+      });
+
+      window.location.href = currentURL;
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginHelp={'**Hey this is a login help message**'}
+          loginAssistanceMessage="Need assistance?"
+          authProviderHint="saml1"
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'basic', name: 'basic1', usesLoginForm: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false },
+            ],
+          }}
+        />
+      );
+
+      expectAutoLoginOverlay(wrapper);
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
+        body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
+      });
+
+      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
+      expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+      expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
+    });
+
+    it('switches to the login selector if could not login with provider suggested by the auth provider hint', async () => {
+      const currentURL = `https://some-host/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+
+      const failureReason = new Error('Oh no!');
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStartMock.http.post.mockRejectedValue(failureReason);
+
+      window.location.href = currentURL;
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginHelp={'**Hey this is a login help message**'}
+          loginAssistanceMessage="Need assistance?"
+          authProviderHint="saml1"
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'basic', name: 'basic1', usesLoginForm: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false },
+            ],
+          }}
+        />
+      );
+
+      expectAutoLoginOverlay(wrapper);
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
+        body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
+      });
+
+      expect(window.location.href).toBe(currentURL);
+      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
+        title: 'Could not perform login.',
+        toastMessage: 'Oh no!',
+      });
+
+      expectPageMode(wrapper, PageMode.Selector);
+      expect(findTestSubject(wrapper, 'loginHelpLink').text()).toEqual('Need help?');
+      expect(findTestSubject(wrapper, 'loginAssistanceMessage').text()).toEqual('Need assistance?');
     });
   });
 });

@@ -47,7 +47,7 @@ describe('AnonymousAuthenticationProvider', () => {
               credentials: { username: 'user', password: 'pass' },
             })
           : new AnonymousAuthenticationProvider(mockOptions, {
-              credentials: { username: 'user', apiKey: 'some-apiKey' },
+              credentials: { apiKey: 'some-apiKey' },
             });
         authorization = useBasicCredentials
           ? new HTTPAuthorizationHeader(
@@ -192,22 +192,23 @@ describe('AnonymousAuthenticationProvider', () => {
         });
 
         if (!useBasicCredentials) {
-          it('rewrites `username` it specified in ApiKey credentials', async () => {
-            const userReturnedFromES = mockAuthenticatedUser({
-              username: 'user-created-apikey',
-              authentication_provider: { type: 'anonymous', name: 'anonymous1' },
+          it('properly handles extended format for the ApiKey credentials', async () => {
+            provider = new AnonymousAuthenticationProvider(mockOptions, {
+              credentials: { apiKey: { id: 'some-id', key: 'some-key' } },
             });
+            authorization = new HTTPAuthorizationHeader(
+              'ApiKey',
+              new BasicHTTPAuthorizationHeaderCredentials('some-id', 'some-key').toString()
+            ).toString();
+
             const request = httpServerMock.createKibanaRequest({ headers: {} });
 
             const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-            mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(userReturnedFromES);
+            mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
             mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
             await expect(provider.authenticate(request, {})).resolves.toEqual(
-              AuthenticationResult.succeeded(
-                { ...userReturnedFromES, username: 'user' },
-                { authHeaders: { authorization } }
-              )
+              AuthenticationResult.succeeded(user, { authHeaders: { authorization } })
             );
 
             expectAuthenticateCall(mockOptions.client, { headers: { authorization } });

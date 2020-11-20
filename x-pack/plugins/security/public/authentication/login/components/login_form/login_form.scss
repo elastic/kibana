@@ -41,14 +41,6 @@
   + .secLoginCard {
     border-top: $euiBorderThin;
   }
-
-  &.secLoginCard-autoLogin {
-    border-color: transparent;
-
-    + .secLoginCard {
-      padding-top: unset;
-    }
-  }
 }
 
 .secLoginCard__hint {

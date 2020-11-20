@@ -25,7 +25,6 @@ import {
   EuiLoadingSpinner,
   EuiLink,
   EuiHorizontalRule,
-  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -79,7 +78,7 @@ export class LoginForm extends Component<Props, State> {
   private readonly validator: LoginValidator;
 
   /**
-   * Optional provider that was suggested by the `authProviderHint={providerName}` query string parameter. If provider
+   * Optional provider that was suggested by the `auth_provider_hint={providerName}` query string parameter. If provider
    * doesn't require Kibana native login form then login process is triggered automatically, otherwise Login Selector
    * just switches to the Login Form mode.
    */
@@ -138,7 +137,7 @@ export class LoginForm extends Component<Props, State> {
     }
 
     return (
-      <div className="secLoginAssistanceMessage">
+      <div data-test-subj="loginAssistanceMessage" className="secLoginAssistanceMessage">
         <EuiHorizontalRule size="half" />
         <EuiText size="xs">
           <ReactMarkdown>{this.props.loginAssistanceMessage}</ReactMarkdown>
@@ -389,27 +388,25 @@ export class LoginForm extends Component<Props, State> {
 
   private renderAutoLoginOverlay = () => {
     return (
-      <Fragment>
-        <EuiPanel data-test-subj="loginSelector" paddingSize="none">
-          {this.props.selector.providers.map(() => (
-            <EuiLoadingContent className="secLoginCard secLoginCard-autoLogin" lines={2} />
-          ))}
-        </EuiPanel>
-        <EuiSpacer />
-        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" className="eui-textCenter">
-              <FormattedMessage
-                id="xpack.security.loginPage.autoLoginAuthenticatingLabel"
-                defaultMessage="Authenticating…"
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
+      <EuiFlexGroup
+        data-test-subj="autoLoginOverlay"
+        alignItems="center"
+        justifyContent="center"
+        gutterSize="m"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="l" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="m" className="eui-textCenter">
+            <FormattedMessage
+              id="xpack.security.loginPage.autoLoginAuthenticatingLabel"
+              defaultMessage="Authenticating…"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 

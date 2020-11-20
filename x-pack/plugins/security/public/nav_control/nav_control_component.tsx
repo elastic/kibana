@@ -118,39 +118,23 @@ export class SecurityNavControl extends Component<Props, State> {
       </EuiHeaderSectionItemButton>
     );
 
-    const profileMenuItem = {
-      name: (
-        <FormattedMessage
-          id="xpack.security.navControlComponent.editProfileLinkText"
-          defaultMessage="Profile"
-        />
-      ),
-      icon: <EuiIcon type="user" size="m" />,
-      href: editProfileUrl,
-      'data-test-subj': 'profileLink',
-    };
-
-    const logoutMenuItem = {
-      name:
-        authenticatedUser?.authentication_provider.type === 'anonymous' ? (
-          <FormattedMessage
-            id="xpack.security.navControlComponent.loginLinkText"
-            defaultMessage="Log in"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.security.navControlComponent.logoutLinkText"
-            defaultMessage="Log out"
-          />
-        ),
-      icon: <EuiIcon type="exit" size="m" />,
-      href: logoutUrl,
-      'data-test-subj': 'logoutLink',
-    };
-
+    const isAnonymousUser = authenticatedUser?.authentication_provider.type === 'anonymous';
     const items: EuiContextMenuPanelItemDescriptor[] = [];
 
-    items.push(profileMenuItem);
+    if (!isAnonymousUser) {
+      const profileMenuItem = {
+        name: (
+          <FormattedMessage
+            id="xpack.security.navControlComponent.editProfileLinkText"
+            defaultMessage="Profile"
+          />
+        ),
+        icon: <EuiIcon type="user" size="m" />,
+        href: editProfileUrl,
+        'data-test-subj': 'profileLink',
+      };
+      items.push(profileMenuItem);
+    }
 
     if (userMenuLinks.length) {
       const userMenuLinkMenuItems = userMenuLinks
@@ -168,6 +152,22 @@ export class SecurityNavControl extends Component<Props, State> {
       });
     }
 
+    const logoutMenuItem = {
+      name: isAnonymousUser ? (
+        <FormattedMessage
+          id="xpack.security.navControlComponent.loginLinkText"
+          defaultMessage="Log in"
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.security.navControlComponent.logoutLinkText"
+          defaultMessage="Log out"
+        />
+      ),
+      icon: <EuiIcon type="exit" size="m" />,
+      href: logoutUrl,
+      'data-test-subj': 'logoutLink',
+    };
     items.push(logoutMenuItem);
 
     const panels = [

@@ -102,11 +102,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should fail if `Authorization` header is present, but not valid', async () => {
-        const spnegoResponse = await supertest
+        const response = await supertest
           .get('/security/account')
           .set('Authorization', 'Basic wow')
           .expect(401);
-        expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
+        expect(response.headers['set-cookie']).to.be(undefined);
       });
     });
 
