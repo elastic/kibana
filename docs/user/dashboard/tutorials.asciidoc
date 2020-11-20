@@ -76,8 +76,6 @@ Now that you've created your *Lens* visualization, add it to a <<dashboard,dashb
 [[vega-lite-tutorial-create-your-first-visualizations]]
 === Create your first visualization with Vega-Lite
 
-experimental[]
-
 In this tutorial, you will learn about how to edit Vega-Lite in {kib} to create
 a stacked area chart from an {es} search query. It will give you a starting point
 for a more comprehensive
@@ -88,7 +86,7 @@ In this tutorial, you will build a stacked area chart from one of the {kib} samp
 sets.
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_1.png[]
+image::visualize/images/vega_lite_tutorial_1.png[Vega-Lite tutorial stacked area chart]
 
 Before beginning this tutorial, install the <<add-sample-data, eCommerce sample data>>
 set.
@@ -98,7 +96,7 @@ line chart which shows the total number of documents across all your indices
 within the time range.
 
 [role="screenshot"]
-image::visualize/images/vega_lite_default.png[]
+image::visualize/images/vega_lite_default.png[Vega-Lite tutorial default visualization]
 
 The text editor contains a Vega-Lite spec written in https://hjson.github.io/[HJSON],
 which is similar to JSON but optimized for human editing. HJSON supports:
@@ -341,17 +339,17 @@ which are shown in the chart. To debug this problem, you need to compare both.
 To inspect data sets, go to *Inspect* and select *View: Vega debug*. You will see:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_3.png[]
+image::visualize/images/vega_lite_tutorial_3.png[Vega-Lite tutorial Inspector Data sets]
 
 To look closer at the source, select the matching option in the dropdown. It looks like:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_4.png[]
+image::visualize/images/vega_lite_tutorial_4.png[Vega-Lite tutorial Data sets source]
 
 To compare to the visually encoded data, change dropdown selection to `data_0`. You will see:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_5.png[]
+image::visualize/images/vega_lite_tutorial_5.png[Vega-Lite tutorial Data sets data]
 
 The issue seems to be that the `key` property is not being converted the right way,
 which makes sense because the `key` is now category (`Men's Clothing`, `Women's Clothing`, etc.) instead of a timestamp.
@@ -377,7 +375,7 @@ This will show more errors, and you can inspect `data_0` to
 understand why. This now shows:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_6.png[]
+image::visualize/images/vega_lite_tutorial_6.png[Vega-Lite tutorial Data sets updated data]
 
 It looks like the problem is that the `time_buckets` inner array is not being
 extracted by Vega. The solution is to use a Vega-lite
@@ -397,7 +395,7 @@ This does not yet produce the results you expect. Inspect the transformed data
 by selecting `data_0` in *Data sets* again:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_7.png[]
+image::visualize/images/vega_lite_tutorial_7.png[Vega-Lite tutorial Data sets transformed data]
 
 The debug view shows `undefined` values where you would expect to see numbers, and
 the cause is that there are duplicate names which are confusing Vega-Lite. This can
@@ -534,7 +532,7 @@ Now that you've enabled a selection, try moving the mouse around the visualizati
 and seeing the points respond to the nearest position:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_2.png[]
+image::visualize/images/vega_lite_tutorial_2.png[Vega-Lite tutorial selection enabled]
 
 The final result of this tutorial is this spec:
 
@@ -652,8 +650,6 @@ The final result of this tutorial is this spec:
 
 [[vega-tutorial-update-kibana-filters-from-vega]]
 === Update {kib} filters from Vega
-
-experimental[]
 
 In this tutorial you will build an area chart in Vega using an {es} search query,
 and add a click handler and drag handler to update {kib} filters.
@@ -905,6 +901,7 @@ The first step is to add a new `signal` to track the X position of the cursor:
       }]
     }
 ```
+To learn more about inspecting signals, explore the <<vega-inspector, Vega Inspector>>.
 
 Now add a new `mark` to indicate the current cursor position:
 
