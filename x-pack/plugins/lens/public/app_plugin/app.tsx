@@ -70,7 +70,9 @@ export function App({
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       query: data.query.queryString.getQuery(),
-      filters: data.query.filterManager.getFilters(),
+      filters: !initialContext
+        ? data.query.filterManager.getGlobalFilters()
+        : data.query.filterManager.getFilters(),
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
       dateRange: {
@@ -146,7 +148,7 @@ export function App({
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
     // can be loaded without a full page refresh. If the user navigates to Lens from Discover
     // we keep the filters
-    if (!initialContext && !Boolean(incomingState?.originatingApp)) {
+    if (!initialContext) {
       data.query.filterManager.setAppFilters([]);
     }
 

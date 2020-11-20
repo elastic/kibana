@@ -121,14 +121,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
       expect(hasGeoDestFilter).to.be(true);
+      await filterBar.addFilter('geo.src', 'is', 'US');
+      await filterBar.toggleFilterPinned('geo.src');
     });
 
-    it('should carry over filters if creating a new lens visualization from within dashboard', async () => {
+    it('should not carry over filters if creating a new lens visualization from within dashboard', async () => {
       await dashboardAddPanel.clickCreateNewLink();
       await dashboardAddPanel.clickVisType('lens');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
-      expect(hasGeoDestFilter).to.be(true);
+      expect(hasGeoDestFilter).to.be(false);
+      const hasGeoSrcFilter = await filterBar.hasFilter('geo.src', 'US', true, true);
+      expect(hasGeoSrcFilter).to.be(true);
     });
   });
 }
