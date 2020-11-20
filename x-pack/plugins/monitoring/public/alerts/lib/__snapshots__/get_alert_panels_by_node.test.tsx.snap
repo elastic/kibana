@@ -1,0 +1,527 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getAlertPanelsByNode should not show any alert if none are firing 1`] = `
+Array [
+  Object {
+    "id": 0,
+    "items": Array [],
+    "title": "Alerts",
+  },
+]
+`;
+
+exports[`getAlertPanelsByNode should properly group for alerts in a single category 1`] = `
+Array [
+  Object {
+    "id": 0,
+    "items": Array [
+      Object {
+        "name": <EuiText>
+          es_name_0
+           (
+          1
+          )
+        </EuiText>,
+        "panel": 1,
+      },
+      Object {
+        "name": <EuiText>
+          es_name_1
+           (
+          1
+          )
+        </EuiText>,
+        "panel": 2,
+      },
+    ],
+    "title": "Alerts",
+  },
+  Object {
+    "id": 1,
+    "items": Array [
+      Object {
+        "name": <React.Fragment>
+          <EuiText
+            size="s"
+          >
+            DATE
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            monitoring_alert_jvm_memory_usage_label
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            es_name_0
+          </EuiText>
+        </React.Fragment>,
+        "panel": 3,
+      },
+    ],
+    "title": "es_name_0",
+  },
+  Object {
+    "id": 2,
+    "items": Array [
+      Object {
+        "name": <React.Fragment>
+          <EuiText
+            size="s"
+          >
+            DATE
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            monitoring_alert_jvm_memory_usage_label
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            es_name_1
+          </EuiText>
+        </React.Fragment>,
+        "panel": 4,
+      },
+    ],
+    "title": "es_name_1",
+  },
+  Object {
+    "content": <AlertPanel
+      alert={
+        Object {
+          "isLegacy": false,
+          "label": "monitoring_alert_jvm_memory_usage_label",
+          "paramDetails": Object {},
+          "rawAlert": Object {},
+          "type": "monitoring_alert_jvm_memory_usage",
+        }
+      }
+      alertState={
+        Object {
+          "firing": true,
+          "meta": Object {},
+          "state": Object {
+            "cluster": Object {
+              "clusterName": "one",
+              "clusterUuid": "1",
+            },
+            "stackProduct": "elasticsearch",
+            "stackProductName": "es_name_0",
+            "stackProductUuid": "es0",
+            "ui": Object {
+              "isFiring": false,
+              "lastCheckedMS": 0,
+              "message": Object {
+                "text": "",
+              },
+              "resolvedMS": 0,
+              "severity": "danger",
+              "triggeredMS": 0,
+            },
+          },
+        }
+      }
+      nextStepsFilter={[Function]}
+    />,
+    "id": 3,
+    "title": "monitoring_alert_jvm_memory_usage_label",
+    "width": 400,
+  },
+  Object {
+    "content": <AlertPanel
+      alert={
+        Object {
+          "isLegacy": false,
+          "label": "monitoring_alert_jvm_memory_usage_label",
+          "paramDetails": Object {},
+          "rawAlert": Object {},
+          "type": "monitoring_alert_jvm_memory_usage",
+        }
+      }
+      alertState={
+        Object {
+          "firing": true,
+          "meta": Object {},
+          "state": Object {
+            "cluster": Object {
+              "clusterName": "one",
+              "clusterUuid": "1",
+            },
+            "stackProduct": "elasticsearch",
+            "stackProductName": "es_name_1",
+            "stackProductUuid": "es1",
+            "ui": Object {
+              "isFiring": false,
+              "lastCheckedMS": 0,
+              "message": Object {
+                "text": "",
+              },
+              "resolvedMS": 0,
+              "severity": "danger",
+              "triggeredMS": 0,
+            },
+          },
+        }
+      }
+      nextStepsFilter={[Function]}
+    />,
+    "id": 4,
+    "title": "monitoring_alert_jvm_memory_usage_label",
+    "width": 400,
+  },
+]
+`;
+
+exports[`getAlertPanelsByNode should properly group for alerts in each category 1`] = `
+Array [
+  Object {
+    "id": 0,
+    "items": Array [
+      Object {
+        "name": <EuiText>
+          es_name_0
+           (
+          3
+          )
+        </EuiText>,
+        "panel": 1,
+      },
+      Object {
+        "name": <EuiText>
+          es_name_1
+           (
+          2
+          )
+        </EuiText>,
+        "panel": 2,
+      },
+    ],
+    "title": "Alerts",
+  },
+  Object {
+    "id": 1,
+    "items": Array [
+      Object {
+        "name": <React.Fragment>
+          <EuiText
+            size="s"
+          >
+            DATE
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            monitoring_alert_nodes_changed_label
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            es_name_0
+          </EuiText>
+        </React.Fragment>,
+        "panel": 3,
+      },
+      Object {
+        "name": <React.Fragment>
+          <EuiText
+            size="s"
+          >
+            DATE
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            monitoring_alert_disk_usage_label
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            es_name_0
+          </EuiText>
+        </React.Fragment>,
+        "panel": 4,
+      },
+      Object {
+        "name": <React.Fragment>
+          <EuiText
+            size="s"
+          >
+            DATE
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            monitoring_alert_license_expiration_label
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            es_name_0
+          </EuiText>
+        </React.Fragment>,
+        "panel": 5,
+      },
+    ],
+    "title": "es_name_0",
+  },
+  Object {
+    "id": 2,
+    "items": Array [
+      Object {
+        "name": <React.Fragment>
+          <EuiText
+            size="s"
+          >
+            DATE
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            monitoring_alert_nodes_changed_label
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            es_name_1
+          </EuiText>
+        </React.Fragment>,
+        "panel": 6,
+      },
+      Object {
+        "name": <React.Fragment>
+          <EuiText
+            size="s"
+          >
+            DATE
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            monitoring_alert_license_expiration_label
+          </EuiText>
+          <EuiText
+            size="s"
+          >
+            es_name_1
+          </EuiText>
+        </React.Fragment>,
+        "panel": 7,
+      },
+    ],
+    "title": "es_name_1",
+  },
+  Object {
+    "content": <AlertPanel
+      alert={
+        Object {
+          "isLegacy": false,
+          "label": "monitoring_alert_nodes_changed_label",
+          "paramDetails": Object {},
+          "rawAlert": Object {},
+          "type": "monitoring_alert_nodes_changed",
+        }
+      }
+      alertState={
+        Object {
+          "firing": true,
+          "meta": Object {},
+          "state": Object {
+            "cluster": Object {
+              "clusterName": "one",
+              "clusterUuid": "1",
+            },
+            "stackProduct": "elasticsearch",
+            "stackProductName": "es_name_0",
+            "stackProductUuid": "es0",
+            "ui": Object {
+              "isFiring": false,
+              "lastCheckedMS": 0,
+              "message": Object {
+                "text": "",
+              },
+              "resolvedMS": 0,
+              "severity": "danger",
+              "triggeredMS": 0,
+            },
+          },
+        }
+      }
+      nextStepsFilter={[Function]}
+    />,
+    "id": 3,
+    "title": "monitoring_alert_nodes_changed_label",
+    "width": 400,
+  },
+  Object {
+    "content": <AlertPanel
+      alert={
+        Object {
+          "isLegacy": false,
+          "label": "monitoring_alert_disk_usage_label",
+          "paramDetails": Object {},
+          "rawAlert": Object {},
+          "type": "monitoring_alert_disk_usage",
+        }
+      }
+      alertState={
+        Object {
+          "firing": true,
+          "meta": Object {},
+          "state": Object {
+            "cluster": Object {
+              "clusterName": "one",
+              "clusterUuid": "1",
+            },
+            "stackProduct": "elasticsearch",
+            "stackProductName": "es_name_0",
+            "stackProductUuid": "es0",
+            "ui": Object {
+              "isFiring": false,
+              "lastCheckedMS": 0,
+              "message": Object {
+                "text": "",
+              },
+              "resolvedMS": 0,
+              "severity": "danger",
+              "triggeredMS": 0,
+            },
+          },
+        }
+      }
+      nextStepsFilter={[Function]}
+    />,
+    "id": 4,
+    "title": "monitoring_alert_disk_usage_label",
+    "width": 400,
+  },
+  Object {
+    "content": <AlertPanel
+      alert={
+        Object {
+          "isLegacy": false,
+          "label": "monitoring_alert_license_expiration_label",
+          "paramDetails": Object {},
+          "rawAlert": Object {},
+          "type": "monitoring_alert_license_expiration",
+        }
+      }
+      alertState={
+        Object {
+          "firing": true,
+          "meta": Object {},
+          "state": Object {
+            "cluster": Object {
+              "clusterName": "one",
+              "clusterUuid": "1",
+            },
+            "stackProduct": "elasticsearch",
+            "stackProductName": "es_name_0",
+            "stackProductUuid": "es0",
+            "ui": Object {
+              "isFiring": false,
+              "lastCheckedMS": 0,
+              "message": Object {
+                "text": "",
+              },
+              "resolvedMS": 0,
+              "severity": "danger",
+              "triggeredMS": 0,
+            },
+          },
+        }
+      }
+      nextStepsFilter={[Function]}
+    />,
+    "id": 5,
+    "title": "monitoring_alert_license_expiration_label",
+    "width": 400,
+  },
+  Object {
+    "content": <AlertPanel
+      alert={
+        Object {
+          "isLegacy": false,
+          "label": "monitoring_alert_nodes_changed_label",
+          "paramDetails": Object {},
+          "rawAlert": Object {},
+          "type": "monitoring_alert_nodes_changed",
+        }
+      }
+      alertState={
+        Object {
+          "firing": true,
+          "meta": Object {},
+          "state": Object {
+            "cluster": Object {
+              "clusterName": "one",
+              "clusterUuid": "1",
+            },
+            "stackProduct": "elasticsearch",
+            "stackProductName": "es_name_1",
+            "stackProductUuid": "es1",
+            "ui": Object {
+              "isFiring": false,
+              "lastCheckedMS": 0,
+              "message": Object {
+                "text": "",
+              },
+              "resolvedMS": 0,
+              "severity": "danger",
+              "triggeredMS": 0,
+            },
+          },
+        }
+      }
+      nextStepsFilter={[Function]}
+    />,
+    "id": 6,
+    "title": "monitoring_alert_nodes_changed_label",
+    "width": 400,
+  },
+  Object {
+    "content": <AlertPanel
+      alert={
+        Object {
+          "isLegacy": false,
+          "label": "monitoring_alert_license_expiration_label",
+          "paramDetails": Object {},
+          "rawAlert": Object {},
+          "type": "monitoring_alert_license_expiration",
+        }
+      }
+      alertState={
+        Object {
+          "firing": true,
+          "meta": Object {},
+          "state": Object {
+            "cluster": Object {
+              "clusterName": "one",
+              "clusterUuid": "1",
+            },
+            "stackProduct": "elasticsearch",
+            "stackProductName": "es_name_1",
+            "stackProductUuid": "es1",
+            "ui": Object {
+              "isFiring": false,
+              "lastCheckedMS": 0,
+              "message": Object {
+                "text": "",
+              },
+              "resolvedMS": 0,
+              "severity": "danger",
+              "triggeredMS": 0,
+            },
+          },
+        }
+      }
+      nextStepsFilter={[Function]}
+    />,
+    "id": 7,
+    "title": "monitoring_alert_license_expiration_label",
+    "width": 400,
+  },
+]
+`;
