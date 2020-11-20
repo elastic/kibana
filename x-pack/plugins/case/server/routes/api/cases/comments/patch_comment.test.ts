@@ -210,7 +210,7 @@ describe('PATCH comment', () => {
         case_id: 'mock-id-1',
       },
       body: {
-        type: 'alert',
+        type: CommentType.alert,
         alertId: 'test-id',
         index: 'test-index',
         id: 'mock-comment-1',

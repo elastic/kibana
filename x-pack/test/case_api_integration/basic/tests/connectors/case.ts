@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../plugins/case/common/constants';
+import { CommentType } from '../../../../../plugins/case/common/api';
 import {
   postCaseReq,
   postCaseResp,
@@ -619,7 +620,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const params = {
           subAction: 'addComment',
           subActionParams: {
-            comment: { comment: 'a comment', type: 'user' },
+            comment: { comment: 'a comment', type: CommentType.user },
           },
         };
 
@@ -684,7 +685,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         createdActionId = createdAction.id;
-        const comment = { alertId: 'test-id', index: 'test-index', type: 'alert' };
+        const comment = { alertId: 'test-id', index: 'test-index', type: CommentType.alert };
         const params = {
           subAction: 'addComment',
           subActionParams: {
@@ -731,7 +732,7 @@ export default ({ getService }: FtrProviderContext): void => {
           subAction: 'addComment',
           subActionParams: {
             caseId: '123',
-            comment: { comment: 'a comment', type: 'user' },
+            comment: { comment: 'a comment', type: CommentType.user },
           },
         };
 
@@ -775,7 +776,7 @@ export default ({ getService }: FtrProviderContext): void => {
           subAction: 'addComment',
           subActionParams: {
             caseId: '123',
-            comment: { alertId: 'test-id', index: 'test-index', type: 'alert' },
+            comment: { alertId: 'test-id', index: 'test-index', type: CommentType.alert },
           },
         };
 
@@ -861,7 +862,7 @@ export default ({ getService }: FtrProviderContext): void => {
           subAction: 'addComment',
           subActionParams: {
             caseId: caseRes.body.id,
-            comment: { comment: 'a comment', type: 'user' },
+            comment: { comment: 'a comment', type: CommentType.user },
           },
         };
 
@@ -914,7 +915,7 @@ export default ({ getService }: FtrProviderContext): void => {
           subAction: 'addComment',
           subActionParams: {
             caseId: caseRes.body.id,
-            comment: { alertId: 'test-id', index: 'test-index', type: 'alert' },
+            comment: { alertId: 'test-id', index: 'test-index', type: CommentType.alert },
           },
         };
 

@@ -348,7 +348,7 @@ describe('Case Configuration API', () => {
         method: 'PATCH',
         body: JSON.stringify({
           comment: 'updated comment',
-          type: 'user',
+          type: CommentType.user,
           id: basicCase.comments[0].id,
           version: basicCase.comments[0].version,
         }),

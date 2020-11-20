@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+import { CommentType } from '../../../../../../plugins/case/common/api';
 import {
   defaultUser,
   postCaseReq,
@@ -92,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send({ type: 'user' })
+        .send({ type: CommentType.user })
         .expect(400);
     });
 
@@ -107,7 +108,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${CASES_URL}/${postedCase.id}/comments`)
           .set('kbn-xsrf', 'true')
-          .send({ type: 'user', [attribute]: attribute, comment: 'a comment' })
+          .send({ type: CommentType.user, [attribute]: attribute, comment: 'a comment' })
           .expect(400);
       }
     });
@@ -120,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const allRequestAttributes = {
-        type: 'alert',
+        type: CommentType.alert,
         index: 'test-index',
         alertId: 'test-id',
       };
@@ -146,7 +147,12 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${CASES_URL}/${postedCase.id}/comments`)
           .set('kbn-xsrf', 'true')
-          .send({ type: 'alert', [attribute]: attribute, alertId: 'test-id', index: 'test-index' })
+          .send({
+            type: CommentType.alert,
+            [attribute]: attribute,
+            alertId: 'test-id',
+            index: 'test-index',
+          })
           .expect(400);
       }
     });

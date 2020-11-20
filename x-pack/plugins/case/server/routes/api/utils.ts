@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom, { boomify, isBoom } from '@hapi/boom';
+import { badRequest, boomify, isBoom } from '@hapi/boom';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -197,9 +197,9 @@ const isAlertContext = (context: CommentRequest): context is CommentRequestAlert
 
 export const decodeComment = (comment: CommentRequest) => {
   if (isUserContext(comment)) {
-    pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(Boom.badRequest), identity));
+    pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isAlertContext(comment)) {
-    pipe(excess(ContextTypeAlertRt).decode(comment), fold(throwErrors(Boom.badRequest), identity));
+    pipe(excess(ContextTypeAlertRt).decode(comment), fold(throwErrors(badRequest), identity));
   }
 };
 

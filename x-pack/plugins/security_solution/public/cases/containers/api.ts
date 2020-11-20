@@ -18,6 +18,7 @@ import {
   ServiceConnectorCaseParams,
   ServiceConnectorCaseResponse,
   ActionTypeExecutorResult,
+  CommentType,
 } from '../../../../case/common/api';
 
 import {
@@ -205,7 +206,12 @@ export const patchComment = async (
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
-    body: JSON.stringify({ comment: commentUpdate, type: 'user', id: commentId, version }),
+    body: JSON.stringify({
+      comment: commentUpdate,
+      type: CommentType.user,
+      id: commentId,
+      version,
+    }),
     signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));

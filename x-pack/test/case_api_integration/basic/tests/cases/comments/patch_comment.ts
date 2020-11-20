@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+import { CommentType } from '../../../../../../plugins/case/common/api';
 import {
   defaultUser,
   postCaseReq,
@@ -50,7 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
           id: patchedCase.comments[0].id,
           version: patchedCase.comments[0].version,
           comment: newComment,
-          type: 'user',
+          type: CommentType.user,
         })
         .expect(200);
 
@@ -78,7 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           id: patchedCase.comments[0].id,
           version: patchedCase.comments[0].version,
-          type: 'alert',
+          type: CommentType.alert,
           alertId: 'new-id',
           index: postCommentAlertReq.index,
         })
@@ -103,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           id: 'id',
           version: 'version',
-          type: 'user',
+          type: CommentType.user,
           comment: 'comment',
         })
         .expect(404);
@@ -116,7 +117,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           id: 'id',
           version: 'version',
-          type: 'user',
+          type: CommentType.user,
           comment: 'comment',
         })
         .expect(404);
@@ -141,7 +142,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           id: patchedCase.comments[0].id,
           version: patchedCase.comments[0].version,
-          type: 'alert',
+          type: CommentType.alert,
           alertId: 'test-id',
           index: 'test-index',
         })
@@ -192,7 +193,7 @@ export default ({ getService }: FtrProviderContext): void => {
             id: patchedCase.comments[0].id,
             version: patchedCase.comments[0].version,
             comment: 'a comment',
-            type: 'user',
+            type: CommentType.user,
             [attribute]: attribute,
           })
           .expect(400);
@@ -213,7 +214,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const allRequestAttributes = {
-        type: 'alert',
+        type: CommentType.alert,
         index: 'test-index',
         alertId: 'test-id',
       };
@@ -252,7 +253,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({
             id: patchedCase.comments[0].id,
             version: patchedCase.comments[0].version,
-            type: 'alert',
+            type: CommentType.alert,
             index: 'test-index',
             alertId: 'test-id',
             [attribute]: attribute,
@@ -281,7 +282,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           id: patchedCase.comments[0].id,
           version: 'version-mismatch',
-          type: 'user',
+          type: CommentType.user,
           comment: newComment,
         })
         .expect(409);

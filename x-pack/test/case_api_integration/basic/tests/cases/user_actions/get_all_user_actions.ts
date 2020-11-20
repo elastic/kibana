@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/case/common/constants';
+import { CommentType } from '../../../../../../plugins/case/common/api';
 import { defaultUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   deleteCases,
@@ -285,7 +286,7 @@ export default ({ getService }: FtrProviderContext): void => {
         id: patchedCase.comments[0].id,
         version: patchedCase.comments[0].version,
         comment: newComment,
-        type: 'user',
+        type: CommentType.user,
       });
 
       const { body } = await supertest
@@ -301,7 +302,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body[2].new_value).to.eql(
         JSON.stringify({
           comment: newComment,
-          type: 'user',
+          type: CommentType.user,
         })
       );
     });
