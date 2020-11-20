@@ -405,7 +405,8 @@ export class SearchSource {
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
       case 'fields':
-        if (getConfig(UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE)) {
+        if (false) {
+        // if (getConfig(UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE)) {
           // preserve legacy behavior
           const fields = uniq((data[key] || []).concat(val));
           return addToRoot(key, fields);
@@ -460,9 +461,9 @@ export class SearchSource {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
 
-    if (!getConfig(UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE)) {
-      return this.flattenWithFieldsApi(searchRequest);
-    }
+    // if (!getConfig(UI_SETTINGS.SEARCH_FIELDS_FROM_SOURCE)) {
+    //   return this.flattenWithFieldsApi(searchRequest);
+    // }
 
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
