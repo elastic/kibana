@@ -56,7 +56,13 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
 
   if (dataLoading) return <Loading />;
 
-  const PermissionsModal = ({ addedSourceName, serviceType }) => (
+  const PermissionsModal = ({
+    addedSourceName,
+    serviceType,
+  }: {
+    addedSourceName: string;
+    serviceType: string;
+  }) => (
     <EuiOverlayMask>
       <EuiModal onClose={resetPermissionsModal}>
         <EuiModalHeader>
