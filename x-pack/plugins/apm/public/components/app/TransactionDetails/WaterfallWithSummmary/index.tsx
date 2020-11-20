@@ -17,8 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
@@ -27,6 +26,12 @@ import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/Tra
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+
+type DistributionApiResponse = APIReturnType<
+  'GET /api/apm/services/{serviceName}/transaction_groups/distribution'
+>;
+
+type DistributionBucket = DistributionApiResponse['buckets'][0];
 
 interface Props {
   urlParams: IUrlParams;
