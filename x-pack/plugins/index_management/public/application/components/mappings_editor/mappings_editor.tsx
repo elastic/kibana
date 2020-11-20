@@ -9,9 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
 import {
-  ConfigurationForm,
   DocumentFields,
+  RuntimeFieldsList,
   TemplatesForm,
+  ConfigurationForm,
   MultipleMappingsWarning,
 } from './components';
 import {
@@ -27,7 +28,7 @@ import { useMappingsState } from './mappings_state_context';
 import { useMappingsStateListener } from './use_state_listener';
 import { useIndexSettings } from './index_settings_context';
 
-type TabName = 'fields' | 'advanced' | 'templates';
+type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 
 interface MappingsEditorParsedMetadata {
   parsedDefaultValue?: {
@@ -139,6 +140,7 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
 
   const tabToContentMap = {
     fields: <DocumentFields />,
+    runtimeFields: <RuntimeFieldsList />,
     templates: <TemplatesForm value={state.templates.defaultValue} />,
     advanced: <ConfigurationForm value={state.configuration.defaultValue} />,
   };
@@ -157,6 +159,15 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
             >
               {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
                 defaultMessage: 'Mapped fields',
+              })}
+            </EuiTab>
+            <EuiTab
+              onClick={() => changeTab('runtimeFields')}
+              isSelected={selectedTab === 'runtimeFields'}
+              data-test-subj="formTab"
+            >
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeFieldsTabLabel', {
+                defaultMessage: 'Runtime fields',
               })}
             </EuiTab>
             <EuiTab

@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './configuration_form';
-
-export * from './document_fields';
-
-export * from './runtime_fields';
-
-export * from './templates_form';
-
-export * from './multiple_mappings_warning';
+export { RuntimeFieldsList } from './runtime_fields_list';
