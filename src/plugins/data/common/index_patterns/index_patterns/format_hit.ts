@@ -87,8 +87,10 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
       partials = {};
       partialFormattedCache.set(hit, partials);
     }
-
-    const val = fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
+    const unformattedFields = ['fields', '_source'];
+    const val = unformattedFields.includes(fieldName)
+      ? hit[fieldName]
+      : indexPattern.flattenHit(hit)[fieldName];
     return convert(hit, val, fieldName);
   };
 

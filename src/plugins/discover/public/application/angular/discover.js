@@ -83,7 +83,6 @@ import {
   MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
 import { UI_SETTINGS } from '../../../../data/common';
-import { getIndexPatternFieldList } from '../helpers/get_index_pattern_field_list';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -609,10 +608,10 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     const { columns } = savedSearch;
     if ($scope.useNewFieldsApi) {
       const indexOfSource = columns.indexOf('_source');
-      if (indexOfSource === -1) {
-        return columns;
+      if (indexOfSource !== -1 && columns.splice(indexOfSource, 1).length > 0) {
+        return columns.splice(indexOfSource, 1).length > 0;
       }
-      return columns.splice(indexOfSource, 1);
+      return [];
     } else if (columns.length > 0) {
       return columns;
     }
@@ -908,7 +907,16 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
     $scope.hits = resp.hits.total;
     $scope.rows = resp.hits.hits.map((hit) => {
-      return { ...hit };
+      if ($scope.useNewFieldsApi) {
+        const fields = {};
+        Object.keys(hit.fields)
+          .splice(0, FIRST_N_COLUMNS_FROM_FIELDS_RESPONSE)
+          .forEach((key) => {
+            fields[key] = hit.fields[key];
+          });
+        return { ...hit, ...fields };
+      }
+      return hit;
     });
 
     // if we haven't counted yet, reset the counts
@@ -923,13 +931,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
     if ($scope.useNewFieldsApi) {
       // get some columns to display
-      const allColumns = getIndexPatternFieldList($scope.indexPattern, counts).map(
-        (el) => el.displayName
-      );
-      const columns = allColumns
-        .filter((el) => !el.startsWith('_'))
-        .slice(0, FIRST_N_COLUMNS_FROM_FIELDS_RESPONSE);
       if ($scope.state.columns.length === 0) {
+        const columns = ['fields'];
         setAppState({ columns });
       }
     }
