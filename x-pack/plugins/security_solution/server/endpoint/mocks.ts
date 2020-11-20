@@ -57,9 +57,7 @@ export const createMockEndpointAppContextService = (
 /**
  * Creates a mocked input contract for the `EndpointAppContextService#start()` method
  */
-export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
-  EndpointAppContextServiceStartContract
-> => {
+export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<EndpointAppContextServiceStartContract> => {
   const factory = new AppClientFactory();
   const config = createMockConfig();
   factory.setup({ getSpaceId: () => 'mockSpace', config });

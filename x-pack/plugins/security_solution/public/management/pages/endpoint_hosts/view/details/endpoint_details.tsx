@@ -102,22 +102,23 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
 
   const agentDetailsWithFlyoutPath = `${agentDetailsAppPath}${openReassignFlyoutSearch}`;
   const agentDetailsWithFlyoutUrl = `${agentDetailsUrl}${openReassignFlyoutSearch}`;
-  const handleReassignEndpointsClick = useNavigateToAppEventHandler<
-    AgentDetailsReassignPolicyAction
-  >(ingestAppId, {
-    path: agentDetailsWithFlyoutPath,
-    state: {
-      onDoneNavigateTo: [
-        'securitySolution:administration',
-        {
-          path: getEndpointDetailsPath({
-            name: 'endpointDetails',
-            selected_endpoint: details.agent.id,
-          }),
-        },
-      ],
-    },
-  });
+  const handleReassignEndpointsClick = useNavigateToAppEventHandler<AgentDetailsReassignPolicyAction>(
+    ingestAppId,
+    {
+      path: agentDetailsWithFlyoutPath,
+      state: {
+        onDoneNavigateTo: [
+          'securitySolution:administration',
+          {
+            path: getEndpointDetailsPath({
+              name: 'endpointDetails',
+              selected_endpoint: details.agent.id,
+            }),
+          },
+        ],
+      },
+    }
+  );
 
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 

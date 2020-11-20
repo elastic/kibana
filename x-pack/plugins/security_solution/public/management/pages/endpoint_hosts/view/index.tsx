@@ -217,17 +217,18 @@ export const EndpointList = () => {
 
   const NOOP = useCallback(() => {}, []);
 
-  const handleDeployEndpointsClick = useNavigateToAppEventHandler<
-    AgentPolicyDetailsDeployAgentAction
-  >('fleet', {
-    path: `#/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
-    state: {
-      onDoneNavigateTo: [
-        'securitySolution:administration',
-        { path: getEndpointListPath({ name: 'endpointList' }) },
-      ],
-    },
-  });
+  const handleDeployEndpointsClick = useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>(
+    'fleet',
+    {
+      path: `#/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
+      state: {
+        onDoneNavigateTo: [
+          'securitySolution:administration',
+          { path: getEndpointListPath({ name: 'endpointList' }) },
+        ],
+      },
+    }
+  );
 
   const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
     return policyItems.map((item) => {
