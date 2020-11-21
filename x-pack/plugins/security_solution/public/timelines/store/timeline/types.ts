@@ -24,7 +24,7 @@ export interface TimelineById {
   [id: string]: TimelineModel;
 }
 
-export interface InsertTimeline {
+export interface AttachTimeline {
   graphEventId?: string;
   timelineId: string;
   timelineSavedObjectId: string | null;
@@ -38,7 +38,7 @@ export interface TimelineState {
   timelineById: TimelineById;
   autoSavedWarningMsg: AutoSavedWarningMsg;
   showCallOutUnauthorizedMsg: boolean;
-  insertTimeline: InsertTimeline | null;
+  attachTimeline: AttachTimeline | null;
 }
 
 export interface ActionTimeline extends Action<string> {

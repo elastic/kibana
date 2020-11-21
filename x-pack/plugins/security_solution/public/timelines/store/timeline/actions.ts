@@ -23,7 +23,7 @@ import {
   TimelineTypeLiteral,
   RowRendererId,
 } from '../../../../common/types/timeline';
-import { InsertTimeline } from './types';
+import { AttachTimeline } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -116,7 +116,7 @@ export const addTimeline = actionCreator<{
   savedTimeline?: boolean;
 }>('ADD_TIMELINE');
 
-export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
+export const setAttachTimeline = actionCreator<AttachTimeline | null>('SET_ATTACH_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{
   id: string;

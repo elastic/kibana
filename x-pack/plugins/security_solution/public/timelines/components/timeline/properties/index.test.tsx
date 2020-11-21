@@ -20,7 +20,7 @@ import '../../../../common/mock/match_media';
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
-import { setInsertTimeline } from '../../../store/timeline/actions';
+import { setAttachTimeline } from '../../../store/timeline/actions';
 export { nextTick } from '@kbn/test/jest';
 import { waitFor } from '@testing-library/react';
 
@@ -375,7 +375,7 @@ describe('Properties', () => {
     await waitFor(() => {
       expect(mockNavigateToApp).toBeCalledWith('securitySolution:case', { path: '/create' });
       expect(mockDispatch).toBeCalledWith(
-        setInsertTimeline({
+        setAttachTimeline({
           timelineId: defaultProps.timelineId,
           timelineSavedObjectId: '1',
           timelineTitle: 'coolness',

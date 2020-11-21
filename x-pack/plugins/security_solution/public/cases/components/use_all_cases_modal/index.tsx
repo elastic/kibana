@@ -12,7 +12,7 @@ import { APP_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../common/components/link_to';
-import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
+import { setAttachTimeline } from '../../../timelines/store/timeline/actions';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 
 import { AllCasesModal } from './all_cases_modal';
@@ -51,7 +51,7 @@ export const useAllCasesModal = ({
       });
 
       dispatch(
-        setInsertTimeline({
+        setAttachTimeline({
           graphEventId: timeline.graphEventId ?? '',
           timelineId,
           timelineSavedObjectId: timeline.savedObjectId ?? '',

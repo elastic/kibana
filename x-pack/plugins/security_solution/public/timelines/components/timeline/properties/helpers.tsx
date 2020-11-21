@@ -51,7 +51,7 @@ import {
   StyledStar,
 } from './styles';
 import * as i18n from './translations';
-import { setInsertTimeline, showTimeline, TimelineInput } from '../../../store/timeline/actions';
+import { setAttachTimeline, showTimeline, TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
@@ -111,7 +111,7 @@ export const StarIcon = React.memo<{
     // TODO: 2 error is: Elements with the 'button' interactive role must be focusable
     // TODO: Investigate this error
     // eslint-disable-next-line
-  <div role="button" onClick={handleClick}>
+    <div role="button" onClick={handleClick}>
       {isFavorite ? (
         <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>
           <StyledStar data-test-subj="timeline-favorite-filled-star" type="starFilled" size="l" />
@@ -299,7 +299,7 @@ export const NewCase = React.memo<NewCaseProps>(
         path: getCreateCaseUrl(),
       }).then(() =>
         dispatch(
-          setInsertTimeline({
+          setAttachTimeline({
             graphEventId,
             timelineId,
             timelineSavedObjectId: savedObjectId,

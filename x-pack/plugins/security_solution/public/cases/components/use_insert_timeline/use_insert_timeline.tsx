@@ -12,7 +12,7 @@ import { CursorPosition } from '../../../common/components/markdown_editor';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { SecurityPageName } from '../../../app/types';
-import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
+import { setAttachTimeline } from '../../../timelines/store/timeline/actions';
 
 export const useInsertTimeline = (value: string, onChange: (newValue: string) => void) => {
   const dispatch = useDispatch();
@@ -22,7 +22,7 @@ export const useInsertTimeline = (value: string, onChange: (newValue: string) =>
     end: 0,
   });
 
-  const insertTimeline = useShallowEqualSelector(timelineSelectors.selectInsertTimeline);
+  const attachTimeline = useShallowEqualSelector(timelineSelectors.selectAttachTimeline);
 
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null, graphEventId?: string) => {
@@ -49,16 +49,16 @@ export const useInsertTimeline = (value: string, onChange: (newValue: string) =>
   }, []);
 
   useEffect(() => {
-    if (insertTimeline != null && value != null) {
-      dispatch(timelineActions.showTimeline({ id: insertTimeline.timelineId, show: false }));
+    if (attachTimeline != null && value != null) {
+      dispatch(timelineActions.showTimeline({ id: attachTimeline.timelineId, show: false }));
       handleOnTimelineChange(
-        insertTimeline.timelineTitle,
-        insertTimeline.timelineSavedObjectId,
-        insertTimeline.graphEventId
+        attachTimeline.timelineTitle,
+        attachTimeline.timelineSavedObjectId,
+        attachTimeline.graphEventId
       );
-      dispatch(setInsertTimeline(null));
+      dispatch(setAttachTimeline(null));
     }
-  }, [insertTimeline, dispatch, handleOnTimelineChange, value]);
+  }, [attachTimeline, dispatch, handleOnTimelineChange, value]);
 
   return {
     cursorPosition,

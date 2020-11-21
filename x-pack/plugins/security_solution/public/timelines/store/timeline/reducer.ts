@@ -26,7 +26,7 @@ import {
   setEventsLoading,
   setExcludedRowRendererIds,
   setFilters,
-  setInsertTimeline,
+  setAttachTimeline,
   setKqlFilterQueryDraft,
   setSavedQueryId,
   setSelected,
@@ -112,7 +112,7 @@ export const initialTimelineState: TimelineState = {
     newTimelineModel: null,
   },
   showCallOutUnauthorizedMsg: false,
-  insertTimeline: null,
+  attachTimeline: null,
 };
 
 /** The reducer for all timeline actions  */
@@ -505,9 +505,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(setInsertTimeline, (state, insertTimeline) => ({
+  .case(setAttachTimeline, (state, attachTimeline) => ({
     ...state,
-    insertTimeline,
+    attachTimeline,
   }))
   .case(updateIndexNames, (state, { id, indexNames }) => ({
     ...state,
