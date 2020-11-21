@@ -7,12 +7,12 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
-import { SecurityPageName } from '../../../../../common/constants';
-import { getTimelineUrl, useFormatUrl } from '../../../../common/components/link_to';
-import { CursorPosition } from '../../../../common/components/markdown_editor';
-import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
-import { setInsertTimeline } from '../../../store/timeline/actions';
+import { getTimelineUrl, useFormatUrl } from '../../../common/components/link_to';
+import { CursorPosition } from '../../../common/components/markdown_editor';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
+import { SecurityPageName } from '../../../app/types';
+import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
 
 export const useInsertTimeline = (value: string, onChange: (newValue: string) => void) => {
   const dispatch = useDispatch();
@@ -48,8 +48,6 @@ export const useInsertTimeline = (value: string, onChange: (newValue: string) =>
     setCursorPosition(cp);
   }, []);
 
-  // insertTimeline selector is defined to attached a timeline to a case outside of the case page.
-  // FYI, if you are in the case page we only use handleOnTimelineChange to attach a timeline to a case.
   useEffect(() => {
     if (insertTimeline != null && value != null) {
       dispatch(timelineActions.showTimeline({ id: insertTimeline.timelineId, show: false }));
