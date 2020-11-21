@@ -224,7 +224,6 @@ async function run(argv) {
     },
     default: {
       cache: true,
-      'prefer-offline': true,
       validate: true
     },
     boolean: ['prefer-offline', 'frozen-lockfile', 'cache', 'validate']

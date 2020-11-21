@@ -81,7 +81,6 @@ export async function run(argv: string[]) {
     },
     default: {
       cache: true,
-      'prefer-offline': true,
       validate: true,
     },
     boolean: ['prefer-offline', 'frozen-lockfile', 'cache', 'validate'],
