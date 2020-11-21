@@ -7,8 +7,8 @@
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import { isPackageLimited, installationStatuses } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { ArchivePackage, InstallSource, RegistryPackage, ValueOf } from '../../../../common/types';
-import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
+import { ArchivePackage, InstallSource, RegistryPackage } from '../../../../common/types';
+import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
 import { getArchivePackage } from '../archive';
