@@ -13,6 +13,8 @@ import { getCaseDetailsUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
 import { CreateCaseForm } from './form';
 import { FormContext } from './form_context';
+import { useInsertTimeline } from '../use_insert_timeline/use_insert_timeline';
+import { fieldName as descriptionFieldName } from './description';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -39,9 +41,19 @@ const SubmitButton = () => {
   );
 };
 
+const InsertTimeline = () => {
+  const { setFieldValue, getFormData } = useFormContext();
+  const formData = getFormData();
+  const onTimelineAttached = useCallback(
+    (newValue: string) => setFieldValue(descriptionFieldName, newValue),
+    [setFieldValue]
+  );
+  useInsertTimeline(formData[descriptionFieldName] ?? '', onTimelineAttached);
+  return null;
+};
+
 export const Create = React.memo(() => {
   const history = useHistory();
-
   const onSuccess = useCallback(
     ({ id }) => {
       history.push(getCaseDetailsUrl({ id }));
@@ -79,6 +91,7 @@ export const Create = React.memo(() => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </Container>
+        <InsertTimeline />
       </FormContext>
     </EuiPanel>
   );

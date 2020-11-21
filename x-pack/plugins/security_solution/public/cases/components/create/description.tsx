@@ -12,9 +12,11 @@ interface Props {
   isLoading: boolean;
 }
 
+export const fieldName = 'description';
+
 const DescriptionComponent: React.FC<Props> = ({ isLoading }) => (
   <UseField
-    path={'description'}
+    path={fieldName}
     component={MarkdownEditorForm}
     componentProps={{
       dataTestSubj: 'caseDescription',

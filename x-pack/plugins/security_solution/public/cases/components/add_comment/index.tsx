@@ -16,6 +16,7 @@ import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
 
 import * as i18n from './translations';
 import { schema, AddCommentFormSchema } from './schema';
+import { useInsertTimeline } from '../use_insert_timeline/use_insert_timeline';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -64,6 +65,13 @@ export const AddComment = React.memo(
       useImperativeHandle(ref, () => ({
         addQuote,
       }));
+
+      const onTimelineAttached = useCallback(
+        (newValue: string) => setFieldValue(fieldName, newValue),
+        [setFieldValue]
+      );
+
+      useInsertTimeline(comment ?? '', onTimelineAttached);
 
       const onSubmit = useCallback(async () => {
         const { isValid, data } = await submit();
