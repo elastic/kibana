@@ -7,7 +7,12 @@
 import { extname } from 'path';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
-import { PACKAGE_ASSETS_INDEX_NAME, InstallablePackage, InstallSource } from '../../../../common';
+import {
+  PACKAGE_ASSETS_INDEX_NAME,
+  InstallablePackage,
+  InstallSource,
+  PackageAssetReference,
+} from '../../../../common';
 import { CallESAsCurrentUser } from '../../../types';
 import { appContextService } from '../../../services';
 import { getArchiveEntry } from './index';
@@ -35,7 +40,8 @@ export interface PackageAsset {
   data_base64: string;
 }
 
-export const ensurePackagesIndex = async (callCluster: CallESAsCurrentUser) => {
+export const ensurePackagesIndex = async (opts: { callCluster: CallESAsCurrentUser }) => {
+  const { callCluster } = opts;
   const logger = appContextService.getLogger();
   const indexExists = await callCluster('indices.exists', { index: PACKAGE_ASSETS_INDEX_NAME });
   if (!indexExists) {
@@ -55,41 +61,33 @@ export const ensurePackagesIndex = async (callCluster: CallESAsCurrentUser) => {
   }
 };
 
-export const saveArchiveEntriesToES = async ({
-  callCluster,
-  paths,
-  packageInfo,
-  installSource,
-}: {
+export const saveArchiveEntriesToES = async (opts: {
   callCluster: CallESAsCurrentUser;
   paths: string[];
   packageInfo: InstallablePackage;
   installSource: InstallSource;
 }) => {
-  await ensurePackagesIndex(callCluster);
+  const { callCluster, paths, packageInfo, installSource } = opts;
+  await ensurePackagesIndex({ callCluster });
   const bulkBody = await createBulkBody({ paths, packageInfo, installSource });
   const results: BulkResponse = await callCluster('bulk', { body: bulkBody });
   return results;
 };
 
-export async function createBulkBody({
-  paths,
-  packageInfo,
-  installSource,
-}: {
+export async function createBulkBody(opts: {
   paths: string[];
   packageInfo: InstallablePackage;
   installSource: InstallSource;
 }) {
+  const { paths, packageInfo, installSource } = opts;
   const bulkBody = await Promise.all(
     paths.map(async (path) => {
       const buffer = getArchiveEntry(path);
       if (!buffer) throw new Error(`Could not find ArchiveEntry at ${path}`);
       const { name, version } = packageInfo;
       const doc = await archiveEntryToESDocument({ path, buffer, name, version, installSource });
-      const docId = `${installSource}-${doc.asset_path}`;
       const action = {
-        index: { _index: PACKAGE_ASSETS_INDEX_NAME, _id: docId },
+        index: { _index: PACKAGE_ASSETS_INDEX_NAME, _id: doc.asset_path },
       };
 
       return [action, doc];
@@ -99,19 +97,14 @@ export async function createBulkBody({
   return bulkBody.flat();
 }
 
-export async function archiveEntryToESDocument({
-  path,
-  buffer,
-  name,
-  version,
-  installSource,
-}: {
+export async function archiveEntryToESDocument(opts: {
   path: string;
   buffer: Buffer;
   name: string;
   version: string;
   installSource: InstallSource;
 }): Promise<PackageAsset> {
+  const { path, buffer, name, version, installSource } = opts;
   const fileExt = extname(path);
   const contentType = mime.lookup(fileExt);
   const mediaType = mime.contentType(contentType || fileExt);
@@ -141,6 +134,19 @@ export async function archiveEntryToESDocument({
     data_utf8: dataUtf8,
     data_base64: dataBase64,
   };
+}
+
+export async function removeArchiveEntriesFromES(opts: {
+  callCluster: CallESAsCurrentUser;
+  refs: PackageAssetReference[];
+}) {
+  const bulkBody = opts.refs.map(({ id }) => {
+    return {
+      delete: { _index: PACKAGE_ASSETS_INDEX_NAME, _id: id },
+    };
+  });
+  const results: BulkResponse = await opts.callCluster('bulk', { body: bulkBody });
+  return results;
 }
 
 // based on plugins/security_solution/server/lib/detection_engine/signals/types.ts

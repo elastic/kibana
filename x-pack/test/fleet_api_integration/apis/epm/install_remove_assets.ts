@@ -487,6 +487,88 @@ const expectAssetsInstalled = ({
         test_logs: 'logs-all_assets.test_logs-*',
         test_metrics: 'metrics-all_assets.test_metrics-*',
       },
+      package_assets: [
+        {
+          id: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ilm_policy/all_assets.json',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/default.yml',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/pipeline1.yml',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/data_stream/test_logs/elasticsearch/ingest_pipeline/pipeline2.yml',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/data_stream/test_logs/fields/ecs.yml',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/data_stream/test_logs/fields/fields.yml',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/data_stream/test_logs/manifest.yml',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/data_stream/test_metrics/fields/ecs.yml',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/data_stream/test_metrics/fields/fields.yml',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/data_stream/test_metrics/manifest.yml',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/docs/README.md',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/elasticsearch/transform/test/default.json',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/img/logo_overrides_64_color.svg',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/kibana/dashboard/sample_dashboard.json',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/kibana/dashboard/sample_dashboard2.json',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/kibana/index_pattern/invalid.json',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/kibana/index_pattern/test_index_pattern.json',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/kibana/search/sample_search.json',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/kibana/visualization/sample_visualization.json',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'all_assets-0.1.0/manifest.yml',
+          type: 'epm-packages-assets',
+        },
+      ],
       name: 'all_assets',
       version: '0.1.0',
       internal: false,

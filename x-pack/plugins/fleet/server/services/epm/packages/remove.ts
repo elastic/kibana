@@ -23,6 +23,7 @@ import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
+import { removeArchiveEntriesFromES } from '../archive/save_to_es';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -69,6 +70,7 @@ export async function removeInstallation(options: {
     installSource: installation.install_source,
   });
 
+  await removeArchiveEntriesFromES({ callCluster, refs: installation.package_assets });
   // successful delete's in SO client return {}. return something more useful
   return installedAssets;
 }
