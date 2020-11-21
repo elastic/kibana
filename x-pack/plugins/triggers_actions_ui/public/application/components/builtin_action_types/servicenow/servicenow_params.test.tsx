@@ -8,7 +8,6 @@ import { mountWithIntl } from '@kbn/test/jest';
 import ServiceNowParamsFields from './servicenow_params';
 import { DocLinksStart } from 'kibana/public';
 import { coreMock } from 'src/core/public/mocks';
-import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 describe('ServiceNowParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -33,7 +32,7 @@ describe('ServiceNowParamsFields renders', () => {
         errors={{ title: [] }}
         editAction={() => {}}
         index={0}
-        messageVariables={[{ name: AlertProvidedActionVariables.alertId, description: '' }]}
+        messageVariables={[{ name: 'alertId', description: '' }]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         toastNotifications={mocks.notifications.toasts}
         http={mocks.http}

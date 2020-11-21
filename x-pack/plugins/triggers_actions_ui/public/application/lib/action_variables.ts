@@ -19,14 +19,6 @@ export function transformActionVariables(actionVariables: ActionVariables): Acti
   return alwaysProvidedVars.concat(contextVars, paramsVars, stateVars);
 }
 
-export enum AlertProvidedActionVariables {
-  alertId = 'alertId',
-  alertName = 'alertName',
-  spaceId = 'spaceId',
-  tags = 'tags',
-  alertInstanceId = 'alertInstanceId',
-}
-
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
   return actionVariables.map((actionVariable) => {
     return { name: `${prefix}${actionVariable.name}`, description: actionVariable.description };
@@ -39,28 +31,28 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   const result: ActionVariable[] = [];
 
   result.push({
-    name: AlertProvidedActionVariables.alertId,
+    name: 'alertId',
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertIdLabel', {
       defaultMessage: 'The id of the alert.',
     }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.alertName,
+    name: 'alertName',
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertNameLabel', {
       defaultMessage: 'The name of the alert.',
     }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.spaceId,
+    name: 'spaceId',
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.spaceIdLabel', {
       defaultMessage: 'The spaceId of the alert.',
     }),
   });
 
   result.push({
-    name: AlertProvidedActionVariables.tags,
+    name: 'tags',
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.tagsLabel', {
       defaultMessage: 'The tags of the alert.',
     }),
