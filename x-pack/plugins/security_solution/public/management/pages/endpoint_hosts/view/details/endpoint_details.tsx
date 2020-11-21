@@ -139,18 +139,20 @@ export const EndpointDetails = memo(
               >
                 {details.Endpoint.policy.applied.name}
               </EndpointPolicyLink>
-              <EuiText
-                color="subdued"
-                size="xs"
-                style={{ whiteSpace: 'nowrap' }}
-                data-test-subj="policyDetailsRevNo"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.details.policy.revisionNumber"
-                  defaultMessage="rev. {revNumber}"
-                  values={{ revNumber: details.Endpoint.policy.applied.endpoint_policy_version }}
-                />
-              </EuiText>
+              {details.Endpoint.policy.applied.endpoint_policy_version && (
+                <EuiText
+                  color="subdued"
+                  size="xs"
+                  style={{ whiteSpace: 'nowrap' }}
+                  data-test-subj="policyDetailsRevNo"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.details.policy.revisionNumber"
+                    defaultMessage="rev. {revNumber}"
+                    values={{ revNumber: details.Endpoint.policy.applied.endpoint_policy_version }}
+                  />
+                </EuiText>
+              )}
               {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && <OutOfDate />}
             </>
           ),

@@ -339,18 +339,20 @@ export const EndpointList = () => {
                   {policy.name}
                 </EndpointPolicyLink>
               </EuiToolTip>
-              <EuiText
-                color="subdued"
-                size="xs"
-                style={{ whiteSpace: 'nowrap', ...PAD_LEFT }}
-                data-test-subj="policyListRevNo"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.list.policy.revisionNumber"
-                  defaultMessage="rev. {revNumber}"
-                  values={{ revNumber: policy.endpoint_policy_version }}
-                />
-              </EuiText>
+              {policy.endpoint_policy_version && (
+                <EuiText
+                  color="subdued"
+                  size="xs"
+                  style={{ whiteSpace: 'nowrap', ...PAD_LEFT }}
+                  data-test-subj="policyListRevNo"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.list.policy.revisionNumber"
+                    defaultMessage="rev. {revNumber}"
+                    values={{ revNumber: policy.endpoint_policy_version }}
+                  />
+                </EuiText>
+              )}
               {isPolicyOutOfDate(policy, item.policy_info) && (
                 <OutOfDate style={PAD_LEFT} data-test-subj="rowPolicyOutOfDate" />
               )}
