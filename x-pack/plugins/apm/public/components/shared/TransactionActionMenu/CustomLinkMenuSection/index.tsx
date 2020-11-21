@@ -42,16 +42,18 @@ export function CustomLinkMenuSection({
   const [showAllLinks, setShowAllLinks] = useState(false);
   const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
 
-  const filters = useMemo(
-    () =>
-      [
-        { key: 'service.name', value: transaction?.service.name },
-        { key: 'service.environment', value: transaction?.service.environment },
-        { key: 'transaction.name', value: transaction?.transaction.name },
-        { key: 'transaction.type', value: transaction?.transaction.type },
-      ].filter((filter): filter is Filter => typeof filter.value === 'string'),
-    [transaction]
-  );
+  const filters = useMemo(() => {
+    if (!transaction) {
+      return [];
+    }
+
+    return [
+      { key: 'service.name', value: transaction.service.name },
+      { key: 'service.environment', value: transaction.service.environment },
+      { key: 'transaction.name', value: transaction.transaction.name },
+      { key: 'transaction.type', value: transaction.transaction.type },
+    ].filter((filter): filter is Filter => typeof filter.value === 'string');
+  }, [transaction]);
 
   const { data: customLinks = [], status, refetch } = useFetcher(
     (callApmApi) =>
