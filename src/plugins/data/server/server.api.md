@@ -494,7 +494,7 @@ export interface IFieldType {
     // (undocumented)
     count?: number;
     // (undocumented)
-    customName?: string;
+    customLabel?: string;
     // (undocumented)
     displayName?: string;
     // (undocumented)
@@ -599,7 +599,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getFieldAttrs: () => {
         [x: string]: {
-            customName: string;
+            customLabel: string;
         };
     };
     // (undocumented)
