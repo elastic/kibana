@@ -186,17 +186,14 @@ export class AlertingPlugin {
         usageCollection,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
-      this.kibanaIndexConfig
-        .pipe(first())
-        .toPromise()
-        .then((config) =>
-          initializeAlertingTelemetry(
-            this.telemetryLogger,
-            core,
-            plugins.taskManager,
-            config.kibana.index
-          )
+      this.kibanaIndexConfig.subscribe((config) => {
+        initializeAlertingTelemetry(
+          this.telemetryLogger,
+          core,
+          plugins.taskManager,
+          config.kibana.index
         );
+      });
     }
 
     initializeApiKeyInvalidator(

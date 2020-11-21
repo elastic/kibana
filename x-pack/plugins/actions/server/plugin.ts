@@ -219,23 +219,20 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       );
     }
 
-    this.kibanaIndexConfig
-      .pipe(first())
-      .toPromise()
-      .then((config) => {
-        core.http.registerRouteHandlerContext(
-          'actions',
-          this.createRouteHandlerContext(core, config.kibana.index)
+    this.kibanaIndexConfig.subscribe((config) => {
+      core.http.registerRouteHandlerContext(
+        'actions',
+        this.createRouteHandlerContext(core, config.kibana.index)
+      );
+      if (usageCollection) {
+        initializeActionsTelemetry(
+          this.telemetryLogger,
+          plugins.taskManager,
+          core,
+          config.kibana.index
         );
-        if (usageCollection) {
-          initializeActionsTelemetry(
-            this.telemetryLogger,
-            plugins.taskManager,
-            core,
-            config.kibana.index
-          );
-        }
-      });
+      }
+    });
 
     // Routes
     const router = core.http.createRouter();
