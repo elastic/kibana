@@ -75,3 +75,6 @@ report.asciidoc
 
 # TS incremental build cache
 *.tsbuildinfo
+
+# Yarn local mirror content
+.yarn-local-mirror

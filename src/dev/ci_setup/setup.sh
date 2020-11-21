@@ -14,7 +14,7 @@ echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-yarn kbn bootstrap --prefer-offline
+yarn kbn bootstrap
 
 ###
 ### Download es snapshots
