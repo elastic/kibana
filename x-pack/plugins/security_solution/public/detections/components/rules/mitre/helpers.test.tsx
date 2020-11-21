@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { hasSubtechniqueOptions, isMitreAttackInvalid, isMitreTechniqueInvalid } from './helpers';
+import {
+  hasSubtechniqueOptions,
+  isMitreAttackInvalid,
+  isMitreAttackTechniqueInvalid,
+} from './helpers';
 
 describe('helpers', () => {
   describe('isMitreAttackInvalid', () => {
@@ -56,11 +60,11 @@ describe('helpers', () => {
   describe('isMitreTechniqueInvalid', () => {
     describe('when technique param is undefined', () => {
       it('returns false if tacticName is `none`', () => {
-        expect(isMitreTechniqueInvalid('none', undefined)).toBe(false);
+        expect(isMitreAttackTechniqueInvalid('none', undefined)).toBe(false);
       });
 
       it('returns false if tacticName exists and is not `none`', () => {
-        expect(isMitreTechniqueInvalid('Test', undefined)).toBe(false);
+        expect(isMitreAttackTechniqueInvalid('Test', undefined)).toBe(false);
       });
     });
 
@@ -76,7 +80,7 @@ describe('helpers', () => {
             ],
           };
           it('returns false', () => {
-            expect(isMitreTechniqueInvalid('Test', validTechnique)).toBe(false);
+            expect(isMitreAttackTechniqueInvalid('Test', validTechnique)).toBe(false);
           });
         });
 
@@ -88,7 +92,7 @@ describe('helpers', () => {
             subtechnique: [],
           };
           it('returns true', () => {
-            expect(isMitreTechniqueInvalid('Test', validTechnique)).toBe(true);
+            expect(isMitreAttackTechniqueInvalid('Test', validTechnique)).toBe(true);
           });
         });
 
@@ -100,7 +104,7 @@ describe('helpers', () => {
             subtechnique: [{ reference: '', name: 'none', id: '' }],
           };
           it('returns true', () => {
-            expect(isMitreTechniqueInvalid('Test', validTechnique)).toBe(true);
+            expect(isMitreAttackTechniqueInvalid('Test', validTechnique)).toBe(true);
           });
         });
       });
@@ -113,7 +117,7 @@ describe('helpers', () => {
           subtechnique: [],
         };
         it('returns false', () => {
-          expect(isMitreTechniqueInvalid('Test', validTechnique)).toBe(false);
+          expect(isMitreAttackTechniqueInvalid('Test', validTechnique)).toBe(false);
         });
       });
     });

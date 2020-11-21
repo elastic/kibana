@@ -17,14 +17,14 @@ import { threatDefault } from '../step_about_rule/default_value';
 import { IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
-import { MitreTechniqueFields } from './technique_fields';
-import { getMitreErrorMessages, isMitreAttackInvalid } from './helpers';
+import { MitreAttackTechniqueFields } from './technique_fields';
+import { getMitreAttackErrorMessages, isMitreAttackInvalid } from './helpers';
 
-const MitreContainer = styled.div`
+const MitreAttackContainer = styled.div`
   margin-top: 16px;
 `;
 
-const InitialMitreFormRow = styled(EuiFormRow)`
+const InitialMitreAttackFormRow = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {
     .euiText {
       padding-right: 32px;
@@ -39,18 +39,18 @@ interface AddItemProps {
   isDisabled: boolean;
 }
 
-export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
+export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItemProps) => {
   const [showValidation, setShowValidation] = useState(false);
 
   const errorMessage = useMemo(() => {
-    const { tacticError } = getMitreErrorMessages(field);
+    const { tacticError } = getMitreAttackErrorMessages(field);
     return tacticError;
   }, [field]);
 
   const removeTactic = useCallback(
     (index: number) => {
       const values = [...(field.value as IMitreEnterpriseAttack[])];
-      const newValues = [...values.slice(0, index), ...values.slice(index + 1)];
+      const newValues = [...values.splice(index, 1)];
       if (isEmpty(newValues)) {
         field.setValue(threatDefault);
       } else {
@@ -60,7 +60,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
     [field]
   );
 
-  const addMitreTactic = useCallback(() => {
+  const addMitreAttackTactic = useCallback(() => {
     const values = [...(field.value as IMitreEnterpriseAttack[])];
     if (!isEmpty(values[values.length - 1])) {
       field.setValue([
@@ -81,13 +81,11 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
         reference: '',
       };
       field.setValue([
-        ...values.slice(0, index),
-        {
+        ...values.splice(index, 1, {
           ...values[index],
           tactic: { id, reference, name },
           technique: [],
-        },
-        ...values.slice(index + 1),
+        }),
       ]);
     },
     [field]
@@ -108,7 +106,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow>
             <EuiSuperSelect
-              id="selectDocExample"
+              id="mitreAttackTactic"
               options={[
                 ...(tacticName === 'none'
                   ? [
@@ -130,7 +128,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
               onChange={updateTactic.bind(null, index)}
               fullWidth={true}
               valueOfSelected={camelCase(tacticName)}
-              data-test-subj="mitreTactic"
+              data-test-subj="mitreAttackTactic"
               placeholder={i18n.TACTIC_PLACEHOLDER}
               isInvalid={showValidation && isTacticValid(threat)}
               onBlur={() => setShowValidation(true)}
@@ -164,11 +162,11 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
   );
 
   return (
-    <MitreContainer>
+    <MitreAttackContainer>
       {values.map((threat, index) => (
         <div key={index}>
           {index === 0 ? (
-            <InitialMitreFormRow
+            <InitialMitreAttackFormRow
               fullWidth
               label={`${field.label} ${i18n.THREATS}`}
               labelAppend={field.labelAppend}
@@ -177,7 +175,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
               error={errorMessage}
             >
               <>{getSelectTactic(threat, index, isDisabled)}</>
-            </InitialMitreFormRow>
+            </InitialMitreAttackFormRow>
           ) : (
             <EuiFormRow
               fullWidth
@@ -189,7 +187,7 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
             </EuiFormRow>
           )}
 
-          <MitreTechniqueFields
+          <MitreAttackTechniqueFields
             field={field}
             threatIndex={index}
             isDisabled={isDisabled || threat.tactic.name === 'none'}
@@ -198,9 +196,13 @@ export const AddMitreThreat = memo(({ field, idAria, isDisabled }: AddItemProps)
           />
         </div>
       ))}
-      <MyAddItemButton data-test-subj="addMitre" onClick={addMitreTactic} isDisabled={isDisabled}>
+      <MyAddItemButton
+        data-test-subj="addMitreAttackTactic"
+        onClick={addMitreAttackTactic}
+        isDisabled={isDisabled}
+      >
         {i18n.ADD_MITRE_TACTIC}
       </MyAddItemButton>
-    </MitreContainer>
+    </MitreAttackContainer>
   );
 });

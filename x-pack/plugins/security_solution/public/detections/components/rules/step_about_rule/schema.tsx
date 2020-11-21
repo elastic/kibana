@@ -14,7 +14,7 @@ import {
   ERROR_CODE,
 } from '../../../../shared_imports';
 import { IMitreEnterpriseAttack, AboutStepRule } from '../../../pages/detection_engine/rules/types';
-import { isMitreAttackInvalid, isMitreTechniqueInvalid } from '../mitre/helpers';
+import { isMitreAttackInvalid, isMitreAttackTechniqueInvalid } from '../mitre/helpers';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
@@ -222,7 +222,7 @@ export const schema: FormSchema<AboutStepRule> = {
           let hasSubtechniqueError = false;
           (value as IMitreEnterpriseAttack[]).forEach((v) => {
             v.technique.forEach((t) => {
-              if (isMitreTechniqueInvalid(v.tactic.name, t)) {
+              if (isMitreAttackTechniqueInvalid(v.tactic.name, t)) {
                 hasSubtechniqueError = true;
               }
             });

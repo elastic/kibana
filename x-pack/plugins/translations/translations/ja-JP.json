@@ -16863,7 +16863,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackTactics.lateralMovementDescription": "水平移動(TA0008)",
     "xpack.securitySolution.detectionEngine.mitreAttackTactics.persistenceDescription": "永続(TA0003)",
     "xpack.securitySolution.detectionEngine.mitreAttackTactics.privilegeEscalationDescription": "特権昇格(TA0004)",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.accessibilityFeaturesDescription": "アクセシビリティ機能(T1015)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.accessTokenManipulationDescription": "アクセストークン操作(T1134)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.accountAccessRemovalDescription": "アカウントアクセス削除(T1531)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.accountDiscoveryDescription": "アカウント検出(T1087)",

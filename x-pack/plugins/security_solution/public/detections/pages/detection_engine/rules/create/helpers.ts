@@ -164,7 +164,9 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   assertUnreachable(type);
 };
 
-function filterThreatByName<T extends IMitreAttack | IMitreAttackTechnique>(filterable: T[]): T[] {
+function trimThreatsWithNoName<T extends IMitreAttack | IMitreAttackTechnique>(
+  filterable: T[]
+): T[] {
   return filterable.filter((item) => item.name !== 'none');
 }
 
@@ -177,11 +179,11 @@ export const filterEmptyThreats = (threats: IMitreEnterpriseAttack[]): IMitreEnt
     .map((threat) => {
       return {
         ...threat,
-        technique: filterThreatByName(threat.technique).map((technique) => {
+        technique: trimThreatsWithNoName(threat.technique).map((technique) => {
           return {
             ...technique,
             subtechnique:
-              technique.subtechnique != null ? filterThreatByName(technique.subtechnique) : [],
+              technique.subtechnique != null ? trimThreatsWithNoName(technique.subtechnique) : [],
           };
         }),
       };

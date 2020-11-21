@@ -16881,7 +16881,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackTactics.lateralMovementDescription": "Lateral Movement (TA0008)",
     "xpack.securitySolution.detectionEngine.mitreAttackTactics.persistenceDescription": "Persistence (TA0003)",
     "xpack.securitySolution.detectionEngine.mitreAttackTactics.privilegeEscalationDescription": "Privilege Escalation (TA0004)",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.accessibilityFeaturesDescription": "Accessibility Features (T1015)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.accessTokenManipulationDescription": "Access Token Manipulation (T1134)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.accountAccessRemovalDescription": "Account Access Removal (T1531)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.accountDiscoveryDescription": "Account Discovery (T1087)",

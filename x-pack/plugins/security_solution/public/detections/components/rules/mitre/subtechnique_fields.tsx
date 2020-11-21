@@ -36,7 +36,7 @@ interface AddSubtechniqueProps {
   onFieldChange: (threats: IMitreEnterpriseAttack[]) => void;
 }
 
-export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
+export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   field,
   idAria,
   isDisabled,
@@ -55,10 +55,7 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
       const threats = [...(field.value as IMitreEnterpriseAttack[])];
       const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
       if (subtechniques != null) {
-        const newSubtechniques = [
-          ...subtechniques.slice(0, index),
-          ...subtechniques.slice(index + 1),
-        ];
+        const newSubtechniques = [...subtechniques.splice(index, 1)];
 
         threats[threatIndex].technique[techniqueIndex] = {
           ...threats[threatIndex].technique[techniqueIndex],
@@ -70,7 +67,7 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
     [field, threatIndex, onFieldChange, techniqueIndex]
   );
 
-  const addMitreSubtechnique = useCallback(() => {
+  const addMitreAttackSubtechnique = useCallback(() => {
     const threats = [...(field.value as IMitreEnterpriseAttack[])];
 
     const subtechniques = threats[threatIndex].technique[techniqueIndex].subtechnique;
@@ -102,27 +99,21 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
       if (subtechniques != null) {
         onFieldChange([
-          ...threats.slice(0, threatIndex),
-          {
+          ...threats.splice(threatIndex, 1, {
             ...threats[threatIndex],
             technique: [
-              ...threats[threatIndex].technique.slice(0, techniqueIndex),
-              {
+              ...threats[threatIndex].technique.splice(techniqueIndex, 1, {
                 ...threats[threatIndex].technique[techniqueIndex],
                 subtechnique: [
-                  ...subtechniques.slice(0, index),
-                  {
+                  ...subtechniques.splice(index, 1, {
                     id,
                     reference,
                     name,
-                  },
-                  ...subtechniques.slice(index + 1),
+                  }),
                 ],
-              },
-              ...threats[threatIndex].technique.slice(techniqueIndex + 1),
+              }),
             ],
-          },
-          ...threats.slice(threatIndex + 1),
+          }),
         ]);
       }
     },
@@ -136,7 +127,7 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
       return (
         <>
           <EuiSuperSelect
-            id="selectDocExample"
+            id="mitreAttackSubtechnique"
             options={[
               ...(subtechnique.name === 'none'
                 ? [
@@ -158,7 +149,7 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
             onChange={updateSubtechnique.bind(null, index)}
             fullWidth={true}
             valueOfSelected={camelCase(subtechnique.name)}
-            data-test-subj="mitreTactic"
+            data-test-subj="mitreAttackSubtechnique"
             disabled={disabled}
             placeholder={i18n.SUBTECHNIQUE_PLACEHOLDER}
           />
@@ -196,8 +187,8 @@ export const MitreSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
           </div>
         ))}
       <MyAddItemButton
-        data-test-subj="addMitreSubtechnique"
-        onClick={addMitreSubtechnique}
+        data-test-subj="addMitreAttackSubtechnique"
+        onClick={addMitreAttackSubtechnique}
         isDisabled={isDisabled}
       >
         {i18n.ADD_MITRE_SUBTECHNIQUE}

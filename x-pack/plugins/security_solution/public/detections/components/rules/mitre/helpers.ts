@@ -23,7 +23,7 @@ export const isMitreAttackInvalid = (
   return false;
 };
 
-export const isMitreTechniqueInvalid = (
+export const isMitreAttackTechniqueInvalid = (
   tacticName: string | null | undefined,
   technique: IMitreAttackTechnique | null | undefined
 ) => {
@@ -60,7 +60,7 @@ export const hasSubtechniqueOptions = (technique: IMitreAttackTechnique) => {
 /**
  * Returns an object with all applicable error messages for the given field param
  */
-export const getMitreErrorMessages = (field: FieldHook) => {
+export const getMitreAttackErrorMessages = (field: FieldHook) => {
   if (field.isChangingValue || !field.errors.length) {
     return {};
   }

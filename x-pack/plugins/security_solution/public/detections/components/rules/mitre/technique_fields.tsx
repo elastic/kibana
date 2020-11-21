@@ -24,9 +24,13 @@ import {
   IMitreEnterpriseAttack,
 } from '../../../pages/detection_engine/rules/types';
 import { MyAddItemButton } from '../add_item_form';
-import { getMitreErrorMessages, hasSubtechniqueOptions, isMitreTechniqueInvalid } from './helpers';
+import {
+  getMitreAttackErrorMessages,
+  hasSubtechniqueOptions,
+  isMitreAttackTechniqueInvalid,
+} from './helpers';
 import * as i18n from './translations';
-import { MitreSubtechniqueFields } from './subtechnique_fields';
+import { MitreAttackSubtechniqueFields } from './subtechnique_fields';
 
 const TechniqueContainer = styled.div`
   ${({ theme }) => css`
@@ -44,7 +48,7 @@ interface AddTechniqueProps {
   onFieldChange: (threats: IMitreEnterpriseAttack[]) => void;
 }
 
-export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
+export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   field,
   idAria,
   isDisabled,
@@ -54,7 +58,7 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
   const [showValidation, setShowValidation] = useState(false);
 
   const errorMessage = useMemo(() => {
-    const { techniqueError } = getMitreErrorMessages(field);
+    const { techniqueError } = getMitreAttackErrorMessages(field);
     return techniqueError;
   }, [field]);
 
@@ -64,7 +68,7 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
     (index: number) => {
       const threats = [...(field.value as IMitreEnterpriseAttack[])];
       const techniques = threats[threatIndex].technique;
-      const newTechniques = [...techniques.slice(0, index), ...techniques.slice(index + 1)];
+      const newTechniques = [...techniques.splice(index, 1)];
       threats[threatIndex] = {
         ...threats[threatIndex],
         technique: newTechniques,
@@ -74,7 +78,7 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
     [field, threatIndex, onFieldChange]
   );
 
-  const addMitreTechnique = useCallback(() => {
+  const addMitreAttackTechnique = useCallback(() => {
     const threats = [...(field.value as IMitreEnterpriseAttack[])];
     threats[threatIndex] = {
       ...threats[threatIndex],
@@ -95,28 +99,24 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
         reference: '',
       };
       onFieldChange([
-        ...threats.slice(0, threatIndex),
-        {
+        ...threats.splice(threatIndex, 1, {
           ...threats[threatIndex],
           technique: [
-            ...threats[threatIndex].technique.slice(0, index),
-            {
+            ...threats[threatIndex].technique.splice(index, 1, {
               id,
               reference,
               name,
               subtechnique: [],
-            },
-            ...threats[threatIndex].technique.slice(index + 1),
+            }),
           ],
-        },
-        ...threats.slice(threatIndex + 1),
+        }),
       ]);
     },
     [threatIndex, onFieldChange, field]
   );
 
   const isTechniqueInvalid = useCallback((tacticName: string, technique: IMitreAttackTechnique) => {
-    return isMitreTechniqueInvalid(tacticName, technique);
+    return isMitreAttackTechniqueInvalid(tacticName, technique);
   }, []);
 
   const getSelectTechnique = useCallback(
@@ -125,7 +125,7 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
       return (
         <>
           <EuiSuperSelect
-            id="selectDocExample"
+            id="mitreAttackTechnique"
             options={[
               ...(technique.name === 'none'
                 ? [
@@ -147,7 +147,7 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
             onChange={updateTechnique.bind(null, index)}
             fullWidth={true}
             valueOfSelected={camelCase(technique.name)}
-            data-test-subj="mitreTactic"
+            data-test-subj="mitreAttackTechnique"
             isInvalid={showValidation && isTechniqueInvalid(tacticName, technique)}
             onBlur={() => setShowValidation(true)}
             disabled={disabled}
@@ -188,7 +188,7 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
 
-          <MitreSubtechniqueFields
+          <MitreAttackSubtechniqueFields
             field={field}
             idAria={idAria}
             isDisabled={
@@ -201,8 +201,8 @@ export const MitreTechniqueFields: React.FC<AddTechniqueProps> = ({
         </div>
       ))}
       <MyAddItemButton
-        data-test-subj="addMitreTechnique"
-        onClick={addMitreTechnique}
+        data-test-subj="addMitreAttackTechnique"
+        onClick={addMitreAttackTechnique}
         isDisabled={isDisabled}
       >
         {i18n.ADD_MITRE_TECHNIQUE}
