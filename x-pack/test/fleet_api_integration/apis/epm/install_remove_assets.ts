@@ -433,6 +433,7 @@ const expectAssetsInstalled = ({
       ...res.attributes,
       installed_kibana: sortBy(res.attributes.installed_kibana, (o: AssetReference) => o.type),
       installed_es: sortBy(res.attributes.installed_es, (o: AssetReference) => o.type),
+      package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
     };
     expect(sortedRes).eql({
       installed_kibana: [
