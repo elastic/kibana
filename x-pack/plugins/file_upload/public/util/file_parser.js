@@ -25,6 +25,7 @@ export const fileHandler = async ({
           })
         )
       );
+      return;
     }
 
     let batches;
@@ -36,7 +37,8 @@ export const fileHandler = async ({
         },
       });
     } catch (e) {
-      console.log(e);
+      reject(e);
+      return;
     }
 
     let featuresProcessed = 0;
@@ -49,17 +51,30 @@ export const fileHandler = async ({
       if (getFileParseActive()) {
         switch (batch.batchType) {
           case 'root-object-batch-complete':
-            if (featuresProcessed) {
-              parsedGeojson = { ...batch.container, features };
+            if (getFileParseActive()) {
+              if (featuresProcessed) {
+                parsedGeojson = { ...batch.container, features };
+              } else {
+                // Handle single feature geoJson
+                try {
+                  parsedGeojson = cleanAndValidate(batch.container);
+                  if (parsedGeojson) {
+                    featuresProcessed++;
+                  }
+                } catch (e) {
+                  boolCleaningErrs = true;
+                  errors.push(e);
+                  resolve(null);
+                  return;
+                }
+              }
             } else {
-              featuresProcessed++;
-              parsedGeojson = cleanAndValidate(batch.container);
+              resolve(null);
+              return;
             }
             break;
           default:
             for (const feature of batch.data) {
-              // Only add these errors once
-              // TODO: Give feedback on which features failed
               let cleanFeature;
               try {
                 cleanFeature = cleanAndValidate(feature);
@@ -67,6 +82,7 @@ export const fileHandler = async ({
                   features.push(cleanFeature);
                 }
               } catch (e) {
+                // TODO: Give feedback on which features failed
                 if (!boolCleaningErrs) {
                   boolCleaningErrs = true;
                   errors.push(
@@ -78,6 +94,7 @@ export const fileHandler = async ({
                   );
                 }
               }
+              // TODO: Give feedback on which features failed
               if ((!feature.geometry || !feature.geometry.type) && !boolGeometryErrs) {
                 boolGeometryErrs = true;
                 errors.push(
@@ -96,10 +113,12 @@ export const fileHandler = async ({
           bytesProcessed: batch.bytesUsed,
           totalBytes: file.size,
         });
+      } else {
+        break;
       }
     }
 
-    if (!featuresProcessed) {
+    if (!featuresProcessed && getFileParseActive()) {
       reject(
         new Error(
           i18n.translate('xpack.fileUpload.fileParser.noFeaturesDetected', {
@@ -107,12 +126,15 @@ export const fileHandler = async ({
           })
         )
       );
+    } else if (!getFileParseActive()) {
+      resolve(null);
     } else {
       resolve({
         errors,
         parsedGeojson,
       });
     }
+    return;
   });
 
   return filePromise;
