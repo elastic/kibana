@@ -6,7 +6,6 @@
 
 import {
   Filter,
-  Query,
   IIndexPattern,
   isFilterDisabled,
   buildEsQuery,
@@ -18,15 +17,10 @@ import {
 } from '../../../lists/common/schemas';
 import { ESBoolQuery } from '../typed_json';
 import { buildExceptionListQueries } from './build_exceptions_query';
-import {
-  Query as QueryString,
-  Language,
-  Index,
-  TimestampOverrideOrUndefined,
-} from './schemas/common/schemas';
+import { Query, Language, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
 
 export const getQueryFilter = (
-  query: QueryString,
+  query: Query,
   language: Language,
   filters: Array<Partial<Filter>>,
   index: Index,
