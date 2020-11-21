@@ -99,7 +99,7 @@ export async function installIndexPatterns(
     const packageToInstall = packagesToFetch.find((pkgSO) => pkgSO.name === pkgName);
     if (packageToInstall) {
       // set the version to the one we want to install
-      // if we're reinstalling for the number will be the same
+      // if we're reinstalling the number will be the same
       // if this is an upgrade then we'll be modifying the version number to the upgrade version
       packageToInstall.version = pkgVersion;
     } else {
