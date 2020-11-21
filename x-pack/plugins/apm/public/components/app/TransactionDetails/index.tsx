@@ -21,11 +21,11 @@ import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
 import { ApmHeader } from '../../shared/ApmHeader';
-import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
+import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -119,9 +119,9 @@ export function TransactionDetails({
       </ApmHeader>
       <SearchBar />
       <EuiPage>
-        <Correlations />
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
+            <Correlations />
             <LocalUIFilters {...localUIFiltersConfig} />
           </EuiFlexItem>
           <EuiFlexItem grow={7}>
