@@ -53,7 +53,7 @@ export function ClientMetrics() {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          pathname: '/api/apm/rum/client-metrics',
+          endpoint: 'GET /api/apm/rum/client-metrics',
           params: {
             query: {
               ...uxQuery,
