@@ -71,12 +71,14 @@ const sortByTitle = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
 
 const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewideOption => {
   const { id, title, url, icon, type, meta } = result;
+  // only displaying icons for applications
+  const useIcon = type === 'application';
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,
     url,
     type,
-    icon: { type: icon ?? 'empty' },
+    icon: { type: useIcon && icon ? icon : 'empty' },
     'data-test-subj': `nav-search-option`,
   };
 
