@@ -34,6 +34,5 @@ export function toEqlKibanaSearchResponse(
     rawResponse: response,
     isPartial: response.body.is_partial,
     isRunning: response.body.is_running,
-    ...getTotalLoaded(response.body),
   };
 }
