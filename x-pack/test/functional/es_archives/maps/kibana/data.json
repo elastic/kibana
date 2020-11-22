@@ -1113,7 +1113,7 @@
         "title" : "dash for tooltip filter action test",
         "hits" : 0,
         "description" : "Zoomed in so entire screen is covered by filter so click to open tooltip can not miss.",
-        "panelsJSON" : "[{\"version\":\"8.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":26,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":-1.31919,\"lon\":59.53306,\"zoom\":9.67},\"isLayerTOCOpen\":false,\"openTOCDetails\":[\"n1t6f\"],\"hiddenLayers\":[],\"enhancements\":{\"dynamicActions\":{\"events\":[{\"eventId\":\"669a3521-1215-4228-9ced-77e2edf5ad17\",\"triggers\":[\"FILTER_TRIGGER\"],\"action\":{\"name\":\"drilldown1\",\"config\":{\"dashboardId\":\"19906970-2e40-11e9-85cb-6965aae20f13\",\"useCurrentFilters\":true,\"useCurrentDateRange\":true},\"factoryId\":\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\"}}]}}},\"panelRefName\":\"panel_0\"}]",
+        "panelsJSON" : "[{\"version\":\"8.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":26,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"mapCenter\":{\"lat\":-1.31919,\"lon\":59.53306,\"zoom\":9.67},\"isLayerTOCOpen\":false,\"openTOCDetails\":[\"n1t6f\"],\"hiddenLayers\":[],\"enhancements\":{\"dynamicActions\":{\"events\":[{\"eventId\":\"669a3521-1215-4228-9ced-77e2edf5ad17\",\"triggers\":[\"FILTER_TRIGGER\"],\"action\":{\"name\":\"drilldown1\",\"config\":{\"useCurrentFilters\":true,\"useCurrentDateRange\":true},\"factoryId\":\"DASHBOARD_TO_DASHBOARD_DRILLDOWN\"}},{\"eventId\":\"b9c20d96-03ce-4dcc-8823-e3503311172e\",\"triggers\":[\"VALUE_CLICK_TRIGGER\"],\"action\":{\"name\":\"urlDrilldownToDiscover\",\"config\":{\"url\":{\"template\":\"{{kibanaUrl}}/app/discover#/?_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'561253e0-f731-11e8-8487-11b9dd924f96',key:{{event.key}},negate:!f,params:(query:{{event.value}}),type:phrase),query:(match_phrase:({{event.key}}:{{event.value}})))),index:'561253e0-f731-11e8-8487-11b9dd924f96',interval:auto,query:(language:kuery,query:''),sort:!())\"},\"openInNewTab\":false},\"factoryId\":\"URL_DRILLDOWN\"}}]}}},\"panelRefName\":\"panel_0\"}]",
         "optionsJSON" : "{\"useMargins\":true,\"hidePanelTitles\":false}",
         "version" : 1,
         "timeRestore" : true,
@@ -1130,15 +1130,20 @@
       "type" : "dashboard",
       "references" : [
         {
+          "name" : "drilldown:DASHBOARD_TO_DASHBOARD_DRILLDOWN:669a3521-1215-4228-9ced-77e2edf5ad17:dashboardId",
+          "type" : "dashboard",
+          "id" : "19906970-2e40-11e9-85cb-6965aae20f13"
+        },
+        {
           "name" : "panel_0",
           "type" : "map",
           "id" : "1649cc70-f736-11e8-8ce0-9723965e01e3"
         }
       ],
       "migrationVersion" : {
-        "dashboard" : "7.3.0"
+        "dashboard" : "7.11.0"
       },
-      "updated_at" : "2020-08-26T14:32:27.854Z"
+      "updated_at" : "2020-11-19T15:12:25.703Z"
     }
   }
 }
