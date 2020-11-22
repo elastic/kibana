@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { CoreStart } from 'src/core/public';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
@@ -37,7 +36,6 @@ export interface DataPublicPluginEnhancements {
 }
 
 export interface DataSetupDependencies {
-  bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   uiActions: UiActionsSetup;
   usageCollection?: UsageCollectionSetup;
