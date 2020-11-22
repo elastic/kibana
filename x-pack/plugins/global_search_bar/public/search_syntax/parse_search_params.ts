@@ -42,12 +42,18 @@ export const parseSearchParams = (term: string): ParsedSearchParams => {
       };
     }, {} as Record<string, FilterValues>);
 
+  const tags = filterValues.get('tag');
+  const types = filterValues.get('type');
+
   return {
     term: searchTerm,
     filters: {
-      tags: filterValues.get('tag') as FilterValues<string>,
-      types: filterValues.get('type') as FilterValues<string>,
+      tags: tags ? valuesToString(tags) : undefined,
+      types: types ? valuesToString(types) : undefined,
       unknowns: unknownFilters,
     },
   };
 };
+
+const valuesToString = (raw: FilterValues): FilterValues<string> =>
+  raw.map((value) => String(value));

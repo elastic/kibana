@@ -57,6 +57,20 @@ describe('getFieldValueMap', () => {
     expect(result.get('tag')).toEqual(['foo', 'bar']);
   });
 
+  it('parses boolean field terms', () => {
+    const result = fieldValueMap('tag:true tag:false');
+
+    expect(result.size).toBe(1);
+    expect(result.get('tag')).toEqual([true, false]);
+  });
+
+  it('parses numeric field terms', () => {
+    const result = fieldValueMap('tag:42 tag:9000');
+
+    expect(result.size).toBe(1);
+    expect(result.get('tag')).toEqual([42, 9000]);
+  });
+
   it('parses multiple mixed single/multi value field terms', () => {
     const result = fieldValueMap('tag:foo tag:(bar OR hello) tag:dolly');
 

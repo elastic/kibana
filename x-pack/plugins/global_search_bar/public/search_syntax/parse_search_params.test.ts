@@ -72,4 +72,16 @@ describe('parseSearchParams', () => {
       },
     });
   });
+
+  it('converts boolean and number values to string for known filters', () => {
+    const searchParams = parseSearchParams('tag:42 tags:true type:69 types:false hello');
+    expect(searchParams).toEqual({
+      term: 'hello',
+      filters: {
+        tags: ['42', 'true'],
+        types: ['69', 'false'],
+        unknowns: {},
+      },
+    });
+  });
 });
