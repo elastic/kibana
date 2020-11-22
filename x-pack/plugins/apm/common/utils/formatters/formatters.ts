@@ -5,6 +5,9 @@
  */
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import { Maybe } from '../../../typings/common';
+import { NOT_AVAILABLE_LABEL } from '../../i18n';
+import { isFiniteNumber } from '../is_finite_number';
 
 export function asDecimal(value: number) {
   return numeral(value).format('0,0.0');
@@ -25,11 +28,11 @@ export function tpmUnit(type?: string) {
 }
 
 export function asPercent(
-  numerator: number,
+  numerator: Maybe<number>,
   denominator: number | undefined,
-  fallbackResult = ''
+  fallbackResult = NOT_AVAILABLE_LABEL
 ) {
-  if (!denominator || isNaN(numerator)) {
+  if (!denominator || !isFiniteNumber(numerator)) {
     return fallbackResult;
   }
 

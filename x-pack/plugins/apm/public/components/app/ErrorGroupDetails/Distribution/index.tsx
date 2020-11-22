@@ -18,10 +18,13 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import d3 from 'd3';
 import React from 'react';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { ErrorDistributionAPIResponse } from '../../../../../server/lib/errors/distribution/get_distribution';
 import { useTheme } from '../../../../hooks/useTheme';
+
+type ErrorDistributionAPIResponse = APIReturnType<
+  'GET /api/apm/services/{serviceName}/errors/distribution'
+>;
 
 interface FormattedBucket {
   x0: number;

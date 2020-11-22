@@ -10,7 +10,6 @@ import { snakeCase } from 'lodash';
 import Boom from '@hapi/boom';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
 import {
   TRANSACTION_DURATION,
@@ -19,9 +18,6 @@ import {
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
-export type CreateAnomalyDetectionJobsAPIResponse = PromiseReturnType<
-  typeof createAnomalyDetectionJobs
->;
 export async function createAnomalyDetectionJobs(
   setup: Setup,
   environments: string[],
@@ -77,6 +73,7 @@ async function createAnomalyDetectionJob({
     prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
     groups: [APM_ML_JOB_GROUP],
     indexPatternName,
+    applyToAllSpaces: true,
     query: {
       bool: {
         filter: [
