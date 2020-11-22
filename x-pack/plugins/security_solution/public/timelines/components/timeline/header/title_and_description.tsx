@@ -167,7 +167,6 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 disabled={isSaving}
                 timelineId={timelineId}
                 isTextArea={true}
-                marginRight={0}
               />
             </EuiFormRow>
             <EuiSpacer />

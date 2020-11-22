@@ -59,14 +59,16 @@ NotesCountBadge.displayName = 'NotesCountBadge';
 
 export type SaveTimeline = (args: TimelineInput) => void;
 
-export const StarIcon = React.memo<{
+interface AddToFavoritesButtonProps {
   timelineId: string;
-}>(({ timelineId }) => {
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const dispatch = useDispatch();
+}
 
-  const { isFavorite } = useShallowEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ timelineId }) => {
+  const dispatch = useDispatch();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const isFavorite = useShallowEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isFavorite
   );
 
   const handleClick = useCallback(
@@ -84,8 +86,10 @@ export const StarIcon = React.memo<{
       {isFavorite ? i18n.NOT_A_FAVORITE : i18n.FAVORITE}
     </EuiButton>
   );
-});
-StarIcon.displayName = 'StarIcon';
+};
+AddToFavoritesButtonComponent.displayName = 'AddToFavoritesButtonComponent';
+
+export const AddToFavoritesButton = React.memo(AddToFavoritesButtonComponent);
 
 interface DescriptionProps {
   timelineId: string;
@@ -93,7 +97,6 @@ interface DescriptionProps {
   disableAutoSave?: boolean;
   disableTooltip?: boolean;
   disabled?: boolean;
-  marginRight?: number;
 }
 
 export const Description = React.memo<DescriptionProps>(
@@ -103,13 +106,12 @@ export const Description = React.memo<DescriptionProps>(
     disableAutoSave = false,
     disableTooltip = false,
     disabled = false,
-    marginRight,
   }) => {
-    const getTimeline = timelineSelectors.getTimelineByIdSelector();
     const dispatch = useDispatch();
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-    const { description } = useShallowEqualSelector(
-      (state) => getTimeline(state, timelineId) ?? timelineDefaults
+    const description = useShallowEqualSelector(
+      (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
     );
 
     const onDescriptionChanged = useCallback(
@@ -182,9 +184,9 @@ export const Name = React.memo<NameProps>(
     disabled = false,
     timelineId,
   }) => {
-    const timelineNameRef = useRef<HTMLInputElement>(null);
-    const getTimeline = timelineSelectors.getTimelineByIdSelector();
     const dispatch = useDispatch();
+    const timelineNameRef = useRef<HTMLInputElement>(null);
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
     const { title, timelineType } = useShallowEqualSelector(
       (state) => getTimeline(state, timelineId) ?? timelineDefaults
@@ -249,8 +251,9 @@ interface NewCaseProps {
 export const NewCase = React.memo<NewCaseProps>(
   ({ compact, graphEventId, onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
     const dispatch = useDispatch();
-    const { savedObjectId } = useShallowEqualSelector((state) =>
-      timelineSelectors.selectTimeline(state, timelineId)
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const savedObjectId = useShallowEqualSelector(
+      (state) => getTimeline(state, timelineId).savedObjectId
     );
     const { navigateToApp } = useKibana().services.application;
     const buttonText = compact ? i18n.ATTACH_TO_NEW_CASE : i18n.ATTACH_TIMELINE_TO_NEW_CASE;

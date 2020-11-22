@@ -45,12 +45,12 @@ interface NotesTabContentProps {
 
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { status: timelineStatus, noteIds } = useDeepEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
 
-  const getNotesByIds = appSelectors.notesByIdsSelector();
+  const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
   const [newNote, setNewNote] = useState('');
   const isImmutable = timelineStatus === TimelineStatus.immutable;
   const notesById = useDeepEqualSelector(getNotesByIds);

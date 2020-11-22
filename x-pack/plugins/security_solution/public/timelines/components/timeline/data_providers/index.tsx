@@ -50,13 +50,13 @@ const DropTargetDataProviders = styled.div`
   justify-content: center;
   padding-bottom: 2px;
   position: relative;
-  border: 0.2rem dashed ${(props) => props.theme.eui.euiColorMediumShade};
+  border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: 5px;
   padding: 5px 0;
   margin: 2px 0 2px 0;
   min-height: 100px;
   overflow-y: auto;
-  background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
+  background-color: ${({ theme }) => theme.eui.euiFormBackgroundColor};
 `;
 
 DropTargetDataProviders.displayName = 'DropTargetDataProviders';
@@ -87,9 +87,9 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
     getManageTimelineById,
     timelineId,
   ]);
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const { dataProviders } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const dataProviders = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).dataProviders
   );
 
   return (

@@ -11,15 +11,11 @@ import { useCreateTimelineButton } from './use_create_timeline';
 import * as i18n from './translations';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { TimelineType } from '../../../../../common/types/timeline';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
-const useShallowEqualSelectorMock = jest.fn();
-jest.mock('../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: useShallowEqualSelectorMock,
-}));
+jest.mock('../../../../common/hooks/use_selector');
 
-jest.mock('./use_create_timeline', () => ({
-  useCreateTimelineButton: jest.fn(),
-}));
+jest.mock('./use_create_timeline');
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
@@ -146,6 +142,10 @@ describe('Name', () => {
     updateTitle: jest.fn(),
   };
 
+  beforeAll(() => {
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  });
+
   test('should render tooltip', () => {
     const component = mount(
       <TestProviders>
@@ -169,7 +169,7 @@ describe('Name', () => {
   });
 
   test('should render placeholder by timelineType - timeline template', () => {
-    useShallowEqualSelectorMock.mockReturnValue({
+    (useShallowEqualSelector as jest.Mock).mockReturnValue({
       ...mockTimelineModel,
       timelineType: TimelineType.template,
     });

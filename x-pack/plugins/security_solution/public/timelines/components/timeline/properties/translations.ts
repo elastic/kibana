@@ -62,7 +62,7 @@ export const UNTITLED_TEMPLATE = i18n.translate(
 export const DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.properties.descriptionPlaceholder',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'Add a description',
   }
 );
 

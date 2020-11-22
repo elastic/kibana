@@ -5,7 +5,7 @@
  */
 
 import { EuiProgress, EuiTabs, EuiTab } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -51,8 +51,8 @@ export interface Props {
 }
 
 const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const dispatch = useDispatch();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const [activeTab, setActiveTab] = useState('query');
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
   const { graphEventId, isSaving, savedObjectId, timelineType } = useDeepEqualSelector(

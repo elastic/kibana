@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { timelineSelectors } from '../../../store/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -16,7 +16,7 @@ interface GraphTabContentProps {
 }
 
 const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }) => {
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { timelineType, graphEventId } = useDeepEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
@@ -34,5 +34,7 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
     />
   );
 };
+
+GraphTabContentComponent.displayName = 'GraphTabContentComponent';
 
 export const GraphTabContent = React.memo(GraphTabContentComponent);

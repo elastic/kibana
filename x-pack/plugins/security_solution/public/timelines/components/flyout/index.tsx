@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { FlyoutBottomBar } from './button';
 import { Pane } from './pane';
 import { timelineSelectors } from '../../store/timeline';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../store/timeline/defaults';
 
 const Visible = styled.div<{ show?: boolean }>`
@@ -24,9 +24,9 @@ interface OwnProps {
 }
 
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId }) => {
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const { show = false } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const show = useShallowEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).show
   );
 
   return (

@@ -1,0 +1,405 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Timeline rendering renders correctly against snapshot 1`] = `
+<I18nProvider>
+  <Component>
+    <ApolloProvider
+      client={
+        ApolloClient {
+          "cache": InMemoryCache {
+            "addTypename": true,
+            "cacheKeyRoot": KeyTrie {
+              "weakness": true,
+            },
+            "config": Object {
+              "addTypename": true,
+              "dataIdFromObject": [Function],
+              "fragmentMatcher": HeuristicFragmentMatcher {},
+              "freezeResults": false,
+              "resultCaching": true,
+            },
+            "data": DepTrackingCache {
+              "data": Object {},
+              "depend": [Function],
+            },
+            "maybeBroadcastWatch": [Function],
+            "optimisticData": DepTrackingCache {
+              "data": Object {},
+              "depend": [Function],
+            },
+            "silenceBroadcast": false,
+            "storeReader": StoreReader {
+              "executeSelectionSet": [Function],
+              "executeStoreQuery": [Function],
+              "executeSubSelectedArray": [Function],
+              "freezeResults": false,
+            },
+            "storeWriter": StoreWriter {},
+            "typenameDocumentCache": Map {},
+            "watches": Set {},
+          },
+          "defaultOptions": Object {},
+          "disableNetworkFetches": false,
+          "link": ApolloLink {
+            "request": [Function],
+          },
+          "mutate": [Function],
+          "query": [Function],
+          "queryDeduplication": true,
+          "reFetchObservableQueries": [Function],
+          "resetStore": [Function],
+          "resetStoreCallbacks": Array [],
+          "ssrMode": false,
+          "store": DataStore {
+            "cache": InMemoryCache {
+              "addTypename": true,
+              "cacheKeyRoot": KeyTrie {
+                "weakness": true,
+              },
+              "config": Object {
+                "addTypename": true,
+                "dataIdFromObject": [Function],
+                "fragmentMatcher": HeuristicFragmentMatcher {},
+                "freezeResults": false,
+                "resultCaching": true,
+              },
+              "data": DepTrackingCache {
+                "data": Object {},
+                "depend": [Function],
+              },
+              "maybeBroadcastWatch": [Function],
+              "optimisticData": DepTrackingCache {
+                "data": Object {},
+                "depend": [Function],
+              },
+              "silenceBroadcast": false,
+              "storeReader": StoreReader {
+                "executeSelectionSet": [Function],
+                "executeStoreQuery": [Function],
+                "executeSubSelectedArray": [Function],
+                "freezeResults": false,
+              },
+              "storeWriter": StoreWriter {},
+              "typenameDocumentCache": Map {},
+              "watches": Set {},
+            },
+          },
+          "version": "2.3.8",
+          "watchQuery": [Function],
+        }
+      }
+    >
+      <Provider
+        store={
+          Object {
+            "dispatch": [Function],
+            "getState": [Function],
+            "replaceReducer": [Function],
+            "subscribe": [Function],
+            Symbol(observable): [Function],
+          }
+        }
+      >
+        <ThemeProvider
+          theme={[Function]}
+        >
+          <DragDropContext
+            onDragEnd={[MockFunction]}
+          >
+            <QueryTabContentComponent
+              columns={
+                Array [
+                  Object {
+                    "aggregatable": true,
+                    "category": "base",
+                    "columnHeaderType": "not-filtered",
+                    "description": "Date/time when the event originated.
+For log events this is the date/time when the event was generated, and not when it was read.
+Required field for all events.",
+                    "example": "2016-05-23T08:05:34.853Z",
+                    "id": "@timestamp",
+                    "type": "date",
+                    "width": 190,
+                  },
+                  Object {
+                    "aggregatable": true,
+                    "category": "event",
+                    "columnHeaderType": "not-filtered",
+                    "description": "Severity describes the severity of the event. What the different severity values mean can very different between use cases. It's up to the implementer to make sure severities are consistent across events.",
+                    "example": "7",
+                    "id": "event.severity",
+                    "type": "long",
+                    "width": 180,
+                  },
+                  Object {
+                    "aggregatable": true,
+                    "category": "event",
+                    "columnHeaderType": "not-filtered",
+                    "description": "Event category.
+This contains high-level information about the contents of the event. It is more generic than \`event.action\`, in the sense that typically a category contains multiple actions. Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.",
+                    "example": "user-management",
+                    "id": "event.category",
+                    "type": "keyword",
+                    "width": 180,
+                  },
+                  Object {
+                    "aggregatable": true,
+                    "category": "event",
+                    "columnHeaderType": "not-filtered",
+                    "description": "The action captured by the event.
+This describes the information in the event. It is more specific than \`event.category\`. Examples are \`group-add\`, \`process-started\`, \`file-created\`. The value is normally defined by the implementer.",
+                    "example": "user-password-change",
+                    "id": "event.action",
+                    "type": "keyword",
+                    "width": 180,
+                  },
+                  Object {
+                    "aggregatable": true,
+                    "category": "host",
+                    "columnHeaderType": "not-filtered",
+                    "description": "Name of the host.
+It can contain what \`hostname\` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.",
+                    "example": "",
+                    "id": "host.name",
+                    "type": "keyword",
+                    "width": 180,
+                  },
+                  Object {
+                    "aggregatable": true,
+                    "category": "source",
+                    "columnHeaderType": "not-filtered",
+                    "description": "IP address of the source.
+Can be one or multiple IPv4 or IPv6 addresses.",
+                    "example": "",
+                    "id": "source.ip",
+                    "type": "ip",
+                    "width": 180,
+                  },
+                  Object {
+                    "aggregatable": true,
+                    "category": "destination",
+                    "columnHeaderType": "not-filtered",
+                    "description": "IP address of the destination.
+Can be one or multiple IPv4 or IPv6 addresses.",
+                    "example": "",
+                    "id": "destination.ip",
+                    "type": "ip",
+                    "width": 180,
+                  },
+                  Object {
+                    "aggregatable": true,
+                    "category": "destination",
+                    "columnHeaderType": "not-filtered",
+                    "description": "Bytes sent from the source to the destination",
+                    "example": "123",
+                    "format": "bytes",
+                    "id": "destination.bytes",
+                    "type": "number",
+                    "width": 180,
+                  },
+                  Object {
+                    "aggregatable": true,
+                    "category": "user",
+                    "columnHeaderType": "not-filtered",
+                    "description": "Short name or login of the user.",
+                    "example": "albert",
+                    "id": "user.name",
+                    "type": "keyword",
+                    "width": 180,
+                  },
+                  Object {
+                    "aggregatable": true,
+                    "category": "base",
+                    "columnHeaderType": "not-filtered",
+                    "description": "Each document has an _id that uniquely identifies it",
+                    "example": "Y-6TfmcB0WOhS6qyMv3s",
+                    "id": "_id",
+                    "type": "keyword",
+                    "width": 180,
+                  },
+                  Object {
+                    "aggregatable": false,
+                    "category": "base",
+                    "columnHeaderType": "not-filtered",
+                    "description": "For log events the message field contains the log message.
+In other use cases the message field can be used to concatenate different values which are then freely searchable. If multiple messages exist, they can be combined into one message.",
+                    "example": "Hello World",
+                    "id": "message",
+                    "type": "text",
+                    "width": 180,
+                  },
+                ]
+              }
+              dataProviders={
+                Array [
+                  Object {
+                    "and": Array [],
+                    "enabled": true,
+                    "excluded": false,
+                    "id": "id-Provider 1",
+                    "kqlQuery": "",
+                    "name": "Provider 1",
+                    "queryMatch": Object {
+                      "field": "name",
+                      "operator": ":",
+                      "value": "Provider 1",
+                    },
+                  },
+                  Object {
+                    "and": Array [],
+                    "enabled": true,
+                    "excluded": false,
+                    "id": "id-Provider 2",
+                    "kqlQuery": "",
+                    "name": "Provider 2",
+                    "queryMatch": Object {
+                      "field": "name",
+                      "operator": ":",
+                      "value": "Provider 2",
+                    },
+                  },
+                  Object {
+                    "and": Array [],
+                    "enabled": true,
+                    "excluded": false,
+                    "id": "id-Provider 3",
+                    "kqlQuery": "",
+                    "name": "Provider 3",
+                    "queryMatch": Object {
+                      "field": "name",
+                      "operator": ":",
+                      "value": "Provider 3",
+                    },
+                  },
+                  Object {
+                    "and": Array [],
+                    "enabled": true,
+                    "excluded": false,
+                    "id": "id-Provider 4",
+                    "kqlQuery": "",
+                    "name": "Provider 4",
+                    "queryMatch": Object {
+                      "field": "name",
+                      "operator": ":",
+                      "value": "Provider 4",
+                    },
+                  },
+                  Object {
+                    "and": Array [],
+                    "enabled": true,
+                    "excluded": false,
+                    "id": "id-Provider 5",
+                    "kqlQuery": "",
+                    "name": "Provider 5",
+                    "queryMatch": Object {
+                      "field": "name",
+                      "operator": ":",
+                      "value": "Provider 5",
+                    },
+                  },
+                  Object {
+                    "and": Array [],
+                    "enabled": true,
+                    "excluded": false,
+                    "id": "id-Provider 6",
+                    "kqlQuery": "",
+                    "name": "Provider 6",
+                    "queryMatch": Object {
+                      "field": "name",
+                      "operator": ":",
+                      "value": "Provider 6",
+                    },
+                  },
+                  Object {
+                    "and": Array [],
+                    "enabled": true,
+                    "excluded": false,
+                    "id": "id-Provider 7",
+                    "kqlQuery": "",
+                    "name": "Provider 7",
+                    "queryMatch": Object {
+                      "field": "name",
+                      "operator": ":",
+                      "value": "Provider 7",
+                    },
+                  },
+                  Object {
+                    "and": Array [],
+                    "enabled": true,
+                    "excluded": false,
+                    "id": "id-Provider 8",
+                    "kqlQuery": "",
+                    "name": "Provider 8",
+                    "queryMatch": Object {
+                      "field": "name",
+                      "operator": ":",
+                      "value": "Provider 8",
+                    },
+                  },
+                  Object {
+                    "and": Array [],
+                    "enabled": true,
+                    "excluded": false,
+                    "id": "id-Provider 9",
+                    "kqlQuery": "",
+                    "name": "Provider 9",
+                    "queryMatch": Object {
+                      "field": "name",
+                      "operator": ":",
+                      "value": "Provider 9",
+                    },
+                  },
+                  Object {
+                    "and": Array [],
+                    "enabled": true,
+                    "excluded": false,
+                    "id": "id-Provider 10",
+                    "kqlQuery": "",
+                    "name": "Provider 10",
+                    "queryMatch": Object {
+                      "field": "name",
+                      "operator": ":",
+                      "value": "Provider 10",
+                    },
+                  },
+                ]
+              }
+              end="2018-03-24T03:33:52.253Z"
+              eventType="all"
+              filters={Array []}
+              isLive={false}
+              isSaving={false}
+              isTimelineExists={true}
+              itemsPerPage={5}
+              itemsPerPageOptions={
+                Array [
+                  5,
+                  10,
+                  20,
+                ]
+              }
+              kqlMode="search"
+              kqlQueryExpression=""
+              noteIds={Array []}
+              show={true}
+              showCallOutUnauthorizedMsg={false}
+              showEventDetails={false}
+              sort={
+                Object {
+                  "columnId": "@timestamp",
+                  "sortDirection": "desc",
+                }
+              }
+              start="2018-03-23T18:49:23.132Z"
+              status="active"
+              timelineId="test"
+              timerangeKind="absolute"
+              updateEventTypeAndIndexesName={[MockFunction]}
+            />
+          </DragDropContext>
+        </ThemeProvider>
+      </Provider>
+    </ApolloProvider>
+  </Component>
+</I18nProvider>
+`;

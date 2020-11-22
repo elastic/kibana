@@ -4,47 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiIcon,
-  EuiAvatar,
-} from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal/open_timeline_modal_button';
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
-
 import * as i18n from '../../timeline/properties/translations';
 import { NewTimeline } from '../../timeline/properties/helpers';
 import { NewTemplateTimeline } from '../../timeline/properties/new_template_timeline';
-
-const DescriptionPopoverMenuContainer = styled.div`
-  margin-top: 15px;
-`;
-
-DescriptionPopoverMenuContainer.displayName = 'DescriptionPopoverMenuContainer';
-
-const SettingsIcon = styled(EuiIcon)`
-  cursor: pointer;
-`;
-
-SettingsIcon.displayName = 'SettingsIcon';
-
-const HiddenFlexItem = styled(EuiFlexItem)`
-  display: none;
-`;
-
-HiddenFlexItem.displayName = 'HiddenFlexItem';
-
-const Avatar = styled(EuiAvatar)`
-  margin-left: 5px;
-`;
-
-Avatar.displayName = 'Avatar';
 
 interface AddTimelineButtonComponentProps {
   timelineId: string;
@@ -62,20 +29,25 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
     setShowTimelineModal(true);
   }, [onClosePopover]);
 
+  const PopoverButtonIcon = useMemo(
+    () => (
+      <EuiButtonIcon
+        data-test-subj="settings-gear"
+        iconType="plusInCircle"
+        color="primary"
+        size="m"
+        onClick={onButtonClick}
+      />
+    ),
+    [onButtonClick]
+  );
+
   return (
     <>
       <EuiFlexItem grow={false}>
         <EuiPopover
           anchorPosition="downRight"
-          button={
-            <EuiButtonIcon
-              data-test-subj="settings-gear"
-              iconType="plusInCircle"
-              color="primary"
-              size="m"
-              onClick={onButtonClick}
-            />
-          }
+          button={PopoverButtonIcon}
           id="timelineSettingsPopover"
           isOpen={showActions}
           closePopover={onClosePopover}

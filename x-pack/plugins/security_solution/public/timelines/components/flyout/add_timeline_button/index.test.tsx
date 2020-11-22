@@ -16,11 +16,11 @@ jest.mock('../../../../common/lib/kibana', () => ({
   useUiSetting$: jest.fn().mockReturnValue([]),
 }));
 
-jest.mock('./new_template_timeline', () => ({
+jest.mock('../../timeline/properties/new_template_timeline', () => ({
   NewTemplateTimeline: jest.fn(() => <div data-test-subj="create-template-btn" />),
 }));
 
-jest.mock('./helpers', () => ({
+jest.mock('../../timeline/properties/helpers', () => ({
   Description: jest.fn().mockReturnValue(<div data-test-subj="Description" />),
   ExistingCase: jest.fn().mockReturnValue(<div data-test-subj="ExistingCase" />),
   NewCase: jest.fn().mockReturnValue(<div data-test-subj="NewCase" />),
@@ -88,18 +88,6 @@ describe('AddTimelineButton', () => {
       test('it renders create timeline btn', () => {
         expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
       });
-
-      test('it renders create attach timeline to a case btn', () => {
-        expect(wrapper.find('[data-test-subj="NewCase"]').exists()).toBeTruthy();
-      });
-
-      test('it renders no NotesButton', () => {
-        expect(wrapper.find('[data-test-subj="NotesButton"]').exists()).not.toBeTruthy();
-      });
-
-      test('it renders no Description', () => {
-        expect(wrapper.find('[data-test-subj="Description"]').exists()).not.toBeTruthy();
-      });
     });
   });
 
@@ -129,19 +117,7 @@ describe('AddTimelineButton', () => {
       });
 
       test('it renders create timeline template btn', () => {
-        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toEqual(true);
-      });
-
-      test('it renders create attach timeline to a case btn', () => {
-        expect(wrapper.find('[data-test-subj="NewCase"]').exists()).toBeTruthy();
-      });
-
-      test('it renders no NotesButton', () => {
-        expect(wrapper.find('[data-test-subj="NotesButton"]').exists()).not.toBeTruthy();
-      });
-
-      test('it renders no Description', () => {
-        expect(wrapper.find('[data-test-subj="Description"]').exists()).not.toBeTruthy();
+        expect(wrapper.find('[data-test-subj="create-template"]').exists()).toEqual(true);
       });
     });
   });

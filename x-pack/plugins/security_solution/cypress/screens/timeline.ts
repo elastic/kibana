@@ -118,9 +118,6 @@ export const TIMELINE_FLYOUT_BODY = '[data-test-subj="eui-flyout-body"]';
 
 export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-icon-button"]`;
 
-export const TIMELINE_NOT_READY_TO_DROP_BUTTON =
-  '[data-test-subj="flyout-button-not-ready-to-drop"]';
-
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
 export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-gear"]';

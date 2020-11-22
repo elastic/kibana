@@ -46,7 +46,7 @@ ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 export const ExpandableEvent = React.memo<Props>(
   ({ browserFields, docValueFields, event, timelineId }) => {
     const dispatch = useDispatch();
-    const getTimeline = timelineSelectors.getTimelineByIdSelector();
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
     const columnHeaders = useDeepEqualSelector((state) => {
       const { columns } = getTimeline(state, timelineId) ?? timelineDefaults;
