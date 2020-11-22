@@ -123,6 +123,22 @@ run(
 
     const foundDifferences = diffSet(foundList, allowedList);
 
+    if (debug && !foundDifferences.size) {
+      log.debug(
+        dedent(`
+      !!!!!!!!!!!!!!!!! UP TO DATE ALLOWED LIST !!!!!!!!!!!!!!!!!
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! The declared circular dependencies allowed list is up    !
+      ! to date and includes every plugin listed in above paths. !
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      The allowed circular dependencies list is (#${allowedList.size}):
+      ${printList(allowedList)}
+      `)
+      );
+      return;
+    }
+
     if (foundDifferences.size > 0) {
       log.error(
         dedent(`
