@@ -17,29 +17,40 @@
  * under the License.
  */
 
-import { ServerExtType } from '@hapi/hapi';
-import Podium from '@hapi/podium';
-// @ts-expect-error: implicit any for JS file
-import { Config } from '../../../../legacy/server/config';
-// @ts-expect-error: implicit any for JS file
-import { setupLogging } from '../../../../legacy/server/logging';
-import { LogLevel, LogRecord } from '../../logging';
-import { LegacyVars } from '../../types';
+import { ServerExtType, Server } from '@hapi/hapi';
+import Podium from 'podium';
+import { setupLogging } from './setup_logging';
+import { attachMetaData } from './metadata';
+import { legacyLoggingConfigSchema } from './schema';
 
-export const metadataSymbol = Symbol('log message with metadata');
-export function attachMetaData(message: string, metadata: LegacyVars = {}) {
-  return {
-    [metadataSymbol]: {
-      message,
-      metadata,
-    },
-  };
+// these LogXXX types are duplicated to avoid a cross dependency with the @kbn/logging package.
+// typescript will error if they diverge at some point.
+type LogLevelId = 'all' | 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'off';
+
+interface LogLevel {
+  id: LogLevelId;
+  value: number;
 }
+
+export interface LogRecord {
+  timestamp: Date;
+  level: LogLevel;
+  context: string;
+  message: string;
+  error?: Error;
+  meta?: { [name: string]: any };
+  pid: number;
+}
+
 const isEmptyObject = (obj: object) => Object.keys(obj).length === 0;
 
 function getDataToLog(error: Error | undefined, metadata: object, message: string) {
-  if (error) return error;
-  if (!isEmptyObject(metadata)) return attachMetaData(message, metadata);
+  if (error) {
+    return error;
+  }
+  if (!isEmptyObject(metadata)) {
+    return attachMetaData(message, metadata);
+  }
   return message;
 }
 
@@ -50,7 +61,7 @@ interface PluginRegisterParams {
       options: PluginRegisterParams['options']
     ) => Promise<void>;
   };
-  options: LegacyVars;
+  options: Record<string, any>;
 }
 
 /**
@@ -84,22 +95,19 @@ export class LegacyLoggingServer {
 
   private onPostStopCallback?: () => void;
 
-  constructor(legacyLoggingConfig: Readonly<LegacyVars>) {
+  constructor(legacyLoggingConfig: any) {
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" Kibana.
-    const config = {
-      logging: {
-        ...legacyLoggingConfig,
-        events: {
-          ...legacyLoggingConfig.events,
-          ops: '__no-ops__',
-        },
+    const { value: loggingConfig } = legacyLoggingConfigSchema.validate({
+      ...legacyLoggingConfig,
+      events: {
+        ...legacyLoggingConfig.events,
+        ops: '__no-ops__',
       },
-      ops: { interval: 2147483647 },
-    };
+    });
 
-    setupLogging(this, Config.withDefaultSchema(config));
+    setupLogging((this as unknown) as Server, loggingConfig, 2147483647);
   }
 
   public register({ plugin: { register }, options }: PluginRegisterParams): Promise<void> {
