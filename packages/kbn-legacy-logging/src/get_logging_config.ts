@@ -18,20 +18,25 @@
  */
 
 import _ from 'lodash';
-import { getLoggerStream } from './log_reporter';
+import { getLogReporter } from './log_reporter';
+import { LegacyLoggingConfig } from './schema';
 
-export default function loggingConfiguration(config) {
-  const events = config.get('logging.events');
+/**
+ * Returns the `@hapi/good` plugin configuration to be used for the legacy logging
+ * @param config
+ */
+export function getLoggingConfiguration(config: LegacyLoggingConfig, opsInterval: number) {
+  const events = config.events;
 
-  if (config.get('logging.silent')) {
+  if (config.silent) {
     _.defaults(events, {});
-  } else if (config.get('logging.quiet')) {
+  } else if (config.quiet) {
     _.defaults(events, {
       log: ['listening', 'error', 'fatal'],
       request: ['error'],
       error: '*',
     });
-  } else if (config.get('logging.verbose')) {
+  } else if (config.verbose) {
     _.defaults(events, {
       log: '*',
       ops: '*',
@@ -48,24 +53,24 @@ export default function loggingConfiguration(config) {
     });
   }
 
-  const loggerStream = getLoggerStream({
+  const loggerStream = getLogReporter({
     config: {
-      json: config.get('logging.json'),
-      dest: config.get('logging.dest'),
-      timezone: config.get('logging.timezone'),
+      json: config.json,
+      dest: config.dest,
+      timezone: config.timezone,
 
       // I'm adding the default here because if you add another filter
       // using the commandline it will remove authorization. I want users
       // to have to explicitly set --logging.filter.authorization=none or
       // --logging.filter.cookie=none to have it show up in the logs.
-      filter: _.defaults(config.get('logging.filter'), {
+      filter: _.defaults(config.filter, {
         authorization: 'remove',
         cookie: 'remove',
       }),
     },
     events: _.transform(
       events,
-      function (filtered, val, key) {
+      function (filtered: Record<string, string>, val: string, key: string) {
         // provide a string compatible way to remove events
         if (val !== '!') filtered[key] = val;
       },
@@ -75,7 +80,7 @@ export default function loggingConfiguration(config) {
 
   const options = {
     ops: {
-      interval: config.get('ops.interval'),
+      interval: opsInterval,
     },
     includes: {
       request: ['headers', 'payload'],

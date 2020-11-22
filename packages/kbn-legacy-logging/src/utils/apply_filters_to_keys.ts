@@ -17,15 +17,15 @@
  * under the License.
  */
 
-function toPojo(obj) {
+function toPojo(obj: Record<string, unknown>) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function replacer(match, group) {
+function replacer(match: string, group: any[]) {
   return new Array(group.length + 1).join('X');
 }
 
-function apply(obj, key, action) {
+function apply(obj: Record<string, unknown>, key: string, action: string) {
   for (const k in obj) {
     if (obj.hasOwnProperty(k)) {
       let val = obj[k];
@@ -44,14 +44,17 @@ function apply(obj, key, action) {
           }
         }
       } else if (typeof val === 'object') {
-        val = apply(val, key, action);
+        val = apply(val as Record<string, any>, key, action);
       }
     }
   }
   return obj;
 }
 
-export default function (obj, actionsByKey) {
+export function applyFiltersToKeys(
+  obj: Record<string, unknown>,
+  actionsByKey: Record<string, string>
+) {
   return Object.keys(actionsByKey).reduce((output, key) => {
     return apply(output, key, actionsByKey[key]);
   }, toPojo(obj));

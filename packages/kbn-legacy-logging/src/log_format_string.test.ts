@@ -18,12 +18,10 @@
  */
 
 import moment from 'moment';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 
-import { createListStream, createPromiseFromStreams } from '../../../core/server/utils';
-
-import KbnLoggerStringFormat from './log_format_string';
+import { attachMetaData } from './metadata';
+import { createListStream, createPromiseFromStreams } from './test_utils';
+import { KbnLoggerStringFormat } from './log_format_string';
 
 const time = +moment('2010-01-01T05:15:59Z', moment.ISO_8601);
 
@@ -39,7 +37,7 @@ describe('KbnLoggerStringFormat', () => {
   it('logs in UTC', async () => {
     const format = new KbnLoggerStringFormat({
       timezone: 'UTC',
-    });
+    } as any);
 
     const result = await createPromiseFromStreams([createListStream([makeEvent()]), format]);
 
@@ -47,7 +45,7 @@ describe('KbnLoggerStringFormat', () => {
   });
 
   it('logs in local timezone when timezone is undefined', async () => {
-    const format = new KbnLoggerStringFormat({});
+    const format = new KbnLoggerStringFormat({} as any);
 
     const result = await createPromiseFromStreams([createListStream([makeEvent()]), format]);
 
@@ -55,7 +53,7 @@ describe('KbnLoggerStringFormat', () => {
   });
   describe('with metadata', () => {
     it('does not log meta data', async () => {
-      const format = new KbnLoggerStringFormat({});
+      const format = new KbnLoggerStringFormat({} as any);
       const event = {
         data: attachMetaData('message for event', {
           prop1: 'value1',

@@ -16,30 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isPlainObject } from 'lodash';
 
-import {
-  metadataSymbol,
-  attachMetaData,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../src/core/server/legacy/logging/legacy_logging_server';
-
-export const logWithMetadata = {
-  isLogEvent(eventData) {
-    return Boolean(isPlainObject(eventData) && eventData[metadataSymbol]);
-  },
-
-  getLogEventData(eventData) {
-    const { message, metadata } = eventData[metadataSymbol];
-    return {
-      ...metadata,
-      message,
-    };
-  },
-
-  decorateServer(server) {
-    server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
-      server.log(tags, attachMetaData(message, metadata));
-    });
-  },
-};
+export { LegacyLoggingConfig, legacyLoggingConfigSchema } from './schema';
+export { attachMetaData } from './metadata';
+export { setupLoggingRotate } from './rotate';
+export { setupLogging, reconfigureLogging } from './setup_logging';
+export { getLoggingConfiguration } from './get_logging_config';
+export { LegacyLoggingServer } from './legacy_logging_server';

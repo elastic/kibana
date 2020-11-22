@@ -17,27 +17,21 @@
  * under the License.
  */
 
+// @ts-expect-error missing type def
 import { Squeeze } from '@hapi/good-squeeze';
-import { createWriteStream as writeStr } from 'fs';
+import { createWriteStream as writeStr, WriteStream } from 'fs';
 
-import LogFormatJson from './log_format_json';
-import LogFormatString from './log_format_string';
+import { KbnLoggerJsonFormat } from './log_format_json';
+import { KbnLoggerStringFormat } from './log_format_string';
 import { LogInterceptor } from './log_interceptor';
+import { LogFormatConfig } from './log_format';
 
-// NOTE: legacy logger creates a new stream for each new access
-// In https://github.com/elastic/kibana/pull/55937 we reach the max listeners
-// default limit of 10 for process.stdout which starts a long warning/error
-// thrown every time we start the server.
-// In order to keep using the legacy logger until we remove it I'm just adding
-// a new hard limit here.
-process.stdout.setMaxListeners(25);
-
-export function getLoggerStream({ events, config }) {
+export function getLogReporter({ events, config }: { events: any; config: LogFormatConfig }) {
   const squeeze = new Squeeze(events);
-  const format = config.json ? new LogFormatJson(config) : new LogFormatString(config);
+  const format = config.json ? new KbnLoggerJsonFormat(config) : new KbnLoggerStringFormat(config);
   const logInterceptor = new LogInterceptor();
 
-  let dest;
+  let dest: WriteStream | NodeJS.WritableStream;
   if (config.dest === 'stdout') {
     dest = process.stdout;
   } else {

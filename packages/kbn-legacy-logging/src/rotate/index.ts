@@ -20,13 +20,13 @@
 import { isMaster, isWorker } from 'cluster';
 import { Server } from '@hapi/hapi';
 import { LogRotator } from './log_rotator';
-import { KibanaConfig } from '../../kbn_server';
+import { LegacyLoggingConfig } from '../schema';
 
 let logRotator: LogRotator;
 
-export async function setupLoggingRotate(server: Server, config: KibanaConfig) {
+export async function setupLoggingRotate(server: Server, config: LegacyLoggingConfig) {
   // If log rotate is not enabled we skip
-  if (!config.get('logging.rotate.enabled')) {
+  if (!config.rotate.enabled) {
     return;
   }
 
@@ -38,7 +38,7 @@ export async function setupLoggingRotate(server: Server, config: KibanaConfig) {
 
   // We don't want to run logging rotate server if
   // we are not logging to a file
-  if (config.get('logging.dest') === 'stdout') {
+  if (config.dest === 'stdout') {
     server.log(
       ['warning', 'logging:rotate'],
       'Log rotation is enabled but logging.dest is configured for stdout. Set logging.dest to a file for this setting to take effect.'
