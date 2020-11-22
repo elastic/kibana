@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTabbedContent, EuiSpacer, EuiTitle, EuiProgress } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import { EuiTabbedContent, EuiProgress, EuiTabs, EuiTab } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -14,13 +14,14 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { TimelineQueryTabContent } from './query_tab_content';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
-import { NotesTabContent } from '../notes';
 import { TimelineType } from '../../../../common/types/timeline';
-import * as i18n from './translations';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
+import { QueryTabContent } from './query_tab_content';
+import { GraphTabContent } from './graph_tab_content';
+import { NotesTabContent } from './notes_tab_content';
+import * as i18n from './translations';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -36,18 +37,13 @@ const TimelineTemplateBadge = styled.div`
   font-size: 0.8em;
 `;
 
-const StyledEuiTabbedContent = styled(EuiTabbedContent)`
-  display: flex;
-  flex-direction: column;
+const StyledDiv = styled.div.attrs(({ $isVisible = false }: { $isVisible: boolean }) => ({
+  style: {
+    display: $isVisible ? 'flex' : 'none',
+  },
+}))`
   flex: 1;
   overflow: hidden;
-
-  > [role='tabpanel'] {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-  }
 `;
 
 export interface Props {
@@ -57,8 +53,9 @@ export interface Props {
 const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const dispatch = useDispatch();
+  const [activeTab, setActiveTab] = useState('query');
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
-  const { status, noteIds, isSaving, savedObjectId, timelineType } = useDeepEqualSelector(
+  const { graphEventId, isSaving, savedObjectId, timelineType } = useDeepEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
 
@@ -77,36 +74,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const tabs = useMemo(
-    () => [
-      {
-        id: 'query',
-        name: 'Query',
-        content: <TimelineQueryTabContent timelineId={timelineId} />,
-      },
-      {
-        id: 'notes',
-        name: 'Notes',
-        content: (
-          <>
-            <EuiSpacer />
-            <EuiTitle>
-              <h3>{'Notes'}</h3>
-            </EuiTitle>
-            <NotesTabContent timelineStatus={status} timelineId={timelineId} noteIds={noteIds} />
-          </>
-        ),
-      },
-      {
-        id: 'pinned',
-        name: 'Pinned',
-        disabled: true,
-        content: <></>,
-      },
-    ],
-    [noteIds, status, timelineId]
-  );
-
   return (
     <TimelineContainer data-test-subj="timeline">
       {isSaving && <EuiProgress size="s" color="primary" position="absolute" />}
@@ -117,7 +84,52 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
       <FlyoutHeaderPanel timelineId={timelineId} />
       <FlyoutHeader timelineId={timelineId} />
 
-      <StyledEuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+      <div>
+        <EuiTabs>
+          <EuiTab
+            onClick={() => setActiveTab('query')}
+            isSelected={'query' === activeTab}
+            disabled={false}
+            key={'query'}
+          >
+            {'Query'}
+          </EuiTab>
+          <EuiTab
+            onClick={() => setActiveTab('graph')}
+            isSelected={'graph' === activeTab}
+            disabled={!graphEventId}
+            key={'graph'}
+          >
+            {'Graph'}
+          </EuiTab>
+          <EuiTab
+            onClick={() => setActiveTab('notes')}
+            isSelected={'notes' === activeTab}
+            disabled={false}
+            key={'notes'}
+          >
+            {'Notes'}
+          </EuiTab>
+          <EuiTab
+            onClick={() => setActiveTab('pinned')}
+            isSelected={'pinned' === activeTab}
+            disabled={true}
+            key={'pinned'}
+          >
+            {'Pinned'}
+          </EuiTab>
+        </EuiTabs>
+      </div>
+
+      <StyledDiv $isVisible={'query' === activeTab}>
+        <QueryTabContent timelineId={timelineId} />
+      </StyledDiv>
+      <StyledDiv $isVisible={'graph' === activeTab}>
+        <GraphTabContent timelineId={timelineId} />
+      </StyledDiv>
+      <StyledDiv $isVisible={'notes' === activeTab}>
+        <NotesTabContent timelineId={timelineId} />
+      </StyledDiv>
     </TimelineContainer>
   );
 };

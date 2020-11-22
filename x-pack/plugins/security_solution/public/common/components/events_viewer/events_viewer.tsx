@@ -18,7 +18,7 @@ import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/
 import { HeaderSection } from '../header_section';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
-import { StatefulBody } from '../../../timelines/components/timeline/body/stateful_body';
+import { StatefulBody } from '../../../timelines/components/timeline/body';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Footer, footerHeight } from '../../../timelines/components/timeline/footer';
 import { combineQueries, resolverIsShowing } from '../../../timelines/components/timeline/helpers';
@@ -77,7 +77,6 @@ const EventsContainerLoading = styled.div`
 `;
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
-  width: 100%;
   overflow: hidden;
   display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
@@ -299,7 +298,6 @@ const EventsViewerComponent: React.FC<Props> = ({
                   <StatefulBody
                     browserFields={browserFields}
                     data={nonDeletedEvents}
-                    docValueFields={docValueFields}
                     id={id}
                     isEventViewer={true}
                     onRuleChange={onRuleChange}

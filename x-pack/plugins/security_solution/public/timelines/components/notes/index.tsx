@@ -31,7 +31,7 @@ interface Props {
   status: TimelineStatusLiteral;
 }
 
-const InMemoryTable: typeof EuiInMemoryTable & { displayName: string } = styled(
+export const InMemoryTable: typeof EuiInMemoryTable & { displayName: string } = styled(
   EuiInMemoryTable as React.ComponentType<EuiInMemoryTableProps<Note>>
 )`
   & thead {

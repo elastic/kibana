@@ -11,8 +11,6 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiToolTip,
-  EuiSwitch,
   EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
@@ -26,29 +24,27 @@ import { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { StatefulBody } from '../body/stateful_body';
+import { StatefulBody } from '../body';
 import { TimelineKqlFetch } from '../fetch_kql_timeline';
 import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
 import { combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import * as i18n from '../translations';
 import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../../manage_timeline';
 import { TimelineEventsType } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
-import { GraphOverlay } from '../../graph_overlay';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { PickEventType } from '../search_or_filter/pick_events';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { sourcererActions } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { inputsActions } from '../../../../common/store/inputs';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { EventDetails } from '../event_details';
+import { TimelineDatePickerLock } from '../date_picker_lock';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -86,10 +82,9 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   padding: 0 10px 5px 12px;
 `;
 
-const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
+const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
   overflow: hidden;
-  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
@@ -140,15 +135,13 @@ interface OwnProps {
 
 export type Props = OwnProps & PropsFromRedux;
 
-export const TimelineQueryTabContentComponent: React.FC<Props> = ({
+export const QueryTabContentComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   end,
   eventType,
   filters,
-  graphEventId,
   timelineId,
-  isDatePickerLocked,
   isLive,
   itemsPerPage,
   itemsPerPageOptions,
@@ -156,14 +149,24 @@ export const TimelineQueryTabContentComponent: React.FC<Props> = ({
   kqlQueryExpression,
   show,
   showCallOutUnauthorizedMsg,
+  showEventDetails,
   start,
   status,
   sort,
   timelineType,
   timerangeKind,
-  toggleLock,
 }) => {
   const dispatch = useDispatch();
+  const [showEventDetailsColumn, setShowEventDetailsColumn] = useState(false);
+
+  useEffect(() => {
+    setShowEventDetailsColumn((current) => {
+      if (showEventDetails && !current) {
+        return true;
+      }
+      return current;
+    });
+  }, [showEventDetails]);
 
   const {
     browserFields,
@@ -172,8 +175,6 @@ export const TimelineQueryTabContentComponent: React.FC<Props> = ({
     indexPattern,
     selectedPatterns: indexNames,
   } = useSourcererScope(SourcererScopeName.timeline);
-
-  const onToggleLock = useCallback(() => toggleLock({ linkToId: 'timeline' }), [toggleLock]);
 
   const { uiSettings } = useKibana().services;
   const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
@@ -270,127 +271,93 @@ export const TimelineQueryTabContentComponent: React.FC<Props> = ({
     <>
       <TimelineKqlFetch id={timelineId} indexPattern={indexPattern} inputId="timeline" />
 
-      <>
-        <TimelineRefetch
-          id={timelineId}
-          inputId="timeline"
-          inspect={inspect}
-          loading={loading}
-          refetch={refetch}
-        />
-        {graphEventId && (
-          <GraphOverlay
-            graphEventId={graphEventId}
-            isEventViewer={false}
-            timelineId={timelineId}
-            timelineType={timelineType}
-          />
-        )}
-        <FullWidthFlexGroup $visible={!graphEventId}>
-          <ScrollableFlexItem grow={2}>
-            <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
-              <EuiFlexGroup gutterSize="s" data-test-subj="timeline-date-picker-container">
-                <DatePicker grow={1}>
-                  <SuperDatePicker id="timeline" timelineId={timelineId} />
-                </DatePicker>
-                <EuiFlexItem grow={false}>
-                  <PickEventType
-                    eventType={eventType}
-                    onChangeEventTypeAndIndexesName={handleUpdateEventTypeAndIndexesName}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <div>
-                <EuiSpacer size="s" />
-                <EuiToolTip
-                  data-test-subj="timeline-date-picker-lock-tooltip"
-                  position="top"
-                  content={
-                    isDatePickerLocked
-                      ? i18n.LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
-                      : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
-                  }
-                >
-                  <EuiSwitch
-                    data-test-subj={`timeline-date-picker-${
-                      isDatePickerLocked ? 'lock' : 'unlock'
-                    }-button`}
-                    label={
-                      isDatePickerLocked
-                        ? i18n.LOCK_SYNC_MAIN_DATE_PICKER_LABEL
-                        : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_LABEL
-                    }
-                    checked={isDatePickerLocked}
-                    onChange={onToggleLock}
-                    compressed
-                    aria-label={
-                      isDatePickerLocked
-                        ? i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA
-                        : i18n.LOCK_SYNC_MAIN_DATE_PICKER_ARIA
-                    }
-                  />
-                </EuiToolTip>
-                <EuiSpacer size="s" />
-              </div>
-              <TimelineHeaderContainer data-test-subj="timelineHeader">
-                <TimelineHeader
-                  browserFields={browserFields}
-                  indexPattern={indexPattern}
-                  filterManager={filterManager}
-                  show={show}
-                  showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                  timelineId={timelineId}
-                  status={status}
+      <TimelineRefetch
+        id={timelineId}
+        inputId="timeline"
+        inspect={inspect}
+        loading={loading}
+        refetch={refetch}
+      />
+      <FullWidthFlexGroup>
+        <ScrollableFlexItem grow={2}>
+          <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
+            <EuiFlexGroup gutterSize="s" data-test-subj="timeline-date-picker-container">
+              <DatePicker grow={1}>
+                <SuperDatePicker id="timeline" timelineId={timelineId} />
+              </DatePicker>
+              <EuiFlexItem grow={false}>
+                <PickEventType
+                  eventType={eventType}
+                  onChangeEventTypeAndIndexesName={handleUpdateEventTypeAndIndexesName}
                 />
-              </TimelineHeaderContainer>
-            </StyledEuiFlyoutHeader>
-            {canQueryTimeline ? (
-              <EventDetailsWidthProvider>
-                <StyledEuiFlyoutBody
-                  data-test-subj="eui-flyout-body"
-                  className="timeline-flyout-body"
-                >
-                  <StatefulBody
-                    browserFields={browserFields}
-                    data={events}
-                    docValueFields={docValueFields}
-                    id={timelineId}
-                    refetch={refetch}
-                    sort={sort}
-                  />
-                </StyledEuiFlyoutBody>
-                <StyledEuiFlyoutFooter
-                  data-test-subj="eui-flyout-footer"
-                  className="timeline-flyout-footer"
-                >
-                  <Footer
-                    activePage={pageInfo.activePage}
-                    data-test-subj="timeline-footer"
-                    updatedAt={updatedAt}
-                    height={footerHeight}
-                    id={timelineId}
-                    isLive={isLive}
-                    isLoading={loading || loadingSourcerer}
-                    itemsCount={events.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    onChangePage={loadPage}
-                    totalCount={totalCount}
-                  />
-                </StyledEuiFlyoutFooter>
-              </EventDetailsWidthProvider>
-            ) : null}
-          </ScrollableFlexItem>
-          <VerticalRule />
-          <ScrollableFlexItem grow={1}>
-            <EventDetails
-              browserFields={browserFields}
-              docValueFields={docValueFields}
-              timelineId={timelineId}
-            />
-          </ScrollableFlexItem>
-        </FullWidthFlexGroup>
-      </>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <div>
+              <EuiSpacer size="s" />
+              <TimelineDatePickerLock />
+              <EuiSpacer size="s" />
+            </div>
+            <TimelineHeaderContainer data-test-subj="timelineHeader">
+              <TimelineHeader
+                browserFields={browserFields}
+                indexPattern={indexPattern}
+                filterManager={filterManager}
+                show={show}
+                showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+                timelineId={timelineId}
+                status={status}
+              />
+            </TimelineHeaderContainer>
+          </StyledEuiFlyoutHeader>
+          {canQueryTimeline ? (
+            <EventDetailsWidthProvider>
+              <StyledEuiFlyoutBody
+                data-test-subj="eui-flyout-body"
+                className="timeline-flyout-body"
+              >
+                <StatefulBody
+                  browserFields={browserFields}
+                  data={events}
+                  id={timelineId}
+                  refetch={refetch}
+                  sort={sort}
+                />
+              </StyledEuiFlyoutBody>
+              <StyledEuiFlyoutFooter
+                data-test-subj="eui-flyout-footer"
+                className="timeline-flyout-footer"
+              >
+                <Footer
+                  activePage={pageInfo.activePage}
+                  data-test-subj="timeline-footer"
+                  updatedAt={updatedAt}
+                  height={footerHeight}
+                  id={timelineId}
+                  isLive={isLive}
+                  isLoading={loading || loadingSourcerer}
+                  itemsCount={events.length}
+                  itemsPerPage={itemsPerPage}
+                  itemsPerPageOptions={itemsPerPageOptions}
+                  onChangePage={loadPage}
+                  totalCount={totalCount}
+                />
+              </StyledEuiFlyoutFooter>
+            </EventDetailsWidthProvider>
+          ) : null}
+        </ScrollableFlexItem>
+        {showEventDetailsColumn && (
+          <>
+            <VerticalRule />
+            <ScrollableFlexItem grow={1}>
+              <EventDetails
+                browserFields={browserFields}
+                docValueFields={docValueFields}
+                timelineId={timelineId}
+              />
+            </ScrollableFlexItem>
+          </>
+        )}
+      </FullWidthFlexGroup>
     </>
   );
 };
@@ -400,15 +367,14 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
-  const getGlobalInput = inputsSelectors.globalSelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const globalInput: inputsModel.InputsRange = getGlobalInput(state);
     const {
       columns,
       dataProviders,
       eventType,
+      expandedEvent,
       filters,
       graphEventId,
       itemsPerPage,
@@ -437,7 +403,6 @@ const makeMapStateToProps = () => {
       filters: timelineFilter,
       graphEventId,
       timelineId,
-      isDatePickerLocked: globalInput.linkTo.includes('timeline'),
       isLive: input.policy.kind === 'interval',
       isSaving,
       isTimelineExists: getTimeline(state, timelineId) != null,
@@ -448,6 +413,7 @@ const makeMapStateToProps = () => {
       noteIds,
       show,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
+      showEventDetails: !!expandedEvent.eventId,
       sort,
       start: input.timerange.from,
       status,
@@ -458,23 +424,16 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = {
-  toggleLock: inputsActions.toggleTimelineLinkTo,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+const connector = connect(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const TimelineQueryTabContent = connector(
+export const QueryTabContent = connector(
   React.memo(
-    TimelineQueryTabContentComponent,
-    // eslint-disable-next-line complexity
+    QueryTabContentComponent,
     (prevProps, nextProps) =>
       isTimerangeSame(prevProps, nextProps) &&
       prevProps.eventType === nextProps.eventType &&
-      prevProps.graphEventId === nextProps.graphEventId &&
-      prevProps.isDatePickerLocked === nextProps.isDatePickerLocked &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.isSaving === nextProps.isSaving &&
       prevProps.isTimelineExists === nextProps.isTimelineExists &&
@@ -483,6 +442,7 @@ export const TimelineQueryTabContent = connector(
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
+      prevProps.showEventDetails === nextProps.showEventDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       prevProps.timelineType === nextProps.timelineType &&
       prevProps.status === nextProps.status &&

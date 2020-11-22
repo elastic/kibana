@@ -12,7 +12,7 @@ import { Direction } from '../../../../../common/search_strategy';
 import { defaultHeaders, mockTimelineData, mockTimelineModel } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { Body, BodyProps } from '.';
+import { BodyComponent, StatefulBodyProps } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { waitFor } from '@testing-library/react';
@@ -85,7 +85,7 @@ describe('Body', () => {
     test('it renders the column headers', () => {
       const wrapper = mount(
         <TestProviders>
-          <Body {...props} />
+          <BodyComponent {...props} />
         </TestProviders>
       );
 
@@ -95,7 +95,7 @@ describe('Body', () => {
     test('it renders the scroll container', () => {
       const wrapper = mount(
         <TestProviders>
-          <Body {...props} />
+          <BodyComponent {...props} />
         </TestProviders>
       );
 
@@ -105,7 +105,7 @@ describe('Body', () => {
     test('it renders events', () => {
       const wrapper = mount(
         <TestProviders>
-          <Body {...props} />
+          <BodyComponent {...props} />
         </TestProviders>
       );
 
@@ -117,7 +117,7 @@ describe('Body', () => {
       const testProps = { ...props, columnHeaders: headersJustTimestamp };
       const wrapper = mount(
         <TestProviders>
-          <Body {...testProps} />
+          <BodyComponent {...testProps} />
         </TestProviders>
       );
       wrapper.update();
@@ -138,7 +138,7 @@ describe('Body', () => {
     test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_BODY_CLASS_NAME}`, () => {
       const wrapper = mount(
         <TestProviders>
-          <Body {...props} />
+          <BodyComponent {...props} />
         </TestProviders>
       );
       expect(
@@ -155,7 +155,7 @@ describe('Body', () => {
       it('should not render the timeline body', () => {
         const wrapper = mount(
           <TestProviders>
-            <Body {...props} />
+            <BodyComponent {...props} />
           </TestProviders>
         );
 
@@ -192,7 +192,7 @@ describe('Body', () => {
     test('Add a Note to an event', () => {
       const wrapper = mount(
         <TestProviders>
-          <Body {...props} />
+          <BodyComponent {...props} />
         </TestProviders>
       );
       addaNoteToEvent(wrapper, 'hello world');
@@ -224,7 +224,7 @@ describe('Body', () => {
     test('Add two Note to an event', () => {
       const Proxy = (proxyProps: BodyProps) => (
         <TestProviders>
-          <Body {...proxyProps} />
+          <BodyComponent {...proxyProps} />
         </TestProviders>
       );
 

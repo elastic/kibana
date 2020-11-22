@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -66,20 +66,28 @@ export const EventDetails = React.memo<Props>(
           id: EventsViewType.tableView,
           name: i18n.TABLE,
           content: (
-            <EventFieldsBrowser
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              data={data}
-              eventId={id}
-              onUpdateColumns={onUpdateColumns}
-              timelineId={timelineId}
-            />
+            <>
+              <EuiSpacer />
+              <EventFieldsBrowser
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                data={data}
+                eventId={id}
+                onUpdateColumns={onUpdateColumns}
+                timelineId={timelineId}
+              />
+            </>
           ),
         },
         {
           id: EventsViewType.jsonView,
           name: i18n.JSON_VIEW,
-          content: <JsonView data={data} />,
+          content: (
+            <>
+              <EuiSpacer />
+              <JsonView data={data} />
+            </>
+          ),
         },
       ],
       [browserFields, columnHeaders, data, id, onUpdateColumns, timelineId]
