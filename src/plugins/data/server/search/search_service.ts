@@ -154,7 +154,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     bfetch.addBatchProcessingRoute<
       { request: IKibanaSearchRequest; options?: ISearchOptions },
-      any
+      IKibanaSearchResponse
     >('/internal/bsearch', (request) => {
       const search = this.asScopedProvider(this.coreStart!)(request);
 
