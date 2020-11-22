@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { get, memoize, trimEnd } from 'lodash';
+import { get, memoize } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-  ES_SEARCH_STRATEGY,
   ISessionService,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
@@ -44,6 +44,7 @@ import { toMountPoint } from '../../../kibana_react/public';
 import { AbortError, getCombinedAbortSignal } from '../../../kibana_utils/public';
 
 export interface SearchInterceptorDeps {
+  bfetch: BfetchPublicSetup;
   http: CoreSetup['http'];
   uiSettings: CoreSetup['uiSettings'];
   startServices: Promise<[CoreStart, any, unknown]>;
@@ -69,6 +70,10 @@ export class SearchInterceptor {
    * @internal
    */
   protected application!: CoreStart['application'];
+  private batchedFetch!: BatchedFunc<
+    { request: IKibanaSearchRequest; options: ISearchOptions },
+    IKibanaSearchResponse
+  >;
 
   /*
    * @internal
@@ -78,6 +83,10 @@ export class SearchInterceptor {
 
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
+    });
+
+    this.batchedFetch = deps.bfetch.batchedFunction({
+      url: '/internal/bsearch',
     });
   }
 
@@ -120,26 +129,17 @@ export class SearchInterceptor {
    * @internal
    */
   protected runSearch(
-    { id, ...request }: IKibanaSearchRequest,
+    request: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
-    const path = trimEnd(
-      `/internal/search/${options?.strategy ?? ES_SEARCH_STRATEGY}/${id ?? ''}`,
-      '/'
+    const { abortSignal, ...requestOptions } = options || {};
+    return this.batchedFetch(
+      {
+        request,
+        options: requestOptions,
+      },
+      abortSignal
     );
-    const body = JSON.stringify({
-      sessionId: options?.sessionId,
-      isStored: options?.isStored,
-      isRestore: options?.isRestore,
-      ...request,
-    });
-
-    return this.deps.http.fetch({
-      method: 'POST',
-      path,
-      body,
-      signal: options?.abortSignal,
-    });
   }
 
   /**
