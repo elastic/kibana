@@ -22,9 +22,9 @@ import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './
 import { removeLeadingSlash } from '../common';
 import {
   createStreamingBatchedFunction,
-  BatchedFunc,
   StreamingBatchedFunctionParams,
 } from './batching/create_streaming_batched_function';
+import { BatchedFunc } from './batching/types';
 
 // eslint-disable-next-line
 export interface BfetchPublicSetupDependencies {}
