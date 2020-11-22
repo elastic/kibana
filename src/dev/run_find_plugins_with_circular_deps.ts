@@ -32,21 +32,10 @@ type CircularDepList = Set<string>;
 const allowedList: CircularDepList = new Set([
   'src/plugins/charts -> src/plugins/expressions',
   'src/plugins/charts -> src/plugins/vis_default_editor',
-  'src/plugins/dashboard -> src/plugins/visualizations',
-  'src/plugins/dashboard -> src/plugins/visualize',
-  'src/plugins/data -> src/plugins/discover',
   'src/plugins/data -> src/plugins/embeddable',
-  'src/plugins/data -> src/plugins/home',
-  'src/plugins/data -> src/plugins/navigation',
-  'src/plugins/data -> src/plugins/saved_objects',
+  'src/plugins/data -> src/plugins/expressions',
   'src/plugins/data -> src/plugins/ui_actions',
-  'src/plugins/data -> src/plugins/vis_default_editor',
-  'src/plugins/data -> src/plugins/visualizations',
-  'src/plugins/data -> src/plugins/visualize',
-  'src/plugins/discover -> src/plugins/embeddable',
   'src/plugins/embeddable -> src/plugins/ui_actions',
-  'src/plugins/embeddable -> src/plugins/visualizations',
-  'src/plugins/embeddable -> src/plugins/visualize',
   'src/plugins/expressions -> src/plugins/visualizations',
   'src/plugins/vis_default_editor -> src/plugins/visualizations',
   'src/plugins/vis_default_editor -> src/plugins/visualize',
@@ -54,7 +43,6 @@ const allowedList: CircularDepList = new Set([
   'x-pack/plugins/actions -> x-pack/plugins/case',
   'x-pack/plugins/apm -> x-pack/plugins/infra',
   'x-pack/plugins/lists -> x-pack/plugins/security_solution',
-  'x-pack/plugins/security -> x-pack/plugins/spaces',
 ]);
 
 run(
@@ -70,7 +58,6 @@ run(
 
     const depTree = await parseDependencyTree(pluginSearchPathGlobs, {
       context: REPO_ROOT,
-      include: /(plugins|examples)\/.*/,
     });
 
     // Build list of circular dependencies as well as the circular dependencies full paths
@@ -106,7 +93,7 @@ run(
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       `)
       );
-      log.debug(prettyCircular(circularDependenciesFullPaths));
+      log.debug(`${prettyCircular(circularDependenciesFullPaths)}\n`);
     }
 
     // Always log the result of comparing the found list with the allowed list
@@ -136,7 +123,6 @@ run(
       ${printList(allowedList)}
       `)
       );
-      return;
     }
 
     if (foundDifferences.size > 0) {
@@ -158,9 +144,12 @@ run(
 
       The differences between both are (#${foundDifferences.size}):
       ${printList(foundDifferences)}
+
+      FAILED: circular dependencies in the allowed list declared on the file '${__filename}' did not match the found ones.
       `)
       );
-      return;
+
+      process.exit(1);
     }
 
     log.success('None non allowed circular dependencies were found');
