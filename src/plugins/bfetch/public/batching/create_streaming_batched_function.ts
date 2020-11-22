@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AbortError, defer } from '../../../kibana_utils/public';
+import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,
@@ -28,7 +28,6 @@ import {
 import { fetchStreaming, split } from '../streaming';
 import { normalizeError } from '../../common';
 import { BatchedFunc, BatchItem } from './types';
-import { isBatchDone, getDonePromise, rejectOnAbort } from './batch_utils';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
   code: string;
@@ -77,51 +76,41 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     flushOnMaxItems = 25,
     maxItemAge = 10,
   } = params;
-  const [fn] = createBatchedFunction<BatchedFunc<Payload, Result>, BatchItem<Payload, Result>>({
+  const [fn] = createBatchedFunction({
     onCall: (payload: Payload, signal?: AbortSignal) => {
       const future = defer<Result>();
       const entry: BatchItem<Payload, Result> = {
         payload,
         future,
         signal,
-        done: false,
       };
       return [future.promise, entry];
     },
     onBatch: async (items) => {
       try {
-        const promises: Array<Promise<void>> = [];
-        const abortController = new AbortController();
+        const donePromises: Array<Promise<any>> = items.map((item) => {
+          if (!item.signal) return item.future.promise.catch(() => {});
 
-        // Filter out and reject any items who's signal is already aborted
-        items = items.filter((item) => {
-          if (item.signal?.aborted) {
+          // Reject promise if aborted
+          const { promise: abortPromise, cleanup } = abortSignalToPromise(item.signal);
+          abortPromise.catch(() => {
             item.future.reject(new AbortError());
-          }
-          return !item.signal?.aborted;
+            cleanup();
+          });
+          return item.future.promise.then(cleanup, cleanup);
         });
 
-        // Prepare batch
-        const batch = items
-          .filter((item) => {
-            if (item.signal?.aborted) {
-              item.future.reject(new AbortError());
-            }
-            return !item.signal?.aborted;
-          })
-          .map((item) => {
-            // Subscribe to reject promise on abort
-            rejectOnAbort(item);
-
-            // Track batch progress
-            promises.push(getDonePromise(item));
-
-            // Return payload to be sent
-            return item.payload;
-          });
-
         // abort when all items were either resolved, rejected or aborted
-        Promise.all(promises).then(() => abortController.abort());
+        const abortController = new AbortController();
+        let isBatchDone = false;
+        Promise.all(donePromises).then(() => {
+          isBatchDone = true;
+          abortController.abort();
+        });
+        const batch = items
+          // Filter out any items whose signal is already aborted
+          .filter((item) => !item.signal?.aborted)
+          .map((item) => item.payload);
 
         const { stream } = fetchStreamingInjected({
           url,
@@ -144,8 +133,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
             for (const { future } of items) future.reject(normalizedError);
           },
           complete: () => {
-            const streamTerminatedPrematurely = !isBatchDone(items);
-            if (streamTerminatedPrematurely) {
+            if (!isBatchDone) {
               const error: BatchedFunctionProtocolError = {
                 message: 'Connection terminated prematurely.',
                 code: 'CONNECTION',

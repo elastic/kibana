@@ -23,7 +23,6 @@ export interface BatchItem<Payload, Result> {
   payload: Payload;
   future: Defer<Result>;
   signal?: AbortSignal;
-  done: boolean;
 }
 
 export type BatchedFunc<Payload, Result> = (
