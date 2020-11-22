@@ -17,15 +17,20 @@
  * under the License.
  */
 
-export { assertNever } from './assert_never';
-export { deepFreeze, Freezable } from './deep_freeze';
-export { get } from './get';
-export { mapToObject } from './map_to_object';
-export { merge } from './merge';
-export { pick } from './pick';
-export { withTimeout } from './promise';
-export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
-export { unset } from './unset';
-export { getFlattenedObject } from './get_flattened_object';
-export * from './streams';
-export * from './rxjs_7';
+import { Transform } from 'stream';
+
+export function createMapStream<T>(fn: (value: T, i: number) => void) {
+  let i = 0;
+
+  return new Transform({
+    objectMode: true,
+    async transform(value, enc, done) {
+      try {
+        this.push(await fn(value, i++));
+        done();
+      } catch (err) {
+        done(err);
+      }
+    },
+  });
+}

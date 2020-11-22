@@ -17,15 +17,28 @@
  * under the License.
  */
 
-export { assertNever } from './assert_never';
-export { deepFreeze, Freezable } from './deep_freeze';
-export { get } from './get';
-export { mapToObject } from './map_to_object';
-export { merge } from './merge';
-export { pick } from './pick';
-export { withTimeout } from './promise';
-export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
-export { unset } from './unset';
-export { getFlattenedObject } from './get_flattened_object';
-export * from './streams';
-export * from './rxjs_7';
+import { Readable } from 'stream';
+
+/**
+ *  Create a Readable stream that provides the items
+ *  from a list as objects to subscribers
+ *
+ *  @param  {Array<any>} items - the list of items to provide
+ *  @return {Readable}
+ */
+export function createListStream<T = any>(items: T | T[] = []) {
+  const queue = Array.isArray(items) ? [...items] : [items];
+
+  return new Readable({
+    objectMode: true,
+    read(size) {
+      queue.splice(0, size).forEach((item) => {
+        this.push(item);
+      });
+
+      if (!queue.length) {
+        this.push(null);
+      }
+    },
+  });
+}

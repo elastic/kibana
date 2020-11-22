@@ -17,15 +17,13 @@
  * under the License.
  */
 
-export { assertNever } from './assert_never';
-export { deepFreeze, Freezable } from './deep_freeze';
-export { get } from './get';
-export { mapToObject } from './map_to_object';
-export { merge } from './merge';
-export { pick } from './pick';
-export { withTimeout } from './promise';
-export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
-export { unset } from './unset';
-export { getFlattenedObject } from './get_flattened_object';
-export * from './streams';
-export * from './rxjs_7';
+export { concatStreamProviders } from './concat_stream_providers';
+export { createIntersperseStream } from './intersperse_stream';
+export { createSplitStream } from './split_stream';
+export { createListStream } from './list_stream';
+export { createReduceStream } from './reduce_stream';
+export { createPromiseFromStreams } from './promise_from_streams';
+export { createConcatStream } from './concat_stream';
+export { createMapStream } from './map_stream';
+export { createReplaceStream } from './replace_stream';
+export { createFilterStream } from './filter_stream';

@@ -17,15 +17,30 @@
  * under the License.
  */
 
-export { assertNever } from './assert_never';
-export { deepFreeze, Freezable } from './deep_freeze';
-export { get } from './get';
-export { mapToObject } from './map_to_object';
-export { merge } from './merge';
-export { pick } from './pick';
-export { withTimeout } from './promise';
-export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
-export { unset } from './unset';
-export { getFlattenedObject } from './get_flattened_object';
-export * from './streams';
-export * from './rxjs_7';
+import { createReduceStream } from './reduce_stream';
+
+/**
+ *  Creates a Transform stream that consumes all provided
+ *  values and concatenates them using each values `concat`
+ *  method.
+ *
+ *  Concatenate strings:
+ *    createListStream(['f', 'o', 'o'])
+ *      .pipe(createConcatStream())
+ *      .on('data', console.log)
+ *      // logs "foo"
+ *
+ *  Concatenate values into an array:
+ *    createListStream([1,2,3])
+ *      .pipe(createConcatStream([]))
+ *      .on('data', console.log)
+ *      // logs "[1,2,3]"
+ *
+ *
+ *  @param {any} initial The initial value that subsequent
+ *                       items will concat with
+ *  @return {Transform}
+ */
+export function createConcatStream<T>(initial?: T) {
+  return createReduceStream((acc, chunk) => acc.concat(chunk), initial);
+}
