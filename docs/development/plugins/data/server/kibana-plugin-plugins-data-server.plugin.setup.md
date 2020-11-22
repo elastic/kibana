@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { expressions, usageCollection }: DataPluginSetupDependencies): {
+setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { bfetch, expressions, usageCollection }: DataPluginSetupDependencies): {
         __enhance: (enhancements: DataEnhancements) => void;
         search: ISearchSetup;
         fieldFormats: {
@@ -21,7 +21,7 @@ setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { expressio
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  core | <code>CoreSetup&lt;DataPluginStartDependencies, DataPluginStart&gt;</code> |  |
-|  { expressions, usageCollection } | <code>DataPluginSetupDependencies</code> |  |
+|  { bfetch, expressions, usageCollection } | <code>DataPluginSetupDependencies</code> |  |
 
 <b>Returns:</b>
 
