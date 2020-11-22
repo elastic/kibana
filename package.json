@@ -131,6 +131,7 @@
     "@kbn/config-schema": "link:packages/kbn-config-schema",
     "@kbn/i18n": "link:packages/kbn-i18n",
     "@kbn/interpreter": "link:packages/kbn-interpreter",
+    "@kbn/legacy-logging": "link:packages/kbn-legacy-logging",
     "@kbn/logging": "link:packages/kbn-logging",
     "@kbn/monaco": "link:packages/kbn-monaco",
     "@kbn/std": "link:packages/kbn-std",

@@ -17,11 +17,9 @@
  * under the License.
  */
 
-jest.mock('../../../../legacy/server/config');
-jest.mock('../../../../legacy/server/logging');
+jest.mock('./setup_logging');
 
-import { LogLevel } from '../../logging';
-import { LegacyLoggingServer } from './legacy_logging_server';
+import { LegacyLoggingServer, LogRecord } from './legacy_logging_server';
 
 test('correctly forwards log records.', () => {
   const loggingServer = new LegacyLoggingServer({ events: {} });
@@ -29,28 +27,37 @@ test('correctly forwards log records.', () => {
   loggingServer.events.on('log', onLogMock);
 
   const timestamp = 1554433221100;
-  const firstLogRecord = {
+  const firstLogRecord: LogRecord = {
     timestamp: new Date(timestamp),
     pid: 5355,
-    level: LogLevel.Info,
+    level: {
+      id: 'info',
+      value: 5,
+    },
     context: 'some-context',
     message: 'some-message',
   };
 
-  const secondLogRecord = {
+  const secondLogRecord: LogRecord = {
     timestamp: new Date(timestamp),
     pid: 5355,
-    level: LogLevel.Error,
+    level: {
+      id: 'error',
+      value: 3,
+    },
     context: 'some-context.sub-context',
     message: 'some-message',
     meta: { unknown: 2 },
     error: new Error('some-error'),
   };
 
-  const thirdLogRecord = {
+  const thirdLogRecord: LogRecord = {
     timestamp: new Date(timestamp),
     pid: 5355,
-    level: LogLevel.Trace,
+    level: {
+      id: 'trace',
+      value: 7,
+    },
     context: 'some-context.sub-context',
     message: 'some-message',
     meta: { tags: ['important', 'tags'], unknown: 2 },
