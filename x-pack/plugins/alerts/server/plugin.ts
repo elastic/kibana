@@ -5,6 +5,7 @@
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { combineLatest } from 'rxjs';
 import { SecurityPluginSetup } from '../../security/server';
@@ -28,7 +29,6 @@ import {
   SavedObjectsServiceStart,
   IContextProvider,
   RequestHandler,
-  SharedGlobalConfig,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
   StatusServiceSetup,
@@ -124,10 +124,10 @@ export class AlertingPlugin {
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
-  private readonly kibanaIndex: Promise<string>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
+  private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
@@ -135,19 +135,14 @@ export class AlertingPlugin {
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
     this.telemetryLogger = initializerContext.logger.get('usage');
-    this.kibanaIndex = initializerContext.config.legacy.globalConfig$
-      .pipe(
-        first(),
-        map((config: SharedGlobalConfig) => config.kibana.index)
-      )
-      .toPromise();
+    this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup<AlertingPluginsStart, unknown>,
     plugins: AlertingPluginsSetup
-  ): Promise<PluginSetupContract> {
+  ): PluginSetupContract {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
 
@@ -187,15 +182,17 @@ export class AlertingPlugin {
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      initializeAlertingTelemetry(
-        this.telemetryLogger,
-        core,
-        plugins.taskManager,
-        await this.kibanaIndex
+      registerAlertsUsageCollector(
+        usageCollection,
+        core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
-
-      core.getStartServices().then(async ([, startPlugins]) => {
-        registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
+      this.kibanaIndexConfig.subscribe((config) => {
+        initializeAlertingTelemetry(
+          this.telemetryLogger,
+          core,
+          plugins.taskManager,
+          config.kibana.index
+        );
       });
     }
 

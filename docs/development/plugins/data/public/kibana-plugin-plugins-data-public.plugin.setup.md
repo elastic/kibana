@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-setup(core: CoreSetup<DataStartDependencies, DataPublicPluginStart>, { expressions, uiActions, usageCollection }: DataSetupDependencies): DataPublicPluginSetup;
+setup(core: CoreSetup<DataStartDependencies, DataPublicPluginStart>, { bfetch, expressions, uiActions, usageCollection }: DataSetupDependencies): DataPublicPluginSetup;
 ```
 
 ## Parameters
@@ -15,7 +15,7 @@ setup(core: CoreSetup<DataStartDependencies, DataPublicPluginStart>, { expressio
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  core | <code>CoreSetup&lt;DataStartDependencies, DataPublicPluginStart&gt;</code> |  |
-|  { expressions, uiActions, usageCollection } | <code>DataSetupDependencies</code> |  |
+|  { bfetch, expressions, uiActions, usageCollection } | <code>DataSetupDependencies</code> |  |
 
 <b>Returns:</b>
 
