@@ -107,7 +107,11 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
               resolve();
               cleanup();
             };
-            if (abortPromise) abortPromise.catch(onDone);
+            if (abortPromise)
+              abortPromise.catch(() => {
+                item.future.reject(new AbortError());
+                onDone();
+              });
             item.future.promise.then(onDone, onDone);
           });
         });
