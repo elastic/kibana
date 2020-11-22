@@ -20,7 +20,7 @@
 import Chance from 'chance';
 import expect from '@kbn/expect';
 
-import { createListStream, createPromiseFromStreams, createConcatStream } from '../../streams';
+import { createListStream, createPromiseFromStreams, createConcatStream } from '@kbn/std';
 
 import { createFilterRecordsStream } from '../filter_records_stream';
 

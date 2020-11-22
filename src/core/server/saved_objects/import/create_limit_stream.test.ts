@@ -21,7 +21,7 @@ import {
   createConcatStream,
   createListStream,
   createPromiseFromStreams,
-} from '../../utils/streams';
+} from '@kbn/std';
 import { createLimitStream } from './create_limit_stream';
 
 describe('createLimitStream()', () => {

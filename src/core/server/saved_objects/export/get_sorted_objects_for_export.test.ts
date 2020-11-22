@@ -20,7 +20,7 @@
 import { exportSavedObjectsToStream } from './get_sorted_objects_for_export';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { Readable } from 'stream';
-import { createPromiseFromStreams, createConcatStream } from '../../utils/streams';
+import { createPromiseFromStreams, createConcatStream } from '@kbn/std';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);

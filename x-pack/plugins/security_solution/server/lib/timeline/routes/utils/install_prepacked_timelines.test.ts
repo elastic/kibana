@@ -5,7 +5,7 @@
  */
 import { join, resolve } from 'path';
 
-import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils';
+import { createPromiseFromStreams } from '@kbn/std';
 import { SecurityPluginSetup } from '../../../../../../security/server';
 
 import { FrameworkRequest } from '../../../framework';

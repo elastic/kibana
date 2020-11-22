@@ -19,7 +19,7 @@
 
 import { createSavedObjectsStreamFromNdJson, validateTypes, validateObjects } from './utils';
 import { Readable } from 'stream';
-import { createPromiseFromStreams, createConcatStream } from '../../utils/streams';
+import { createPromiseFromStreams, createConcatStream } from '@kbn/std';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);

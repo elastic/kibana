@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 
-import { createListStream, createPromiseFromStreams } from '../../streams';
+import { createListStream, createPromiseFromStreams } from '@kbn/std';
 
 import { createDeleteIndexStream } from '../delete_index_stream';
 

@@ -19,8 +19,7 @@
 
 import sinon from 'sinon';
 import expect from '@kbn/expect';
-
-import { createListStream, createPromiseFromStreams, createConcatStream } from '../../streams';
+import { createListStream, createPromiseFromStreams, createConcatStream } from '@kbn/std';
 
 import { createStubClient, createStubStats } from './stubs';
 

@@ -21,7 +21,7 @@ import { createGzip, Z_BEST_COMPRESSION } from 'zlib';
 import { PassThrough } from 'stream';
 import stringify from 'json-stable-stringify';
 
-import { createMapStream, createIntersperseStream } from '../streams';
+import { createMapStream, createIntersperseStream } from '@kbn/std';
 import { RECORD_SEPARATOR } from './constants';
 
 export function createFormatArchiveStreams({ gzip = false }: { gzip?: boolean } = {}) {

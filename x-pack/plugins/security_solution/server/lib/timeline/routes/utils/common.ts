@@ -7,11 +7,9 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import readline from 'readline';
 import fs from 'fs';
 import { Readable } from 'stream';
+import { createListStream } from '@kbn/std';
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-
-import { createListStream } from '../../../../../../../../src/core/server/utils';
-
 import { SetupPlugins } from '../../../../plugin';
 
 import { FrameworkRequest } from '../../../framework';

@@ -13,7 +13,7 @@ import {
   createConcatStream,
   createSplitStream,
   createMapStream,
-} from '../../../../../../src/core/server/utils';
+} from '@kbn/std';
 import {
   parseNdjsonStrings,
   filterExportedCounts,

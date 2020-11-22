@@ -7,6 +7,12 @@ import { Transform } from 'stream';
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
+import {
+  createSplitStream,
+  createMapStream,
+  createConcatStream,
+} from '@kbn/std';
+
 import { formatErrors } from '../../../../common/format_errors';
 import { importRuleValidateTypeDependents } from '../../../../common/detection_engine/schemas/request/import_rules_type_dependents';
 import { exactCheck } from '../../../../common/exact_check';
@@ -15,11 +21,6 @@ import {
   ImportRulesSchema,
   ImportRulesSchemaDecoded,
 } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
-import {
-  createSplitStream,
-  createMapStream,
-  createConcatStream,
-} from '../../../../../../../src/core/server/utils';
 import { BadRequestError } from '../errors/bad_request_error';
 import {
   parseNdjsonStrings,

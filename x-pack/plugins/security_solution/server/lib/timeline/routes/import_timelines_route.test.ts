@@ -79,7 +79,7 @@ describe('import timelines', () => {
       };
     });
 
-    jest.doMock('../../../../../../../src/core/server/utils', () => {
+    jest.doMock('@kbn/std', () => {
       return {
         createPromiseFromStreams: jest.fn().mockReturnValue(mockParsedObjects),
       };
