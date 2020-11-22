@@ -170,7 +170,7 @@ const TimelineStatusInfo = ({ timelineId }) => {
 
   const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
 
-  if (!isUnsaved) {
+  if (isUnsaved) {
     return <EuiTextColor color="warning">{'Unsaved'}</EuiTextColor>;
   }
 
