@@ -7,6 +7,15 @@
 import { Query } from '@elastic/eui';
 import { FilterValues } from './types';
 
+/**
+ * Return a name->values map for all the field clauses of given query.
+ *
+ * @example
+ * ```
+ *  getFieldValueMap(Query.parse('foo:bar foo:baz hello:dolly term'));
+ *  >>  { foo: ['bar', 'baz'], hello: ['dolly] }
+ * ```
+ */
 export const getFieldValueMap = (query: Query) => {
   const fieldMap = new Map<string, FilterValues>();
 
@@ -23,6 +32,9 @@ export const getFieldValueMap = (query: Query) => {
   return fieldMap;
 };
 
+/**
+ * Aggregate all term clauses from given query and concatenate them.
+ */
 export const getSearchTerm = (query: Query): string | undefined => {
   let term: string | undefined;
   if (query.ast.getTermClauses().length) {
@@ -36,6 +48,16 @@ export const getSearchTerm = (query: Query): string | undefined => {
   return term?.length ? term : undefined;
 };
 
+/**
+ * Apply given alias map to the value map, concatenating the aliases values to the alias target, and removing
+ * the alias entry. Any non-aliased entries will remain unchanged.
+ *
+ * @example
+ * ```
+ *  applyAliases({ field: ['foo'], alias: ['bar'], hello: ['dolly'] }, { field: ['alias']});
+ *  >>  { field: ['foo', 'bar'], hello: ['dolly'] }
+ * ```
+ */
 export const applyAliases = (
   valueMap: Map<string, FilterValues>,
   aliasesMap: Record<string, string[]>
