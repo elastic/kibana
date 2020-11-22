@@ -85,7 +85,8 @@ function normalizeMappingValue(eventField: string, mappingValue: string): string
 function normalizeEventValue(eventField: string, eventValue: SearchTypes): Set<string | number> {
   const eventValues = Array.isArray(eventValue) ? eventValue : [eventValue];
   const validValues = eventValues.filter((v): v is string | number => isValidValue(eventField, v));
-  return new Set(validValues);
+  const finalValues = eventField === ECS_SEVERITY_FIELD ? validValues : validValues.map(String);
+  return new Set(finalValues);
 }
 
 function isValidValue(eventField: string, value: unknown): value is string | number {

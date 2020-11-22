@@ -14,6 +14,9 @@ import {
   BuildSeverityFromMappingReturn,
 } from './build_severity_from_mapping';
 
+const ECS_FIELD = 'event.severity';
+const ANY_FIELD = 'event.my_custom_severity';
+
 describe('buildSeverityFromMapping', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,47 +33,90 @@ describe('buildSeverityFromMapping', () => {
     });
   });
 
-  describe('base cases: when mapping to a single field', () => {
-    // TODO: Discuss at Play Time. Support arbitrary fields and string values.
-    test.skip(`severity is overridden if there's a match to a string`, () => {
-      testIt({
-        fieldValue: 'hackerman',
-        severityDefault: 'low',
-        severityMapping: [
-          { field: 'event.severity', operator: 'equals', value: 'anything', severity: 'medium' },
-          { field: 'event.severity', operator: 'equals', value: 'hackerman', severity: 'critical' },
-        ],
-        expected: overridenSeverityOf('critical'),
-      });
-    });
-
+  describe('base cases: when mapping to the "event.severity" field from ECS', () => {
     test(`severity is overridden if there's a match to a number`, () => {
       testIt({
         fieldValue: 23,
         severityDefault: 'low',
         severityMapping: [
-          { field: 'event.severity', operator: 'equals', value: '13', severity: 'low' },
-          { field: 'event.severity', operator: 'equals', value: '23', severity: 'medium' },
-          { field: 'event.severity', operator: 'equals', value: '33', severity: 'high' },
-          { field: 'event.severity', operator: 'equals', value: '43', severity: 'critical' },
+          { field: ECS_FIELD, operator: 'equals', value: '13', severity: 'low' },
+          { field: ECS_FIELD, operator: 'equals', value: '23', severity: 'medium' },
+          { field: ECS_FIELD, operator: 'equals', value: '33', severity: 'high' },
+          { field: ECS_FIELD, operator: 'equals', value: '43', severity: 'critical' },
         ],
         expected: overridenSeverityOf('medium'),
+      });
+    });
+
+    test(`returns the default severity if there's a match to a string (ignores strings)`, () => {
+      testIt({
+        fieldValue: 'hackerman',
+        severityDefault: 'low',
+        severityMapping: [
+          { field: ECS_FIELD, operator: 'equals', value: 'hackerman', severity: 'critical' },
+        ],
+        expected: severityOf('low'),
+      });
+    });
+  });
+
+  describe('base cases: when mapping to any other field containing a single value', () => {
+    test(`severity is overridden if there's a match to a number`, () => {
+      testIt({
+        fieldName: ANY_FIELD,
+        fieldValue: 23,
+        severityDefault: 'low',
+        severityMapping: [
+          { field: ANY_FIELD, operator: 'equals', value: '13', severity: 'low' },
+          { field: ANY_FIELD, operator: 'equals', value: '23', severity: 'medium' },
+          { field: ANY_FIELD, operator: 'equals', value: '33', severity: 'high' },
+          { field: ANY_FIELD, operator: 'equals', value: '43', severity: 'critical' },
+        ],
+        expected: overridenSeverityOf('medium', ANY_FIELD),
+      });
+    });
+
+    test(`severity is overridden if there's a match to a string`, () => {
+      testIt({
+        fieldName: ANY_FIELD,
+        fieldValue: 'hackerman',
+        severityDefault: 'low',
+        severityMapping: [
+          { field: ANY_FIELD, operator: 'equals', value: 'anything', severity: 'medium' },
+          { field: ANY_FIELD, operator: 'equals', value: 'hackerman', severity: 'critical' },
+        ],
+        expected: overridenSeverityOf('critical', ANY_FIELD),
       });
     });
   });
 
   describe('base cases: when mapping to an array', () => {
-    test(`severity is overridden to highest matched mapping`, () => {
+    test(`severity is overridden to highest matched mapping (works for "event.severity" field)`, () => {
       testIt({
         fieldValue: [23, 'some string', 43, 33],
         severityDefault: 'low',
         severityMapping: [
-          { field: 'event.severity', operator: 'equals', value: '13', severity: 'low' },
-          { field: 'event.severity', operator: 'equals', value: '23', severity: 'medium' },
-          { field: 'event.severity', operator: 'equals', value: '33', severity: 'high' },
-          { field: 'event.severity', operator: 'equals', value: '43', severity: 'critical' },
+          { field: ECS_FIELD, operator: 'equals', value: '13', severity: 'low' },
+          { field: ECS_FIELD, operator: 'equals', value: '23', severity: 'medium' },
+          { field: ECS_FIELD, operator: 'equals', value: '33', severity: 'high' },
+          { field: ECS_FIELD, operator: 'equals', value: '43', severity: 'critical' },
         ],
         expected: overridenSeverityOf('critical'),
+      });
+    });
+
+    test(`severity is overridden to highest matched mapping (works for any custom field)`, () => {
+      testIt({
+        fieldName: ANY_FIELD,
+        fieldValue: ['foo', 'bar', 'baz', 'boo'],
+        severityDefault: 'low',
+        severityMapping: [
+          { field: ANY_FIELD, operator: 'equals', value: 'bar', severity: 'high' },
+          { field: ANY_FIELD, operator: 'equals', value: 'baz', severity: 'critical' },
+          { field: ANY_FIELD, operator: 'equals', value: 'foo', severity: 'low' },
+          { field: ANY_FIELD, operator: 'equals', value: 'boo', severity: 'medium' },
+        ],
+        expected: overridenSeverityOf('critical', ANY_FIELD),
       });
     });
   });
@@ -81,9 +127,9 @@ describe('buildSeverityFromMapping', () => {
         fieldValue: 23,
         severityDefault: 'low',
         severityMapping: [
-          { field: 'event.severity', operator: 'equals', value: '23', severity: 'medium' },
-          { field: 'event.severity', operator: 'equals', value: '23', severity: 'critical' },
-          { field: 'event.severity', operator: 'equals', value: '23', severity: 'high' },
+          { field: ECS_FIELD, operator: 'equals', value: '23', severity: 'medium' },
+          { field: ECS_FIELD, operator: 'equals', value: '23', severity: 'critical' },
+          { field: ECS_FIELD, operator: 'equals', value: '23', severity: 'high' },
         ],
         expected: overridenSeverityOf('critical'),
       });
@@ -92,15 +138,16 @@ describe('buildSeverityFromMapping', () => {
 });
 
 interface TestCase {
+  fieldName?: string;
   fieldValue: unknown;
   severityDefault: Severity;
   severityMapping: SeverityMappingOrUndefined;
   expected: BuildSeverityFromMappingReturn;
 }
 
-function testIt({ fieldValue, severityDefault, severityMapping, expected }: TestCase) {
+function testIt({ fieldName, fieldValue, severityDefault, severityMapping, expected }: TestCase) {
   const result = buildSeverityFromMapping({
-    eventSource: sampleDocSeverity(fieldValue)._source,
+    eventSource: sampleDocSeverity(fieldValue, fieldName)._source,
     severity: severityDefault,
     severityMapping,
   });
@@ -115,11 +162,11 @@ function severityOf(value: Severity) {
   };
 }
 
-function overridenSeverityOf(value: Severity) {
+function overridenSeverityOf(value: Severity, field = ECS_FIELD) {
   return {
     severity: value,
     severityMeta: {
-      severityOverrideField: 'event.severity',
+      severityOverrideField: field,
     },
   };
 }
