@@ -88,16 +88,28 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     },
     onBatch: async (items) => {
       try {
-        const donePromises: Array<Promise<any>> = items.map((item) => {
-          if (!item.signal) return item.future.promise.catch(() => {});
+        // Filter out any items whose signal is already aborted
+        items = items.filter((item) => {
+          if (item.signal?.aborted) item.future.reject(new AbortError());
+          return !item.signal?.aborted;
+        });
 
-          // Reject promise if aborted
-          const { promise: abortPromise, cleanup } = abortSignalToPromise(item.signal);
-          abortPromise.catch(() => {
-            item.future.reject(new AbortError());
-            cleanup();
+        const donePromises: Array<Promise<any>> = items.map((item) => {
+          return new Promise<void>((resolve) => {
+            const { promise: abortPromise, cleanup } = item.signal
+              ? abortSignalToPromise(item.signal)
+              : {
+                  promise: undefined,
+                  cleanup: () => {},
+                };
+
+            const onDone = () => {
+              resolve();
+              cleanup();
+            };
+            if (abortPromise) abortPromise.catch(onDone);
+            item.future.promise.then(onDone, onDone);
           });
-          return item.future.promise.then(cleanup, cleanup);
         });
 
         // abort when all items were either resolved, rejected or aborted
@@ -107,10 +119,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           isBatchDone = true;
           abortController.abort();
         });
-        const batch = items
-          // Filter out any items whose signal is already aborted
-          .filter((item) => !item.signal?.aborted)
-          .map((item) => item.payload);
+        const batch = items.map((item) => item.payload);
 
         const { stream } = fetchStreamingInjected({
           url,
