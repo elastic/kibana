@@ -93,14 +93,15 @@ const StatefulEventComponent: React.FC<Props> = ({
   }, [event]);
 
   const onPinEvent: OnPinEvent = useCallback(
-    (eventId) => dispatch(timelineActions.pinEvent!({ id: timelineId, eventId })),
+    (eventId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId })),
     [dispatch, timelineId]
   );
 
   const onUnPinEvent: OnPinEvent = useCallback(
-    (eventId) => dispatch(timelineActions.unPinEvent!({ id: timelineId, eventId })),
+    (eventId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId })),
     [dispatch, timelineId]
   );
+
   const handleOnEventToggled = useCallback(() => {
     const eventId = event._id;
     const indexName = event._index!;

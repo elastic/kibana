@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -17,6 +16,10 @@ import { FilterManager } from '../../../../../../../../src/plugins/data/public/q
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
+
+jest.mock('../../../../common/hooks/use_selector', () => ({
+  useDeepEqualSelector: jest.fn().mockReturnValue(getNotesByIds),
+}));
 
 const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 describe('DataProviders', () => {
@@ -32,14 +35,15 @@ describe('DataProviders', () => {
           filterManager,
         },
       };
-      const wrapper = shallow(
+      const wrapper = mount(
         <TestProviders>
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DataProviders data-test-subj="dataProviders-container" timelineId="foo" />
           </ManageGlobalTimeline>
         </TestProviders>
       );
-      expect(wrapper.find(`[data-test-subj="dataProviders-container"]`).dive()).toMatchSnapshot();
+      expect(wrapper.find(`[data-test-subj="dataProviders-container"]`)).toBeTruthy();
+      expect(wrapper.find(`[date-test-subj="drop-target-data-providers"]`)).toBeTruthy();
     });
 
     test('it should render a placeholder when there are zero data providers', () => {

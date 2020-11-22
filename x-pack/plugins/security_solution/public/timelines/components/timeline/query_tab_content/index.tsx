@@ -14,9 +14,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
+import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -153,13 +154,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   start,
   status,
   sort,
-  timelineType,
   timerangeKind,
+  updateEventTypeAndIndexesName,
 }) => {
-  const dispatch = useDispatch();
   const [showEventDetailsColumn, setShowEventDetailsColumn] = useState(false);
 
   useEffect(() => {
+    // it should changed only once to true and then stay visible till the component umount
     setShowEventDetailsColumn((current) => {
       if (showEventDetails && !current) {
         return true;
@@ -219,20 +220,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [sort.columnId, sort.sortDirection]
   );
 
-  const handleUpdateEventTypeAndIndexesName = useCallback(
-    (newEventType: TimelineEventsType, newIndexNames: string[]) => {
-      dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-      dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
-      dispatch(
-        sourcererActions.setSelectedIndexPatterns({
-          id: SourcererScopeName.timeline,
-          selectedPatterns: newIndexNames,
-        })
-      );
-    },
-    [dispatch, timelineId]
-  );
-
   const [isQueryLoading, setIsQueryLoading] = useState(false);
   const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
@@ -288,7 +275,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <PickEventType
                   eventType={eventType}
-                  onChangeEventTypeAndIndexesName={handleUpdateEventTypeAndIndexesName}
+                  onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -417,14 +404,26 @@ const makeMapStateToProps = () => {
       sort,
       start: input.timerange.from,
       status,
-      timelineType,
       timerangeKind: input.timerange.kind,
     };
   };
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
+  updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
+    dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
+    dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
+    dispatch(
+      sourcererActions.setSelectedIndexPatterns({
+        id: SourcererScopeName.timeline,
+        selectedPatterns: newIndexNames,
+      })
+    );
+  },
+});
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
@@ -443,9 +442,9 @@ export const QueryTabContent = connector(
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.showEventDetails === nextProps.showEventDetails &&
-      prevProps.timelineId === nextProps.timelineId &&
-      prevProps.timelineType === nextProps.timelineType &&
       prevProps.status === nextProps.status &&
+      prevProps.timelineId === nextProps.timelineId &&
+      prevProps.updateEventTypeAndIndexesName === nextProps.updateEventTypeAndIndexesName &&
       deepEqual(prevProps.noteIds, nextProps.noteIds) &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&

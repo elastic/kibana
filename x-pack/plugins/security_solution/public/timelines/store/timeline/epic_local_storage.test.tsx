@@ -31,8 +31,8 @@ import {
 } from './actions';
 
 import {
-  TimelineQueryTabContentComponent,
-  Props as TimelineQueryTabContentComponentProps,
+  QueryTabContentComponent,
+  Props as QueryTabContentComponentProps,
 } from '../../components/timeline/query_tab_content';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
 import { Sort } from '../../components/timeline/body/sort';
@@ -40,7 +40,7 @@ import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../containers/local_storage');
 
@@ -57,7 +57,7 @@ describe('epicLocalStorage', () => {
     storage
   );
 
-  let props = {} as TimelineQueryTabContentComponentProps;
+  let props = {} as QueryTabContentComponentProps;
   const sort: Sort = {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
@@ -77,21 +77,26 @@ describe('epicLocalStorage', () => {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
+      eventType: 'all',
       filters: [],
+      graphEventId: undefined,
       isLive: false,
       isSaving: false,
+      isTimelineExists: true,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      kqlMode: 'search' as TimelineQueryTabContentComponentProps['kqlMode'],
+      kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
       show: true,
       showCallOutUnauthorizedMsg: false,
+      showEventDetails: false,
       start: startDate,
       status: TimelineStatus.active,
       sort,
       timelineId: 'foo',
-      timelineType: TimelineType.default,
       timerangeKind: 'absolute',
+      noteIds: [],
+      updateEventTypeAndIndexesName: jest.fn(),
     };
   });
 
@@ -103,7 +108,7 @@ describe('epicLocalStorage', () => {
   it('persist adding / reordering of a column correctly', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineQueryTabContentComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(upsertColumn({ id: 'test', index: 1, column: defaultHeaders[0] }));
@@ -113,7 +118,7 @@ describe('epicLocalStorage', () => {
   it('persist timeline when removing a column ', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineQueryTabContentComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(removeColumn({ id: 'test', columnId: '@timestamp' }));
@@ -123,7 +128,7 @@ describe('epicLocalStorage', () => {
   it('persists resizing of a column', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineQueryTabContentComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(applyDeltaToColumnWidth({ id: 'test', columnId: '@timestamp', delta: 80 }));
@@ -133,7 +138,7 @@ describe('epicLocalStorage', () => {
   it('persist the resetting of the fields', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineQueryTabContentComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(updateColumns({ id: 'test', columns: defaultHeaders }));
@@ -143,7 +148,7 @@ describe('epicLocalStorage', () => {
   it('persist items per page', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineQueryTabContentComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(updateItemsPerPage({ id: 'test', itemsPerPage: 50 }));
@@ -153,7 +158,7 @@ describe('epicLocalStorage', () => {
   it('persist the sorting of a column', async () => {
     shallow(
       <TestProviders store={store}>
-        <TimelineQueryTabContentComponent {...props} />
+        <QueryTabContentComponent {...props} />
       </TestProviders>
     );
     store.dispatch(

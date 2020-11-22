@@ -8,14 +8,12 @@ import React from 'react';
 import { mount } from 'enzyme';
 import '../../../../common/mock/formatted_relative';
 
-import { Note } from '../../../../common/lib/note';
-
 import { NoteCards } from '.';
 import { TimelineStatus } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
 
-const getNotesByIds = (_: string[]): Note[] => [
-  {
+const getNotesByIds = () => ({
+  abc: {
     created: new Date(),
     id: 'abc',
     lastEdit: null,
@@ -24,7 +22,7 @@ const getNotesByIds = (_: string[]): Note[] => [
     user: 'elastic',
     version: null,
   },
-  {
+  def: {
     created: new Date(),
     id: 'def',
     lastEdit: null,
@@ -33,10 +31,10 @@ const getNotesByIds = (_: string[]): Note[] => [
     user: 'elastic',
     version: null,
   },
-];
+});
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
-  useDeepEqualSelector: jest.fn().mockReturnValue(getNotesByIds),
+  useDeepEqualSelector: jest.fn().mockReturnValue(getNotesByIds()),
 }));
 
 describe('NoteCards', () => {
@@ -86,7 +84,7 @@ describe('NoteCards', () => {
         .find('.euiMarkdownFormat')
         .first()
         .text()
-    ).toEqual(getNotesByIds(noteIds)[0].note);
+    ).toEqual(getNotesByIds().abc.note);
   });
 
   test('it shows controls for adding notes when showAddNote is true', () => {

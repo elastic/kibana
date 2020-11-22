@@ -90,6 +90,21 @@ export const getColumns = ({
     ),
   },
   {
+    field: 'description',
+    name: '',
+    render: (description: string | null | undefined, data: EventFieldsData) => (
+      <EuiIconTip
+        aria-label={i18n.DESCRIPTION}
+        type="iInCircle"
+        color="subdued"
+        content={`${description || ''} ${getExampleText(data.example)}`}
+      />
+    ),
+    sortable: true,
+    truncateText: true,
+    width: '30px',
+  },
+  {
     field: 'field',
     name: i18n.FIELD,
     sortable: true,

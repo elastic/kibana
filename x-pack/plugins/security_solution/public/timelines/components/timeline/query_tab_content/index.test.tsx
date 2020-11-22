@@ -17,7 +17,7 @@ import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from
 import { Sort } from '../body/sort';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineStatus } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 
@@ -87,6 +87,11 @@ describe('Timeline', () => {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
+      eventType: 'all',
+      graphEventId: undefined,
+      isTimelineExists: true,
+      noteIds: [],
+      showEventDetails: false,
       filters: [],
       timelineId: TimelineId.test,
       isLive: false,
@@ -100,8 +105,8 @@ describe('Timeline', () => {
       sort,
       start: startDate,
       status: TimelineStatus.active,
-      timelineType: TimelineType.default,
       timerangeKind: 'absolute',
+      updateEventTypeAndIndexesName: jest.fn(),
     };
   });
 

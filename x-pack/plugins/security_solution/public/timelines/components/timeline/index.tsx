@@ -37,11 +37,11 @@ const TimelineTemplateBadge = styled.div`
   font-size: 0.8em;
 `;
 
-const StyledDiv = styled.div.attrs(({ $isVisible = false }: { $isVisible: boolean }) => ({
+const StyledDiv = styled.div.attrs<{ $isVisible: boolean }>(({ $isVisible = false }) => ({
   style: {
     display: $isVisible ? 'flex' : 'none',
   },
-}))`
+}))<{ $isVisible: boolean }>`
   flex: 1;
   overflow: hidden;
 `;

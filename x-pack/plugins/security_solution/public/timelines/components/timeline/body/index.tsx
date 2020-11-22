@@ -45,7 +45,7 @@ export const hasAdditionalActions = (id: TimelineId): boolean =>
 
 const EXTRA_WIDTH = 4; // px
 
-type StatefulBodyProps = OwnProps & PropsFromRedux;
+export type StatefulBodyProps = OwnProps & PropsFromRedux;
 
 export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
