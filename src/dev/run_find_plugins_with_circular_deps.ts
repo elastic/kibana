@@ -156,7 +156,7 @@ run(
       The found circular dependencies list is (#${foundList.size}):
       ${printList(foundList)}
 
-      The differences between both are (#${foundList.size}):
+      The differences between both are (#${foundDifferences.size}):
       ${printList(foundDifferences)}
       `)
       );
