@@ -60,7 +60,7 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
 
 describe('Body', () => {
   const mount = useMountAppended();
-  const props: BodyProps = {
+  const props: StatefulBodyProps = {
     browserFields: mockBrowserFields,
     columnHeaders: defaultHeaders,
     columnRenderers,
@@ -222,7 +222,7 @@ describe('Body', () => {
     });
 
     test('Add two Note to an event', () => {
-      const Proxy = (proxyProps: BodyProps) => (
+      const Proxy = (proxyProps: StatefulBodyProps) => (
         <TestProviders>
           <BodyComponent {...proxyProps} />
         </TestProviders>

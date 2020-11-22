@@ -63,7 +63,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     setSelected,
     clearSelected,
     onRuleChange,
-    show,
     showCheckboxes,
     refetch,
     sort,
@@ -141,7 +140,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     return (
       <>
-        <TimelineBody data-test-subj="timeline-body" data-timeline-id={id} visible={show}>
+        <TimelineBody data-test-subj="timeline-body" data-timeline-id={id}>
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}
@@ -191,7 +190,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
     prevProps.loadingEventIds === nextProps.loadingEventIds &&
     prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
-    prevProps.show === nextProps.show &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
     prevProps.sort === nextProps.sort
@@ -216,7 +214,6 @@ const makeMapStateToProps = () => {
       loadingEventIds,
       pinnedEventIds,
       selectedEventIds,
-      show,
       showCheckboxes,
     } = timeline;
 
@@ -229,7 +226,6 @@ const makeMapStateToProps = () => {
       id,
       pinnedEventIds,
       selectedEventIds,
-      show,
       showCheckboxes,
     };
   };

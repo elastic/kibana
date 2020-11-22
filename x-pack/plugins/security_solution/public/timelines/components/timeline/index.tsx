@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTabbedContent, EuiProgress, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiProgress, EuiTabs, EuiTab } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';

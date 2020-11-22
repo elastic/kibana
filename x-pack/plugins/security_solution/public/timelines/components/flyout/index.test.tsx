@@ -115,7 +115,6 @@ describe.skip('Flyout', () => {
     });
 
     test('should NOT show the flyout button when show is false', () => {
-      const openMock = jest.fn();
       const wrapper = mount(
         <TestProviders>
           <FlyoutBottomBar show={false} timelineId="test" />
@@ -127,7 +126,6 @@ describe.skip('Flyout', () => {
     });
 
     test('should return the flyout button with text', () => {
-      const openMock = jest.fn();
       const wrapper = mount(
         <TestProviders>
           <FlyoutBottomBar show={true} timelineId="test" />
@@ -138,16 +136,15 @@ describe.skip('Flyout', () => {
       ).toContain('Timeline');
     });
 
-    test('should call the onOpen when it is clicked', () => {
-      const openMock = jest.fn();
-      const wrapper = mount(
-        <TestProviders>
-          <FlyoutBottomBar show={true} timelineId="test" />
-        </TestProviders>
-      );
-      wrapper.find('[data-test-subj="flyoutOverlay"]').first().simulate('click');
+    // test('should call the onOpen when it is clicked', () => {
+    //   const wrapper = mount(
+    //     <TestProviders>
+    //       <FlyoutBottomBar show={true} timelineId="test" />
+    //     </TestProviders>
+    //   );
+    //   wrapper.find('[data-test-subj="flyoutOverlay"]').first().simulate('click');
 
-      expect(openMock).toBeCalled();
-    });
+    //   expect(openMock).toBeCalled();
+    // });
   });
 });

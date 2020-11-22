@@ -13,10 +13,7 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import {
-  TimelineQueryTabContentComponent,
-  Props as TimelineQueryTabContentComponentProps,
-} from './index';
+import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from './index';
 import { Sort } from '../body/sort';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
@@ -63,7 +60,7 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 describe('Timeline', () => {
-  let props = {} as TimelineQueryTabContentComponentProps;
+  let props = {} as QueryTabContentComponentProps;
   const sort: Sort = {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
@@ -96,7 +93,7 @@ describe('Timeline', () => {
       isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      kqlMode: 'search' as TimelineQueryTabContentComponentProps['kqlMode'],
+      kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
       show: true,
       showCallOutUnauthorizedMsg: false,
@@ -112,7 +109,7 @@ describe('Timeline', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <TimelineQueryTabContentComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -122,7 +119,7 @@ describe('Timeline', () => {
     test('it renders the timeline header', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineQueryTabContentComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -132,7 +129,7 @@ describe('Timeline', () => {
     test('it renders the title field', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineQueryTabContentComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -144,7 +141,7 @@ describe('Timeline', () => {
     test('it renders the timeline table', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineQueryTabContentComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -154,7 +151,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when the source is loading', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineQueryTabContentComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -164,7 +161,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when start is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineQueryTabContentComponent {...props} start={''} />
+          <QueryTabContentComponent {...props} start={''} />
         </TestProviders>
       );
 
@@ -174,7 +171,7 @@ describe('Timeline', () => {
     test('it does NOT render the timeline table when end is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineQueryTabContentComponent {...props} end={''} />
+          <QueryTabContentComponent {...props} end={''} />
         </TestProviders>
       );
 
@@ -184,7 +181,7 @@ describe('Timeline', () => {
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineQueryTabContentComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -194,7 +191,7 @@ describe('Timeline', () => {
     it('it shows the timeline footer', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineQueryTabContentComponent {...props} />
+          <QueryTabContentComponent {...props} />
         </TestProviders>
       );
 

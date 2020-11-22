@@ -25,12 +25,12 @@ export const TimelineBodyGlobalStyle = createGlobalStyle`
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_BODY_CLASS_NAME} ${className}`,
-}))<{ bodyHeight?: number; visible: boolean }>`
+}))<{ bodyHeight?: number }>`
   height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;
-  display: ${({ visible }) => (visible ? 'block' : 'none')};
+  display: block;
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};

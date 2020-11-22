@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
 
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import {
@@ -74,6 +73,5 @@ export const EventDetailsFlyout = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
-    prevProps.timelineId === nextProps.timelineId &&
-    prevProps.toggleColumn === nextProps.toggleColumn
+    prevProps.timelineId === nextProps.timelineId
 );
