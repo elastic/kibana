@@ -446,6 +446,35 @@ describe('createStreamingBatchedFunction()', () => {
     });
 
     describe('when requests are aborted', () => {
+      test('aborts stream when all are aborted', async () => {
+        const { fetchStreaming } = setup();
+        const fn = createStreamingBatchedFunction({
+          url: '/test',
+          fetchStreaming,
+          maxItemAge: 5,
+          flushOnMaxItems: 3,
+        });
+
+        const abortController = new AbortController();
+        const promise = fn({ a: '1' }, abortController.signal);
+        const promise2 = fn({ a: '2' }, abortController.signal);
+        await new Promise((r) => setTimeout(r, 6));
+
+        expect(await isPending(promise)).toBe(true);
+        expect(await isPending(promise2)).toBe(true);
+
+        abortController.abort();
+        await new Promise((r) => setTimeout(r, 6));
+
+        expect(await isPending(promise)).toBe(false);
+        expect(await isPending(promise2)).toBe(false);
+        const [, error] = await of(promise);
+        const [, error2] = await of(promise2);
+        expect(error).toBeInstanceOf(AbortError);
+        expect(error2).toBeInstanceOf(AbortError);
+        expect(fetchStreaming.mock.calls[0][0].signal.aborted).toBeTruthy();
+      });
+
       test('rejects promise on abort and lets others continue', async () => {
         const { fetchStreaming, stream } = setup();
         const fn = createStreamingBatchedFunction({

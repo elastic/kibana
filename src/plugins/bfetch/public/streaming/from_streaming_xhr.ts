@@ -57,13 +57,14 @@ export const fromStreamingXhr = (
   if (signal) signal.addEventListener('abort', onBatchAbort);
 
   xhr.onreadystatechange = () => {
+    if (aborted) return;
     // Older browsers don't support onprogress, so we need
     // to call this here, too. It's safe to call this multiple
     // times even for the same progress event.
     processBatch();
 
     // 4 is the magic number that means the request is done
-    if (!aborted && xhr.readyState === 4) {
+    if (xhr.readyState === 4) {
       if (signal) signal.removeEventListener('abort', onBatchAbort);
 
       // 0 indicates a network failure. 400+ messages are considered server errors
