@@ -30,25 +30,71 @@
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
-Cypress.Commands.add('stubSecurityApi', function (dataFileName) {
-  cy.on('window:before:load', (win) => {
-    win.fetch = null;
-  });
-  cy.server();
-  cy.fixture(dataFileName).as(`${dataFileName}JSON`);
-  cy.route('POST', 'api/solutions/security/graphql', `@${dataFileName}JSON`);
-});
+import { findIndex } from 'lodash/fp';
+
+const getFindRequestConfig = (searchStrategyName, factoryQueryType) => {
+  if (!factoryQueryType) {
+    return {
+      options: { strategy: searchStrategyName },
+    };
+  }
+
+  return {
+    options: { strategy: searchStrategyName },
+    request: { factoryQueryType },
+  };
+};
 
 Cypress.Commands.add('stubSearchStrategyApi', function (
-  dataFileName,
+  stubObject,
+  factoryQueryType,
   searchStrategyName = 'securitySolutionSearchStrategy'
 ) {
-  cy.on('window:before:load', (win) => {
-    win.fetch = null;
+  cy.route2('POST', '/internal/bsearch', (req) => {
+    const bodyObj = JSON.parse(req.body);
+    const findRequestConfig = getFindRequestConfig(searchStrategyName, factoryQueryType);
+
+    const hostOverviewRequestIndex = findIndex(findRequestConfig, bodyObj.batch);
+
+    if (hostOverviewRequestIndex > -1) {
+      return req.reply((res) => {
+        const responseObjectsArray = res.body.split('\n').map((responseString) => {
+          try {
+            return JSON.parse(responseString);
+          } catch {
+            return responseString;
+          }
+        });
+        const hostOverviewResponseIndex = findIndex(
+          { id: hostOverviewRequestIndex },
+          responseObjectsArray
+        );
+
+        const stubbedResponseObjectsArray = [...responseObjectsArray];
+        stubbedResponseObjectsArray[hostOverviewResponseIndex] = {
+          ...stubbedResponseObjectsArray[hostOverviewResponseIndex],
+          result: {
+            ...stubbedResponseObjectsArray[hostOverviewResponseIndex].result,
+            ...stubObject,
+          },
+        };
+
+        const stubbedResponse = stubbedResponseObjectsArray
+          .map((object) => {
+            try {
+              return JSON.stringify(object);
+            } catch {
+              return object;
+            }
+          })
+          .join('\n');
+
+        res.send(stubbedResponse);
+      });
+    }
+
+    req.reply();
   });
-  cy.server();
-  cy.fixture(dataFileName).as(`${dataFileName}JSON`);
-  cy.route('POST', `internal/search/${searchStrategyName}`, `@${dataFileName}JSON`);
 });
 
 Cypress.Commands.add(

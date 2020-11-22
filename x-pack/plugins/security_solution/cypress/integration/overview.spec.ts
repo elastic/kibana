@@ -11,9 +11,12 @@ import { loginAndWaitForPage } from '../tasks/login';
 
 import { OVERVIEW_URL } from '../urls/navigation';
 
+import overviewFixture from '../fixtures/overview_search_strategy.json';
+import emptyInstance from '../fixtures/empty_instance.json';
+
 describe('Overview Page', () => {
   it('Host stats render with correct values', () => {
-    cy.stubSearchStrategyApi('overview_search_strategy');
+    cy.stubSearchStrategyApi(overviewFixture, 'overviewHost');
     loginAndWaitForPage(OVERVIEW_URL);
     expandHostStats();
 
@@ -23,7 +26,7 @@ describe('Overview Page', () => {
   });
 
   it('Network stats render with correct values', () => {
-    cy.stubSearchStrategyApi('overview_search_strategy');
+    cy.stubSearchStrategyApi(overviewFixture, 'overviewNetwork');
     loginAndWaitForPage(OVERVIEW_URL);
     expandNetworkStats();
 
@@ -33,14 +36,10 @@ describe('Overview Page', () => {
   });
 
   describe('with no data', () => {
-    before(() => {
-      cy.server();
-      cy.fixture('empty_instance').as('emptyInstance');
-      loginAndWaitForPage(OVERVIEW_URL);
-      cy.route('POST', '**/internal/search/securitySolutionIndexFields', '@emptyInstance');
-    });
-
     it('Splash screen should be here', () => {
+      cy.stubSearchStrategyApi(emptyInstance, undefined, 'securitySolutionIndexFields');
+      loginAndWaitForPage(OVERVIEW_URL);
+
       cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
     });
   });
