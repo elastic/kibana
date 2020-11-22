@@ -7,7 +7,6 @@
 import { $Values } from '@kbn/utility-types';
 import { Adapters } from 'src/plugins/inspector/common';
 import { ApiResponse } from '@elastic/elasticsearch';
-import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch/lib/Transport';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { ConfigDeprecationProvider } from '@kbn/config';
@@ -1083,7 +1082,7 @@ export function searchUsageObserver(logger: Logger_2, usage?: SearchUsage): {
 };
 
 // @internal
-export function shimAbortSignal<T = ApiResponse_2<SearchResponse<unknown>>>(promise: TransportRequestPromise<T>, signal?: AbortSignal): Promise<T>;
+export const shimAbortSignal: <T>(promise: TransportRequestPromise<T>, signal?: AbortSignal | undefined) => TransportRequestPromise<T>;
 
 // @internal
 export function shimHitsTotal(response: SearchResponse<any>): {
