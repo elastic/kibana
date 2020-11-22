@@ -4548,11 +4548,6 @@
   dependencies:
     "@types/webpack" "*"
 
-"@types/console-stamp@^0.2.32":
-  version "0.2.32"
-  resolved "https://registry.yarnpkg.com/@types/console-stamp/-/console-stamp-0.2.32.tgz#9cb9dce41b6203a28486365300a8a1cf99e5801f"
-  integrity sha512-Ih8HUSWSNtmHf5DgLv+BZGKaNGZKOaFjkxb/nHOBfc2wLrWY5wFQq6rjLu+LxCD/Mc+8GoKhby364Bu0Be25tQ==
-
 "@types/cookiejar@*":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@types/cookiejar/-/cookiejar-2.1.0.tgz#4b7daf2c51696cfc70b942c11690528229d1a1ce"
@@ -10135,15 +10130,6 @@ console-log-level@^1.4.1:
   resolved "https://registry.yarnpkg.com/console-log-level/-/console-log-level-1.4.1.tgz#9c5a6bb9ef1ef65b05aba83028b0ff894cdf630a"
   integrity sha512-VZzbIORbP+PPcN/gg3DXClTLPLg5Slwd5fL2MIc+o1qZ4BXBvWyc6QxPk6T/Mkr6IVjRpoAGf32XxP3ZWMVRcQ==
 
-console-stamp@^0.2.9:
-  version "0.2.9"
-  resolved "https://registry.yarnpkg.com/console-stamp/-/console-stamp-0.2.9.tgz#9c0cd206d1fd60dec4e263ddeebde2469209c99f"
-  integrity sha512-jtgd1Fx3Im+pWN54mF269ptunkzF5Lpct2LBTbtyNoK2A4XjcxLM+TQW+e+XE/bLwLQNGRqPqlxm9JMixFntRA==
-  dependencies:
-    chalk "^1.1.1"
-    dateformat "^1.0.11"
-    merge "^1.2.0"
-
 constant-case@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/constant-case/-/constant-case-2.0.0.tgz#4175764d389d3fa9c8ecd29186ed6005243b6a46"
@@ -11206,14 +11192,6 @@ date-now@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
   integrity sha1-6vQ5/U1ISK105cx9vvIAZyueNFs=
-
-dateformat@^1.0.11:
-  version "1.0.12"
-  resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-1.0.12.tgz#9f124b67594c937ff706932e4a642cca8dbbfee9"
-  integrity sha1-nxJLZ1lMk3/3BpMuSmQsyo27/uk=
-  dependencies:
-    get-stdin "^4.0.1"
-    meow "^3.3.0"
 
 dateformat@^3.0.2, dateformat@~3.0.3:
   version "3.0.3"
@@ -19900,7 +19878,7 @@ memory-fs@^0.5.0:
     errno "^0.1.3"
     readable-stream "^2.0.1"
 
-meow@^3.3.0, meow@^3.7.0:
+meow@^3.7.0:
   version "3.7.0"
   resolved "https://registry.yarnpkg.com/meow/-/meow-3.7.0.tgz#72cb668b425228290abbfa856892587308a801fb"
   integrity sha1-cstmi0JSKCkKu/qFaJJYcwioAfs=
