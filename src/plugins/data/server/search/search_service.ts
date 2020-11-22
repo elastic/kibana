@@ -29,7 +29,8 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first, switchMap } from 'rxjs/operators';
+import { catchError, first, switchMap } from 'rxjs/operators';
+import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import {
   ISearchSetup,
@@ -85,6 +86,7 @@ type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
+  bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -106,6 +108,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly searchSourceService = new SearchSourceService();
   private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
+  private coreStart?: CoreStart;
   private sessionService: BackgroundSessionService = new BackgroundSessionService();
 
   constructor(
@@ -115,7 +118,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<{}, DataPluginStart>,
-    { expressions, usageCollection }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
@@ -128,10 +131,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerMsearchRoute(router, routeDependencies);
     registerSessionRoutes(router);
 
+    core.getStartServices().then(([coreStart]) => {
+      this.coreStart = coreStart;
+    });
+
     core.http.registerRouteHandlerContext('search', async (context, request) => {
-      const [coreStart] = await core.getStartServices();
-      const search = this.asScopedProvider(coreStart)(request);
-      const session = this.sessionService.asScopedProvider(coreStart)(request);
+      const search = this.asScopedProvider(this.coreStart!)(request);
+      const session = this.sessionService.asScopedProvider(this.coreStart!)(request);
       return { ...search, session };
     });
 
@@ -144,6 +150,36 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.logger,
         usage
       )
+    );
+
+    bfetch.addBatchProcessingRoute<{ request: any; options?: ISearchOptions }, any>(
+      '/internal/bsearch',
+      (request) => {
+        const search = this.asScopedProvider(this.coreStart!)(request);
+
+        return {
+          onBatchItem: async ({ request: requestData, options }) => {
+            return search
+              .search(requestData, options)
+              .pipe(
+                first(),
+                catchError((err) => {
+                  // eslint-disable-next-line no-throw-literal
+                  throw {
+                    statusCode: err.statusCode || 500,
+                    body: {
+                      message: err.message,
+                      attributes: {
+                        error: err.body?.error || err.message,
+                      },
+                    },
+                  };
+                })
+              )
+              .toPromise();
+          },
+        };
+      }
     );
 
     core.savedObjects.registerType(searchTelemetry);
