@@ -152,43 +152,43 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
-    bfetch.addBatchProcessingRoute<{ request: IKibanaSearchRequest; options?: ISearchOptions }, any>(
-      '/internal/bsearch',
-      (request) => {
-        const search = this.asScopedProvider(this.coreStart!)(request);
+    bfetch.addBatchProcessingRoute<
+      { request: IKibanaSearchRequest; options?: ISearchOptions },
+      any
+    >('/internal/bsearch', (request) => {
+      const search = this.asScopedProvider(this.coreStart!)(request);
 
-        return {
-          onBatchItem: async ({ request: requestData, options }) => {
-            return search
-              .search(requestData, options)
-              .pipe(
-                first(),
-                map(response => {
-                  return {
-                    ...response,
-                    ...{
-                      rawResponse: shimHitsTotal(response.rawResponse),
-                    }
-                  }
-                }),
-                catchError((err) => {
-                  // eslint-disable-next-line no-throw-literal
-                  throw {
-                    statusCode: err.statusCode || 500,
-                    body: {
-                      message: err.message,
-                      attributes: {
-                        error: err.body?.error || err.message,
-                      },
+      return {
+        onBatchItem: async ({ request: requestData, options }) => {
+          return search
+            .search(requestData, options)
+            .pipe(
+              first(),
+              map((response) => {
+                return {
+                  ...response,
+                  ...{
+                    rawResponse: shimHitsTotal(response.rawResponse),
+                  },
+                };
+              }),
+              catchError((err) => {
+                // eslint-disable-next-line no-throw-literal
+                throw {
+                  statusCode: err.statusCode || 500,
+                  body: {
+                    message: err.message,
+                    attributes: {
+                      error: err.body?.error || err.message,
                     },
-                  };
-                })
-              )
-              .toPromise();
-          },
-        };
-      }
-    );
+                  },
+                };
+              })
+            )
+            .toPromise();
+        },
+      };
+    });
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
