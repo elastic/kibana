@@ -154,6 +154,37 @@ describe('Mappings editor: runtime fields', () => {
         fields = actions.getRuntimeFieldsList();
         expect(fields.length).toBe(0);
       });
+
+      test('should edit the runtime field', async () => {
+        const { find, component, actions } = testBed;
+
+        await actions.addRuntimeField({
+          name: 'myField',
+          script: 'emit("hello")',
+          type: 'boolean',
+        });
+
+        let fields = actions.getRuntimeFieldsList();
+        expect(fields.length).toBe(1);
+
+        await actions.startEditRuntimeField('myField');
+        await actions.updateRuntimeFieldForm({
+          name: 'updatedName',
+          script: 'new script',
+          type: 'date',
+        });
+
+        await act(async () => {
+          find('runtimeFieldEditor.saveFieldButton').simulate('click');
+        });
+        component.update();
+
+        fields = actions.getRuntimeFieldsList();
+        const [field] = fields;
+
+        expect(field.name).toBe('updatedName');
+        expect(field.type).toBe('Date');
+      });
     });
   });
 });

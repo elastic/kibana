@@ -23,7 +23,7 @@ export interface DomFields {
 }
 
 const createActions = (testBed: TestBed<TestSubjects>) => {
-  const { find, form, component } = testBed;
+  const { find, exists, form, component } = testBed;
 
   // --- Mapped fields ---
   const getFieldInfo = (testSubjectField: string): { name: string; type: string } => {
@@ -181,6 +181,10 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
       double: 'Double',
       boolean: 'Boolean',
     };
+
+    if (!exists('runtimeFieldEditor')) {
+      throw new Error(`Can't update runtime field form as the editor is not opened.`);
+    }
 
     await act(async () => {
       form.setInputValue('runtimeFieldEditor.nameField.input', field.name);

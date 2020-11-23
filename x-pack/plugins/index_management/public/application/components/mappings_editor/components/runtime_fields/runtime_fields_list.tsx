@@ -22,7 +22,7 @@ export const RuntimeFieldsList = () => {
   const runtimeFieldsDocsUri = documentationService.getRuntimeFields();
   const {
     runtimeFields,
-    runtimeFieldsList: { status },
+    runtimeFieldsList: { status, fieldToEdit },
   } = useMappingsState();
   const dispatch = useDispatch();
   const {
@@ -40,9 +40,19 @@ export const RuntimeFieldsList = () => {
 
   const saveRuntimeField = useCallback(
     (field: RuntimeField) => {
-      dispatch({ type: 'runtimeField.add', value: field });
+      if (fieldToEdit) {
+        dispatch({
+          type: 'runtimeField.edit',
+          value: {
+            id: fieldToEdit,
+            source: field,
+          },
+        });
+      } else {
+        dispatch({ type: 'runtimeField.add', value: field });
+      }
     },
-    [dispatch]
+    [dispatch, fieldToEdit]
   );
 
   useEffect(() => {
@@ -53,6 +63,7 @@ export const RuntimeFieldsList = () => {
         props: {
           onSave: saveRuntimeField,
           onCancel: exitEdit,
+          defaultValue: fieldToEdit ? runtimeFields[fieldToEdit]?.source : undefined,
           docLinks: {
             DOC_LINK_VERSION: 'master',
             ELASTIC_WEBSITE_URL: 'https://elastic.co',
@@ -70,7 +81,15 @@ export const RuntimeFieldsList = () => {
     } else if (status === 'idle') {
       removeContentFromGlobalFlyout('runtimeFieldEditor');
     }
-  }, [status, addContentToGlobalFlyout, removeContentFromGlobalFlyout, saveRuntimeField, exitEdit]);
+  }, [
+    status,
+    fieldToEdit,
+    runtimeFields,
+    addContentToGlobalFlyout,
+    removeContentFromGlobalFlyout,
+    saveRuntimeField,
+    exitEdit,
+  ]);
 
   const fieldsToArray = Object.entries(runtimeFields);
   const isEmpty = fieldsToArray.length === 0;

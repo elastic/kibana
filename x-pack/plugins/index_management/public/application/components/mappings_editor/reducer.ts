@@ -520,6 +520,21 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
     }
+    case 'runtimeField.edit': {
+      const fieldToEdit = state.runtimeFieldsList.fieldToEdit!;
+
+      return {
+        ...state,
+        runtimeFields: {
+          ...state.runtimeFields,
+          [fieldToEdit]: action.value,
+        },
+        runtimeFieldsList: {
+          ...state.runtimeFieldsList,
+          status: 'idle',
+        },
+      };
+    }
     case 'runtimeField.remove': {
       const field = state.runtimeFields[action.value];
       const { id } = field;
