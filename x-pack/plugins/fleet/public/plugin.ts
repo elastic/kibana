@@ -104,7 +104,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           storage: this.storage,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
-        const unmount = renderApp(coreStartServices, params, config, kibanaVersion, extensions);
+        const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
 
         return () => {
           unmount();

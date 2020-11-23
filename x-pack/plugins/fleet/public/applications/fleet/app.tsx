@@ -5,7 +5,7 @@
  */
 
 import React, { memo, useEffect, useState } from 'react';
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters } from 'kibana/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
 import { HashRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -32,7 +32,7 @@ import { DataStreamApp } from './sections/data_stream';
 import { FleetApp } from './sections/agents';
 import { IngestManagerOverview } from './sections/overview';
 import { ProtectedRoute } from './index';
-import { FleetConfigType } from '../../plugin';
+import { FleetConfigType, FleetStartServices } from '../../plugin';
 import { UIExtensionsStorage } from './types';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../xpack_legacy/common';
@@ -177,17 +177,17 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
  */
 export const FleetAppContext: React.FC<{
   basepath: string;
-  coreStart: CoreStart;
+  startServices: FleetStartServices;
   config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
-}> = memo(({ children, coreStart, config, history, kibanaVersion, extensions }) => {
-  const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
+}> = memo(({ children, startServices, config, history, kibanaVersion, extensions }) => {
+  const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
   return (
-    <coreStart.i18n.Context>
-      <KibanaContextProvider services={{ ...coreStart }}>
+    <startServices.i18n.Context>
+      <KibanaContextProvider services={{ ...startServices }}>
         <EuiErrorBoundary>
           <ConfigContext.Provider value={config}>
             <KibanaVersionContext.Provider value={kibanaVersion}>
@@ -196,7 +196,7 @@ export const FleetAppContext: React.FC<{
                   <FleetStatusProvider>
                     <IntraAppStateProvider kibanaScopedHistory={history}>
                       <Router>
-                        <PackageInstallProvider notifications={coreStart.notifications}>
+                        <PackageInstallProvider notifications={startServices.notifications}>
                           {children}
                         </PackageInstallProvider>
                       </Router>
@@ -208,7 +208,7 @@ export const FleetAppContext: React.FC<{
           </ConfigContext.Provider>
         </EuiErrorBoundary>
       </KibanaContextProvider>
-    </coreStart.i18n.Context>
+    </startServices.i18n.Context>
   );
 });
 

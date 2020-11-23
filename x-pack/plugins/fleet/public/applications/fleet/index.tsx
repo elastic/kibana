@@ -7,7 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect, Route, RouteProps } from 'react-router-dom';
 import { CoreStart, AppMountParameters } from 'src/core/public';
-import { FleetConfigType } from '../../plugin';
+import { FleetConfigType, FleetStartServices } from '../../plugin';
 import { licenseService } from './hooks';
 import { UIExtensionsStorage } from './types';
 import { AppRoutes, FleetAppContext, WithPermissionsAndSetup } from './app';
@@ -27,7 +27,7 @@ export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
 
 interface FleetAppProps {
   basepath: string;
-  coreStart: CoreStart;
+  startServices: FleetStartServices;
   config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
@@ -35,7 +35,7 @@ interface FleetAppProps {
 }
 const FleetApp = ({
   basepath,
-  coreStart,
+  startServices,
   config,
   history,
   kibanaVersion,
@@ -44,7 +44,7 @@ const FleetApp = ({
   return (
     <FleetAppContext
       basepath={basepath}
-      coreStart={coreStart}
+      startServices={startServices}
       config={config}
       history={history}
       kibanaVersion={kibanaVersion}
@@ -58,7 +58,7 @@ const FleetApp = ({
 };
 
 export function renderApp(
-  coreStart: CoreStart,
+  startServices: FleetStartServices,
   { element, appBasePath, history }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
@@ -67,7 +67,7 @@ export function renderApp(
   ReactDOM.render(
     <FleetApp
       basepath={appBasePath}
-      coreStart={coreStart}
+      startServices={startServices}
       config={config}
       history={history}
       kibanaVersion={kibanaVersion}
