@@ -17,7 +17,7 @@ import {
   ResolverEntityIndex,
   SafeResolverEvent,
   ResolverPaginatedEvents,
-  ResolverGraph,
+  NewResolverTree,
 } from '../../common/endpoint/types';
 
 /**
@@ -153,7 +153,7 @@ export type CameraState = {
 /**
  * Wrappers around our internal types that make them compatible with `rbush`.
  */
-export type IndexedEntity = IndexedEdgeLineSegment | IndexedGraphNode;
+export type IndexedEntity = IndexedEdgeLineSegment | IndexedTreeNode;
 
 /**
  * The entity stored in `rbush` for resolver edge lines.
@@ -166,8 +166,8 @@ export interface IndexedEdgeLineSegment extends BBox {
 /**
  * The entity store in `rbush` for resolver process nodes.
  */
-export interface IndexedGraphNode extends BBox {
-  type: 'graphNode';
+export interface IndexedTreeNode extends BBox {
+  type: 'treeNode';
   entity: ResolverNode;
   position: Vector2;
 }
@@ -299,7 +299,7 @@ export interface DataState {
     data: SafeResolverEvent | null;
   };
 
-  readonly graph?: {
+  readonly tree?: {
     /**
      * The parameters passed from the resolver properties
      */
@@ -324,9 +324,9 @@ export interface DataState {
            */
           readonly successful: true;
           /**
-           * The ResolverGraph parsed from the response.
+           * The NewResolverTree parsed from the response.
            */
-          readonly result: ResolverGraph;
+          readonly result: NewResolverTree;
         }
       | {
           /**
@@ -422,7 +422,7 @@ export interface ProcessEvent {
 /**
  * A representation of a process tree with indices for O(1) access to children and values by id.
  */
-export interface IndexedGraph {
+export interface IndexedProcessTree {
   /**
    * Map of ID to a process's ordered children
    */
@@ -718,7 +718,7 @@ export interface DataAccessLayer {
   /**
    * Fetch a ResolverTree for a given id
    */
-  resolverGraph: (
+  newResolverTree: (
     dataId: string,
     schema: TreeIdSchema,
     timerange: Timerange,

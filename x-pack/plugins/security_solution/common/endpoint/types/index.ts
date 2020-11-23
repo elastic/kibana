@@ -127,7 +127,7 @@ export interface ResolverNode {
   stats: EventStats;
 }
 
-export interface ResolverGraph {
+export interface NewResolverTree {
   originId: string | null;
   nodes: ResolverNode[];
 }

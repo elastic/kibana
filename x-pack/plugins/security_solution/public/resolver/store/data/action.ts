@@ -6,7 +6,7 @@
 
 import {
   ResolverRelatedEvents,
-  ResolverGraph,
+  NewResolverTree,
   SafeEndpointEvent,
   SafeResolverEvent,
 } from '../../../../common/endpoint/types';
@@ -18,7 +18,7 @@ interface ServerReturnedResolverData {
     /**
      * The result of fetching data
      */
-    result: ResolverGraph;
+    result: NewResolverTree;
     /**
      * The database parameters that was used to fetch the resolver tree
      */

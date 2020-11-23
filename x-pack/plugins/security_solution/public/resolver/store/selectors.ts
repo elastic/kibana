@@ -54,25 +54,6 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
 /**
- * Whether or not a given entity id is in the set of termination events.
- */
-export const isNodeInactive = composeSelectors(dataStateSelector, dataSelectors.isNodeInactive);
-
-/**
- * Given a nodeID (aka entity_id) get the indexed process event.
- * Legacy functions take process events instead of nodeID, use this to get
- * process events for them.
- *
- * @deprecated use the nodeData selector instead
- */
-export const graphNodeForId: (
-  state: ResolverState
-) => (nodeID: string) => ResolverNode | null = composeSelectors(
-  dataStateSelector,
-  dataSelectors.graphNodeForID
-);
-
-/**
  * The position of nodes and edges.
  */
 export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSelectors(
@@ -97,8 +78,6 @@ export const resolverComponentInstanceID = composeSelectors(
   dataStateSelector,
   dataSelectors.resolverComponentInstanceID
 );
-
-export const inactiveNodes = composeSelectors(dataStateSelector, dataSelectors.inactiveNodes);
 
 /**
  * This returns a map of nodeIds to the associated stats provided by the datasource.
@@ -182,14 +161,14 @@ function uiStateSelector(state: ResolverState) {
 /**
  * Whether or not the resolver is pending fetching data
  */
-export const isGraphLoading = composeSelectors(dataStateSelector, dataSelectors.isGraphLoading);
+export const isTreeLoading = composeSelectors(dataStateSelector, dataSelectors.isTreeLoading);
 
 /**
  * Whether or not the resolver encountered an error while fetching data
  */
-export const hadErrorLoadingGraph = composeSelectors(
+export const hadErrorLoadingTree = composeSelectors(
   dataStateSelector,
-  dataSelectors.hadErrorLoadingGraph
+  dataSelectors.hadErrorLoadingTree
 );
 
 /**

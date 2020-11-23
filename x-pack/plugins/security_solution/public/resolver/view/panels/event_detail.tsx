@@ -49,11 +49,11 @@ export const EventDetail = memo(function EventDetail({
   eventCategory: string;
 }) {
   const isEventLoading = useSelector(selectors.isCurrentRelatedEventLoading);
-  const isGraphLoading = useSelector(selectors.isGraphLoading);
+  const isTreeLoading = useSelector(selectors.isTreeLoading);
   const nodeData = useSelector(selectors.nodeDataForID)(nodeID);
 
   const isNodeDataLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
-  const isLoading = isEventLoading || isGraphLoading || isNodeDataLoading;
+  const isLoading = isEventLoading || isTreeLoading || isNodeDataLoading;
 
   const event = useSelector(selectors.currentRelatedEventData);
 

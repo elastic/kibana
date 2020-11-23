@@ -71,8 +71,8 @@ export const ResolverWithoutProviders = React.memo(
       },
       [cameraRef, refToForward]
     );
-    const isLoading = useSelector(selectors.isGraphLoading);
-    const hasError = useSelector(selectors.hadErrorLoadingGraph);
+    const isLoading = useSelector(selectors.isTreeLoading);
+    const hasError = useSelector(selectors.hadErrorLoadingTree);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
     const colorMap = useColors();
 
@@ -113,15 +113,15 @@ export const ResolverWithoutProviders = React.memo(
                 />
               )
             )}
-            {[...processNodePositions].map(([graphNode, position]) => {
-              const nodeId = nodeID(graphNode);
+            {[...processNodePositions].map(([treeNode, position]) => {
+              const nodeId = nodeID(treeNode);
               return (
                 <ProcessEventDot
                   key={nodeId}
                   nodeID={nodeId}
                   position={position}
                   projectionMatrix={projectionMatrix}
-                  node={graphNode}
+                  node={treeNode}
                   timeAtRender={timeAtRender}
                 />
               );

@@ -5,20 +5,20 @@
  */
 
 import { orderByTime } from '../process_event';
-import { IndexedGraph } from '../../types';
+import { IndexedProcessTree } from '../../types';
 import { ResolverNode } from '../../../../common/endpoint/types';
 import { levelOrder as baseLevelOrder } from '../../lib/tree_sequencers';
 import * as nodeModel from '../../../../common/endpoint/models/node';
 
 /**
- * Create a new IndexedGraph from an array of ProcessEvents.
+ * Create a new IndexedProcessTree from an array of ProcessEvents.
  * siblings will be ordered by timestamp
  */
 export function factory(
   // Array of processes to index as a tree
   nodes: ResolverNode[],
   originId: string | undefined
-): IndexedGraph {
+): IndexedProcessTree {
   const idToChildren = new Map<string | undefined, ResolverNode[]>();
   const idToValue = new Map<string, ResolverNode>();
 
@@ -53,50 +53,53 @@ export function factory(
 /**
  * Returns an array with any children `ProcessEvent`s of the passed in `process`
  */
-export function children(graph: IndexedGraph, parentID: string | undefined): ResolverNode[] {
-  const currentSiblings = graph.idToChildren.get(parentID);
+export function children(tree: IndexedProcessTree, parentID: string | undefined): ResolverNode[] {
+  const currentSiblings = tree.idToChildren.get(parentID);
   return currentSiblings === undefined ? [] : currentSiblings;
 }
 
 /**
  * Get the indexed process event for the ID
  */
-export function graphNode(graph: IndexedGraph, entityID: string): ResolverNode | null {
-  return graph.idToNode.get(entityID) ?? null;
+export function treeNode(tree: IndexedProcessTree, entityID: string): ResolverNode | null {
+  return tree.idToNode.get(entityID) ?? null;
 }
 
 /**
  * Returns the parent ProcessEvent, if any, for the passed in `childProcess`
  */
-export function parent(graph: IndexedGraph, childNode: ResolverNode): ResolverNode | undefined {
+export function parent(
+  tree: IndexedProcessTree,
+  childNode: ResolverNode
+): ResolverNode | undefined {
   const uniqueParentId = nodeModel.parentId(childNode);
   if (uniqueParentId === undefined) {
     return undefined;
   } else {
-    return graph.idToNode.get(uniqueParentId);
+    return tree.idToNode.get(uniqueParentId);
   }
 }
 
 /**
  * Number of processes in the tree
  */
-export function size(graph: IndexedGraph) {
-  return graph.idToNode.size;
+export function size(tree: IndexedProcessTree) {
+  return tree.idToNode.size;
 }
 
 /**
  * Return the root process
  */
-export function root(graph: IndexedGraph) {
-  if (size(graph) === 0) {
+export function root(tree: IndexedProcessTree) {
+  if (size(tree) === 0) {
     return null;
   }
   // any node will do
-  let current: ResolverNode = graph.idToNode.values().next().value;
+  let current: ResolverNode = tree.idToNode.values().next().value;
 
   // iteratively swap current w/ its parent
-  while (parent(graph, current) !== undefined) {
-    current = parent(graph, current)!;
+  while (parent(tree, current) !== undefined) {
+    current = parent(tree, current)!;
   }
   return current;
 }
@@ -104,11 +107,11 @@ export function root(graph: IndexedGraph) {
 /**
  * Yield processes in level order
  */
-export function* levelOrder(graph: IndexedGraph) {
-  const rootNode = root(graph);
+export function* levelOrder(tree: IndexedProcessTree) {
+  const rootNode = root(tree);
   if (rootNode !== null) {
     yield* baseLevelOrder(rootNode, (parentNode: ResolverNode): ResolverNode[] =>
-      children(graph, nodeModel.nodeID(parentNode))
+      children(tree, nodeModel.nodeID(parentNode))
     );
   }
 }

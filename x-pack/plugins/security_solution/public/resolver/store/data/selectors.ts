@@ -12,7 +12,7 @@ import {
   Vector2,
   IndexedEntity,
   IndexedEdgeLineSegment,
-  IndexedGraphNode,
+  IndexedTreeNode,
   AABB,
   VisibleEntites,
   TreeFetcherParameters,
@@ -20,36 +20,35 @@ import {
   IDToNodeInfo,
   NodeData,
 } from '../../types';
-import * as indexedGraphModel from '../../models/indexed_graph';
+import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as nodeModel from '../../../../common/endpoint/models/node';
 import * as nodeEventsInCategoryModel from './node_events_in_category_model';
 import {
   SafeResolverEvent,
-  ResolverGraph,
+  NewResolverTree,
   ResolverNode,
   EventStats,
 } from '../../../../common/endpoint/types';
-import * as resolverGraphModel from '../../models/resolver_graph';
+import * as resolverTreeModel from '../../models/resolver_tree';
 import * as treeFetcherParametersModel from '../../models/tree_fetcher_parameters';
-import * as isometricTaxiLayoutModel from '../../models/indexed_graph/isometric_taxi_layout'; // TODO replace with indexed
+import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout'; // TODO replace with indexed
 import * as aabbModel from '../../models/aabb';
 import * as vector2 from '../../models/vector2';
-import { isTerminatedProcess } from '../../models/process_event';
 
 /**
  * Was a request made for graph data
  */
 
-export function isGraphLoading(state: DataState): boolean {
-  return state.graph?.pendingRequestParameters !== undefined;
+export function isTreeLoading(state: DataState): boolean {
+  return state.tree?.pendingRequestParameters !== undefined;
 }
 
 /**
  * If a request was made and it threw an error or returned a failure response code.
  */
-export function hadErrorLoadingGraph(state: DataState): boolean {
-  if (state.graph?.lastResponse) {
-    return !state.graph?.lastResponse.successful;
+export function hadErrorLoadingTree(state: DataState): boolean {
+  if (state.tree?.lastResponse) {
+    return !state.tree?.lastResponse.successful;
   }
   return false;
 }
@@ -62,23 +61,11 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
- * The last ResolverGraph we received, if any. It may be stale (it might not be for the same databaseDocumentID that
+ * The last NewResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
-const resolverGraphResponse = (state: DataState): ResolverGraph | undefined => {
-  return state.graph?.lastResponse?.successful ? state.graph?.lastResponse.result : undefined;
-};
-
-interface NodeDisplayTypePredicateFunctions {
-  isInactiveNode: (node: ResolverNode) => boolean;
-}
-/**
- * Injected predicate functions to determine which nodes display as active, terminated, etc...
- */
-const resolverGraphNodePredicates = (state: DataState): NodeDisplayTypePredicateFunctions => {
-  return {
-    isInactiveNode: (node) => isTerminatedProcess(node.data as SafeResolverEvent), // TODO: update to use process type checker
-  };
+const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => {
+  return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
 };
 
 /**
@@ -86,45 +73,11 @@ const resolverGraphNodePredicates = (state: DataState): NodeDisplayTypePredicate
  * NB: this could be stale if the last response is stale
  */
 export const originID: (state: DataState) => string | undefined = createSelector(
-  resolverGraphResponse,
-  function (resolverGraph?) {
-    return resolverGraph?.originId ?? undefined;
+  resolverTreeResponse,
+  function (newResolverTree?) {
+    return newResolverTree?.originId ?? undefined;
   }
 );
-
-/**
- * Nodes that will be displayed as the 'blue' inactive state.
- * @deprecated
- * TODO: remove after swapping over tests
- */
-export const inactiveNodes = createSelector(
-  resolverGraphResponse,
-  resolverGraphNodePredicates,
-  function (graph: ResolverGraph | undefined, predicates: NodeDisplayTypePredicateFunctions) {
-    return new Set(
-      resolverGraphModel
-        .nodesToShowAsInactive(graph, predicates.isInactiveNode)
-        .map((inactiveNode) => {
-          return nodeModel.nodeID(inactiveNode);
-        })
-    );
-  }
-);
-
-/**
- * A function that given an entity id returns a boolean indicating if the id is in the set of terminated processes.
- * @deprecated use isNodeTerminated
- * TODO: maybe delete this, it has tests so need to swap them over
- * TODO: Discuss if we want to keep this in Resolver or let Security Solution provide this logic
- */
-export const isNodeInactive = createSelector(inactiveNodes, function (
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  inactiveNodes
-) {
-  return (nodeId: string) => {
-    return inactiveNodes.has(nodeId);
-  };
-});
 
 /**
  * Returns a data structure for accessing events for specific nodes in a graph. For Endpoint graphs these nodes will be
@@ -180,7 +133,7 @@ export const isNodeDataLoading: (state: DataState) => (id: string) => boolean = 
 /**
  * Process events that will be graphed.
  */
-export const graphableNodes = createSelector(resolverGraphResponse, function (graphResponse?) {
+export const graphableNodes = createSelector(resolverTreeResponse, function (graphResponse?) {
   // Keep track of the last process event (in array order) for each entity ID
   const nodes: Map<string, ResolverNode> = new Map();
   if (graphResponse) {
@@ -196,25 +149,24 @@ export const graphableNodes = createSelector(resolverGraphResponse, function (gr
   }
 });
 
-export const graph = createSelector(graphableNodes, originID, function indexedGraph(
+export const tree = createSelector(graphableNodes, originID, function indexedProcessTree(
   // eslint-disable-next-line @typescript-eslint/no-shadow
   graphableNodes,
   originId
 ) {
-  return indexedGraphModel.factory(graphableNodes, originId);
+  return indexedProcessTreeModel.factory(graphableNodes, originId);
 });
 
 /**
  * This returns a map of nodeIds to the associated stats provided by the datasource.
- * @deprecated - TODO: looks like this is still used though??
  */
 export const nodeStats: (
   state: DataState
 ) => (nodeID: string) => EventStats | undefined = createSelector(
-  resolverGraphResponse,
-  (resolverGraph?: ResolverGraph) => {
-    if (resolverGraph) {
-      const map = resolverGraphModel.nodeStats(resolverGraph);
+  resolverTreeResponse,
+  (newResolverTree?: NewResolverTree) => {
+    if (newResolverTree) {
+      const map = resolverTreeModel.nodeStats(newResolverTree);
       return (nodeId: string) => map.get(nodeId);
     } else {
       return () => undefined;
@@ -277,8 +229,8 @@ export const relatedEventCountByCategory: (
  * @deprecated
  */
 export function hasMoreChildren(state: DataState): boolean {
-  const resolverGraph = resolverGraphResponse(state);
-  return resolverGraph ? resolverGraphModel.hasMoreChildren(resolverGraph) : false;
+  const newResolverTree = resolverTreeResponse(state);
+  return newResolverTree ? resolverTreeModel.hasMoreChildren(newResolverTree) : false;
 }
 
 /**
@@ -286,8 +238,8 @@ export function hasMoreChildren(state: DataState): boolean {
  * @deprecated
  */
 export function hasMoreAncestors(state: DataState): boolean {
-  const resolverGraph = resolverGraphResponse(state);
-  return resolverGraph ? resolverGraphModel.hasMoreAncestors(resolverGraph) : false;
+  const newResolverTree = resolverTreeResponse(state);
+  return newResolverTree ? resolverTreeModel.hasMoreAncestors(newResolverTree) : false;
 }
 
 /**
@@ -298,35 +250,35 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
    * If there are current tree parameters that don't match the parameters used in the pending request (if there is a pending request) and that don't match the parameters used in the last completed request (if there was a last completed request) then we need to fetch the tree resource using the current parameters.
    */
   if (
-    state.graph?.currentParameters !== undefined &&
+    state.tree?.currentParameters !== undefined &&
     !treeFetcherParametersModel.equal(
-      state.graph?.currentParameters,
-      state.graph?.lastResponse?.parameters
+      state.tree?.currentParameters,
+      state.tree?.lastResponse?.parameters
     ) &&
     !treeFetcherParametersModel.equal(
-      state.graph?.currentParameters,
-      state.graph?.pendingRequestParameters
+      state.tree?.currentParameters,
+      state.tree?.pendingRequestParameters
     )
   ) {
-    return state.graph.currentParameters;
+    return state.tree.currentParameters;
   } else {
     return null;
   }
 }
 
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
-  graph,
+  tree,
   originID,
-  function processNodePositionsAndEdgeLineSegments(indexedGraph, originId) {
+  function processNodePositionsAndEdgeLineSegments(indexedProcessTree, originId) {
     // use the isometric taxi layout as a base
-    const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedGraph);
+    const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedProcessTree);
     if (!originId) {
       // no data has loaded.
       return taxiLayout;
     }
 
     // find the origin node
-    const originNode = indexedGraphModel.graphNode(indexedGraph, originId);
+    const originNode = indexedProcessTreeModel.treeNode(indexedProcessTree, originId);
     if (originNode === null) {
       // If a tree is returned that has no process events for the origin, this can happen.
       return taxiLayout;
@@ -354,9 +306,9 @@ export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
 export const graphNodeForID: (
   state: DataState
 ) => (nodeID: string) => ResolverNode | null = createSelector(
-  graph,
-  (indexedGraph) => (nodeID: string) => {
-    return indexedGraphModel.graphNode(indexedGraph, nodeID);
+  tree,
+  (indexedProcessTree) => (nodeID: string) => {
+    return indexedProcessTreeModel.treeNode(indexedProcessTree, nodeID);
   }
 );
 
@@ -380,9 +332,9 @@ export const ariaLevel: (state: DataState) => (nodeID: string) => number | null 
 export const ariaFlowtoCandidate: (
   state: DataState
 ) => (nodeID: string) => string | null = createSelector(
-  graph,
+  tree,
   graphNodeForID,
-  (indexedGraph, nodeGetter) => {
+  (indexedProcessTree, nodeGetter) => {
     // A map of preceding sibling IDs to following sibling IDs or `null`, if there is no following sibling
     const memo: Map<string, string | null> = new Map();
 
@@ -411,8 +363,10 @@ export const ariaFlowtoCandidate: (
       }
 
       // nodes with the same parent ID
-      // TODO: Only using the first parent for now as we will only have one parent in the tree setting
-      const children = indexedGraphModel.children(indexedGraph, nodeModel.parentId(node));
+      const children = indexedProcessTreeModel.children(
+        indexedProcessTree,
+        nodeModel.parentId(node)
+      );
 
       let previousChild: ResolverNode | null = null;
       // Loop over all nodes that have the same parent ID (even if the parent ID is undefined or points to a node that isn't in the tree.)
@@ -446,7 +400,7 @@ const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = creat
   layout,
   function ({ processNodePositions, edgeLineSegments }) {
     const spatialIndex: rbush<IndexedEntity> = new rbush();
-    const nodeToIndex: IndexedGraphNode[] = [];
+    const nodeToIndex: IndexedTreeNode[] = [];
     const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
 
     // Make sure these numbers are big enough to cover the process nodes at all zoom levels.
@@ -454,16 +408,16 @@ const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = creat
     const graphNodeViewWidth = 720;
     const graphNodeViewHeight = 240;
     const lineSegmentPadding = 30;
-    for (const [graphNode, position] of processNodePositions) {
+    for (const [treeNode, position] of processNodePositions) {
       const [nodeX, nodeY] = position;
-      const indexedEvent: IndexedGraphNode = {
+      const indexedEvent: IndexedTreeNode = {
         minX: nodeX - 0.5 * graphNodeViewWidth,
         minY: nodeY - 0.5 * graphNodeViewHeight,
         maxX: nodeX + 0.5 * graphNodeViewWidth,
         maxY: nodeY + 0.5 * graphNodeViewHeight,
         position,
-        entity: graphNode,
-        type: 'graphNode',
+        entity: treeNode,
+        type: 'treeNode',
       };
       nodeToIndex.push(indexedEvent);
     }
@@ -513,7 +467,7 @@ export const nodesAndEdgelines: (
     });
     const visibleProcessNodePositions = new Map<ResolverNode, Vector2>(
       entities
-        .filter((entity): entity is IndexedGraphNode => entity.type === 'graphNode')
+        .filter((entity): entity is IndexedTreeNode => entity.type === 'treeNode')
         .map((node) => [node.entity, node.position])
     );
     const connectingEdgeLineSegments = entities
@@ -548,13 +502,13 @@ export function treeRequestParametersToAbort(state: DataState): TreeFetcherParam
    * If there is a pending request, and its not for the current parameters (even, if the current parameters are undefined) then we should abort the request.
    */
   if (
-    state.graph?.pendingRequestParameters !== undefined &&
+    state.tree?.pendingRequestParameters !== undefined &&
     !treeFetcherParametersModel.equal(
-      state.graph?.pendingRequestParameters,
-      state.graph?.currentParameters
+      state.tree?.pendingRequestParameters,
+      state.tree?.currentParameters
     )
   ) {
-    return state.graph.pendingRequestParameters;
+    return state.tree.pendingRequestParameters;
   } else {
     return null;
   }
