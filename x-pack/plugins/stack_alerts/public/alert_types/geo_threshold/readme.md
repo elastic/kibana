@@ -155,8 +155,8 @@ created earlier in dev tools: `manhattan_mta_alerts`. Accept the provided defaul
     "PreviousBoundaryId": "{{context.fromBoundaryId}}",
     "PreviousBoundaryName": "{{context.fromBoundaryName}}"
 }
-- At the bottom right, click `Save`. Your alert should now be created!
 ```
+- At the bottom right, click `Save`. Your alert should now be created!
 
 ### 10. Create another index pattern to track the alerts you're creating
 - Go to Index patterns tab and click `Create index pattern`
