@@ -22,6 +22,7 @@ import {
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
   serviceErrorGroupsRoute,
+  serviceTransactionGroupsRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -43,8 +44,8 @@ import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
 import { transactionByTraceIdRoute } from './transaction';
 import {
-  correlationsForRangesRoute,
   correlationsForSlowTransactionsRoute,
+  correlationsForFailedTransactionsRoute,
 } from './correlations';
 import {
   transactionGroupsBreakdownRoute,
@@ -116,6 +117,7 @@ const createApmApi = () => {
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
     .add(serviceErrorGroupsRoute)
+    .add(serviceTransactionGroupsRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -129,7 +131,7 @@ const createApmApi = () => {
 
     // Correlations
     .add(correlationsForSlowTransactionsRoute)
-    .add(correlationsForRangesRoute)
+    .add(correlationsForFailedTransactionsRoute)
 
     // APM indices
     .add(apmIndexSettingsRoute)

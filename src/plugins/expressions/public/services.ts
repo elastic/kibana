@@ -25,10 +25,12 @@ export const [getNotifications, setNotifications] = createGetterSetter<Notificat
   'Notifications'
 );
 
-export const [getRenderersRegistry, setRenderersRegistry] = createGetterSetter<
-  ExpressionRendererRegistry
->('Renderers registry');
+export const [
+  getRenderersRegistry,
+  setRenderersRegistry,
+] = createGetterSetter<ExpressionRendererRegistry>('Renderers registry');
 
-export const [getExpressionsService, setExpressionsService] = createGetterSetter<
-  ExpressionsService
->('ExpressionsService');
+export const [
+  getExpressionsService,
+  setExpressionsService,
+] = createGetterSetter<ExpressionsService>('ExpressionsService');

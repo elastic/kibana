@@ -8,6 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from '@testing-library/react';
 import { nextTick } from '@kbn/test/jest';
+import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { LoginState } from '../../../common/login_state';
 import { LoginPage } from './login_page';
 import { coreMock } from '../../../../../../src/core/public/mocks';
@@ -37,14 +38,12 @@ describe('LoginPage', () => {
     httpMock.addLoadingCountSource.mockReset();
   };
 
-  beforeAll(() => {
+  beforeEach(() => {
     Object.defineProperty(window, 'location', {
       value: { href: 'http://some-host/bar', protocol: 'http' },
       writable: true,
     });
-  });
 
-  beforeEach(() => {
     resetHttpMock();
   });
 
@@ -206,10 +205,10 @@ describe('LoginPage', () => {
       expect(wrapper.find(LoginForm)).toMatchSnapshot();
     });
 
-    it('renders as expected when info message is set', async () => {
+    it('properly passes query string parameters to the form', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
-      window.location.href = 'http://some-host/bar?msg=SESSION_EXPIRED';
+      window.location.href = `http://some-host/bar?msg=SESSION_EXPIRED&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=basic1`;
 
       const wrapper = shallow(
         <LoginPage
@@ -226,7 +225,9 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper.find(LoginForm)).toMatchSnapshot();
+      const { authProviderHint, infoMessage } = wrapper.find(LoginForm).props();
+      expect(authProviderHint).toBe('basic1');
+      expect(infoMessage).toBe('Your session has timed out. Please log in again.');
     });
 
     it('renders as expected when loginAssistanceMessage is set', async () => {
