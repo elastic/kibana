@@ -6,13 +6,10 @@
 
 import { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
 import { hasHistoricalAgentData } from './has_historical_agent_data';
-
-export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
 
 export async function getServices({
   setup,
