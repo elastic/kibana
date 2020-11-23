@@ -39,8 +39,7 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
      */
     async getTelemetryStats(payload: {
       unencrypted?: boolean;
-      timestamp: number | string;
-    }): Promise<TelemetryCollectionManagerPlugin['getStats']> {
+    }): Promise<ReturnType<TelemetryCollectionManagerPlugin['getStats']>> {
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')

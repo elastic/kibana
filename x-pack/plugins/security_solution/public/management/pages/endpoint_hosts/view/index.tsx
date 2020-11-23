@@ -35,6 +35,7 @@ import { NavigateToAppOptions } from 'kibana/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
+import { isPolicyOutOfDate } from '../utils';
 import {
   HOST_STATUS_TO_HEALTH_COLOR,
   POLICY_STATUS_TO_HEALTH_COLOR,
@@ -57,6 +58,7 @@ import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/rou
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
+import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -322,17 +324,22 @@ export const EndpointList = () => {
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
-        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
+        render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           return (
-            <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
-              <EndpointPolicyLink
-                policyId={policy.id}
-                className="eui-textTruncate"
-                data-test-subj="policyNameCellLink"
-              >
-                {policy.name}
-              </EndpointPolicyLink>
-            </EuiToolTip>
+            <>
+              <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
+                <EndpointPolicyLink
+                  policyId={policy.id}
+                  className="eui-textTruncate"
+                  data-test-subj="policyNameCellLink"
+                >
+                  {policy.name}
+                </EndpointPolicyLink>
+              </EuiToolTip>
+              {isPolicyOutOfDate(policy, item.policy_info) && (
+                <OutOfDate style={{ paddingLeft: '6px' }} data-test-subj="rowPolicyOutOfDate" />
+              )}
+            </>
           );
         },
       },

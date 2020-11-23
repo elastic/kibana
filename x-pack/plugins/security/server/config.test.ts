@@ -28,6 +28,7 @@ describe('config schema', () => {
             ],
           },
           "providers": Object {
+            "anonymous": undefined,
             "basic": Object {
               "basic": Object {
                 "accessAgreement": undefined,
@@ -77,6 +78,7 @@ describe('config schema', () => {
             ],
           },
           "providers": Object {
+            "anonymous": undefined,
             "basic": Object {
               "basic": Object {
                 "accessAgreement": undefined,
@@ -126,6 +128,7 @@ describe('config schema', () => {
             ],
           },
           "providers": Object {
+            "anonymous": undefined,
             "basic": Object {
               "basic": Object {
                 "accessAgreement": undefined,
@@ -997,6 +1000,253 @@ describe('config schema', () => {
       });
     });
 
+    describe('`anonymous` provider', () => {
+      it('requires `order`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { anonymous: { anonymous1: { enabled: true } } } },
+          })
+        ).toThrow(
+          '[authc.providers.1.anonymous.anonymous1.order]: expected value of type [number] but got [undefined]'
+        );
+      });
+
+      it('requires `credentials`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { anonymous: { anonymous1: { order: 0 } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.anonymous.anonymous1.credentials]: expected at least one defined value but got [undefined]"
+        `);
+      });
+
+      it('requires both `username` and `password` in username/password `credentials`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: { anonymous1: { order: 0, credentials: { username: 'some-user' } } },
+              },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
+           - [credentials.0.password]: expected value of type [string] but got [undefined]
+           - [credentials.1.apiKey]: expected at least one defined value but got [undefined]"
+        `);
+
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: { anonymous1: { order: 0, credentials: { password: 'some-pass' } } },
+              },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
+           - [credentials.0.username]: expected value of type [string] but got [undefined]
+           - [credentials.1.apiKey]: expected at least one defined value but got [undefined]"
+        `);
+      });
+
+      it('can be successfully validated with username/password credentials', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: {
+                  anonymous1: {
+                    order: 0,
+                    credentials: { username: 'some-user', password: 'some-pass' },
+                  },
+                },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "anonymous": Object {
+              "anonymous1": Object {
+                "credentials": Object {
+                  "password": "some-pass",
+                  "username": "some-user",
+                },
+                "description": "Continue as Guest",
+                "enabled": true,
+                "hint": "For anonymous users",
+                "icon": "globe",
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": null,
+                },
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+
+      it('requires both `id` and `key` in extended `apiKey` format credentials', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: { anonymous1: { order: 0, credentials: { apiKey: { id: 'some-id' } } } },
+              },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
+           - [credentials.0.username]: expected value of type [string] but got [undefined]
+           - [credentials.1.apiKey]: types that failed validation:
+            - [credentials.apiKey.0.key]: expected value of type [string] but got [undefined]
+            - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
+        `);
+
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: {
+                  anonymous1: { order: 0, credentials: { apiKey: { key: 'some-key' } } },
+                },
+              },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
+           - [credentials.0.username]: expected value of type [string] but got [undefined]
+           - [credentials.1.apiKey]: types that failed validation:
+            - [credentials.apiKey.0.id]: expected value of type [string] but got [undefined]
+            - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
+        `);
+      });
+
+      it('can be successfully validated with API keys credentials', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: {
+                  anonymous1: {
+                    order: 0,
+                    credentials: { apiKey: 'some-API-key' },
+                  },
+                },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "anonymous": Object {
+              "anonymous1": Object {
+                "credentials": Object {
+                  "apiKey": "some-API-key",
+                },
+                "description": "Continue as Guest",
+                "enabled": true,
+                "hint": "For anonymous users",
+                "icon": "globe",
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": null,
+                },
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: {
+                  anonymous1: {
+                    order: 0,
+                    credentials: { apiKey: { id: 'some-id', key: 'some-key' } },
+                  },
+                },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "anonymous": Object {
+              "anonymous1": Object {
+                "credentials": Object {
+                  "apiKey": Object {
+                    "id": "some-id",
+                    "key": "some-key",
+                  },
+                },
+                "description": "Continue as Guest",
+                "enabled": true,
+                "hint": "For anonymous users",
+                "icon": "globe",
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": null,
+                },
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+
+      it('can be successfully validated with session config overrides', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                anonymous: {
+                  anonymous1: {
+                    order: 1,
+                    credentials: { username: 'some-user', password: 'some-pass' },
+                    session: { idleTimeout: 321, lifespan: 546 },
+                  },
+                },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "anonymous": Object {
+              "anonymous1": Object {
+                "credentials": Object {
+                  "password": "some-pass",
+                  "username": "some-user",
+                },
+                "description": "Continue as Guest",
+                "enabled": true,
+                "hint": "For anonymous users",
+                "icon": "globe",
+                "order": 1,
+                "session": Object {
+                  "idleTimeout": "PT0.321S",
+                  "lifespan": "PT0.546S",
+                },
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+    });
+
     it('`name` should be unique across all provider types', () => {
       expect(() =>
         ConfigSchema.validate({
@@ -1754,6 +2004,114 @@ describe('createConfig()', () => {
         Object {
           "idleTimeout": null,
           "lifespan": null,
+        }
+      `);
+    });
+
+    it('properly handles config for the anonymous provider', async () => {
+      expect(
+        createMockConfig({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 0,
+                  credentials: { username: 'some-user', password: 'some-pass' },
+                },
+              },
+            },
+          },
+        }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": "P30D",
+        }
+      `);
+
+      expect(
+        createMockConfig({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 0,
+                  credentials: { username: 'some-user', password: 'some-pass' },
+                },
+              },
+            },
+          },
+          session: { idleTimeout: 0, lifespan: null },
+        }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+
+      expect(
+        createMockConfig({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 0,
+                  credentials: { username: 'some-user', password: 'some-pass' },
+                  session: { idleTimeout: 0, lifespan: null },
+                },
+              },
+            },
+          },
+        }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+
+      expect(
+        createMockConfig({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 0,
+                  credentials: { username: 'some-user', password: 'some-pass' },
+                  session: { idleTimeout: 321, lifespan: 546 },
+                },
+              },
+            },
+          },
+          session: { idleTimeout: null, lifespan: 0 },
+        }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT0.321S",
+          "lifespan": "PT0.546S",
+        }
+      `);
+
+      expect(
+        createMockConfig({
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  order: 0,
+                  credentials: { username: 'some-user', password: 'some-pass' },
+                  session: { idleTimeout: 321, lifespan: 546 },
+                },
+              },
+            },
+          },
+          session: { idleTimeout: 123, lifespan: 456 },
+        }).session.getExpirationTimeouts({ type: 'anonymous', name: 'anonymous1' })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": "PT0.321S",
+          "lifespan": "PT0.546S",
         }
       `);
     });
