@@ -108,9 +108,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           alertId: eventId,
           index: eventIndex ?? '',
         },
-        () => {
-          displaySuccessToast(i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title), dispatchToaster);
-        }
+        () => displaySuccessToast(i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title), dispatchToaster)
       );
     },
     [dispatchToaster, eventId, postComment, eventIndex]

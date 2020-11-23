@@ -8,7 +8,8 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { useKibana } from '../../../common/lib/kibana';
 import '../../../common/mock/match_media';
@@ -26,6 +27,17 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../all_cases', () => {
+  return {
+    AllCases: ({ onRowClick }: { onRowClick: ({ id }: { id: string }) => void }) => {
+      return (
+        <button type="button" onClick={() => onRowClick({ id: 'case-id' })}>
+          {'case-row'}
+        </button>
+      );
+    },
+  };
+});
 
 jest.mock('../../../common/hooks/use_selector');
 
@@ -45,7 +57,7 @@ describe('useAllCasesModal', () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
       () => useAllCasesModal({ onRowClick }),
       {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
     );
 
@@ -56,7 +68,7 @@ describe('useAllCasesModal', () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
       () => useAllCasesModal({ onRowClick }),
       {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
     );
 
@@ -71,7 +83,7 @@ describe('useAllCasesModal', () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
       () => useAllCasesModal({ onRowClick }),
       {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
     );
 
@@ -87,7 +99,7 @@ describe('useAllCasesModal', () => {
     const { result, rerender } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
       () => useAllCasesModal({ onRowClick }),
       {
-        wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
     );
 
@@ -96,5 +108,28 @@ describe('useAllCasesModal', () => {
     const result2 = result.current;
 
     expect(Object.is(result1, result2)).toBe(true);
+  });
+
+  it('closes the modal when clicking a row', async () => {
+    const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
+      () => useAllCasesModal({ onRowClick }),
+      {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
+    );
+
+    act(() => {
+      result.current.openModal();
+    });
+
+    const Modal = result.current.Modal;
+    render(<Modal />);
+
+    act(() => {
+      userEvent.click(screen.getByText('case-row'));
+    });
+
+    expect(result.current.isModalOpen).toBe(false);
+    expect(onRowClick).toHaveBeenCalledWith({ id: 'case-id' });
   });
 });

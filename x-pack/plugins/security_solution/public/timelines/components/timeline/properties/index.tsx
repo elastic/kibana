@@ -23,6 +23,7 @@ import { Case } from '../../../../cases/containers/types';
 import { TimelineProperties } from './styles';
 import { PropertiesRight } from './properties_right';
 import { PropertiesLeft } from './properties_left';
+import { setInsertTimeline } from '../../../store/timeline/actions';
 
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
