@@ -17,6 +17,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import semverGte from 'semver/functions/gte';
+import semverCoerce from 'semver/functions/coerce';
 import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { TimeRange, esKuery } from '../../../../../../../../../../../src/plugins/data/public';
 import { LogStream } from '../../../../../../../../../infra/public';
@@ -138,6 +140,18 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
     [logStreamQuery, dateRange.endExpression, dateRange.startExpression, http.basePath]
   );
 
+  const agentVersion = agent.local_metadata?.elastic?.agent?.version;
+  const isLogLevelSelectionAvailable = useMemo(() => {
+    if (!agentVersion) {
+      return false;
+    }
+    const agentVersionWithPrerelease = semverCoerce(agentVersion)?.version;
+    if (!agentVersionWithPrerelease) {
+      return false;
+    }
+    return semverGte(agentVersionWithPrerelease, '7.11.0');
+  }, [agentVersion]);
+
   return (
     <WrapperFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
@@ -214,9 +228,11 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SelectLogLevel agent={agent} />
-      </EuiFlexItem>
+      {isLogLevelSelectionAvailable && (
+        <EuiFlexItem grow={false}>
+          <SelectLogLevel agent={agent} />
+        </EuiFlexItem>
+      )}
     </WrapperFlexGroup>
   );
 });
