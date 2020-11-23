@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { customMsg } from '../../utils/utils';
 
 export default ({ getService, getPageObjects }) => {
   const log = getService('log');
@@ -19,10 +20,13 @@ export default ({ getService, getPageObjects }) => {
       await appsMenu.clickLink('Stack Monitoring');
     });
 
-    it('should show banner Help us improve the Elastic Stack', async () => {
-      const actualMessage = await PageObjects.monitoring.getWelcome();
-      log.debug(`X-Pack message = ${actualMessage}`);
-      expect(actualMessage).to.contain('Help us improve the Elastic Stack');
+    it('should show banner Help us improve Kibana and Elasticsearch', async () => {
+      const expected = `Help us improve the Elastic Stack
+To learn about how usage data helps us manage and improve our products and services, see our Privacy Statement. To stop collection, disable usage data here.
+Dismiss`;
+      const actual = await PageObjects.monitoring.getWelcome();
+      log.debug(`X-Pack message = ${actual}`);
+      expect(actual).to.be(expected, customMsg(actual)(expected));
     });
   });
 };
