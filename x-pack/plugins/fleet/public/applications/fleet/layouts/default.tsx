@@ -26,6 +26,12 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
+
 const Nav = styled.nav`
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
   border-bottom: ${(props) => props.theme.eui.euiBorderThin};
@@ -56,7 +62,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
         />
       )}
       <Container>
-        <div>
+        <Wrapper>
           <Nav>
             <EuiFlexGroup gutterSize="l" alignItems="center">
               <EuiFlexItem>
@@ -126,7 +132,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
             </EuiFlexGroup>
           </Nav>
           {children}
-        </div>
+        </Wrapper>
         <AlphaMessaging />
       </Container>
     </>

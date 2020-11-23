@@ -6,6 +6,7 @@
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator, AlertStates } from './types';
 import * as mocks from './test_mocks';
+import { ResolvedActionGroup } from '../../../../../alerts/common';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import {
   alertsMock,
@@ -20,7 +21,7 @@ interface AlertTestInstance {
   state: any;
 }
 
-let persistAlertInstances = false; // eslint-disable-line
+let persistAlertInstances = false;
 
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
@@ -343,50 +344,49 @@ describe('The metric threshold alert type', () => {
     });
   });
 
-  // describe('querying a metric that later recovers', () => {
-  //   const instanceID = '*';
-  //   const execute = (threshold: number[]) =>
-  //     executor({
-  //
-  //       services,
-  //       params: {
-  //         criteria: [
-  //           {
-  //             ...baseCriterion,
-  //             comparator: Comparator.GT,
-  //             threshold,
-  //           },
-  //         ],
-  //       },
-  //     });
-  //   beforeAll(() => (persistAlertInstances = true));
-  //   afterAll(() => (persistAlertInstances = false));
+  describe('querying a metric that later recovers', () => {
+    const instanceID = '*';
+    const execute = (threshold: number[]) =>
+      executor({
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator: Comparator.GT,
+              threshold,
+            },
+          ],
+        },
+      });
+    beforeAll(() => (persistAlertInstances = true));
+    afterAll(() => (persistAlertInstances = false));
 
-  //   test('sends a recovery alert as soon as the metric recovers', async () => {
-  //     await execute([0.5]);
-  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
-  //     await execute([2]);
-  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
-  //   });
-  //   test('does not continue to send a recovery alert if the metric is still OK', async () => {
-  //     await execute([2]);
-  //     expect(mostRecentAction(instanceID)).toBe(undefined);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
-  //     await execute([2]);
-  //     expect(mostRecentAction(instanceID)).toBe(undefined);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
-  //   });
-  //   test('sends a recovery alert again once the metric alerts and recovers again', async () => {
-  //     await execute([0.5]);
-  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
-  //     await execute([2]);
-  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
-  //   });
-  // });
+    test('sends a recovery alert as soon as the metric recovers', async () => {
+      await execute([0.5]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute([2]);
+      expect(mostRecentAction(instanceID).id).toBe(ResolvedActionGroup.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+    test('does not continue to send a recovery alert if the metric is still OK', async () => {
+      await execute([2]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+      await execute([2]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+    test('sends a recovery alert again once the metric alerts and recovers again', async () => {
+      await execute([0.5]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute([2]);
+      expect(mostRecentAction(instanceID).id).toBe(ResolvedActionGroup.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+  });
 
   describe('querying a metric with a percentage metric', () => {
     const instanceID = '*';
