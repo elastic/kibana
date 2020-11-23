@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 
 import type { Logger } from 'kibana/server';
 import type { ApiResponse } from '@elastic/elasticsearch';
@@ -30,7 +30,6 @@ import { getDefaultSearchParams, getShardTimeout } from '../es_search';
 import type { ISearchStrategy } from '../types';
 import type { SearchUsage } from '../collectors/usage';
 import type { IEsRawSearchResponse } from '../../../common';
-import { shimHitsTotal } from '..';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -55,10 +54,6 @@ export const esSearchStrategyProvider = (
       return esClient.asCurrentUser.search(params);
     }, abortSignal).pipe(
       toKibanaSearchResponse(),
-      map((response) => ({
-        ...response,
-        rawResponse: shimHitsTotal(response.rawResponse),
-      })),
       trackSearchStatus(logger, usage),
       includeTotalLoaded()
     );
