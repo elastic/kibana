@@ -9,11 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { TeamsActionConnector } from '../types';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const TeamsActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
   TeamsActionConnector
->> = ({ action, editActionSecrets, errors, readOnly, docLinks }) => {
+>> = ({ action, editActionSecrets, errors, readOnly }) => {
   const { webhookUrl } = action.secrets;
+  const { docLinks } = useKibana().services;
 
   return (
     <Fragment>
