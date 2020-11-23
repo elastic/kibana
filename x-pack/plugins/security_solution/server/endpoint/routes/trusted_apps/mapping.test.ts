@@ -55,6 +55,7 @@ const exceptionListItemSchema = (
   tie_breaker_id: '123',
   updated_at: '11/11/2011T11:11:11.111',
   updated_by: 'admin',
+  ...(item || {}),
 });
 
 describe('mapping', () => {
