@@ -65,10 +65,9 @@ export async function getTransactionErrorCountChartPreview({
   }
 
   return resp.aggregations.timeseries.buckets.map((bucket) => {
-    const errorCount = ;
     return {
       x: bucket.key,
-      y: bucket.doc_count
+      y: bucket.doc_count,
     };
   });
 }

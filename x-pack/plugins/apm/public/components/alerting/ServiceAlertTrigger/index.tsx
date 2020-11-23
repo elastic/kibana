@@ -7,8 +7,6 @@
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Coordinate } from '../../../../typings/timeseries';
-import { ChartPreview } from '../chart_preview';
 
 interface Props {
   alertTypeName: string;
