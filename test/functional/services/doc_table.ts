@@ -21,17 +21,23 @@ import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export function DocTableProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'header']);
 
   interface SelectOptions {
-    isAnchorRow: boolean;
+    isAnchorRow?: boolean;
     rowIndex: number;
   }
 
   class DocTable {
-    public async getTable(selector?: string) {
-      return await testSubjects.find(selector ? selector : 'docTable');
+    private async isLegacy(selector: string = 'docTable') {
+      const table = await this.getTable(selector);
+      const hasEuiClass = await table.elementHasClass('euiDataGrid__verticalScroll');
+      return !hasEuiClass;
+    }
+    public async getTable(selector: string = 'docTable') {
+      return await testSubjects.find(selector);
     }
 
     public async getRowsText() {
@@ -44,7 +50,10 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async getBodyRows(): Promise<WebElementWrapper[]> {
       const table = await this.getTable();
-      return await table.findAllByTestSubject('~docTableRow');
+      if (!(await this.isLegacy())) {
+        return await table.findAllByTestSubject('dataGridRow');
+      }
+      return await table.findAllByTestSubject('docTableRow');
     }
 
     public async getAnchorRow(): Promise<WebElementWrapper> {
@@ -79,6 +88,9 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     public async getDetailsRows(): Promise<WebElementWrapper[]> {
+      if (!(await this.isLegacy())) {
+        return [await testSubjects.find('docTableDetailsFlyout')];
+      }
       const table = await this.getTable();
       return await table.findAllByCssSelector(
         '[data-test-subj~="docTableRow"] + [data-test-subj~="docTableDetailsRow"]'
@@ -95,6 +107,24 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     public async getFields(options: { isAnchorRow: boolean } = { isAnchorRow: false }) {
+      if (!(await this.isLegacy())) {
+        const rows = await find.allByCssSelector('.euiDataGridRow');
+
+        const result = [];
+        for (const row of rows) {
+          const cells = await row.findAllByClassName('euiDataGridRowCell__truncate');
+          const cellsText = [];
+          let cellIdx = 0;
+          for (const cell of cells) {
+            if (cellIdx > 0) {
+              cellsText.push(await cell.getVisibleText());
+            }
+            cellIdx++;
+          }
+          result.push(cellsText);
+        }
+        return result;
+      }
       const table = await this.getTable();
       const $ = await table.parseDomContent();
       const rowLocator = options.isAnchorRow ? '~docTableAnchorRow' : '~docTableRow';
@@ -110,6 +140,14 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     public async getHeaderFields(selector?: string): Promise<string[]> {
       const table = await this.getTable(selector);
       const $ = await table.parseDomContent();
+      if (!(await this.isLegacy())) {
+        const result = await find.allByCssSelector('.euiDataGridHeaderCell__content');
+        const textArr = [];
+        for (const cell of result) {
+          textArr.push(await cell.getVisibleText());
+        }
+        return Promise.resolve(textArr);
+      }
       return $.findTestSubjects('~docTableHeaderField')
         .toArray()
         .map((field: any) => $(field).text().trim());

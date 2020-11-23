@@ -31,6 +31,7 @@ export const ViewButton = ({ rowIndex }: { rowIndex: number }) => {
       })}
       onClick={() => setViewed(rowIndex === viewed ? -1 : rowIndex)}
       className="dscTable__buttonToggle"
+      data-test-subj="docTableExpandToggleColumn"
     >
       <EuiIcon size="s" type={viewed === rowIndex ? 'expandMini' : 'expand'} />
     </button>

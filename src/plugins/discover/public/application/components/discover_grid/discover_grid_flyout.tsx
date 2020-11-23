@@ -61,7 +61,7 @@ export const DiscoverGridFlyout = function DiscoverGridInner({
 
   return (
     <EuiPortal>
-      <EuiFlyout onClose={() => onClose()} size="m">
+      <EuiFlyout onClose={() => onClose()} size="m" data-test-subj="docTableDetailsFlyout">
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
             <EuiFlexItem>
@@ -89,6 +89,7 @@ export const DiscoverGridFlyout = function DiscoverGridInner({
                   size="xs"
                   iconType="documents"
                   href={getContextAppHref ? getContextAppHref(hit._id) : ''}
+                  data-test-subj="docTableRowAction"
                 >
                   {i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkText', {
                     defaultMessage: 'View surrounding documents',
@@ -103,6 +104,7 @@ export const DiscoverGridFlyout = function DiscoverGridInner({
                 href={`#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
                   hit._id as string
                 )}`}
+                data-test-subj="docTableRowAction"
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkText', {
                   defaultMessage: 'View single document',

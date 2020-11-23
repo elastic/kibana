@@ -226,6 +226,7 @@ export const DiscoverGrid = React.memo(
             <EuiDataGridMemoized
               aria-labelledby={ariaLabelledBy}
               aria-describedby={randomId}
+              data-test-subj="docTable"
               sorting={sorting}
               rowCount={rowCount}
               columns={euiGridColumns}

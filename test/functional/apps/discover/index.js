@@ -50,5 +50,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_date_nanos_mixed'));
     loadTestFile(require.resolve('./_indexpattern_without_timefield'));
     loadTestFile(require.resolve('./_data_grid'));
+    loadTestFile(require.resolve('./_data_grid_context'));
   });
 }
