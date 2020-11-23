@@ -96,11 +96,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   const isLoadingMore = pageLoadingState === 'loading';
 
   const columnConfigurations = useMemo(() => {
-    return sourceConfiguration
-      ? customColumns
-        ? customColumns
-        : sourceConfiguration.configuration.logColumns
-      : [];
+    return sourceConfiguration ? customColumns ?? sourceConfiguration.configuration.logColumns : [];
   }, [sourceConfiguration, customColumns]);
 
   const streamItems = useMemo(

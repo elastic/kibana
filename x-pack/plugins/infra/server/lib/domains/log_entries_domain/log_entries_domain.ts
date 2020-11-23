@@ -142,7 +142,7 @@ export class InfraLogEntriesDomain {
       sourceId
     );
 
-    const columnDefinitions = customColumns ? customColumns : configuration.logColumns;
+    const columnDefinitions = customColumns ?? configuration.logColumns;
 
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(configuration.fields.message)
