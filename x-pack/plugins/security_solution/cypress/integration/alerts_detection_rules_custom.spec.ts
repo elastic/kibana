@@ -215,8 +215,7 @@ describe('Custom detection rules creation', () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/83772
-describe.skip('Custom detection rules deletion and edition', () => {
+describe('Custom detection rules deletion and edition', () => {
   beforeEach(() => {
     esArchiverLoad('custom_rules');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
