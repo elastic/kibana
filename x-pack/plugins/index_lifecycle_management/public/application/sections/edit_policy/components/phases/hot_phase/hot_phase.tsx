@@ -220,8 +220,12 @@ export const HotPhase: FunctionComponent = () => {
           </>
         )}
       </EuiDescribedFormGroup>
-      {isRolloverEnabled && <Forcemerge phase="hot" />}
-      {isRolloverEnabled && <ShrinkField phase="hot" />}
+      {isRolloverEnabled && (
+        <>
+          <Forcemerge phase="hot" />
+          <ShrinkField phase="hot" />
+        </>
+      )}
       <SetPriorityInput phase={hotProperty} />
     </>
   );
