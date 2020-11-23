@@ -192,7 +192,6 @@ export default function (program) {
   if (DEV_MODE_SUPPORTED) {
     command
       .option('--dev', 'Run the server with development mode defaults')
-      .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--dist', 'Use production assets from kbn/optimizer')
       .option(
@@ -222,7 +221,6 @@ export default function (program) {
       configs: [].concat(opts.config || []),
       cliArgs: {
         dev: !!opts.dev,
-        open: !!opts.open,
         envName: unknownOptions.env ? unknownOptions.env.name : undefined,
         quiet: !!opts.quiet,
         silent: !!opts.silent,

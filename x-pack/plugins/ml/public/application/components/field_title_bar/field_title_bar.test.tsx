@@ -5,26 +5,22 @@
  */
 
 import { mountWithIntl } from '@kbn/test/jest';
+
 import React from 'react';
 
 import { FieldTitleBar } from './field_title_bar';
-
-// helper to let PropTypes throw errors instead of just doing console.error()
-const error = console.error;
-console.error = (warning, ...args) => {
-  if (/(Invalid prop|Failed prop type)/gi.test(warning)) {
-    throw new Error(warning);
-  }
-  error.apply(console, [warning, ...args]);
-};
+import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 
 describe('FieldTitleBar', () => {
-  test(`throws an error because card is a required prop`, () => {
-    expect(() => <FieldTitleBar />).toThrow();
-  });
-
   test(`card prop is an empty object`, () => {
-    const props = { card: {} };
+    const props = {
+      card: {
+        type: ML_JOB_FIELD_TYPES.NUMBER,
+        existsInDocs: true,
+        loading: false,
+        aggregatable: true,
+      },
+    };
 
     const wrapper = mountWithIntl(<FieldTitleBar {...props} />);
 
@@ -36,29 +32,43 @@ describe('FieldTitleBar', () => {
   });
 
   test(`card.isUnsupportedType is true`, () => {
-    const testFieldName = 'foo';
-    const props = { card: { fieldName: testFieldName, isUnsupportedType: true } };
+    const props = {
+      card: {
+        type: ML_JOB_FIELD_TYPES.UNKNOWN,
+        fieldName: 'foo',
+        existsInDocs: true,
+        loading: false,
+        aggregatable: true,
+        isUnsupportedType: true,
+      },
+    };
 
     const wrapper = mountWithIntl(<FieldTitleBar {...props} />);
 
     const fieldName = wrapper.find({ className: 'field-name' }).text();
-    expect(fieldName).toEqual(testFieldName);
+    expect(fieldName).toEqual(props.card.fieldName);
 
     const hasClassName = wrapper.find('EuiText').hasClass('type-other');
     expect(hasClassName).toBeTruthy();
   });
 
   test(`card.fieldName and card.type is set`, () => {
-    const testFieldName = 'foo';
-    const testType = 'bar';
-    const props = { card: { fieldName: testFieldName, type: testType } };
+    const props = {
+      card: {
+        type: ML_JOB_FIELD_TYPES.KEYWORD,
+        fieldName: 'bar',
+        existsInDocs: true,
+        loading: false,
+        aggregatable: true,
+      },
+    };
 
     const wrapper = mountWithIntl(<FieldTitleBar {...props} />);
 
     const fieldName = wrapper.find({ className: 'field-name' }).text();
-    expect(fieldName).toEqual(testFieldName);
+    expect(fieldName).toEqual(props.card.fieldName);
 
-    const hasClassName = wrapper.find('EuiText').hasClass(testType);
+    const hasClassName = wrapper.find('EuiText').hasClass(props.card.type);
     expect(hasClassName).toBeTruthy();
   });
 
@@ -66,11 +76,19 @@ describe('FieldTitleBar', () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
     jest.useFakeTimers();
 
-    const props = { card: { fieldName: 'foo', type: 'bar' } };
+    const props = {
+      card: {
+        type: ML_JOB_FIELD_TYPES.KEYWORD,
+        fieldName: 'bar',
+        existsInDocs: true,
+        loading: false,
+        aggregatable: true,
+      },
+    };
     const wrapper = mountWithIntl(<FieldTitleBar {...props} />);
     const container = wrapper.find({ className: 'field-name' });
 
-    expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
+    expect(wrapper.find('EuiToolTip').children()).toHaveLength(2);
 
     container.simulate('mouseover');
 
@@ -78,7 +96,7 @@ describe('FieldTitleBar', () => {
     jest.runAllTimers();
 
     wrapper.update();
-    expect(wrapper.find('EuiToolTip').children()).toHaveLength(2);
+    expect(wrapper.find('EuiToolTip').children()).toHaveLength(3);
 
     container.simulate('mouseout');
 
@@ -86,7 +104,7 @@ describe('FieldTitleBar', () => {
     jest.runAllTimers();
 
     wrapper.update();
-    expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
+    expect(wrapper.find('EuiToolTip').children()).toHaveLength(2);
 
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();
