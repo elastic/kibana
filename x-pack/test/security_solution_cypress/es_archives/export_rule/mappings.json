@@ -5129,6 +5129,9 @@
             "status": {
               "type": "keyword"
             },
+            "threshold_count": {
+              "type": "float"
+            },
             "threshold_result": {
               "properties": {
                 "count": {
