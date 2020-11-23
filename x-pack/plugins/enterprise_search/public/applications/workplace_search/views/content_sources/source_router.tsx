@@ -99,39 +99,30 @@ export const SourceRouter: React.FC = () => {
       {/* TODO: Figure out with design how to make this look better */}
       {pageHeader}
       <Switch>
-        <Route
-          exact
-          path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}
-          component={Overview}
-        />
-        <Route
-          exact
-          path={sourcePath(SOURCE_CONTENT_PATH, sourceId, isOrganization)}
-          component={SourceContent}
-        />
+        <Route exact path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}>
+          <Overview />
+        </Route>
+        <Route exact path={sourcePath(SOURCE_CONTENT_PATH, sourceId, isOrganization)}>
+          <SourceContent />
+        </Route>
         {isCustomSource && (
-          <Route
-            path={sourcePath(SOURCE_SCHEMAS_PATH, sourceId, isOrganization)}
-            component={Schema}
-          />
+          <Route path={sourcePath(SOURCE_SCHEMAS_PATH, sourceId, isOrganization)}>
+            <Schema />
+          </Route>
         )}
         {isCustomSource && (
-          <Route
-            path={getSourcesPath(REINDEX_JOB_PATH, isOrganization)}
-            component={SchemaChangeErrors}
-          />
+          <Route path={getSourcesPath(REINDEX_JOB_PATH, isOrganization)}>
+            <SchemaChangeErrors />
+          </Route>
         )}
         {isCustomSource && (
-          <Route
-            path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}
-            component={DisplaySettingsRouter}
-          />
+          <Route path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}>
+            <DisplaySettingsRouter />
+          </Route>
         )}
-        <Route
-          exact
-          path={sourcePath(SOURCE_SETTINGS_PATH, sourceId, isOrganization)}
-          component={SourceSettings}
-        />
+        <Route exact path={sourcePath(SOURCE_SETTINGS_PATH, sourceId, isOrganization)}>
+          <SourceSettings />
+        </Route>
       </Switch>
     </>
   );

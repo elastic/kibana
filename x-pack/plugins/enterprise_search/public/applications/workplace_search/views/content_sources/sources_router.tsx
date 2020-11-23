@@ -50,61 +50,55 @@ export const SourcesRouter: React.FC = () => {
 
   return (
     <Switch>
-      <Route exact path={PERSONAL_SOURCES_PATH} component={PrivateSources} />
-      <Route exact path={SOURCES_PATH} component={OrganizationSources} />
+      <Route exact path={PERSONAL_SOURCES_PATH}>
+        <PrivateSources />
+      </Route>
+      <Route exact path={SOURCES_PATH}>
+        <OrganizationSources />
+      </Route>
       {staticSourceData.map(({ addPath, accountContextOnly }, i) => (
-        <Route
-          key={i}
-          exact
-          path={getSourcesPath(addPath, isOrganization)}
-          render={() =>
-            !hasPlatinumLicense && accountContextOnly ? (
-              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-            ) : (
-              <AddSource sourceIndex={i} />
-            )
-          }
-        />
+        <Route key={i} exact path={getSourcesPath(addPath, isOrganization)}>
+          {!hasPlatinumLicense && accountContextOnly ? (
+            <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
+          ) : (
+            <AddSource sourceIndex={i} />
+          )}
+        </Route>
       ))}
       {staticSourceData.map(({ addPath }, i) => (
-        <Route
-          key={i}
-          exact
-          path={`${getSourcesPath(addPath, isOrganization)}/connect`}
-          render={() => <AddSource connect sourceIndex={i} />}
-        />
+        <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/connect`}>
+          <AddSource connect sourceIndex={i} />
+        </Route>
       ))}
       {staticSourceData.map(({ addPath }, i) => (
-        <Route
-          key={i}
-          exact
-          path={`${getSourcesPath(addPath, isOrganization)}/re-authenticate`}
-          render={() => <AddSource reAuthenticate sourceIndex={i} />}
-        />
+        <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/re-authenticate`}>
+          <AddSource reAuthenticate sourceIndex={i} />
+        </Route>
       ))}
       {staticSourceData.map(({ addPath, configuration: { needsConfiguration } }, i) => {
         if (needsConfiguration)
           return (
-            <Route
-              key={i}
-              exact
-              path={`${getSourcesPath(addPath, isOrganization)}/configure`}
-              render={() => <AddSource configure sourceIndex={i} />}
-            />
+            <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/configure`}>
+              <AddSource configure sourceIndex={i} />
+            </Route>
           );
       })}
       {canCreatePersonalSources ? (
-        <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)} component={AddSourceList} />
+        <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)}>
+          <AddSourceList />
+        </Route>
       ) : (
         <Redirect exact from={getSourcesPath(ADD_SOURCE_PATH, false)} to={PERSONAL_SOURCES_PATH} />
       )}
-      <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)} component={AddSourceList} /> :
-      <Route
-        path={getSourcesPath(SOURCE_ADDED_PATH, isOrganization)}
-        exact
-        component={SourceAdded}
-      />
-      <Route path={getSourcesPath(SOURCE_DETAILS_PATH, isOrganization)} component={SourceRouter} />
+      <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)}>
+        <AddSourceList />
+      </Route>
+      <Route path={getSourcesPath(SOURCE_ADDED_PATH, isOrganization)} exact>
+        <SourceAdded />
+      </Route>
+      <Route path={getSourcesPath(SOURCE_DETAILS_PATH, isOrganization)}>
+        <SourceRouter />
+      </Route>
     </Switch>
   );
 };
