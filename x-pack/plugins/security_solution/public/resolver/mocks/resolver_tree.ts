@@ -51,22 +51,13 @@ export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
     },
   };
 
+  const treeResponse = [originNode];
+
   return {
-    treeResponse: [originNode],
+    treeResponse,
     resolverTree: {
       originId: originID,
-      nodes: [
-        {
-          id: originID,
-          name: nodeName,
-          stats: { total: eventsToGenerate, byCategory: { registry: eventsToGenerate } },
-          data: {
-            '@timestamp': timestamp,
-            'process.entity_id': originID,
-            'process.name': nodeName,
-          },
-        },
-      ],
+      nodes: treeResponse,
     },
     relatedEvents: {
       entityID: originID,
@@ -84,42 +75,47 @@ export function mockTreeWith2AncestorsAndNoChildren({
   secondAncestorID: string;
   firstAncestorID: string;
   originID: string;
-}): ResolverTree {
-  const secondAncestor: SafeResolverEvent = mockEndpointEvent({
-    entityID: secondAncestorID,
-    processName: 'a',
-    parentEntityID: 'none',
-    timestamp: 1600863932316,
-  });
-  const firstAncestor: SafeResolverEvent = mockEndpointEvent({
-    entityID: firstAncestorID,
-    processName: 'b',
-    parentEntityID: secondAncestorID,
-    timestamp: 1600863932317,
-  });
-  const originEvent: SafeResolverEvent = mockEndpointEvent({
-    entityID: originID,
-    processName: 'c',
-    parentEntityID: firstAncestorID,
-    timestamp: 1600863932318,
-  });
+}): NewResolverTree {
+  const secondAncestorNode: ResolverNode = {
+    id: secondAncestorID,
+    name: 'a',
+    data: {
+      '@timestamp': 1600863932317,
+      'process.entity_id': secondAncestorID,
+      'process.name': 'a',
+    },
+    stats: { total: 0, byCategory: {} },
+  };
+
+  const firstAncestorNode: ResolverNode = {
+    id: firstAncestorID,
+    name: 'b',
+    parent: secondAncestorID,
+    data: {
+      '@timestamp': 1600863932317,
+      'process.entity_id': firstAncestorID,
+      'process.parent.entity_id': secondAncestorID,
+      'process.name': 'b',
+    },
+    stats: { total: 0, byCategory: {} },
+  };
+
+  const originNode: ResolverNode = {
+    id: originID,
+    name: 'c',
+    parent: firstAncestorID,
+    data: {
+      '@timestamp': 1600863932318,
+      'process.entity_id': originID,
+      'process.parent.entity_id': firstAncestorID,
+      'process.name': 'c',
+    },
+    stats: { total: 2, byCategory: {} },
+  };
+
   return {
-    entityID: originID,
-    children: {
-      childNodes: [],
-      nextChild: null,
-    },
-    ancestry: {
-      nextAncestor: null,
-      ancestors: [
-        { entityID: secondAncestorID, lifecycle: [secondAncestor] },
-        { entityID: firstAncestorID, lifecycle: [firstAncestor] },
-      ],
-    },
-    lifecycle: [originEvent],
-    relatedEvents: { events: [], nextEvent: null },
-    relatedAlerts: { alerts: [], nextAlert: null },
-    stats: { events: { total: 2, byCategory: {} }, totalAlerts: 0 },
+    originId: originID,
+    nodes: [secondAncestorNode, firstAncestorNode, originNode],
   };
 }
 
@@ -189,26 +185,33 @@ export function mockTreeWithAllProcessesTerminated({
 /**
  * Add/replace related event info (on origin node) for any mock ResolverTree
  */
-function withRelatedEventsOnOrigin(tree: ResolverTree, events: SafeResolverEvent[]): ResolverTree {
+function withRelatedEventsOnOrigin(
+  tree: NewResolverTree,
+  events: SafeResolverEvent[],
+  originID: string
+): {
+  tree: NewResolverTree;
+  relatedEvents: Partial<ResolverRelatedEvents>;
+} {
   const byCategory: Record<string, number> = {};
   const stats = {
-    totalAlerts: 0,
-    events: {
-      total: 0,
-      byCategory,
-    },
+    total: 0,
+    byCategory,
   };
   for (const event of events) {
-    stats.events.total++;
+    stats.total++;
     for (const category of eventModel.eventCategory(event)) {
-      stats.events.byCategory[category] = stats.events.byCategory[category]
-        ? stats.events.byCategory[category] + 1
-        : 1;
+      stats.byCategory[category] = stats.byCategory[category] ? stats.byCategory[category] + 1 : 1;
     }
   }
+
+  const originNode = tree.nodes.find((node) => node.id === originID);
+  if (originNode) {
+    originNode.stats = stats;
+  }
+
   return {
-    ...tree,
-    stats,
+    tree,
     relatedEvents: {
       events,
       nextEvent: null,
@@ -224,7 +227,11 @@ export function mockTreeWithNoAncestorsAnd2Children({
   originID: string;
   firstChildID: string;
   secondChildID: string;
-}): ResolverTree {
+}): {
+  treeResponse: ResolverNode[];
+  resolverTree: NewResolverTree;
+  relatedEvents: Partial<ResolverRelatedEvents>;
+} {
   const origin: SafeResolverEvent = mockEndpointEvent({
     pid: 0,
     entityID: originID,
@@ -248,23 +255,57 @@ export function mockTreeWithNoAncestorsAnd2Children({
     timestamp: 1600863932318,
   });
 
+  const originNode: ResolverNode = {
+    id: originID,
+    name: 'c.ext',
+    stats: { total: 2, byCategory: {} },
+    data: {
+      '@timestamp': 1600863932316,
+      'process.entity_id': originID,
+      'process.name': 'c.ext',
+    },
+  };
+
+  const firstChildNode: ResolverNode = {
+    id: firstChildID,
+    name: 'd',
+    parent: originID,
+    stats: { total: 0, byCategory: {} },
+    data: {
+      '@timestamp': 1600863932317,
+      'process.entity_id': firstChildID,
+      'process.name': 'd',
+      'process.parent.entity_id': originID,
+    },
+  };
+
+  const secondChildNode: ResolverNode = {
+    id: secondChildID,
+    name:
+      'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
+    parent: originID,
+    stats: { total: 0, byCategory: {} },
+    data: {
+      '@timestamp': 1600863932318,
+      'process.entity_id': secondChildID,
+      'process.name':
+        'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
+      'process.parent.entity_id': originID,
+    },
+  };
+
+  const treeResponse = [originNode, firstChildNode, secondChildNode];
+
   return {
-    entityID: originID,
-    children: {
-      childNodes: [
-        { entityID: firstChildID, lifecycle: [firstChild] },
-        { entityID: secondChildID, lifecycle: [secondChild] },
-      ],
-      nextChild: null,
+    treeResponse,
+    resolverTree: {
+      originId: originID,
+      nodes: treeResponse,
     },
-    ancestry: {
-      ancestors: [],
-      nextAncestor: null,
+    relatedEvents: {
+      events: [],
+      nextEvent: null,
     },
-    lifecycle: [origin],
-    relatedEvents: { events: [], nextEvent: null },
-    relatedAlerts: { alerts: [], nextAlert: null },
-    stats: { events: { total: 2, byCategory: {} }, totalAlerts: 0 },
   };
 }
 
