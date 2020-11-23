@@ -1,6 +1,8 @@
 ---
 - name: Install Docker
   hosts: all
+  environment:
+    PYTHONPATH: "/home/path/.local/lib/python3.8/site-packages"
   vars:
     DOCKER_PACKAGES:
       - apt-transport-https
@@ -8,44 +10,69 @@
       - curl
       - gnupg-agent
       - software-properties-common
+      - python3-pip
 
   tasks:
   - name: Update apt packages
     become: yes
     apt:
       update_cache: "yes"
+      cache_valid_time: 3600
 
-  - name: Install packages needed for Docker
+  - name: install packages needed for Docker
     become: yes
     apt:
       name: "{{ DOCKER_PACKAGES }}"
       state: present
       force_apt_get: "yes"
 
-  - name: Add Docker GPG apt Key
+  - name: add Docker GPG apt Key
     become: yes
     apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg
       state: present
 
-  - name: Save the current Ubuntu release version into a variable
+  - name: save the current Ubuntu release version into a variable
     shell: lsb_release -cs
     register: ubuntu_version
+    changed_when: false
 
-  - name: Add Docker Repository
+  - name: add Docker Repository
     become: yes
     apt_repository:
       repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ubuntu_version.stdout }} stable"
       state: present
 
-  - name: Update apt packages
+  - name: update apt packages
     become: yes
     apt:
       update_cache: "yes"
+      cache_valid_time: 3600
 
-  - name: Install Docker
+  - name: install Docker
     become: yes
     apt:
       name: "docker-ce"
       state: present
       force_apt_get: "yes"
+
+  - name: install docker sdk
+    become: yes
+    pip:
+      name: docker
+
+  - name: load kibana
+    become: yes
+    docker_image:
+      name: kibana
+      load_path: /packages/kibana-8.0.0-SNAPSHOT-docker-build-context.tar.gz
+      source: load
+      state: present
+  - name: start kibana
+    become: yes
+    community.general.docker_container:
+      name: kibana
+      image: kibana
+      env:
+        SERVER_HOST: 0.0.0.0
+        ELASTICSEARCH_HOSTS: 192.168.50.5
