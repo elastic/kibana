@@ -11,7 +11,7 @@ import {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
-import { operationDefinitionMap, OperationType } from './operations';
+import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -50,44 +50,39 @@ export function getInvalidLayers(state: IndexPatternPrivateState) {
   return Object.values(state.layers).filter((layer) => {
     return layer.columnOrder.some((columnId) => {
       const column = layer.columns[columnId];
-      return (
-        hasField(column) &&
-        fieldIsInvalid(
-          column.sourceField,
-          column.operationType,
-          state.indexPatterns[layer.indexPatternId]
-        )
-      );
+      return isColumnInvalid(column, state.indexPatterns[layer.indexPatternId]);
     });
   });
 }
 
-export function getInvalidFieldsForLayer(
+export function getInvalidColumnsForLayer(
   layers: IndexPatternLayer[],
   indexPatternMap: Record<string, IndexPattern>
 ) {
   return layers.map((layer) => {
     return layer.columnOrder.filter((columnId) => {
       const column = layer.columns[columnId];
-      return (
-        hasField(column) &&
-        fieldIsInvalid(
-          column.sourceField,
-          column.operationType,
-          indexPatternMap[layer.indexPatternId]
-        )
-      );
+      return isColumnInvalid(column, indexPatternMap[layer.indexPatternId]);
     });
   });
 }
 
-export function fieldIsInvalid(
-  sourceField: string | undefined,
-  operationType: OperationType | undefined,
-  indexPattern: IndexPattern
-) {
-  const operationDefinition = operationType && operationDefinitionMap[operationType];
+export function isColumnInvalid(column: IndexPatternColumn, indexPattern: IndexPattern) {
+  const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
+  return (
+    operationDefinition.hasInvalidReferences &&
+    operationDefinition.hasInvalidReferences(column, indexPattern)
+  );
+}
+
+export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPattern: IndexPattern) {
+  if (!column || !hasField(column)) {
+    return false;
+  }
+
+  const { sourceField, operationType } = column;
   const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
+  const operationDefinition = operationType && operationDefinitionMap[operationType];
 
   return Boolean(
     sourceField &&

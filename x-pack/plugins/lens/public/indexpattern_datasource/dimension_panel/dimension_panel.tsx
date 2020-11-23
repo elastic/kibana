@@ -12,7 +12,7 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternColumn } from '../indexpattern';
-import { fieldIsInvalid } from '../utils';
+import { isColumnInvalid } from '../utils';
 import { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
 import { DateRange } from '../../../common';
@@ -52,12 +52,9 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
   const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
 
-  const selectedColumnSourceField =
-    selectedColumn && 'sourceField' in selectedColumn ? selectedColumn.sourceField : undefined;
   const currentFieldIsInvalid = useMemo(
-    () =>
-      fieldIsInvalid(selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern),
-    [selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern]
+    () => isColumnInvalid(selectedColumn, currentIndexPattern),
+    [selectedColumn, currentIndexPattern]
   );
 
   const { columnId, uniqueLabel } = props;

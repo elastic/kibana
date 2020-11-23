@@ -230,7 +230,7 @@ describe('last_value', () => {
           name: 'test',
           displayName: 'test',
         },
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(lastValueColumn.dataType).toEqual('boolean');
     });
@@ -245,7 +245,7 @@ describe('last_value', () => {
           name: 'test',
           displayName: 'test',
         },
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(lastValueColumn.params.sortOrder).toEqual('desc');
     });
@@ -253,15 +253,15 @@ describe('last_value', () => {
     it('should use indexPattern timeFieldName as a default sortField', () => {
       const lastValueColumn = lastValueOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
-        columns: {
-          col1: {
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
-            sourceField: 'Records',
-            operationType: 'count',
-          },
-        },
+
+        layer: { columns: {  col1: {
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count',
+        },}, columnOrder: [], indexPatternId: '' },
+      
         field: {
           aggregatable: true,
           searchable: true,
@@ -301,15 +301,15 @@ describe('last_value', () => {
       };
       const lastValueColumn = lastValueOperation.buildColumn({
         indexPattern: indexPatternNoTimeField,
-        columns: {
-          col1: {
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
-            sourceField: 'Records',
-            operationType: 'count',
-          },
-        },
+        
+        layer: { columns: {  col1: {
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count',
+        }}, columnOrder: [], indexPatternId: '' },
+      
         field: {
           aggregatable: true,
           searchable: true,

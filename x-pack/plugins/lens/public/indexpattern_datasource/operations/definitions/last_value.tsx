@@ -5,12 +5,13 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSelect, EuiButtonGroup } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiButtonGroup, EuiComboBoxOptionOption } from '@elastic/eui';
 import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
+import { fieldIsInvalid } from '../../utils';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
@@ -21,9 +22,23 @@ function ofName(name: string) {
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
+export function sortFieldIsInvalid(sortField: string, indexPattern: IndexPattern) {
+  const field = indexPattern.getFieldByName(sortField);
+  return !(field && field.type === 'date');
+}
+
+function isTimeFieldNameDateField(indexPattern: IndexPattern) {
+  return (
+    indexPattern.timeFieldName &&
+    indexPattern.fields.find(
+      (field) => field.name === indexPattern.timeFieldName && field.type === 'date'
+    )
+  );
+}
+
 function getDateFields(indexPattern: IndexPattern): IndexPatternField[] {
   const dateFields = indexPattern.fields.filter((field) => field.type === 'date');
-  if (indexPattern.timeFieldName) {
+  if (isTimeFieldNameDateField(indexPattern)) {
     dateFields.sort(({ name: nameA }, { name: nameB }) => {
       if (nameA === indexPattern.timeFieldName) {
         return -1;
@@ -57,6 +72,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
     defaultMessage: 'Last value',
   }),
+  getDefaultLabel: (column, indexPattern) =>
+    indexPattern.getFieldByName(column.sourceField)!.displayName,
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
@@ -85,9 +102,16 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       });
     }
   },
+  hasInvalidReferences(column, indexPattern) {
+    return (
+      fieldIsInvalid(column, indexPattern) ||
+      sortFieldIsInvalid(column.params.sortField, indexPattern)
+    );
+  },
   buildColumn({ field, previousColumn, indexPattern }) {
-    const sortField =
-      indexPattern.timeFieldName || indexPattern.fields.find((f) => f.type === 'date')?.name;
+    const sortField = isTimeFieldNameDateField(indexPattern)
+      ? indexPattern.timeFieldName
+      : indexPattern.fields.find((f) => f.type === 'date')?.name;
 
     if (!sortField) {
       throw new Error(
@@ -142,7 +166,8 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   },
 
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
-    const dateFields = getDateFields(state.indexPatterns[state.layers[layerId].indexPatternId]);
+    const currentIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
+    const dateFields = getDateFields(currentIndexPattern);
     const sortOrderButtons = [
       {
         id: `lns-lastValue-ascending`,
@@ -155,6 +180,10 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
         value: 'desc',
       },
     ];
+    const isSortFieldInvalid = sortFieldIsInvalid(
+      currentColumn.params.sortField,
+      currentIndexPattern
+    );
     return (
       <>
         <EuiFormRow
@@ -163,31 +192,53 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
           })}
           display="columnCompressed"
           fullWidth
+          error={i18n.translate('xpack.lens.indexPattern.sortField.invalid', {
+            defaultMessage: 'Invalid field. Check your index pattern or pick another field.',
+          })}
+          isInvalid={isSortFieldInvalid}
         >
-          <EuiSelect
+          <EuiComboBox
+            placeholder={i18n.translate('xpack.lens.indexPattern.lastValue.sortFieldPlaceholder', {
+              defaultMessage: 'Sort field',
+            })}
             compressed
+            isClearable={false}
             data-test-subj="lns-indexPattern-lastValue-sortField"
+            isInvalid={isSortFieldInvalid}
+            singleSelection={{ asPlainText: true }}
+            aria-label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
+              defaultMessage: 'Sort by date field',
+            })}
             options={dateFields?.map((field: IndexPatternField) => {
               return {
                 value: field.name,
-                text: field.displayName,
+                label: field.displayName,
               };
             })}
-            value={currentColumn.params.sortField}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            onChange={(choices) => {
+              if (choices.length === 0) {
+                return;
+              }
               setState(
                 updateColumnParam({
                   state,
                   layerId,
                   currentColumn,
                   paramName: 'sortField',
-                  value: e.target.value,
+                  value: choices[0].value,
                 })
-              )
+              );
+            }}
+            selectedOptions={
+              ((currentColumn.params?.sortField
+                ? [
+                    {
+                      label: currentColumn.params.sortField,
+                      value: currentColumn.params.sortField,
+                    },
+                  ]
+                : []) as unknown) as EuiComboBoxOptionOption[]
             }
-            aria-label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
-              defaultMessage: 'Sort by date field',
-            })}
           />
         </EuiFormRow>
         <EuiFormRow

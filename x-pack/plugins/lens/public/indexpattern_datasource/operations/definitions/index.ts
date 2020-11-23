@@ -156,6 +156,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * the status. Otherwise it returns undefined
    */
   getDisabledStatus?: (indexPattern: IndexPattern) => string | undefined;
+  /**
+   * Returns true if column contains invalid references
+   */
+  hasInvalidReferences?: (column: C, indexPattern: IndexPattern) => boolean;
 }
 
 interface BaseBuildColumnArgs {

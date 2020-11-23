@@ -107,7 +107,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       })
       .map((def) => def.type)
       .filter((type) => fieldByOperation[type]?.size || operationWithoutField.has(type));
-  }, [fieldByOperation, operationWithoutField]);
+  }, [operationWithoutField]);
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
@@ -129,14 +129,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
     };
   });
 
-  const selectedColumnSourceField =
-    selectedColumn && 'sourceField' in selectedColumn ? selectedColumn.sourceField : undefined;
-
-  const currentFieldIsInvalid = useMemo(
-    () =>
-      fieldIsInvalid(selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern),
-    [selectedColumnSourceField, selectedColumn?.operationType, currentIndexPattern]
-  );
+  const currentFieldIsInvalid = useMemo(() => fieldIsInvalid(selectedColumn, currentIndexPattern), [
+    selectedColumn,
+    currentIndexPattern,
+  ]);
 
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
     ({ operationType, compatibleWithCurrentField, disabledStatus }) => {

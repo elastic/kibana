@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+import { fieldIsInvalid } from '../../utils';
 
 type MetricColumn<T> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
@@ -29,6 +30,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     priority,
     displayName,
     input: 'field',
+    hasInvalidReferences: fieldIsInvalid,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&
