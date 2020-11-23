@@ -16,6 +16,8 @@ import { chartPluginMock } from '../../../../../../../../src/plugins/charts/publ
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
 import { featuresPluginMock } from '../../../../../../features/public/mocks';
+import { ActionConnector } from '../../../../types';
+import { times } from 'lodash';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -109,36 +111,38 @@ describe('actions_connectors_list component empty', () => {
 describe('actions_connectors_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
-  async function setup() {
+  async function setup(actionConnectors?: ActionConnector[]) {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce([
-      {
-        id: '1',
-        actionTypeId: 'test',
-        description: 'My test',
-        isPreconfigured: false,
-        referencedByCount: 1,
-        config: {},
-      },
-      {
-        id: '2',
-        actionTypeId: 'test2',
-        description: 'My test 2',
-        referencedByCount: 1,
-        isPreconfigured: false,
-        config: {},
-      },
-      {
-        id: '3',
-        actionTypeId: 'test2',
-        description: 'My preconfigured test 2',
-        referencedByCount: 1,
-        isPreconfigured: true,
-        config: {},
-      },
-    ]);
+    loadAllActions.mockResolvedValueOnce(
+      actionConnectors ?? [
+        {
+          id: '1',
+          actionTypeId: 'test',
+          description: 'My test',
+          isPreconfigured: false,
+          referencedByCount: 1,
+          config: {},
+        },
+        {
+          id: '2',
+          actionTypeId: 'test2',
+          description: 'My test 2',
+          referencedByCount: 1,
+          isPreconfigured: false,
+          config: {},
+        },
+        {
+          id: '3',
+          actionTypeId: 'test2',
+          description: 'My preconfigured test 2',
+          referencedByCount: 1,
+          isPreconfigured: true,
+          config: {},
+        },
+      ]
+    );
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -215,6 +219,36 @@ describe('actions_connectors_list component with items', () => {
   it('renders table with preconfigured connectors', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
+  });
+
+  it('supports pagination', async () => {
+    await setup(
+      times(15, (index) => ({
+        id: `connector${index}`,
+        actionTypeId: 'test',
+        name: `My test ${index}`,
+        secrets: {},
+        description: `My test ${index}`,
+        isPreconfigured: false,
+        referencedByCount: 1,
+        config: {},
+      }))
+    );
+    expect(wrapper.find('[data-test-subj="actionsTable"]').first().prop('pagination'))
+      .toMatchInlineSnapshot(`
+      Object {
+        "initialPageIndex": 0,
+        "pageIndex": 0,
+      }
+    `);
+    wrapper.find('[data-test-subj="pagination-button-1"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="actionsTable"]').first().prop('pagination'))
+      .toMatchInlineSnapshot(`
+      Object {
+        "initialPageIndex": 0,
+        "pageIndex": 1,
+      }
+    `);
   });
 
   test('if select item for edit should render ConnectorEditFlyout', async () => {

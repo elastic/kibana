@@ -88,6 +88,12 @@ export interface ContentSource {
   name: string;
 }
 
+export interface SourceContentItem {
+  id: string;
+  last_updated: string;
+  [key: string]: string;
+}
+
 export interface ContentSourceDetails extends ContentSource {
   status: string;
   statusMessage: string;
@@ -105,11 +111,23 @@ interface DescriptionList {
   description: string;
 }
 
+export interface DocumentSummaryItem {
+  count: number;
+  type: string;
+}
+
+interface SourceActivity {
+  details: string[];
+  event: string;
+  time: string;
+  status: string;
+}
+
 export interface ContentSourceFullData extends ContentSourceDetails {
-  activities: object[];
+  activities: SourceActivity[];
   details: DescriptionList[];
-  summary: object[];
-  groups: object[];
+  summary: DocumentSummaryItem[];
+  groups: Group[];
   custom: boolean;
   accessToken: string;
   key: string;
