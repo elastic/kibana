@@ -23,9 +23,7 @@ import { useUrlParams } from '../../hooks/useUrlParams';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { units } from '../../style/variables';
 
-export type AnomalyDetectionApiResponse = APIReturnType<
-  'GET /api/apm/settings/anomaly-detection'
->;
+export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection'>;
 
 const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
 

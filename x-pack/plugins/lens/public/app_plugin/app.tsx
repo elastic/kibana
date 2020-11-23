@@ -26,7 +26,7 @@ import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   esFilters,
-  exportAsCSVs,
+  exporters,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   syncQueryStateWithUrl,
@@ -493,11 +493,29 @@ export function App({
     savingPermitted,
     actions: {
       exportToCSV: () => {
-        const content = exportAsCSVs(lastKnownDoc?.title || unsavedTitle, state.activeData, {
-          csvSeparator: uiSettings.get('csv:separator', ','),
-          quoteValues: uiSettings.get('csv:quoteValues', true),
-          formatFactory: data.fieldFormats.deserialize,
-        });
+        if (!state.activeData) {
+          return;
+        }
+        const datatables = Object.values(state.activeData);
+        const content = datatables.reduce<Record<string, { content: string; type: string }>>(
+          (memo, datatable, i) => {
+            // skip empty datatables
+            if (datatable) {
+              const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+
+              memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
+                content: exporters.datatableToCSV(datatable, {
+                  csvSeparator: uiSettings.get('csv:separator', ','),
+                  quoteValues: uiSettings.get('csv:quoteValues', true),
+                  formatFactory: data.fieldFormats.deserialize,
+                }),
+                type: exporters.CSV_MIME_TYPE,
+              };
+            }
+            return memo;
+          },
+          {}
+        );
         if (content) {
           downloadMultipleAs(content);
         }

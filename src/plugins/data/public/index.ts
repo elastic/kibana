@@ -216,7 +216,11 @@ export {
  * Exporters (CSV)
  */
 
-export * from './exports';
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
 
 /*
  * Index patterns:

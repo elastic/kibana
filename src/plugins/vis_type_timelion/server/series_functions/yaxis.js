@@ -106,86 +106,79 @@ export default new Chainable('yaxis', {
       'Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis',
   }),
   fn: function yaxisFn(args) {
-    return alter(args, function (
-      eachSeries,
-      yaxis,
-      min,
-      max,
-      position,
-      label,
-      color,
-      units,
-      tickDecimals
-    ) {
-      yaxis = yaxis || 1;
+    return alter(
+      args,
+      function (eachSeries, yaxis, min, max, position, label, color, units, tickDecimals) {
+        yaxis = yaxis || 1;
 
-      eachSeries.yaxis = yaxis;
-      eachSeries._global = eachSeries._global || {};
+        eachSeries.yaxis = yaxis;
+        eachSeries._global = eachSeries._global || {};
 
-      eachSeries._global.yaxes = eachSeries._global.yaxes || [];
-      eachSeries._global.yaxes[yaxis - 1] = eachSeries._global.yaxes[yaxis - 1] || {};
+        eachSeries._global.yaxes = eachSeries._global.yaxes || [];
+        eachSeries._global.yaxes[yaxis - 1] = eachSeries._global.yaxes[yaxis - 1] || {};
 
-      const myAxis = eachSeries._global.yaxes[yaxis - 1];
-      myAxis.position = position || (yaxis % 2 ? 'left' : 'right');
-      myAxis.min = min;
-      myAxis.max = max;
-      myAxis.axisLabelFontSizePixels = 11;
-      myAxis.axisLabel = label;
-      myAxis.axisLabelColour = color;
-      myAxis.axisLabelUseCanvas = true;
+        const myAxis = eachSeries._global.yaxes[yaxis - 1];
+        myAxis.position = position || (yaxis % 2 ? 'left' : 'right');
+        myAxis.min = min;
+        myAxis.max = max;
+        myAxis.axisLabelFontSizePixels = 11;
+        myAxis.axisLabel = label;
+        myAxis.axisLabelColour = color;
+        myAxis.axisLabelUseCanvas = true;
 
-      if (tickDecimals) {
-        myAxis.tickDecimals = tickDecimals < 0 ? 0 : tickDecimals;
-      }
-
-      if (units) {
-        const unitTokens = units.split(':');
-        const unitType = unitTokens[0];
-        if (!tickFormatters[unitType]) {
-          throw new Error(
-            i18n.translate(
-              'timelion.serverSideErrors.yaxisFunction.notSupportedUnitTypeErrorMessage',
-              {
-                defaultMessage: '{units} is not a supported unit type.',
-                values: { units },
-              }
-            )
-          );
+        if (tickDecimals) {
+          myAxis.tickDecimals = tickDecimals < 0 ? 0 : tickDecimals;
         }
-        if (unitType === 'currency') {
-          const threeLetterCode = /^[A-Za-z]{3}$/;
-          const currency = unitTokens[1];
-          if (currency && !threeLetterCode.test(currency)) {
+
+        if (units) {
+          const unitTokens = units.split(':');
+          const unitType = unitTokens[0];
+          if (!tickFormatters[unitType]) {
             throw new Error(
               i18n.translate(
-                'timelion.serverSideErrors.yaxisFunction.notValidCurrencyFormatErrorMessage',
+                'timelion.serverSideErrors.yaxisFunction.notSupportedUnitTypeErrorMessage',
                 {
-                  defaultMessage: 'Currency must be a three letter code',
+                  defaultMessage: '{units} is not a supported unit type.',
+                  values: { units },
                 }
               )
             );
           }
-        }
+          if (unitType === 'currency') {
+            const threeLetterCode = /^[A-Za-z]{3}$/;
+            const currency = unitTokens[1];
+            if (currency && !threeLetterCode.test(currency)) {
+              throw new Error(
+                i18n.translate(
+                  'timelion.serverSideErrors.yaxisFunction.notValidCurrencyFormatErrorMessage',
+                  {
+                    defaultMessage: 'Currency must be a three letter code',
+                  }
+                )
+              );
+            }
+          }
 
-        myAxis.units = {
-          type: unitType,
-          prefix: unitTokens[1] || '',
-          suffix: unitTokens[2] || '',
-        };
+          myAxis.units = {
+            type: unitType,
+            prefix: unitTokens[1] || '',
+            suffix: unitTokens[2] || '',
+          };
 
-        if (unitType === 'percent') {
-          // jquery.flot uses axis.tickDecimals to generate tick values
-          // need 2 extra decimal places to preserve precision when percent shifts value to left
-          myAxis.units.tickDecimalsShift = 2;
-          if (tickDecimals) {
-            myAxis.tickDecimals += myAxis.units.tickDecimalsShift;
-          } else {
-            myAxis.tickDecimals = myAxis.units.tickDecimalsShift;
+          if (unitType === 'percent') {
+            // jquery.flot uses axis.tickDecimals to generate tick values
+            // need 2 extra decimal places to preserve precision when percent shifts value to left
+            myAxis.units.tickDecimalsShift = 2;
+            if (tickDecimals) {
+              myAxis.tickDecimals += myAxis.units.tickDecimalsShift;
+            } else {
+              myAxis.tickDecimals = myAxis.units.tickDecimalsShift;
+            }
           }
         }
-      }
 
-      return eachSeries;
-    });
+        return eachSeries;
+      }
+    );
   },
 });
