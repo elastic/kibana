@@ -10,9 +10,9 @@ import {
   AvailabilityKey,
   getMonitorAvailability,
 } from '../get_monitor_availability';
-import { setupMockEsCompositeQuery } from './helper';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { getUptimeESMockClient, setupMockEsCompositeQuery } from './helper';
 import { GetMonitorAvailabilityParams, makePing, Ping } from '../../../../common/runtime_types';
+
 interface AvailabilityTopHit {
   _source: Ping;
 }
@@ -108,9 +108,11 @@ describe('monitor availability', () => {
         "minimum_should_match": 1
       }
     }`;
+
+      const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
       await getMonitorAvailability({
-        callES: esMock,
-        dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+        uptimeEsClient,
         filters: exampleFilter,
         range: 2,
         rangeUnit: 'w',
@@ -286,9 +288,11 @@ describe('monitor availability', () => {
         rangeUnit: 'd',
         threshold: '69',
       };
+
+      const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
       const result = await getMonitorAvailability({
-        callES: esMock,
-        dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+        uptimeEsClient,
         ...clientParameters,
       });
       expect(esMock.search).toHaveBeenCalledTimes(1);
@@ -509,9 +513,10 @@ describe('monitor availability', () => {
         ],
         genBucketItem
       );
+      const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
       const result = await getMonitorAvailability({
-        callES: esMock,
-        dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+        uptimeEsClient,
         range: 3,
         rangeUnit: 'M',
         threshold: '98',
@@ -812,9 +817,11 @@ describe('monitor availability', () => {
         ],
         genBucketItem
       );
+
+      const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
       await getMonitorAvailability({
-        callES: esMock,
-        dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+        uptimeEsClient,
         range: 3,
         rangeUnit: 's',
         threshold: '99',
