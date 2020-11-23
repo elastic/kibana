@@ -214,10 +214,12 @@ Please use the `defaultRoute` advanced setting instead.
 The default application to load. *Default: `"home"`*
 
 |[[kibana-index]] `kibana.index:`
- | {kib} uses an index in {es} to store saved searches, visualizations, and
+ | *deprecated* This setting is deprecated and will be removed in 8.0. Multitenancy by changing
+'kibana.index' will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy[8.0 Breaking Changes]
+for more details. {kib} uses an index in {es} to store saved searches, visualizations, and
 dashboards. {kib} creates a new index if the index doesn’t already exist.
 If you configure a custom index, the name must be lowercase, and conform to the
-{es} {ref}/indices-create-index.html[index name limitations].
+{es} {ref}/indices-create-index.html[index name limitations]. 
 *Default: `".kibana"`*
 
 | `kibana.autocompleteTimeout:` {ess-icon}
