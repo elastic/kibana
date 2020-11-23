@@ -25,7 +25,7 @@ function isInvalidPercentile(percentile: unknown) {
     return true;
   }
 
-  return percentile <= 0 || percentile >= 100;
+  return percentile <= 1 || percentile > 100;
 }
 
 export class PercentilesForm extends Component<Props, State> {

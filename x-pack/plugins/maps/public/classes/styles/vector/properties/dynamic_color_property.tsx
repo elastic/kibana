@@ -5,6 +5,7 @@
  */
 
 import { Map as MbMap } from 'mapbox-gl';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { DynamicStyleProperty } from './dynamic_style_property';
@@ -26,6 +27,31 @@ import { LegendProps } from './style_property';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
+
+function getOrdinalSuffix(value: number) {
+  const lastDigit = value % 10;
+  if (lastDigit === 1 && value !== 11) {
+    return i18n.translate('xpack.maps.styles.firstOrdinalSuffix', {
+      defaultMessage: 'st',
+    });
+  }
+
+  if (lastDigit === 2 && value !== 12) {
+    return i18n.translate('xpack.maps.styles.secondOrdinalSuffix', {
+      defaultMessage: 'nd',
+    });
+  }
+
+  if (lastDigit === 3 && value !== 13) {
+    return i18n.translate('xpack.maps.styles.thirdOrdinalSuffix', {
+      defaultMessage: 'rd',
+    });
+  }
+
+  return i18n.translate('xpack.maps.styles.ordinalSuffix', {
+    defaultMessage: 'th',
+  });
+}
 
 export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptions> {
   syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
@@ -135,7 +161,9 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         RGBA_0000, // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
-    } else if (this.getStepFunction() === STEP_FUNCTION.PERCENTILES) {
+    }
+
+    if (this.getStepFunction() === STEP_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
       if (!percentilesFieldMeta || !percentilesFieldMeta.length) {
         return null;
@@ -151,44 +179,42 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
 
       const lessThanFirstStopValue = percentilesFieldMeta[0].value - 1;
       return [
-        'interpolate',
-        ['linear'],
+        'step',
         ['coalesce', [this.getMbLookupFunction(), targetName], lessThanFirstStopValue],
-        lessThanFirstStopValue,
-        RGBA_0000,
-        ...colorStops,
-      ];
-    } else {
-      const rangeFieldMeta = this.getRangeFieldMeta();
-      if (!rangeFieldMeta) {
-        return null;
-      }
-
-      const colorStops = getOrdinalMbColorRampStops(
-        this._options.color ? this._options.color : null,
-        rangeFieldMeta.min,
-        rangeFieldMeta.max
-      );
-      if (!colorStops) {
-        return null;
-      }
-
-      const lessThanFirstStopValue = rangeFieldMeta.min - 1;
-      return [
-        'interpolate',
-        ['linear'],
-        makeMbClampedNumberExpression({
-          minValue: rangeFieldMeta.min,
-          maxValue: rangeFieldMeta.max,
-          lookupFunction: this.getMbLookupFunction(),
-          fallback: lessThanFirstStopValue,
-          fieldName: targetName,
-        }),
-        lessThanFirstStopValue,
         RGBA_0000,
         ...colorStops,
       ];
     }
+
+    const rangeFieldMeta = this.getRangeFieldMeta();
+    if (!rangeFieldMeta) {
+      return null;
+    }
+
+    const colorStops = getOrdinalMbColorRampStops(
+      this._options.color ? this._options.color : null,
+      rangeFieldMeta.min,
+      rangeFieldMeta.max
+    );
+    if (!colorStops) {
+      return null;
+    }
+
+    const lessThanFirstStopValue = rangeFieldMeta.min - 1;
+    return [
+      'interpolate',
+      ['linear'],
+      makeMbClampedNumberExpression({
+        minValue: rangeFieldMeta.min,
+        maxValue: rangeFieldMeta.max,
+        lookupFunction: this.getMbLookupFunction(),
+        fallback: lessThanFirstStopValue,
+        fieldName: targetName,
+      }),
+      lessThanFirstStopValue,
+      RGBA_0000,
+      ...colorStops,
+    ];
   }
 
   _getColorPaletteStops() {
@@ -274,6 +300,54 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       return this._options.customColorRamp;
     }
 
+    if (this.getStepFunction() === STEP_FUNCTION.PERCENTILES) {
+      const percentilesFieldMeta = this.getPercentilesFieldMeta();
+      const userDefinedPercentiles = this.getFieldMetaOptions().percentiles;
+      if (!percentilesFieldMeta || !userDefinedPercentiles) {
+        return [];
+      }
+      const colorStops = getPercentilesMbColorRampStops(
+        this._options.color ? this._options.color : null,
+        percentilesFieldMeta
+      );
+      if (!colorStops || colorStops.length <= 2) {
+        return [];
+      }
+
+      const colorRampStops = [];
+      const indexOfLastStop = colorStops.length - 2;
+      for (let i = 0; i < colorStops.length; i += 2) {
+        let stop = '';
+        if (i === 0) {
+          const percentile = userDefinedPercentiles[0];
+          stop = `<${percentile}${getOrdinalSuffix(percentile)}: ${this.formatField(
+            dynamicRound(colorStops[i + 2])
+          )}`;
+        } else if (i === indexOfLastStop) {
+          const percentile = userDefinedPercentiles[userDefinedPercentiles.length - 1];
+          stop = `>${percentile}${getOrdinalSuffix(percentile)}: ${this.formatField(
+            dynamicRound(colorStops[i])
+          )}`;
+        } else {
+          const beginPercentile = userDefinedPercentiles[i / 2 - 1];
+          const begin = `${beginPercentile}${getOrdinalSuffix(
+            beginPercentile
+          )}:  ${this.formatField(dynamicRound(colorStops[i]))}`;
+          const endPercentile = userDefinedPercentiles[i / 2];
+          const end = `${endPercentile}${getOrdinalSuffix(endPercentile)}:  ${this.formatField(
+            dynamicRound(colorStops[i + 2])
+          )}`;
+          stop = `${begin} - ${end}`;
+        }
+
+        colorRampStops.push({
+          stop,
+          color: colorStops[i + 1],
+        });
+      }
+      return colorRampStops;
+    }
+
     if (!this._options.color) {
       return [];
     }
@@ -290,7 +364,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       return [
         {
           color: colors[colors.length - 1],
-          stop: dynamicRound(rangeFieldMeta.max),
+          stop: this.formatField(dynamicRound(rangeFieldMeta.max)),
         },
       ];
     }
@@ -299,7 +373,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       const rawStopValue = rangeFieldMeta.min + rangeFieldMeta.delta * (index / colors.length);
       return {
         color,
-        stop: dynamicRound(rawStopValue),
+        stop: this.formatField(dynamicRound(rawStopValue)),
       };
     });
   }
@@ -311,7 +385,12 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         defaultColor: null,
       };
     } else if (this.isCategorical()) {
-      return this._getColorPaletteStops();
+      return this._getColorPaletteStops().map((colorStop) => {
+        return {
+          color: colorStop.color,
+          stop: this.formatField(colorStop.stop),
+        };
+      });
     } else {
       return EMPTY_STOPS;
     }
@@ -325,7 +404,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         breaks.push({
           color,
           symbolId,
-          label: this.formatField(stop),
+          label: stop,
         });
       }
     });

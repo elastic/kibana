@@ -135,7 +135,7 @@ export class DynamicStyleProperty<T>
 
     const styleMetaData = styleMetaDataRequest.getData() as StyleMetaData;
     const percentiles = styleMetaData[this._field.getRootName()];
-    return percentiles !== undefined
+    return percentiles !== undefined && 'values' in percentiles
       ? Object.keys(percentiles.values).map((key) => {
           return {
             percentile: key,

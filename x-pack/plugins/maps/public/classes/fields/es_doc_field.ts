@@ -104,7 +104,7 @@ export class ESDocField extends AbstractField implements IField {
     }
 
     const metricAggConfig: { script?: unknown; field?: string; percents: number[] } = {
-      percents: [0, ...percentiles, 100],
+      percents: [0, ...percentiles],
     };
     if (indexPatternField.scripted) {
       metricAggConfig.script = {
