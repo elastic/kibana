@@ -9,6 +9,7 @@
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
+/x-pack/plugins/vis_type_timeseries_enhanced/ @elastic/kibana-app
 /src/plugins/advanced_settings/ @elastic/kibana-app
 /src/plugins/charts/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
@@ -29,40 +30,40 @@
 /src/plugins/visualizations/ @elastic/kibana-app
 
 # Application Services
-/examples/bfetch_explorer/ @elastic/kibana-app-arch
-/examples/dashboard_embeddable_examples/ @elastic/kibana-app-arch
-/examples/demo_search/ @elastic/kibana-app-arch
-/examples/developer_examples/ @elastic/kibana-app-arch
-/examples/embeddable_examples/ @elastic/kibana-app-arch
-/examples/embeddable_explorer/ @elastic/kibana-app-arch
-/examples/state_containers_examples/ @elastic/kibana-app-arch
-/examples/ui_action_examples/ @elastic/kibana-app-arch
-/examples/ui_actions_explorer/ @elastic/kibana-app-arch
-/examples/url_generators_examples/ @elastic/kibana-app-arch
-/examples/url_generators_explorer/ @elastic/kibana-app-arch
-/packages/elastic-datemath/ @elastic/kibana-app-arch
-/packages/kbn-interpreter/ @elastic/kibana-app-arch
-/src/plugins/bfetch/ @elastic/kibana-app-arch
-/src/plugins/data/ @elastic/kibana-app-arch
-/src/plugins/embeddable/ @elastic/kibana-app-arch
-/src/plugins/expressions/ @elastic/kibana-app-arch
-/src/plugins/inspector/ @elastic/kibana-app-arch
-/src/plugins/kibana_react/ @elastic/kibana-app-arch
+/examples/bfetch_explorer/ @elastic/kibana-app-services
+/examples/dashboard_embeddable_examples/ @elastic/kibana-app-services
+/examples/demo_search/ @elastic/kibana-app-services
+/examples/developer_examples/ @elastic/kibana-app-services
+/examples/embeddable_examples/ @elastic/kibana-app-services
+/examples/embeddable_explorer/ @elastic/kibana-app-services
+/examples/state_containers_examples/ @elastic/kibana-app-services
+/examples/ui_action_examples/ @elastic/kibana-app-services
+/examples/ui_actions_explorer/ @elastic/kibana-app-services
+/examples/url_generators_examples/ @elastic/kibana-app-services
+/examples/url_generators_explorer/ @elastic/kibana-app-services
+/packages/elastic-datemath/ @elastic/kibana-app-services
+/packages/kbn-interpreter/ @elastic/kibana-app-services
+/src/plugins/bfetch/ @elastic/kibana-app-services
+/src/plugins/data/ @elastic/kibana-app-services
+/src/plugins/embeddable/ @elastic/kibana-app-services
+/src/plugins/expressions/ @elastic/kibana-app-services
+/src/plugins/inspector/ @elastic/kibana-app-services
+/src/plugins/kibana_react/ @elastic/kibana-app-services
 /src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
-/src/plugins/kibana_utils/ @elastic/kibana-app-arch
-/src/plugins/navigation/ @elastic/kibana-app-arch
-/src/plugins/share/ @elastic/kibana-app-arch
-/src/plugins/ui_actions/ @elastic/kibana-app-arch
-/x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-arch
-/x-pack/plugins/data_enhanced/ @elastic/kibana-app-arch
-/x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-arch
-/x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-arch
-#CC# /src/plugins/bfetch/ @elastic/kibana-app-arch
-#CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-arch
-#CC# /src/plugins/inspector/ @elastic/kibana-app-arch
-#CC# /src/plugins/share/ @elastic/kibana-app-arch
-#CC# /x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
-#CC# /packages/kbn-interpreter/ @elastic/kibana-app-arch
+/src/plugins/kibana_utils/ @elastic/kibana-app-services
+/src/plugins/navigation/ @elastic/kibana-app-services
+/src/plugins/share/ @elastic/kibana-app-services
+/src/plugins/ui_actions/ @elastic/kibana-app-services
+/x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
+/x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
+/x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
+/x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
+#CC# /src/plugins/bfetch/ @elastic/kibana-app-services
+#CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-services
+#CC# /src/plugins/inspector/ @elastic/kibana-app-services
+#CC# /src/plugins/share/ @elastic/kibana-app-services
+#CC# /x-pack/plugins/drilldowns/ @elastic/kibana-app-services
+#CC# /packages/kbn-interpreter/ @elastic/kibana-app-services
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
@@ -131,7 +132,7 @@
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
 
 # Maps
-/x-pack/plugins/maps/ @elastic/kibana-gis
+#CC# /x-pack/plugins/maps/ @elastic/kibana-gis
 /x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
@@ -158,9 +159,11 @@
 /packages/kbn-ui-shared-deps/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
-/src/legacy/server/keystore/ @elastic/kibana-operations
+/src/cli/keystore/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
+/.ci/teamcity/ @elastic/kibana-operations
+/.teamcity/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
 
@@ -171,38 +174,38 @@
 /test/functional/services/lib @elastic/kibana-qa
 /test/functional/services/remote @elastic/kibana-qa
 
-# Platform
-/src/core/  @elastic/kibana-platform
-/src/plugins/saved_objects_tagging_oss  @elastic/kibana-platform
-/config/kibana.yml @elastic/kibana-platform
-/x-pack/plugins/features/  @elastic/kibana-platform
-/x-pack/plugins/licensing/  @elastic/kibana-platform
-/x-pack/plugins/global_search/  @elastic/kibana-platform
-/x-pack/plugins/cloud/ @elastic/kibana-platform
-/x-pack/plugins/saved_objects_tagging/ @elastic/kibana-platform
-/x-pack/test/saved_objects_field_count/ @elastic/kibana-platform
-/x-pack/test/saved_object_tagging/ @elastic/kibana-platform
-/packages/kbn-config-schema/ @elastic/kibana-platform
-/packages/kbn-std/ @elastic/kibana-platform
-/src/legacy/server/config/ @elastic/kibana-platform
-/src/legacy/server/http/ @elastic/kibana-platform
-/src/legacy/server/logging/ @elastic/kibana-platform
-/src/plugins/status_page/ @elastic/kibana-platform
-/src/plugins/saved_objects_management/ @elastic/kibana-platform
-/src/dev/run_check_published_api_changes.ts @elastic/kibana-platform
-#CC# /src/core/server/csp/ @elastic/kibana-platform
-#CC# /src/legacy/server/config/ @elastic/kibana-platform
-#CC# /src/legacy/server/http/ @elastic/kibana-platform
-#CC# /src/legacy/ui/public/documentation_links @elastic/kibana-platform
-#CC# /src/plugins/legacy_export/ @elastic/kibana-platform
-#CC# /src/plugins/saved_objects/ @elastic/kibana-platform
-#CC# /src/plugins/status_page/ @elastic/kibana-platform
-#CC# /x-pack/plugins/cloud/ @elastic/kibana-platform
-#CC# /x-pack/plugins/features/ @elastic/kibana-platform
-#CC# /x-pack/plugins/global_search/ @elastic/kibana-platform
+# Core
+/src/core/  @elastic/kibana-core
+/src/plugins/saved_objects_tagging_oss  @elastic/kibana-core
+/config/kibana.yml @elastic/kibana-core
+/x-pack/plugins/features/  @elastic/kibana-core
+/x-pack/plugins/licensing/  @elastic/kibana-core
+/x-pack/plugins/global_search/  @elastic/kibana-core
+/x-pack/plugins/cloud/ @elastic/kibana-core
+/x-pack/plugins/saved_objects_tagging/ @elastic/kibana-core
+/x-pack/test/saved_objects_field_count/ @elastic/kibana-core
+/x-pack/test/saved_object_tagging/ @elastic/kibana-core
+/packages/kbn-config-schema/ @elastic/kibana-core
+/packages/kbn-std/ @elastic/kibana-core
+/src/legacy/server/config/ @elastic/kibana-core
+/src/legacy/server/http/ @elastic/kibana-core
+/src/legacy/server/logging/ @elastic/kibana-core
+/src/plugins/status_page/ @elastic/kibana-core
+/src/plugins/saved_objects_management/ @elastic/kibana-core
+/src/dev/run_check_published_api_changes.ts @elastic/kibana-core
+#CC# /src/core/server/csp/ @elastic/kibana-core
+#CC# /src/legacy/server/config/ @elastic/kibana-core
+#CC# /src/legacy/server/http/ @elastic/kibana-core
+#CC# /src/legacy/ui/public/documentation_links @elastic/kibana-core
+#CC# /src/plugins/legacy_export/ @elastic/kibana-core
+#CC# /src/plugins/saved_objects/ @elastic/kibana-core
+#CC# /src/plugins/status_page/ @elastic/kibana-core
+#CC# /x-pack/plugins/cloud/ @elastic/kibana-core
+#CC# /x-pack/plugins/features/ @elastic/kibana-core
+#CC# /x-pack/plugins/global_search/ @elastic/kibana-core
 
 # Security
-/src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
+/src/core/server/csp/  @elastic/kibana-security @elastic/kibana-core
 /src/plugins/security_oss/ @elastic/kibana-security
 /test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security

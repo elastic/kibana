@@ -4,20 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { noop } from 'lodash';
-import useMount from 'react-use/lib/useMount';
 import { euiStyled } from '../../../../observability/public';
 
 import { LogEntriesCursor } from '../../../common/http_api';
 
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { useLogSource } from '../../containers/logs/log_source';
+import { LogSourceConfigurationProperties, useLogSource } from '../../containers/logs/log_source';
 import { useLogStream } from '../../containers/logs/log_stream';
 
 import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
 
 const PAGE_THRESHOLD = 2;
+
+type LogColumnDefinition =
+  | { type: 'timestamp' }
+  | { type: 'message' }
+  | { type: 'field'; field: string };
 
 export interface LogStreamProps {
   sourceId?: string;
@@ -27,6 +31,7 @@ export interface LogStreamProps {
   center?: LogEntriesCursor;
   highlight?: string;
   height?: string | number;
+  columns?: LogColumnDefinition[];
 }
 
 export const LogStream: React.FC<LogStreamProps> = ({
@@ -37,7 +42,13 @@ export const LogStream: React.FC<LogStreamProps> = ({
   center,
   highlight,
   height = '400px',
+  columns,
 }) => {
+  const customColumns = useMemo(
+    () => (columns ? convertLogColumnDefinitionToLogSourceColumnDefinition(columns) : undefined),
+    [columns]
+  );
+
   // source boilerplate
   const { services } = useKibana();
   if (!services?.http?.fetch) {
@@ -75,6 +86,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
     endTimestamp,
     query,
     center,
+    columns: customColumns,
   });
 
   // Derived state
@@ -84,8 +96,8 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   const isLoadingMore = pageLoadingState === 'loading';
 
   const columnConfigurations = useMemo(() => {
-    return sourceConfiguration ? sourceConfiguration.configuration.logColumns : [];
-  }, [sourceConfiguration]);
+    return sourceConfiguration ? customColumns ?? sourceConfiguration.configuration.logColumns : [];
+  }, [sourceConfiguration, customColumns]);
 
   const streamItems = useMemo(
     () =>
@@ -100,10 +112,13 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
   const parsedHeight = typeof height === 'number' ? `${height}px` : height;
 
   // Component lifetime
-  useMount(() => {
+  useEffect(() => {
     loadSourceConfiguration();
+  }, [loadSourceConfiguration]);
+
+  useEffect(() => {
     fetchEntries();
-  });
+  }, [fetchEntries]);
 
   // Pagination handler
   const handlePagination = useCallback(
@@ -132,7 +147,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
         columnConfigurations={columnConfigurations}
         items={streamItems}
         scale="medium"
-        wrap={false}
+        wrap={true}
         isReloading={isReloading}
         isLoadingMore={isLoadingMore}
         hasMoreBeforeStart={hasMoreBefore}
@@ -160,6 +175,21 @@ const LogStreamContent = euiStyled.div<{ height: string }>`
   background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   height: ${(props) => props.height};
 `;
+
+function convertLogColumnDefinitionToLogSourceColumnDefinition(
+  columns: LogColumnDefinition[]
+): LogSourceConfigurationProperties['logColumns'] {
+  return columns.map((column) => {
+    switch (column.type) {
+      case 'timestamp':
+        return { timestampColumn: { id: '___#timestamp' } };
+      case 'message':
+        return { messageColumn: { id: '___#message' } };
+      case 'field':
+        return { fieldColumn: { id: `___#${column.field}`, field: column.field } };
+    }
+  });
+}
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
