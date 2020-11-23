@@ -60,3 +60,11 @@ export const reload = (afterReload: () => void) => {
   cy.contains('a', 'Security');
   afterReload();
 };
+
+export const removeSignalsIndex = () => {
+  cy.request({
+    method: 'DELETE',
+    url: `api/detection_engine/index`,
+    headers: { 'kbn-xsrf': 'delete-signals' },
+  });
+};

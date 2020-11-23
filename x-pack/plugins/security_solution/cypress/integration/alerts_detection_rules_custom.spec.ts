@@ -97,6 +97,7 @@ import {
 } from '../tasks/create_new_rule';
 import { saveEditedRule, waitForKibana } from '../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { removeSignalsIndex } from '../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
@@ -122,6 +123,7 @@ describe('Custom detection rules creation', () => {
   after(() => {
     deleteRule();
     esArchiverUnload('timeline');
+    removeSignalsIndex();
   });
 
   it('Creates and activates a new rule', () => {
