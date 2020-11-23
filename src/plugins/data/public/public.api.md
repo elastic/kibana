@@ -469,6 +469,12 @@ export interface DataPublicPluginStartUi {
     SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "CSVOptions" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "datatableToCSV" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export function datatableToCSV({ columns, rows }: Datatable_3, { csvSeparator, quoteValues, formatFactory, raw }: Omit<CSVOptions, 'asString'>): string;
+
 // Warning: (ae-missing-release-tag) "DuplicateIndexPatternError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -679,7 +685,6 @@ export type ExistsFilter = Filter & {
     exists?: FilterExistsProperty;
 };
 
-// Warning: (ae-forgotten-export) The symbol "CSVOptions" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "exportAsCSVs" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
