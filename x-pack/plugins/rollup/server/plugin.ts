@@ -24,7 +24,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { ReqFacade } from '../../../../src/plugins/vis_type_timeseries/server';
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
 import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
@@ -32,7 +31,6 @@ import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
 import { rollupDataEnricher } from './rollup_data_enricher';
 import { IndexPatternsFetcher } from './shared_imports';
-import { registerRollupSearchStrategy } from './lib/search_strategies';
 import { elasticsearchJsPlugin } from './client/elasticsearch_rollup';
 import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
@@ -45,6 +43,7 @@ async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']
   const [core] = await getStartServices();
   // Extend the elasticsearchJs client with additional endpoints.
   const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+
   return core.elasticsearch.legacy.createClient('rollup', esClientConfig);
 }
 
@@ -127,15 +126,6 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         schema: schema.boolean(),
       },
     });
-
-    if (visTypeTimeseries) {
-      const getRollupService = async (request: ReqFacade) => {
-        this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-        return this.rollupEsClient.asScoped(request);
-      };
-      const { addSearchStrategy } = visTypeTimeseries;
-      registerRollupSearchStrategy(addSearchStrategy, getRollupService);
-    }
 
     if (usageCollection) {
       this.globalConfig$

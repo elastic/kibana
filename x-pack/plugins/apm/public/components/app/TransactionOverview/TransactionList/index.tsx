@@ -8,8 +8,7 @@ import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TransactionGroup } from '../../../../../server/lib/transaction_groups/fetcher';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import {
   asDecimal,
   asMillisecondDuration,
@@ -20,6 +19,10 @@ import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+
+type TransactionGroup = APIReturnType<
+  'GET /api/apm/services/{serviceName}/transaction_groups'
+>['items'][0];
 
 // Truncate both the link and the child span (the tooltip anchor.) The link so
 // it doesn't overflow, and the anchor so we get the ellipsis.

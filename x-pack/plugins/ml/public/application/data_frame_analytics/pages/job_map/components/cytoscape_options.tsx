@@ -80,7 +80,8 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
     {
       selector: 'node',
       style: {
-        'background-color': theme.euiColorGhost,
+        'background-color': (el: cytoscape.NodeSingular) =>
+          el.data('isRoot') ? theme.euiColorLightShade : theme.euiColorGhost,
         'background-height': '60%',
         'background-width': '60%',
         'border-color': (el: cytoscape.NodeSingular) => borderColorForNode(el),
