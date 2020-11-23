@@ -5,10 +5,9 @@
  */
 
 export { useCapabilities } from './use_capabilities';
-export { useCore } from './use_core';
+export { useStartServices } from './use_core';
 export { useConfig, ConfigContext } from './use_config';
 export { useKibanaVersion, KibanaVersionContext } from './use_kibana_version';
-export { useSetupDeps, useStartDeps, DepsContext } from './use_deps';
 export { licenseService, useLicense } from './use_license';
 export { useBreadcrumbs } from './use_breadcrumbs';
 export { useLink } from './use_link';
