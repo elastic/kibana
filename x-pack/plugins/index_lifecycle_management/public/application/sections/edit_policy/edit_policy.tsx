@@ -47,7 +47,6 @@ import {
 
 import { schema, deserializer, createSerializer, createPolicyNameValidations } from './form';
 import { useEditPolicyContext } from './edit_policy_context';
-import { ConfigurationWarningProvider } from './configuration_warning_context';
 import { FormInternal } from './types';
 
 export interface Props {
@@ -150,198 +149,190 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
           <div className="euiAnimateContentLoad">
             <Form form={form}>
-              <ConfigurationWarningProvider>
-                <EuiSpacer size="xs" />
-                <EuiText color="subdued">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePolicyDescriptionText"
-                      defaultMessage="Use an index policy to automate the four phases of the index lifecycle,
+              <EuiSpacer size="xs" />
+              <EuiText color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePolicyDescriptionText"
+                    defaultMessage="Use an index policy to automate the four phases of the index lifecycle,
                       from actively writing to the index to deleting it."
-                    />{' '}
-                    <LearnMoreLink
-                      docPath="index-lifecycle-management.html"
-                      text={
+                  />{' '}
+                  <LearnMoreLink
+                    docPath="index-lifecycle-management.html"
+                    text={
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexLifecycleManagementLinkText"
+                        defaultMessage="Learn about the index lifecycle."
+                      />
+                    }
+                  />
+                </p>
+              </EuiText>
+
+              <EuiSpacer />
+
+              {isNewPolicy ? null : (
+                <Fragment>
+                  <EuiText>
+                    <p>
+                      <strong>
                         <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexLifecycleManagementLinkText"
-                          defaultMessage="Learn about the index lifecycle."
+                          id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
+                          defaultMessage="You are editing an existing policy"
                         />
-                      }
-                    />
-                  </p>
-                </EuiText>
-
-                <EuiSpacer />
-
-                {isNewPolicy ? null : (
-                  <Fragment>
-                    <EuiText>
-                      <p>
-                        <strong>
-                          <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
-                            defaultMessage="You are editing an existing policy"
-                          />
-                        </strong>
-                        .{' '}
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
-                          defaultMessage="Any changes you make will affect the indices that are
+                      </strong>
+                      .{' '}
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
+                        defaultMessage="Any changes you make will affect the indices that are
                               attached to this policy. Alternatively, you can save these changes in
                               a new policy."
-                        />
-                      </p>
-                    </EuiText>
-                    <EuiSpacer />
-
-                    <EuiFormRow>
-                      <EuiSwitch
-                        data-test-subj="saveAsNewSwitch"
-                        style={{ maxWidth: '100%' }}
-                        checked={saveAsNew}
-                        onChange={(e) => {
-                          setSaveAsNew(e.target.checked);
-                        }}
-                        label={
-                          <span>
-                            <FormattedMessage
-                              id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
-                              defaultMessage="Save as new policy"
-                            />
-                          </span>
-                        }
                       />
-                    </EuiFormRow>
-                  </Fragment>
-                )}
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
 
-                {saveAsNew || isNewPolicy ? (
-                  <EuiDescribedFormGroup
-                    title={
-                      <div>
-                        <span className="eui-displayInlineBlock eui-alignMiddle">
+                  <EuiFormRow>
+                    <EuiSwitch
+                      data-test-subj="saveAsNewSwitch"
+                      style={{ maxWidth: '100%' }}
+                      checked={saveAsNew}
+                      onChange={(e) => {
+                        setSaveAsNew(e.target.checked);
+                      }}
+                      label={
+                        <span>
                           <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.editPolicy.nameLabel"
-                            defaultMessage="Name"
+                            id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
+                            defaultMessage="Save as new policy"
                           />
                         </span>
-                      </div>
-                    }
-                    titleSize="s"
-                    fullWidth
-                  >
-                    <UseField<string, FormInternal>
-                      path={policyNamePath}
-                      config={{
-                        label: i18n.translate(
-                          'xpack.indexLifecycleMgmt.editPolicy.policyNameLabel',
-                          {
-                            defaultMessage: 'Policy name',
-                          }
-                        ),
-                        helpText: i18n.translate(
-                          'xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage',
-                          {
-                            defaultMessage:
-                              'A policy name cannot start with an underscore and cannot contain a question mark or a space.',
-                          }
-                        ),
-                        validations: policyNameValidations,
-                      }}
-                      component={TextField}
-                      componentProps={{
-                        fullWidth: false,
-                        euiFieldProps: {
-                          'data-test-subj': 'policyNameField',
-                        },
-                      }}
+                      }
                     />
-                  </EuiDescribedFormGroup>
-                ) : null}
+                  </EuiFormRow>
+                </Fragment>
+              )}
 
-                <EuiSpacer />
-
-                <HotPhase />
-
-                <EuiHorizontalRule />
-
-                <WarmPhase />
-
-                <EuiHorizontalRule />
-
-                <ColdPhase />
-
-                <EuiHorizontalRule />
-
-                <DeletePhase />
-
-                <EuiHorizontalRule />
-
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          data-test-subj="savePolicyButton"
-                          fill
-                          iconType="check"
-                          iconSide="left"
-                          disabled={form.isValid === false || form.isSubmitting}
-                          onClick={submit}
-                          color="secondary"
-                        >
-                          {saveAsNew ? (
-                            <FormattedMessage
-                              id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewButton"
-                              defaultMessage="Save as new policy"
-                            />
-                          ) : (
-                            <FormattedMessage
-                              id="xpack.indexLifecycleMgmt.editPolicy.saveButton"
-                              defaultMessage="Save policy"
-                            />
-                          )}
-                        </EuiButton>
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          data-test-subj="cancelTestPolicy"
-                          onClick={backToPolicyList}
-                        >
-                          <FormattedMessage
-                            id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
-                            defaultMessage="Cancel"
-                          />
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
-                      {isShowingPolicyJsonFlyout ? (
+              {saveAsNew || isNewPolicy ? (
+                <EuiDescribedFormGroup
+                  title={
+                    <div>
+                      <span className="eui-displayInlineBlock eui-alignMiddle">
                         <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
-                          defaultMessage="Hide request"
+                          id="xpack.indexLifecycleMgmt.editPolicy.nameLabel"
+                          defaultMessage="Name"
                         />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
-                          defaultMessage="Show request"
-                        />
-                      )}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                {isShowingPolicyJsonFlyout ? (
-                  <PolicyJsonFlyout
-                    policyName={saveAsNew ? currentPolicyName : policyName}
-                    close={() => setIsShowingPolicyJsonFlyout(false)}
+                      </span>
+                    </div>
+                  }
+                  titleSize="s"
+                  fullWidth
+                >
+                  <UseField<string, FormInternal>
+                    path={policyNamePath}
+                    config={{
+                      label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
+                        defaultMessage: 'Policy name',
+                      }),
+                      helpText: i18n.translate(
+                        'xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage',
+                        {
+                          defaultMessage:
+                            'A policy name cannot start with an underscore and cannot contain a question mark or a space.',
+                        }
+                      ),
+                      validations: policyNameValidations,
+                    }}
+                    component={TextField}
+                    componentProps={{
+                      fullWidth: false,
+                      euiFieldProps: {
+                        'data-test-subj': 'policyNameField',
+                      },
+                    }}
                   />
-                ) : null}
-              </ConfigurationWarningProvider>
+                </EuiDescribedFormGroup>
+              ) : null}
+
+              <EuiSpacer />
+
+              <HotPhase />
+
+              <EuiHorizontalRule />
+
+              <WarmPhase />
+
+              <EuiHorizontalRule />
+
+              <ColdPhase />
+
+              <EuiHorizontalRule />
+
+              <DeletePhase />
+
+              <EuiHorizontalRule />
+
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="savePolicyButton"
+                        fill
+                        iconType="check"
+                        iconSide="left"
+                        disabled={form.isValid === false || form.isSubmitting}
+                        onClick={submit}
+                        color="secondary"
+                      >
+                        {saveAsNew ? (
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewButton"
+                            defaultMessage="Save as new policy"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.editPolicy.saveButton"
+                            defaultMessage="Save policy"
+                          />
+                        )}
+                      </EuiButton>
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={backToPolicyList}>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
+                          defaultMessage="Cancel"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
+                    {isShowingPolicyJsonFlyout ? (
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
+                        defaultMessage="Hide request"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
+                        defaultMessage="Show request"
+                      />
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              {isShowingPolicyJsonFlyout ? (
+                <PolicyJsonFlyout
+                  policyName={saveAsNew ? currentPolicyName : policyName}
+                  close={() => setIsShowingPolicyJsonFlyout(false)}
+                />
+              ) : null}
             </Form>
           </div>
         </EuiPageContent>
