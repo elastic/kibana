@@ -31,7 +31,6 @@ const alertParams = {
   geoField: '',
   entity: '',
   dateField: '',
-  trackingEvent: '',
   boundaryType: '',
   boundaryIndexTitle: '',
   boundaryIndexId: '',

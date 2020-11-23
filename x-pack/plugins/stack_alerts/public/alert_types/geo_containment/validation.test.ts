@@ -15,7 +15,6 @@ describe('expression params validation', () => {
       geoField: 'testField',
       entity: 'testField',
       dateField: 'testField',
-      trackingEvent: 'testEvent',
       boundaryType: 'testType',
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
@@ -32,7 +31,6 @@ describe('expression params validation', () => {
       geoField: '',
       entity: 'testField',
       dateField: 'testField',
-      trackingEvent: 'testEvent',
       boundaryType: 'testType',
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
@@ -49,7 +47,6 @@ describe('expression params validation', () => {
       geoField: 'testField',
       entity: '',
       dateField: 'testField',
-      trackingEvent: 'testEvent',
       boundaryType: 'testType',
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
@@ -66,7 +63,6 @@ describe('expression params validation', () => {
       geoField: 'testField',
       entity: 'testField',
       dateField: '',
-      trackingEvent: 'testEvent',
       boundaryType: 'testType',
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
@@ -76,25 +72,6 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.dateField[0]).toBe('Date field is required.');
   });
 
-  test('if trackingEvent property is invalid should return proper error message', () => {
-    const initialParams: GeoContainmentAlertParams = {
-      index: 'testIndex',
-      indexId: 'testIndexId',
-      geoField: 'testField',
-      entity: 'testField',
-      dateField: 'testField',
-      trackingEvent: '',
-      boundaryType: 'testType',
-      boundaryIndexTitle: 'testIndex',
-      boundaryIndexId: 'testIndexId',
-      boundaryGeoField: 'testField',
-    };
-    expect(validateExpression(initialParams).errors.trackingEvent.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.trackingEvent[0]).toBe(
-      'Tracking event is required.'
-    );
-  });
-
   test('if boundaryType property is invalid should return proper error message', () => {
     const initialParams: GeoContainmentAlertParams = {
       index: 'testIndex',
@@ -102,7 +79,6 @@ describe('expression params validation', () => {
       geoField: 'testField',
       entity: 'testField',
       dateField: 'testField',
-      trackingEvent: 'testEvent',
       boundaryType: '',
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
@@ -121,7 +97,6 @@ describe('expression params validation', () => {
       geoField: 'testField',
       entity: 'testField',
       dateField: 'testField',
-      trackingEvent: 'testEvent',
       boundaryType: 'testType',
       boundaryIndexTitle: '',
       boundaryIndexId: 'testIndexId',
@@ -140,7 +115,6 @@ describe('expression params validation', () => {
       geoField: 'testField',
       entity: 'testField',
       dateField: 'testField',
-      trackingEvent: 'testEvent',
       boundaryType: 'testType',
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
@@ -159,7 +133,6 @@ describe('expression params validation', () => {
       geoField: 'testField',
       entity: 'testField',
       dateField: 'testField',
-      trackingEvent: 'testEvent',
       boundaryType: 'testType',
       boundaryIndexTitle: 'testIndex',
       boundaryIndexId: 'testIndexId',
