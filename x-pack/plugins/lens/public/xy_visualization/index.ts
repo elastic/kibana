@@ -7,7 +7,6 @@
 import { CoreSetup, IUiSettingsClient } from 'kibana/public';
 import moment from 'moment-timezone';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { LensPluginStartDependencies } from '../plugin';
@@ -63,7 +62,7 @@ export class XyVisualization {
           chartsThemeService: charts.theme,
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
-          histogramBarTarget: core.uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+          getIntervalByColumn: data.search.aggs.getDateMetaByDatatableColumn,
         })
       );
       return getXyVisualization({ paletteService: palettes, data });
