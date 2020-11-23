@@ -15,12 +15,15 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
+import { UNIVERSAL_LANGUAGE } from '../../constants';
 
 interface EnginesTableData {
   name: string;
   created_at: string;
   document_count: number;
   field_count: number;
+  language: string | null;
+  isMeta: boolean;
 }
 interface EnginesTablePagination {
   totalEngines: number;
@@ -97,12 +100,8 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         }
       ),
       dataType: 'string',
-      render: (language: string) => (
-        <FormattedMessage
-          id="xpack.enterpriseSearch.appSearch.enginesOverview.table.column.language"
-          defaultMessage={language}
-        />
-      ),
+      render: (language: string, engine: EnginesTableData) =>
+        engine.isMeta ? '' : language || UNIVERSAL_LANGUAGE,
     },
     {
       field: 'document_count',

@@ -17,24 +17,27 @@ import { EnginesTable } from './engines_table';
 describe('EnginesTable', () => {
   const onPaginate = jest.fn(); // onPaginate updates the engines API call upstream
 
-  const wrapper = mountWithIntl(
-    <EnginesTable
-      data={[
-        {
-          name: 'test-engine',
-          created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
-          language: 'English',
-          document_count: 99999,
-          field_count: 10,
-        },
-      ]}
-      pagination={{
-        totalEngines: 50,
-        pageIndex: 0,
-        onPaginate,
-      }}
-    />
-  );
+  const data = [
+    {
+      name: 'test-engine',
+      created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
+      language: 'English',
+      isMeta: false,
+      document_count: 99999,
+      field_count: 10,
+    },
+  ];
+  const pagination = {
+    totalEngines: 50,
+    pageIndex: 0,
+    onPaginate,
+  };
+  const props = {
+    data,
+    pagination,
+  };
+
+  const wrapper = mountWithIntl(<EnginesTable {...props} />);
   const table = wrapper.find(EuiBasicTable);
 
   it('renders', () => {
@@ -81,5 +84,58 @@ describe('EnginesTable', () => {
     const emptyTable = emptyWrapper.find(EuiBasicTable);
 
     expect(emptyTable.prop('pagination').pageIndex).toEqual(0);
+  });
+
+  describe('language field', () => {
+    it('renders language when available', () => {
+      const wrapperWithLanguage = mountWithIntl(
+        <EnginesTable
+          data={[
+            {
+              ...data[0],
+              language: 'German',
+              isMeta: false,
+            },
+          ]}
+          pagination={pagination}
+        />
+      );
+      const tableContent = wrapperWithLanguage.find(EuiBasicTable).text();
+      expect(tableContent).toContain('German');
+    });
+
+    it('renders the language as Universal if no language is set', () => {
+      const wrapperWithLanguage = mountWithIntl(
+        <EnginesTable
+          data={[
+            {
+              ...data[0],
+              language: null,
+              isMeta: false,
+            },
+          ]}
+          pagination={pagination}
+        />
+      );
+      const tableContent = wrapperWithLanguage.find(EuiBasicTable).text();
+      expect(tableContent).toContain('Universal');
+    });
+
+    it('renders no language text if the engine is a Meta Engine', () => {
+      const wrapperWithLanguage = mountWithIntl(
+        <EnginesTable
+          data={[
+            {
+              ...data[0],
+              language: null,
+              isMeta: true,
+            },
+          ]}
+          pagination={pagination}
+        />
+      );
+      const tableContent = wrapperWithLanguage.find(EuiBasicTable).text();
+      expect(tableContent).not.toContain('Universal');
+    });
   });
 });
