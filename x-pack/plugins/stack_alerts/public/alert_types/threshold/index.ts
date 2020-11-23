@@ -27,7 +27,7 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, Alerts
     defaultActionMessage: i18n.translate(
       'xpack.stackAlerts.threshold.ui.alertType.defaultActionMessage',
       {
-        defaultMessage: `alert \\{\\{alertName\\}\\} is active for group '\\{\\{context.group\\}\\}':
+        defaultMessage: `alert '\\{\\{alertName\\}\\}' is active for group '\\{\\{context.group\\}\\}':
 
 - Value: \\{\\{context.value\\}\\}
 - Conditions Met: \\{\\{context.conditions\\}\\} over \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\}

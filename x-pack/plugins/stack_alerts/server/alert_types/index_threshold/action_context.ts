@@ -48,7 +48,7 @@ export function addMessages(
   const message = i18n.translate(
     'xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription',
     {
-      defaultMessage: `alert {name} is active for group '{group}':
+      defaultMessage: `alert '{name}' is active for group '{group}':
 
 - Value: {value}
 - Conditions Met: {conditions} over {window}
