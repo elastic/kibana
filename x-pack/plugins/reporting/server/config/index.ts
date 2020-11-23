@@ -25,7 +25,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
       const reporting = get(settings, fromPath);
       if (reporting?.index) {
         log(
-          `Setting [xpack.reporting.index] is deprecated. Multitenancy by changing 'kibana.index' will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`
+          `"xpack.reporting.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`
         );
       }
       return settings;
