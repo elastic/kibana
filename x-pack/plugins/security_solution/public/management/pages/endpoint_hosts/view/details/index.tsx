@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiEmptyPrompt,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -84,13 +85,21 @@ export const EndpointDetailsFlyout = memo(() => {
       size="s"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          {loading ? (
-            <EuiLoadingContent lines={1} />
-          ) : (
-            <h2 data-test-subj="endpointDetailsFlyoutTitle"> {details?.host?.hostname} </h2>
-          )}
-        </EuiTitle>
+        {loading ? (
+          <EuiLoadingContent lines={1} />
+        ) : (
+          <EuiToolTip content={details?.host?.hostname} anchorClassName="eui-textTruncate">
+            <EuiTitle size="s">
+              <h2
+                style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                data-test-subj="endpointDetailsFlyoutTitle"
+              >
+                {' '}
+                {details?.host?.hostname}{' '}
+              </h2>
+            </EuiTitle>
+          </EuiToolTip>
+        )}
       </EuiFlyoutHeader>
       {details === undefined ? (
         <>
