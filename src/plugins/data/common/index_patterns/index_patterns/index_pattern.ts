@@ -109,6 +109,7 @@ export class IndexPattern implements IIndexPattern {
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
     this.fieldAttrs = spec.fieldAttrs || {};
+    this.intervalName = spec.intervalName;
   }
 
   setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
@@ -199,6 +200,7 @@ export class IndexPattern implements IIndexPattern {
       type: this.type,
       fieldFormats: this.fieldFormatMap,
       fieldAttrs: this.fieldAttrs,
+      intervalName: this.intervalName,
     };
   }
 

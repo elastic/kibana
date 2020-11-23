@@ -21,6 +21,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('create_index_pattern', () => {
-    loadTestFile(require.resolve('./errors'));
+    loadTestFile(require.resolve('./validation'));
+    loadTestFile(require.resolve('./main'));
   });
 }

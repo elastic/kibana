@@ -23,7 +23,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('errors', () => {
+  describe('validation', () => {
     it('returns error when index_pattern object is not provided', async () => {
       const response = await supertest.post('/api/index_patterns/index_pattern');
 
