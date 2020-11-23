@@ -25,7 +25,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
 
 import { DashboardApp } from './dashboard_app';
-import { DashboardListing, Dashboard404 } from './listing';
+import { DashboardListing } from './listing';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from './types';
@@ -224,7 +224,6 @@ export async function mountApp({
               render={renderDashboard}
             />
             <Route exact path={DashboardConstants.LANDING_PAGE_PATH} render={renderListingPage} />
-            <Dashboard404 />
           </Switch>
         </HashRouter>
       </KibanaContextProvider>

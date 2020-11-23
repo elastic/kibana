@@ -577,7 +577,6 @@
     "dashboard.createNewVisualizationButton": "新規作成...",
     "dashboard.createNewVisualizationButtonAriaLabel": "新規ビジュアライゼーションを追加",
     "dashboard.dashboardAppBreadcrumbsTitle": "ダッシュボード",
-    "dashboard.dashboardBreadcrumbsTitle": "ダッシュボード",
     "dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage": "ダッシュボードが読み込めません。",
     "dashboard.dashboardPageTitle": "ダッシュボード",
     "dashboard.dashboardWasNotSavedDangerMessage": "ダッシュボード「{dashTitle}」が保存されませんでした。エラー：{errorMessage}",
