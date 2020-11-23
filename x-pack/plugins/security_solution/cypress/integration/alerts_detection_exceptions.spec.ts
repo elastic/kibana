@@ -37,19 +37,18 @@ import { DETECTIONS_URL } from '../urls/navigation';
 const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = 2;
 
 describe('Exceptions', () => {
+  beforeEach(() => {
+    esArchiverLoad('rule_for_exceptions');
+  });
+
+  afterEach(() => {
+    esArchiverUnload('rule_for_exceptions');
+    esArchiverUnload('auditbeat_for_exceptions');
+    esArchiverUnload('auditbeat_for_exceptions2');
+    esArchiverUnload('auditbeat_for_exceptions3');
+    removeSignalsIndex();
+  });
   context('From rule', () => {
-    before(() => {
-      esArchiverLoad('rule_for_exceptions');
-    });
-
-    after(() => {
-      esArchiverUnload('rule_for_exceptions');
-      esArchiverUnload('auditbeat_for_exceptions');
-      esArchiverUnload('auditbeat_for_exceptions2');
-      esArchiverUnload('auditbeat_for_exceptions3');
-      removeSignalsIndex();
-    });
-
     it('Creates an exception and deletes it', () => {
       loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
       waitForAlertsIndexToBeCreated();
@@ -136,18 +135,6 @@ describe('Exceptions', () => {
   });
 
   context('From alert', () => {
-    before(() => {
-      esArchiverLoad('rule_for_exceptions_from_alert');
-    });
-
-    after(() => {
-      esArchiverUnload('rule_for_exceptions_from_alert');
-      esArchiverUnload('auditbeat_for_exceptions_from_alert');
-      esArchiverUnload('auditbeat_for_exceptions_from_alert2');
-      esArchiverUnload('auditbeat_for_exceptions_from_alert3');
-      removeSignalsIndex();
-    });
-
     it('Creates an exception and deletes it', () => {
       loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
       waitForAlertsIndexToBeCreated();
@@ -156,7 +143,7 @@ describe('Exceptions', () => {
 
       cy.get(RULE_STATUS).should('have.text', '—');
 
-      esArchiverLoad('auditbeat_for_exceptions_from_alert');
+      esArchiverLoad('auditbeat_for_exceptions');
       activatesRule();
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
@@ -176,7 +163,7 @@ describe('Exceptions', () => {
       addExceptionFromFirstAlert();
       addsException(exception);
       activatesRule();
-      esArchiverLoad('auditbeat_for_exceptions_from_alert2');
+      esArchiverLoad('auditbeat_for_exceptions2');
 
       cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT)
@@ -210,7 +197,7 @@ describe('Exceptions', () => {
 
       goToExceptionsTab();
       removeException();
-      esArchiverLoad('auditbeat_for_exceptions_from_alert3');
+      esArchiverLoad('auditbeat_for_exceptions3');
       goToAlertsTab();
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
