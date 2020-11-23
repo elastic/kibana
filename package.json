@@ -754,6 +754,7 @@
     "node-sass": "^4.13.1",
     "null-loader": "^3.0.0",
     "nyc": "^15.0.1",
+    "oboe": "^2.1.4",
     "ora": "^4.0.4",
     "p-limit": "^3.0.1",
     "parse-link-header": "^1.0.1",
