@@ -169,6 +169,7 @@ export const useMatrixHistogram = ({
           to: endDate,
         },
         stackByField,
+        threshold,
         ...(prevRequest.isPtrIncluded != null ? { isPtrIncluded } : {}),
       };
       if (!deepEqual(prevRequest, myRequest)) {
@@ -176,7 +177,16 @@ export const useMatrixHistogram = ({
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, isPtrIncluded]);
+  }, [
+    indexNames,
+    endDate,
+    filterQuery,
+    startDate,
+    stackByField,
+    histogramType,
+    threshold,
+    isPtrIncluded,
+  ]);
 
   useEffect(() => {
     if (!skip) {

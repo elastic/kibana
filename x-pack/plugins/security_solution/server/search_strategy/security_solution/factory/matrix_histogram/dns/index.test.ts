@@ -8,8 +8,8 @@ import { dnsMatrixHistogramConfig } from '.';
 import { buildDnsHistogramQuery } from './query.dns_histogram.dsl';
 import { getDnsParsedData } from './helpers';
 
-jest.mock('../../network/dns/query.dns_network.dsl', () => ({
-  buildDnsQuery: jest.fn(),
+jest.mock('./query.dns_histogram.dsl', () => ({
+  buildDnsHistogramQuery: jest.fn(),
 }));
 
 jest.mock('./helpers', () => ({

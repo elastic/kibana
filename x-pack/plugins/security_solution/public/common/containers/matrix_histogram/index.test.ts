@@ -32,6 +32,7 @@ describe('useMatrixHistogram', () => {
     rerender();
 
     const mockCalls = (useKibana().services.data.search.search as jest.Mock).mock.calls;
+
     expect(mockCalls.length).toBe(2);
     expect(mockCalls[0][0].stackByField).toBe('event.module');
     expect(mockCalls[1][0].stackByField).toBe('event.action');
