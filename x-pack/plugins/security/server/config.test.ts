@@ -877,15 +877,27 @@ describe('config schema', () => {
         );
       });
 
-      it('requires `credentials`', () => {
-        expect(() =>
+      it('does not require `credentials`', () => {
+        expect(
           ConfigSchema.validate({
             authc: { providers: { anonymous: { anonymous1: { order: 0 } } } },
-          })
-        ).toThrowErrorMatchingInlineSnapshot(`
-          "[authc.providers]: types that failed validation:
-          - [authc.providers.0]: expected value of type [array] but got [Object]
-          - [authc.providers.1.anonymous.anonymous1.credentials]: expected at least one defined value but got [undefined]"
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "anonymous": Object {
+              "anonymous1": Object {
+                "description": "Continue as Guest",
+                "enabled": true,
+                "hint": "For anonymous users",
+                "icon": "globe",
+                "order": 0,
+                "session": Object {
+                  "idleTimeout": null,
+                },
+                "showInSelector": true,
+              },
+            },
+          }
         `);
       });
 

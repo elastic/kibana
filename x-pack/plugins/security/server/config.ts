@@ -149,18 +149,20 @@ const providersConfigSchema = schema.object(
         }),
       },
       {
-        credentials: schema.oneOf([
-          schema.object({
-            username: schema.string(),
-            password: schema.string(),
-          }),
-          schema.object({
-            apiKey: schema.oneOf([
-              schema.object({ id: schema.string(), key: schema.string() }),
-              schema.string(),
-            ]),
-          }),
-        ]),
+        credentials: schema.maybe(
+          schema.oneOf([
+            schema.object({
+              username: schema.string(),
+              password: schema.string(),
+            }),
+            schema.object({
+              apiKey: schema.oneOf([
+                schema.object({ id: schema.string(), key: schema.string() }),
+                schema.string(),
+              ]),
+            }),
+          ])
+        ),
       }
     ),
   },

@@ -59,9 +59,10 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
   static readonly type = 'anonymous';
 
   /**
-   * Defines HTTP authorization header that should be used to authenticate request.
+   * Defines HTTP authorization header that should be used to authenticate request. It isn't defined
+   * if provider should rely on Elasticsearch native anonymous access.
    */
-  private readonly httpAuthorizationHeader: HTTPAuthorizationHeader;
+  private readonly httpAuthorizationHeader?: HTTPAuthorizationHeader;
 
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
@@ -72,29 +73,31 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
     super(options);
 
     const credentials = anonymousOptions?.credentials;
-    if (!credentials) {
-      throw new Error('Credentials must be specified');
-    }
-
-    if (isAPIKeyCredentials(credentials)) {
-      this.logger.debug('Anonymous requests will be authenticated via API key.');
-      this.httpAuthorizationHeader = new HTTPAuthorizationHeader(
-        'ApiKey',
-        typeof credentials.apiKey === 'string'
-          ? credentials.apiKey
-          : new BasicHTTPAuthorizationHeaderCredentials(
-              credentials.apiKey.id,
-              credentials.apiKey.key
-            ).toString()
-      );
+    if (credentials) {
+      if (isAPIKeyCredentials(credentials)) {
+        this.logger.debug('Anonymous requests will be authenticated via API key.');
+        this.httpAuthorizationHeader = new HTTPAuthorizationHeader(
+          'ApiKey',
+          typeof credentials.apiKey === 'string'
+            ? credentials.apiKey
+            : new BasicHTTPAuthorizationHeaderCredentials(
+                credentials.apiKey.id,
+                credentials.apiKey.key
+              ).toString()
+        );
+      } else {
+        this.logger.debug('Anonymous requests will be authenticated via username and password.');
+        this.httpAuthorizationHeader = new HTTPAuthorizationHeader(
+          'Basic',
+          new BasicHTTPAuthorizationHeaderCredentials(
+            credentials.username,
+            credentials.password
+          ).toString()
+        );
+      }
     } else {
-      this.logger.debug('Anonymous requests will be authenticated via username and password.');
-      this.httpAuthorizationHeader = new HTTPAuthorizationHeader(
-        'Basic',
-        new BasicHTTPAuthorizationHeaderCredentials(
-          credentials.username,
-          credentials.password
-        ).toString()
+      this.logger.debug(
+        'Anonymous requests will be authenticated using Elasticsearch native anonymous access.'
       );
     }
   }
@@ -155,7 +158,7 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
    * HTTP header that provider attaches to all successfully authenticated requests to Elasticsearch.
    */
   public getHTTPAuthenticationScheme() {
-    return this.httpAuthorizationHeader.scheme.toLowerCase();
+    return this.httpAuthorizationHeader?.scheme.toLowerCase() ?? null;
   }
 
   /**
@@ -164,7 +167,9 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
    * @param state State value previously stored by the provider.
    */
   private async authenticateViaAuthorizationHeader(request: KibanaRequest, state?: unknown) {
-    const authHeaders = { authorization: this.httpAuthorizationHeader.toString() };
+    const authHeaders = this.httpAuthorizationHeader
+      ? { authorization: this.httpAuthorizationHeader.toString() }
+      : ({} as Record<string, string>);
     try {
       const user = await this.getUser(request, authHeaders);
       this.logger.debug(
