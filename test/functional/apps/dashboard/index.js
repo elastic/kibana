@@ -70,12 +70,20 @@ export default function ({ getService, loadTestFile }) {
     });
 
     describe('using current data', function () {
-      this.tags('ciGroup3');
+      this.tags('ciGroup1');
       before(loadCurrentData);
       after(unloadCurrentData);
 
       loadTestFile(require.resolve('./full_screen_mode'));
       loadTestFile(require.resolve('./dashboard_filter_bar'));
+      loadTestFile(require.resolve('./dashboard_time_picker'));
+    });
+
+    describe('using current data', function () {
+      this.tags('ciGroup3');
+      before(loadCurrentData);
+      after(unloadCurrentData);
+
       loadTestFile(require.resolve('./dashboard_filtering'));
       loadTestFile(require.resolve('./panel_expand_toggle'));
       loadTestFile(require.resolve('./dashboard_grid'));
@@ -96,7 +104,6 @@ export default function ({ getService, loadTestFile }) {
       before(loadLogstash);
       after(unloadLogstash);
 
-      loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
       loadTestFile(require.resolve('./panel_replacing'));
       loadTestFile(require.resolve('./panel_cloning'));

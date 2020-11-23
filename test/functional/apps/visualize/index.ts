@@ -43,10 +43,15 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     describe('', function () {
-      this.tags('ciGroup9');
+      this.tags('ciGroup7');
 
       loadTestFile(require.resolve('./_embedding_chart'));
       loadTestFile(require.resolve('./_chart_types'));
+    });
+
+    describe('', function () {
+      this.tags('ciGroup9');
+
       loadTestFile(require.resolve('./_area_chart'));
       loadTestFile(require.resolve('./_data_table'));
       loadTestFile(require.resolve('./_data_table_nontimeindex'));
