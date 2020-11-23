@@ -56,6 +56,13 @@ const TRUSTED_APP = {
 };
 
 describe('service', () => {
+  beforeEach(() => {
+    exceptionsListClient.deleteExceptionListItem.mockReset();
+    exceptionsListClient.createExceptionListItem.mockReset();
+    exceptionsListClient.findExceptionListItem.mockReset();
+    exceptionsListClient.createTrustedAppsList.mockReset();
+  });
+
   describe('deleteTrustedApp', () => {
     it('should delete existing trusted app', async () => {
       exceptionsListClient.deleteExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
