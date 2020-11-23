@@ -18,7 +18,6 @@
  */
 import {
   AppMountParameters,
-  CoreSetup,
   CoreStart,
   SavedObjectsClientContract,
   ScopedHistory,
@@ -26,37 +25,21 @@ import {
   IUiSettingsClient,
   PluginInitializerContext,
 } from 'kibana/public';
-import { History } from 'history';
-import {
-  DataPublicPluginStart,
-  IndexPattern,
-  IndexPatternsContract,
-  SavedQuery,
-  TimefilterContract,
-} from '../../../data/public';
-import { EmbeddableStart, ViewMode } from '../../../embeddable/public';
-import { NavigationPublicPluginStart } from '../../../navigation/public';
+
 import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
-import { SharePluginStart } from '../../../share/public';
-import { UrlForwardingStart } from '../../../url_forwarding/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
-import { IKbnUrlStateStorage, Storage } from '../../../kibana_utils/public';
-import { DashboardStateManager } from './dashboard_state_manager';
+import { DataPublicPluginStart, IndexPatternsContract } from '../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import { DashboardContainer, DashboardSavedObject } from '..';
+import { NavigationPublicPluginStart } from '../../../navigation/public';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { UrlForwardingStart } from '../../../url_forwarding/public';
+import { EmbeddableStart } from '../../../embeddable/public';
+import { SharePluginStart } from '../../../share/public';
+import { Storage } from '../../../kibana_utils/public';
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
   | { destination: 'dashboard'; id?: string; useReplace?: boolean }
   | { destination: 'listing'; filter?: string; useReplace?: boolean };
-
-export interface DashboardAppProps {
-  embedSettings?: DashboardEmbedSettings;
-  redirectTo: DashboardRedirect;
-  savedDashboardId?: string;
-  history: History;
-}
 
 export interface DashboardEmbedSettings {
   forceShowTopNavMenu?: boolean;
@@ -71,63 +54,19 @@ export interface DashboardSaveOptions {
   newDescription: string;
   newCopyOnSave: boolean;
   newTimeRestore: boolean;
-  isTitleDuplicateConfirmed: boolean;
   onTitleDuplicate: () => void;
-}
-
-export interface DashboardAppComponentState {
-  savedDashboard?: DashboardSavedObject;
-  dashboardStateManager?: DashboardStateManager;
-  dashboardContainer?: DashboardContainer;
-  indexPatterns?: IndexPattern[];
-}
-
-export type DashboardAppComponentActiveState = Required<DashboardAppComponentState>;
-
-export interface DashboardTopNavState {
-  chromeIsVisible: boolean;
-  savedQuery?: SavedQuery;
-}
-
-export type DashboardTopNavProps = Omit<DashboardAppComponentActiveState, 'initialized'> & {
-  timefilter: TimefilterContract;
-  redirectTo: DashboardRedirect;
-  addFromLibrary: () => void;
-  updateViewMode: (newViewMode: ViewMode) => void;
-  onQuerySubmit: (_payload: unknown, isUpdate: boolean | undefined) => void;
-  createNew: () => void;
-  lastDashboardId?: string;
-  embedSettings?: DashboardEmbedSettings;
-};
-
-export interface DashboardListingProps {
-  kbnUrlStateStorage: IKbnUrlStateStorage;
-  redirectTo: DashboardRedirect;
-  initialFilter?: string;
-  title?: string;
-}
-
-export interface DashboardMountProps {
-  appUnMounted: () => void;
-  restorePreviousUrl: () => void;
-  scopedHistory: ScopedHistory<unknown>;
-  element: AppMountParameters['element'];
-  initializerContext: PluginInitializerContext;
-  onAppLeave: AppMountParameters['onAppLeave'];
-  core: CoreSetup<DashboardStartDependencies, DashboardStart>;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  usageCollection: DashboardSetupDependencies['usageCollection'];
+  isTitleDuplicateConfirmed: boolean;
 }
 
 export interface DashboardCapabilities {
   visualizeCapabilities: { save: boolean };
   mapsCapabilities: { save: boolean };
   hideWriteControls: boolean;
-  show: boolean;
-  createNew: boolean;
   showWriteControls: boolean;
   createShortUrl: boolean;
   saveQuery: boolean;
+  createNew: boolean;
+  show: boolean;
 }
 
 export interface DashboardAppServices {

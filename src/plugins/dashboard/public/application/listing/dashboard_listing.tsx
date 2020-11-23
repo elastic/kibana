@@ -18,17 +18,24 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { DashboardAppServices, DashboardListingProps } from '../types';
-import { TableListView, useKibana } from '../../../../kibana_react/public';
-import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { syncQueryStateWithUrl } from '../../../../data/public';
+import { DashboardAppServices, DashboardRedirect } from '../types';
+import { IKbnUrlStateStorage } from '../../../../kibana_utils/public';
+import { TableListView, useKibana } from '../../../../kibana_react/public';
+import { dashboardBreadcrumb, dashboardListingTable } from '../dashboard_strings';
 import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
+import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
 
-export const EMPTY_FILTER = '';
+export interface DashboardListingProps {
+  kbnUrlStateStorage: IKbnUrlStateStorage;
+  redirectTo: DashboardRedirect;
+  initialFilter?: string;
+  title?: string;
+}
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
 // the legacy implementation got around this by pulling `listingLimit` items and doing client side sorting
@@ -58,9 +65,7 @@ export const DashboardListing = ({
   useEffect(() => {
     chrome.setBreadcrumbs([
       {
-        text: i18n.translate('dashboard.dashboardBreadcrumbsTitle', {
-          defaultMessage: 'Dashboards',
-        }),
+        text: dashboardBreadcrumb,
       },
     ]);
   }, [chrome]);
@@ -170,18 +175,10 @@ export const DashboardListing = ({
       listingLimit={listingLimit}
       findItems={fetchItems}
       rowHeader="title"
-      entityName={i18n.translate('dashboard.listing.table.entityName', {
-        defaultMessage: 'dashboard',
-      })}
-      entityNamePlural={i18n.translate('dashboard.listing.table.entityNamePlural', {
-        defaultMessage: 'dashboards',
-      })}
-      tableListTitle={i18n.translate('dashboard.listing.dashboardsTitle', {
-        defaultMessage: 'Dashboards',
-      })}
-      tableCaption={i18n.translate('dashboard.listing.dashboardsTitle', {
-        defaultMessage: 'Dashboards',
-      })}
+      entityName={dashboardListingTable.entityName}
+      tableCaption={dashboardListingTable.tableCaption}
+      tableListTitle={dashboardListingTable.tableListTitle}
+      entityNamePlural={dashboardListingTable.entityNamePlural}
     />
   );
 };
@@ -193,9 +190,7 @@ const getTableColumns = (
   return [
     {
       field: 'title',
-      name: i18n.translate('dashboard.listing.table.titleColumnName', {
-        defaultMessage: 'Title',
-      }),
+      name: dashboardListingTable.titleColumnName,
       sortable: true,
       render: (field: string, record: { id: string; title: string }) => (
         <EuiLink
@@ -208,9 +203,7 @@ const getTableColumns = (
     },
     {
       field: 'description',
-      name: i18n.translate('dashboard.listing.table.descriptionColumnName', {
-        defaultMessage: 'Description',
-      }),
+      name: dashboardListingTable.descriptionColumnName,
       render: (field: string, record: { description: string }) => <span>{record.description}</span>,
       sortable: true,
     },

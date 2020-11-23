@@ -61,6 +61,35 @@ export const dashboardBreadcrumb = i18n.translate('dashboard.dashboardAppBreadcr
   defaultMessage: 'Dashboard',
 });
 
+export const dashboardPageTitle = i18n.translate('dashboard.dashboardPageTitle', {
+  defaultMessage: 'Dashboards',
+});
+
+export const dashboard60Warning = i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
+  defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
+});
+
+export const dashboardListingTable = {
+  entityName: i18n.translate('dashboard.listing.table.entityName', {
+    defaultMessage: 'dashboard',
+  }),
+  entityNamePlural: i18n.translate('dashboard.listing.table.entityNamePlural', {
+    defaultMessage: 'dashboards',
+  }),
+  tableListTitle: i18n.translate('dashboard.listing.dashboardsTitle', {
+    defaultMessage: 'Dashboards',
+  }),
+  tableCaption: i18n.translate('dashboard.listing.dashboardsTitle', {
+    defaultMessage: 'Dashboards',
+  }),
+  titleColumnName: i18n.translate('dashboard.listing.table.titleColumnName', {
+    defaultMessage: 'Title',
+  }),
+  descriptionColumnName: i18n.translate('dashboard.listing.table.descriptionColumnName', {
+    defaultMessage: 'Description',
+  }),
+};
+
 export const dashboardReadonlyBadge = {
   text: i18n.translate('dashboard.badge.readOnly.text', {
     defaultMessage: 'Read only',

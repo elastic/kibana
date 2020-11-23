@@ -19,48 +19,28 @@
 
 import React, { useEffect, useCallback, useState } from 'react';
 import { History } from 'history';
-
-import _, { uniqBy } from 'lodash';
-import deepEqual from 'fast-deep-equal';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  map,
-  mapTo,
-  startWith,
-  switchMap,
-} from 'rxjs/operators';
-import { merge, Observable, pipe, Subscription } from 'rxjs';
-import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import ReactDOM from 'react-dom';
+import _ from 'lodash';
+
+import { map } from 'rxjs/operators';
+import { merge, Subscription } from 'rxjs';
+import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import { getSavedObjectFinder, SavedObject } from '../../../saved_objects/public';
 import { DashboardStateManager } from './dashboard_state_manager';
 import {
   createKbnUrlStateStorage,
-  getQueryParams,
   removeQueryParam,
   SavedObjectNotFound,
   withNotifyOnErrors,
 } from '../../../kibana_utils/public';
-import {
-  DashboardAppComponentActiveState,
-  DashboardAppComponentState,
-  DashboardAppProps,
-  DashboardAppServices,
-  DashboardCapabilities,
-} from './types';
+import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from './types';
 import { useKibana } from '../../../kibana_react/public';
 import { DashboardSavedObject } from '../saved_dashboards';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 import {
   connectToQueryState,
   esFilters,
-  FilterManager,
   IndexPattern,
-  IndexPatternsContract,
-  QueryStart,
   QueryState,
   syncQueryStateWithUrl,
 } from '../../../data/public';
@@ -68,252 +48,45 @@ import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
-  EmbeddablePackageState,
   ErrorEmbeddable,
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
 } from '../../../embeddable/public';
-import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE } from '.';
-import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
+import { DASHBOARD_CONTAINER_TYPE } from '.';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
-import { dashboardBreadcrumb, getDashboardTitle, leaveConfirmStrings } from './dashboard_strings';
+import {
+  dashboard60Warning,
+  dashboardBreadcrumb,
+  getDashboardTitle,
+  leaveConfirmStrings,
+} from './dashboard_strings';
 import type { TagDecoratedSavedObject } from '../../../saved_objects_tagging_oss/public';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 import {
-  DashboardConstants,
-  DashboardContainer,
-  DashboardContainerInput,
-  SavedDashboardPanel,
-} from '..';
+  getChangesFromAppStateForContainerState,
+  getDashboardContainerInput,
+  getFiltersSubscription,
+  getInputSubscription,
+  getOutputSubscription,
+  getSearchSessionIdFromURL,
+} from './dashboard_app_functions';
+import { DashboardConstants, DashboardContainer, DashboardContainerInput } from '..';
+export interface DashboardAppComponentState {
+  dashboardStateManager?: DashboardStateManager;
+  dashboardContainer?: DashboardContainer;
+  savedDashboard?: DashboardSavedObject;
+  indexPatterns?: IndexPattern[];
+}
 
-const getChangesFromAppStateForContainerState = ({
-  dashboardContainer,
-  appStateDashboardInput,
-}: {
-  dashboardContainer: DashboardContainer;
-  appStateDashboardInput: DashboardContainerInput;
-}) => {
-  if (!dashboardContainer || isErrorEmbeddable(dashboardContainer)) {
-    return appStateDashboardInput;
-  }
-  const containerInput = dashboardContainer.getInput();
-  const differences: Partial<DashboardContainerInput> = {};
+export interface DashboardAppProps {
+  history: History;
+  savedDashboardId?: string;
+  redirectTo: DashboardRedirect;
+  embedSettings?: DashboardEmbedSettings;
+}
 
-  // Filters shouldn't  be compared using regular isEqual
-  if (
-    !esFilters.compareFilters(
-      containerInput.filters,
-      appStateDashboardInput.filters,
-      esFilters.COMPARE_ALL_OPTIONS
-    )
-  ) {
-    differences.filters = appStateDashboardInput.filters;
-  }
-
-  Object.keys(
-    _.omit(containerInput, ['filters', 'searchSessionId', 'lastReloadRequestTime'])
-  ).forEach((key) => {
-    const containerValue = (containerInput as { [key: string]: unknown })[key];
-    const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[key];
-    if (!_.isEqual(containerValue, appStateValue)) {
-      (differences as { [key: string]: unknown })[key] = appStateValue;
-    }
-  });
-
-  // last reload request time can be undefined without causing a refresh
-  if (
-    appStateDashboardInput.lastReloadRequestTime &&
-    containerInput.lastReloadRequestTime !== appStateDashboardInput.lastReloadRequestTime
-  ) {
-    differences.lastReloadRequestTime = appStateDashboardInput.lastReloadRequestTime;
-  }
-
-  // cloneDeep hack is needed, as there are multiple place, where container's input mutated,
-  // but values from appStateValue are deeply frozen, as they can't be mutated directly
-  return Object.values(differences).length === 0 ? undefined : _.cloneDeep(differences);
-};
-
-const getDashboardContainerInput = ({
-  query,
-  searchSessionId,
-  incomingEmbeddable,
-  isEmbeddedExternally,
-  lastReloadRequestTime,
-  dashboardStateManager,
-  dashboardCapabilities,
-}: {
-  dashboardCapabilities: DashboardCapabilities;
-  dashboardStateManager: DashboardStateManager;
-  incomingEmbeddable?: EmbeddablePackageState;
-  lastReloadRequestTime?: number;
-  isEmbeddedExternally: boolean;
-  searchSessionId?: string;
-  query: QueryStart;
-}): DashboardContainerInput => {
-  const embeddablesMap: {
-    [key: string]: DashboardPanelState;
-  } = {};
-  dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
-    embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
-  });
-
-  // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
-  if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
-    const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
-    embeddablesMap[incomingEmbeddable.embeddableId] = {
-      gridData: originalPanelState.gridData,
-      type: incomingEmbeddable.type,
-      explicitInput: {
-        ...originalPanelState.explicitInput,
-        ...incomingEmbeddable.input,
-        id: incomingEmbeddable.embeddableId,
-      },
-    };
-  }
-
-  return {
-    id: dashboardStateManager.savedDashboard.id || '',
-    filters: query.filterManager.getFilters(),
-    hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
-    query: dashboardStateManager.getQuery(),
-    searchSessionId,
-    timeRange: {
-      ..._.cloneDeep(query.timefilter.timefilter.getTime()),
-    },
-    refreshConfig: query.timefilter.timefilter.getRefreshInterval(),
-    viewMode: dashboardStateManager.getViewMode(),
-    panels: embeddablesMap,
-    isFullScreenMode: dashboardStateManager.getFullScreenMode(),
-    isEmbeddedExternally,
-    useMargins: dashboardStateManager.getUseMargins(),
-    lastReloadRequestTime,
-    dashboardCapabilities,
-    title: dashboardStateManager.getTitle(),
-    description: dashboardStateManager.getDescription(),
-    expandedPanelId: dashboardStateManager.getExpandedPanelId(),
-  };
-};
-
-const getInputSubscription = ({
-  dashboardContainer,
-  dashboardStateManager,
-  filterManager,
-}: {
-  dashboardContainer: DashboardContainer;
-  dashboardStateManager: DashboardStateManager;
-  filterManager: FilterManager;
-}) =>
-  dashboardContainer.getInput$().subscribe(() => {
-    // This has to be first because handleDashboardContainerChanges causes
-    // appState.save which will cause refreshDashboardContainer to be called.
-
-    if (
-      !esFilters.compareFilters(
-        dashboardContainer.getInput().filters,
-        filterManager.getFilters(),
-        esFilters.COMPARE_ALL_OPTIONS
-      )
-    ) {
-      // Add filters modifies the object passed to it, hence the clone deep.
-      filterManager.addFilters(_.cloneDeep(dashboardContainer.getInput().filters));
-
-      dashboardStateManager.applyFilters(
-        dashboardStateManager.getQuery(),
-        dashboardContainer.getInput().filters
-      );
-    }
-
-    dashboardStateManager.handleDashboardContainerChanges(dashboardContainer);
-  });
-
-const getOutputSubscription = ({
-  dashboardContainer,
-  indexPatterns,
-  onUpdateIndexPatterns,
-}: {
-  dashboardContainer: DashboardContainer;
-  indexPatterns: IndexPatternsContract;
-  onUpdateIndexPatterns: (newIndexPatterns: IndexPattern[]) => void;
-}) => {
-  const updateIndexPatternsOperator = pipe(
-    filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
-    map((container: DashboardContainer): IndexPattern[] => {
-      let panelIndexPatterns: IndexPattern[] = [];
-      Object.values(container.getChildIds()).forEach((id) => {
-        const embeddableInstance = container.getChild(id);
-        if (isErrorEmbeddable(embeddableInstance)) return;
-        const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
-        if (!embeddableIndexPatterns) return;
-        panelIndexPatterns.push(...embeddableIndexPatterns);
-      });
-      panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
-      return panelIndexPatterns;
-    }),
-    distinctUntilChanged((a, b) =>
-      deepEqual(
-        a.map((ip) => ip.id),
-        b.map((ip) => ip.id)
-      )
-    ),
-    // using switchMap for previous task cancellation
-    switchMap((panelIndexPatterns: IndexPattern[]) => {
-      return new Observable((observer) => {
-        if (panelIndexPatterns && panelIndexPatterns.length > 0) {
-          if (observer.closed) return;
-          onUpdateIndexPatterns(panelIndexPatterns);
-          observer.complete();
-        } else {
-          indexPatterns.getDefault().then((defaultIndexPattern) => {
-            if (observer.closed) return;
-            onUpdateIndexPatterns([defaultIndexPattern as IndexPattern]);
-            observer.complete();
-          });
-        }
-      });
-    })
-  );
-
-  return merge(
-    // output of dashboard container itself
-    dashboardContainer.getOutput$(),
-    // plus output of dashboard container children,
-    // children may change, so make sure we subscribe/unsubscribe with switchMap
-    dashboardContainer.getOutput$().pipe(
-      map(() => dashboardContainer!.getChildIds()),
-      distinctUntilChanged(deepEqual),
-      switchMap((newChildIds: string[]) =>
-        merge(...newChildIds.map((childId) => dashboardContainer!.getChild(childId).getOutput$()))
-      )
-    )
-  )
-    .pipe(
-      mapTo(dashboardContainer),
-      startWith(dashboardContainer), // to trigger initial index pattern update
-      updateIndexPatternsOperator
-    )
-    .subscribe();
-};
-
-const getFiltersSubscription = ({
-  query,
-  dashboardStateManager,
-}: {
-  query: QueryStart;
-  dashboardStateManager: DashboardStateManager;
-}) => {
-  return merge(query.filterManager.getUpdates$(), query.queryString.getUpdates$())
-    .pipe(debounceTime(100))
-    .subscribe(() => {
-      dashboardStateManager.applyFilters(
-        query.queryString.getQuery(),
-        query.filterManager.getFilters()
-      );
-    });
-};
-
-const getSearchSessionIdFromURL = (history: History): string | undefined =>
-  getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
+export type DashboardAppComponentActiveState = Required<DashboardAppComponentState>;
 
 const isActiveState = (s: DashboardAppComponentState): s is DashboardAppComponentActiveState => {
   return Boolean(
@@ -453,12 +226,7 @@ export function DashboardApp({
             pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
           });
 
-          core.notifications.toasts.addWarning(
-            i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
-              defaultMessage:
-                'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
-            })
-          );
+          core.notifications.toasts.addWarning(dashboard60Warning);
         } else {
           // E.g. a corrupt or deleted dashboard
           core.notifications.toasts.addDanger(error.message);

@@ -23,21 +23,22 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { SavedQuery } from '../../../../data/public';
+import { SavedQuery, TimefilterContract } from '../../../../data/public';
 
 import { ViewMode } from '../../../../embeddable/public';
 import { useKibana } from '../../../../kibana_react/public';
 import { setStateToKbnUrl, unhashUrl } from '../../../../kibana_utils/public';
 import { SavedObjectSaveOpts, SaveResult, showSaveModal } from '../../../../saved_objects/public';
 import { NavAction } from '../../types';
+import { DashboardAppComponentActiveState } from '../dashboard_app';
 import { UrlParams } from '../dashboard_router';
 import { leaveConfirmStrings } from '../dashboard_strings';
 import { saveDashboard } from '../lib';
 import {
   DashboardAppServices,
+  DashboardEmbedSettings,
+  DashboardRedirect,
   DashboardSaveOptions,
-  DashboardTopNavProps,
-  DashboardTopNavState,
 } from '../types';
 import { getTopNavConfig } from './get_top_nav_config';
 import { DashboardSaveModal } from './save_modal';
@@ -55,6 +56,22 @@ interface UrlParamsSelectedMap {
 interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTER_BAR> {
   [UrlParams.HIDE_FILTER_BAR]: boolean;
 }
+
+export interface DashboardTopNavState {
+  chromeIsVisible: boolean;
+  savedQuery?: SavedQuery;
+}
+
+export type DashboardTopNavProps = DashboardAppComponentActiveState & {
+  onQuerySubmit: (_payload: unknown, isUpdate: boolean | undefined) => void;
+  updateViewMode: (newViewMode: ViewMode) => void;
+  embedSettings?: DashboardEmbedSettings;
+  timefilter: TimefilterContract;
+  redirectTo: DashboardRedirect;
+  addFromLibrary: () => void;
+  lastDashboardId?: string;
+  createNew: () => void;
+};
 
 export function DashboardTopNav({
   dashboardStateManager,

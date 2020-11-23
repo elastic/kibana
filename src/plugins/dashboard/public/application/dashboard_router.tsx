@@ -19,28 +19,30 @@
 
 import './index.scss';
 import React from 'react';
-
 import { I18nProvider } from '@kbn/i18n/react';
+import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
-import { parse, ParsedQuery } from 'query-string';
-import { i18n } from '@kbn/i18n';
+
+import { DashboardApp } from './dashboard_app';
+import { DashboardListing, Dashboard404 } from './listing';
+import { KibanaContextProvider } from '../../../kibana_react/public';
+import { createDashboardListingFilterUrl } from '../dashboard_constants';
+import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from './types';
+import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
+
 import {
   createKbnUrlStateStorage,
   Storage,
   withNotifyOnErrors,
 } from '../../../kibana_utils/public';
-import { KibanaContextProvider } from '../../../kibana_react/public';
-import { DashboardListing, Dashboard404 } from './listing';
+import { dashboardPageTitle, dashboardReadonlyBadge } from './dashboard_strings';
 import {
-  DashboardAppServices,
-  DashboardEmbedSettings,
-  DashboardMountProps,
-  RedirectToProps,
-} from './types';
-import { DashboardApp } from './dashboard_app';
-import { createDashboardListingFilterUrl } from '../dashboard_constants';
-import { dashboardReadonlyBadge } from './dashboard_strings';
+  AppMountParameters,
+  CoreSetup,
+  PluginInitializerContext,
+  ScopedHistory,
+} from '../../../../core/public';
 import { createDashboardEditUrl, DashboardConstants } from '..';
 
 export enum UrlParams {
@@ -49,6 +51,18 @@ export enum UrlParams {
   SHOW_TIME_FILTER = 'show-time-filter',
   SHOW_FILTER_BAR = 'show-filter-bar',
   HIDE_FILTER_BAR = 'hide-filter-bar',
+}
+
+export interface DashboardMountProps {
+  appUnMounted: () => void;
+  restorePreviousUrl: () => void;
+  scopedHistory: ScopedHistory<unknown>;
+  element: AppMountParameters['element'];
+  initializerContext: PluginInitializerContext;
+  onAppLeave: AppMountParameters['onAppLeave'];
+  core: CoreSetup<DashboardStartDependencies, DashboardStart>;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  usageCollection: DashboardSetupDependencies['usageCollection'];
 }
 
 export async function mountApp({
@@ -173,9 +187,7 @@ export async function mountApp({
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
     setBadge();
-    coreStart.chrome.docTitle.change(
-      i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
-    );
+    coreStart.chrome.docTitle.change(dashboardPageTitle);
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
