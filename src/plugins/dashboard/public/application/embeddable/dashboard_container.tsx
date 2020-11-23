@@ -173,26 +173,25 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public replacePanel(
     previousPanelState: DashboardPanelState<EmbeddableInput>,
-    newPanelState: Partial<PanelState>
+    newPanelState: Partial<PanelState>,
+    generateNewId?: boolean
   ) {
     let panels;
-    if (
-      newPanelState.explicitInput?.id &&
-      newPanelState.explicitInput.id !== previousPanelState.explicitInput.id
-    ) {
-      // replace panel can be called with a new id in order to destroy and recreate the embeddable
+    if (generateNewId) {
+      // replace panel can be called with generateNewId in order to totally destroy and recreate the embeddable
       panels = { ...this.input.panels };
       delete panels[previousPanelState.explicitInput.id];
-      panels[newPanelState.explicitInput.id] = {
+      const newId = newPanelState.explicitInput?.id ?? uuid.v4();
+      panels[newId] = {
         ...previousPanelState,
         ...newPanelState,
         gridData: {
           ...previousPanelState.gridData,
-          i: newPanelState.explicitInput.id,
+          i: newId,
         },
         explicitInput: {
           ...newPanelState.explicitInput,
-          id: newPanelState.explicitInput.id,
+          id: newId,
         },
       };
     } else {

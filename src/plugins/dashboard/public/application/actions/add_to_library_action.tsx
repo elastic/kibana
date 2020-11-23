@@ -91,7 +91,7 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
       type: embeddable.type,
       explicitInput: { ...newInput, id: uuid.v4() },
     };
-    dashboard.replacePanel(panelToReplace, newPanel);
+    dashboard.replacePanel(panelToReplace, newPanel, true);
 
     const title = i18n.translate('dashboard.panel.addToLibrary.successMessage', {
       defaultMessage: `Panel '{panelTitle}' was added to the visualize library`,
