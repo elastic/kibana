@@ -13,7 +13,7 @@ import { useFetcher } from '../../../../hooks/useFetcher';
 import { useTheme } from '../../../../hooks/useTheme';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { LineChart } from '../line_chart';
+import { TimeseriesChart } from '../timeseries_chart';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -73,7 +73,7 @@ export function TransactionErrorRateChart({
           })}
         </h2>
       </EuiTitle>
-      <LineChart
+      <TimeseriesChart
         id="errorRate"
         height={height}
         showAnnotations={showAnnotations}
