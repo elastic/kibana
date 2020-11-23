@@ -201,6 +201,9 @@ export class LayerPanel extends React.Component {
               </EuiAccordion>
             </div>
           </EuiFlyoutHeader>
+          <EuiFlyoutFooter className="mapLayerPanel__footer">
+            <FlyoutFooter />
+          </EuiFlyoutFooter>
 
           <div className="mapLayerPanel__body">
             <div className="mapLayerPanel__bodyOverflow">
@@ -219,10 +222,6 @@ export class LayerPanel extends React.Component {
               <StyleSettings />
             </div>
           </div>
-
-          <EuiFlyoutFooter className="mapLayerPanel__footer">
-            <FlyoutFooter />
-          </EuiFlyoutFooter>
         </EuiFlexGroup>
       </KibanaContextProvider>
     );
