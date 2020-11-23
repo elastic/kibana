@@ -5,6 +5,7 @@
  */
 import { useParams } from 'react-router-dom';
 import React from 'react';
+import { asPercent } from '../../../../common/utils/formatters';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
 import { useEnvironments } from '../../../hooks/useEnvironments';
@@ -22,6 +23,7 @@ import {
 import { useFetcher } from '../../../hooks/useFetcher';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { getParsedDate } from '../../../context/UrlParamsContext/helpers';
+import { ChartPreview } from '../chart_preview';
 
 interface AlertParams {
   windowSize: number;
@@ -51,7 +53,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   const { data } = useFetcher(() => {
     if (threshold && windowSize && windowUnit) {
       return callApmApi({
-        endpoint: 'GET /api/apm/alerts/transaction_error_rate/chart_preview',
+        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
         params: {
           query: {
             start: getParsedDate(`now-${windowSize}${windowUnit}`)!,
@@ -123,6 +125,10 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     />,
   ];
 
+  const chartPreview = (
+    <ChartPreview data={data} yTickFormat={(d: any) => asPercent(d, 1)} />
+  );
+
   return (
     <ServiceAlertTrigger
       alertTypeName={ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate].name}
@@ -130,7 +136,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       defaults={defaultParams}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}
-      chartPreviewData={data}
+      chartPreview={chartPreview}
     />
   );
 }

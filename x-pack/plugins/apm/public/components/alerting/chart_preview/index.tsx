@@ -12,19 +12,20 @@ import {
   Position,
   ScaleType,
   Settings,
+  TickFormatter,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
 import { max as getMax, min as getMin } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { asPercent } from '../../../../common/utils/formatters';
 import { Coordinate } from '../../../../typings/timeseries';
 
 interface Props {
+  yTickFormat?: TickFormatter;
   data?: Coordinate[];
 }
 
-export function ChartPreview({ data = [] }: Props) {
+export function ChartPreview({ data = [], yTickFormat }: Props) {
   if (!data.length) {
     return null;
   }
@@ -47,11 +48,7 @@ export function ChartPreview({ data = [] }: Props) {
             showOverlappingTicks
             tickFormat={xFormatter}
           />
-          <Axis
-            id="y-axis"
-            position={Position.Left}
-            tickFormat={(d: any) => asPercent(d, 1)}
-          />
+          <Axis id="y-axis" position={Position.Left} tickFormat={yTickFormat} />
 
           <BarSeries
             id="chart_preview"

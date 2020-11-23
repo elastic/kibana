@@ -10,8 +10,12 @@ import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { getParsedDate } from '../../../context/UrlParamsContext/helpers';
 import { useEnvironments } from '../../../hooks/useEnvironments';
+import { useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, ServiceField, IsAboveField } from '../fields';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 
@@ -35,6 +39,25 @@ export function ErrorCountAlertTrigger(props: Props) {
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
+
+  const { threshold, windowSize, windowUnit, environment } = alertParams;
+
+  const { data } = useFetcher(() => {
+    if (threshold && windowSize && windowUnit) {
+      return callApmApi({
+        endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
+        params: {
+          query: {
+            start: getParsedDate(`now-${windowSize}${windowUnit}`)!,
+            end: getParsedDate('now')!,
+            threshold,
+            environment,
+            serviceName,
+          },
+        },
+      });
+    }
+  }, [threshold, windowSize, windowUnit, environment, serviceName]);
 
   const defaults = {
     threshold: 25,
@@ -63,11 +86,11 @@ export function ErrorCountAlertTrigger(props: Props) {
       onChange={(value) => setAlertParams('threshold', value)}
     />,
     <ForLastExpression
-      onChangeWindowSize={(windowSize) =>
-        setAlertParams('windowSize', windowSize || '')
+      onChangeWindowSize={(_windowSize) =>
+        setAlertParams('windowSize', _windowSize || '')
       }
-      onChangeWindowUnit={(windowUnit) =>
-        setAlertParams('windowUnit', windowUnit)
+      onChangeWindowUnit={(_windowUnit) =>
+        setAlertParams('windowUnit', _windowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
@@ -78,6 +101,8 @@ export function ErrorCountAlertTrigger(props: Props) {
     />,
   ];
 
+  const chartPreview = <ChartPreview data={data} />;
+
   return (
     <ServiceAlertTrigger
       alertTypeName={ALERT_TYPES_CONFIG[AlertType.ErrorCount].name}
@@ -85,6 +110,7 @@ export function ErrorCountAlertTrigger(props: Props) {
       fields={fields}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}
+      chartPreview={chartPreview}
     />
   );
 }
