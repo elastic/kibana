@@ -5198,7 +5198,6 @@
     "xpack.apm.settings.customizeUI.customLink.flyout.required": "必須",
     "xpack.apm.settings.customizeUI.customLink.flyout.save": "保存",
     "xpack.apm.settings.customizeUI.customLink.flyout.title": "リンクを作成",
-    "xpack.apm.settings.customizeUI.customLink.info": "これらのリンクは、トランザクションの「アクション」コンテキストメニューに表示されます。",
     "xpack.apm.settings.customizeUI.customLink.license.text": "カスタムリンクを作成するには、Elastic Gold 以上のライセンスが必要です。適切なライセンスがあれば、カスタムリンクを作成してサービスを分析する際にワークフローを改良できます。",
     "xpack.apm.settings.customizeUI.customLink.linkPreview.descrition": "上記のフィルターに基づき、サンプルトランザクションドキュメントの値でリンクをテストしてください。",
     "xpack.apm.settings.customizeUI.customLink.preview.contextVariable.invalid": "無効な変数が定義されているため、サンプルトランザクションドキュメントが見つかりませんでした。",
