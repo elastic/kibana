@@ -19,7 +19,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../../core/server';
-import { ErrorIndexPatternFieldNotFound, ErrorIndexPatternNotFound } from '../../error';
+import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { assertIndexPatternsContext } from '../util/assert_index_patterns_context';
 import { handleErrors } from '../util/handle_errors';
 
