@@ -25,9 +25,10 @@ import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
 
 const indexPatternSpecSchema = schema.object({
+  title: schema.string(),
+
   id: schema.maybe(schema.string()),
   version: schema.maybe(schema.string()),
-  title: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
   intervalName: schema.maybe(schema.string()),
   timeFieldName: schema.maybe(schema.string()),
