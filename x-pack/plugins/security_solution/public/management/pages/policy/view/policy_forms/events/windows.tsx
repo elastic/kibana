@@ -25,11 +25,13 @@ export const WindowsEvents = React.memo(() => {
   const total = usePolicyDetailsSelector(totalWindowsEvents);
 
   const checkboxes = useMemo(() => {
-    const items: Immutable<Array<{
-      name: string;
-      os: 'windows';
-      protectionField: keyof UIPolicyConfig['windows']['events'];
-    }>> = [
+    const items: Immutable<
+      Array<{
+        name: string;
+        os: 'windows';
+        protectionField: keyof UIPolicyConfig['windows']['events'];
+      }>
+    > = [
       {
         name: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetailsConfig.windows.events.dllDriverLoad',

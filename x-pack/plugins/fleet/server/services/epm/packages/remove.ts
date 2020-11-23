@@ -67,7 +67,6 @@ export async function removeInstallation(options: {
   deletePackageCache({
     name: pkgName,
     version: pkgVersion,
-    installSource: installation.install_source,
   });
 
   await removeArchiveEntriesFromES({ callCluster, refs: installation.package_assets });
