@@ -74,7 +74,7 @@ export class InnerJoin {
   }
 
   joinPropertiesToFeature(feature: Feature, propertiesMap: PropertiesMap): boolean {
-    if (!feature.properties || !this._leftField) {
+    if (!feature.properties || !this._leftField || !this._rightSource) {
       return false;
     }
     const rightMetricFields = this._rightSource!.getMetricFields();
@@ -106,7 +106,7 @@ export class InnerJoin {
     }
   }
 
-  getRightJoinSource() {
+  getRightJoinSource(): ESTermSource {
     if (!this._rightSource) {
       throw new Error('Cannot get rightSource from InnerJoin with incomplete config');
     }
@@ -118,18 +118,18 @@ export class InnerJoin {
   }
 
   async getTooltipProperties(properties: GeoJsonProperties) {
-    return await this._rightSource!.getTooltipProperties(properties);
+    return await this.getRightJoinSource().getTooltipProperties(properties);
   }
 
   getIndexPatternIds() {
-    return this._rightSource!.getIndexPatternIds();
+    return this.getRightJoinSource().getIndexPatternIds();
   }
 
   getQueryableIndexPatternIds() {
-    return this._rightSource!.getQueryableIndexPatternIds();
+    return this.getRightJoinSource().getQueryableIndexPatternIds();
   }
 
   getWhereQuery(): Query | undefined {
-    return this._rightSource!.getWhereQuery();
+    return this.getRightJoinSource().getWhereQuery();
   }
 }
