@@ -8,8 +8,7 @@
     "filebeatZeek": 71129,
     "packetbeatDNS": 1090,
     "packetbeatFlow": 722153,
-    "packetbeatTLS": 340,
-    "__typename": "OverviewNetworkData"
+    "packetbeatTLS": 340
   },
   "overviewHost": {
     "auditbeatAuditd": 123,

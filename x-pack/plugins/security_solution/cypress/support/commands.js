@@ -54,9 +54,9 @@ Cypress.Commands.add('stubSearchStrategyApi', function (
     const bodyObj = JSON.parse(req.body);
     const findRequestConfig = getFindRequestConfig(searchStrategyName, factoryQueryType);
 
-    const hostOverviewRequestIndex = findIndex(findRequestConfig, bodyObj.batch);
+    const requestIndex = findIndex(findRequestConfig, bodyObj.batch);
 
-    if (hostOverviewRequestIndex > -1) {
+    if (requestIndex > -1) {
       return req.reply((res) => {
         const responseObjectsArray = res.body.split('\n').map((responseString) => {
           try {
@@ -65,16 +65,13 @@ Cypress.Commands.add('stubSearchStrategyApi', function (
             return responseString;
           }
         });
-        const hostOverviewResponseIndex = findIndex(
-          { id: hostOverviewRequestIndex },
-          responseObjectsArray
-        );
+        const responseIndex = findIndex({ id: requestIndex }, responseObjectsArray);
 
         const stubbedResponseObjectsArray = [...responseObjectsArray];
-        stubbedResponseObjectsArray[hostOverviewResponseIndex] = {
-          ...stubbedResponseObjectsArray[hostOverviewResponseIndex],
+        stubbedResponseObjectsArray[responseIndex] = {
+          ...stubbedResponseObjectsArray[responseIndex],
           result: {
-            ...stubbedResponseObjectsArray[hostOverviewResponseIndex].result,
+            ...stubbedResponseObjectsArray[responseIndex].result,
             ...stubObject,
           },
         };

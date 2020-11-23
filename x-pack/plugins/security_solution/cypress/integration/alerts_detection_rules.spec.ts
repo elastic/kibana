@@ -35,13 +35,12 @@ import { DEFAULT_RULE_REFRESH_INTERVAL_VALUE } from '../../common/constants';
 import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Alerts detection rules', () => {
-  before(() => {
+  beforeEach(() => {
     esArchiverLoad('prebuilt_rules_loaded');
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('prebuilt_rules_loaded');
-    cy.clock().invoke('restore');
   });
 
   it('Sorts by activated rules', () => {
