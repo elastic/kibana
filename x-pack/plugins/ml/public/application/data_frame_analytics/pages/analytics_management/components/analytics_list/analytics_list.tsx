@@ -82,6 +82,7 @@ function getItemIdToExpandedRowMap(
 interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
+  spacesEnabled?: boolean;
   blockRefresh?: boolean;
   pageState: ListingPageUrlState;
   updatePageState: (update: Partial<ListingPageUrlState>) => void;
@@ -89,6 +90,7 @@ interface Props {
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
   isMlEnabledInSpace = true,
+  spacesEnabled = false,
   blockRefresh = false,
   pageState,
   updatePageState,
@@ -159,7 +161,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
-  useRefreshAnalyticsList(
+  const { refresh } = useRefreshAnalyticsList(
     {
       isLoading: setIsLoading,
       onRefresh: getAnalyticsCallback,
@@ -171,7 +173,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     expandedRowItemIds,
     setExpandedRowItemIds,
     isManagementTable,
-    isMlEnabledInSpace
+    isMlEnabledInSpace,
+    spacesEnabled,
+    refresh
   );
 
   const { onTableChange, pagination, sorting } = useTableSettings<DataFrameAnalyticsListRow>(

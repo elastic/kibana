@@ -8,6 +8,7 @@ import {
   AreaSeries,
   Axis,
   Chart,
+  CurveType,
   niceTimeFormatter,
   Placement,
   Position,
@@ -103,6 +104,7 @@ export function TransactionBreakdownGraph({ fetchStatus, timeseries }: Props) {
                 stackAccessors={['x']}
                 stackMode={'percentage'}
                 color={serie.areaColor}
+                curve={CurveType.CURVE_MONOTONE_X}
               />
             );
           })

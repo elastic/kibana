@@ -97,11 +97,11 @@ test('context receives stateContainer', () => {
   const { Provider, context } = createStateContainerReactHelpers<typeof stateContainer>();
 
   ReactDOM.render(
-    /* eslint-disable no-shadow */
+    /* eslint-disable @typescript-eslint/no-shadow */
     <Provider value={stateContainer}>
       <context.Consumer>{(stateContainer) => stateContainer.get().foo}</context.Consumer>
     </Provider>,
-    /* eslint-enable no-shadow */
+    /* eslint-enable @typescript-eslint/no-shadow */
     container
   );
 
@@ -116,7 +116,7 @@ describe('hooks', () => {
       const stateContainer = createStateContainer({ foo: 'bar' });
       const { Provider, useContainer } = createStateContainerReactHelpers<typeof stateContainer>();
       const Demo: React.FC<{}> = () => {
-        // eslint-disable-next-line no-shadow
+        // eslint-disable-next-line @typescript-eslint/no-shadow
         const stateContainer = useContainer();
         return <>{stateContainer.get().foo}</>;
       };
