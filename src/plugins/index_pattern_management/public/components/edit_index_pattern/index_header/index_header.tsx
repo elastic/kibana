@@ -26,7 +26,6 @@ interface IndexHeaderProps {
   indexPattern: IIndexPattern;
   defaultIndex?: string;
   setDefault?: () => void;
-  refreshFields?: () => void;
   deleteIndexPatternClick?: () => void;
 }
 
@@ -44,14 +43,6 @@ const setDefaultTooltip = i18n.translate(
   }
 );
 
-const refreshAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.refreshAria', {
-  defaultMessage: 'Reload field list.',
-});
-
-const refreshTooltip = i18n.translate('indexPatternManagement.editIndexPattern.refreshTooltip', {
-  defaultMessage: 'Refresh field list.',
-});
-
 const removeAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.removeAria', {
   defaultMessage: 'Remove index pattern.',
 });
@@ -64,7 +55,6 @@ export function IndexHeader({
   defaultIndex,
   indexPattern,
   setDefault,
-  refreshFields,
   deleteIndexPatternClick,
 }: IndexHeaderProps) {
   return (
@@ -85,20 +75,6 @@ export function IndexHeader({
                   iconType="starFilled"
                   aria-label={setDefaultAriaLabel}
                   data-test-subj="setDefaultIndexPatternButton"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-
-          {refreshFields && (
-            <EuiFlexItem>
-              <EuiToolTip content={refreshTooltip}>
-                <EuiButtonIcon
-                  color="text"
-                  onClick={refreshFields}
-                  iconType="refresh"
-                  aria-label={refreshAriaLabel}
-                  data-test-subj="refreshFieldsIndexPatternButton"
                 />
               </EuiToolTip>
             </EuiFlexItem>

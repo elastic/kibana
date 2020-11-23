@@ -10,7 +10,7 @@ import {
   DatatableColumn,
 } from 'src/plugins/expressions/public';
 
-interface FormatColumn {
+export interface FormatColumnArgs {
   format: string;
   columnId: string;
   decimals?: number;
@@ -50,7 +50,7 @@ export const supportedFormats: Record<
 export const formatColumn: ExpressionFunctionDefinition<
   'lens_format_column',
   Datatable,
-  FormatColumn,
+  FormatColumnArgs,
   Datatable
 > = {
   name: 'lens_format_column',
@@ -77,7 +77,7 @@ export const formatColumn: ExpressionFunctionDefinition<
     },
   },
   inputTypes: ['datatable'],
-  fn(input, { format, columnId, decimals, parentFormat }: FormatColumn) {
+  fn(input, { format, columnId, decimals, parentFormat }: FormatColumnArgs) {
     return {
       ...input,
       columns: input.columns.map((col) => {
