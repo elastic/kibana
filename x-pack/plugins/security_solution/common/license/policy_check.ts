@@ -15,5 +15,28 @@ export const isEndpointPolicyValidForLicense = (
   policy: PolicyConfig,
   license: LicenseService
 ): boolean => {
+  if (license.isPlatinumPlus()) {
+    return true; // currently, platinum allows all features
+  }
+
+  // only platinum or higher may disable malware notification
+  if (
+    policy.windows.popup.malware.enabled === false ||
+    policy.mac.popup.malware.enabled === false
+  ) {
+    return false;
+  }
+
+  // todo: should/can this value be imported if the default ever changes?
+  // should this check against policy_config::factory?
+  const defaultMalwareNotificationMessage = 'Elastic Security { action } { filename }';
+
+  if (
+    policy.windows.popup.malware.message !== defaultMalwareNotificationMessage ||
+    policy.mac.popup.malware.message !== defaultMalwareNotificationMessage
+  ) {
+    return false;
+  }
+
   return true;
 };
