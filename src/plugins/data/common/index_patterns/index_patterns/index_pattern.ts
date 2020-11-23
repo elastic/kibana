@@ -135,8 +135,8 @@ export class IndexPattern implements IIndexPattern {
     const newFieldAttrs = { ...this.fieldAttrs };
 
     this.fields.forEach((field) => {
-      if (field.customName) {
-        newFieldAttrs[field.name] = { customName: field.customName };
+      if (field.customLabel) {
+        newFieldAttrs[field.name] = { customLabel: field.customLabel };
       } else {
         delete newFieldAttrs[field.name];
       }

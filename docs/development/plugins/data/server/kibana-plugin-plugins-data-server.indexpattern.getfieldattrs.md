@@ -9,7 +9,7 @@
 ```typescript
 getFieldAttrs: () => {
         [x: string]: {
-            customName: string;
+            customLabel: string;
         };
     };
 ```

@@ -28,7 +28,7 @@ import {
   useLink,
   useBreadcrumbs,
   sendCreatePackagePolicy,
-  useCore,
+  useStartServices,
   useConfig,
   sendGetAgentStatus,
 } from '../../../hooks';
@@ -60,7 +60,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const {
     notifications,
     application: { navigateToApp },
-  } = useCore();
+  } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
