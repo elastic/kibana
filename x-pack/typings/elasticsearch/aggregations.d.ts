@@ -354,6 +354,7 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
     bg_count: number;
     buckets: Array<
       {
+        score: number;
         bg_count: number;
         doc_count: number;
         key: string | number;
@@ -378,9 +379,11 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
 // Union keys are not included in keyof. The type will fall back to keyof T if
 // UnionToIntersection fails, which happens when there are conflicts between the union
 // types, e.g. { foo: string; bar?: undefined } | { foo?: undefined; bar: string };
-export type ValidAggregationKeysOf<
-  T extends Record<string, any>
-> = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
+export type ValidAggregationKeysOf<T extends Record<string, any>> = keyof (UnionToIntersection<
+  T
+> extends never
+  ? T
+  : UnionToIntersection<T>);
 
 export type AggregationResultOf<
   TAggregationOptionsMap extends AggregationOptionsMap,

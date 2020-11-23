@@ -80,7 +80,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.response.length).to.be(18);
+      expect(res.body.response.length).to.be(23);
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {
