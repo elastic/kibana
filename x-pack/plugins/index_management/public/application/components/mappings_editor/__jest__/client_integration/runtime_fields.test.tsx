@@ -59,49 +59,37 @@ describe('Mappings editor: runtime fields', () => {
       });
     });
 
-    describe.skip('when there are runtime fields', () => {
-      // const defaultMappings = {
-      //   runtime: {
-      //     day_of_week: {
-      //       type: 'keyword',
-      //       script: {
-      //         source:
-      //           "emit(doc['timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
-      //       },
-      //     },
-      //   },
-      // };
-      // test('should list the fields', async () => {
-      //   testBed = setup({
-      //     value: defaultMappings,
-      //     onChange: onChangeHandler,
-      //   });
-      //   const {
-      //     actions: { expandAllFieldsAndReturnMetadata },
-      //   } = testBed;
-      //   const domTreeMetadata = await expandAllFieldsAndReturnMetadata();
-      //   expect(domTreeMetadata).toEqual(defaultMappings.properties);
-      // });
-      // test('should allow to be controlled by parent component and update on prop change', async () => {
-      //   testBed = setup({
-      //     value: defaultMappings,
-      //     onChange: onChangeHandler,
-      //   });
-      //   const {
-      //     component,
-      //     setProps,
-      //     actions: { expandAllFieldsAndReturnMetadata },
-      //   } = testBed;
-      //   const newMappings = { properties: { hello: { type: 'text' } } };
-      //   let domTreeMetadata: DomFields = {};
-      //   await act(async () => {
-      //     // Change the `value` prop of our <MappingsEditor />
-      //     setProps({ value: newMappings });
-      //   });
-      //   component.update();
-      //   domTreeMetadata = await expandAllFieldsAndReturnMetadata();
-      //   expect(domTreeMetadata).toEqual(newMappings.properties);
-      // });
+    describe('when there are runtime fields', () => {
+      const defaultMappings = {
+        runtime: {
+          day_of_week: {
+            type: 'date',
+            script: {
+              source: 'emit("hello Kibana")',
+            },
+          },
+        },
+      };
+
+      beforeEach(async () => {
+        testBed = setup({
+          value: defaultMappings,
+          onChange: onChangeHandler,
+        });
+
+        await testBed.actions.selectTab('runtimeFields');
+      });
+
+      test('should list the fields', async () => {
+        const { actions } = testBed;
+
+        const fields = actions.getRuntimeFieldsList();
+        expect(fields.length).toBe(1);
+
+        const [field] = fields;
+        expect(field.name).toBe('day_of_week');
+        expect(field.type).toBe('Date');
+      });
     });
 
     describe('Create / edit / delete runtime fields', () => {

@@ -22,6 +22,7 @@ import {
   Mappings,
   MappingsConfiguration,
   MappingsTemplates,
+  RuntimeFields,
 } from './types';
 import { extractMappingsDefinition } from './lib';
 import { useMappingsState } from './mappings_state_context';
@@ -35,6 +36,7 @@ interface MappingsEditorParsedMetadata {
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
     templates: MappingsTemplates;
+    runtime: RuntimeFields;
   };
   multipleMappingsDeclared: boolean;
 }
@@ -61,11 +63,12 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
       _meta,
       _routing,
       dynamic,
+      properties,
+      runtime,
       /* eslint-disable @typescript-eslint/naming-convention */
       numeric_detection,
       date_detection,
       dynamic_date_formats,
-      properties,
       dynamic_templates,
       /* eslint-enable @typescript-eslint/naming-convention */
     } = mappingsDefinition;
@@ -84,6 +87,7 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
       templates: {
         dynamic_templates,
       },
+      runtime,
     };
 
     return { parsedDefaultValue: parsed, multipleMappingsDeclared: false };

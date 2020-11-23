@@ -158,14 +158,8 @@ function RuntimeFieldsListItemComponent(
     );
   };
 
-  // const dataTestSubj = `${path.join('')}Field`;
-  const dataTestSubj = 'doWeNeedThis';
-
   return (
-    <li
-      className="mappingsEditor__fieldsListItem"
-      data-test-subj={`runtimeFieldsListItem ${dataTestSubj}`}
-    >
+    <li className="mappingsEditor__fieldsListItem" data-test-subj="runtimeFieldsListItem">
       <div
         className={classNames('mappingsEditor__fieldsListItem__field', {
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -191,17 +185,13 @@ function RuntimeFieldsListItemComponent(
             <EuiFlexItem
               grow={false}
               className="mappingsEditor__fieldsListItem__name"
-              data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
+              data-test-subj="fieldName"
             >
               {source.name}
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                data-test-subj={`fieldType ${dataTestSubj}-datatype`}
-                data-type-value={source.type}
-              >
+              <EuiBadge color="hollow" data-test-subj="fieldType" data-type-value={source.type}>
                 {getTypeLabelFromField(source)}
               </EuiBadge>
             </EuiFlexItem>

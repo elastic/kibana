@@ -198,14 +198,6 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     });
   };
 
-  const getRuntimeFieldInfo = (
-    testSubjectField: string
-  ): { name: string; type: string; doesShadowMappedField: boolean } => {
-    const name = find(`${testSubjectField}-fieldName` as TestSubjects).text();
-    const type = find(`${testSubjectField}-datatype` as TestSubjects).props()['data-type-value'];
-    return { name, type, doesShadowMappedField: false };
-  };
-
   const getRuntimeFieldsList = () => {
     const fields = find('runtimeFieldsListItem').map((wrapper) => wrapper);
     return fields.map((field) => {

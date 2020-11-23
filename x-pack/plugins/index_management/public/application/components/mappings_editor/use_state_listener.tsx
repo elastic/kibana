@@ -11,8 +11,9 @@ import {
   MappingsConfiguration,
   MappingsTemplates,
   OnUpdateHandler,
+  RuntimeFields,
 } from './types';
-import { normalize, deNormalize, stripUndefinedValues } from './lib';
+import { normalize, deNormalize, stripUndefinedValues, normalizeRuntimeFields } from './lib';
 import { useMappingsState, useDispatch } from './mappings_state_context';
 
 interface Args {
@@ -21,6 +22,7 @@ interface Args {
     templates: MappingsTemplates;
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
+    runtime: RuntimeFields;
   };
 }
 
@@ -28,7 +30,13 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
   const state = useMappingsState();
   const dispatch = useDispatch();
 
-  const parsedFieldsDefaultValue = useMemo(() => normalize(value?.fields), [value?.fields]);
+  const { fields: mappedFields, runtime: runtimeFields } = value ?? {};
+
+  const parsedFieldsDefaultValue = useMemo(() => normalize(mappedFields), [mappedFields]);
+  const parsedRuntimeFieldsDefaultValue = useMemo(() => normalizeRuntimeFields(runtimeFields), [
+    runtimeFields,
+  ]);
+
   useEffect(() => {
     // If we are creating a new field, but haven't entered any name
     // it is valid and we can byPass its form validation (that requires a "name" to be defined)
@@ -118,7 +126,8 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
           status: parsedFieldsDefaultValue.rootLevelFields.length === 0 ? 'creatingField' : 'idle',
           editor: 'default',
         },
+        runtimeFields: parsedRuntimeFieldsDefaultValue,
       },
     });
-  }, [value, parsedFieldsDefaultValue, dispatch]);
+  }, [value, parsedFieldsDefaultValue, dispatch, parsedRuntimeFieldsDefaultValue]);
 };

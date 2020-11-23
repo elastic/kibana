@@ -30,7 +30,7 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ createField, runtimeFiel
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.mappingsEditor.runtimeFields.emptyPromptDescription"
-            defaultMessage="For example, you can create a runtime field for a visualisation without the need of indexing it yet and occupying disk space."
+            defaultMessage="For example, you can create a runtime field for a visualisation without indexing it and save on disk space."
           />
           <br />
           <EuiLink

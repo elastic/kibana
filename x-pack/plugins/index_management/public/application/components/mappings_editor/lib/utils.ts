@@ -18,6 +18,8 @@ import {
   ParameterName,
   ComboBoxOption,
   GenericObject,
+  RuntimeFields,
+  NormalizedRuntimeFields,
 } from '../types';
 
 import {
@@ -561,3 +563,29 @@ export const stripUndefinedValues = <T = GenericObject>(obj: GenericObject, recu
       ? { ...acc, [key]: stripUndefinedValues(value, recursive) }
       : { ...acc, [key]: value };
   }, {} as T);
+
+export const normalizeRuntimeFields = (fields: RuntimeFields = {}): NormalizedRuntimeFields => {
+  return Object.entries(fields).reduce((acc, [name, field]) => {
+    const id = getUniqueId();
+    return {
+      ...acc,
+      [id]: {
+        id,
+        source: {
+          name,
+          ...field,
+        },
+      },
+    };
+  }, {} as NormalizedRuntimeFields);
+};
+
+export const deNormalizeRuntimeFields = (fields: NormalizedRuntimeFields): RuntimeFields => {
+  return Object.values(fields).reduce((acc, { source }) => {
+    const { name, ...rest } = source;
+    return {
+      ...acc,
+      [name]: rest,
+    };
+  }, {} as RuntimeFields);
+};

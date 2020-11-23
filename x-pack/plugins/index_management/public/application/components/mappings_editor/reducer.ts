@@ -195,6 +195,10 @@ export const reducer = (state: State, action: Action): State => {
           fieldToAddFieldTo: undefined,
           fieldToEdit: undefined,
         },
+        runtimeFields: action.value.runtimeFields,
+        runtimeFieldsList: {
+          status: 'idle',
+        },
         search: {
           term: '',
           result: [],

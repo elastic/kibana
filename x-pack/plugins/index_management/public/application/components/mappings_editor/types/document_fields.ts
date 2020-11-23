@@ -220,7 +220,15 @@ export interface AliasOption {
   label: string;
 }
 
+export interface RuntimeFields {
+  [name: string]: Omit<RuntimeField, 'name'>;
+}
+
 export interface NormalizedRuntimeField {
   id: string;
   source: RuntimeField;
+}
+
+export interface NormalizedRuntimeFields {
+  [id: string]: NormalizedRuntimeField;
 }

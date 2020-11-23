@@ -5,7 +5,12 @@
  */
 
 import { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
-import { Field, NormalizedFields, NormalizedRuntimeField } from './document_fields';
+import {
+  Field,
+  NormalizedFields,
+  NormalizedRuntimeField,
+  NormalizedRuntimeFields,
+} from './document_fields';
 import { FieldsEditor, SearchResult } from './mappings_editor';
 
 export type Mappings = MappingsTemplates &
@@ -79,7 +84,7 @@ export interface State {
   documentFields: DocumentFieldsState;
   runtimeFieldsList: RuntimeFieldsListState;
   fields: NormalizedFields;
-  runtimeFields: { [id: string]: NormalizedRuntimeField };
+  runtimeFields: NormalizedRuntimeFields;
   fieldForm?: OnFormUpdateArg<any>;
   fieldsJsonEditor: {
     format(): MappingsFields;
