@@ -93,6 +93,31 @@ describe('Mappings editor: runtime fields', () => {
         await actions.startEditRuntimeField('day_of_week');
         expect(find('runtimeFieldEditor.scriptField').props().value).toBe('emit("hello Kibana")');
       });
+
+      test('should have a button to create fields', () => {
+        const { actions, exists } = testBed;
+
+        expect(exists('createRuntimeFieldButton')).toBe(true);
+
+        actions.openRuntimeFieldEditor();
+        expect(exists('runtimeFieldEditor')).toBe(true);
+      });
+
+      test('should close the runtime editor when switching tab', async () => {
+        const { exists, actions } = testBed;
+        expect(exists('runtimeFieldEditor')).toBe(false); // closed
+
+        actions.openRuntimeFieldEditor();
+        expect(exists('runtimeFieldEditor')).toBe(true); // opened
+
+        // Navigate away
+        await testBed.actions.selectTab('templates');
+        expect(exists('runtimeFieldEditor')).toBe(false); // closed
+
+        // Back to runtime fields
+        await testBed.actions.selectTab('runtimeFields');
+        expect(exists('runtimeFieldEditor')).toBe(false); // still closed
+      });
     });
 
     describe('Create / edit / delete runtime fields', () => {

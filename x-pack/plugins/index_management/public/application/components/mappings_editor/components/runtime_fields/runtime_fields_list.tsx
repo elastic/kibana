@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 
 import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import {
@@ -93,6 +95,7 @@ export const RuntimeFieldsList = () => {
 
   const fieldsToArray = Object.entries(runtimeFields);
   const isEmpty = fieldsToArray.length === 0;
+  const isCreateFieldDisabled = status !== 'idle';
 
   return isEmpty ? (
     <EmptyPrompt createField={createField} runtimeFieldsDocsUri={runtimeFieldsDocsUri} />
@@ -103,6 +106,19 @@ export const RuntimeFieldsList = () => {
           <RuntimeFieldsListItemContainer key={fieldId} fieldId={fieldId} />
         ))}
       </ul>
+
+      <EuiSpacer />
+
+      <EuiButtonEmpty
+        disabled={isCreateFieldDisabled}
+        onClick={createField}
+        iconType="plusInCircleFilled"
+        data-test-subj="createRuntimeFieldButton"
+      >
+        {i18n.translate('xpack.idxMgmt.mappingsEditor.addRuntimeFieldButtonLabel', {
+          defaultMessage: 'Add field',
+        })}
+      </EuiButtonEmpty>
     </>
   );
 };
