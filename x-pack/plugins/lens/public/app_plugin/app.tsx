@@ -195,7 +195,6 @@ export function App({
     data.query,
     history,
     initialContext,
-    incomingState?.originatingApp,
   ]);
 
   useEffect(() => {
