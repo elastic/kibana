@@ -9,7 +9,11 @@ import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
-import { getOrdinalMbColorRampStops, getColorPalette } from '../../color_palettes';
+import {
+  getOrdinalMbColorRampStops,
+  getPercentilesMbColorRampStops,
+  getColorPalette,
+} from '../../color_palettes';
 import { COLOR_MAP_TYPE, STEP_FUNCTION } from '../../../../../common/constants';
 import {
   isCategoricalStopsInvalid,
@@ -133,7 +137,27 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       ];
     } else if (this.getStepFunction() === STEP_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
-      return null;
+      if (!percentilesFieldMeta || !percentilesFieldMeta.length) {
+        return null;
+      }
+
+      const colorStops = getPercentilesMbColorRampStops(
+        this._options.color ? this._options.color : null,
+        percentilesFieldMeta
+      );
+      if (!colorStops) {
+        return null;
+      }
+
+      const lessThanFirstStopValue = percentilesFieldMeta[0].value - 1;
+      return [
+        'interpolate',
+        ['linear'],
+        ['coalesce', [this.getMbLookupFunction(), targetName], lessThanFirstStopValue],
+        lessThanFirstStopValue,
+        RGBA_0000,
+        ...colorStops,
+      ];
     } else {
       const rangeFieldMeta = this.getRangeFieldMeta();
       if (!rangeFieldMeta) {

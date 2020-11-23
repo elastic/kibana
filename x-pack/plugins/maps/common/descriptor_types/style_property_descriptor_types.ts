@@ -205,7 +205,8 @@ export type RangeFieldMeta = {
 };
 
 export type PercentilesFieldMeta = Array<{
-  [key: string]: number;
+  percentile: string;
+  value: number;
 }>;
 
 export type Category = {

@@ -24,6 +24,7 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui/lib/services';
 import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import { PercentilesFieldMeta } from '../../../common/descriptor_types';
 
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
 
@@ -35,39 +36,64 @@ export const DEFAULT_LINE_COLORS: string[] = [
   '#FFF',
 ];
 
-const COLOR_PALETTES: EuiColorPalettePickerPaletteProps[] = [
+type COLOR_PALETTE = EuiColorPalettePickerPaletteProps & {
+  getPalette?: (steps: number) => string[];
+};
+
+const COLOR_PALETTES: COLOR_PALETTE[] = [
   {
     value: 'Blues',
+    getPalette: (steps: number) => {
+      return euiPaletteCool(steps);
+    },
     palette: euiPaletteCool(8),
     type: 'gradient',
   },
   {
     value: 'Greens',
+    getPalette: (steps: number) => {
+      return euiPalettePositive(steps);
+    },
     palette: euiPalettePositive(8),
     type: 'gradient',
   },
   {
     value: 'Greys',
+    getPalette: (steps: number) => {
+      return euiPaletteGray(steps);
+    },
     palette: euiPaletteGray(8),
     type: 'gradient',
   },
   {
     value: 'Reds',
+    getPalette: (steps: number) => {
+      return euiPaletteNegative(steps);
+    },
     palette: euiPaletteNegative(8),
     type: 'gradient',
   },
   {
     value: 'Yellow to Red',
+    getPalette: (steps: number) => {
+      return euiPaletteWarm(steps);
+    },
     palette: euiPaletteWarm(8),
     type: 'gradient',
   },
   {
     value: 'Green to Red',
+    getPalette: (steps: number) => {
+      return euiPaletteForStatus(steps);
+    },
     palette: euiPaletteForStatus(8),
     type: 'gradient',
   },
   {
     value: 'Blue to Red',
+    getPalette: (steps: number) => {
+      return euiPaletteForTemperature(steps);
+    },
     palette: euiPaletteForTemperature(8),
     type: 'gradient',
   },
@@ -99,20 +125,16 @@ const COLOR_PALETTES: EuiColorPalettePickerPaletteProps[] = [
   },
 ];
 
-export const NUMERICAL_COLOR_PALETTES = COLOR_PALETTES.filter(
-  (palette: EuiColorPalettePickerPaletteProps) => {
-    return palette.type === 'gradient';
-  }
-);
+export const NUMERICAL_COLOR_PALETTES = COLOR_PALETTES.filter((palette: COLOR_PALETTE) => {
+  return palette.type === 'gradient';
+});
 
-export const CATEGORICAL_COLOR_PALETTES = COLOR_PALETTES.filter(
-  (palette: EuiColorPalettePickerPaletteProps) => {
-    return palette.type === 'fixed';
-  }
-);
+export const CATEGORICAL_COLOR_PALETTES = COLOR_PALETTES.filter((palette: COLOR_PALETTE) => {
+  return palette.type === 'fixed';
+});
 
 export function getColorPalette(colorPaletteId: string): string[] {
-  const colorPalette = COLOR_PALETTES.find(({ value }: EuiColorPalettePickerPaletteProps) => {
+  const colorPalette = COLOR_PALETTES.find(({ value }: COLOR_PALETTE) => {
     return value === colorPaletteId;
   });
   return colorPalette ? (colorPalette.palette as string[]) : [];
@@ -159,6 +181,31 @@ export function getOrdinalMbColorRampStops(
     },
     []
   );
+}
+
+// Returns an array of color stops
+// [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
+export function getPercentilesMbColorRampStops(
+  colorPaletteId: string | null,
+  percentiles: PercentilesFieldMeta
+): Array<number | string> | null {
+  if (!colorPaletteId) {
+    return null;
+  }
+
+  const paletteObject = COLOR_PALETTES.find(({ value }: COLOR_PALETTE) => {
+    return value === colorPaletteId;
+  });
+
+  if (!paletteObject || paletteObject.getPalette === undefined) {
+    return null;
+  }
+
+  return paletteObject
+    .getPalette(percentiles.length)
+    .reduce((accu: Array<number | string>, stopColor: string, idx: number) => {
+      return [...accu, percentiles[idx].value, stopColor];
+    }, []);
 }
 
 export function getLinearGradient(colorStrings: string[]): string {
