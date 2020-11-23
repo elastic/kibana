@@ -814,7 +814,7 @@ describe('xy_expression', () => {
           renderMode="noInteractivity"
           chartsThemeService={chartsThemeService}
           paletteService={paletteService}
-          histogramBarTarget={50}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
@@ -888,7 +888,7 @@ describe('xy_expression', () => {
       });
     });
 
-    test('onElementClick is triggering event on noInteractivity mode', () => {
+    test('onElementClick is not triggering event on noInteractivity mode', () => {
       const { args, data } = sampleArgs();
 
       const wrapper = mountWithIntl(
@@ -900,7 +900,7 @@ describe('xy_expression', () => {
           renderMode="noInteractivity"
           chartsThemeService={chartsThemeService}
           paletteService={paletteService}
-          histogramBarTarget={50}
+          minInterval={50}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
         />
