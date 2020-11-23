@@ -8,7 +8,6 @@ import { isValidNamespace } from './is_valid_namespace';
 describe('Ingest Manager - isValidNamespace', () => {
   it('returns true for valid namespaces', () => {
     expect(isValidNamespace('default').valid).toBe(true);
-    expect(isValidNamespace('namespace-with-dash').valid).toBe(true);
     expect(isValidNamespace('123').valid).toBe(true);
     expect(isValidNamespace('testlength😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀').valid).toBe(
       true
@@ -19,6 +18,7 @@ describe('Ingest Manager - isValidNamespace', () => {
     expect(isValidNamespace('').valid).toBe(false);
     expect(isValidNamespace(' ').valid).toBe(false);
     expect(isValidNamespace('Default').valid).toBe(false);
+    expect(isValidNamespace('namespace-with-dash').valid).toBe(false);
     expect(isValidNamespace('namespace with spaces').valid).toBe(false);
     expect(isValidNamespace('foo/bar').valid).toBe(false);
     expect(isValidNamespace('foo\\bar').valid).toBe(false);
