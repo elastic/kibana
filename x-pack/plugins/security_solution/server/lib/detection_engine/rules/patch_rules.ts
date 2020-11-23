@@ -178,6 +178,7 @@ export const patchRules = async ({
     },
     actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
     params: removeUndefined(nextParams),
+    notifyOnlyOnActionGroupChange: false,
   };
   const [validated, errors] = validate(newRule, internalRuleUpdate);
   if (errors != null || validated === null) {

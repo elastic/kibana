@@ -72,7 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await defineAlert(alertName);
 
       await testSubjects.setValue('throttleInput', '10');
-      await testSubjects.click('notifyOnStateChange');
+      await testSubjects.click('notifyOnlyOnActionGroupChange');
       const throttleInput = await find.byCssSelector('[data-test-subj="throttleInput"]');
       expect(await throttleInput.getAttribute('value')).to.be.empty();
 

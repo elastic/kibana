@@ -659,13 +659,13 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiFormRow fullWidth label={labelForAlertRenotify}>
             <EuiSwitch
-              checked={alert.notifyOnStateChange || false}
-              data-test-subj="notifyOnStateChange"
-              id="notifyOnStateChange"
+              checked={alert.notifyOnlyOnActionGroupChange || false}
+              data-test-subj="notifyOnlyOnActionGroupChange"
+              id="notifyOnlyOnActionGroupChange"
               label={
                 <FormattedMessage
                   defaultMessage="Notify only when action group changes."
-                  id="xpack.triggersActionsUI.sections.alertForm.notifyOnStateChange"
+                  id="xpack.triggersActionsUI.sections.alertForm.notifyOnlyOnActionGroupChange"
                 />
               }
               onChange={(e) => {
@@ -674,7 +674,7 @@ export const AlertForm = ({
                   setAlertThrottle(null);
                   setAlertProperty('throttle', null);
                 }
-                setAlertProperty('notifyOnStateChange', e.target.checked);
+                setAlertProperty('notifyOnlyOnActionGroupChange', e.target.checked);
               }}
             />
           </EuiFormRow>
@@ -685,7 +685,7 @@ export const AlertForm = ({
                   fullWidth
                   min={1}
                   compressed
-                  disabled={alert.notifyOnStateChange}
+                  disabled={alert.notifyOnlyOnActionGroupChange}
                   value={alertThrottle || ''}
                   name="throttle"
                   data-test-subj="throttleInput"
@@ -713,7 +713,7 @@ export const AlertForm = ({
               <EuiFlexItem grow={false}>
                 <EuiSelect
                   compressed
-                  disabled={alert.notifyOnStateChange}
+                  disabled={alert.notifyOnlyOnActionGroupChange}
                   value={alertThrottleUnit}
                   options={getTimeOptions(alertThrottle ?? 1)}
                   onChange={(e) => {

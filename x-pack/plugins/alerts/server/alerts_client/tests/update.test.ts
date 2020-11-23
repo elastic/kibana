@@ -65,7 +65,7 @@ describe('update()', () => {
       scheduledTaskId: 'task-123',
       params: {},
       throttle: null,
-      notifyOnStateChange: false,
+      notifyOnlyOnActionGroupChange: false,
       actions: [
         {
           group: 'default',
@@ -180,7 +180,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: null,
-        notifyOnStateChange: false,
+        notifyOnlyOnActionGroupChange: false,
         actions: [
           {
             group: 'default',
@@ -291,7 +291,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
-        "notifyOnStateChange": false,
+        "notifyOnlyOnActionGroupChange": false,
         "params": Object {
           "bar": true,
         },
@@ -415,7 +415,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
-        notifyOnStateChange: false,
+        notifyOnlyOnActionGroupChange: false,
         actions: [
           {
             group: 'default',
@@ -477,7 +477,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
-        "notifyOnStateChange": false,
+        "notifyOnlyOnActionGroupChange": false,
         "params": Object {
           "bar": true,
         },
@@ -582,7 +582,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
-        notifyOnStateChange: false,
+        notifyOnlyOnActionGroupChange: false,
         actions: [
           {
             group: 'default',
@@ -645,7 +645,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
-        "notifyOnStateChange": false,
+        "notifyOnlyOnActionGroupChange": false,
         "params": Object {
           "bar": true,
         },
@@ -702,7 +702,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
-          notifyOnStateChange: false,
+          notifyOnlyOnActionGroupChange: false,
           actions: [
             {
               group: 'default',
@@ -831,7 +831,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: null,
-        notifyOnStateChange: false,
+        notifyOnlyOnActionGroupChange: false,
         actions: [
           {
             group: 'default',
@@ -939,7 +939,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
-        notifyOnStateChange: false,
+        notifyOnlyOnActionGroupChange: false,
         actions: [
           {
             group: 'default',
@@ -1001,7 +1001,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
-          notifyOnStateChange: false,
+          notifyOnlyOnActionGroupChange: false,
           actions: [
             {
               group: 'default',
@@ -1121,7 +1121,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
-          notifyOnStateChange: false,
+          notifyOnlyOnActionGroupChange: false,
           actions: [
             {
               group: 'default',
@@ -1153,7 +1153,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
-          notifyOnStateChange: false,
+          notifyOnlyOnActionGroupChange: false,
           actions: [
             {
               group: 'default',
@@ -1190,7 +1190,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
-          notifyOnStateChange: false,
+          notifyOnlyOnActionGroupChange: false,
           actions: [
             {
               group: 'default',
@@ -1226,7 +1226,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
-          notifyOnStateChange: false,
+          notifyOnlyOnActionGroupChange: false,
           actions: [
             {
               group: 'default',
@@ -1280,7 +1280,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
-          notifyOnStateChange: false,
+          notifyOnlyOnActionGroupChange: false,
           actions: [],
         },
       });
@@ -1304,7 +1304,7 @@ describe('update()', () => {
               bar: true,
             },
             throttle: null,
-            notifyOnStateChange: false,
+            notifyOnlyOnActionGroupChange: false,
             actions: [],
           },
         })

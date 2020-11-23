@@ -197,7 +197,7 @@ export async function updateAlert({
   http: HttpSetup;
   alert: Pick<
     AlertUpdates,
-    'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'notifyOnStateChange'
+    'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'notifyOnlyOnActionGroupChange'
   >;
   id: string;
 }): Promise<Alert> {
@@ -210,7 +210,7 @@ export async function updateAlert({
         'schedule',
         'params',
         'actions',
-        'notifyOnStateChange',
+        'notifyOnlyOnActionGroupChange',
       ])
     ),
   });

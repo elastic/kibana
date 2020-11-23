@@ -115,7 +115,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
                 throttle: '1m',
-                notifyOnStateChange: false,
+                notifyOnlyOnActionGroupChange: false,
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
                 muteAll: false,

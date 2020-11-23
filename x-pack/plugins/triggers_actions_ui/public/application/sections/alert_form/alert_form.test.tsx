@@ -179,8 +179,8 @@ describe('alert_form', () => {
 
     it('renders notify on state change only switch', async () => {
       await setup();
-      const notifyOnStateChangeSwitch = wrapper.find('[data-test-subj="notifyOnStateChange"]');
-      expect(notifyOnStateChangeSwitch.exists()).toBeTruthy();
+      const notifyOnlyOnActionGroupChangeSwitch = wrapper.find('[data-test-subj="notifyOnlyOnActionGroupChange"]');
+      expect(notifyOnlyOnActionGroupChangeSwitch.exists()).toBeTruthy();
     });
 
     it('renders registered action types', async () => {

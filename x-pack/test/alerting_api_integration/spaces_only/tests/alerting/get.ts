@@ -46,7 +46,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
-        notifyOnStateChange: false,
+        notifyOnlyOnActionGroupChange: false,
         muteAll: false,
         mutedInstanceIds: [],
         createdAt: response.body.createdAt,

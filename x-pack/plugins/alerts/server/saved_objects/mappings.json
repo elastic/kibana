@@ -74,7 +74,7 @@
       "throttle": {
         "type": "keyword"
       },
-      "notifyOnStateChange": {
+      "notifyOnlyOnActionGroupChange": {
         "type": "boolean"
       },
       "muteAll": {

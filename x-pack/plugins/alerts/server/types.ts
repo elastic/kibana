@@ -151,7 +151,7 @@ export interface RawAlert extends SavedObjectAttributes {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
-  notifyOnStateChange: boolean;
+  notifyOnlyOnActionGroupChange: boolean;
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: AlertMeta;
@@ -162,7 +162,7 @@ export type AlertInfoParams = Pick<
   RawAlert,
   | 'params'
   | 'throttle'
-  | 'notifyOnStateChange'
+  | 'notifyOnlyOnActionGroupChange'
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'name'

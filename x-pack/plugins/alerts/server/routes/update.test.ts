@@ -41,7 +41,7 @@ describe('updateAlertRoute', () => {
         },
       },
     ],
-    notifyOnStateChange: false,
+    notifyOnlyOnActionGroupChange: false,
   };
 
   it('updates an alert with proper parameters', async () => {
@@ -79,7 +79,7 @@ describe('updateAlertRoute', () => {
               },
             },
           ],
-          notifyOnStateChange: false,
+          notifyOnlyOnActionGroupChange: false,
         },
       },
       ['ok']
@@ -102,7 +102,7 @@ describe('updateAlertRoute', () => {
               },
             ],
             "name": "abc",
-            "notifyOnStateChange": false,
+            "notifyOnlyOnActionGroupChange": false,
             "params": Object {
               "otherField": false,
             },

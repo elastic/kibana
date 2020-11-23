@@ -39,7 +39,7 @@ const bodySchema = schema.object({
     }),
     { defaultValue: [] }
   ),
-  notifyOnStateChange: schema.boolean({ defaultValue: false }),
+  notifyOnlyOnActionGroupChange: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) => {
@@ -63,11 +63,11 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
         }
         const alertsClient = context.alerting.getAlertsClient();
         const { id } = req.params;
-        const { name, actions, params, schedule, tags, throttle, notifyOnStateChange } = req.body;
+        const { name, actions, params, schedule, tags, throttle, notifyOnlyOnActionGroupChange } = req.body;
         return res.ok({
           body: await alertsClient.update({
             id,
-            data: { name, actions, params, schedule, tags, throttle, notifyOnStateChange },
+            data: { name, actions, params, schedule, tags, throttle, notifyOnlyOnActionGroupChange },
           }),
         });
       })

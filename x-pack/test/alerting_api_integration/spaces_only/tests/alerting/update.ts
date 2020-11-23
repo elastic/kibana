@@ -54,7 +54,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         apiKeyOwner: null,
         muteAll: false,
         mutedInstanceIds: [],
-        notifyOnStateChange: false,
+        notifyOnlyOnActionGroupChange: false,
         scheduledTaskId: createdAlert.scheduledTaskId,
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,

@@ -587,7 +587,7 @@ const BaseAlert: SanitizedAlert = {
   tags: [],
   consumer: 'alert-consumer',
   throttle: null,
-  notifyOnStateChange: false,
+  notifyOnlyOnActionGroupChange: false,
   muteAll: false,
   mutedInstanceIds: [],
   params: { bar: true },

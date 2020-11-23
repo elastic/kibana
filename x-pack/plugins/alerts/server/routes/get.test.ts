@@ -46,7 +46,7 @@ describe('getAlertRoute', () => {
     tags: ['foo'],
     enabled: true,
     muteAll: false,
-    notifyOnStateChange: false,
+    notifyOnlyOnActionGroupChange: false,
     createdBy: '',
     updatedBy: '',
     apiKey: '',

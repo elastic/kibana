@@ -114,7 +114,7 @@ export const createRules = async ({
       enabled,
       actions: actions.map(transformRuleToAlertAction),
       throttle: null,
-      notifyOnStateChange: false,
+      notifyOnlyOnActionGroupChange: false,
     },
   });
 };

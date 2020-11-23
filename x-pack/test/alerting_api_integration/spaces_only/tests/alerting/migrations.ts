@@ -91,5 +91,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       expect(response.body.updatedAt).to.eql('2020-06-17T15:35:39.839Z');
     });
+
+    it('7.11.0 migrates alerts to contain `notifyOnlyOnActionGroupChange` field', async () => {
+      const response = await supertest.get(
+        `${getUrlPrefix(``)}/api/alerts/alert/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
+      );
+
+      expect(response.status).to.eql(200);
+      expect(response.body.notifyOnlyOnActionGroupChange).to.eql(false);
+    });
   });
 }

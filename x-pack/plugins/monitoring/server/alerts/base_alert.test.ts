@@ -64,7 +64,7 @@ describe('BaseAlert', () => {
           },
           tags: [],
           throttle: '1d',
-          notifyOnStateChange: false,
+          notifyOnlyOnActionGroupChange: false,
         },
       });
     });

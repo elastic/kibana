@@ -292,6 +292,18 @@ describe('7.11.0', () => {
       },
     });
   });
+
+  test('add notifyOnlyOnActionGroupChange field - default to false', () => {
+    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+    const alert = getMockData({});
+    expect(migration711(alert, { log })).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        notifyOnlyOnActionGroupChange: false,
+      },
+    });
+  });
 });
 
 function getUpdatedAt(): string {
