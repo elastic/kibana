@@ -13,7 +13,6 @@ import {
   EuiIconTip,
   EuiInputPopover,
   EuiSuperSelect,
-  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -29,7 +28,10 @@ import {
   Query,
   QueryStringInput,
 } from '../../../../../../../../../src/plugins/data/public';
-
+import { ShardSizeFilter } from './shard_size_select';
+import { DatavisualizerFieldNameFilter } from './field_name_filter';
+import { DatavisualizerFieldTypeFilter } from './field_type_filter';
+import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 interface Props {
   indexPattern: IndexPattern;
   searchString: Query['query'];
@@ -40,43 +42,21 @@ interface Props {
   setSearchQueryLanguage(q: any): void;
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
-  totalCount: number;
+  overallStats: any;
+  indexedFieldTypes: ML_JOB_FIELD_TYPES[];
 }
-
-const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
-  return {
-    value: String(v),
-    inputDisplay:
-      v > 0 ? (
-        <span data-test-subj={`mlDataVisualizerShardSizeOption ${v}`}>
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.searchPanel.sampleSizeOptionLabel"
-            defaultMessage="Sample size (per shard): {wrappedValue}"
-            values={{ wrappedValue: <b>{v}</b> }}
-          />
-        </span>
-      ) : (
-        <span data-test-subj={`mlDataVisualizerShardSizeOption all`}>
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.searchPanel.allOptionLabel"
-            defaultMessage="Search all"
-          />
-        </span>
-      ),
-  };
-});
 
 export const SearchPanel: FC<Props> = ({
   indexPattern,
   searchString,
   setSearchString,
-  searchQuery,
   setSearchQuery,
   searchQueryLanguage,
   setSearchQueryLanguage,
   samplerShardSize,
   setSamplerShardSize,
-  totalCount,
+  overallStats,
+  indexedFieldTypes,
 }) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -149,51 +129,36 @@ export const SearchPanel: FC<Props> = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false} style={{ width: 270 }}>
-            <EuiSuperSelect
-              options={searchSizeOptions}
-              valueOfSelected={String(samplerShardSize)}
-              onChange={(value) => setSamplerShardSize(+value)}
-              aria-label={i18n.translate(
-                'xpack.ml.datavisualizer.searchPanel.sampleSizeAriaLabel',
-                {
-                  defaultMessage: 'Select number of documents to sample',
-                }
-              )}
-              data-test-subj="mlDataVisualizerShardSizeSelect"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip
-              content={i18n.translate('xpack.ml.datavisualizer.searchPanel.queryBarPlaceholder', {
-                defaultMessage:
-                  'Selecting a smaller sample size will reduce query run times and the load on the cluster.',
-              })}
-              position="right"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ShardSizeFilter
+          samplerShardSize={samplerShardSize}
+          setSamplerShardSize={setSamplerShardSize}
+        />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.searchPanel.totalDocCountLabel"
-            defaultMessage="Total documents: {strongTotalCount}"
-            values={{
-              strongTotalCount: (
-                <strong data-test-subj="mlDataVisualizerTotalDocCount">
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.searchPanel.totalDocCountNumber"
-                    defaultMessage="{totalCount, plural, one {#} other {#}}"
-                    values={{ totalCount }}
-                  />
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
-      </EuiFlexItem>
+      <DatavisualizerFieldNameFilter overallStats={overallStats} />
+      <DatavisualizerFieldTypeFilter indexedFieldTypes={indexedFieldTypes} />
+      {/* <EuiFlexItem grow={false}>*/}
+      {/*  <EuiSuperSelect*/}
+      {/*    options={searchSizeOptions}*/}
+      {/*    valueOfSelected={String(samplerShardSize)}*/}
+      {/*    onChange={(value) => setSamplerShardSize(+value)}*/}
+      {/*    aria-label={i18n.translate('xpack.ml.datavisualizer.searchPanel.sampleSizeAriaLabel', {*/}
+      {/*      defaultMessage: 'Field Name',*/}
+      {/*    })}*/}
+      {/*    data-test-subj="mlDataVisualizerFieldNameSelect"*/}
+      {/*  />*/}
+      {/* </EuiFlexItem>*/}
+      {/* <EuiFlexItem grow={false}>*/}
+      {/*  <EuiSuperSelect*/}
+      {/*    options={searchSizeOptions}*/}
+      {/*    valueOfSelected={String(samplerShardSize)}*/}
+      {/*    onChange={(value) => setSamplerShardSize(+value)}*/}
+      {/*    aria-label={i18n.translate('xpack.ml.datavisualizer.searchPanel.sampleSizeAriaLabel', {*/}
+      {/*      defaultMessage: 'Field type',*/}
+      {/*    })}*/}
+      {/*    data-test-subj="mlDataVisualizerFieldTypeSelect"*/}
+      {/*  />*/}
+      {/* </EuiFlexItem>*/}
+
       <EuiFlexItem grow={false} />
     </EuiFlexGroup>
   );

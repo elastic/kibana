@@ -19,8 +19,10 @@ import {
   EuiPageContentHeaderSection,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   IFieldType,
   KBN_FIELD_TYPES,
@@ -680,6 +682,27 @@ export const Page: FC = () => {
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <EuiPanel>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      <FormattedMessage
+                        id="xpack.ml.datavisualizer.searchPanel.totalDocCountLabel"
+                        defaultMessage="Total documents: {strongTotalCount}"
+                        values={{
+                          strongTotalCount: (
+                            <strong data-test-subj="mlDataVisualizerTotalDocCount">
+                              <FormattedMessage
+                                id="xpack.ml.datavisualizer.searchPanel.totalDocCountNumber"
+                                defaultMessage="{totalCount, plural, one {#} other {#}}"
+                                values={{ totalCount: overallStats.totalCount }}
+                              />
+                            </strong>
+                          ),
+                        }}
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiSpacer size={'m'} />
+
                   <SearchPanel
                     indexPattern={currentIndexPattern}
                     searchString={searchString}
@@ -690,7 +713,8 @@ export const Page: FC = () => {
                     setSearchQueryLanguage={setSearchQueryLanguage}
                     samplerShardSize={samplerShardSize}
                     setSamplerShardSize={setSamplerShardSize}
-                    totalCount={overallStats.totalCount}
+                    overallStats={overallStats}
+                    indexedFieldTypes={indexedFieldTypes}
                   />
                   <EuiHorizontalRule />
                   <EuiFlexGroup gutterSize="m">
