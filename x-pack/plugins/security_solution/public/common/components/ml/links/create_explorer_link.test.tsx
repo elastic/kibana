@@ -21,10 +21,11 @@ describe('create_explorer_link', () => {
 
   test('it returns expected link', async () => {
     const ml = { urlGenerator: new MlUrlGenerator({ appBasePath: '/app/ml', useHash: false }) };
+    const http = { basePath: { get: jest.fn(() => {}) } };
 
     await act(async () => {
       const { findByText } = render(
-        <KibanaContextProvider services={{ ml }}>
+        <KibanaContextProvider services={{ ml, http }}>
           <ExplorerLink
             linkName={'Open in Anomaly Explorer'}
             startDate={'1970'}

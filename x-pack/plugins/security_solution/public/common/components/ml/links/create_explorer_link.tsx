@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
 import { Anomaly } from '../types';
 import { useKibana } from '../../../lib/kibana';
+import { useMlHref } from '../../../../../../ml/public';
 
 interface ExplorerLinkProps {
   score: Anomaly;
@@ -22,40 +23,26 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
   endDate,
   linkName,
 }) => {
-  const urlGenerator = useKibana().services.ml?.urlGenerator;
-  const [explorerUrl, setExplorerUrl] = useState('');
+  const {
+    services: { ml, http },
+  } = useKibana();
 
-  useEffect(() => {
-    let unmount = false;
-    if (!urlGenerator) return;
-
-    urlGenerator
-      .createUrl({
-        page: 'explorer',
-        pageState: {
-          jobIds: [score.jobId],
-          timeRange: {
-            from: new Date(startDate).toISOString(),
-            to: new Date(endDate).toISOString(),
-            mode: 'absolute',
-          },
-          refreshInterval: {
-            pause: true,
-            value: 0,
-            display: 'Off',
-          },
-        },
-      })
-      .then((url) => {
-        if (!unmount) {
-          setExplorerUrl(url);
-        }
-      });
-
-    return () => {
-      unmount = true;
-    };
-  }, [urlGenerator, startDate, endDate, score]);
+  const explorerUrl = useMlHref(ml, http.basePath.get(), {
+    page: 'explorer',
+    pageState: {
+      jobIds: [score.jobId],
+      timeRange: {
+        from: new Date(startDate).toISOString(),
+        to: new Date(endDate).toISOString(),
+        mode: 'absolute',
+      },
+      refreshInterval: {
+        pause: true,
+        value: 0,
+        display: 'Off',
+      },
+    },
+  });
 
   if (!explorerUrl) return null;
 
