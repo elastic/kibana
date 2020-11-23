@@ -457,7 +457,8 @@ of buckets to try to represent.
 Enables the new charts library for area, line, and bar charts in visualization panels. Does *not* support the split chart aggregation.
 
 [[visualization-colormapping]]`visualization:colorMapping`::
-Maps values to specified colors in visualizations.
+**This setting is deprecated and will not be supported as of 8.0.**
+Maps values to specific colors in *Visualize* charts and *TSVB*. This setting does not apply to *Lens*.
 
 [[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
 The opacity of the chart items that are dimmed when highlighting another element
