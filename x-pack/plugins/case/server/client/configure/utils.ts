@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorMappingsAttributes, ConnectorTypes, Field } from '../../../common/api/connectors';
+import {
+  ConnectorMappingsAttributes,
+  ConnectorTypes,
+  ConnectorField,
+} from '../../../common/api/connectors';
 import {
   JiraGetFieldsResponse,
   ResilientGetFieldsResponse,
@@ -12,11 +16,11 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../actions/server/types';
 
-export const formatFields = (theData: unknown, theType: string): Field[] => {
+export const formatFields = (theData: unknown, theType: string): ConnectorField[] => {
   switch (theType) {
     case ConnectorTypes.jira:
       const jiraFields = theData as JiraGetFieldsResponse;
-      return Object.keys(jiraFields).reduce<Field[]>(
+      return Object.keys(jiraFields).reduce<ConnectorField[]>(
         (acc, data) =>
           jiraFields[data].schema.type === 'string'
             ? [
@@ -33,7 +37,7 @@ export const formatFields = (theData: unknown, theType: string): Field[] => {
       );
     case ConnectorTypes.resilient:
       const resilientFields = theData as ResilientGetFieldsResponse;
-      return resilientFields.reduce<Field[]>(
+      return resilientFields.reduce<ConnectorField[]>(
         (acc, data) =>
           (data.input_type === 'textarea' || data.input_type === 'text') && !data.read_only
             ? [
@@ -50,7 +54,7 @@ export const formatFields = (theData: unknown, theType: string): Field[] => {
       );
     case ConnectorTypes.servicenow:
       const snFields = theData as ServiceNowGetFieldsResponse;
-      return snFields.reduce<Field[]>(
+      return snFields.reduce<ConnectorField[]>(
         (acc, data) => [
           ...acc,
           {
@@ -67,20 +71,22 @@ export const formatFields = (theData: unknown, theType: string): Field[] => {
   }
 };
 export const createDefaultMapping = (
-  fields: Field[],
+  fields: ConnectorField[],
   theType: string
 ): ConnectorMappingsAttributes[] => {
   let titleTarget =
     (
-      fields.find((field: Field) => field.type === 'text' && field.required) ??
-      fields.find((field: Field) => field.type === 'text')
+      fields.find((field: ConnectorField) => field.type === 'text' && field.required) ??
+      fields.find((field: ConnectorField) => field.type === 'text')
     )?.id ?? '';
-  let remainingFields = fields.filter((field: Field) => field.id !== titleTarget);
+  let remainingFields = fields.filter((field: ConnectorField) => field.id !== titleTarget);
   let descriptionTarget =
     (
-      remainingFields.find((field: Field) => field.type === 'textarea' && field.required) ??
-      remainingFields.find((field: Field) => field.type === 'textarea') ??
-      remainingFields.find((field: Field) => field.type === 'text')
+      remainingFields.find(
+        (field: ConnectorField) => field.type === 'textarea' && field.required
+      ) ??
+      remainingFields.find((field: ConnectorField) => field.type === 'textarea') ??
+      remainingFields.find((field: ConnectorField) => field.type === 'text')
     )?.id ?? '';
 
   let preferredTitle: string = '';
@@ -97,21 +103,25 @@ export const createDefaultMapping = (
   }
   if (preferredTitle.length > 0 && preferredDescription.length > 0) {
     if (titleTarget !== preferredTitle) {
-      const currentT = fields.find((field: Field) => field.id === titleTarget);
-      const preferredT = fields.find((field: Field) => field.id === preferredTitle);
+      const currentT = fields.find((field: ConnectorField) => field.id === titleTarget);
+      const preferredT = fields.find((field: ConnectorField) => field.id === preferredTitle);
       if (preferredT != null && !(currentT?.required && !preferredT.required)) {
         titleTarget = preferredTitle;
-        remainingFields = fields.filter((field: Field) => field.id !== preferredTitle);
+        remainingFields = fields.filter((field: ConnectorField) => field.id !== preferredTitle);
         descriptionTarget =
           (
-            remainingFields.find((field: Field) => field.type === 'textarea' && field.required) ??
-            remainingFields.find((field: Field) => field.type === 'textarea') ??
-            remainingFields.find((field: Field) => field.type === 'text')
+            remainingFields.find(
+              (field: ConnectorField) => field.type === 'textarea' && field.required
+            ) ??
+            remainingFields.find((field: ConnectorField) => field.type === 'textarea') ??
+            remainingFields.find((field: ConnectorField) => field.type === 'text')
           )?.id ?? '';
       }
       if (descriptionTarget !== preferredDescription) {
-        const currentD = fields.find((field: Field) => field.id === descriptionTarget);
-        const preferredD = fields.find((field: Field) => field.id === preferredDescription);
+        const currentD = fields.find((field: ConnectorField) => field.id === descriptionTarget);
+        const preferredD = fields.find(
+          (field: ConnectorField) => field.id === preferredDescription
+        );
         if (preferredD != null && !(currentD?.required && !preferredD.required)) {
           descriptionTarget = preferredDescription;
         }

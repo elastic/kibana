@@ -448,7 +448,7 @@ describe('Case Configuration API', () => {
     });
     const connectorId = 'connectorId';
     test('check url, method, signal', async () => {
-      await pushToService(connectorId, casePushParams, abortCtrl.signal);
+      await pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`/api/actions/action/${connectorId}/_execute`, {
         method: 'POST',
         body: JSON.stringify({
@@ -459,7 +459,12 @@ describe('Case Configuration API', () => {
     });
 
     test('happy path', async () => {
-      const resp = await pushToService(connectorId, casePushParams, abortCtrl.signal);
+      const resp = await pushToService(
+        connectorId,
+        ConnectorTypes.jira,
+        casePushParams,
+        abortCtrl.signal
+      );
       expect(resp).toEqual(serviceConnector);
     });
 
@@ -472,7 +477,7 @@ describe('Case Configuration API', () => {
         message: 'not it',
       });
       await expect(
-        pushToService(connectorId, casePushParams, abortCtrl.signal)
+        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
 
@@ -484,7 +489,7 @@ describe('Case Configuration API', () => {
         message: theError,
       });
       await expect(
-        pushToService(connectorId, casePushParams, abortCtrl.signal)
+        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
 
@@ -495,7 +500,7 @@ describe('Case Configuration API', () => {
         status: 'error',
       });
       await expect(
-        pushToService(connectorId, casePushParams, abortCtrl.signal)
+        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
   });

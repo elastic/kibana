@@ -21,15 +21,8 @@ import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
 } from '../helpers';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../../../actions/server/saved_objects';
 
-export function initPostCaseConfigure({
-  caseConfigureService,
-  caseService,
-  connectorMappingsService,
-  router,
-}: RouteDeps) {
+export function initPostCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.post(
     {
       path: CASE_CONFIGURE_URL,
@@ -76,47 +69,19 @@ export function initPostCaseConfigure({
             updated_by: null,
           },
         });
-
-        const myConnectorMappings = await connectorMappingsService.find({
-          client,
-          options: {
-            hasReference: {
-              type: ACTION_SAVED_OBJECT_TYPE,
-              id: query.connector.id,
-            },
-          },
+        const mappings = await caseClient.getMappings({
+          actionsClient,
+          caseClient,
+          connectorId: query.connector.id,
+          connectorType: query.connector.type,
         });
-        let theMapping;
-        // Create connector mappings if there are none
-        if (myConnectorMappings.total === 0) {
-          const res = await caseClient.getFields({
-            actionsClient,
-            connectorId: query.connector.id,
-            connectorType: query.connector.type,
-          });
-          theMapping = await connectorMappingsService.post({
-            client,
-            attributes: {
-              mappings: res.defaultMappings,
-            },
-            references: [
-              {
-                type: ACTION_SAVED_OBJECT_TYPE,
-                name: `associated-${ACTION_SAVED_OBJECT_TYPE}`,
-                id: query.connector.id,
-              },
-            ],
-          });
-        } else {
-          theMapping = myConnectorMappings.saved_objects[0];
-        }
 
         return response.ok({
           body: CaseConfigureResponseRt.encode({
             ...post.attributes,
             // Reserve for future implementations
             connector: transformESConnectorToCaseConnector(post.attributes.connector),
-            mappings: theMapping ? theMapping.attributes.mappings : [],
+            mappings,
             version: post.version ?? '',
           }),
         });

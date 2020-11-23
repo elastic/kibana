@@ -21,7 +21,7 @@ export const mappings: CaseConnectorMapping[] = [
   {
     source: 'description',
     target: 'description',
-    actionType: 'append',
+    actionType: 'overwrite',
   },
   {
     source: 'comments',

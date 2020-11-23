@@ -3,11 +3,30 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
 import * as rt from 'io-ts';
-import { ServiceConnectorBasicCaseParamsRt } from '../cases';
 import { ElasticUser } from '../../../../security_solution/public/cases/containers/types';
-import { ExecutorSubActionPushParams } from '../../../../actions/server/builtin_action_types/jira/types';
-import { CaseConnectorMapping } from '../../../../security_solution/public/cases/containers/configure/types';
+import {
+  PushToServiceApiParams as JiraPushToServiceApiParams,
+  Incident as JiraIncident,
+} from '../../../../actions/server/builtin_action_types/jira/types';
+import {
+  PushToServiceApiParams as ResilientPushToServiceApiParams,
+  Incident as ResilientIncident,
+} from '../../../../actions/server/builtin_action_types/resilient/types';
+import {
+  PushToServiceApiParams as ServiceNowPushToServiceApiParams,
+  Incident as ServiceNowIncident,
+} from '../../../../actions/server/builtin_action_types/servicenow/types';
+// import { ServiceConnectorBasicCaseParamsRt } from '../cases';
+
+export type Incident = JiraIncident | ResilientIncident | ServiceNowIncident;
+export type PushToServiceApiParams =
+  | JiraPushToServiceApiParams
+  | ResilientPushToServiceApiParams
+  | ServiceNowPushToServiceApiParams;
 
 const ActionTypeRT = rt.union([
   rt.literal('append'),
@@ -25,9 +44,9 @@ export type CaseField = rt.TypeOf<typeof CaseFieldRT>;
 export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRT>;
 
 export const ConnectorMappingsAttributesRT = rt.type({
+  action_type: ActionTypeRT,
   source: CaseFieldRT,
   target: ThirdPartyFieldRT,
-  action_type: ActionTypeRT,
 });
 export const ConnectorMappingsRt = rt.type({
   mappings: rt.array(ConnectorMappingsAttributesRT),
@@ -37,13 +56,13 @@ export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
 
 const FieldTypeRT = rt.union([rt.literal('text'), rt.literal('textarea')]);
 
-const FieldRt = rt.type({
+const ConnectorFieldRt = rt.type({
   id: rt.string,
   name: rt.string,
   required: rt.boolean,
   type: FieldTypeRT,
 });
-export type Field = rt.TypeOf<typeof FieldRt>;
+export type ConnectorField = rt.TypeOf<typeof ConnectorFieldRt>;
 export const ConnectorRequestParamsRt = rt.type({
   connector_id: rt.string,
 });
@@ -51,51 +70,71 @@ export const GetFieldsRequestQueryRt = rt.type({
   connector_type: rt.string,
 });
 const GetFieldsResponseRt = rt.type({
-  fields: rt.array(FieldRt),
   defaultMappings: rt.array(ConnectorMappingsAttributesRT),
+  fields: rt.array(ConnectorFieldRt),
 });
 export type GetFieldsResponse = rt.TypeOf<typeof GetFieldsResponseRt>;
 
-/////////////////////////////////////////////////////////////////////////////
-
-export const PostPushRequestRt = rt.type({
-  mappings: rt.array(ConnectorMappingsAttributesRT),
-  params: ServiceConnectorBasicCaseParamsRt,
-});
+///////////////////////////////////////////////////////////////////////
 
 export type ExternalServiceParams = Record<string, unknown>;
 
 export interface PipedField {
-  key: string;
-  value: string;
   actionType: string;
+  key: string;
   pipes: string[];
+  value: string;
 }
 export interface PrepareFieldsForTransformArgs {
-  externalCase: Record<string, string>;
-  mappings: CaseConnectorMapping[];
   defaultPipes?: string[];
+  externalCase: Record<string, string>;
+  mappings: ConnectorMappingsAttributes[];
 }
 export interface EntityInformation {
-  createdAt: string;
-  createdBy: ElasticUser;
-  updatedAt: string;
-  updatedBy: ElasticUser;
+  createdAt: string | null;
+  createdBy: ElasticUser | null;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
 }
 export interface TransformerArgs {
-  value: string;
   date?: string;
-  user?: string;
   previousValue?: string;
+  user?: string;
+  value: string;
 }
 
 export type Transformer = (args: TransformerArgs) => TransformerArgs;
 export interface TransformFieldsArgs<P, S> {
-  params: P;
-  fields: PipedField[];
   currentIncident?: S;
+  fields: PipedField[];
+  params: P;
 }
-export type Incident = Pick<
-  ExecutorSubActionPushParams,
-  'description' | 'priority' | 'labels' | 'issueType' | 'parent'
-> & { summary: string };
+export const ConnectorUserParams = rt.type({
+  fullName: rt.union([rt.string, rt.null]),
+  username: rt.string,
+});
+
+export const ConnectorCommentParamsRt = rt.type({
+  commentId: rt.string,
+  comment: rt.string,
+  createdAt: rt.string,
+  createdBy: ConnectorUserParams,
+  updatedAt: rt.union([rt.string, rt.null]),
+  updatedBy: rt.union([ConnectorUserParams, rt.null]),
+});
+
+export const ConnectorBasicCaseParamsRt = rt.type({
+  comments: rt.union([rt.array(ConnectorCommentParamsRt), rt.null]),
+  createdAt: rt.string,
+  createdBy: ConnectorUserParams,
+  description: rt.union([rt.string, rt.null]),
+  externalId: rt.union([rt.string, rt.null]),
+  savedObjectId: rt.string,
+  title: rt.string,
+  updatedAt: rt.union([rt.string, rt.null]),
+  updatedBy: rt.union([ConnectorUserParams, rt.null]),
+});
+export const PostPushRequestRt = rt.type({
+  connector_type: rt.string,
+  params: ConnectorBasicCaseParamsRt,
+});

@@ -9,6 +9,7 @@ import { create } from './cases/create';
 import { update } from './cases/update';
 import { addComment } from './comments/add';
 import { getFields } from './configure/fields';
+import { getMappings } from './configure/mappings';
 
 export { CaseClient } from './types';
 
@@ -46,5 +47,13 @@ export const createCaseClient = ({
       userActionService,
     }),
     getFields: getFields(),
+    getMappings: getMappings({
+      caseConfigureService,
+      caseService,
+      connectorMappingsService,
+      request,
+      savedObjectsClient,
+      userActionService,
+    }),
   };
 };

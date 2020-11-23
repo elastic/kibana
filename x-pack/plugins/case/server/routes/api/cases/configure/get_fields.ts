@@ -37,7 +37,7 @@ export function initCaseConfigureGetFields({ router }: RouteDeps) {
           fold(throwErrors(Boom.badRequest), identity)
         );
         const params = pipe(
-          ConnectorRequestParamsRt.decode(query.params),
+          ConnectorRequestParamsRt.decode(request.params),
           fold(throwErrors(Boom.badRequest), identity)
         );
 

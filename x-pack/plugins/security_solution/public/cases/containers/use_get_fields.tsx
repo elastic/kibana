@@ -9,10 +9,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getFields } from './api';
 import * as i18n from './translations';
-import { Field } from '../../../../case/common/api';
+import { ConnectorField } from '../../../../case/common/api';
 
 interface FieldsState {
-  fields: Field[];
+  fields: ConnectorField[];
   isLoading: boolean;
   isError: boolean;
 }

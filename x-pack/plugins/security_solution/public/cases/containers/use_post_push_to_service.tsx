@@ -101,6 +101,7 @@ export const usePostPushToService = (): UsePostPushToService => {
         const casePushData = await getCase(caseId, true, abortCtrl.signal);
         const responseService = await pushToService(
           connector.id,
+          connector.type,
           formatServiceRequestData(casePushData, connector, caseServices),
           abortCtrl.signal
         );

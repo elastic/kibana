@@ -6,30 +6,60 @@
 import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
+  ConnectorMappingsAttributes,
+  ConnectorTypes,
   EntityInformation,
+  ExternalServiceParams,
+  Incident,
   PipedField,
   PrepareFieldsForTransformArgs,
+  PushToServiceApiParams,
   Transformer,
   TransformerArgs,
   TransformFieldsArgs,
 } from '../../../../../common/api';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionsClient } from '../../../../../../actions/server/actions_client';
 
-const formatMappings = async (
+export const mapFields = async (
+  actionsClient: ActionsClient,
   connectorId: string,
-  mapping: CaseConnectorMapping[],
-  params: PushToServiceApiParams,
-  signal: AbortSignal
+  connectorType: string,
+  mappings: ConnectorMappingsAttributes[],
+  params: PushToServiceApiParams
 ) => {
+  console.log(
+    'mapFields',
+    JSON.stringify({
+      connectorId,
+      connectorType,
+      mappings,
+      params,
+    })
+  );
   const { externalId } = params;
   const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
-
+  let thirdPartyName;
+  if (connectorType === ConnectorTypes.jira) {
+    thirdPartyName = 'Jira';
+  } else if (connectorType === ConnectorTypes.resilient) {
+    thirdPartyName = 'Resilient';
+  } else if (connectorType === ConnectorTypes.servicenow) {
+    thirdPartyName = 'ServiceNow';
+  }
   if (externalId) {
     try {
-      currentIncident = await getIncident(connectorId, externalId, signal);
+      currentIncident = ((await actionsClient.execute({
+        actionId: connectorId,
+        params: {
+          subAction: 'getIncident',
+          subActionParams: params,
+        },
+      })) as unknown) as ExternalServiceParams | undefined;
     } catch (ex) {
       throw new Error(
-        `Retrieving Incident by id ${externalId} from Jira failed with exception: ${ex}`
+        `Retrieving Incident by id ${externalId} from ${thirdPartyName} failed with exception: ${ex}`
       );
     }
   }
@@ -51,20 +81,23 @@ const formatMappings = async (
       fields,
       currentIncident,
     });
-
-    const { priority, labels, issueType, parent } = params;
-    incident = {
-      summary: transformedFields.summary,
-      description: transformedFields.description,
-      priority,
-      labels,
-      issueType,
-      parent,
-    };
-  } else {
-    const { title, description, priority, labels, issueType, parent } = params;
-    incident = { summary: title, description, priority, labels, issueType, parent };
+    console.log('INCIDENT FIELDS', JSON.stringify({ fields, transformedFields }));
+    incident = { fields, transformedFields };
   }
+  return incident;
+  //   const { priority, labels, issueType, parent } = params;
+  //   incident = {
+  //     summary: transformedFields.summary,
+  //     description: transformedFields.description,
+  //     priority,
+  //     labels,
+  //     issueType,
+  //     parent,
+  //   };
+  // } else {
+  //   const { title, description, priority, labels, issueType, parent } = params;
+  //   incident = { summary: title, description, priority, labels, issueType, parent };
+  // }
 };
 
 export const getEntity = (entity: EntityInformation): string =>
@@ -83,17 +116,28 @@ export const prepareFieldsForTransformation = ({
   mappings,
   defaultPipes = ['informationCreated'],
 }: PrepareFieldsForTransformArgs): PipedField[] => {
-  return Object.keys(externalCase)
-    .filter((p) => mappings.get(p)?.actionType != null && mappings.get(p)?.actionType !== 'nothing')
-    .map((p) => {
-      const actionType = mappings.get(p)?.actionType ?? 'nothing';
-      return {
-        key: p,
-        value: externalCase[p],
-        actionType,
-        pipes: actionType === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
-      };
-    });
+  console.log(
+    'prepareFieldsForTransformation',
+    JSON.stringify({
+      externalCase,
+      mappings,
+      defaultPipes,
+    })
+  );
+  return [];
+  // return Object.keys(externalCase)
+  //   .filter(
+  //     (p) => mappings.get(p)?.action_type != null && mappings.get(p)?.action_type !== 'nothing'
+  //   )
+  //   .map((p) => {
+  //     const action_type = mappings.get(p)?.action_type ?? 'nothing';
+  //     return {
+  //       key: p,
+  //       value: externalCase[p],
+  //       actionType: action_type,
+  //       pipes: action_type === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
+  //     };
+  //   });
 };
 export const FIELD_INFORMATION = (
   mode: string,

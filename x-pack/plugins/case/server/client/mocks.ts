@@ -18,10 +18,11 @@ import { createCaseClient } from '.';
 
 export type CaseClientMock = jest.Mocked<CaseClient>;
 export const createCaseClientMock = (): CaseClientMock => ({
-  create: jest.fn(),
-  update: jest.fn(),
   addComment: jest.fn(),
+  create: jest.fn(),
   getFields: jest.fn(),
+  getMappings: jest.fn(),
+  update: jest.fn(),
 });
 
 export const createCaseClientWithMockSavedObjectsClient = async (

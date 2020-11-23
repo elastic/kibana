@@ -12,6 +12,7 @@ import {
   CasesPatchRequest,
   CasesResponse,
   CommentRequest,
+  ConnectorMappingsAttributes,
   GetFieldsResponse,
 } from '../../common/api';
 import {
@@ -51,5 +52,13 @@ export interface CaseClient {
   addComment: (args: CaseClientAddComment) => Promise<CaseResponse>;
   create: (args: CaseClientCreate) => Promise<CaseResponse>;
   getFields: (args: ConfigureFields) => Promise<GetFieldsResponse>;
+  getMappings: (args: MappingsClient) => Promise<ConnectorMappingsAttributes[]>;
   update: (args: CaseClientUpdate) => Promise<CasesResponse>;
+}
+
+export interface MappingsClient {
+  actionsClient: ActionsClient;
+  caseClient: CaseClient;
+  connectorId: string;
+  connectorType: string;
 }

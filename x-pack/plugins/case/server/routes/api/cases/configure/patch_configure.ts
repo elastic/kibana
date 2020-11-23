@@ -13,6 +13,7 @@ import {
   CasesConfigurePatchRt,
   CaseConfigureResponseRt,
   throwErrors,
+  ConnectorMappingsAttributes,
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
@@ -21,15 +22,8 @@ import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,
 } from '../helpers';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../../../actions/server/saved_objects';
 
-export function initPatchCaseConfigure({
-  caseConfigureService,
-  caseService,
-  connectorMappingsService,
-  router,
-}: RouteDeps) {
+export function initPatchCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.patch(
     {
       path: CASE_CONFIGURE_URL,
@@ -40,14 +34,6 @@ export function initPatchCaseConfigure({
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
-        if (!context.case) {
-          throw Boom.badRequest('RouteHandlerContext is not registered for cases');
-        }
-        const caseClient = context.case.getCaseClient();
-        const actionsClient = await context.actions?.getActionsClient();
-        if (actionsClient == null) {
-          throw Boom.notFound('Action client have not been found');
-        }
         const query = pipe(
           CasesConfigurePatchRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
@@ -83,40 +69,22 @@ export function initPatchCaseConfigure({
             updated_by: { email, full_name, username },
           },
         });
-        let theMapping;
+        let mappings: ConnectorMappingsAttributes[] = [];
         if (connector != null) {
-          const myConnectorMappings = await connectorMappingsService.find({
-            client,
-            options: {
-              hasReference: {
-                type: ACTION_SAVED_OBJECT_TYPE,
-                id: connector.id,
-              },
-            },
-          });
-          // Create connector mappings if there are none
-          if (myConnectorMappings.total === 0) {
-            const res = await caseClient.getFields({
-              actionsClient,
-              connectorId: connector.id,
-              connectorType: connector.type,
-            });
-            theMapping = await connectorMappingsService.post({
-              client,
-              attributes: {
-                mappings: res.defaultMappings,
-              },
-              references: [
-                {
-                  type: ACTION_SAVED_OBJECT_TYPE,
-                  name: `associated-${ACTION_SAVED_OBJECT_TYPE}`,
-                  id: connector.id,
-                },
-              ],
-            });
-          } else {
-            theMapping = myConnectorMappings.saved_objects[0];
+          if (!context.case) {
+            throw Boom.badRequest('RouteHandlerContext is not registered for cases');
           }
+          const caseClient = context.case.getCaseClient();
+          const actionsClient = await context.actions?.getActionsClient();
+          if (actionsClient == null) {
+            throw Boom.notFound('Action client have not been found');
+          }
+          mappings = await caseClient.getMappings({
+            actionsClient,
+            caseClient,
+            connectorId: connector.id,
+            connectorType: connector.type,
+          });
         }
 
         return response.ok({
@@ -126,7 +94,7 @@ export function initPatchCaseConfigure({
             connector: transformESConnectorToCaseConnector(
               patch.attributes.connector ?? myCaseConfigure.saved_objects[0].attributes.connector
             ),
-            mappings: theMapping ? theMapping.attributes.mappings : [],
+            mappings,
             version: patch.version ?? '',
           }),
         });

@@ -119,7 +119,7 @@ export const CasesResponseRt = rt.array(CaseResponseRt);
 
 // TODO: Refactor to support multiple connectors with various fields
 
-const ServiceConnectorUserParams = rt.type({
+export const ServiceConnectorUserParams = rt.type({
   fullName: rt.union([rt.string, rt.null]),
   username: rt.string,
 });
@@ -132,7 +132,6 @@ export const ServiceConnectorCommentParamsRt = rt.type({
   updatedAt: rt.union([rt.string, rt.null]),
   updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
 });
-
 export const ServiceConnectorBasicCaseParamsRt = rt.type({
   comments: rt.union([rt.array(ServiceConnectorCommentParamsRt), rt.null]),
   createdAt: rt.string,
@@ -182,7 +181,6 @@ export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceReq
 export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCaseParamsRt>;
 export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
-export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;
 
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
 export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
