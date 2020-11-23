@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { Dashboard404 } from './dashboard_404';
 export { DashboardListing } from './dashboard_listing';
