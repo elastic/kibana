@@ -8,11 +8,15 @@ import moment from 'moment';
 // @ts-expect-error
 import { calculateAuto } from './calculate_auto';
 
-export function getBucketSize(
-  start: number,
-  end: number,
-  numBuckets: number = 100
-) {
+export function getBucketSize({
+  start,
+  end,
+  numBuckets = 100,
+}: {
+  start: number;
+  end: number;
+  numBuckets?: number;
+}) {
   const duration = moment.duration(end - start, 'ms');
   const bucketSize = Math.max(
     calculateAuto.near(numBuckets, duration).asSeconds(),

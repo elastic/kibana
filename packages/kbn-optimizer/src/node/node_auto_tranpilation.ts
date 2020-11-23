@@ -39,7 +39,7 @@ import Crypto from 'crypto';
 
 import * as babel from '@babel/core';
 import { addHook } from 'pirates';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/dev-utils';
 import sourceMapSupport from 'source-map-support';
 
 import { Cache } from './cache';
@@ -134,7 +134,13 @@ export function registerNodeAutoTranspilation() {
   installed = true;
 
   const cache = new Cache({
+    dir: Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH),
     prefix: determineCachePrefix(),
+    log: process.env.DEBUG_NODE_TRANSPILER_CACHE
+      ? Fs.createWriteStream(Path.resolve(REPO_ROOT, 'node_auto_transpilation_cache.log'), {
+          flags: 'a',
+        })
+      : undefined,
   });
 
   sourceMapSupport.install({

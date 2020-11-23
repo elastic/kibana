@@ -7,7 +7,6 @@
 import { mount, shallow } from 'enzyme';
 import { set } from '@elastic/safer-lodash-set/fp';
 import React from 'react';
-import { ActionCreator } from 'typescript-fsa';
 import '../../../common/mock/react_beautiful_dnd';
 
 import {
@@ -20,9 +19,20 @@ import {
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
+import * as timelineActions from '../../store/timeline/actions';
 
-import { Flyout, FlyoutComponent } from '.';
+import { Flyout } from '.';
 import { FlyoutButton } from './button';
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 jest.mock('../timeline', () => ({
   // eslint-disable-next-line react/display-name
@@ -34,6 +44,10 @@ const usersViewing = ['elastic'];
 describe('Flyout', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
+
+  beforeEach(() => {
+    mockDispatch.mockClear();
+  });
 
   describe('rendering', () => {
     test('it renders correctly against snapshot', () => {
@@ -162,23 +176,15 @@ describe('Flyout', () => {
     });
 
     test('should call the onOpen when the mouse is clicked for rendering', () => {
-      const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
       const wrapper = mount(
         <TestProviders>
-          <FlyoutComponent
-            dataProviders={mockDataProviders}
-            show={false}
-            showTimeline={showTimeline}
-            timelineId="test"
-            width={100}
-            usersViewing={usersViewing}
-          />
+          <Flyout timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
       wrapper.find('[data-test-subj="flyoutOverlay"]').first().simulate('click');
 
-      expect(showTimeline).toBeCalled();
+      expect(mockDispatch).toBeCalledWith(timelineActions.showTimeline({ id: 'test', show: true }));
     });
   });
 

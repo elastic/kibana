@@ -115,6 +115,12 @@ For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 _Note: Run the following commands from `kibana/`._
 
+### Typescript
+
+```
+yarn tsc --noEmit --project x-pack/tsconfig.json --skipLibCheck
+```
+
 ### Prettier
 
 ```

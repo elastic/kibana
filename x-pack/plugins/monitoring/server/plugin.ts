@@ -30,11 +30,8 @@ import {
   SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
 import { MonitoringConfig, createConfig, configSchema } from './config';
-// @ts-ignore
 import { requireUIRoutes } from './routes';
-// @ts-ignore
 import { initBulkUploader } from './kibana_monitoring';
-// @ts-ignore
 import { initInfraSource } from './lib/logs/init_infra_source';
 import { mbSafeQuery } from './lib/mb_safe_query';
 import { instantiateClient } from './es_client/instantiate_client';
@@ -74,7 +71,7 @@ export class Plugin {
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
-  private bulkUploader: IBulkUploader = {} as IBulkUploader;
+  private bulkUploader: IBulkUploader | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -173,6 +170,7 @@ export class Plugin {
       elasticsearch: core.elasticsearch,
       config,
       log: kibanaMonitoringLog,
+      opsMetrics$: core.metrics.getOpsMetrics$(),
       statusGetter$: core.status.overall$,
       kibanaStats: {
         uuid: this.initializerContext.env.instanceUuid,
@@ -199,7 +197,7 @@ export class Plugin {
           const monitoringBulkEnabled =
             mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
           if (monitoringBulkEnabled) {
-            bulkUploader.start(plugins.usageCollection);
+            bulkUploader.start();
           } else {
             bulkUploader.handleNotEnabled();
           }
@@ -240,7 +238,7 @@ export class Plugin {
     return {
       // OSS stats api needs to call this in order to centralize how
       // we fetch kibana specific stats
-      getKibanaStats: () => this.bulkUploader.getKibanaStats(),
+      getKibanaStats: () => bulkUploader.getKibanaStats(),
     };
   }
 
@@ -253,6 +251,7 @@ export class Plugin {
     if (this.licenseService) {
       this.licenseService.stop();
     }
+    this.bulkUploader?.stop();
   }
 
   registerPluginInUI(plugins: PluginsSetup) {
