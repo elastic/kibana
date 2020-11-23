@@ -76,8 +76,7 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 }
 
 export function Detail() {
-  // TODO: fix forced cast if possible
-  const { pkgkey, panel = DEFAULT_PANEL } = useParams() as DetailParams;
+  const { pkgkey, panel = DEFAULT_PANEL } = useParams<DetailParams>();
   const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
 
@@ -263,13 +262,14 @@ export function Detail() {
           id: panelId,
           name: display,
           isSelected: panelId === panel,
+          'data-test-subj': `tab-${panelId}`,
           href: getHref('integration_details', {
             pkgkey: `${packageInfo?.name}-${packageInfo?.version}`,
             panel: panelId,
           }),
         };
       }) as unknown) as WithHeaderLayoutProps['tabs'];
-  }, [getHref, packageInfo, panel, showCustomTab, packageInfoData]);
+  }, [getHref, packageInfo, panel, showCustomTab]);
 
   return (
     <WithHeaderLayout
