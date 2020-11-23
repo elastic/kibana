@@ -11,9 +11,9 @@ import { ServerLogActionParams } from '.././types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { resolvedActionGroupMessage } from '../../../constants';
 
-export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
-  ServerLogActionParams
->> = ({ actionParams, editAction, index, errors, messageVariables, defaultMessage }) => {
+export const ServerLogParamsFields: React.FunctionComponent<
+  ActionParamsProps<ServerLogActionParams>
+> = ({ actionParams, editAction, index, errors, messageVariables, defaultMessage }) => {
   const { message, level } = actionParams;
   const levelOptions = [
     { value: 'trace', text: 'Trace' },
