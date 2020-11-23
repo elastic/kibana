@@ -19,7 +19,6 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { get } from 'lodash';
-import { string } from 'joi';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 // @ts-expect-error no ts
@@ -195,7 +194,6 @@ export const hasFilterKeyError = (
   types: string[],
   indexMapping: IndexMapping
 ): string | null => {
-  // console.log('hasFilterKeyError', indexMapping, key)
   if (key == null) {
     return `The key is empty and needs to be wrapped by a saved object type like ${types.join()}`;
   }
