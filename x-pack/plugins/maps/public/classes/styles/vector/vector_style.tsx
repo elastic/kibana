@@ -83,8 +83,8 @@ export interface IVectorStyle extends IStyle {
   getStyleMeta(): StyleMeta;
   getDescriptorWithUpdatedStyleProps(
     nextFields: IField[],
-    mapColors: string[],
-    oldFields: IField[]
+    oldFields: IField[],
+    mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
   isTimeAware: () => boolean;
@@ -172,14 +172,12 @@ export class VectorStyle implements IVectorStyle {
     return getDefaultStaticProperties(mapColors);
   }
 
-  static async updateFieldsInDescriptor(
+  async _updateFieldsInDescriptor(
     currentFields: IField[],
     styleFieldsHelper: StyleFieldsHelper,
     originalProperties: VectorStylePropertiesDescriptor,
     previousFields: IField[],
-    mapColors: string[],
-    isTimeAware: boolean,
-    dynamicProperties: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>
+    mapColors: string[]
   ) {
     const invalidDynamicProperties = (Object.keys(originalProperties) as VECTOR_STYLES[]).filter(
       (key) => {
@@ -189,7 +187,9 @@ export class VectorStyle implements IVectorStyle {
         }
 
         const matchingField = currentFields.find((field) => {
-          return dynamicOptions.field.name === field.getName();
+          return (
+            dynamicOptions && dynamicOptions.field && dynamicOptions.field.name === field.getName()
+          );
         });
         return !matchingField;
       }
@@ -205,15 +205,15 @@ export class VectorStyle implements IVectorStyle {
 
       // Check if the updated field can be assigned to any of the broken style-properties.
       for (let j = 0; j < invalidDynamicProperties.length; j++) {
-        const dynamicProperty = dynamicProperties.find(
+        const dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions> = this.getAllStyleProperties().find(
           (d) => d.getStyleName() === invalidDynamicProperties[j]
-        );
+        ) as IDynamicStyleProperty<DynamicStylePropertyOptions>;
 
         if (!dynamicProperty) {
           continue;
         }
-        let newFieldDescriptor: StylePropertyField | undefined;
 
+        let newFieldDescriptor: StylePropertyField | undefined;
         const isFieldDataTypeCompatible = styleFieldsHelper.isFieldDataTypeCompatibleWithStyleType(
           currentField,
           dynamicProperty.getStyleName()
@@ -234,29 +234,27 @@ export class VectorStyle implements IVectorStyle {
           }
         }
 
-        const originalStyleProp = originalProperties[dynamicProperty.getStyleName()];
-        originalStyleProp!.options!.field = newFieldDescriptor;
+        (originalProperties[dynamicProperty.getStyleName()]!
+          .options! as DynamicStylePropertyOptions).field = newFieldDescriptor;
       }
     }
 
     // Revert left-over invalid props to static styling, if necessary
-    return VectorStyle.deleteFieldsFromDescriptorAndUpdateStyling(
+    return this._deleteFieldsFromDescriptorAndUpdateStyling(
       currentFields,
       styleFieldsHelper,
       originalProperties,
       mapColors,
-      hasChanges,
-      isTimeAware
+      hasChanges
     );
   }
 
-  static async deleteFieldsFromDescriptorAndUpdateStyling(
+  async _deleteFieldsFromDescriptorAndUpdateStyling(
     nextFields: IField[],
     styleFieldsHelper: StyleFieldsHelper,
     originalProperties: VectorStylePropertiesDescriptor,
     mapColors: string[],
-    hasChanges: boolean,
-    isTimeAware: boolean
+    hasChanges: boolean
   ) {
     const updatedProperties = {} as VectorStylePropertiesDescriptor;
 
@@ -299,7 +297,7 @@ export class VectorStyle implements IVectorStyle {
       } as any;
 
       if ('field' in updatedProperties[key].options) {
-        delete updatedProperties[key].options.field;
+        delete (updatedProperties[key].options as DynamicStylePropertyOptions).field;
       }
     });
 
@@ -311,13 +309,13 @@ export class VectorStyle implements IVectorStyle {
             ...originalProperties,
             ...updatedProperties,
           },
-          isTimeAware
+          this.isTimeAware()
         ),
       };
     } else {
       return {
         hasChanges,
-        nextStyleDescriptor: VectorStyle.createDescriptor(originalProperties, isTimeAware),
+        nextStyleDescriptor: VectorStyle.createDescriptor(originalProperties, this.isTimeAware()),
       };
     }
   }
@@ -403,33 +401,28 @@ export class VectorStyle implements IVectorStyle {
    */
   async getDescriptorWithUpdatedStyleProps(
     currentFields: IField[],
-    mapColors: string[],
-    previousFields: IField[]
+    previousFields: IField[],
+    mapColors: string[]
   ) {
     const styleFieldsHelper = await createStyleFieldsHelper(currentFields);
-    const originalProperties = this.getRawProperties();
 
-    if (previousFields.length === currentFields.length) {
-      return await VectorStyle.updateFieldsInDescriptor(
-        currentFields,
-        styleFieldsHelper,
-        originalProperties,
-        previousFields,
-        mapColors,
-        this.isTimeAware(),
-        this.getAllStyleProperties().filter((f) => f.isDynamic())
-      );
-    } else {
-      // Metrics got added and/or deleted
-      return await VectorStyle.deleteFieldsFromDescriptorAndUpdateStyling(
-        currentFields,
-        styleFieldsHelper,
-        originalProperties,
-        mapColors,
-        false,
-        this.isTimeAware()
-      );
-    }
+    return previousFields.length === currentFields.length
+      ? // Field-config changed
+        await this._updateFieldsInDescriptor(
+          currentFields,
+          styleFieldsHelper,
+          this.getRawProperties(),
+          previousFields,
+          mapColors
+        )
+      : // Deletions or additions
+        await this._deleteFieldsFromDescriptorAndUpdateStyling(
+          currentFields,
+          styleFieldsHelper,
+          this.getRawProperties(),
+          mapColors,
+          false
+        );
   }
 
   getType() {
@@ -989,7 +982,7 @@ export class VectorStyle implements IVectorStyle {
 }
 
 function getDynamicOptions(
-  originalProperties,
+  originalProperties: VectorStylePropertiesDescriptor,
   key: VECTOR_STYLES
 ): DynamicStylePropertyOptions | null {
   if (!originalProperties[key]) {

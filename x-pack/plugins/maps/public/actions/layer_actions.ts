@@ -464,8 +464,8 @@ export function updateStyleProperties(layerId: string, previousFields: IField[])
       nextStyleDescriptor,
     } = await (style as IVectorStyle).getDescriptorWithUpdatedStyleProps(
       nextFields,
-      getMapColors(getState()),
-      previousFields
+      previousFields,
+      getMapColors(getState())
     );
     if (hasChanges && nextStyleDescriptor) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
