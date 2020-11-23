@@ -5,6 +5,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Option, MultiselectPicker } from '../../../../components/multi_select_picker';
 import { FieldTypeIcon } from '../../../../components/field_type_icon';
 
@@ -41,19 +42,19 @@ export const DatavisualizerFieldTypeFilter: FC<{
 
       return {
         name: (
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-            <div style={{ width: 20 }}>
-              {indexedFieldName && (
+          <EuiFlexGroup>
+            <EuiFlexItem grow={true}> {item.name}</EuiFlexItem>
+            {indexedFieldName && (
+              <EuiFlexItem grow={false}>
                 <FieldTypeIcon
                   type={indexedFieldName}
                   fieldName={item.name}
                   tooltipEnabled={false}
                   needsAria={true}
                 />
-              )}
-            </div>
-            {item.name}
-          </div>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         ),
       };
     });
