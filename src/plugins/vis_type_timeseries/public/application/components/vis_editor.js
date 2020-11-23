@@ -23,12 +23,10 @@ import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { VisEditorVisualization } from './vis_editor_visualization';
-import { Visualization } from './visualization';
 import { VisPicker } from './vis_picker';
 import { PanelConfig } from './panel_config';
-import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
-import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries/common/extract_index_patterns';
+import { extractIndexPatterns } from '../../../common/extract_index_patterns';
 import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
@@ -49,7 +47,6 @@ export class VisEditor extends Component {
       visFields: props.visFields,
       extractedIndexPatterns: [''],
     };
-    this.onBrush = createBrushHandler((data) => props.vis.API.events.applyFilter(data));
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 
@@ -69,12 +66,6 @@ export class VisEditor extends Component {
 
   getConfig = (...args) => {
     return this.props.config.get(...args);
-  };
-
-  handleUiState = (field, value) => {
-    this.props.vis.uiState.set(field, value);
-    // reload visualization because data might need to be re-fetched
-    this.props.vis.uiState.emit('reload');
   };
 
   updateVisState = debounce(() => {
@@ -101,16 +92,14 @@ export class VisEditor extends Component {
       dirty = false;
     }
 
-    if (this.props.isEditorMode) {
-      const extractedIndexPatterns = extractIndexPatterns(nextModel);
-      if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        fetchFields(extractedIndexPatterns).then((visFields) =>
-          this.setState({
-            visFields,
-            extractedIndexPatterns,
-          })
-        );
-      }
+    const extractedIndexPatterns = extractIndexPatterns(nextModel);
+    if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
+      fetchFields(extractedIndexPatterns).then((visFields) =>
+        this.setState({
+          visFields,
+          extractedIndexPatterns,
+        })
+      );
     }
 
     this.setState({
@@ -141,23 +130,6 @@ export class VisEditor extends Component {
   };
 
   render() {
-    if (!this.props.isEditorMode) {
-      if (!this.props.visParams || !this.props.visData) {
-        return null;
-      }
-      return (
-        <Visualization
-          dateFormat={this.props.config.get('dateFormat')}
-          onBrush={this.onBrush}
-          onUiState={this.handleUiState}
-          uiState={this.uiState}
-          model={this.props.visParams}
-          visData={this.props.visData}
-          getConfig={this.getConfig}
-        />
-      );
-    }
-
     const { model } = this.state;
 
     if (model) {
@@ -211,23 +183,12 @@ export class VisEditor extends Component {
   }
 
   componentDidMount() {
-    this.props.renderComplete();
-
-    if (this.props.isEditorMode && this.props.eventEmitter) {
-      this.props.eventEmitter.on('updateEditor', this.updateModel);
-    }
-  }
-
-  componentDidUpdate() {
-    this.props.renderComplete();
+    this.props.eventEmitter.on('updateEditor', this.updateModel);
   }
 
   componentWillUnmount() {
     this.updateVisState.cancel();
-
-    if (this.props.isEditorMode && this.props.eventEmitter) {
-      this.props.eventEmitter.off('updateEditor', this.updateModel);
-    }
+    this.props.eventEmitter.off('updateEditor', this.updateModel);
   }
 }
 
@@ -241,7 +202,6 @@ VisEditor.propTypes = {
   visFields: PropTypes.object,
   renderComplete: PropTypes.func,
   config: PropTypes.object,
-  isEditorMode: PropTypes.bool,
   savedObj: PropTypes.object,
   timeRange: PropTypes.object,
   appState: PropTypes.object,

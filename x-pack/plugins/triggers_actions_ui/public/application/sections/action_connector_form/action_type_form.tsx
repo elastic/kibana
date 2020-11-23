@@ -24,8 +24,9 @@ import {
   EuiSuperSelect,
   EuiLoadingSpinner,
   EuiBadge,
+  EuiErrorBoundary,
 } from '@elastic/eui';
-import { ResolvedActionGroup } from '../../../../../alerts/common';
+import { AlertActionParam, ResolvedActionGroup } from '../../../../../alerts/common';
 import {
   IErrorObject,
   AlertAction,
@@ -50,7 +51,7 @@ export type ActionTypeFormProps = {
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
-  setActionParamsProperty: (key: string, value: any, index: number) => void;
+  setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
 } & Pick<
@@ -254,28 +255,30 @@ export const ActionTypeForm = ({
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
-        <Suspense
-          fallback={
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          <ParamsFieldsComponent
-            actionParams={actionItem.params as any}
-            index={index}
-            errors={actionParamsErrors.errors}
-            editAction={setActionParamsProperty}
-            messageVariables={availableActionVariables}
-            defaultMessage={availableDefaultActionMessage}
-            docLinks={docLinks}
-            http={http}
-            toastNotifications={toastNotifications}
-            actionConnector={actionConnector}
-          />
-        </Suspense>
+        <EuiErrorBoundary>
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <ParamsFieldsComponent
+              actionParams={actionItem.params as any}
+              index={index}
+              errors={actionParamsErrors.errors}
+              editAction={setActionParamsProperty}
+              messageVariables={availableActionVariables}
+              defaultMessage={availableDefaultActionMessage}
+              docLinks={docLinks}
+              http={http}
+              toastNotifications={toastNotifications}
+              actionConnector={actionConnector}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
       ) : null}
     </Fragment>
   ) : (

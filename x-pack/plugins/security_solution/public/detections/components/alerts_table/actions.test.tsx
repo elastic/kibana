@@ -190,6 +190,7 @@ describe('alert actions', () => {
             eventIdToNoteIds: {},
             eventType: 'all',
             excludedRowRendererIds: [],
+            expandedEvent: {},
             filters: [
               {
                 $state: {
@@ -253,7 +254,6 @@ describe('alert actions', () => {
             templateTimelineId: null,
             templateTimelineVersion: null,
             version: null,
-            width: 1100,
           },
           to: '2018-11-05T19:03:25.937Z',
           ruleNote: '# this is some markdown documentation',

@@ -70,10 +70,12 @@ import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestStatistics as RequestStatistics_2 } from 'src/plugins/inspector/common';
 import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
-import { SavedObject } from 'src/core/server';
-import { SavedObject as SavedObject_2 } from 'src/core/public';
+import { SavedObject } from 'kibana/server';
+import { SavedObject as SavedObject_2 } from 'src/core/server';
+import { SavedObject as SavedObject_3 } from 'src/core/public';
 import { SavedObjectReference } from 'src/core/types';
 import { SavedObjectsClientContract } from 'src/core/public';
+import { SavedObjectsFindResponse } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
@@ -976,7 +978,7 @@ export interface IFieldType {
     // (undocumented)
     count?: number;
     // (undocumented)
-    customName?: string;
+    customLabel?: string;
     // (undocumented)
     displayName?: string;
     // (undocumented)
@@ -1149,9 +1151,7 @@ export class IndexPattern implements IIndexPattern {
     };
     // (undocumented)
     getFieldAttrs: () => {
-        [x: string]: {
-            customName: string;
-        };
+        [x: string]: FieldAttrSet;
     };
     // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
@@ -1257,8 +1257,8 @@ export class IndexPatternField implements IFieldType {
     get count(): number;
     set count(count: number);
     // (undocumented)
-    get customName(): string | undefined;
-    set customName(label: string | undefined);
+    get customLabel(): string | undefined;
+    set customLabel(customLabel: string | undefined);
     // (undocumented)
     get displayName(): string;
     // (undocumented)
@@ -1297,7 +1297,7 @@ export class IndexPatternField implements IFieldType {
         aggregatable: boolean;
         readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
-        customName: string | undefined;
+        customLabel: string | undefined;
     };
     // (undocumented)
     toSpec({ getFormatterForField, }?: {
@@ -1389,7 +1389,7 @@ export class IndexPatternsService {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternSavedObjectAttrs" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>;
+    getCache: () => Promise<SavedObject_2<IndexPatternSavedObjectAttrs>[] | null | undefined>;
     getDefault: () => Promise<IndexPattern | null>;
     getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>;
     // Warning: (ae-forgotten-export) The symbol "GetFieldsOptions" needs to be exported by the entry point index.d.ts
@@ -1401,7 +1401,7 @@ export class IndexPatternsService {
     }>>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
-    savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec;
+    savedObjectToSpec: (savedObject: SavedObject_2<IndexPatternAttributes>) => IndexPatternSpec;
     setDefault: (id: string, force?: boolean) => Promise<void>;
     updateSavedObject(indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean): Promise<void | Error>;
 }
@@ -1446,6 +1446,8 @@ export type ISearchGeneric = <SearchStrategyRequest extends IKibanaSearchRequest
 // @public (undocumented)
 export interface ISearchOptions {
     abortSignal?: AbortSignal;
+    isRestore?: boolean;
+    isStored?: boolean;
     sessionId?: string;
     strategy?: string;
 }
@@ -1498,10 +1500,19 @@ export const isErrorResponse: (response?: IKibanaSearchResponse<any> | undefined
 // @public (undocumented)
 export interface ISessionService {
     clear: () => void;
+    delete: (sessionId: string) => Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "SearchSessionFindOptions" needs to be exported by the entry point index.d.ts
+    find: (options: SearchSessionFindOptions) => Promise<SavedObjectsFindResponse<BackgroundSessionSavedObjectAttributes>>;
+    get: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
     getSession$: () => Observable<string | undefined>;
     getSessionId: () => string | undefined;
-    restore: (sessionId: string) => void;
+    isRestore: () => boolean;
+    isStored: () => boolean;
+    // Warning: (ae-forgotten-export) The symbol "BackgroundSessionSavedObjectAttributes" needs to be exported by the entry point index.d.ts
+    restore: (sessionId: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
+    save: (name: string, url: string) => Promise<SavedObject<BackgroundSessionSavedObjectAttributes>>;
     start: () => string;
+    update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) => Promise<any>;
 }
 
 // Warning: (ae-missing-release-tag) "isFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1784,6 +1795,10 @@ export interface QueryStringInputProps {
     dataTestSubj?: string;
     // (undocumented)
     disableAutoFocus?: boolean;
+    // (undocumented)
+    disableLanguageSwitcher?: boolean;
+    // (undocumented)
+    iconType?: string;
     // (undocumented)
     indexPatterns: Array<IIndexPattern | string>;
     // (undocumented)
@@ -2069,7 +2084,7 @@ export class SearchInterceptor {
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
-    protected runSearch(request: IKibanaSearchRequest, signal: AbortSignal, strategy?: string): Promise<IKibanaSearchResponse>;
+    protected runSearch(request: IKibanaSearchRequest, options?: ISearchOptions): Promise<IKibanaSearchResponse>;
     search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
     // @internal (undocumented)
     protected setupAbortSignal({ abortSignal, timeout, }: {
@@ -2349,6 +2364,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:33:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:31:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:135:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:113:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:67:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "FILTERS" needs to be exported by the entry point index.d.ts
