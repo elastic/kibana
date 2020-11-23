@@ -27,6 +27,7 @@ import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
 import { buildQuery } from './build_query';
+import { SelectLogLevel } from './select_log_level';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -212,6 +213,9 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
             query={logStreamQuery}
           />
         </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SelectLogLevel agent={agent} />
       </EuiFlexItem>
     </WrapperFlexGroup>
   );
