@@ -20,7 +20,6 @@ import { getTimeFilter } from '../kibana_services';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
-import { InnerJoin } from '../classes/joins/join';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeojsonFileSource } from '../classes/sources/geojson_file_source';
