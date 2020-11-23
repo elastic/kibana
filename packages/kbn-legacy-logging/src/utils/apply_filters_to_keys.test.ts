@@ -17,16 +17,44 @@
  * under the License.
  */
 
-import { setupLogging, setupLoggingRotate, attachMetaData } from '@kbn/legacy-logging';
+import { applyFiltersToKeys } from './apply_filters_to_keys';
 
-export async function loggingMixin(kbnServer, server, config) {
-  server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
-    server.log(tags, attachMetaData(message, metadata));
+describe('applyFiltersToKeys(obj, actionsByKey)', function () {
+  it('applies for each key+prop in actionsByKey', function () {
+    const data = applyFiltersToKeys(
+      {
+        a: {
+          b: {
+            c: 1,
+          },
+          d: {
+            e: 'foobar',
+          },
+        },
+        req: {
+          headers: {
+            authorization: 'Basic dskd939k2i',
+          },
+        },
+      },
+      {
+        b: 'remove',
+        e: 'censor',
+        authorization: '/([^\\s]+)$/',
+      }
+    );
+
+    expect(data).toEqual({
+      a: {
+        d: {
+          e: 'XXXXXX',
+        },
+      },
+      req: {
+        headers: {
+          authorization: 'Basic XXXXXXXXXX',
+        },
+      },
+    });
   });
-
-  const loggingConfig = config.get('logging');
-  const opsInterval = config.get('ops.interval');
-
-  await setupLogging(server, loggingConfig, opsInterval);
-  await setupLoggingRotate(server, loggingConfig);
-}
+});

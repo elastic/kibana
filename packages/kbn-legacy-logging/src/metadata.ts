@@ -17,16 +17,37 @@
  * under the License.
  */
 
-import { setupLogging, setupLoggingRotate, attachMetaData } from '@kbn/legacy-logging';
+import { isPlainObject } from 'lodash';
 
-export async function loggingMixin(kbnServer, server, config) {
-  server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
-    server.log(tags, attachMetaData(message, metadata));
-  });
+export const metadataSymbol = Symbol('log message with metadata');
 
-  const loggingConfig = config.get('logging');
-  const opsInterval = config.get('ops.interval');
-
-  await setupLogging(server, loggingConfig, opsInterval);
-  await setupLoggingRotate(server, loggingConfig);
+export interface EventData {
+  [metadataSymbol]?: EventMetadata;
+  [key: string]: any;
 }
+
+export interface EventMetadata {
+  message: string;
+  metadata: Record<string, any>;
+}
+
+export const isEventData = (eventData: EventData) => {
+  return Boolean(isPlainObject(eventData) && eventData[metadataSymbol]);
+};
+
+export const getLogEventData = (eventData: EventData) => {
+  const { message, metadata } = eventData[metadataSymbol]!;
+  return {
+    ...metadata,
+    message,
+  };
+};
+
+export const attachMetaData = (message: string, metadata: Record<string, any> = {}) => {
+  return {
+    [metadataSymbol]: {
+      message,
+      metadata,
+    },
+  };
+};
