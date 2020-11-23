@@ -19473,7 +19473,6 @@
     "xpack.stackAlerts.indexThreshold.actionVariableContextThresholdLabel": "用作阈值的值数组；“between”和“notBetween”需要两个值，其他则需要一个值。",
     "xpack.stackAlerts.indexThreshold.actionVariableContextTitleLabel": "告警的预构造标题。",
     "xpack.stackAlerts.indexThreshold.actionVariableContextValueLabel": "超过阈值的值。",
-    "xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription": "告警 {name} 组 {group} 值 {value} 在 {window} 于 {date}超过了阈值 {function}",
     "xpack.stackAlerts.indexThreshold.alertTypeContextSubjectTitle": "告警 {name} 组 {group} 超过了阈值",
     "xpack.stackAlerts.indexThreshold.alertTypeTitle": "索引阈值",
     "xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage": "指定的 thresholdComparator 无效：{comparator}",
