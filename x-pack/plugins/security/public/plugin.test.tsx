@@ -31,9 +31,9 @@ describe('Security Plugin', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
       expect(
         plugin.setup(
-          coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<
-            PluginStartDependencies
-          >,
+          coreMock.createSetup({
+            basePath: '/some-base-path',
+          }) as CoreSetup<PluginStartDependencies>,
           {
             licensing: licensingMock.createSetup(),
             securityOss: mockSecurityOssPlugin.createSetup(),
