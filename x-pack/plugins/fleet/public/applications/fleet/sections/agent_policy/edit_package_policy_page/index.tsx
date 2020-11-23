@@ -19,7 +19,7 @@ import { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
-  useCore,
+  useStartServices,
   useConfig,
   sendUpdatePackagePolicy,
   sendGetAgentStatus,
@@ -41,9 +41,13 @@ import {
 } from '../create_package_policy_page/types';
 import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
+import { useUIExtension } from '../../../hooks/use_ui_extension';
+import { ExtensionWrapper } from '../../../components/extension_wrapper';
+import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
+import { PackagePolicyEditExtensionComponentProps } from '../../../types';
 
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -68,6 +72,9 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     inputs: [],
     version: '',
   });
+  const [originalPackagePolicy, setOriginalPackagePolicy] = useState<
+    GetOnePackagePolicyResponse['item']
+  >();
 
   // Retrieve agent policy, package, and package policy info
   useEffect(() => {
@@ -83,6 +90,8 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
           setAgentPolicy(agentPolicyData.item);
         }
         if (packagePolicyData?.item) {
+          setOriginalPackagePolicy(packagePolicyData.item);
+
           const {
             id,
             revision,
@@ -189,6 +198,21 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     [packagePolicy, updatePackagePolicyValidation]
   );
 
+  const handleExtensionViewOnChange = useCallback<
+    PackagePolicyEditExtensionComponentProps['onChange']
+  >(
+    ({ isValid, updatedPolicy }) => {
+      updatePackagePolicy(updatedPolicy);
+      setFormState((prevState) => {
+        if (prevState === 'VALID' && !isValid) {
+          return 'INVALID';
+        }
+        return prevState;
+      });
+    },
+    [updatePackagePolicy]
+  );
+
   // Cancel url
   const cancelUrl = getHref('policy_details', { policyId });
 
@@ -267,6 +291,8 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     packageInfo,
   };
 
+  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
+
   const configurePackage = useMemo(
     () =>
       agentPolicy && packageInfo ? (
@@ -288,16 +314,32 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
             validationResults={validationResults!}
             submitAttempted={formState === 'INVALID'}
           />
+
+          {packagePolicy.policy_id &&
+            packagePolicy.package?.name &&
+            originalPackagePolicy &&
+            ExtensionView && (
+              <ExtensionWrapper>
+                <ExtensionView
+                  policy={originalPackagePolicy}
+                  newPolicy={packagePolicy}
+                  onChange={handleExtensionViewOnChange}
+                />
+              </ExtensionWrapper>
+            )}
         </>
       ) : null,
     [
       agentPolicy,
-      formState,
-      packagePolicy,
-      packagePolicyId,
       packageInfo,
+      packagePolicy,
       updatePackagePolicy,
       validationResults,
+      packagePolicyId,
+      formState,
+      originalPackagePolicy,
+      ExtensionView,
+      handleExtensionViewOnChange,
     ]
   );
 
