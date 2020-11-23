@@ -52,9 +52,10 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       return await table.findByTestSubject('~docTableAnchorRow');
     }
 
-    public async getRow({ isAnchorRow = false, rowIndex = 0 }: SelectOptions = {}): Promise<
-      WebElementWrapper
-    > {
+    public async getRow({
+      isAnchorRow = false,
+      rowIndex = 0,
+    }: SelectOptions = {}): Promise<WebElementWrapper> {
       return isAnchorRow ? await this.getAnchorRow() : (await this.getBodyRows())[rowIndex];
     }
 

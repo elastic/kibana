@@ -49,7 +49,7 @@ export function PointSeriesOptions(
         ({ type, data: { id: paramId } }) =>
           type === ChartType.Histogram && aggs.aggs.find(({ id }) => id === paramId)?.enabled
       ),
-    [stateParams.seriesParams]
+    [stateParams.seriesParams, aggs.aggs]
   );
 
   return (
