@@ -13,15 +13,17 @@ import { inputsModel } from '../../../common/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
-import { NetworkDnsEdges, PageInfoPaginated } from '../../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkModel, networkSelectors } from '../../store';
 import {
+  DocValueFields,
   NetworkQueries,
   NetworkDnsRequestOptions,
   NetworkDnsStrategyResponse,
   MatrixOverOrdinalHistogramData,
-} from '../../../../common/search_strategy/security_solution/network';
+  NetworkDnsEdges,
+  PageInfoPaginated,
+} from '../../../../common/search_strategy';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
@@ -45,6 +47,7 @@ export interface NetworkDnsArgs {
 
 interface UseNetworkDns {
   id?: string;
+  docValueFields: DocValueFields[];
   indexNames: string[];
   type: networkModel.NetworkType;
   filterQuery?: ESTermQuery | string;
@@ -54,6 +57,7 @@ interface UseNetworkDns {
 }
 
 export const useNetworkDns = ({
+  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -72,6 +76,7 @@ export const useNetworkDns = ({
     !skip
       ? {
           defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
           factoryQueryType: NetworkQueries.dns,
           filterQuery: createFilter(filterQuery),
           isPtrIncluded,
@@ -188,6 +193,7 @@ export const useNetworkDns = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        docValueFields: docValueFields ?? [],
         isPtrIncluded,
         factoryQueryType: NetworkQueries.dns,
         filterQuery: createFilter(filterQuery),
@@ -204,7 +210,18 @@ export const useNetworkDns = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip, isPtrIncluded]);
+  }, [
+    activePage,
+    indexNames,
+    endDate,
+    filterQuery,
+    limit,
+    startDate,
+    sort,
+    skip,
+    isPtrIncluded,
+    docValueFields,
+  ]);
 
   useEffect(() => {
     networkDnsSearch(networkDnsRequest);

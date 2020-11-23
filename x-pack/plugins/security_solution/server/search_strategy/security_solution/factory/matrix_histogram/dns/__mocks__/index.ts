@@ -50,7 +50,6 @@ export const expectedDsl = {
         terms: { field: 'dns.question.registered_domain', size: 1000000 },
       },
     },
-    docvalue_fields: undefined,
     query: {
       bool: {
         filter: [
