@@ -52,21 +52,21 @@ describe('Runtime field form', () => {
     const defaultValue: RuntimeField = {
       name: 'foo',
       type: 'date',
-      script: 'test=123',
+      script: { source: 'test=123' },
     };
     testBed = setup({ defaultValue, links });
     const { find } = testBed;
 
     expect(find('nameField.input').props().value).toBe(defaultValue.name);
     expect(find('typeField').props().value).toBe(defaultValue.type);
-    expect(find('scriptField').props().value).toBe(defaultValue.script);
+    expect(find('scriptField').props().value).toBe(defaultValue.script.source);
   });
 
   test('should accept an "onChange" prop to forward the form state', async () => {
     const defaultValue: RuntimeField = {
       name: 'foo',
       type: 'date',
-      script: 'test=123',
+      script: { source: 'test=123' },
     };
     testBed = setup({ onChange, defaultValue, links });
 

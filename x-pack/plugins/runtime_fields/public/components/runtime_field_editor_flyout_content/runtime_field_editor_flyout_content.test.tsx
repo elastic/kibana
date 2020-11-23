@@ -39,7 +39,7 @@ describe('Runtime field editor flyout', () => {
     const field: RuntimeField = {
       name: 'foo',
       type: 'date',
-      script: 'test=123',
+      script: { source: 'test=123' },
     };
 
     const { find } = setup({ ...defaultProps, defaultValue: field });
@@ -47,14 +47,14 @@ describe('Runtime field editor flyout', () => {
     expect(find('flyoutTitle').text()).toBe(`Edit ${field.name} field`);
     expect(find('nameField.input').props().value).toBe(field.name);
     expect(find('typeField').props().value).toBe(field.type);
-    expect(find('scriptField').props().value).toBe(field.script);
+    expect(find('scriptField').props().value).toBe(field.script.source);
   });
 
   test('should accept an onSave prop', async () => {
     const field: RuntimeField = {
       name: 'foo',
       type: 'date',
-      script: 'test=123',
+      script: { source: 'test=123' },
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
@@ -120,7 +120,7 @@ describe('Runtime field editor flyout', () => {
       expect(fieldReturned).toEqual({
         name: 'someName',
         type: 'keyword', // default to keyword
-        script: 'script=123',
+        script: { source: 'script=123' },
       });
 
       // Change the type and make sure it is forwarded
@@ -139,7 +139,7 @@ describe('Runtime field editor flyout', () => {
       expect(fieldReturned).toEqual({
         name: 'someName',
         type: 'other_type',
-        script: 'script=123',
+        script: { source: 'script=123' },
       });
     });
   });

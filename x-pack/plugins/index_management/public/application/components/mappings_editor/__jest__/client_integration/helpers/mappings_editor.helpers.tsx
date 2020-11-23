@@ -188,7 +188,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     await act(async () => {
       form.setInputValue('runtimeFieldEditor.nameField.input', field.name);
-      form.setInputValue('runtimeFieldEditor.scriptField', field.script);
+      form.setInputValue('runtimeFieldEditor.scriptField', field.script.source);
       find('typeField').simulate('change', [
         {
           label: valueToLabelMap[field.type],

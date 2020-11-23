@@ -46,7 +46,7 @@ describe('Runtime field editor', () => {
     const defaultValue: RuntimeField = {
       name: 'foo',
       type: 'date',
-      script: 'test=123',
+      script: { source: 'test=123' },
     };
     testBed = setup({ onChange, defaultValue, docLinks });
 

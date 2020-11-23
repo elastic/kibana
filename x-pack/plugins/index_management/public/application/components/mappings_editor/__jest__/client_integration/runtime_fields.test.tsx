@@ -81,7 +81,7 @@ describe('Mappings editor: runtime fields', () => {
       });
 
       test('should list the fields', async () => {
-        const { actions } = testBed;
+        const { find, actions } = testBed;
 
         const fields = actions.getRuntimeFieldsList();
         expect(fields.length).toBe(1);
@@ -89,6 +89,9 @@ describe('Mappings editor: runtime fields', () => {
         const [field] = fields;
         expect(field.name).toBe('day_of_week');
         expect(field.type).toBe('Date');
+
+        await actions.startEditRuntimeField('day_of_week');
+        expect(find('runtimeFieldEditor.scriptField').props().value).toBe('emit("hello Kibana")');
       });
     });
 
@@ -109,7 +112,7 @@ describe('Mappings editor: runtime fields', () => {
 
         await actions.addRuntimeField({
           name: 'myField',
-          script: 'emit("hello")',
+          script: { source: 'emit("hello")' },
           type: 'boolean',
         });
 
@@ -130,7 +133,7 @@ describe('Mappings editor: runtime fields', () => {
 
         await actions.addRuntimeField({
           name: 'myField',
-          script: 'emit("hello")',
+          script: { source: 'emit("hello")' },
           type: 'boolean',
         });
 
@@ -148,7 +151,7 @@ describe('Mappings editor: runtime fields', () => {
 
         await actions.addRuntimeField({
           name: 'myField',
-          script: 'emit("hello")',
+          script: { source: 'emit("hello")' },
           type: 'boolean',
         });
 
@@ -158,7 +161,7 @@ describe('Mappings editor: runtime fields', () => {
         await actions.startEditRuntimeField('myField');
         await actions.updateRuntimeFieldForm({
           name: 'updatedName',
-          script: 'new script',
+          script: { source: 'new script' },
           type: 'date',
         });
 

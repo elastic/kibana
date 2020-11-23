@@ -95,7 +95,7 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
       <EuiSpacer size="l" />
 
       {/* Script */}
-      <UseField<string> path="script">
+      <UseField<string> path="script.source">
         {({ value, setValue, label, isValid, getErrorsMessages }) => {
           return (
             <EuiFormRow
