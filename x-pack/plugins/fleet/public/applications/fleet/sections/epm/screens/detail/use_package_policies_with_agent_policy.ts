@@ -73,9 +73,10 @@ export const usePackagePoliciesWithAgentPolicy = (
       .join(' or ')}) `;
   }, [packagePoliciesData]);
 
-  const { data: agentPoliciesData, isLoading: isLoadingAgentPolicies } = useConditionalRequest<
-    GetAgentPoliciesResponse
-  >({
+  const {
+    data: agentPoliciesData,
+    isLoading: isLoadingAgentPolicies,
+  } = useConditionalRequest<GetAgentPoliciesResponse>({
     path: agentPolicyRouteService.getListPath(),
     method: 'get',
     query: {
