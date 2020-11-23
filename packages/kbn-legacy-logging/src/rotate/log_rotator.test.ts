@@ -19,10 +19,10 @@
 
 import del from 'del';
 import fs, { existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
-import { LogRotator } from './log_rotator';
 import { tmpdir } from 'os';
 import { dirname, join } from 'path';
-import lodash from 'lodash';
+import { LogRotator } from './log_rotator';
+import { LegacyLoggingConfig } from '../schema';
 
 const mockOn = jest.fn();
 jest.mock('chokidar', () => ({
@@ -32,19 +32,26 @@ jest.mock('chokidar', () => ({
   })),
 }));
 
-lodash.throttle = (fn: any) => fn;
+jest.mock('lodash', () => ({
+  ...(jest.requireActual('lodash') as any),
+  throttle: (fn: any) => fn,
+}));
 
 const tempDir = join(tmpdir(), 'kbn_log_rotator_test');
 const testFilePath = join(tempDir, 'log_rotator_test_log_file.log');
 
-const createLogRotatorConfig: any = (logFilePath: string) => {
-  return new Map([
-    ['logging.dest', logFilePath],
-    ['logging.rotate.everyBytes', 2],
-    ['logging.rotate.keepFiles', 2],
-    ['logging.rotate.usePolling', false],
-    ['logging.rotate.pollingInterval', 10000],
-  ] as any);
+const createLogRotatorConfig = (logFilePath: string): LegacyLoggingConfig => {
+  return {
+    dest: logFilePath,
+    rotate: {
+      enabled: true,
+      keepFiles: 2,
+      everyBytes: 2,
+      usePolling: false,
+      pollingInterval: 10000,
+      pollingPolicyTestTimeout: 4000,
+    },
+  } as LegacyLoggingConfig;
 };
 
 const mockServer: any = {
@@ -62,7 +69,7 @@ describe('LogRotator', () => {
   });
 
   afterEach(() => {
-    del.sync(dirname(testFilePath), { force: true });
+    del.sync(tempDir, { force: true });
     mockOn.mockClear();
   });
 
@@ -71,14 +78,14 @@ describe('LogRotator', () => {
 
     const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
+
     await logRotator.start();
 
     expect(logRotator.running).toBe(true);
 
     await logRotator.stop();
-    const testLogFileDir = dirname(testFilePath);
 
-    expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
+    expect(existsSync(join(tempDir, 'log_rotator_test_log_file.log.0'))).toBeTruthy();
   });
 
   it('rotates log file when equal than set limit over time', async () => {

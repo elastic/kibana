@@ -17,44 +17,18 @@
  * under the License.
  */
 
-import applyFiltersToKeys from './apply_filters_to_keys';
+// @ts-expect-error missing type def
+import stringify from 'json-stringify-safe';
+import { BaseLogFormat } from './log_format';
 
-describe('applyFiltersToKeys(obj, actionsByKey)', function () {
-  it('applies for each key+prop in actionsByKey', function () {
-    const data = applyFiltersToKeys(
-      {
-        a: {
-          b: {
-            c: 1,
-          },
-          d: {
-            e: 'foobar',
-          },
-        },
-        req: {
-          headers: {
-            authorization: 'Basic dskd939k2i',
-          },
-        },
-      },
-      {
-        b: 'remove',
-        e: 'censor',
-        authorization: '/([^\\s]+)$/',
-      }
-    );
+const stripColors = function (string: string) {
+  return string.replace(/\u001b[^m]+m/g, '');
+};
 
-    expect(data).toEqual({
-      a: {
-        d: {
-          e: 'XXXXXX',
-        },
-      },
-      req: {
-        headers: {
-          authorization: 'Basic XXXXXXXXXX',
-        },
-      },
-    });
-  });
-});
+export class KbnLoggerJsonFormat extends BaseLogFormat {
+  format(data: Record<string, any>) {
+    data.message = stripColors(data.message);
+    data['@timestamp'] = this.extractAndFormatTimestamp(data);
+    return stringify(data);
+  }
+}
