@@ -90,7 +90,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
           <>
             <span>
               <FormattedMessage
-                id="savedObjects.saveModalDashboard.addToDashboardLabel"
+                id="presentationUtil.saveModalDashboard.addToDashboardLabel"
                 defaultMessage="Add to dashboard"
               />
             </span>
@@ -98,7 +98,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
               type="iInCircle"
               content={
                 <FormattedMessage
-                  id="savedObjects.saveModalDashboard.dashboardInfoTooltip"
+                  id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"
                   defaultMessage="Items added to a dashboard will not appear in the library and must be edited from the dashboard."
                 />
               }
@@ -115,7 +115,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
               id="existing"
               name="dashboard-option"
               label={i18n.translate(
-                'savedObjects.saveModalDashboard.existingDashboardOptionLabel',
+                'presentationUtil.saveModalDashboard.existingDashboardOptionLabel',
                 {
                   defaultMessage: 'Existing',
                 }
@@ -125,7 +125,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
 
             <EuiComboBox
               placeholder={i18n.translate(
-                'savedObjects.saveModalDashboard.searchDashboardPlaceholder',
+                'presentationUtil.saveModalDashboard.searchDashboardPlaceholder',
                 {
                   defaultMessage: 'Search dashboards...',
                 }
@@ -152,7 +152,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
               checked={dashboardOption === 'new'}
               id="new"
               name="dashboard-option"
-              label={i18n.translate('savedObjects.saveModalDashboard.newDashboardOptionLabel', {
+              label={i18n.translate('presentationUtil.saveModalDashboard.newDashboardOptionLabel', {
                 defaultMessage: 'New',
               })}
               onChange={() => setDashboardOption('new')}
@@ -164,7 +164,7 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
               checked={dashboardOption === null}
               id="library"
               name="dashboard-option"
-              label={i18n.translate('savedObjects.saveModalDashboard.libraryOptionLabel', {
+              label={i18n.translate('presentationUtil.saveModalDashboard.libraryOptionLabel', {
                 defaultMessage: 'No dashboard, but add to library',
               })}
               onChange={() => setDashboardOption(null)}
@@ -195,11 +195,14 @@ export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
     props.onSave({ ...onSaveProps, dashboardId });
   };
 
-  const saveLibraryLabel = i18n.translate('savedObjects.saveModalDashboard.saveToLibraryLabel', {
-    defaultMessage: 'Save and add to library',
-  });
+  const saveLibraryLabel = i18n.translate(
+    'presentationUtil.saveModalDashboard.saveToLibraryLabel',
+    {
+      defaultMessage: 'Save and add to library',
+    }
+  );
   const saveDashboardLabel = i18n.translate(
-    'savedObjects.saveModalDashboard.saveAndGoToDashboardLabel',
+    'presentationUtil.saveModalDashboard.saveAndGoToDashboardLabel',
     {
       defaultMessage: 'Save and go to Dashboard',
     }
