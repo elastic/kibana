@@ -273,6 +273,7 @@ export enum STEP_FUNCTION {
   EASING_BETWEEN_MIN_AND_MAX = 'EASING_BETWEEN_MIN_AND_MAX',
   PERCENTILES = 'PERCENTILES',
 }
+export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 export type RawValue = string | number | boolean | undefined | null;
 

@@ -23,10 +23,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
-import { STEP_FUNCTION, VECTOR_STYLES } from '../../../../../../common/constants';
+import {
+  DEFAULT_PERCENTILES,
+  STEP_FUNCTION,
+  VECTOR_STYLES,
+} from '../../../../../../common/constants';
 import { PercentilesForm } from './percentiles_form';
-
-const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 const easingTitle = i18n.translate('xpack.maps.styles.dataDomainOptions.easingTitle', {
   defaultMessage: `Easing between min and max`,

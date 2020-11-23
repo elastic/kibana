@@ -11,6 +11,7 @@ import { FeatureIdentifier, Map as MbMap } from 'mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
+  DEFAULT_PERCENTILES,
   FIELD_ORIGIN,
   MB_LOOKUP_FUNCTION,
   SOURCE_META_DATA_REQUEST_ID,
@@ -45,7 +46,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   isFieldMetaEnabled(): boolean;
   isOrdinal(): boolean;
   supportsFieldMeta(): boolean;
-  getFieldMetaRequest(): Promise<unknown>;
+  getFieldMetaRequest(): Promise<unknown | null>;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
@@ -120,6 +121,30 @@ export class DynamicStyleProperty<T>
     return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
   }
 
+  getPercentilesFieldMeta() {
+    const fieldName = this.getFieldName();
+    const dataRequestId = this._getStyleMetaDataRequestId(fieldName);
+    if (!dataRequestId) {
+      return null;
+    }
+
+    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
+    if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
+      return null;
+    }
+
+    const styleMetaData = styleMetaDataRequest.getData() as StyleMetaData;
+    const percentiles = styleMetaData[this._field.getRootName()];
+    return percentiles !== undefined
+      ? Object.keys(percentiles.values).map((key) => {
+          return {
+            percentile: key,
+            value: percentiles.values[key],
+          };
+        })
+      : null;
+  }
+
   getCategoryFieldMeta() {
     const style = this._layer.getStyle() as IVectorStyle;
     const styleMeta = style.getStyleMeta();
@@ -192,13 +217,21 @@ export class DynamicStyleProperty<T>
     }
 
     if (this.isOrdinal()) {
-      return this._field.getOrdinalFieldMetaRequest();
-    } else if (this.isCategorical()) {
+      return this.getStepFunction() === STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX
+        ? this._field.getExtendedStatsFieldMetaRequest()
+        : this._field.getPercentilesFieldMetaRequest(
+            this.getFieldMetaOptions().percentiles !== undefined
+              ? this.getFieldMetaOptions().percentiles
+              : DEFAULT_PERCENTILES
+          );
+    }
+
+    if (this.isCategorical()) {
       const numberOfCategories = this.getNumberOfCategories();
       return this._field.getCategoricalFieldMetaRequest(numberOfCategories);
-    } else {
-      return null;
     }
+
+    return null;
   }
 
   supportsMbFeatureState() {
@@ -213,6 +246,12 @@ export class DynamicStyleProperty<T>
 
   getFieldMetaOptions() {
     return _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+  }
+
+  getStepFunction() {
+    return 'stepFunction' in this._options
+      ? this._options.stepFunction
+      : STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX;
   }
 
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]) {
@@ -348,11 +387,7 @@ export class DynamicStyleProperty<T>
         styleName={this.getStyleName()}
         onChange={onChange}
         switchDisabled={switchDisabled}
-        stepFunction={
-          `stepFunction` in this._options
-            ? this._options.stepFunction
-            : STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX
-        }
+        stepFunction={this.getStepFunction()}
       />
     );
   }

@@ -204,6 +204,10 @@ export type RangeFieldMeta = {
   isMaxOutsideStdRange?: boolean;
 };
 
+export type PercentilesFieldMeta = Array<{
+  [key: string]: number;
+}>;
+
 export type Category = {
   key: string;
   count: number;

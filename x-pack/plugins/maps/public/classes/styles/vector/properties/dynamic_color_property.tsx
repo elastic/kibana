@@ -10,7 +10,7 @@ import { EuiTextColor } from '@elastic/eui';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
 import { getOrdinalMbColorRampStops, getColorPalette } from '../../color_palettes';
-import { COLOR_MAP_TYPE } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE, STEP_FUNCTION } from '../../../../../common/constants';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
@@ -131,6 +131,9 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         RGBA_0000, // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
+    } else if (this.getStepFunction() === STEP_FUNCTION.PERCENTILES) {
+      const percentilesFieldMeta = this.getPercentilesFieldMeta();
+      return null;
     } else {
       const rangeFieldMeta = this.getRangeFieldMeta();
       if (!rangeFieldMeta) {
