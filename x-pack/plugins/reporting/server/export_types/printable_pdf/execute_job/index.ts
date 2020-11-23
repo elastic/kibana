@@ -20,9 +20,9 @@ import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { getCustomLogo } from '../lib/get_custom_logo';
 import { TaskPayloadPDF } from '../types';
 
-export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
-  TaskPayloadPDF
->> = function executeJobFactoryFn(reporting, parentLogger) {
+export const runTaskFnFactory: RunTaskFnFactory<
+  RunTaskFn<TaskPayloadPDF>
+> = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
 
