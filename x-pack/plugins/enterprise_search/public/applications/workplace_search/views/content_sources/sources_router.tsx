@@ -50,8 +50,8 @@ export const SourcesRouter: React.FC = () => {
 
   return (
     <Switch>
-      <Route exact path={SOURCES_PATH} component={PrivateSources} />
-      <Route exact path={ORG_SOURCES_PATH} component={OrganizationSources} />
+      <Route exact path={PERSONAL_SOURCES_PATH} component={PrivateSources} />
+      <Route exact path={SOURCES_PATH} component={OrganizationSources} />
       {staticSourceData.map(({ addPath, accountContextOnly }, i) => (
         <Route
           key={i}
@@ -59,7 +59,7 @@ export const SourcesRouter: React.FC = () => {
           path={getSourcesPath(addPath, isOrganization)}
           render={() =>
             !hasPlatinumLicense && accountContextOnly ? (
-              <Redirect exact from={ADD_SOURCE_PATH} to={ORG_SOURCES_PATH} />
+              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
             ) : (
               <AddSource sourceIndex={i} />
             )
@@ -94,9 +94,9 @@ export const SourcesRouter: React.FC = () => {
           );
       })}
       {canCreatePersonalSources ? (
-        <Route exact path={ADD_SOURCE_PATH} component={AddSourceList} />
+        <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)} component={AddSourceList} />
       ) : (
-        <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
+        <Redirect exact from={getSourcesPath(ADD_SOURCE_PATH, false)} to={PERSONAL_SOURCES_PATH} />
       )}
       <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)} component={AddSourceList} /> :
       <Route
