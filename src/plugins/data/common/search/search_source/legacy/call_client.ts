@@ -28,10 +28,9 @@ export function callClient(
   fetchHandlers: FetchHandlers
 ) {
   // Correlate the options with the request that they're associated with
-  const requestOptionEntries: Array<[
-    SearchRequest,
-    ISearchOptions
-  ]> = searchRequests.map((request, i) => [request, requestsOptions[i]]);
+  const requestOptionEntries: Array<
+    [SearchRequest, ISearchOptions]
+  > = searchRequests.map((request, i) => [request, requestsOptions[i]]);
   const requestOptionsMap = new Map<SearchRequest, ISearchOptions>(requestOptionEntries);
   const requestResponseMap = new Map<SearchRequest, Promise<SearchResponse<any>>>();
 

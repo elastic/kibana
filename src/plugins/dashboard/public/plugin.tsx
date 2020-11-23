@@ -177,9 +177,7 @@ export class DashboardPlugin
       usageCollection,
     }: DashboardSetupDependencies
   ): DashboardSetup {
-    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
-      DashboardFeatureFlagConfig
-    >();
+    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const startServices = core.getStartServices();
 
     if (share) {
