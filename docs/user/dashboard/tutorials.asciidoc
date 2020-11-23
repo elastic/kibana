@@ -377,7 +377,7 @@ understand why. This now shows:
 [role="screenshot"]
 image::visualize/images/vega_lite_tutorial_6.png[Table for data_0 showing that the column time_buckets.buckets.key is undefined]
 
-It looks like the problem is that the `time_buckets` inner array is not being
+It looks like the problem is that the `time_buckets.buckets` inner array is not being
 extracted by Vega. The solution is to use a Vega-lite
 https://vega.github.io/vega-lite/docs/flatten.html[flatten transformation], available in {kib} 7.9 and later.
 If using an older version of Kibana, the flatten transformation is available in Vega
