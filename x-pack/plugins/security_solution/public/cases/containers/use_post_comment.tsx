@@ -6,7 +6,7 @@
 
 import { useReducer, useCallback } from 'react';
 
-import { CommentRequest } from '../../../../case/common/api';
+import { CommentRequestUserType } from '../../../../case/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 
 import { postComment } from './api';
@@ -42,7 +42,7 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
 };
 
 export interface UsePostComment extends NewCommentState {
-  postComment: (data: CommentRequest, updateCase: (newCase: Case) => void) => void;
+  postComment: (data: CommentRequestUserType, updateCase: (newCase: Case) => void) => void;
 }
 
 export const usePostComment = (caseId: string): UsePostComment => {
@@ -53,7 +53,7 @@ export const usePostComment = (caseId: string): UsePostComment => {
   const [, dispatchToaster] = useStateToaster();
 
   const postMyComment = useCallback(
-    async (data: CommentRequest, updateCase: (newCase: Case) => void) => {
+    async (data: CommentRequestUserType, updateCase: (newCase: Case) => void) => {
       let cancel = false;
       const abortCtrl = new AbortController();
 
