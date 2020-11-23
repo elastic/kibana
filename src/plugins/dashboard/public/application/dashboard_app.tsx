@@ -544,6 +544,12 @@ export function DashboardApp({
       }
     );
 
+    // Apply initial filters to Dashboard State Manager
+    dashboardStateManager.applyFilters(
+      dashboardStateManager.getQuery() || queryStringManager.getDefaultQuery(),
+      filterManager.getFilters()
+    );
+
     // The hash check is so we only update the time filter on dashboard open, not during
     // normal cross app navigation.
     if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
