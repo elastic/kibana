@@ -70,7 +70,7 @@ const EditFlowMessage = memo<{
       TrustedAppsListPageRouteState['onBackButtonNavigateTo']
   >(() => {
     return [
-      'ingestManager',
+      'fleet',
       {
         path: `#${pagePathGetters.edit_integration({
           policyId: agentPolicyId,
@@ -99,11 +99,11 @@ const EditFlowMessage = memo<{
       path: getTrustedAppsListPath(),
       state: {
         backButtonUrl: navigateBackToIngest[1]?.path
-          ? `${getUrlForApp('ingestManager')}${navigateBackToIngest[1].path}`
+          ? `${getUrlForApp('fleet')}${navigateBackToIngest[1].path}`
           : undefined,
         onBackButtonNavigateTo: navigateBackToIngest,
         backButtonLabel: i18n.translate(
-          'xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.trustedAppsMessageReturnBackLabel',
+          'xpack.securitySolution.endpoint.fleet.editPackagePolicy.trustedAppsMessageReturnBackLabel',
           { defaultMessage: 'Back to Edit Integration' }
         ),
       },
@@ -120,7 +120,7 @@ const EditFlowMessage = memo<{
         data-test-subj="endpointActions"
       >
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.menuButton"
+          id="xpack.securitySolution.endpoint.fleet.editPackagePolicy.menuButton"
           defaultMessage="Actions"
         />
       </EuiButton>
@@ -135,7 +135,7 @@ const EditFlowMessage = memo<{
         data-test-subj="securityPolicy"
       >
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.actionSecurityPolicy"
+          id="xpack.securitySolution.endpoint.fleet.editPackagePolicy.actionSecurityPolicy"
           defaultMessage="Edit Policy"
         />
       </EuiContextMenuItem>,
@@ -145,7 +145,7 @@ const EditFlowMessage = memo<{
         data-test-subj="trustedAppsAction"
       >
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.actionTrustedApps"
+          id="xpack.securitySolution.endpoint.fleet.editPackagePolicy.actionTrustedApps"
           defaultMessage="Edit Trusted Applications"
         />
       </EuiContextMenuItem>,
@@ -156,7 +156,7 @@ const EditFlowMessage = memo<{
     <EuiFlexGroup>
       <EuiFlexItem>
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.message"
+          id="xpack.securitySolution.endpoint.fleet.editPackagePolicy.message"
           defaultMessage="Access additional configuration options from the action menu"
         />
       </EuiFlexItem>

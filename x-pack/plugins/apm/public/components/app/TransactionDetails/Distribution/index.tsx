@@ -24,17 +24,24 @@ import d3 from 'd3';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
 import { ValuesType } from 'utility-types';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { useTheme } from '../../../../../../observability/public';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+
+type TransactionDistributionAPIResponse = APIReturnType<
+  'GET /api/apm/services/{serviceName}/transaction_groups/distribution'
+>;
+
+type DistributionApiResponse = APIReturnType<
+  'GET /api/apm/services/{serviceName}/transaction_groups/distribution'
+>;
+
+type DistributionBucket = DistributionApiResponse['buckets'][0];
 
 interface IChartPoint {
   x0: number;

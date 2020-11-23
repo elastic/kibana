@@ -104,11 +104,12 @@ export function createDataFrameAnalyticsMapUrl(
   let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_MAP}`;
 
   if (mlUrlGeneratorState) {
-    const { jobId, analysisType, defaultIsTraining, globalState } = mlUrlGeneratorState;
+    const { jobId, modelId, analysisType, defaultIsTraining, globalState } = mlUrlGeneratorState;
 
     const queryState: DataFrameAnalyticsExplorationQueryState = {
       ml: {
         jobId,
+        modelId,
         analysisType,
         defaultIsTraining,
       },
