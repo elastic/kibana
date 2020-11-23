@@ -30,7 +30,6 @@ import {
 } from '../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { removeSignalsIndex } from '../tasks/common';
 import { DEFAULT_RULE_REFRESH_INTERVAL_VALUE } from '../../common/constants';
 
 import { DETECTIONS_URL } from '../urls/navigation';
@@ -41,7 +40,7 @@ describe('Alerts detection rules', () => {
   });
 
   after(() => {
-    // esArchiverUnload('prebuilt_rules_loaded');
+    esArchiverUnload('prebuilt_rules_loaded');
   });
 
   it('Sorts by activated rules', () => {
@@ -83,8 +82,9 @@ describe('Alerts detection rules', () => {
       });
   });
 
+  // FIXME: UI hangs on loading
   it.skip('Auto refreshes rules', () => {
-    cy.clock();
+    cy.clock(Date.now());
 
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
@@ -111,6 +111,5 @@ describe('Alerts detection rules', () => {
     cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.exist');
 
     cy.clock().invoke('restore');
-    cy.reload(true);
   });
 });
