@@ -77,7 +77,7 @@ export class InnerJoin {
     if (!feature.properties || !this._leftField || !this._rightSource) {
       return false;
     }
-    const rightMetricFields = this._rightSource!.getMetricFields();
+    const rightMetricFields = this._rightSource.getMetricFields();
     // delete feature properties added by previous join
     for (let j = 0; j < rightMetricFields.length; j++) {
       const metricPropertyKey = rightMetricFields[j].getName();
