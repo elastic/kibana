@@ -13,9 +13,8 @@ import { ISessionService, SessionState } from '../../../../../../../src/plugins/
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
 const coreStart = coreMock.createStart();
-const sessionService = dataPluginMock.createStartContract().search.session as jest.Mocked<
-  ISessionService
->;
+const sessionService = dataPluginMock.createStartContract().search
+  .session as jest.Mocked<ISessionService>;
 
 test("shouldn't show indicator in case no active search session", async () => {
   const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({
