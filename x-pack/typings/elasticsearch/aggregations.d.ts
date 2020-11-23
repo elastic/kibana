@@ -360,6 +360,7 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
     bg_count: number;
     buckets: Array<
       {
+        score: number;
         bg_count: number;
         doc_count: number;
         key: string | number;
