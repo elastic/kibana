@@ -35,12 +35,12 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          newResolverTree: simulator.testSubject('resolver:graph').length,
+          resolverTree: simulator.testSubject('resolver:graph').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 1,
         resolverGraphError: 0,
-        newResolverTree: 0,
+        resolverTree: 0,
       });
     });
   });
@@ -66,12 +66,12 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          newResolverTree: simulator.testSubject('resolver:graph').length,
+          resolverTree: simulator.testSubject('resolver:graph').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 1,
         resolverGraphError: 0,
-        newResolverTree: 0,
+        resolverTree: 0,
       });
     });
   });
@@ -96,12 +96,12 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          newResolverTree: simulator.testSubject('resolver:graph').length,
+          resolverTree: simulator.testSubject('resolver:graph').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 0,
         resolverGraphError: 1,
-        newResolverTree: 0,
+        resolverTree: 0,
       });
     });
   });
@@ -126,13 +126,13 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          newResolverTree: simulator.testSubject('resolver:graph').length,
+          resolverTree: simulator.testSubject('resolver:graph').length,
           resolverGraphNodes: simulator.testSubject('resolver:node').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 0,
         resolverGraphError: 0,
-        newResolverTree: 1,
+        resolverTree: 1,
         resolverGraphNodes: 0,
       });
     });
@@ -158,13 +158,13 @@ describe('Resolver: data loading and resolution states', () => {
         simulator.map(() => ({
           resolverGraphLoading: simulator.testSubject('resolver:graph:loading').length,
           resolverGraphError: simulator.testSubject('resolver:graph:error').length,
-          newResolverTree: simulator.testSubject('resolver:graph').length,
+          resolverTree: simulator.testSubject('resolver:graph').length,
           resolverGraphNodes: simulator.testSubject('resolver:node').length,
         }))
       ).toYieldEqualTo({
         resolverGraphLoading: 0,
         resolverGraphError: 0,
-        newResolverTree: 1,
+        resolverTree: 1,
         resolverGraphNodes: 3,
       });
     });

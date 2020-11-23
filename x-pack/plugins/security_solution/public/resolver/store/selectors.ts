@@ -354,6 +354,11 @@ export const getNodeState = composeSelectors(dataStateSelector, dataSelectors.ge
 export const nodeDataForID = composeSelectors(dataStateSelector, dataSelectors.nodeDataForID);
 
 /**
+ * Returns the graph node for a given ID
+ */
+export const graphNodeForID = composeSelectors(dataStateSelector, dataSelectors.graphNodeForID);
+
+/**
  * Returns a Set of node IDs representing the visible nodes in the view.
  */
 export const visibleNodes: (state: ResolverState) => (time: number) => Set<string> = createSelector(

@@ -74,8 +74,8 @@ const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => 
  */
 export const originID: (state: DataState) => string | undefined = createSelector(
   resolverTreeResponse,
-  function (newResolverTree?) {
-    return newResolverTree?.originId ?? undefined;
+  function (resolverTree?) {
+    return resolverTree?.originId ?? undefined;
   }
 );
 
@@ -164,9 +164,9 @@ export const nodeStats: (
   state: DataState
 ) => (nodeID: string) => EventStats | undefined = createSelector(
   resolverTreeResponse,
-  (newResolverTree?: NewResolverTree) => {
-    if (newResolverTree) {
-      const map = resolverTreeModel.nodeStats(newResolverTree);
+  (resolverTree?: NewResolverTree) => {
+    if (resolverTree) {
+      const map = resolverTreeModel.nodeStats(resolverTree);
       return (nodeId: string) => map.get(nodeId);
     } else {
       return () => undefined;
@@ -229,8 +229,8 @@ export const relatedEventCountByCategory: (
  * @deprecated
  */
 export function hasMoreChildren(state: DataState): boolean {
-  const newResolverTree = resolverTreeResponse(state);
-  return newResolverTree ? resolverTreeModel.hasMoreChildren(newResolverTree) : false;
+  const resolverTree = resolverTreeResponse(state);
+  return resolverTree ? resolverTreeModel.hasMoreChildren(resolverTree) : false;
 }
 
 /**
@@ -238,8 +238,8 @@ export function hasMoreChildren(state: DataState): boolean {
  * @deprecated
  */
 export function hasMoreAncestors(state: DataState): boolean {
-  const newResolverTree = resolverTreeResponse(state);
-  return newResolverTree ? resolverTreeModel.hasMoreAncestors(newResolverTree) : false;
+  const resolverTree = resolverTreeResponse(state);
+  return resolverTree ? resolverTreeModel.hasMoreAncestors(resolverTree) : false;
 }
 
 /**

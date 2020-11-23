@@ -60,6 +60,7 @@ describe(`Resolver: when analyzing a tree with only the origin and paginated rel
       });
     });
     it('should show the load more data button', async () => {
+      simulator().debugActions();
       await expect(
         simulator().map(() => ({
           loadMoreButton: simulator().testSubject('resolver:nodeEventsInCategory:loadMore').length,

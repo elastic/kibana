@@ -8,9 +8,9 @@ import { DataAccessLayer, Timerange } from '../../types';
 import { mockTreeWithOneNodeAndTwoPagesOfRelatedEvents } from '../../mocks/resolver_tree';
 import {
   ResolverRelatedEvents,
-  ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
+  ResolverNode,
 } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 
@@ -37,7 +37,7 @@ export function oneNodeWithPaginatedEvents(): {
     databaseDocumentID: '_id',
     entityIDs: { origin: 'origin' },
   };
-  const tree = mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
+  const mockTree = mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
     originID: metadata.entityIDs.origin,
   });
 
@@ -59,7 +59,7 @@ export function oneNodeWithPaginatedEvents(): {
         /**
          * Respond with the mocked related events when the origin's related events are fetched.
          **/
-        const events = entityID === metadata.entityIDs.origin ? tree.relatedEvents.events : [];
+        const events = entityID === metadata.entityIDs.origin ? mockTree.relatedEvents.events : [];
 
         return {
           entityID,
@@ -85,7 +85,7 @@ export function oneNodeWithPaginatedEvents(): {
         indexPatterns: string[];
       }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         let events: SafeResolverEvent[] = [];
-        const eventsOfCategory = tree.relatedEvents.events.filter(
+        const eventsOfCategory = mockTree.relatedEvents.events.filter(
           (event) => event.event?.category === category
         );
         if (after === undefined) {
@@ -112,7 +112,8 @@ export function oneNodeWithPaginatedEvents(): {
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
         return (
-          tree.relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null
+          mockTree.relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ??
+          null
         );
       },
 
@@ -133,8 +134,8 @@ export function oneNodeWithPaginatedEvents(): {
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(): Promise<ResolverTree> {
-        return tree;
+      async resolverTree(): Promise<ResolverNode[]> {
+        return mockTree.treeResponse;
       },
 
       /**

@@ -5,47 +5,74 @@
  */
 
 import { mockEndpointEvent } from './endpoint_event';
-import { ResolverTree, SafeResolverEvent } from '../../../common/endpoint/types';
+import {
+  ResolverTree,
+  SafeResolverEvent,
+  NewResolverTree,
+  ResolverNode,
+  ResolverRelatedEvents,
+} from '../../../common/endpoint/types';
 import * as eventModel from '../../../common/endpoint/models/event';
 
 export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
   originID,
 }: {
   originID: string;
-}): ResolverTree {
-  const originEvent: SafeResolverEvent = mockEndpointEvent({
-    entityID: originID,
-    processName: 'c',
-    parentEntityID: undefined,
-    timestamp: 1600863932318,
-  });
-  const events = [];
-  // page size is currently 25
+}): {
+  treeResponse: ResolverNode[];
+  resolverTree: NewResolverTree;
+  relatedEvents: ResolverRelatedEvents;
+} {
+  const timestamp = 1600863932318;
+  const nodeName = 'c';
   const eventsToGenerate = 30;
+  const events = [];
+
+  // page size is currently 25
   for (let i = 0; i < eventsToGenerate; i++) {
     const newEvent = mockEndpointEvent({
       entityID: originID,
       eventID: `test-${i}`,
       eventType: 'access',
       eventCategory: 'registry',
-      timestamp: 1600863932318,
+      timestamp,
     });
     events.push(newEvent);
   }
+
+  const originNode: ResolverNode = {
+    id: originID,
+    name: nodeName,
+    stats: { total: eventsToGenerate, byCategory: { registry: eventsToGenerate } },
+    data: {
+      '@timestamp': timestamp,
+      'process.entity_id': originID,
+      'process.name': nodeName,
+    },
+  };
+
   return {
-    entityID: originID,
-    children: {
-      childNodes: [],
-      nextChild: null,
+    treeResponse: [originNode],
+    resolverTree: {
+      originId: originID,
+      nodes: [
+        {
+          id: originID,
+          name: nodeName,
+          stats: { total: eventsToGenerate, byCategory: { registry: eventsToGenerate } },
+          data: {
+            '@timestamp': timestamp,
+            'process.entity_id': originID,
+            'process.name': nodeName,
+          },
+        },
+      ],
     },
-    ancestry: {
-      nextAncestor: null,
-      ancestors: [],
+    relatedEvents: {
+      entityID: originID,
+      events,
+      nextEvent: null,
     },
-    lifecycle: [originEvent],
-    relatedEvents: { events, nextEvent: null },
-    relatedAlerts: { alerts: [], nextAlert: null },
-    stats: { events: { total: eventsToGenerate, byCategory: {} }, totalAlerts: 0 },
   };
 }
 
