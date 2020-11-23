@@ -87,9 +87,15 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   },
   buildColumn({ field, previousColumn, indexPattern }) {
     const sortField =
-      indexPattern.timeFieldName ||
-      indexPattern.fields.find((f) => f.type === 'date')?.name ||
-      field.name;
+      indexPattern.timeFieldName || indexPattern.fields.find((f) => f.type === 'date')?.name;
+
+    if (!sortField) {
+      throw new Error(
+        i18n.translate('xpack.lens.functions.lastValue.missingSortField', {
+          defaultMessage: 'This index pattern does not contain any date fields',
+        })
+      );
+    }
 
     const sortOrder =
       (previousColumn?.params &&
@@ -126,7 +132,13 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
 
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
-    return Boolean(newField && newField.type === column.dataType);
+    const newTimeField = newIndexPattern.getFieldByName(column.params.sortField);
+    return Boolean(
+      newField &&
+        newField.type === column.dataType &&
+        !newField.aggregationRestrictions &&
+        newTimeField?.type === 'date'
+    );
   },
 
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
