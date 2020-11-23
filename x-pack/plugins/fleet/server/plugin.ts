@@ -58,6 +58,8 @@ import {
   ESIndexPatternSavedObjectService,
   ESIndexPatternService,
   AgentService,
+  AgentPolicyServiceInterface,
+  agentPolicyService,
   packagePolicyService,
   PackageService,
 } from './services';
@@ -134,6 +136,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
+  agentPolicyService: AgentPolicyServiceInterface;
   /**
    * Register callbacks for inclusion in fleet API processing
    * @param args
@@ -235,7 +238,7 @@ export class FleetPlugin
         if (isESOUsingEphemeralEncryptionKey) {
           if (this.logger) {
             this.logger.warn(
-              'Fleet APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+              'Fleet APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
             );
           }
         } else {
@@ -291,6 +294,12 @@ export class FleetPlugin
         listAgents,
         getAgentStatusById,
         authenticateAgentWithAccessToken,
+      },
+      agentPolicyService: {
+        get: agentPolicyService.get,
+        list: agentPolicyService.list,
+        getDefaultAgentPolicyId: agentPolicyService.getDefaultAgentPolicyId,
+        getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
       },
       packagePolicyService,
       registerExternalCallback: (...args: ExternalCallback) => {

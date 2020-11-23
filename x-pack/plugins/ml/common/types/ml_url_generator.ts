@@ -157,6 +157,7 @@ export type TimeSeriesExplorerUrlState = MLPageState<
 
 export interface DataFrameAnalyticsQueryState {
   jobId?: JobId | JobId[];
+  modelId?: string;
   groupIds?: string[];
   globalState?: MlCommonGlobalState;
 }
@@ -171,6 +172,7 @@ export interface DataFrameAnalyticsExplorationQueryState {
     jobId: JobId;
     analysisType: DataFrameAnalysisConfigType;
     defaultIsTraining?: boolean;
+    modelId?: string;
   };
 }
 
@@ -181,6 +183,7 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
     analysisType: DataFrameAnalysisConfigType;
     globalState?: MlCommonGlobalState;
     defaultIsTraining?: boolean;
+    modelId?: string;
   }
 >;
 
