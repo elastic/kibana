@@ -107,9 +107,9 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
   isCanceled: boolean;
 }
 
-const createSessionDefaultState: <SearchDescriptor = unknown>() => SessionStateInternal<
-  SearchDescriptor
-> = () => ({
+const createSessionDefaultState: <
+  SearchDescriptor = unknown
+>() => SessionStateInternal<SearchDescriptor> = () => ({
   sessionId: undefined,
   isStored: false,
   isRestore: false,
