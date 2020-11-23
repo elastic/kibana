@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostsQueries, NetworkQueries } from '../../common/search_strategy/security_solution';
 import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../screens/overview';
 
 import { expandHostStats, expandNetworkStats } from '../tasks/overview';
@@ -17,7 +16,7 @@ import emptyInstance from '../fixtures/empty_instance.json';
 
 describe('Overview Page', () => {
   it('Host stats render with correct values', () => {
-    cy.stubSearchStrategyApi(overviewFixture, HostsQueries.overview);
+    cy.stubSearchStrategyApi(overviewFixture, 'overviewHost');
     loginAndWaitForPage(OVERVIEW_URL);
     expandHostStats();
 
@@ -27,7 +26,7 @@ describe('Overview Page', () => {
   });
 
   it('Network stats render with correct values', () => {
-    cy.stubSearchStrategyApi(overviewFixture, NetworkQueries.overview);
+    cy.stubSearchStrategyApi(overviewFixture, 'overviewNetwork');
     loginAndWaitForPage(OVERVIEW_URL);
     expandNetworkStats();
 
