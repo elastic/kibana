@@ -10,9 +10,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { TeamsActionConnector } from '../types';
 
-const TeamsActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  TeamsActionConnector
->> = ({ action, editActionSecrets, errors, readOnly, docLinks }) => {
+const TeamsActionFields: React.FunctionComponent<
+  ActionConnectorFieldsProps<TeamsActionConnector>
+> = ({ action, editActionSecrets, errors, readOnly, docLinks }) => {
   const { webhookUrl } = action.secrets;
 
   return (

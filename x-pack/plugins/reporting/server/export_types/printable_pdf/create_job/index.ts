@@ -13,10 +13,9 @@ import { JobParamsPDF, TaskPayloadPDF } from '../types';
 // @ts-ignore no module def (deprecated module)
 import { compatibilityShimFactory } from './compatibility_shim';
 
-export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
-  JobParamsPDF,
-  TaskPayloadPDF
->> = function createJobFactoryFn(reporting, parentLogger) {
+export const createJobFnFactory: CreateJobFnFactory<
+  CreateJobFn<JobParamsPDF, TaskPayloadPDF>
+> = function createJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'create-job']);
