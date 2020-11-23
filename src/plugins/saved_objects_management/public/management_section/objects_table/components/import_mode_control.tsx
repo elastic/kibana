@@ -141,6 +141,15 @@ export const ImportModeControl = ({
       data-test-subj="savedObjectsManagement-importModeControl"
     >
       <EuiCheckableCard
+        id={createNewCopiesEnabled.id}
+        label={createLabel(createNewCopiesEnabled)}
+        checked={createNewCopies}
+        onChange={() => onChange({ createNewCopies: true })}
+      />
+
+      <EuiSpacer size="s" />
+
+      <EuiCheckableCard
         id={createNewCopiesDisabled.id}
         label={createLabel(createNewCopiesDisabled)}
         checked={!createNewCopies}
@@ -148,15 +157,6 @@ export const ImportModeControl = ({
       >
         {overwriteRadio}
       </EuiCheckableCard>
-
-      <EuiSpacer size="s" />
-
-      <EuiCheckableCard
-        id={createNewCopiesEnabled.id}
-        label={createLabel(createNewCopiesEnabled)}
-        checked={createNewCopies}
-        onChange={() => onChange({ createNewCopies: true })}
-      />
     </EuiFormFieldset>
   );
 };
