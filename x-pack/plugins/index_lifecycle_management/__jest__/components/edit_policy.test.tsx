@@ -476,7 +476,7 @@ describe('edit policy', () => {
       await setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'warm');
       act(() => {
-        findTestSubject(rendered, 'shrinkSwitch').simulate('click');
+        findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
       await setPhaseAfter(rendered, 'warm', '1');
@@ -494,7 +494,7 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'warm');
       await setPhaseAfter(rendered, 'warm', '1');
       act(() => {
-        findTestSubject(rendered, 'shrinkSwitch').simulate('click');
+        findTestSubject(rendered, 'warm-shrinkSwitch').simulate('click');
       });
       rendered.update();
       const shrinkInput = findTestSubject(rendered, 'warm-selectedPrimaryShardCount');
