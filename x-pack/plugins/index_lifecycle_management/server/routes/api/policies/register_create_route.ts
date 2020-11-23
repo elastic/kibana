@@ -45,6 +45,10 @@ const allocateSchema = schema.maybe(
   })
 );
 
+const shrinkActionSchema = schema.object({
+  number_of_shards: schema.number(),
+});
+
 const forcemergeSchema = schema.maybe(
   schema.object({
     max_num_segments: schema.number(),
@@ -65,6 +69,7 @@ const hotPhaseSchema = schema.object({
       })
     ),
     forcemerge: forcemergeSchema,
+    shrink: schema.maybe(shrinkActionSchema),
   }),
 });
 
@@ -77,11 +82,7 @@ const warmPhaseSchema = schema.maybe(
       unfollow: unfollowSchema,
       readonly: schema.maybe(schema.object({})), // Readonly has no options
       allocate: allocateSchema,
-      shrink: schema.maybe(
-        schema.object({
-          number_of_shards: schema.number(),
-        })
-      ),
+      shrink: schema.maybe(shrinkActionSchema),
       forcemerge: forcemergeSchema,
     }),
   })

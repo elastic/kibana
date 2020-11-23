@@ -56,6 +56,7 @@ export interface SerializedHotPhase extends SerializedPhase {
       max_docs?: number;
     };
     forcemerge?: ForcemergeAction;
+    shrink?: ShrinkAction;
     set_priority?: {
       priority: number | null;
     };
@@ -65,9 +66,7 @@ export interface SerializedHotPhase extends SerializedPhase {
 export interface SerializedWarmPhase extends SerializedPhase {
   actions: {
     allocate?: AllocateAction;
-    shrink?: {
-      number_of_shards: number;
-    };
+    shrink?: ShrinkAction;
     forcemerge?: ForcemergeAction;
     set_priority?: {
       priority: number | null;
@@ -105,6 +104,10 @@ export interface AllocateAction {
   require?: {
     [attribute: string]: string;
   };
+}
+
+export interface ShrinkAction {
+  number_of_shards: number;
 }
 
 export interface ForcemergeAction {

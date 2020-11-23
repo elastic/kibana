@@ -34,7 +34,7 @@ import { ROLLOVER_FORM_PATHS } from '../../../constants';
 
 import { LearnMoreLink, ActiveBadge } from '../../';
 
-import { Forcemerge, SetPriorityInput, useRolloverPath } from '../shared_fields';
+import { Forcemerge, SetPriorityInput, useRolloverPath, ShrinkField } from '../shared_fields';
 
 import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
@@ -221,6 +221,7 @@ export const HotPhase: FunctionComponent = () => {
         )}
       </EuiDescribedFormGroup>
       {isRolloverEnabled && <Forcemerge phase="hot" />}
+      {isRolloverEnabled && <ShrinkField phase="hot" />}
       <SetPriorityInput phase={hotProperty} />
     </>
   );
