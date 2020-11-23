@@ -14,7 +14,6 @@ import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 import {
   ConfigContext,
-  DepsContext,
   FleetStatusProvider,
   KibanaVersionContext,
   sendGetPermissionsCheck,
@@ -33,11 +32,7 @@ import { DataStreamApp } from './sections/data_stream';
 import { FleetApp } from './sections/agents';
 import { IngestManagerOverview } from './sections/overview';
 import { ProtectedRoute } from './index';
-import {
-  IngestManagerConfigType,
-  IngestManagerSetupDeps,
-  IngestManagerStartDeps,
-} from '../../plugin';
+import { FleetConfigType } from '../../plugin';
 import { UIExtensionsStorage } from './types';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../xpack_legacy/common';
@@ -183,45 +178,39 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
 export const FleetAppContext: React.FC<{
   basepath: string;
   coreStart: CoreStart;
-  setupDeps: IngestManagerSetupDeps;
-  startDeps: IngestManagerStartDeps;
-  config: IngestManagerConfigType;
+  config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
-}> = memo(
-  ({ children, coreStart, setupDeps, startDeps, config, history, kibanaVersion, extensions }) => {
-    const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
+}> = memo(({ children, coreStart, config, history, kibanaVersion, extensions }) => {
+  const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
 
-    return (
-      <coreStart.i18n.Context>
-        <KibanaContextProvider services={{ ...coreStart }}>
-          <EuiErrorBoundary>
-            <DepsContext.Provider value={{ setup: setupDeps, start: startDeps }}>
-              <ConfigContext.Provider value={config}>
-                <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider>
-                        <IntraAppStateProvider kibanaScopedHistory={history}>
-                          <Router>
-                            <PackageInstallProvider notifications={coreStart.notifications}>
-                              {children}
-                            </PackageInstallProvider>
-                          </Router>
-                        </IntraAppStateProvider>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
-                </KibanaVersionContext.Provider>
-              </ConfigContext.Provider>
-            </DepsContext.Provider>
-          </EuiErrorBoundary>
-        </KibanaContextProvider>
-      </coreStart.i18n.Context>
-    );
-  }
-);
+  return (
+    <coreStart.i18n.Context>
+      <KibanaContextProvider services={{ ...coreStart }}>
+        <EuiErrorBoundary>
+          <ConfigContext.Provider value={config}>
+            <KibanaVersionContext.Provider value={kibanaVersion}>
+              <EuiThemeProvider darkMode={isDarkMode}>
+                <UIExtensionsContext.Provider value={extensions}>
+                  <FleetStatusProvider>
+                    <IntraAppStateProvider kibanaScopedHistory={history}>
+                      <Router>
+                        <PackageInstallProvider notifications={coreStart.notifications}>
+                          {children}
+                        </PackageInstallProvider>
+                      </Router>
+                    </IntraAppStateProvider>
+                  </FleetStatusProvider>
+                </UIExtensionsContext.Provider>
+              </EuiThemeProvider>
+            </KibanaVersionContext.Provider>
+          </ConfigContext.Provider>
+        </EuiErrorBoundary>
+      </KibanaContextProvider>
+    </coreStart.i18n.Context>
+  );
+});
 
 export const AppRoutes = memo(() => {
   const { agents } = useConfig();

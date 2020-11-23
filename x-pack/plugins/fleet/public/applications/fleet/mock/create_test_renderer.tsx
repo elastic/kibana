@@ -7,7 +7,7 @@
 import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from 'src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { FleetAppContext } from '../app';
 import { FleetConfigType, FleetSetupDeps, FleetStartDeps, FleetStart } from '../../../plugin';
@@ -53,8 +53,6 @@ export const createTestRendererMock = (): TestRenderer => {
         <FleetAppContext
           basepath={'/mock'}
           coreStart={coreStart}
-          setupDeps={setupDeps}
-          startDeps={startDeps}
           config={config}
           history={history}
           kibanaVersion={testRendererMocks.kibanaVersion}
