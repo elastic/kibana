@@ -378,7 +378,7 @@ describe('last_value', () => {
 
       const select = instance.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]');
 
-      expect(select.prop('selectedOptions')).toEqual([{ value: 'datefield' }]);
+      expect(select.prop('selectedOptions')).toEqual([{ label: 'datefield', value: 'datefield' }]);
     });
 
     it('should update state when changing sortField', () => {
