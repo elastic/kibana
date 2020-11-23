@@ -55,10 +55,7 @@ export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEn
     if (entry.field.startsWith('process.hash') && entry.type === 'match') {
       return {
         ...result,
-        [ConditionEntryField.HASH]: createConditionEntry(
-          ConditionEntryField.HASH,
-          entry.value.toLowerCase()
-        ),
+        [ConditionEntryField.HASH]: createConditionEntry(ConditionEntryField.HASH, entry.value),
       };
     } else if (entry.field === 'process.executable.caseless' && entry.type === 'match') {
       return {
@@ -150,7 +147,7 @@ export const conditionEntriesToEntries = (
     if (conditionEntry.field === ConditionEntryField.HASH) {
       return createEntryMatch(
         `process.hash.${hashType(conditionEntry.value)}`,
-        conditionEntry.value
+        conditionEntry.value.toLowerCase()
       );
     } else if (conditionEntry.field === ConditionEntryField.SIGNER) {
       return createEntryNested(`process.Ext.code_signature`, [
