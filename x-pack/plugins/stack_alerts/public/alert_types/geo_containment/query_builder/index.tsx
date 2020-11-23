@@ -288,22 +288,12 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
           }}
         />
       </EuiFlexItem>
-
-      <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.geoContainment.selectIndex"
-            defaultMessage="Define the condition"
-          />
-        </h5>
-      </EuiTitle>
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.geoContainment.selectBoundaryIndex"
-            defaultMessage="Select boundary:"
+            defaultMessage="Select boundary"
           />
         </h5>
       </EuiTitle>
