@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './export_csv';
+export { datatableToCSV, CSV_MIME_TYPE } from './export_csv';

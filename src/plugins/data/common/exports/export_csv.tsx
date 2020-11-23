@@ -21,7 +21,6 @@
 
 import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
 import { Datatable } from 'src/plugins/expressions';
-import { DownloadableContent } from 'src/plugins/share/public/';
 
 const LINE_FEED_CHARACTER = '\r\n';
 const nonAlphaNumRE = /[^a-zA-Z0-9]/;
@@ -52,7 +51,7 @@ interface CSVOptions {
 
 export function datatableToCSV(
   { columns, rows }: Datatable,
-  { csvSeparator, quoteValues, formatFactory, raw }: Omit<CSVOptions, 'asString'>
+  { csvSeparator, quoteValues, formatFactory, raw }: CSVOptions
 ) {
   // Build the header row by its names
   const header = columns.map((col) => escape(col.name, quoteValues));
@@ -72,48 +71,12 @@ export function datatableToCSV(
     );
   });
 
+  if (header.length === 0) {
+    return '';
+  }
+
   return (
     [header, ...csvRows].map((row) => row.join(csvSeparator)).join(LINE_FEED_CHARACTER) +
     LINE_FEED_CHARACTER
   ); // Add \r\n after last line
-}
-
-/**
- *
- * @param filename - filename to use (either as is, or as prefix for multiple CSVs) for the files to download
- * @param datatables - data (as a dictionary of Datatable) to be translated into CSVs. It can contain multiple tables.
- * @param options - set of options for the exporter
- *
- * @returns A dictionary of files to download: the key is the filename and the value the CSV string
- */
-export function exportAsCSVs(
-  filename: string,
-  datatables: Record<string, Datatable> | undefined,
-  options: CSVOptions
-) {
-  if (datatables == null) {
-    return;
-  }
-  // build a csv for datatable layer
-  const csvs = Object.keys(datatables)
-    .filter((layerId) => {
-      return (
-        datatables[layerId].columns.length &&
-        datatables[layerId].rows.length &&
-        datatables[layerId].rows.every((row) => Object.keys(row).length)
-      );
-    })
-    .reduce<Record<string, string>>((memo, layerId) => {
-      memo[layerId] = datatableToCSV(datatables[layerId], options);
-      return memo;
-    }, {});
-
-  const layerIds = Object.keys(csvs);
-
-  return layerIds.reduce<Record<string, Exclude<DownloadableContent, Blob>>>((memo, layerId, i) => {
-    const content = csvs[layerId];
-    const postFix = layerIds.length > 1 ? `-${i + 1}` : '';
-    memo[`${filename}${postFix}.csv`] = { content, type: CSV_MIME_TYPE };
-    return memo;
-  }, {});
 }
