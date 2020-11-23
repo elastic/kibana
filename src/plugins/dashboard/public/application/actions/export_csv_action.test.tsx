@@ -1,39 +1,45 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
-import {
-  isErrorEmbeddable,
-  IContainer,
-  ErrorEmbeddable,
-} from 'src/plugins/dashboard/public/embeddable_plugin';
-import { DashboardContainer } from 'src/plugins/dashboard/public/application/embeddable';
-import {
-  getSampleDashboardInput,
-  getSampleDashboardPanel,
-} from 'src/plugins/dashboard/public/application/test_helpers';
+import { CoreStart } from 'kibana/public';
+
+import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../embeddable_plugin';
+import { DashboardContainer } from '../../application/embeddable';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../../application/test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from 'src/plugins/dashboard/public/embeddable_plugin_test_samples';
-import { coreMock } from 'src/core/public/mocks';
-import { CoreStart } from 'kibana/public';
+} from '../../embeddable_plugin_test_samples';
+import { coreMock } from '../../../../../core/public/mocks';
 import { ExportCSVAction } from './export_csv_action';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { DataPublicPluginStart } from 'src/plugins/data/public/types';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { LINE_FEED_CHARACTER } from 'src/plugins/data/public/exports/export_csv';
+import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
+import { DataPublicPluginStart } from '../../../../data/public/types';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import { LINE_FEED_CHARACTER } from '../../../../data/public/exports/export_csv';
 
 describe('Export CSV action', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     new ContactCardEmbeddableFactory((() => null) as any, {} as any)
   );
   const start = doStart();
@@ -55,17 +61,12 @@ describe('Export CSV action', () => {
     const options = {
       ExitFullScreenButton: () => null,
       SavedObjectFinder: () => null,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       application: {} as any,
       embeddable: start,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       inspector: {} as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       notifications: {} as any,
       overlays: coreStart.overlays,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       savedObjectMetaData: {} as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       uiActions: {} as any,
     };
     const input = getSampleDashboardInput({

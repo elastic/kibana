@@ -1,16 +1,29 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
-import { DataPublicPluginStart, exportAsCSVs } from '../../../../../../src/plugins/data/public';
-import { downloadMultipleAs } from '../../../../../../src/plugins/share/public';
-import { Adapters, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
-import { CoreStart } from '../../../../../../src/core/public';
+import { FormatFactory } from '../../../../data/common/field_formats/utils';
+import { DataPublicPluginStart, exportAsCSVs } from '../../../../data/public';
+import { downloadMultipleAs } from '../../../../share/public';
+import { Adapters, IEmbeddable } from '../../../../embeddable/public';
+import { ActionByType } from '../../../../ui_actions/public';
+import { CoreStart } from '../../../../../core/public';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
 

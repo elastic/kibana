@@ -6,11 +6,7 @@
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
 import {
@@ -49,11 +45,6 @@ import { visualizeFieldAction } from './trigger_actions/visualize_field_actions'
 import { getSearchProvider } from './search_provider';
 
 import { LensAttributeService } from './lens_attribute_service';
-import {
-  ACTION_EXPORT_CSV,
-  ExportContext,
-  ExportCSVAction,
-} from './editor_frame_service/embeddable/export_csv_action';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -75,12 +66,6 @@ export interface LensPluginStartDependencies {
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-}
-
-declare module '../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_EXPORT_CSV]: ExportContext;
-  }
 }
 
 export class LensPlugin {
@@ -201,9 +186,6 @@ export class LensPlugin {
       VISUALIZE_FIELD_TRIGGER,
       visualizeFieldAction(core.application)
     );
-
-    const ExportCSVPlugin = new ExportCSVAction({ core, data: startDependencies.data });
-    startDependencies.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, ExportCSVPlugin);
   }
 
   stop() {
