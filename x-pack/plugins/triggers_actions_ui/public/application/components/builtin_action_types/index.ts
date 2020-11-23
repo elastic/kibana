@@ -15,6 +15,7 @@ import { ActionTypeModel } from '../../../types';
 import { getServiceNowActionType } from './servicenow';
 import { getJiraActionType } from './jira';
 import { getResilientActionType } from './resilient';
+import { getTeamsActionType } from './teams';
 
 export function registerBuiltInActionTypes({
   actionTypeRegistry,
@@ -30,4 +31,5 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getServiceNowActionType());
   actionTypeRegistry.register(getJiraActionType());
   actionTypeRegistry.register(getResilientActionType());
+  actionTypeRegistry.register(getTeamsActionType());
 }
