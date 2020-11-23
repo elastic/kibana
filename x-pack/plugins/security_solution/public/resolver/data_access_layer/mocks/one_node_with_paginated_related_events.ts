@@ -103,7 +103,17 @@ export function oneNodeWithPaginatedEvents(): {
        * Get entities matching a document.
        */
       async entities(): Promise<ResolverEntityIndex> {
-        return [{ entity_id: metadata.entityIDs.origin }];
+        return [
+          {
+            name: 'endpoint',
+            schema: {
+              id: 'process.entity_id',
+              parent: 'process.parent.entity_id',
+              ancestry: 'process.Ext.ancestry',
+            },
+            id: metadata.entityIDs.origin,
+          },
+        ];
       },
     },
   };
