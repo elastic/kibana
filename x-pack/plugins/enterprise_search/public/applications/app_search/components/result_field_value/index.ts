@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DocumentDetailLogic } from './document_detail_logic';
-export { DocumentsLogic } from './documents_logic';
-export { Documents } from './documents';
-export { DocumentDetail } from './document_detail';
+export { ResultFieldValue } from './result_field_value';
