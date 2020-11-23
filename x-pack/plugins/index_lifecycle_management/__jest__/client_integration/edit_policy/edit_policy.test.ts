@@ -119,6 +119,7 @@ describe('<EditPolicy />', () => {
         await actions.hot.toggleForceMerge(true);
         await actions.hot.setForcemergeSegments('123');
         await actions.hot.setBestCompression(true);
+        await actions.hot.setShrink('2');
         await actions.hot.setIndexPriority('123');
 
         await actions.savePolicy();
@@ -141,6 +142,9 @@ describe('<EditPolicy />', () => {
                   },
                   "set_priority": Object {
                     "priority": 123,
+                  },
+                  "shrink": Object {
+                    "number_of_shards": 2,
                   },
                 },
                 "min_age": "0ms",

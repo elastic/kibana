@@ -43,7 +43,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       titleSize="xs"
       switchProps={{
         'aria-controls': 'shrinkContent',
-        'data-test-subj': 'shrinkSwitch',
+        'data-test-subj': `${phase}-shrinkSwitch`,
         label: i18nTexts.editPolicy.shrinkLabel,
         'aria-label': i18nTexts.editPolicy.shrinkLabel,
         initialValue: Boolean(policy.phases[phase]?.actions?.shrink),

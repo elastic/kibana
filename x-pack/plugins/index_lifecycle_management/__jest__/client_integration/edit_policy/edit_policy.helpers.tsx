@@ -175,9 +175,9 @@ export const setup = async () => {
     await createFormSetValueAction(`${phase}-selectedReplicaCount`)(value);
   };
 
-  const setShrink = async (value: string) => {
-    await createFormToggleAction('shrinkSwitch')(true);
-    await createFormSetValueAction('warm-selectedPrimaryShardCount')(value);
+  const setShrink = (phase: Phases) => async (value: string) => {
+    await createFormToggleAction(`${phase}-shrinkSwitch`)(true);
+    await createFormSetValueAction(`${phase}-selectedPrimaryShardCount`)(value);
   };
 
   const setFreeze = createFormToggleAction('freezeSwitch');
@@ -196,6 +196,7 @@ export const setup = async () => {
         setForcemergeSegments: setForcemergeSegmentsCount('hot'),
         setBestCompression: setBestCompression('hot'),
         setIndexPriority: setIndexPriority('hot'),
+        setShrink: setShrink('hot'),
       },
       warm: {
         enable: enable('warm'),
@@ -205,7 +206,7 @@ export const setup = async () => {
         setDataAllocation: setDataAllocation('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
-        setShrink,
+        setShrink: setShrink('warm'),
         toggleForceMerge: toggleForceMerge('warm'),
         setForcemergeSegments: setForcemergeSegmentsCount('warm'),
         setBestCompression: setBestCompression('warm'),
