@@ -254,7 +254,7 @@ export function registerAccountPrepareSourcesRoute({
     },
     async (context, request, response) => {
       return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/pre_content_sources/${request.params.service_type}`,
+        path: `/ws/sources/${request.params.service_type}/prepare`,
       })(context, request, response);
     }
   );
@@ -514,7 +514,7 @@ export function registerOrgPrepareSourcesRoute({
     },
     async (context, request, response) => {
       return enterpriseSearchRequestHandler.createRequest({
-        path: `/ws/org/pre_content_sources/${request.params.service_type}`,
+        path: `/ws/org/sources/${request.params.service_type}/prepare`,
       })(context, request, response);
     }
   );
