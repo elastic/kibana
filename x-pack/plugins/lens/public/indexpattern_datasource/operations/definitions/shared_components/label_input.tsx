@@ -28,10 +28,6 @@ export const LabelInput = ({
 }) => {
   const [inputValue, setInputValue] = useState(value);
 
-  useEffect(() => {
-    setInputValue(value);
-  }, [value, setInputValue]);
-
   useDebounce(() => onChange(inputValue), 256, [inputValue]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
