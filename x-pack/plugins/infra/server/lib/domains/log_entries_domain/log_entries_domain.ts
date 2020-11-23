@@ -75,7 +75,7 @@ export class InfraLogEntriesDomain {
     requestContext: RequestHandlerContext,
     sourceId: string,
     params: LogEntriesAroundParams,
-    customColumns?: LogEntriesRequest['columns']
+    columnOverrides?: LogEntriesRequest['columns']
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
     const { startTimestamp, endTimestamp, center, query, size, highlightTerm } = params;
 
@@ -100,7 +100,7 @@ export class InfraLogEntriesDomain {
         size: Math.floor(halfSize),
         highlightTerm,
       },
-      customColumns
+      columnOverrides
     );
 
     /*
@@ -135,14 +135,14 @@ export class InfraLogEntriesDomain {
     requestContext: RequestHandlerContext,
     sourceId: string,
     params: LogEntriesParams,
-    customColumns?: LogEntriesRequest['columns']
+    columnOverrides?: LogEntriesRequest['columns']
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext.core.savedObjects.client,
       sourceId
     );
 
-    const columnDefinitions = customColumns ?? configuration.logColumns;
+    const columnDefinitions = columnOverrides ?? configuration.logColumns;
 
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(configuration.fields.message)
