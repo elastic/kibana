@@ -24,7 +24,6 @@ export interface FetchStreamingParams {
   headers?: Record<string, string>;
   method?: 'GET' | 'POST';
   body?: string;
-  signal?: AbortSignal;
 }
 
 /**
@@ -36,7 +35,6 @@ export function fetchStreaming({
   headers = {},
   method = 'POST',
   body = '',
-  signal,
 }: FetchStreamingParams) {
   const xhr = new window.XMLHttpRequest();
 
@@ -47,7 +45,7 @@ export function fetchStreaming({
   // Set the HTTP headers
   Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
 
-  const stream = fromStreamingXhr(xhr, signal);
+  const stream = fromStreamingXhr(xhr);
 
   // Send the payload to the server
   xhr.send(body);
