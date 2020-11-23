@@ -50,7 +50,7 @@ interface CSVOptions {
   raw?: boolean;
 }
 
-function buildCSV(
+export function datatableToCSV(
   { columns, rows }: Datatable,
   { csvSeparator, quoteValues, formatFactory, raw }: Omit<CSVOptions, 'asString'>
 ) {
@@ -104,7 +104,7 @@ export function exportAsCSVs(
       );
     })
     .reduce<Record<string, string>>((memo, layerId) => {
-      memo[layerId] = buildCSV(datatables[layerId], options);
+      memo[layerId] = datatableToCSV(datatables[layerId], options);
       return memo;
     }, {});
 
