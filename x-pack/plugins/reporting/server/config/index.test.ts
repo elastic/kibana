@@ -7,7 +7,7 @@
 import { config } from './index';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 
-const CONFIG_PATH = 'kibana';
+const CONFIG_PATH = 'xpack.reporting';
 
 const applyReportingDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);
