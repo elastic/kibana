@@ -54,6 +54,10 @@ export const registerCreateFieldRoute = (router: IRouter) => {
             field,
           } = req.body;
 
+          if (!field.scripted) {
+            throw new Error('Only scripted fields can be created.');
+          }
+
           const indexPattern = await ip.get(id);
 
           if (indexPattern.fields.getByName(field.name)) {

@@ -57,6 +57,10 @@ export const registerDeleteFieldRoute = (router: IRouter) => {
             throw new ErrorIndexPatternFieldNotFound(id, name);
           }
 
+          if (!field.scripted) {
+            throw new Error('Only scripted fields can be deleted.');
+          }
+
           indexPattern.fields.remove(field);
 
           await ip.updateSavedObject(indexPattern);
