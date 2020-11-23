@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMELINE_WIDTH } from '../../timelines/components/timeline/body/constants';
 import {
   Direction,
   FlowTarget,
@@ -213,6 +212,7 @@ export const mockGlobalState: State = {
         description: '',
         eventIdToNoteIds: {},
         excludedRowRendererIds: [],
+        expandedEvent: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,
@@ -238,7 +238,6 @@ export const mockGlobalState: State = {
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
         sort: { columnId: '@timestamp', sortDirection: Direction.desc },
-        width: DEFAULT_TIMELINE_WIDTH,
         isSaving: false,
         version: null,
         status: TimelineStatus.active,
