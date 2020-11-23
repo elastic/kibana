@@ -1806,6 +1806,10 @@ export interface QueryStringInputProps {
     // (undocumented)
     disableAutoFocus?: boolean;
     // (undocumented)
+    disableLanguageSwitcher?: boolean;
+    // (undocumented)
+    iconType?: string;
+    // (undocumented)
     indexPatterns: Array<IIndexPattern | string>;
     // (undocumented)
     isInvalid?: boolean;
