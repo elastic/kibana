@@ -33,7 +33,7 @@ export const networkDns: SecuritySolutionFactory<NetworkQueries.dns> = {
     options: NetworkDnsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkDnsStrategyResponse> => {
-    const { activePage, fakePossibleCount } = options.pagination ?? {};
+    const { activePage, fakePossibleCount } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response.rawResponse);
     const edges: NetworkDnsEdges[] = getDnsEdges(response);
     const fakeTotalCount =

@@ -6,6 +6,7 @@
 
 import { isEmpty } from 'lodash/fp';
 
+import { assertUnreachable } from '../../../../../../common/utility_types';
 import {
   Direction,
   SortField,
@@ -36,6 +37,7 @@ const getQueryOrder = (sort: SortField<NetworkDnsFields>): QueryOrder => {
     case NetworkDnsFields.dnsBytesOut:
       return { dns_bytes_out: { order: sort.direction } };
   }
+  assertUnreachable(sort.field);
 };
 
 const getCountAgg = () => ({

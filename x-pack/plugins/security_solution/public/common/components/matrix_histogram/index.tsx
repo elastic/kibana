@@ -87,7 +87,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   title,
   titleSize,
   yTickFormatter,
-}: MatrixHistogramComponentProps) => {
+}) => {
   const dispatch = useDispatch();
   const handleBrushEnd = useCallback(
     ({ x }) => {
