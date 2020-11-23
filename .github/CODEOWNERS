@@ -132,7 +132,7 @@
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
 
 # Maps
-/x-pack/plugins/maps/ @elastic/kibana-gis
+#CC# /x-pack/plugins/maps/ @elastic/kibana-gis
 /x-pack/test/api_integration/apis/maps/ @elastic/kibana-gis
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
@@ -162,6 +162,8 @@
 /src/cli/keystore/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
+/.ci/teamcity/ @elastic/kibana-operations
+/.teamcity/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
 
