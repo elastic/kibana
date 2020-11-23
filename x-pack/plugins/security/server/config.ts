@@ -247,7 +247,7 @@ export function createConfig(
   if (encryptionKey === undefined) {
     logger.warn(
       'Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on ' +
-        'restart, please set xpack.security.encryptionKey in kibana.yml'
+        'restart, please set xpack.security.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
     );
 
     encryptionKey = crypto.randomBytes(16).toString('hex');

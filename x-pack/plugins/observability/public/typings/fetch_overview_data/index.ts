@@ -47,7 +47,7 @@ export type HasData = (params?: HasDataParams) => Promise<HasDataResponse>;
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability' | 'stack_monitoring'
+  'observability-overview' | 'stack_monitoring'
 >;
 
 export interface DataHandler<
