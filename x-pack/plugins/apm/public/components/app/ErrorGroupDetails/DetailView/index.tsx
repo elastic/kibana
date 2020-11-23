@@ -20,8 +20,7 @@ import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { px, unit, units } from '../../../../style/variables';
@@ -56,7 +55,9 @@ const TransactionLinkName = styled.div`
 `;
 
 interface Props {
-  errorGroup: ErrorGroupAPIResponse;
+  errorGroup: APIReturnType<
+    'GET /api/apm/services/{serviceName}/errors/{groupId}'
+  >;
   urlParams: IUrlParams;
   location: Location;
 }

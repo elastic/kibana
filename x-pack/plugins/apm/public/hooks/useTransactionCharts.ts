@@ -6,7 +6,7 @@
 
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { getTransactionCharts } from '../selectors/chartSelectors';
+import { getTransactionCharts } from '../selectors/chart_selectors';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
 
@@ -21,7 +21,8 @@ export function useTransactionCharts() {
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/transaction_groups/charts',
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transaction_groups/charts',
           params: {
             path: { serviceName },
             query: {
