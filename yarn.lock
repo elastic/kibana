@@ -10714,7 +10714,7 @@ cypress-promise@^1.1.0:
 
 cypress@^5.5.0:
   version "5.5.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-5.6.0.tgz#1da0355794a43247f8a80cb7f505e83e1cf847cb"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-5.5.0.tgz#1da0355794a43247f8a80cb7f505e83e1cf847cb"
   integrity sha512-UHEiTca8AUTevbT2pWkHQlxoHtXmbq+h6Eiu/Mz8DqpNkF98zjTBLv/HFiKJUU5rQzp9EwSWtms33p5TWCJ8tQ==
   dependencies:
     "@cypress/listr-verbose-renderer" "^0.4.1"
