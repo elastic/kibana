@@ -15,6 +15,7 @@ import { saveApmIndices } from '../../lib/settings/apm_indices/save_apm_indices'
 // get list of apm indices and values
 export const apmIndexSettingsRoute = createRoute({
   endpoint: 'GET /api/apm/settings/apm-index-settings',
+  options: { tags: ['access:apm'] },
   handler: async ({ context }) => {
     return await getApmIndexSettings({ context });
   },
@@ -23,6 +24,7 @@ export const apmIndexSettingsRoute = createRoute({
 // get apm indices configuration object
 export const apmIndicesRoute = createRoute({
   endpoint: 'GET /api/apm/settings/apm-indices',
+  options: { tags: ['access:apm'] },
   handler: async ({ context }) => {
     return await getApmIndices({
       savedObjectsClient: context.core.savedObjects.client,

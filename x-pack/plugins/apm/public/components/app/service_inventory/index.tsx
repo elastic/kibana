@@ -129,9 +129,9 @@ export function ServiceInventory() {
     <>
       <SearchBar />
       <EuiPage>
-        <Correlations />
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
+            <Correlations />
             <LocalUIFilters {...localFiltersConfig} />
           </EuiFlexItem>
           <EuiFlexItem grow={7}>

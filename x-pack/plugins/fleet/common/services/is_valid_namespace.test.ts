@@ -5,7 +5,7 @@
  */
 import { isValidNamespace } from './is_valid_namespace';
 
-describe('Ingest Manager - isValidNamespace', () => {
+describe('Fleet - isValidNamespace', () => {
   it('returns true for valid namespaces', () => {
     expect(isValidNamespace('default').valid).toBe(true);
     expect(isValidNamespace('namespace-with-dash').valid).toBe(true);
