@@ -15,10 +15,9 @@ import {
 import { JoinDescriptor } from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
 import { IField } from '../fields/field';
-import { IJoin } from './join';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
 
-export class InnerJoin implements IJoin {
+export class InnerJoin {
   private readonly _descriptor: JoinDescriptor;
   private readonly _rightSource?: ESTermSource;
   private readonly _leftField?: IField;
@@ -72,7 +71,7 @@ export class InnerJoin implements IJoin {
   }
 
   joinPropertiesToFeature(feature: Feature, propertiesMap: PropertiesMap): boolean {
-    if (!feature.properties) {
+    if (!feature.properties || !this._leftField) {
       return false;
     }
     const rightMetricFields = this._rightSource!.getMetricFields();
@@ -88,7 +87,6 @@ export class InnerJoin implements IJoin {
           featurePropertyKey.length >= stylePropertyPrefix.length &&
           featurePropertyKey.substring(0, stylePropertyPrefix.length) === stylePropertyPrefix
         ) {
-          // For some reason, ts compilation complains about this deletion
           if (feature.properties) {
             delete feature.properties[featurePropertyKey];
           }
@@ -96,10 +94,10 @@ export class InnerJoin implements IJoin {
       });
     }
 
-    const joinKey = this._leftField ? feature.properties[this._leftField.getName()] : undefined;
+    const joinKey = feature.properties[this._leftField.getName()];
     const coercedKey =
       typeof joinKey === 'undefined' || joinKey === null ? null : joinKey.toString();
-    if (propertiesMap && coercedKey !== null && propertiesMap.has(coercedKey)) {
+    if (coercedKey !== null && propertiesMap.has(coercedKey)) {
       Object.assign(feature.properties, propertiesMap.get(coercedKey));
       return true;
     } else {
