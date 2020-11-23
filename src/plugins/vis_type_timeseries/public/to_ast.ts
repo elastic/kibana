@@ -17,25 +17,17 @@
  * under the License.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { Vis } from '../../visualizations/public';
+import { TimeseriesExpressionFunctionDefinition, TimeseriesVisParams } from './metrics_fn';
 
-export function NoDataComponent() {
-  return (
-    <div className="visError" data-test-subj="noTSVBDataMessage">
-      <EuiText size="xs" color="subdued">
-        <EuiIcon type="visualizeApp" size="m" color="subdued" aria-hidden="true" />
+export const toExpressionAst = (vis: Vis<TimeseriesVisParams>) => {
+  const timeseries = buildExpressionFunction<TimeseriesExpressionFunctionDefinition>('tsvb', {
+    params: JSON.stringify(vis.params),
+    uiState: JSON.stringify(vis.uiState),
+  });
 
-        <EuiSpacer size="s" />
+  const ast = buildExpression([timeseries]);
 
-        <p>
-          <FormattedMessage
-            id="visTypeTimeseries.noDataDescription"
-            defaultMessage="No data to display for the selected metrics"
-          />
-        </p>
-      </EuiText>
-    </div>
-  );
-}
+  return ast.toAst();
+};
