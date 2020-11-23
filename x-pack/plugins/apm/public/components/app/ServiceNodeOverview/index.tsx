@@ -130,7 +130,7 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
       }),
       field: 'cpu',
       sortable: true,
-      render: (value: number | null) => asPercent(value || 0, 1),
+      render: (value: number | null) => asPercent(value, 1),
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {
