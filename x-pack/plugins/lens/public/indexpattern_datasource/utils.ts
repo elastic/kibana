@@ -42,7 +42,7 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
   );
 }
 
-export function hasInvalidFields(state: IndexPatternPrivateState) {
+export function hasInvalidColumns(state: IndexPatternPrivateState) {
   return getInvalidLayers(state).length > 0;
 }
 
