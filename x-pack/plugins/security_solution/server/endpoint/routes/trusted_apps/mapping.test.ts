@@ -206,6 +206,25 @@ describe('mapping', () => {
         })
       );
     });
+
+    it('should lowercase hash condition value', function () {
+      testMapping(
+        {
+          name: 'MD5 trusted app',
+          description: 'MD5 Trusted App',
+          os: 'linux',
+          entries: [
+            createConditionEntry(ConditionEntryField.HASH, '1234234659Af249ddf3e40864E9FB241'),
+          ],
+        },
+        createExceptionListItemOptions({
+          name: 'MD5 trusted app',
+          description: 'MD5 Trusted App',
+          osTypes: ['linux'],
+          entries: [createEntryMatch('process.hash.md5', '1234234659af249ddf3e40864e9fb241')],
+        })
+      );
+    });
   });
 
   describe('exceptionListItemToTrustedApp', () => {
