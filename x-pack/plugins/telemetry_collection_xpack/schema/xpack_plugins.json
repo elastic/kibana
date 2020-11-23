@@ -1778,30 +1778,6 @@
         }
       }
     },
-    "infraops": {
-      "properties": {
-        "last_24_hours": {
-          "properties": {
-            "hits": {
-              "properties": {
-                "infraops_hosts": {
-                  "type": "long"
-                },
-                "infraops_docker": {
-                  "type": "long"
-                },
-                "infraops_kubernetes": {
-                  "type": "long"
-                },
-                "logs": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "ingest_manager": {
       "properties": {
         "fleet_enabled": {
@@ -1835,6 +1811,30 @@
               },
               "enabled": {
                 "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "infraops": {
+      "properties": {
+        "last_24_hours": {
+          "properties": {
+            "hits": {
+              "properties": {
+                "infraops_hosts": {
+                  "type": "long"
+                },
+                "infraops_docker": {
+                  "type": "long"
+                },
+                "infraops_kubernetes": {
+                  "type": "long"
+                },
+                "logs": {
+                  "type": "long"
+                }
               }
             }
           }
@@ -3131,6 +3131,50 @@
             },
             "total": {
               "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "saved_objects_tagging": {
+      "properties": {
+        "usedTags": {
+          "type": "integer"
+        },
+        "taggedObjects": {
+          "type": "integer"
+        },
+        "types": {
+          "properties": {
+            "dashboard": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "visualization": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "map": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
