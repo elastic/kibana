@@ -94,8 +94,7 @@ export const EndpointDetailsFlyout = memo(() => {
                 style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                 data-test-subj="endpointDetailsFlyoutTitle"
               >
-                {' '}
-                {details?.host?.hostname}{' '}
+                {details?.host?.hostname}
               </h2>
             </EuiTitle>
           </EuiToolTip>
