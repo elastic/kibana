@@ -23,10 +23,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiFormRow, EuiRadio, EuiIconTip, EuiComboBox, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { SavedObjectDashboard } from '../../../../plugins/dashboard/public';
 import { SavedObjectsClientContract } from '../../../../core/public';
+import { SavedObjectDashboard } from '../../../../plugins/dashboard/public';
 
-import { OnSaveProps, SaveModalState, SavedObjectSaveModal } from '.';
+import {
+  OnSaveProps,
+  SaveModalState,
+  SavedObjectSaveModal,
+} from '../../../../plugins/saved_objects/public';
 
 interface SaveModalDocumentInfo {
   id?: string;
@@ -43,16 +47,16 @@ export interface DashboardSaveModalProps {
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
 }
 
-interface SmallDashboard {
+interface DashboardOption {
   label: string;
   value: string;
 }
 
 export function SavedObjectSaveModalDashboard(props: DashboardSaveModalProps) {
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>('existing');
-  const [dashboards, setDashboards] = useState<SmallDashboard[]>([]);
+  const [dashboards, setDashboards] = useState<DashboardOption[]>([]);
   const [isLoadingDashboards, setIsLoadingDashboards] = useState(true);
-  const [selectedDashboard, setSelectedDashboard] = useState<SmallDashboard | null>(null);
+  const [selectedDashboard, setSelectedDashboard] = useState<DashboardOption | null>(null);
 
   const { documentInfo, savedObjectsClient, tagOptions } = props;
 

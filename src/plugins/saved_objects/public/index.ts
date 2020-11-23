@@ -22,8 +22,6 @@ import { SavedObjectsPublicPlugin } from './plugin';
 export {
   OnSaveProps,
   SavedObjectSaveModal,
-  SavedObjectSaveModalDashboard,
-  DashboardSaveModalProps,
   SavedObjectSaveModalOrigin,
   OriginSaveModalProps,
   SaveModalState,

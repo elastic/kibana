@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export { SavedObjectSaveModal, OnSaveProps, SaveModalState } from './saved_object_save_modal';
-export { SavedObjectSaveModalOrigin, OriginSaveModalProps } from './saved_object_save_modal_origin';
-export { showSaveModal, SaveResult } from './show_saved_object_save_modal';
+export const PLUGIN_ID = 'presentationUtil';
+export const PLUGIN_NAME = 'presentationUtil';

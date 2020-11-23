@@ -26,10 +26,10 @@ import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualiza
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
-  SavedObjectSaveModalDashboard,
   SavedObjectSaveOpts,
   OnSaveProps,
 } from '../../../../saved_objects/public';
+import { SavedObjectSaveModalDashboard } from '../../../../presentation_util/public';
 import { unhashUrl } from '../../../../kibana_utils/public';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 

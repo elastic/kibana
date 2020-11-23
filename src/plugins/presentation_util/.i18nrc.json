@@ -1,0 +1,7 @@
+{
+  "prefix": "presentationUtil",
+  "paths": {
+    "presentationUtil": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
