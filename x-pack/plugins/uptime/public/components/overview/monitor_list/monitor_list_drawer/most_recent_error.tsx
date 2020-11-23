@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { MonitorPageLink } from '../../../common/monitor_page_link';
 import { useGetUrlParams } from '../../../../hooks';
 import { stringifyUrlParams } from '../../../../lib/helper/stringify_url_params';
-import { MonitorError } from '../../../../../common/runtime_types';
+import { PingError } from '../../../../../common/runtime_types';
 
 interface MostRecentErrorProps {
   /**
    * error returned from API for monitor details
    */
-  error: MonitorError | undefined;
+  error: PingError | undefined;
 
   /**
    * monitorId to be used for link to detail page
