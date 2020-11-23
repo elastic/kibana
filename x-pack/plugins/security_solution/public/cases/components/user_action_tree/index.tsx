@@ -380,7 +380,7 @@ export const UserActionTree = React.memo(
               ];
             }
 
-            // description, comments, tags
+            // title, description, comments, tags
             if (
               action.actionField.length === 1 &&
               ['title', 'description', 'comment', 'tags'].includes(action.actionField[0])

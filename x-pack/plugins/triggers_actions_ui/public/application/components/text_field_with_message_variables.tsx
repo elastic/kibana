@@ -16,6 +16,7 @@ interface Props {
   inputTargetValue?: string;
   editAction: (property: string, value: any, index: number) => void;
   errors?: string[];
+  defaultValue?: string | number | string[];
 }
 
 export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
@@ -25,6 +26,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   inputTargetValue,
   editAction,
   errors,
+  defaultValue,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLInputElement | null>(null);
 
@@ -51,6 +53,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       data-test-subj={`${paramsProperty}Input`}
       value={inputTargetValue || ''}
+      defaultValue={defaultValue}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
       onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
         setCurrentTextElement(e.target);
