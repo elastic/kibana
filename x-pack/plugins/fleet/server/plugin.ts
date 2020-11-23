@@ -51,7 +51,12 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import { EsAssetReference, IngestManagerConfigType, NewPackagePolicy } from '../common';
+import {
+  EsAssetReference,
+  IngestManagerConfigType,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../common';
 import {
   appContextService,
   licenseService,
@@ -112,14 +117,23 @@ const allSavedObjectTypes = [
 /**
  * Callbacks supported by the Ingest plugin
  */
-export type ExternalCallback = [
-  'packagePolicyCreate',
-  (
-    newPackagePolicy: NewPackagePolicy,
-    context: RequestHandlerContext,
-    request: KibanaRequest
-  ) => Promise<NewPackagePolicy>
-];
+export type ExternalCallback =
+  | [
+      'packagePolicyCreate',
+      (
+        newPackagePolicy: NewPackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<NewPackagePolicy>
+    ]
+  | [
+      'packagePolicyUpdate',
+      (
+        newPackagePolicy: UpdatePackagePolicy,
+        context: RequestHandlerContext,
+        request: KibanaRequest
+      ) => Promise<UpdatePackagePolicy>
+    ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
 

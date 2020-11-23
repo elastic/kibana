@@ -123,16 +123,37 @@ export const updatePackagePolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const logger = appContextService.getLogger();
+  const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
+
+  if (!packagePolicy) {
+    throw Boom.notFound('Package policy not found');
+  }
+
+  let newData = { ...request.body };
+  const pkg = newData.package || packagePolicy.package;
+  const inputs = newData.inputs || packagePolicy.inputs;
+
   try {
-    const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
+    const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyUpdate');
+    if (externalCallbacks && externalCallbacks.size > 0) {
+      let updatedNewData: NewPackagePolicy = newData;
 
-    if (!packagePolicy) {
-      throw Boom.notFound('Package policy not found');
+      for (const callback of externalCallbacks) {
+        try {
+          updatedNewData = UpdatePackagePolicyRequestSchema.body.validate(
+            await callback(updatedNewData, context, request)
+          );
+        } catch (error) {
+          logger.error(
+            'An external registered [ packagePolicyUpdate ] callback failed when executed.'
+          );
+          logger.error(error);
+          throw error;
+        }
+      }
+      newData = updatedNewData;
     }
-
-    const newData = { ...request.body };
-    const pkg = newData.package || packagePolicy.package;
-    const inputs = newData.inputs || packagePolicy.inputs;
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,

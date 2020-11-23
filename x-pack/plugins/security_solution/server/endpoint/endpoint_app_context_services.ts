@@ -12,7 +12,10 @@ import {
 import { SecurityPluginSetup } from '../../../security/server';
 import { AgentService, IngestManagerStartContract, PackageService } from '../../../fleet/server';
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
-import { getPackagePolicyCreateCallback } from './ingest_integration';
+import {
+  getPackagePolicyCreateCallback,
+  getPackagePolicyUpdateCallback,
+} from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import { MetadataQueryStrategy } from './types';
 import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
@@ -105,6 +108,11 @@ export class EndpointAppContextService {
           dependencies.security,
           dependencies.alerts
         )
+      );
+
+      dependencies.registerIngestCallback(
+        'packagePolicyUpdate',
+        getPackagePolicyUpdateCallback(dependencies.logger)
       );
     }
   }

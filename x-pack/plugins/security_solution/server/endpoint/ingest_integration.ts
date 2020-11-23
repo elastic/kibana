@@ -8,7 +8,7 @@ import { PluginStartContract as AlertsStartContract } from '../../../alerts/serv
 import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../fleet/server';
 import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
-import { NewPackagePolicy } from '../../../fleet/common/types/models';
+import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
@@ -20,6 +20,7 @@ import { AppClientFactory } from '../client';
 import { createDetectionIndex } from '../lib/detection_engine/routes/index/create_index_route';
 import { createPrepackagedRules } from '../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
 import { buildFrameworkRequest } from '../lib/timeline/routes/utils/common';
+import { licenseService } from '../lib/license/license';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;
@@ -163,4 +164,28 @@ export const getPackagePolicyCreateCallback = (
   };
 
   return handlePackagePolicyCreate;
+};
+
+export const getPackagePolicyUpdateCallback = (logger: Logger): ExternalCallback[1] => {
+  const handlePackagePolicyUpdate = async (
+    newPackagePolicy: NewPackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<UpdatePackagePolicy> => {
+    if (newPackagePolicy.package?.name !== 'endpoint') {
+      return newPackagePolicy;
+    }
+
+    logger.warn(`READY TO RETURN...`);
+
+    if (!licenseService.isPlatinumPlus()) {
+      // grab correct verbiage
+      throw new Error('Requires Platinum license');
+    }
+    // return newPackagePolicy;
+    /* const myError = new Error('erro message');
+    error.statusCode = 403;
+    return myError;*/
+  };
+  return handlePackagePolicyUpdate;
 };
