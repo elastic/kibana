@@ -15,6 +15,7 @@ import { UIProcessorEvent } from '../../common/processor_event';
 
 export const staticIndexPatternRoute = createRoute((core) => ({
   endpoint: 'POST /api/apm/index_pattern/static',
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const savedObjectsClient = await getInternalSavedObjectsClient(core);
@@ -37,6 +38,7 @@ export const dynamicIndexPatternRoute = createRoute({
       ]),
     }),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context }) => {
     const indices = await getApmIndices({
       config: context.config,
@@ -59,6 +61,7 @@ export const dynamicIndexPatternRoute = createRoute({
 
 export const apmIndexPatternTitleRoute = createRoute({
   endpoint: 'GET /api/apm/index_pattern/title',
+  options: { tags: ['access:apm'] },
   handler: async ({ context }) => {
     return getApmIndexPatternTitle(context);
   },

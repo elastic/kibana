@@ -52,6 +52,8 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
+  getDefaultLabel: (column, indexPattern) =>
+    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
   buildColumn({ field, previousColumn }) {
     return {
       label: ofName(field.displayName),
