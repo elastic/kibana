@@ -25,7 +25,6 @@ import { Setup as InspectorSetup } from '../../inspector/public';
 import {
   setNotifications,
   setData,
-  setSavedObjects,
   setInjectedVars,
   setUISettings,
   setMapsLegacyConfig,
@@ -100,7 +99,6 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public start(core: CoreStart, { data }: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
-    setSavedObjects(core.savedObjects);
     setData(data);
     setInjectedMetadata(core.injectedMetadata);
   }

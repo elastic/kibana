@@ -27,24 +27,19 @@ import { SavedObjectsClientCommon, SavedObject } from '..';
  * @param title {string}
  * @returns {Promise<SavedObject|undefined>}
  */
-export async function findByTitle(
-  client: SavedObjectsClientCommon,
-  title: string
-): Promise<SavedObject<any> | void> {
-  if (!title) {
-    return Promise.resolve();
+export async function findByTitle(client: SavedObjectsClientCommon, title: string) {
+  if (title) {
+    const savedObjects = await client.find({
+      type: 'index-pattern',
+      perPage: 10,
+      search: `"${title}"`,
+      searchFields: ['title'],
+      fields: ['title'],
+    });
+
+    return find(
+      savedObjects,
+      (obj: SavedObject<any>) => obj.attributes.title.toLowerCase() === title.toLowerCase()
+    );
   }
-
-  const savedObjects = await client.find({
-    type: 'index-pattern',
-    perPage: 10,
-    search: `"${title}"`,
-    searchFields: ['title'],
-    fields: ['title'],
-  });
-
-  return find(
-    savedObjects,
-    (obj: SavedObject<any>) => obj.attributes.title.toLowerCase() === title.toLowerCase()
-  );
 }

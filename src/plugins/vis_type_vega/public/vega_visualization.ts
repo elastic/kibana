@@ -20,13 +20,12 @@ import { i18n } from '@kbn/i18n';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { VegaParser } from './data_model/vega_parser';
 import { VegaVisualizationDependencies } from './plugin';
-import { getNotifications, getData, getSavedObjects } from './services';
+import { getNotifications, getData } from './services';
 import type { VegaView } from './vega_view/vega_view';
 
 export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizationDependencies) =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
-    private readonly savedObjectsClient = getSavedObjects();
     private vegaView: InstanceType<typeof VegaView> | null = null;
 
     constructor(
@@ -44,8 +43,7 @@ export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizatio
       let idxObj;
 
       if (index) {
-        // @ts-expect-error
-        idxObj = indexPatterns.findByTitle(this.savedObjectsClient, index);
+        idxObj = await indexPatterns.findByTitle(index);
         if (!idxObj) {
           throw new Error(
             i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {

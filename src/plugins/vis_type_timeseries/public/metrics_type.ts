@@ -91,13 +91,11 @@ export const metricsVisDefinition = {
     const indexes: string = params.index_pattern;
 
     if (indexes) {
-      const cachedIndexes = await indexPatterns.getIdsWithTitle();
-      const ids = indexes
-        .split(INDEXES_SEPARATOR)
-        .map((title) => cachedIndexes.find((i) => i.title === title)?.id)
-        .filter((id) => id);
-
-      return Promise.all(ids.map((id) => indexPatterns.get(id!)));
+      return (
+        await Promise.all(
+          indexes.split(INDEXES_SEPARATOR).map((title) => indexPatterns.findByTitle(title))
+        )
+      ).filter((index) => Boolean(index));
     }
 
     return [];
