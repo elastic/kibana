@@ -14,6 +14,7 @@ import {
   EuiDescriptionList,
   EuiCallOut,
   EuiSpacer,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -53,32 +54,34 @@ export const TestConnectorForm = ({
     {
       title: 'Create an action',
       children: ParamsFieldsComponent ? (
-        <Suspense
-          fallback={
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          <ParamsFieldsComponent
-            actionParams={actionParams}
-            index={0}
-            errors={actionErrors.errors}
-            editAction={(field, value) =>
-              setActionParams({
-                ...actionParams,
-                [field]: value,
-              })
+        <EuiErrorBoundary>
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             }
-            messageVariables={[]}
-            docLinks={docLinks}
-            http={http}
-            toastNotifications={toastNotifications}
-            actionConnector={connector}
-          />
-        </Suspense>
+          >
+            <ParamsFieldsComponent
+              actionParams={actionParams}
+              index={0}
+              errors={actionErrors.errors}
+              editAction={(field, value) =>
+                setActionParams({
+                  ...actionParams,
+                  [field]: value,
+                })
+              }
+              messageVariables={[]}
+              docLinks={docLinks}
+              http={http}
+              toastNotifications={toastNotifications}
+              actionConnector={connector}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
       ) : (
         <EuiText>
           <p>This Connector does not require any Action Parameter.</p>
