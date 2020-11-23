@@ -37,6 +37,8 @@ import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
 import { SourceRouter } from './source_router';
 
+import './sources.scss';
+
 export const SourcesRouter: React.FC = () => {
   const { pathname } = useLocation() as Location;
   const { hasPlatinumLicense } = useValues(LicensingLogic);
