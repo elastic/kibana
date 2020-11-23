@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -50,15 +50,16 @@ export const ShardSizeFilter: FC<Props> = ({ samplerShardSize, setSamplerShardSi
           data-test-subj="mlDataVisualizerShardSizeSelect"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIconTip
-          content={i18n.translate('xpack.ml.datavisualizer.searchPanel.queryBarPlaceholder', {
-            defaultMessage:
-              'Selecting a smaller sample size will reduce query run times and the load on the cluster.',
-          })}
-          position="right"
-        />
-      </EuiFlexItem>
+      {/* @TODO: check if we still want this*/}
+      {/* <EuiFlexItem grow={false}>*/}
+      {/*  <EuiIconTip*/}
+      {/*    content={i18n.translate('xpack.ml.datavisualizer.searchPanel.queryBarPlaceholder', {*/}
+      {/*      defaultMessage:*/}
+      {/*        'Selecting a smaller sample size will reduce query run times and the load on the cluster.',*/}
+      {/*    })}*/}
+      {/*    position="right"*/}
+      {/*  />*/}
+      {/* </EuiFlexItem>*/}
     </EuiFlexGroup>
   );
 };

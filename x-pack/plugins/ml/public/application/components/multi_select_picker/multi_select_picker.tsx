@@ -15,11 +15,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { FC, useEffect, useState } from 'react';
-
+// @ts-ignore
+import { FieldTypeIcon } from '../../../application/components/field_type_icon';
 export interface Option {
   name: string;
   checked?: 'on' | 'off';
   disabled?: boolean;
+  type?: string;
 }
 
 const NoFilterItems = () => {
@@ -108,8 +110,17 @@ export const MultiselectPicker: FC<{ options: Option[]; onChange: Function }> = 
               checked={item.checked}
               key={index}
               onClick={() => updateItem(index)}
+              style={{ flexDirection: 'row' }}
             >
               {item.name}
+              {item.type && (
+                <FieldTypeIcon
+                  type={item.type}
+                  fieldNames={item.name}
+                  tooltipEnabled={false}
+                  needsaria={true}
+                />
+              )}
             </EuiFilterSelectItem>
           ))
         ) : (

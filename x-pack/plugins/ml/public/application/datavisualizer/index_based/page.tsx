@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import React, { createContext, FC, Fragment, useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
@@ -53,7 +53,7 @@ import { ActionsPanel } from './components/actions_panel';
 import { FieldsPanel } from './components/fields_panel';
 import { SearchPanel } from './components/search_panel';
 import { DataLoader } from './data_loader';
-
+import { DocumentCountContent } from './components/field_data_card/content_types/document_count_content';
 interface DataVisualizerPageState {
   searchQuery: Query['query'];
   searchString: Query['query'];
@@ -71,6 +71,7 @@ interface DataVisualizerPageState {
   showAllNonMetrics: boolean;
   nonMetricShowFieldType: ML_JOB_FIELD_TYPES | '*';
   nonMetricFieldQuery?: string;
+  documentCountStats?: FieldVisConfig;
 }
 
 const defaultSearchQuery = {
@@ -99,8 +100,11 @@ function getDefaultPageState(): DataVisualizerPageState {
     populatedNonMetricFieldCount: 0,
     showAllNonMetrics: false,
     nonMetricShowFieldType: '*',
+    documentCountStats: undefined,
   };
 }
+
+export const DataVisualizerContext = createContext<DataVisualizerPageState>(getDefaultPageState());
 
 export const Page: FC = () => {
   const mlContext = useMlContext();
@@ -142,11 +146,7 @@ export const Page: FC = () => {
   indexPatternFields.forEach((field) => {
     if (field.scripted !== true) {
       const dataVisualizerType: ML_JOB_FIELD_TYPES | undefined = kbnTypeToMLJobType(field);
-      if (
-        dataVisualizerType !== undefined &&
-        !indexedFieldTypes.includes(dataVisualizerType) &&
-        dataVisualizerType !== ML_JOB_FIELD_TYPES.NUMBER
-      ) {
+      if (dataVisualizerType !== undefined && !indexedFieldTypes.includes(dataVisualizerType)) {
         indexedFieldTypes.push(dataVisualizerType);
       }
     }
@@ -175,6 +175,7 @@ export const Page: FC = () => {
   // TODO - type overallStats and stats
   const [overallStats, setOverallStats] = useState(defaults.overallStats);
 
+  const [documentCountStats, setDocumentCountStats] = useState(defaults.documentCountStats);
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [totalMetricFieldCount, setTotalMetricFieldCount] = useState(
     defaults.totalMetricFieldCount
@@ -364,6 +365,8 @@ export const Page: FC = () => {
               (fieldStats: any) => fieldStats.fieldName === config.fieldName
             ),
           };
+          configWithStats.loading = false;
+          configs.push(configWithStats);
         } else {
           // Document count card.
           configWithStats.stats = metricFieldStats.find(
@@ -373,9 +376,8 @@ export const Page: FC = () => {
           // Add earliest / latest of timefilter for setting x axis domain.
           configWithStats.stats.timeRangeEarliest = earliest;
           configWithStats.stats.timeRangeLatest = latest;
+          setDocumentCountStats(configWithStats);
         }
-        configWithStats.loading = false;
-        configs.push(configWithStats);
       });
 
       setMetricConfigs(configs);
@@ -701,7 +703,11 @@ export const Page: FC = () => {
                       />
                     </EuiText>
                   </EuiFlexItem>
-                  <EuiSpacer size={'m'} />
+                  {documentCountStats && (
+                    <EuiFlexItem grow={true}>
+                      <DocumentCountContent config={documentCountStats} />
+                    </EuiFlexItem>
+                  )}
 
                   <SearchPanel
                     indexPattern={currentIndexPattern}

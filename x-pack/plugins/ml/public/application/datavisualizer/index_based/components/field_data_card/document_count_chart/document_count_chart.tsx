@@ -18,19 +18,14 @@ import {
   Settings,
 } from '@elastic/charts';
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-
-import { useUiSettings } from '../../../../../contexts/kibana/use_ui_settings_context';
-
 export interface DocumentCountChartPoint {
   time: number | string;
   value: number;
 }
 
 interface Props {
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   chartPoints: DocumentCountChartPoint[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
@@ -56,21 +51,15 @@ export const DocumentCountChart: FC<Props> = ({
 
   const dateFormatter = niceTimeFormatter([timeRangeEarliest, timeRangeLatest]);
 
-  const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
-  const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
-  const EVENT_RATE_COLOR = themeName.euiColorVis2;
-
   return (
-    <div style={{ width, height }} data-test-subj="mlFieldDataCardDocumentCountChart">
-      <Chart>
-        <Settings
-          xDomain={xDomain}
-          theme={{
-            colors: {
-              vizColors: [EVENT_RATE_COLOR],
-            },
-          }}
-        />
+    <div style={{ width: width ?? '100%' }} data-test-subj="mlFieldDataCardDocumentCountChart">
+      <Chart
+        size={{
+          width: '100%',
+          height: 120,
+        }}
+      >
+        <Settings xDomain={xDomain} />
         <Axis
           id="bottom"
           position={Position.Bottom}

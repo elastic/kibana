@@ -37,6 +37,7 @@ export const DatavisualizerFieldTypeFilter: FC<{
   const options: Option[] = useMemo(() => {
     return indexedFieldTypes.map((indexedFieldName) => ({
       ...ML_JOB_FIELD_TYPES_OPTIONS[indexedFieldName],
+      type: indexedFieldName,
     }));
   }, [indexedFieldTypes]);
   return <MultiselectPicker options={options} onChange={() => {}} />;

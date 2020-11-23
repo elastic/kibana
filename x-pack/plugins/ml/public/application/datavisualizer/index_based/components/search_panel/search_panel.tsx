@@ -6,16 +6,8 @@
 
 import React, { FC, useState } from 'react';
 
-import {
-  EuiCode,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiIconTip,
-  EuiInputPopover,
-  EuiSuperSelect,
-} from '@elastic/eui';
+import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiInputPopover } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
@@ -136,28 +128,6 @@ export const SearchPanel: FC<Props> = ({
       </EuiFlexItem>
       <DatavisualizerFieldNameFilter overallStats={overallStats} />
       <DatavisualizerFieldTypeFilter indexedFieldTypes={indexedFieldTypes} />
-      {/* <EuiFlexItem grow={false}>*/}
-      {/*  <EuiSuperSelect*/}
-      {/*    options={searchSizeOptions}*/}
-      {/*    valueOfSelected={String(samplerShardSize)}*/}
-      {/*    onChange={(value) => setSamplerShardSize(+value)}*/}
-      {/*    aria-label={i18n.translate('xpack.ml.datavisualizer.searchPanel.sampleSizeAriaLabel', {*/}
-      {/*      defaultMessage: 'Field Name',*/}
-      {/*    })}*/}
-      {/*    data-test-subj="mlDataVisualizerFieldNameSelect"*/}
-      {/*  />*/}
-      {/* </EuiFlexItem>*/}
-      {/* <EuiFlexItem grow={false}>*/}
-      {/*  <EuiSuperSelect*/}
-      {/*    options={searchSizeOptions}*/}
-      {/*    valueOfSelected={String(samplerShardSize)}*/}
-      {/*    onChange={(value) => setSamplerShardSize(+value)}*/}
-      {/*    aria-label={i18n.translate('xpack.ml.datavisualizer.searchPanel.sampleSizeAriaLabel', {*/}
-      {/*      defaultMessage: 'Field type',*/}
-      {/*    })}*/}
-      {/*    data-test-subj="mlDataVisualizerFieldTypeSelect"*/}
-      {/*  />*/}
-      {/* </EuiFlexItem>*/}
 
       <EuiFlexItem grow={false} />
     </EuiFlexGroup>
