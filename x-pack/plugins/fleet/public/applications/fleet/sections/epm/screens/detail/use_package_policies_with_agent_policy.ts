@@ -100,7 +100,7 @@ export const usePackagePoliciesWithAgentPolicy = (
     const agentPoliciesById: Record<string, GetAgentPoliciesResponseItem> = {};
 
     if (agentPoliciesData?.items) {
-      for (const agentPolicy of agentPoliciesData?.items) {
+      for (const agentPolicy of agentPoliciesData.items) {
         agentPoliciesById[agentPolicy.id] = agentPolicy;
       }
     }
