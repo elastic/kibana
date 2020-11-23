@@ -21,7 +21,7 @@ describe('EventFieldsBrowser', () => {
   const mount = useMountAppended();
 
   describe('column headers', () => {
-    ['Field', 'Value', 'Description'].forEach((header) => {
+    ['Field', 'Value'].forEach((header) => {
       test(`it renders the ${header} column header`, () => {
         const wrapper = mount(
           <TestProviders>
@@ -229,8 +229,15 @@ describe('EventFieldsBrowser', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('.euiTableRow').find('.euiTableRowCell').at(3).text()).toContain(
-        'DescriptionDate/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events. Example: 2016-05-23T08:05:34.853Z'
+      expect(
+        wrapper
+          .find('.euiTableRow')
+          .find('.euiTableRowCell')
+          .at(1)
+          .find('EuiIconTip')
+          .prop('content')
+      ).toContain(
+        'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events. Example: 2016-05-23T08:05:34.853Z'
       );
     });
   });

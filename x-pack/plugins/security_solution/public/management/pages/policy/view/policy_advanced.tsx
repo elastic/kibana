@@ -48,7 +48,7 @@ export const AdvancedPolicyForms = React.memo(() => {
           />
         </h4>
       </EuiText>
-      <EuiPanel paddingSize="s">
+      <EuiPanel data-test-subj="advancedPolicyPanel" paddingSize="s">
         {AdvancedPolicySchema.map((advancedField, index) => {
           const configPath = advancedField.key.split('.');
           return (
@@ -114,7 +114,12 @@ const PolicyAdvanced = React.memo(
             </EuiText>
           }
         >
-          <EuiFieldText fullWidth value={value as string} onChange={onChange} />
+          <EuiFieldText
+            data-test-subj={configPath.join('.')}
+            fullWidth
+            value={value as string}
+            onChange={onChange}
+          />
         </EuiFormRow>
       </>
     );
