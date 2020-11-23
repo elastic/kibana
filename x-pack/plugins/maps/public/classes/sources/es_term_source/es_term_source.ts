@@ -56,7 +56,9 @@ export class ESTermSource extends AbstractESAggSource {
     }
     return {
       ...normalizedDescriptor,
-      indexPatternTitle: descriptor.indexPatternTitle ? descriptor.indexPatternTitle : '',
+      indexPatternTitle: descriptor.indexPatternTitle
+        ? descriptor.indexPatternTitle
+        : descriptor.indexPatternId,
       term: descriptor.term!,
       type: SOURCE_TYPES.ES_TERM_SOURCE,
     };

@@ -67,7 +67,10 @@ export class InnerJoin {
   }
 
   getLeftField(): IField {
-    return this._leftField!;
+    if (!this._leftField) {
+      throw new Error('Cannot get leftField from InnerJoin with incomplete config');
+    }
+    return this._leftField;
   }
 
   joinPropertiesToFeature(feature: Feature, propertiesMap: PropertiesMap): boolean {
@@ -87,9 +90,7 @@ export class InnerJoin {
           featurePropertyKey.length >= stylePropertyPrefix.length &&
           featurePropertyKey.substring(0, stylePropertyPrefix.length) === stylePropertyPrefix
         ) {
-          if (feature.properties) {
-            delete feature.properties[featurePropertyKey];
-          }
+          delete feature.properties![featurePropertyKey];
         }
       });
     }
@@ -106,7 +107,10 @@ export class InnerJoin {
   }
 
   getRightJoinSource() {
-    return this._rightSource!;
+    if (!this._rightSource) {
+      throw new Error('Cannot get rightSource from InnerJoin with incomplete config');
+    }
+    return this._rightSource;
   }
 
   toDescriptor(): JoinDescriptor {
