@@ -158,7 +158,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
 }
 
 interface BaseBuildColumnArgs {
-  columns: Record<string, IndexPatternColumn>;
+  layer: IndexPatternLayer;
   indexPattern: IndexPattern;
 }
 
@@ -256,7 +256,6 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
-      columnOrder: string[];
       referenceIds: string[];
       previousColumn?: IndexPatternColumn;
     }
