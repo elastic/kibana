@@ -823,7 +823,11 @@ export interface SafeLegacyEndpointEvent {
 /**
  * The response body for the resolver '/entity' index API
  */
-export type ResolverEntityIndex = Array<{ entity_id: string }>;
+export type ResolverEntityIndex = Array<{
+  name: string;
+  schema: { id: string; parent: string; ancestry?: string };
+  id: string;
+}>;
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.

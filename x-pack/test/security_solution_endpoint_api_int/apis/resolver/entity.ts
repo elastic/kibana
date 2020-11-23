@@ -29,8 +29,14 @@ export default function ({ getService }: FtrProviderContext) {
       );
       expect(body).eql([
         {
+          name: 'endpoint',
+          schema: {
+            id: 'process.entity_id',
+            parent: 'process.parent.entity_id',
+            ancestry: 'process.Ext.ancestry',
+          },
           // this value is from the es archive
-          entity_id:
+          id:
             'MTIwNWY1NWQtODRkYS00MzkxLWIyNWQtYTNkNGJmNDBmY2E1LTc1NTItMTMyNDM1NDY1MTQuNjI0MjgxMDA=',
         },
       ]);

@@ -3,10 +3,61 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RequestHandler } from 'kibana/server';
+import _ from 'lodash';
+import { RequestHandler, SearchResponse } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
+import { ApiResponse } from '@elastic/elasticsearch';
 import { validateEntities } from '../../../../common/endpoint/schema/resolver';
 import { ResolverEntityIndex } from '../../../../common/endpoint/types';
+
+interface SupportedSchema {
+  name: string;
+  constraint: { field: string; value: string };
+  schema: {
+    id: string;
+    parent: string;
+    ancestry?: string;
+  };
+}
+
+/**
+ * This structure defines the preset supported schemas for a resolver graph. We'll probably want convert this
+ * implementation to something similar to how row renderers is implemented.
+ */
+const supportedSchemas: SupportedSchema[] = [
+  {
+    name: 'endpoint',
+    constraint: {
+      field: 'agent.type',
+      value: 'endpoint',
+    },
+    schema: {
+      id: 'process.entity_id',
+      parent: 'process.parent.entity_id',
+      ancestry: 'process.Ext.ancestry',
+    },
+  },
+  {
+    name: 'winlogbeat',
+    constraint: {
+      field: 'agent.type',
+      value: 'winlogbeat',
+    },
+    schema: {
+      id: 'process.entity_id',
+      parent: 'process.parent.entity_id',
+    },
+  },
+];
+
+function getFieldAsString(doc: unknown, field: string): string | undefined {
+  const value = _.get(doc, field);
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return String(value);
+}
 
 /**
  * This is used to get an 'entity_id' which is an internal-to-Resolver concept, from an `_id`, which
@@ -18,61 +69,46 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
       query: { _id, indices },
     } = request;
 
-    /**
-     * A safe type for the response based on the semantics of the query.
-     * We specify _source, asking for `process.entity_id` and we only
-     * accept documents that have it.
-     * Also, we only request 1 document.
-     */
-    interface ExpectedQueryResponse {
-      hits: {
-        hits:
-          | []
-          | [
+    const queryResponse: ApiResponse<
+      SearchResponse<unknown>
+    > = await context.core.elasticsearch.client.asCurrentUser.search({
+      ignore_unavailable: true,
+      index: indices,
+      body: {
+        // only return 1 match at most
+        size: 1,
+        query: {
+          bool: {
+            filter: [
               {
-                _source: {
-                  process?: {
-                    entity_id?: string;
-                  };
-                };
-              }
-            ];
-      };
-    }
-
-    const queryResponse: ExpectedQueryResponse = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-      'search',
-      {
-        ignoreUnavailable: true,
-        index: indices,
-        body: {
-          // only return process.entity_id
-          _source: 'process.entity_id',
-          // only return 1 match at most
-          size: 1,
-          query: {
-            bool: {
-              filter: [
-                {
-                  // only return documents with the matching _id
-                  ids: {
-                    values: _id,
-                  },
+                // only return documents with the matching _id
+                ids: {
+                  values: _id,
                 },
-              ],
-            },
+              },
+            ],
           },
         },
-      }
-    );
+      },
+    });
 
     const responseBody: ResolverEntityIndex = [];
-    for (const hit of queryResponse.hits.hits) {
-      // check that the field is defined and that is not an empty string
-      if (hit._source.process?.entity_id) {
-        responseBody.push({
-          entity_id: hit._source.process.entity_id,
-        });
+    for (const hit of queryResponse.body.hits.hits) {
+      for (const supportedSchema of supportedSchemas) {
+        const fieldValue = getFieldAsString(hit._source, supportedSchema.constraint.field);
+        const id = getFieldAsString(hit._source, supportedSchema.schema.id);
+        // check that the constraint and id fields are defined and that the id field is not an empty string
+        if (
+          fieldValue?.toLowerCase() === supportedSchema.constraint.value.toLowerCase() &&
+          id !== undefined &&
+          id !== ''
+        ) {
+          responseBody.push({
+            name: supportedSchema.name,
+            schema: supportedSchema.schema,
+            id,
+          });
+        }
       }
     }
     return response.ok({ body: responseBody });
