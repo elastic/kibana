@@ -7,10 +7,8 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('security app - login selector', function () {
-    this.tags('ciGroup4');
-
-    loadTestFile(require.resolve('./basic_functionality'));
-    loadTestFile(require.resolve('./auth_provider_hint'));
+  describe('security APIs - Anonymous access', function () {
+    this.tags('ciGroup6');
+    loadTestFile(require.resolve('./login'));
   });
 }
