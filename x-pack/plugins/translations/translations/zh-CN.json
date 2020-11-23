@@ -4030,7 +4030,6 @@
     "visTypeTimeseries.movingAverage.windowSizeHint": "窗口必须始终至少是期间大小的两倍",
     "visTypeTimeseries.movingAverage.windowSizeLabel": "窗口大小",
     "visTypeTimeseries.noButtonLabel": "否",
-    "visTypeTimeseries.noDataDescription": "所选指标没有可显示的数据",
     "visTypeTimeseries.percentile.aggregationLabel": "聚合",
     "visTypeTimeseries.percentile.fieldLabel": "字段",
     "visTypeTimeseries.percentile.fillToLabel": "填充到：",

@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiText, EuiToolTip } from '@elastic/eui';
 
-import { FieldTypeIcon } from '../field_type_icon';
-import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
 import { i18n } from '@kbn/i18n';
 
-export function FieldTitleBar({ card }) {
-  // don't render and fail gracefully if card prop isn't set
-  if (typeof card !== 'object' || card === null) {
-    return null;
-  }
+import { FieldTypeIcon } from '../field_type_icon';
+import { FieldVisConfig } from '../../datavisualizer/index_based/common';
+import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
 
+interface Props {
+  card: FieldVisConfig;
+}
+
+export const FieldTitleBar: FC<Props> = ({ card }) => {
   const fieldName =
     card.fieldName ||
     i18n.translate('xpack.ml.fieldTitleBar.documentCountLabel', {
@@ -37,20 +37,23 @@ export function FieldTitleBar({ card }) {
   }
 
   if (card.isUnsupportedType !== true) {
-    cardTitleAriaLabel.unshift(getMLJobTypeAriaLabel(card.type));
+    // All the supported field types have aria labels.
+    cardTitleAriaLabel.unshift(getMLJobTypeAriaLabel(card.type)!);
   }
 
   return (
     <EuiText className={classNames.join(' ')}>
-      <FieldTypeIcon type={card.type} tooltipEnabled={true} needsAria={false} />
+      <FieldTypeIcon
+        type={card.type}
+        fieldName={card.fieldName}
+        tooltipEnabled={true}
+        needsAria={false}
+      />
       <EuiToolTip position="left" content={fieldName}>
-        <div className="field-name" tabIndex="0" aria-label={`${cardTitleAriaLabel.join(', ')}`}>
+        <div className="field-name" tabIndex={0} aria-label={`${cardTitleAriaLabel.join(', ')}`}>
           {fieldName}
         </div>
       </EuiToolTip>
     </EuiText>
   );
-}
-FieldTitleBar.propTypes = {
-  card: PropTypes.object.isRequired,
 };
