@@ -181,7 +181,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       // replace panel can be called with generateNewId in order to totally destroy and recreate the embeddable
       panels = { ...this.input.panels };
       delete panels[previousPanelState.explicitInput.id];
-      const newId = newPanelState.explicitInput?.id ?? uuid.v4();
+      const newId = uuid.v4();
       panels[newId] = {
         ...previousPanelState,
         ...newPanelState,

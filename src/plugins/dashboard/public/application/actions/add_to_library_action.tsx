@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import uuid from 'uuid';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
 import {
@@ -89,7 +88,7 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
 
     const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
-      explicitInput: { ...newInput, id: uuid.v4() },
+      explicitInput: { ...newInput },
     };
     dashboard.replacePanel(panelToReplace, newPanel, true);
 
