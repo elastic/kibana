@@ -19376,7 +19376,6 @@
     "xpack.spaces.management.shareToSpace.shareToSpacesButton": "保存して閉じる",
     "xpack.spaces.management.shareToSpace.shareWarningBody": "1つのスペースでのみ編集するには、{makeACopyLink}してください。",
     "xpack.spaces.management.shareToSpace.shareWarningLink": "コピーを作成",
-    "xpack.spaces.management.shareToSpace.shareWarningTitle": "共有オブジェクトの編集は、すべてのスペースで変更を適用します。",
     "xpack.spaces.management.shareToSpace.showLessSpacesLink": "縮小表示",
     "xpack.spaces.management.shareToSpace.showMoreSpacesLink": "他{count}件",
     "xpack.spaces.management.shareToSpace.spacesLoadErrorTitle": "利用可能なスペースを読み込み中にエラーが発生",

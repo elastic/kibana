@@ -19395,7 +19395,6 @@
     "xpack.spaces.management.shareToSpace.shareToSpacesButton": "保存并关闭",
     "xpack.spaces.management.shareToSpace.shareWarningBody": "要仅在一个工作区中编辑，请改为{makeACopyLink}。",
     "xpack.spaces.management.shareToSpace.shareWarningLink": "创建副本",
-    "xpack.spaces.management.shareToSpace.shareWarningTitle": "编辑共享对象会在所有工作区中应用更改",
     "xpack.spaces.management.shareToSpace.showLessSpacesLink": "显示更少",
     "xpack.spaces.management.shareToSpace.showMoreSpacesLink": "另外 {count} 个",
     "xpack.spaces.management.shareToSpace.spacesLoadErrorTitle": "加载可用工作区时出错",
