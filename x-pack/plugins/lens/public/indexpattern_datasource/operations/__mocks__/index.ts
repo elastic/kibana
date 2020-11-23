@@ -6,12 +6,14 @@
 
 const actualOperations = jest.requireActual('../operations');
 const actualHelpers = jest.requireActual('../layer_helpers');
+const actualMocks = jest.requireActual('../mocks');
 
 jest.spyOn(actualOperations.operationDefinitionMap.date_histogram, 'paramEditor');
 jest.spyOn(actualOperations.operationDefinitionMap.terms, 'onOtherColumnChanged');
 jest.spyOn(actualHelpers, 'insertOrReplaceColumn');
 jest.spyOn(actualHelpers, 'insertNewColumn');
 jest.spyOn(actualHelpers, 'replaceColumn');
+jest.spyOn(actualHelpers, 'getErrorMessages');
 
 export const {
   getAvailableOperationsByMetadata,
@@ -35,4 +37,8 @@ export const {
   updateLayerIndexPattern,
   mergeLayer,
   isColumnTransferable,
+  getErrorMessages,
+  isReferenced,
 } = actualHelpers;
+
+export const { createMockedReferenceOperation } = actualMocks;

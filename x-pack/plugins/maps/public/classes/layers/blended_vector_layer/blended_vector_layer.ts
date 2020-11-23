@@ -36,6 +36,7 @@ import {
   LayerDescriptor,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
+  VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { LICENSED_FEATURES } from '../../../licensed_features';
@@ -79,13 +80,15 @@ function getClusterStyleDescriptor(
   clusterSource: ESGeoGridSource
 ): VectorStyleDescriptor {
   const defaultDynamicProperties = getDefaultDynamicProperties();
-  const clusterStyleDescriptor: VectorStyleDescriptor = {
+  const clusterStyleDescriptor: Omit<VectorStyleDescriptor, 'properties'> & {
+    properties: Partial<VectorStylePropertiesDescriptor>;
+  } = {
     type: LAYER_STYLE_TYPE.VECTOR,
     properties: {
       [VECTOR_STYLES.LABEL_TEXT]: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]!.options,
+          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
           field: {
             name: COUNT_PROP_NAME,
             origin: FIELD_ORIGIN.SOURCE,
@@ -95,7 +98,7 @@ function getClusterStyleDescriptor(
       [VECTOR_STYLES.ICON_SIZE]: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
           field: {
             name: COUNT_PROP_NAME,
             origin: FIELD_ORIGIN.SOURCE,
@@ -157,7 +160,7 @@ function getClusterStyleDescriptor(
       }
     });
 
-  return clusterStyleDescriptor;
+  return clusterStyleDescriptor as VectorStyleDescriptor;
 }
 
 export interface BlendedVectorLayerArguments {
