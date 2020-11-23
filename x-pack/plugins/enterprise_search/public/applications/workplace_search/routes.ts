@@ -44,7 +44,6 @@ export const CUSTOM_API_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-sourc
 export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL = `${CUSTOM_SOURCE_DOCS_URL}#custom-api-source-document-level-access-control`;
 export const ENT_SEARCH_LICENSE_MANAGEMENT = `${ENT_SEARCH_DOCS_PREFIX}/license-management.html`;
 
-export const ORG_PATH = '/org';
 export const PERSONAL_PATH = '/p';
 
 export const ROLE_MAPPINGS_PATH = '/role-mappings';
