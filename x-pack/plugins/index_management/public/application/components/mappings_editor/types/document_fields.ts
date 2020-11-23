@@ -7,7 +7,7 @@ import { ReactNode } from 'react';
 
 import { GenericObject } from './mappings_editor';
 
-import { FieldConfig } from '../shared_imports';
+import { FieldConfig, RuntimeField } from '../shared_imports';
 import { PARAMETERS_DEFINITION } from '../constants';
 
 export interface DataTypeDefinition {
@@ -218,4 +218,9 @@ export type ChildFieldName = 'properties' | 'fields';
 export interface AliasOption {
   id: string;
   label: string;
+}
+
+export interface NormalizedRuntimeField {
+  id: string;
+  source: RuntimeField;
 }

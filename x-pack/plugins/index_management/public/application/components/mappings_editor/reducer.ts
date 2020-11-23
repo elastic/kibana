@@ -502,11 +502,17 @@ export const reducer = (state: State, action: Action): State => {
       };
     }
     case 'runtimeField.add': {
+      const id = getUniqueId();
+      const normalizedField = {
+        id,
+        source: action.value,
+      };
+
       return {
         ...state,
         runtimeFields: {
           ...state.runtimeFields,
-          [getUniqueId()]: action.value,
+          [id]: normalizedField,
         },
         runtimeFieldsList: {
           ...state.runtimeFieldsList,

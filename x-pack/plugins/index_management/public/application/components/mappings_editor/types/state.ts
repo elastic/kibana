@@ -5,7 +5,7 @@
  */
 
 import { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
-import { Field, NormalizedFields } from './document_fields';
+import { Field, NormalizedFields, NormalizedRuntimeField } from './document_fields';
 import { FieldsEditor, SearchResult } from './mappings_editor';
 
 export type Mappings = MappingsTemplates &
@@ -79,7 +79,7 @@ export interface State {
   documentFields: DocumentFieldsState;
   runtimeFieldsList: RuntimeFieldsListState;
   fields: NormalizedFields;
-  runtimeFields: { [key: string]: RuntimeField };
+  runtimeFields: { [id: string]: NormalizedRuntimeField };
   fieldForm?: OnFormUpdateArg<any>;
   fieldsJsonEditor: {
     format(): MappingsFields;
@@ -112,7 +112,7 @@ export type Action =
   | { type: 'runtimeFieldsList.closeRuntimeFieldEditor' }
   | { type: 'runtimeField.add'; value: RuntimeField }
   | { type: 'runtimeField.remove'; value: string }
-  | { type: 'runtimeField.edit'; value: { id: string; field: RuntimeField } }
+  | { type: 'runtimeField.edit'; value: NormalizedRuntimeField }
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
   | { type: 'search:update'; value: string }
   | { type: 'validity:update'; value: boolean };
