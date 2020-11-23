@@ -206,7 +206,8 @@ export const SearchExamplesApp = ({
       searchSource
         .setField('index', indexPattern)
         .setField('filter', filters)
-        .setField('query', query);
+        .setField('query', query)
+        .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : ['*']);
 
       if (selectedNumericField) {
         searchSource.setField('aggs', () => {
@@ -216,13 +217,6 @@ export const SearchExamplesApp = ({
             ])
             .toDsl();
         });
-      }
-
-      if (selectedFields.length) {
-        searchSource.setField(
-          'fields',
-          selectedFields.map((f) => f.name)
-        );
       }
 
       setRequest(await searchSource.getSearchRequestBody());
