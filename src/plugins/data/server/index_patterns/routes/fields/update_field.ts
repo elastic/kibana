@@ -44,7 +44,7 @@ export const registerUpdateFieldRoute = (router: IRouter) => {
           { unknowns: 'allow' }
         ),
         body: schema.object({
-          skip_field_refresh: schema.maybe(schema.boolean({ defaultValue: false })),
+          refresh_fields: schema.maybe(schema.boolean({ defaultValue: true })),
           field: schema.object({
             ...fieldSpecSchemaFields,
 
@@ -72,7 +72,7 @@ export const registerUpdateFieldRoute = (router: IRouter) => {
           const name = req.params.name;
           const {
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            skip_field_refresh = false,
+            refresh_fields = true,
           } = req.body;
 
           const field = ({ ...req.body.field, name } as unknown) as FieldSpec;
@@ -93,7 +93,7 @@ export const registerUpdateFieldRoute = (router: IRouter) => {
           });
 
           await ip.updateSavedObject(indexPattern);
-          if (!skip_field_refresh) {
+          if (refresh_fields) {
             await ip.refreshFields(indexPattern);
           }
 
