@@ -520,6 +520,18 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
     }
+    case 'runtimeField.remove': {
+      const field = state.runtimeFields[action.value];
+      const { id } = field;
+
+      const updatedFields = { ...state.runtimeFields };
+      delete updatedFields[id];
+
+      return {
+        ...state,
+        runtimeFields: updatedFields,
+      };
+    }
     case 'runtimeFieldsList.closeRuntimeFieldEditor':
       return {
         ...state,

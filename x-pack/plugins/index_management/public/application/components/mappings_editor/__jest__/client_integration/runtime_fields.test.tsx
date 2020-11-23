@@ -54,7 +54,7 @@ describe('Mappings editor: runtime fields', () => {
         expect(find('createRuntimeFieldButton').text()).toBe('Create a runtime field');
 
         expect(exists('runtimeFieldEditor')).toBe(false);
-        actions.createRuntimeField();
+        actions.openRuntimeFieldEditor();
         expect(exists('runtimeFieldEditor')).toBe(true);
       });
     });
@@ -117,18 +117,13 @@ describe('Mappings editor: runtime fields', () => {
       });
 
       test('should add the runtime field to the list and remove the empty prompt', async () => {
-        const { find, exists, form, component, actions } = testBed;
+        const { exists, actions } = testBed;
 
-        actions.createRuntimeField();
-        act(() => {
-          form.setInputValue('runtimeFieldEditor.nameField.input', 'myField');
-          form.setInputValue('runtimeFieldEditor.scriptField', 'emit("hello")');
+        await actions.addRuntimeField({
+          name: 'myField',
+          script: 'emit("hello")',
+          type: 'boolean',
         });
-
-        await act(async () => {
-          find('runtimeFieldEditor.saveFieldButton').simulate('click');
-        });
-        component.update();
 
         // Make sure editor is closed and the field is in the list
         expect(exists('runtimeFieldEditor')).toBe(false);
@@ -139,7 +134,25 @@ describe('Mappings editor: runtime fields', () => {
 
         const [field] = fields;
         expect(field.name).toBe('myField');
-        expect(field.type).toBeDefined(); // We don't assert on the default type as it will probably change overtime
+        expect(field.type).toBe('Boolean');
+      });
+
+      test('should remove the runtime field from the list', async () => {
+        const { actions } = testBed;
+
+        await actions.addRuntimeField({
+          name: 'myField',
+          script: 'emit("hello")',
+          type: 'boolean',
+        });
+
+        let fields = actions.getRuntimeFieldsList();
+        expect(fields.length).toBe(1);
+
+        await actions.deleteRuntimeField('myField');
+
+        fields = actions.getRuntimeFieldsList();
+        expect(fields.length).toBe(0);
       });
     });
   });

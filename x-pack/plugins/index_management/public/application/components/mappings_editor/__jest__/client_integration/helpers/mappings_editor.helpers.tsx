@@ -11,6 +11,7 @@ import { registerTestBed, TestBed, findTestSubject } from '@kbn/test/jest';
 // This import needs to come first as it sets the jest.mock calls
 import { WithAppDependencies } from './setup_environment';
 import { getChildFieldsName } from '../../../lib';
+import { RuntimeField } from '../../../shared_imports';
 import { MappingsEditor } from '../../../mappings_editor';
 
 export interface DomFields {
@@ -166,9 +167,31 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 
   // --- Runtime fields ---
-  const createRuntimeField = () => {
+  const openRuntimeFieldEditor = () => {
     find('createRuntimeFieldButton').simulate('click');
     component.update();
+  };
+
+  const updateRuntimeFieldForm = async (field: RuntimeField) => {
+    const valueToLabelMap = {
+      keyword: 'Keyword',
+      date: 'Date',
+      ip: 'IP',
+      long: 'Long',
+      double: 'Double',
+      boolean: 'Boolean',
+    };
+
+    await act(async () => {
+      form.setInputValue('runtimeFieldEditor.nameField.input', field.name);
+      form.setInputValue('runtimeFieldEditor.scriptField', field.script);
+      find('typeField').simulate('change', [
+        {
+          label: valueToLabelMap[field.type],
+          value: field.type,
+        },
+      ]);
+    });
   };
 
   const getRuntimeFieldInfo = (
@@ -183,10 +206,61 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     const fields = find('runtimeFieldsListItem').map((wrapper) => wrapper);
     return fields.map((field) => {
       return {
+        reactWrapper: field,
         name: findTestSubject(field, 'fieldName').text(),
         type: findTestSubject(field, 'fieldType').text(),
       };
     });
+  };
+
+  /**
+   * Open the editor, fill the form and close the editor
+   * @param field the field to add
+   */
+  const addRuntimeField = async (field: RuntimeField) => {
+    openRuntimeFieldEditor();
+
+    await updateRuntimeFieldForm(field);
+
+    await act(async () => {
+      find('runtimeFieldEditor.saveFieldButton').simulate('click');
+    });
+    component.update();
+  };
+
+  const deleteRuntimeField = async (name: string) => {
+    const runtimeField = getRuntimeFieldsList().find((field) => field.name === name);
+
+    if (!runtimeField) {
+      throw new Error(`Runtime field "${name}" to delete not found.`);
+    }
+
+    await act(async () => {
+      findTestSubject(runtimeField.reactWrapper, 'removeFieldButton').simulate('click');
+    });
+    component.update();
+
+    // Modal is opened, confirm deletion
+    const modal = find('runtimeFieldDeleteConfirmModal');
+
+    act(() => {
+      findTestSubject(modal, 'confirmModalConfirmButton').simulate('click');
+    });
+
+    component.update();
+  };
+
+  const startEditRuntimeField = async (name: string) => {
+    const runtimeField = getRuntimeFieldsList().find((field) => field.name === name);
+
+    if (!runtimeField) {
+      throw new Error(`Runtime field "${name}" to edit not found.`);
+    }
+
+    await act(async () => {
+      findTestSubject(runtimeField.reactWrapper, 'editFieldButton').simulate('click');
+    });
+    component.update();
   };
 
   // --- Other ---
@@ -252,8 +326,12 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     getToggleValue,
     getCheckboxValue,
     toggleFormRow,
-    createRuntimeField,
+    openRuntimeFieldEditor,
     getRuntimeFieldsList,
+    updateRuntimeFieldForm,
+    addRuntimeField,
+    deleteRuntimeField,
+    startEditRuntimeField,
   };
 };
 

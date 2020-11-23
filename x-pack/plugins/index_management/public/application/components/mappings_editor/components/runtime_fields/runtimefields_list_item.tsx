@@ -16,10 +16,10 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedRuntimeField } from '../../types';
-// import { getTypeLabelFromField } from '../../lib';
+import { getTypeLabelFromField } from '../../lib';
 
 // import { CreateField } from './create_field';
-// import { DeleteFieldProvider } from './delete_field_provider';
+import { DeleteRuntimeFieldProvider } from './delete_field_provider';
 
 interface Props {
   field: NormalizedRuntimeField;
@@ -93,12 +93,12 @@ function RuntimeFieldsListItemComponent(
       }
     );
 
-    // const deleteButtonLabel = i18n.translate(
-    //   'xpack.idxMgmt.mappingsEditor.removeRuntimeFieldButtonLabel',
-    //   {
-    //     defaultMessage: 'Remove',
-    //   }
-    // );
+    const deleteButtonLabel = i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.removeRuntimeFieldButtonLabel',
+      {
+        defaultMessage: 'Remove',
+      }
+    );
 
     return (
       <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">
@@ -140,7 +140,7 @@ function RuntimeFieldsListItemComponent(
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          {/* <DeleteFieldProvider>
+          <DeleteRuntimeFieldProvider>
             {(deleteField) => (
               <EuiToolTip content={deleteButtonLabel}>
                 <EuiButtonIcon
@@ -152,8 +152,7 @@ function RuntimeFieldsListItemComponent(
                 />
               </EuiToolTip>
             )}
-          </DeleteFieldProvider> */}
-          delete
+          </DeleteRuntimeFieldProvider>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -203,8 +202,7 @@ function RuntimeFieldsListItemComponent(
                 data-test-subj={`fieldType ${dataTestSubj}-datatype`}
                 data-type-value={source.type}
               >
-                {/* {getTypeLabelFromField(source)} */}
-                {source.type}
+                {getTypeLabelFromField(source)}
               </EuiBadge>
             </EuiFlexItem>
 

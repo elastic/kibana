@@ -77,7 +77,7 @@ const getTypeLabel = (type?: DataType): string => {
     : `${TYPE_DEFINITION.other.label}: ${type}`;
 };
 
-export const getTypeLabelFromField = (field: Field) => {
+export const getTypeLabelFromField = (field: { type: DataType }) => {
   const { type } = field;
   const typeLabel = getTypeLabel(type);
 
