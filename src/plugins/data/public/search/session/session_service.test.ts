@@ -21,17 +21,23 @@ import { SessionService, ISessionService } from './session_service';
 import { coreMock } from '../../../../../core/public/mocks';
 import { take, toArray } from 'rxjs/operators';
 import { getSessionsClientMock } from './mocks';
+import { BehaviorSubject } from 'rxjs';
+import { SessionState } from './session_state';
 
 describe('Session service', () => {
   let sessionService: ISessionService;
+  let state$: BehaviorSubject<SessionState>;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
     sessionService = new SessionService(
       initializerContext,
       coreMock.createSetup().getStartServices,
-      getSessionsClientMock()
+      getSessionsClientMock(),
+      { freezeState: false } // needed to use mocks inside state container
     );
+    state$ = new BehaviorSubject<SessionState>(SessionState.None);
+    sessionService.state$.subscribe(state$);
   });
 
   describe('Session management', () => {
@@ -55,6 +61,41 @@ describe('Session service', () => {
       sessionService.clear();
 
       expect(await emittedValues).toEqual(['1', '2', undefined]);
+    });
+
+    it('Only tracks searches for current session', () => {
+      sessionService.trackSearch(undefined, { abort: () => {} });
+      expect(state$.getValue()).toBe(SessionState.None);
+
+      const id = sessionService.start();
+      sessionService.trackSearch(undefined, { abort: () => {} });
+      expect(state$.getValue()).toBe(SessionState.None);
+      sessionService.trackSearch('other_id', { abort: () => {} });
+      expect(state$.getValue()).toBe(SessionState.None);
+
+      const untrack = sessionService.trackSearch(id, { abort: () => {} });
+      expect(state$.getValue()).toBe(SessionState.Loading);
+      untrack();
+      expect(state$.getValue()).toBe(SessionState.Completed);
+    });
+
+    it('Cancels all tracked searches within current session', async () => {
+      const nonCurrentAbort = jest.fn();
+      const currentAbort = jest.fn();
+
+      sessionService.trackSearch(undefined, { abort: nonCurrentAbort });
+      expect(state$.getValue()).toBe(SessionState.None);
+
+      const id = sessionService.start();
+      sessionService.trackSearch(undefined, { abort: nonCurrentAbort });
+      sessionService.trackSearch('other_id', { abort: nonCurrentAbort });
+      sessionService.trackSearch(id, { abort: currentAbort });
+      sessionService.trackSearch(id, { abort: currentAbort });
+
+      await sessionService.cancel();
+
+      expect(nonCurrentAbort).not.toBeCalled();
+      expect(currentAbort).toBeCalledTimes(2);
     });
   });
 });

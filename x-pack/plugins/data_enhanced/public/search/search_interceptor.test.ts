@@ -9,7 +9,7 @@ import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
-import { SearchTimeoutError } from 'src/plugins/data/public';
+import { ISessionService, SearchTimeoutError } from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 
 const timeTravel = (msToRun = 0) => {
@@ -41,11 +41,13 @@ function mockFetchImplementation(responses: any[]) {
 
 describe('EnhancedSearchInterceptor', () => {
   let mockUsageCollector: any;
+  let sessionService: jest.Mocked<ISessionService>;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     const dataPluginMockStart = dataPluginMock.createStartContract();
+    sessionService = dataPluginMockStart.search.session as jest.Mocked<ISessionService>;
 
     mockCoreSetup.uiSettings.get.mockImplementation((name: string) => {
       switch (name) {
@@ -80,7 +82,7 @@ describe('EnhancedSearchInterceptor', () => {
       http: mockCoreSetup.http,
       uiSettings: mockCoreSetup.uiSettings,
       usageCollector: mockUsageCollector,
-      session: dataPluginMockStart.search.session,
+      session: sessionService,
     });
   });
 
@@ -390,6 +392,81 @@ describe('EnhancedSearchInterceptor', () => {
       );
       expect(areAllRequestsAborted).toBe(true);
       expect(mockUsageCollector.trackQueriesCancelled).toBeCalledTimes(1);
+    });
+  });
+
+  describe('session', () => {
+    test('should track searches', async () => {
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: false,
+            isRunning: true,
+            id: 1,
+          },
+        },
+        {
+          time: 300,
+          value: {
+            isPartial: false,
+            isRunning: false,
+            id: 1,
+          },
+        },
+      ];
+      mockFetchImplementation(responses);
+
+      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      response.subscribe({ next, error });
+      await timeTravel(10);
+      expect(sessionService.trackSearch).toBeCalledTimes(1);
+      expect(untrack).not.toBeCalled();
+      await timeTravel(300);
+      expect(sessionService.trackSearch).toBeCalledTimes(1);
+      expect(untrack).toBeCalledTimes(1);
+    });
+
+    test('session service should be able to cancel search', async () => {
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: false,
+            isRunning: true,
+            id: 1,
+          },
+        },
+        {
+          time: 300,
+          value: {
+            isPartial: false,
+            isRunning: false,
+            id: 1,
+          },
+        },
+      ];
+      mockFetchImplementation(responses);
+      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      response.subscribe({ next, error });
+      await timeTravel(10);
+      expect(sessionService.trackSearch).toBeCalledTimes(1);
+
+      const abort = sessionService.trackSearch.mock.calls[0][1].abort;
+      expect(abort).toBeInstanceOf(Function);
+
+      abort();
+
+      await timeTravel(10);
+
+      expect(error).toHaveBeenCalled();
+      expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
     });
   });
 });

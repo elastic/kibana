@@ -210,14 +210,17 @@ export type SessionStateContainer<SearchDescriptor = unknown> = StateContainer<
   SessionPureSelectors<SearchDescriptor>
 >;
 
-export const createSessionStateContainer = <SearchDescriptor = unknown>(): {
+export const createSessionStateContainer = <SearchDescriptor = unknown>(
+  { freeze = true }: { freeze: boolean } = { freeze: true }
+): {
   stateContainer: SessionStateContainer<SearchDescriptor>;
   sessionState$: Observable<SessionState>;
 } => {
   const stateContainer = createStateContainer(
     createSessionDefaultState(),
     sessionPureTransitions,
-    sessionPureSelectors
+    sessionPureSelectors,
+    freeze ? undefined : { freeze: (s) => s }
   ) as SessionStateContainer<SearchDescriptor>;
 
   const sessionState$: Observable<SessionState> = stateContainer.state$.pipe(

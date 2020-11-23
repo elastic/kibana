@@ -62,9 +62,12 @@ export class SessionService implements ISessionService {
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
     getStartServices: StartServicesAccessor,
-    private readonly sessionsClient: ISessionsClient
+    private readonly sessionsClient: ISessionsClient,
+    { freezeState = true }: { freezeState: boolean } = { freezeState: true }
   ) {
-    const { stateContainer, sessionState$ } = createSessionStateContainer<TrackSearchDescriptor>();
+    const { stateContainer, sessionState$ } = createSessionStateContainer<TrackSearchDescriptor>({
+      freeze: freezeState,
+    });
     this.state$ = sessionState$;
     this.state = stateContainer;
 
