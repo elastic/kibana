@@ -94,7 +94,7 @@ describe('service', () => {
         os: 'linux',
         entries: [
           createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
-          createConditionEntry(ConditionEntryField.HASH, '1234234659AF249DDF3E40864E9FB241'),
+          createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
         ],
       });
 
