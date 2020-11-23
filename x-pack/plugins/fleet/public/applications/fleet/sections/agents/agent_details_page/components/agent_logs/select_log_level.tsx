@@ -12,6 +12,8 @@ import { Agent } from '../../../../../types';
 import { sendPostAgentAction, useStartServices } from '../../../../../hooks';
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from './constants';
 
+const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
+
 export const SelectLogLevel: React.FC<{ agent: Agent }> = memo(({ agent }) => {
   const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +40,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent }> = memo(({ agent }) => {
         setAgentLogLevel(selectedLogLevel);
         notifications.toasts.addSuccess(
           i18n.translate('xpack.fleet.agentLogs.selectLogLevel.successText', {
-            defaultMessage: 'Changed agent logging level to "{logLevel}".',
+            defaultMessage: `Changed agent logging level to '{logLevel}'.`,
             values: {
               logLevel: selectedLogLevel,
             },
@@ -46,7 +48,9 @@ export const SelectLogLevel: React.FC<{ agent: Agent }> = memo(({ agent }) => {
         );
       } catch (error) {
         notifications.toasts.addError(error, {
-          title: 'Error',
+          title: i18n.translate('xpack.fleet.agentLogs.selectLogLevel.errorTitleText', {
+            defaultMessage: 'Error updating agent logging level',
+          }),
         });
       }
       setIsLoading(false);
@@ -74,12 +78,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent }> = memo(({ agent }) => {
           onChange={(event) => {
             setSelectedLogLevel(event.target.value);
           }}
-          options={[
-            { text: AGENT_LOG_LEVELS.ERROR, value: AGENT_LOG_LEVELS.ERROR },
-            { text: AGENT_LOG_LEVELS.WARNING, value: AGENT_LOG_LEVELS.WARNING },
-            { text: AGENT_LOG_LEVELS.INFO, value: AGENT_LOG_LEVELS.INFO },
-            { text: AGENT_LOG_LEVELS.DEBUG, value: AGENT_LOG_LEVELS.DEBUG },
-          ]}
+          options={LEVEL_VALUES.map((level) => ({ text: level, value: level }))}
         />
       </EuiFlexItem>
       {agentLogLevel !== selectedLogLevel && (

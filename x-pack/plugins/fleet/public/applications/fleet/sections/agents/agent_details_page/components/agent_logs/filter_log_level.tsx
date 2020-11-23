@@ -3,41 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useStartServices } from '../../../../../hooks';
-import { AGENT_LOG_INDEX_PATTERN, LOG_LEVEL_FIELD } from './constants';
+import { AGENT_LOG_LEVELS } from './constants';
+
+const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
 
 export const LogLevelFilter: React.FunctionComponent<{
   selectedLevels: string[];
   onToggleLevel: (level: string) => void;
 }> = memo(({ selectedLevels, onToggleLevel }) => {
-  const { data } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [levelValues, setLevelValues] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchValues = async () => {
-      setIsLoading(true);
-      try {
-        const values = await data.autocomplete.getValueSuggestions({
-          indexPattern: {
-            title: AGENT_LOG_INDEX_PATTERN,
-            fields: [LOG_LEVEL_FIELD],
-          },
-          field: LOG_LEVEL_FIELD,
-          query: '',
-        });
-        setLevelValues(values.sort());
-      } catch (e) {
-        setLevelValues([]);
-      }
-      setIsLoading(false);
-    };
-    fetchValues();
-  }, [data.autocomplete]);
 
   return (
     <EuiPopover
@@ -46,8 +23,7 @@ export const LogLevelFilter: React.FunctionComponent<{
           iconType="arrowDown"
           onClick={() => setIsOpen(true)}
           isSelected={isOpen}
-          isLoading={isLoading}
-          numFilters={levelValues.length}
+          numFilters={LEVEL_VALUES.length}
           hasActiveFilters={selectedLevels.length > 0}
           numActiveFilters={selectedLevels.length}
         >
@@ -60,7 +36,7 @@ export const LogLevelFilter: React.FunctionComponent<{
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
     >
-      {levelValues.map((level) => (
+      {LEVEL_VALUES.map((level) => (
         <EuiFilterSelectItem
           checked={selectedLevels.includes(level) ? 'on' : undefined}
           key={level}
