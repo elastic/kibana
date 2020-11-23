@@ -8,6 +8,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 const SEND_TO_BACKGROUND_TEST_SUBJ = 'backgroundSessionIndicator';
+const SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ = 'backgroundSessionIndicatorPopoverContainer';
+
 type SessionStateType =
   | 'none'
   | 'loading'
@@ -20,6 +22,7 @@ type SessionStateType =
 export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const browser = getService('browser');
 
   return new (class SendToBackgroundService {
     public async find(): Promise<WebElementWrapper> {
@@ -40,19 +43,46 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
     }
 
     public async viewBackgroundSessions() {
-      throw new Error('TODO');
+      await this.ensurePopoverOpened();
+      await testSubjects.click('backgroundSessionIndicatorViewBackgroundSessionsLink');
     }
 
     public async save() {
-      throw new Error('TODO');
+      await this.ensurePopoverOpened();
+      await testSubjects.click('backgroundSessionIndicatorSaveBtn');
+      await this.ensurePopoverClosed();
     }
 
     public async cancel() {
-      throw new Error('TODO');
+      await this.ensurePopoverOpened();
+      await testSubjects.click('backgroundSessionIndicatorCancelBtn');
+      await this.ensurePopoverClosed();
     }
 
     public async refresh() {
-      throw new Error('TODO');
+      await this.ensurePopoverOpened();
+      await testSubjects.click('backgroundSessionIndicatorRefreshBtn');
+      await this.ensurePopoverClosed();
+    }
+
+    private async ensurePopoverOpened() {
+      const isAlreadyOpen = await testSubjects.exists(SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ);
+      if (isAlreadyOpen) return;
+      return retry.waitFor(`sendToBackground popover opened`, async () => {
+        await testSubjects.click(SEND_TO_BACKGROUND_TEST_SUBJ);
+        return await testSubjects.exists(SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ);
+      });
+    }
+
+    private async ensurePopoverClosed() {
+      const isAlreadyClosed = !(await testSubjects.exists(
+        SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ
+      ));
+      if (isAlreadyClosed) return;
+      return retry.waitFor(`sendToBackground popover closed`, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        return !(await testSubjects.exists(SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ));
+      });
     }
   })();
 }

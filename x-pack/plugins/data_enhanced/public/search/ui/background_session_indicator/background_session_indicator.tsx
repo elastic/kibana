@@ -35,7 +35,11 @@ export interface BackgroundSessionIndicatorProps {
 type ActionButtonProps = BackgroundSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
 
 const CancelButton = ({ onCancel = () => {}, buttonProps = {} }: ActionButtonProps) => (
-  <EuiButtonEmpty onClick={onCancel} {...buttonProps}>
+  <EuiButtonEmpty
+    onClick={onCancel}
+    data-test-subj={'backgroundSessionIndicatorCancelBtn'}
+    {...buttonProps}
+  >
     <FormattedMessage
       id="xpack.data.backgroundSessionIndicator.cancelButtonText"
       defaultMessage="Cancel"
@@ -47,7 +51,11 @@ const ContinueInBackgroundButton = ({
   onContinueInBackground = () => {},
   buttonProps = {},
 }: ActionButtonProps) => (
-  <EuiButtonEmpty onClick={onContinueInBackground} {...buttonProps}>
+  <EuiButtonEmpty
+    onClick={onContinueInBackground}
+    data-test-subj={'backgroundSessionIndicatorContinueInBackgroundBtn'}
+    {...buttonProps}
+  >
     <FormattedMessage
       id="xpack.data.backgroundSessionIndicator.continueInBackgroundButtonText"
       defaultMessage="Continue in background"
@@ -59,7 +67,11 @@ const ViewBackgroundSessionsButton = ({
   viewBackgroundSessionsLink = 'management',
   buttonProps = {},
 }: ActionButtonProps) => (
-  <EuiButtonEmpty href={viewBackgroundSessionsLink} {...buttonProps}>
+  <EuiButtonEmpty
+    href={viewBackgroundSessionsLink}
+    data-test-subj={'backgroundSessionIndicatorViewBackgroundSessionsLink'}
+    {...buttonProps}
+  >
     <FormattedMessage
       id="xpack.data.backgroundSessionIndicator.viewBackgroundSessionsLinkText"
       defaultMessage="View background sessions"
@@ -68,7 +80,11 @@ const ViewBackgroundSessionsButton = ({
 );
 
 const RefreshButton = ({ onRefresh = () => {}, buttonProps = {} }: ActionButtonProps) => (
-  <EuiButtonEmpty onClick={onRefresh} {...buttonProps}>
+  <EuiButtonEmpty
+    onClick={onRefresh}
+    data-test-subj={'backgroundSessionIndicatorRefreshBtn'}
+    {...buttonProps}
+  >
     <FormattedMessage
       id="xpack.data.backgroundSessionIndicator.refreshButtonText"
       defaultMessage="Refresh"
@@ -77,7 +93,11 @@ const RefreshButton = ({ onRefresh = () => {}, buttonProps = {} }: ActionButtonP
 );
 
 const SaveButton = ({ onSaveResults = () => {}, buttonProps = {} }: ActionButtonProps) => (
-  <EuiButtonEmpty onClick={onSaveResults} {...buttonProps}>
+  <EuiButtonEmpty
+    onClick={onSaveResults}
+    data-test-subj={'backgroundSessionIndicatorSaveBtn'}
+    {...buttonProps}
+  >
     <FormattedMessage
       id="xpack.data.backgroundSessionIndicator.saveButtonText"
       defaultMessage="Save"
@@ -87,7 +107,9 @@ const SaveButton = ({ onSaveResults = () => {}, buttonProps = {} }: ActionButton
 
 const backgroundSessionIndicatorViewStateToProps: {
   [state in SessionState]: {
-    button: Pick<EuiButtonIconProps, 'color' | 'iconType' | 'aria-label'> & { tooltipText: string };
+    button: Pick<EuiButtonIconProps, 'color' | 'iconType' | 'aria-label'> & {
+      tooltipText: string;
+    };
     popover: {
       text: string;
       primaryAction?: React.ComponentType<ActionButtonProps>;
@@ -278,6 +300,7 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
         alignItems={'center'}
         gutterSize={'s'}
         className="backgroundSessionIndicator__popoverContainer"
+        data-test-subj={'backgroundSessionIndicatorPopoverContainer'}
       >
         <EuiFlexItem grow={true}>
           <EuiText size="s" color={'subdued'}>
