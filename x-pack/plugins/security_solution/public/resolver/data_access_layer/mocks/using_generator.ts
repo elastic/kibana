@@ -9,6 +9,7 @@ import {
   Event,
   Tree,
   TreeNode,
+  TreeOptions,
 } from '../../../../common/endpoint/generate_data';
 import { DataAccessLayer, Timerange, TreeIdSchema } from '../../types';
 
@@ -19,6 +20,7 @@ import {
   ResolverNode,
   FieldsObject,
   EventStats,
+  NewResolverTree,
 } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 
@@ -28,22 +30,97 @@ interface Metadata {
    */
   databaseDocumentID: string;
   tree: Tree;
+  structuredTree: NewResolverTree;
 }
 
-export function usingGenerator(): {
+export function generateStructuredTree(tree: Tree) {
+  const allData = new Map([[tree.origin.id, tree.origin], ...tree.children, ...tree.ancestry]);
+
+  /**
+   * Creates an EventStats object from a generated TreeNOde.
+   * @param node a TreeNode created by the EndpointDocGenerator
+   */
+  const buildStats = (node: TreeNode): EventStats => {
+    return node.relatedEvents.reduce(
+      (accStats: EventStats, event: SafeResolverEvent) => {
+        accStats.total += 1;
+        const categories = eventModel.eventCategory(event);
+        if (categories.length > 0) {
+          const category = categories[0];
+          if (accStats.byCategory[category] === undefined) {
+            accStats.byCategory[category] = 1;
+          } else {
+            accStats.byCategory[category] += 1;
+          }
+        }
+        return accStats;
+      },
+      { total: 0, byCategory: {} }
+    );
+  };
+
+  /**
+   * Builds a fields object style object from a generated event.
+   *
+   * @param {SafeResolverEvent} event a lifecycle event to convert into FieldObject style
+   */
+  const buildFieldsObj = (event: Event): FieldsObject => {
+    return {
+      '@timestamp': eventModel.timestampSafeVersion(event) ?? 0,
+      'process.entity_id': eventModel.entityIDSafeVersion(event) ?? '',
+      'process.parent.entity_id': eventModel.parentEntityIDSafeVersion(event) ?? '',
+      'process.name': eventModel.processNameSafeVersion(event) ?? '',
+    };
+  };
+
+  const treeResponse = Array.from(allData.values()).reduce(
+    (acc: ResolverNode[], node: TreeNode) => {
+      const lifecycleEvent = node.lifecycle[0];
+      acc.push({
+        data: buildFieldsObj(lifecycleEvent),
+        id: node.id,
+        parent: eventModel.parentEntityIDSafeVersion(lifecycleEvent),
+        stats: buildStats(node),
+        name: eventModel.processNameSafeVersion(lifecycleEvent),
+      });
+      return acc;
+    },
+    []
+  );
+
+  return {
+    nodes: treeResponse,
+    originId: tree.origin.id,
+  };
+}
+
+export function usingGenerator(
+  treeOptions?: TreeOptions
+): {
   dataAccessLayer: DataAccessLayer;
   metadata: Metadata;
 } {
   const generator = new EndpointDocGenerator('resolver');
   const tree = generator.generateTree({
-    generations: 5,
-    children: 3,
+    ...treeOptions,
     alwaysGenMaxChildrenPerNode: true,
   });
+
+  // ancestors: 5,
+  // relatedEvents: relatedEventsToGen,
+  // relatedAlerts,
+  // children: 3,
+  // generations: 2,
+  // percentTerminated: 100,
+  // percentWithRelated: 100,
+  // numTrees: 1,
+  // alwaysGenMaxChildrenPerNode: true,
+  // ancestryArraySize: 2,
 
   const metadata: Metadata = {
     databaseDocumentID: '_id',
     tree,
+    structuredTree: generateStructuredTree(tree),
   };
 
   const allData = new Map([[tree.origin.id, tree.origin], ...tree.children, ...tree.ancestry]);

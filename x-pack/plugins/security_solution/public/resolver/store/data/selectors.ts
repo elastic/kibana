@@ -133,11 +133,11 @@ export const isNodeDataLoading: (state: DataState) => (id: string) => boolean = 
 /**
  * Process events that will be graphed.
  */
-export const graphableNodes = createSelector(resolverTreeResponse, function (graphResponse?) {
+export const graphableNodes = createSelector(resolverTreeResponse, function (treeResponse?) {
   // Keep track of the last process event (in array order) for each entity ID
   const nodes: Map<string, ResolverNode> = new Map();
-  if (graphResponse) {
-    for (const node of graphResponse.nodes) {
+  if (treeResponse) {
+    for (const node of treeResponse.nodes) {
       const nodeId = nodeModel.nodeID(node);
       if (nodeId !== undefined) {
         nodes.set(nodeId, node);
