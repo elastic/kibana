@@ -45,7 +45,7 @@ export const LogStream: React.FC<LogStreamProps> = ({
   columns,
 }) => {
   const customColumns = useMemo(
-    () => (columns ? convertLogColumnDefinitiontoLogSourceColumnDefinition(columns) : undefined),
+    () => (columns ? convertLogColumnDefinitionToLogSourceColumnDefinition(columns) : undefined),
     [columns]
   );
 
@@ -180,7 +180,7 @@ const LogStreamContent = euiStyled.div<{ height: string }>`
   height: ${(props) => props.height};
 `;
 
-function convertLogColumnDefinitiontoLogSourceColumnDefinition(
+function convertLogColumnDefinitionToLogSourceColumnDefinition(
   columns: LogColumnDefinition[]
 ): LogSourceConfigurationProperties['logColumns'] {
   return columns.map((column) => {
