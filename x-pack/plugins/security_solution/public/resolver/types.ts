@@ -206,6 +206,16 @@ export interface TreeFetcherParameters {
    * The indices that the backend will use to search for the document ID.
    */
   indices: string[];
+
+  /**
+   * The number of ancestors that were requested from the server.
+   */
+  requestedAncestors?: number;
+
+  /**
+   * The number of descendants that were requested from the sever.
+   */
+  requestedDescendants?: number;
 }
 
 /**
@@ -718,12 +728,21 @@ export interface DataAccessLayer {
   /**
    * Fetch a ResolverTree for a given id
    */
-  newResolverTree: (
-    dataId: string,
-    schema: TreeIdSchema,
-    timerange: Timerange,
-    indices: string[]
-  ) => Promise<ResolverNode[]>;
+  resolverTree({
+    dataId,
+    schema,
+    timerange,
+    indices,
+    ancestors,
+    descendants,
+  }: {
+    dataId: string;
+    schema: TreeIdSchema;
+    timerange: Timerange;
+    indices: string[];
+    ancestors: number;
+    descendants: number;
+  }): Promise<ResolverNode[]>;
 
   /**
    * Get entities matching a document.

@@ -897,9 +897,7 @@ export type ResolverEntityIndex = Array<{ entity_id: string }>;
  * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
 export type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
-  ? KbnConfigSchemaInputObjectTypeOf<
-      T
-    > /** `schema.number()` accepts strings, so this type should accept them as well. */
+  ? KbnConfigSchemaInputObjectTypeOf<T> /** `schema.number()` accepts strings, so this type should accept them as well. */
   : number extends T
   ? T | string
   : T;

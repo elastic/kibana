@@ -115,3 +115,29 @@ export function* levelOrder(tree: IndexedProcessTree) {
     );
   }
 }
+
+/**
+ * Returns the number of descendant nodes in the graph.
+ */
+export function countChildren(tree: IndexedProcessTree) {
+  // The children map includes the origin, so remove that
+  return !tree.originId ? 0 : tree.idToChildren.size - 1;
+}
+
+/**
+ * Returns the number of ancestors nodes (including the origin) in the graph.
+ */
+export function countAncestors(tree: IndexedProcessTree) {
+  if (!tree.originId) {
+    return 0;
+  }
+
+  // include the origin
+  let total = 1;
+  let current: ResolverNode | undefined = tree.idToNode.get(tree.originId);
+  while (current !== undefined && parent(tree, current) !== undefined) {
+    total++;
+    current = parent(tree, current);
+  }
+  return total;
+}
