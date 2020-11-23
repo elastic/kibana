@@ -179,7 +179,9 @@ describe('alert_form', () => {
 
     it('renders notify on state change only switch', async () => {
       await setup();
-      const notifyOnlyOnActionGroupChangeSwitch = wrapper.find('[data-test-subj="notifyOnlyOnActionGroupChange"]');
+      const notifyOnlyOnActionGroupChangeSwitch = wrapper.find(
+        '[data-test-subj="notifyOnlyOnActionGroupChange"]'
+      );
       expect(notifyOnlyOnActionGroupChangeSwitch.exists()).toBeTruthy();
     });
 

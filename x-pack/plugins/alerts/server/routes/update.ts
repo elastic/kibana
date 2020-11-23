@@ -63,11 +63,27 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
         }
         const alertsClient = context.alerting.getAlertsClient();
         const { id } = req.params;
-        const { name, actions, params, schedule, tags, throttle, notifyOnlyOnActionGroupChange } = req.body;
+        const {
+          name,
+          actions,
+          params,
+          schedule,
+          tags,
+          throttle,
+          notifyOnlyOnActionGroupChange,
+        } = req.body;
         return res.ok({
           body: await alertsClient.update({
             id,
-            data: { name, actions, params, schedule, tags, throttle, notifyOnlyOnActionGroupChange },
+            data: {
+              name,
+              actions,
+              params,
+              schedule,
+              tags,
+              throttle,
+              notifyOnlyOnActionGroupChange,
+            },
           }),
         });
       })

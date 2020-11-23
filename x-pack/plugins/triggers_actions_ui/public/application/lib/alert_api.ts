@@ -197,7 +197,13 @@ export async function updateAlert({
   http: HttpSetup;
   alert: Pick<
     AlertUpdates,
-    'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'notifyOnlyOnActionGroupChange'
+    | 'throttle'
+    | 'name'
+    | 'tags'
+    | 'schedule'
+    | 'params'
+    | 'actions'
+    | 'notifyOnlyOnActionGroupChange'
   >;
   id: string;
 }): Promise<Alert> {

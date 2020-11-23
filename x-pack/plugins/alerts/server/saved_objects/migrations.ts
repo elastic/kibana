@@ -37,7 +37,10 @@ export function getMigrations(
     )
   );
 
-  const migrationAlertUpdatedAtAndNotifyOnlyOnActionGroupChange = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+  const migrationAlertUpdatedAtAndNotifyOnlyOnActionGroupChange = encryptedSavedObjects.createMigration<
+    RawAlert,
+    RawAlert
+  >(
     // migrate all documents in 7.11 in order to add the "updatedAt" and "notifyOnlyOnActionGroupChange" fields
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
     pipeMigrations(setAlertUpdatedAtDate, setNotifyOnlyOnActionGroupChange)
@@ -45,7 +48,10 @@ export function getMigrations(
 
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
-    '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyOnlyOnActionGroupChange, '7.11.0'),
+    '7.11.0': executeMigrationWithErrorHandling(
+      migrationAlertUpdatedAtAndNotifyOnlyOnActionGroupChange,
+      '7.11.0'
+    ),
   };
 }
 
