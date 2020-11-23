@@ -401,3 +401,14 @@ export const importTimelineResultSchema = runtimeTypes.exact(
 export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;
 
 export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
+
+export interface TimelineExpandedEventType {
+  eventId: string;
+  indexName: string;
+  loading: boolean;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type EmptyObject = Record<any, never>;
+
+export type TimelineExpandedEvent = TimelineExpandedEventType | EmptyObject;

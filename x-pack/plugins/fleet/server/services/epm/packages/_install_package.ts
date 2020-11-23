@@ -82,7 +82,8 @@ export async function _installPackage({
   const installIndexPatternPromise = installIndexPatterns(
     savedObjectsClient,
     pkgName,
-    pkgVersion
+    pkgVersion,
+    installSource
   ).catch((reason) => (installIndexPatternError = reason));
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg)

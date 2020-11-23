@@ -17,6 +17,7 @@ import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
 } from '../../../../src/plugins/home/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 import { BASE_PATH } from './applications/fleet/constants';
@@ -58,10 +59,15 @@ export interface FleetStartDeps {
   data: DataPublicPluginStart;
 }
 
+export interface FleetStartServices extends CoreStart, FleetStartDeps {
+  storage: Storage;
+}
+
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
   private config: FleetConfigType;
   private kibanaVersion: string;
   private extensions: UIExtensionsStorage = {};
+  private storage = new Storage(localStorage);
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<FleetConfigType>();
@@ -86,26 +92,23 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       title: i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' }),
       order: 9020,
       euiIconType: 'logoElastic',
-      async mount(params: AppMountParameters) {
-        const [coreStart, startDeps] = (await core.getStartServices()) as [
+      mount: async (params: AppMountParameters) => {
+        const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
           CoreStart,
           FleetStartDeps,
           FleetStart
         ];
-        const { renderApp, teardownFleet } = await import('./applications/fleet/');
-        const unmount = renderApp(
-          coreStart,
-          params,
-          deps,
-          startDeps,
-          config,
-          kibanaVersion,
-          extensions
-        );
+        const startServices: FleetStartServices = {
+          ...coreStartServices,
+          ...startDepsServices,
+          storage: this.storage,
+        };
+        const { renderApp, teardownFleet } = await import('./applications/fleet');
+        const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
 
         return () => {
           unmount();
-          teardownFleet(coreStart);
+          teardownFleet(startServices);
         };
       },
     });
