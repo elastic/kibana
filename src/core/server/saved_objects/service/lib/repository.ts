@@ -765,26 +765,25 @@ export class SavedObjectsRepository {
     }
 
     let kueryNode;
-
-    try {
-      if (filter) {
+    if (filter) {
+      try {
         kueryNode = validateConvertFilterToKueryNode(allowedTypes, filter, this._mappings);
-      }
-    } catch (e) {
-      if (e.name === 'KQLSyntaxError') {
-        throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
-      } else {
-        throw e;
+      } catch (e) {
+        if (e.name === 'KQLSyntaxError') {
+          throw SavedObjectsErrorHelpers.createBadRequestError('KQLSyntaxError: ' + e.message);
+        } else {
+          throw e;
+        }
       }
     }
 
     let aggsObject = null;
-    try {
-      if (aggs) {
+    if (aggs) {
+      try {
         aggsObject = validateGetSavedObjectsAggs(allowedTypes, aggs, this._mappings);
+      } catch (e) {
+        throw e;
       }
-    } catch (e) {
-      throw e;
     }
 
     const esOptions = {

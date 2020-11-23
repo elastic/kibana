@@ -62,7 +62,6 @@ import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { RequestAdapter as RequestAdapter_2 } from 'src/plugins/inspector/common';
 import { Required } from '@kbn/utility-types';
-import * as rt from 'io-ts';
 import * as Rx from 'rxjs';
 import { SavedObject as SavedObject_2 } from 'kibana/server';
 import { SavedObject as SavedObject_3 } from 'src/core/server';

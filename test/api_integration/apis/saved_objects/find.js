@@ -346,7 +346,7 @@ export default function ({ getService }) {
                 JSON.stringify({
                   type_count: {
                     max: {
-                      field: 'dashboard.attributes.version',
+                      field: 'visualization.attributes.version',
                       script: 'Oh yes I am going to a script',
                     },
                   },
@@ -359,7 +359,7 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 error: 'Bad Request',
                 message:
-                  'Invalid value {"type_count":{"max":{"field":"dashboard.attributes.version","script":"Oh yes I am going to a script"}}}, excess properties: ["script"]: Bad Request',
+                  'script attribute is not supported in saved objects aggregation: Bad Request',
                 statusCode: 400,
               });
             }));

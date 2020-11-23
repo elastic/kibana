@@ -75,7 +75,7 @@ export const registerFindRoute = (router: IRouter) => {
         hasReferenceOperator: query.has_reference_operator,
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
-        aggs: query.aggs != null ? JSON.parse(query.aggs) : undefined,
+        aggs: query.aggs ? JSON.parse(query.aggs) : undefined,
         namespaces,
       });
 

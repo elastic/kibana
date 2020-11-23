@@ -19,30 +19,31 @@
 
 import * as rt from 'io-ts';
 
-import { FieldBasicRT } from '../helpers';
+import { fieldBasic } from '../helpers';
 
-export const BucketAggsTypeRt = rt.partial({
-  filter: rt.type({
-    term: rt.record(rt.string, rt.string),
-  }),
-  histogram: rt.intersection([
-    FieldBasicRT,
-    rt.type({ interval: rt.number }),
-    rt.partial({
-      min_doc_count: rt.number,
-      extended_bounds: rt.type({ min: rt.number, max: rt.number }),
-      keyed: rt.boolean,
-      missing: rt.number,
-      order: rt.record(rt.string, rt.literal('asc', 'desc')),
-    }),
-  ]),
-  terms: rt.intersection([
-    FieldBasicRT,
-    rt.partial({
-      field: rt.string,
-      size: rt.number,
-      show_term_doc_count_error: rt.boolean,
-      order: rt.record(rt.string, rt.literal('asc', 'desc')),
-    }),
-  ]),
-});
+export const bucketAggsType: Record<string, Record<string, rt.Any>> = {
+  filter: {
+    term: rt.record(rt.string, rt.any),
+  },
+  histogram: {
+    ...fieldBasic,
+    interval: rt.number,
+    min_doc_count: rt.number,
+    extended_bounds: rt.type({ min: rt.number, max: rt.number }),
+    keyed: rt.boolean,
+    missing: rt.number,
+    order: rt.record(rt.string, rt.literal('asc', 'desc')),
+  },
+  terms: {
+    ...fieldBasic,
+    collect_mode: rt.string,
+    exclude: rt.unknown,
+    execution_hint: rt.string,
+    include: rt.unknown,
+    missing: rt.string,
+    min_doc_count: rt.number,
+    size: rt.number,
+    show_term_doc_count_error: rt.boolean,
+    order: rt.record(rt.string, rt.literal('asc', 'desc')),
+  },
+};

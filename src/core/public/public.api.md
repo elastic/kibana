@@ -31,7 +31,6 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import * as rt from 'io-ts';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@kbn/utility-types';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
@@ -1030,12 +1029,6 @@ export interface SavedObjectReference {
     type: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "SavedObjectsAggsRt" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "SavedObjectsAggs" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type SavedObjectsAggs = rt.TypeOf<typeof SavedObjectsAggsRt>;
-
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
     namespace?: string;
@@ -1116,8 +1109,8 @@ export interface SavedObjectsCreateOptions {
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
-    // (undocumented)
-    aggs?: SavedObjectsAggs;
+    // @alpha
+    aggs?: Record<string, unknown>;
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts

@@ -31,5 +31,4 @@ export {
 
 export { SavedObjectsErrorHelpers } from './errors';
 
-export { SavedObjectsAggs } from './saved_objects_aggs_types';
 export { SavedObjectsUtils } from './utils';

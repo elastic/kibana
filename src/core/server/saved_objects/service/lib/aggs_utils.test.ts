@@ -19,7 +19,6 @@
 
 import { validateGetSavedObjectsAggs } from './aggs_utils';
 import { mockMappings } from './filter_utils.test';
-import { SavedObjectsAggs } from './saved_objects_aggs_types';
 
 describe('Filter Utils', () => {
   describe('#validateGetSavedObjectsAggs', () => {
@@ -38,7 +37,8 @@ describe('Filter Utils', () => {
         },
       });
     });
-    test('Validate a nested simple aggregations', () => {
+
+    test('Validate a nested field in simple aggregations', () => {
       expect(
         validateGetSavedObjectsAggs(
           ['alert'],
@@ -49,6 +49,72 @@ describe('Filter Utils', () => {
         aggName: {
           cardinality: {
             field: 'alert.actions.group',
+          },
+        },
+      });
+    });
+
+    test('Validate a nested aggregations', () => {
+      expect(
+        validateGetSavedObjectsAggs(
+          ['alert'],
+          {
+            aggName: {
+              cardinality: {
+                field: 'alert.attributes.actions.group',
+                aggs: {
+                  aggName: {
+                    max: { field: 'alert.attributes.actions.group' },
+                  },
+                },
+              },
+            },
+          },
+          mockMappings
+        )
+      ).toEqual({
+        aggName: {
+          cardinality: {
+            field: 'alert.actions.group',
+            aggs: {
+              aggName: {
+                max: {
+                  field: 'alert.actions.group',
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
+    test('Validate an aggregation without the attribute field', () => {
+      expect(
+        validateGetSavedObjectsAggs(
+          ['alert'],
+          { aggName: { terms: { 'alert.attributes.actions.group': ['myFriend', 'snoopy'] } } },
+          mockMappings
+        )
+      ).toEqual({
+        aggName: {
+          terms: {
+            'alert.actions.group': ['myFriend', 'snoopy'],
+          },
+        },
+      });
+    });
+
+    test('Validate a filter term aggregations', () => {
+      expect(
+        validateGetSavedObjectsAggs(
+          ['foo'],
+          { aggName: { filter: { term: { 'foo.attributes.bytes': 10 } } } },
+          mockMappings
+        )
+      ).toEqual({
+        aggName: {
+          filter: {
+            term: { 'foo.attributes.bytes': 10 },
           },
         },
       });
@@ -68,7 +134,37 @@ describe('Filter Utils', () => {
       }).toThrowErrorMatchingInlineSnapshot(`"This type foo is not allowed: Bad Request"`);
     });
 
-    test('Throw an error when aggregation is not defined in  SavedObjectsAggs', () => {
+    test('Throw an error when add an invalid attributes ', () => {
+      expect(() => {
+        validateGetSavedObjectsAggs(
+          ['foo'],
+          {
+            aggName: {
+              max: { field: 'foo.attributes.bytes', notValid: 'yesIamNotValid' },
+            },
+          },
+          mockMappings
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"notValid attribute is not supported in max saved objects aggregation: Bad Request"`
+      );
+    });
+
+    test('Throw an error when an attributes is not defined correctly', () => {
+      expect(() =>
+        validateGetSavedObjectsAggs(
+          ['alert'],
+          {
+            aggName: {
+              terms: { 'alert.attributes.actions.group': ['myFriend', 'snoopy'], missing: 0 },
+            },
+          },
+          mockMappings
+        )
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid value 0 supplied to : string: Bad Request"`);
+    });
+
+    test('Throw an error when aggregation is not defined in SavedObjectsAggs', () => {
       expect(() => {
         validateGetSavedObjectsAggs(
           ['foo'],
@@ -76,15 +172,38 @@ describe('Filter Utils', () => {
             aggName: {
               MySuperAgg: { field: 'foo.attributes.bytes' },
             },
-          } as SavedObjectsAggs,
+          },
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value {\\"aggName\\":{\\"MySuperAgg\\":{\\"field\\":\\"foo.attributes.bytes\\"}}}, excess properties: [\\"MySuperAgg\\"]: Bad Request"`
+        `"This aggregation MySuperAgg is not valid or we did not defined it yet: Bad Request"`
       );
     });
 
-    test('Throw an error when you add attributes who are not defined in SavedObjectsAggs', () => {
+    test('Throw an error when children aggregation is not defined in SavedObjectsAggs', () => {
+      expect(() => {
+        validateGetSavedObjectsAggs(
+          ['foo'],
+          {
+            aggName: {
+              cardinality: {
+                field: 'foo.attributes.bytes',
+                aggs: {
+                  aggName: {
+                    MySuperAgg: { field: 'alert.attributes.actions.group' },
+                  },
+                },
+              },
+            },
+          },
+          mockMappings
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"This aggregation MySuperAgg is not valid or we did not defined it yet: Bad Request"`
+      );
+    });
+
+    test('Throw an error when you add the script attribute who are not defined in SavedObjectsAggs', () => {
       expect(() => {
         validateGetSavedObjectsAggs(
           ['alert'],
@@ -93,11 +212,37 @@ describe('Filter Utils', () => {
               cardinality: { field: 'alert.attributes.actions.group' },
               script: 'I want to access that I should not',
             },
-          } as SavedObjectsAggs,
+          },
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid value {\\"aggName\\":{\\"cardinality\\":{\\"field\\":\\"alert.attributes.actions.group\\"},\\"script\\":\\"I want to access that I should not\\"}}, excess properties: [\\"script\\"]: Bad Request"`
+        `"script attribute is not supported in saved objects aggregation: Bad Request"`
+      );
+    });
+
+    test('Throw an error when you add the script attribute in a nested aggregations who are not defined in SavedObjectsAggs', () => {
+      expect(() => {
+        validateGetSavedObjectsAggs(
+          ['alert'],
+          {
+            aggName: {
+              cardinality: {
+                field: 'alert.attributes.actions.group',
+                aggs: {
+                  aggName: {
+                    max: {
+                      field: 'alert.attributes.actions.group',
+                      script: 'I want to access that I should not',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          mockMappings
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"script attribute is not supported in saved objects aggregation: Bad Request"`
       );
     });
   });

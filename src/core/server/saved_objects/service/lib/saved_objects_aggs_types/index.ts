@@ -23,24 +23,20 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import * as rt from 'io-ts';
 
-import { BucketAggsTypeRt } from './bucket_aggs';
-import { MetricsAggsTypeRt } from './metrics_aggs';
+import { bucketAggsType } from './bucket_aggs';
+import { metricsAggsType } from './metrics_aggs';
 
 import { SavedObjectsErrorHelpers } from '../errors';
-import { excess, throwErrors } from './helpers';
+import { throwErrors } from './helpers';
 
-const AllAggsRt = rt.intersection([BucketAggsTypeRt, MetricsAggsTypeRt]);
+export const savedObjectsAggs = {
+  ...metricsAggsType,
+  ...bucketAggsType,
+};
 
-const SavedObjectsAggsRt = rt.record(
-  rt.string,
-  rt.intersection([AllAggsRt, rt.partial({ aggs: AllAggsRt })])
-);
-
-export type SavedObjectsAggs = rt.TypeOf<typeof SavedObjectsAggsRt>;
-
-export const validateSavedObjectTypeAggs = (aggObjects: SavedObjectsAggs) => {
+export const validateSavedObjectsTypeAggs = (rtType: rt.Any, aggObject: unknown) => {
   pipe(
-    excess(SavedObjectsAggsRt).decode(aggObjects),
+    rtType.decode(aggObject),
     fold(throwErrors(SavedObjectsErrorHelpers.createBadRequestError), identity)
   );
 };

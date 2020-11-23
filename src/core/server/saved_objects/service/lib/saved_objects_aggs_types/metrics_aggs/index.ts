@@ -19,7 +19,7 @@
 
 import * as rt from 'io-ts';
 
-import { FieldBasicRT } from '../helpers';
+import { fieldBasic, FieldBasicRT } from '../helpers';
 
 /*
  * Types for Metrics Aggregations
@@ -39,24 +39,24 @@ import { FieldBasicRT } from '../helpers';
  * - Median Absolute Deviation Aggregation https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-median-absolute-deviation-aggregation.html
  */
 
-const MinMaxAggBodyRt = rt.intersection([FieldBasicRT, rt.partial({ missing: rt.number })]);
-
-export const MetricsAggsTypeRt = rt.partial({
-  avg: FieldBasicRT,
-  weighted_avg: rt.intersection([
-    rt.type({
-      value: rt.intersection([FieldBasicRT, rt.partial({ missing: rt.number })]),
-      weight: rt.intersection([FieldBasicRT, rt.partial({ missing: rt.number })]),
-    }),
-    rt.partial({
-      format: rt.string,
-      value_type: rt.string,
-    }),
-  ]),
-  cardinality: FieldBasicRT,
-  max: MinMaxAggBodyRt,
-  min: MinMaxAggBodyRt,
-  top_hits: rt.partial({
+export const metricsAggsType: Record<string, Record<string, rt.Any>> = {
+  avg: fieldBasic,
+  weighted_avg: {
+    value: rt.intersection([FieldBasicRT, rt.partial({ missing: rt.number })]),
+    weight: rt.intersection([FieldBasicRT, rt.partial({ missing: rt.number })]),
+    format: rt.string,
+    value_type: rt.string,
+  },
+  cardinality: fieldBasic,
+  max: {
+    ...fieldBasic,
+    missing: rt.number,
+  },
+  min: {
+    ...fieldBasic,
+    missing: rt.number,
+  },
+  top_hits: {
     explain: rt.boolean,
     from: rt.string,
     highlight: rt.any,
@@ -70,5 +70,5 @@ export const MetricsAggsTypeRt = rt.partial({
       includes: rt.array(rt.string),
       excludes: rt.array(rt.string),
     }),
-  }),
-});
+  },
+};

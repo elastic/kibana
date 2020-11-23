@@ -24,7 +24,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   SavedObject,
   SavedObjectReference,
-  SavedObjectsAggs,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
@@ -39,9 +38,6 @@ type SavedObjectsFindOptions = Omit<
 >;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
-
-/** @public */
-export { SavedObjectsAggs };
 
 export interface SavedObjectsCreateOptions {
   /**
@@ -353,6 +349,12 @@ export class SavedObjectsClient {
     // is not doing it implicitly.
     if (query.has_reference) {
       query.has_reference = JSON.stringify(query.has_reference);
+    }
+
+    // `aggs` is a structured object. we need to stringify it before sending it, as `fetch`
+    // is not doing it implicitly.
+    if (query.aggs) {
+      query.aggs = JSON.stringify(query.aggs);
     }
 
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
