@@ -109,7 +109,6 @@ export const query = async (
   potentialMatchMonitorIDs: string[]
 ): Promise<any> => {
   const params = {
-    index: queryContext.heartbeatIndices,
     body: {
       size: 0,
       query: {
