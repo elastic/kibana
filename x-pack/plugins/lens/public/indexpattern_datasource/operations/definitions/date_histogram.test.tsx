@@ -188,7 +188,7 @@ describe('date_histogram', () => {
   describe('buildColumn', () => {
     it('should create column object with auto interval for primary time field', () => {
       const column = dateHistogramOperation.buildColumn({
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'timestamp',
@@ -204,7 +204,7 @@ describe('date_histogram', () => {
 
     it('should create column object with auto interval for non-primary time fields', () => {
       const column = dateHistogramOperation.buildColumn({
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'start_date',
@@ -220,7 +220,7 @@ describe('date_histogram', () => {
 
     it('should create column object with restrictions', () => {
       const column = dateHistogramOperation.buildColumn({
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'timestamp',
