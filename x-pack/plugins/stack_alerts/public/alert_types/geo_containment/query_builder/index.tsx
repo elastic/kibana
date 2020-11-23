@@ -5,23 +5,11 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiFieldNumber,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSelect,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
   AlertTypeParamsExpressionProps,
-  getTimeOptions,
   AlertsContextValue,
 } from '../../../../../triggers_actions_ui/public';
 import { GeoContainmentAlertParams } from '../types';
@@ -50,22 +38,6 @@ const DEFAULT_VALUES = {
   BOUNDARY_NAME_FIELD: '',
   DELAY_OFFSET_WITH_UNITS: '0m',
 };
-
-const labelForDelayOffset = (
-  <>
-    <FormattedMessage
-      id="xpack.stackAlerts.geoContainment.delayOffset"
-      defaultMessage="Delayed evaluation offset"
-    />{' '}
-    <EuiIconTip
-      position="right"
-      type="questionInCircle"
-      content={i18n.translate('xpack.stackAlerts.geoContainment.delayOffsetTooltip', {
-        defaultMessage: 'Evaluate alerts on a delayed cycle to adjust for data latency',
-      })}
-    />
-  </>
-);
 
 function validateQuery(query: Query) {
   try {
@@ -142,12 +114,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
       language: 'kuery',
     }
   );
-  const [delayOffset, _setDelayOffset] = useState<number>(0);
-  function setDelayOffset(_delayOffset: number) {
-    setAlertParams('delayOffsetWithUnits', `${_delayOffset}${delayOffsetUnit}`);
-    _setDelayOffset(_delayOffset);
-  }
-  const [delayOffsetUnit, setDelayOffsetUnit] = useState<string>('m');
 
   const hasExpressionErrors = false;
   const expressionErrorMessage = i18n.translate(
@@ -202,47 +168,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
         </Fragment>
       ) : null}
       <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.geoContainment.selectOffset"
-            defaultMessage="Select offset (optional)"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFlexGrid columns={2}>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth display="rowCompressed" label={labelForDelayOffset}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
-                <EuiFieldNumber
-                  fullWidth
-                  min={0}
-                  compressed
-                  value={delayOffset || 0}
-                  name="delayOffset"
-                  onChange={(e) => {
-                    setDelayOffset(+e.target.value);
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  fullWidth
-                  compressed
-                  value={delayOffsetUnit}
-                  options={getTimeOptions(+alertInterval ?? 1)}
-                  onChange={(e) => {
-                    setDelayOffsetUnit(e.target.value);
-                  }}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiSpacer size="m" />
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
