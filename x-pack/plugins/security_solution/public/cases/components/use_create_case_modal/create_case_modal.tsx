@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
 import {
   EuiModal,

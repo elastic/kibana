@@ -18,7 +18,6 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { useAllCasesModal } from '../../../../cases/components/use_all_cases_modal';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store/timeline';
-import { setInsertTimeline } from '../../../store/timeline/actions';
 import { Case } from '../../../../cases/containers/types';
 
 import { TimelineProperties } from './styles';
