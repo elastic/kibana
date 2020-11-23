@@ -109,8 +109,12 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
     public async getHeaderFields(): Promise<string[]> {
       const result = await find.allByCssSelector('.euiDataGridHeaderCell__content');
       const textArr = [];
+      let idx = 0;
       for (const cell of result) {
-        textArr.push(await cell.getVisibleText());
+        if (idx > 0) {
+          textArr.push(await cell.getVisibleText());
+        }
+        idx++;
       }
       return Promise.resolve(textArr);
     }
@@ -120,6 +124,16 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
     ): Promise<WebElementWrapper[]> {
       const detailsRow = (await this.getDetailsRows())[options.rowIndex];
       return await detailsRow.findAllByTestSubject('~docTableRowAction');
+    }
+
+    public async clickDocSortAsc() {
+      await find.clickByCssSelector('.euiDataGridHeaderCell__button');
+      await find.clickByButtonText('Sort ASC');
+    }
+
+    public async clickDocSortDesc() {
+      await find.clickByCssSelector('.euiDataGridHeaderCell__button');
+      await find.clickByButtonText('Sort Desc');
     }
   }
 
