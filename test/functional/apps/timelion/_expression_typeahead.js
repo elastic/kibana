@@ -86,7 +86,7 @@ export default function ({ getPageObjects }) {
           await PageObjects.timelion.updateExpression(',split');
           await PageObjects.timelion.clickSuggestion();
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
-          expect(suggestions.length).to.eql(51);
+          expect(suggestions.length).to.eql(52);
           expect(suggestions[0].includes('@message.raw')).to.eql(true);
           await PageObjects.timelion.clickSuggestion(10);
         });
