@@ -9,6 +9,7 @@ import { TagsCapabilities } from '../../../common';
 import { ITagInternalClient } from '../../tags';
 import { TagBulkAction } from '../types';
 import { getBulkDeleteAction } from './bulk_delete';
+import { getBulkAssignAction } from './bulk_assign';
 import { getClearSelectionAction } from './clear_selection';
 
 interface GetBulkActionOptions {
@@ -28,6 +29,9 @@ export const getBulkActions = ({
 }: GetBulkActionOptions): TagBulkAction[] => {
   const actions: TagBulkAction[] = [];
 
+  if (capabilities.assign) {
+    actions.push(getBulkAssignAction({ notifications, overlays, tagClient, setLoading }));
+  }
   if (capabilities.delete) {
     actions.push(getBulkDeleteAction({ notifications, overlays, tagClient, setLoading }));
   }

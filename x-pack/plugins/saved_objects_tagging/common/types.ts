@@ -16,6 +16,17 @@ export type TagWithRelations = Tag & {
   relationCount: number;
 };
 
+/**
+ * Represent an assignable saved object, as returned by the `_find_assignable_objects` API
+ */
+export interface AssignableObject {
+  id: string;
+  type: string;
+  icon?: string;
+  title: string;
+  tags: string[];
+}
+
 // re-export types from oss definition
 export type {
   Tag,

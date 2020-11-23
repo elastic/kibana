@@ -6,3 +6,4 @@
 
 export { registerInternalFindTagsRoute } from './find_tags';
 export { registerInternalBulkDeleteRoute } from './bulk_delete';
+export { registerInternalFindAssignableObjectsRoute } from './find_assignable_objects';
