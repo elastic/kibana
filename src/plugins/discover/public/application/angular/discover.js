@@ -301,7 +301,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         $scope.state.sort,
         config.get(MODIFY_COLUMNS_ON_SWITCH)
       );
-      await replaceUrlAppState(nextAppState);
+      await setAppState(nextAppState);
       $route.reload();
     }
   };
