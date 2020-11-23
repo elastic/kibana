@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointDocGenerator, Tree, TreeNode } from '../../../../common/endpoint/generate_data';
-import { DataAccessLayer, Timerange } from '../../types';
-import { mock as mockResolverTree } from '../../models/resolver_tree';
+import {
+  EndpointDocGenerator,
+  Event,
+  Tree,
+  TreeNode,
+} from '../../../../common/endpoint/generate_data';
+import { DataAccessLayer, Timerange, TreeIdSchema } from '../../types';
 
 import {
-  mockTreeWithNoProcessEvents,
-  mockTreeWithOneNodeAndTwoPagesOfRelatedEvents,
-} from '../../mocks/resolver_tree';
-import {
   ResolverRelatedEvents,
-  ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
-  ResolverChildNode,
+  ResolverNode,
+  FieldsObject,
+  EventStats,
 } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 
@@ -27,123 +28,6 @@ interface Metadata {
    */
   databaseDocumentID: string;
   tree: Tree;
-  /**
-   * A record of entityIDs to be used in tests assertions.
-   */
-  entityIDs: {
-    /**
-     * The entityID of the node related to the document being analyzed.
-     */
-    origin: 'origin';
-  };
-}
-
-export function mock({
-  events,
-  cursors = { childrenNextChild: null, ancestryNextAncestor: null },
-  children = [],
-}: {
-  /**
-   * Events represented by the ResolverTree.
-   */
-  events: SafeResolverEvent[];
-  children?: ResolverChildNode[];
-  /**
-   * Optionally provide cursors for the 'children' and 'ancestry' edges.
-   */
-  cursors?: { childrenNextChild: string | null; ancestryNextAncestor: string | null };
-}): ResolverTree | null {
-  if (events.length === 0) {
-    return null;
-  }
-  const first = events[0];
-  const entityID = eventModel.entityIDSafeVersion(first);
-  if (!entityID) {
-    throw new Error('first mock event must include an entityID.');
-  }
-  return {
-    entityID,
-    // Required
-    children: {
-      childNodes: children,
-      nextChild: cursors.childrenNextChild,
-    },
-    // Required
-    relatedEvents: {
-      events: [],
-      nextEvent: null,
-    },
-    // Required
-    relatedAlerts: {
-      alerts: [],
-      nextAlert: null,
-    },
-    // Required
-    ancestry: {
-      ancestors: [],
-      nextAncestor: cursors.ancestryNextAncestor,
-    },
-    // Normally, this would have only certain events, but for testing purposes, it will have all events, since
-    // the position of events in the ResolverTree is irrelevant.
-    lifecycle: events,
-    // Required
-    stats: {
-      events: {
-        total: 0,
-        byCategory: {},
-      },
-      totalAlerts: 0,
-    },
-  };
-}
-
-function mockedTree(baseTree: Tree) {
-  const { children } = baseTree;
-  const firstChildNodeInTree = [...children.values()][0];
-
-  // The `generateBaseTree` mock doesn't calculate stats (the actual data has them.)
-  // So calculate some stats for just the node that we'll test.
-  // const statsResults = compileStatsForChild(firstChildNodeInTree);
-
-  const tree = mockResolverTree({
-    // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
-    // a lot of the frontend functions. So casting it back to the unsafe type for now.
-    events: baseTree.allEvents,
-    /**
-     * Calculate children from the ResolverTree response using the children of the `Tree` we generated using the Resolver data generator code.
-     * Compile (and attach) stats to the first child node.
-     *
-     * The purpose of `children` here is to set the `actual`
-     * value that the stats values will be compared with
-     * to derive things like the number of missing events and if
-     * related event limits should be shown.
-     */
-    children: [...baseTree.children.values()].map((node: TreeNode) => {
-      const childNode: Partial<ResolverChildNode> = {};
-      // Casting here because the generator returns the SafeResolverEvent type which isn't yet compatible with
-      // a lot of the frontend functions. So casting it back to the unsafe type for now.
-      childNode.lifecycle = node.lifecycle;
-
-      // `TreeNode` has `id` which is the same as `entityID`.
-      // The `ResolverChildNode` calls the entityID as `entityID`.
-      // Set `entityID` on `childNode` since the code in test relies on it.
-      childNode.entityID = node.id;
-
-      // This should only be true for the first child.
-      /** if (node.id === firstChildNodeInTree.id) {
-        // attach stats
-        childNode.stats = {
-          events: statsResults.eventStats,
-          totalAlerts: 0,
-        };
-      } */
-      return childNode;
-    }) as ResolverChildNode[] /**
-          Cast to ResolverChildNode[] array is needed because incoming
-          TreeNodes from the generator cannot be assigned cleanly to the
-          tree model's expected ResolverChildNode type.
-        */,
-  });
 }
 
 export function usingGenerator(): {
@@ -159,15 +43,10 @@ export function usingGenerator(): {
 
   const metadata: Metadata = {
     databaseDocumentID: '_id',
-    entityIDs: { origin: 'origin' },
     tree,
   };
 
   const allData = new Map([[tree.origin.id, tree.origin], ...tree.children, ...tree.ancestry]);
-
-  /* const tree = mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
-    originID: metadata.entityIDs.origin,
-  }); */
 
   return {
     metadata,
@@ -184,7 +63,13 @@ export function usingGenerator(): {
         timerange: Timerange;
         indexPatterns: string[];
       }): Promise<ResolverRelatedEvents> {
-        return { entityID: '', events: [], nextEvent: null };
+        const node = allData.get(entityID);
+        const events: SafeResolverEvent[] = [];
+        if (node) {
+          events.push(...node.relatedEvents);
+        }
+
+        return { entityID, events, nextEvent: null };
       },
 
       /**
@@ -203,7 +88,18 @@ export function usingGenerator(): {
         timerange: Timerange;
         indexPatterns: string[];
       }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
-        return { events: [], nextEvent: null };
+        const node = allData.get(entityID);
+        const events: SafeResolverEvent[] = [];
+        if (node) {
+          events.push(
+            ...node.relatedEvents.filter((event: SafeResolverEvent) => {
+              const categories = eventModel.eventCategory(event);
+              return categories.length > 0 && categories[0] === category;
+            })
+          );
+        }
+
+        return { events, nextEvent: null };
       },
 
       /**
@@ -246,15 +142,67 @@ export function usingGenerator(): {
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(): Promise<ResolverTree> {
-        return mockTreeWithNoProcessEvents();
+      async resolverGraph(
+        dataId: string,
+        schema: TreeIdSchema,
+        timerange: Timerange,
+        indices: string[]
+      ): Promise<ResolverNode[]> {
+        /**
+         * Creates an EventStats object from a generated TreeNOde.
+         * @param node a TreeNode created by the EndpointDocGenerator
+         */
+        const buildStats = (node: TreeNode): EventStats => {
+          return node.relatedEvents.reduce(
+            (accStats: EventStats, event: SafeResolverEvent) => {
+              accStats.total += 1;
+              const categories = eventModel.eventCategory(event);
+              if (categories.length > 0) {
+                const category = categories[0];
+                if (accStats.byCategory[category] === undefined) {
+                  accStats.byCategory[category] = 1;
+                } else {
+                  accStats.byCategory[category] += 1;
+                }
+              }
+              return accStats;
+            },
+            { total: 0, byCategory: {} }
+          );
+        };
+
+        /**
+         * Builds a fields object style object from a generated event.
+         *
+         * @param {SafeResolverEvent} event a lifecycle event to convert into FieldObject style
+         */
+        const buildFieldsObj = (event: Event): FieldsObject => {
+          return {
+            '@timestamp': eventModel.timestampSafeVersion(event) ?? 0,
+            'process.entity_id': eventModel.entityIDSafeVersion(event) ?? '',
+            'process.parent.entity_id': eventModel.parentEntityIDSafeVersion(event) ?? '',
+            'process.name': eventModel.processNameSafeVersion(event) ?? '',
+          };
+        };
+
+        return Array.from(allData.values()).reduce((acc: ResolverNode[], node: TreeNode) => {
+          const lifecycleEvent = node.lifecycle[0];
+          acc.push({
+            data: buildFieldsObj(lifecycleEvent),
+            id: node.id,
+            parent: eventModel.parentEntityIDSafeVersion(lifecycleEvent),
+            stats: buildStats(node),
+            name: eventModel.processNameSafeVersion(lifecycleEvent),
+          });
+          return acc;
+        }, []);
       },
 
       /**
        * Get entities matching a document.
        */
       async entities(): Promise<ResolverEntityIndex> {
-        return [{ entity_id: metadata.entityIDs.origin }];
+        return [{ entity_id: tree.origin.id }];
       },
     },
   };
