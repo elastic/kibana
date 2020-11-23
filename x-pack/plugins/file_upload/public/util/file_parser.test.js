@@ -10,11 +10,6 @@ import '@loaders.gl/polyfills';
 const cleanAndValidate = jest.fn((a) => a);
 const setFileProgress = jest.fn((a) => a);
 
-// Handle no file
-// Handle bad file
-// Handle good file
-// Give single error + results on cleaning problem
-// Give single error + results on geometry problem
 const testJson = {
   type: 'Feature',
   geometry: {
