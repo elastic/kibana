@@ -20,12 +20,8 @@ const entryFieldLabels: { [k in ConditionEntryField]: string } = {
   [ConditionEntryField.SIGNER]: 'Signer',
 };
 
-const isValidHash = (value: string) => {
-  // TODO: I believe this should be more a task for UI to correct values
-  const trimmed = value.trim();
-
-  return HASH_LENGTHS.includes(trimmed.length) && !INVALID_CHARACTERS_PATTERN.test(trimmed);
-};
+const isValidHash = (value: string) =>
+  HASH_LENGTHS.includes(value.length) && !INVALID_CHARACTERS_PATTERN.test(value);
 
 export const DeleteTrustedAppsRequestSchema = {
   params: schema.object({

@@ -71,93 +71,62 @@ describe('When invoking Trusted Apps Schema', () => {
   });
 
   describe('for POST Create', () => {
-    const getCreateTrustedAppItem = () => ({
+    const createConditionEntry = <T>(data?: T) => ({
+      field: ConditionEntryField.PATH,
+      type: 'match',
+      operator: 'included',
+      value: 'c:/programs files/Anti-Virus',
+      ...(data || {}),
+    });
+    const createNewTrustedApp = <T>(data?: T) => ({
       name: 'Some Anti-Virus App',
       description: 'this one is ok',
       os: 'windows',
-      entries: [
-        {
-          field: ConditionEntryField.PATH,
-          type: 'match',
-          operator: 'included',
-          value: 'c:/programs files/Anti-Virus',
-        },
-      ],
+      entries: [createConditionEntry()],
+      ...(data || {}),
     });
     const body = PostTrustedAppCreateRequestSchema.body;
 
     it('should not error on a valid message', () => {
-      const bodyMsg = getCreateTrustedAppItem();
+      const bodyMsg = createNewTrustedApp();
       expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
     });
 
     it('should validate `name` is required', () => {
-      const bodyMsg = {
-        ...getCreateTrustedAppItem(),
-        name: undefined,
-      };
-      expect(() => body.validate(bodyMsg)).toThrow();
+      expect(() => body.validate(createNewTrustedApp({ name: undefined }))).toThrow();
     });
 
     it('should validate `name` value to be non-empty', () => {
-      const bodyMsg = {
-        ...getCreateTrustedAppItem(),
-        name: '',
-      };
-      expect(() => body.validate(bodyMsg)).toThrow();
+      expect(() => body.validate(createNewTrustedApp({ name: '' }))).toThrow();
     });
 
     it('should validate `description` as optional', () => {
-      const { description, ...bodyMsg } = getCreateTrustedAppItem();
+      const { description, ...bodyMsg } = createNewTrustedApp();
       expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
     });
 
     it('should validate `os` to to only accept known values', () => {
-      const bodyMsg = {
-        ...getCreateTrustedAppItem(),
-        os: undefined,
-      };
+      const bodyMsg = createNewTrustedApp({ os: undefined });
       expect(() => body.validate(bodyMsg)).toThrow();
 
-      const bodyMsg2 = {
-        ...bodyMsg,
-        os: '',
-      };
-      expect(() => body.validate(bodyMsg2)).toThrow();
+      expect(() => body.validate({ ...bodyMsg, os: '' })).toThrow();
 
-      const bodyMsg3 = {
-        ...bodyMsg,
-        os: 'winz',
-      };
-      expect(() => body.validate(bodyMsg3)).toThrow();
+      expect(() => body.validate({ ...bodyMsg, os: 'winz' })).toThrow();
 
       ['linux', 'macos', 'windows'].forEach((os) => {
-        expect(() => {
-          body.validate({
-            ...bodyMsg,
-            os,
-          });
-        }).not.toThrow();
+        expect(() => body.validate({ ...bodyMsg, os })).not.toThrow();
       });
     });
 
     it('should validate `entries` as required', () => {
-      const bodyMsg = {
-        ...getCreateTrustedAppItem(),
-        entries: undefined,
-      };
-      expect(() => body.validate(bodyMsg)).toThrow();
+      expect(() => body.validate(createNewTrustedApp({ entries: undefined }))).toThrow();
 
-      const { entries, ...bodyMsg2 } = getCreateTrustedAppItem();
+      const { entries, ...bodyMsg2 } = createNewTrustedApp();
       expect(() => body.validate(bodyMsg2)).toThrow();
     });
 
     it('should validate `entries` to have at least 1 item', () => {
-      const bodyMsg = {
-        ...getCreateTrustedAppItem(),
-        entries: [],
-      };
-      expect(() => body.validate(bodyMsg)).toThrow();
+      expect(() => body.validate(createNewTrustedApp({ entries: [] }))).toThrow();
     });
 
     describe('when `entries` are defined', () => {
@@ -166,171 +135,163 @@ describe('When invoking Trusted Apps Schema', () => {
       const VALID_HASH_SHA1 = 'aedb279e378BED6C2DB3C9DC9e12ba635e0b391c';
       const VALID_HASH_SHA256 = 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476';
 
-      const getTrustedAppItemEntryItem = () => getCreateTrustedAppItem().entries[0];
-
       it('should validate `entry.field` is required', () => {
-        const { field, ...entry } = getTrustedAppItemEntryItem();
-        const bodyMsg = {
-          ...getCreateTrustedAppItem(),
-          entries: [entry],
-        };
+        const { field, ...entry } = createConditionEntry();
+        expect(() => body.validate(createNewTrustedApp({ entries: [entry] }))).toThrow();
+      });
+
+      it('should validate `entry.field` does not accept empty values', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [createConditionEntry({ field: '' })],
+        });
         expect(() => body.validate(bodyMsg)).toThrow();
       });
 
-      it('should validate `entry.field` is limited to known values', () => {
-        const bodyMsg = {
-          ...getCreateTrustedAppItem(),
-          entries: [
-            {
-              ...getTrustedAppItemEntryItem(),
-              field: '',
-            },
-          ],
-        };
+      it('should validate `entry.field` does not accept unknown values', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [createConditionEntry({ field: 'invalid value' })],
+        });
         expect(() => body.validate(bodyMsg)).toThrow();
+      });
 
-        const bodyMsg2 = {
-          ...getCreateTrustedAppItem(),
-          entries: [
-            {
-              ...getTrustedAppItemEntryItem(),
-              field: 'invalid value',
-            },
-          ],
-        };
-        expect(() => body.validate(bodyMsg2)).toThrow();
-
-        [
-          {
-            field: ConditionEntryField.HASH,
-            value: 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
-          },
-          { field: ConditionEntryField.PATH, value: '/tmp/dir1' },
-        ].forEach((partialEntry) => {
-          const bodyMsg3 = {
-            ...getCreateTrustedAppItem(),
+      it('should validate `entry.field` accepts hash field name for all os values', () => {
+        ['linux', 'macos', 'windows'].forEach((os) => {
+          const bodyMsg3 = createNewTrustedApp({
+            os,
             entries: [
-              {
-                ...getTrustedAppItemEntryItem(),
-                ...partialEntry,
-              },
+              createConditionEntry({
+                field: ConditionEntryField.HASH,
+                value: 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+              }),
             ],
-          };
+          });
 
           expect(() => body.validate(bodyMsg3)).not.toThrow();
         });
       });
 
-      it('should validate `entry.type` is limited to known values', () => {
-        const bodyMsg = {
-          ...getCreateTrustedAppItem(),
-          entries: [
-            {
-              ...getTrustedAppItemEntryItem(),
-              type: 'invalid',
-            },
-          ],
-        };
-        expect(() => body.validate(bodyMsg)).toThrow();
+      it('should validate `entry.field` accepts path field name for all os values', () => {
+        ['linux', 'macos', 'windows'].forEach((os) => {
+          const bodyMsg3 = createNewTrustedApp({
+            os,
+            entries: [
+              createConditionEntry({ field: ConditionEntryField.PATH, value: '/tmp/dir1' }),
+            ],
+          });
 
-        // Allow `match`
-        const bodyMsg2 = {
-          ...getCreateTrustedAppItem(),
-          entries: [
-            {
-              ...getTrustedAppItemEntryItem(),
-              type: 'match',
-            },
-          ],
-        };
-        expect(() => body.validate(bodyMsg2)).not.toThrow();
+          expect(() => body.validate(bodyMsg3)).not.toThrow();
+        });
       });
 
-      it('should validate `entry.operator` is limited to known values', () => {
-        const bodyMsg = {
-          ...getCreateTrustedAppItem(),
+      it('should validate `entry.field` accepts signer field name for windows os value', () => {
+        const bodyMsg3 = createNewTrustedApp({
+          os: 'windows',
           entries: [
-            {
-              ...getTrustedAppItemEntryItem(),
-              operator: 'invalid',
-            },
+            createConditionEntry({ field: ConditionEntryField.SIGNER, value: 'Microsoft' }),
           ],
-        };
-        expect(() => body.validate(bodyMsg)).toThrow();
+        });
 
-        // Allow `match`
-        const bodyMsg2 = {
-          ...getCreateTrustedAppItem(),
-          entries: [
-            {
-              ...getTrustedAppItemEntryItem(),
-              operator: 'included',
-            },
-          ],
-        };
-        expect(() => body.validate(bodyMsg2)).not.toThrow();
+        expect(() => body.validate(bodyMsg3)).not.toThrow();
+      });
+
+      it('should validate `entry.field` does not accept signer field name for linux and macos os values', () => {
+        ['linux', 'macos'].forEach((os) => {
+          const bodyMsg3 = createNewTrustedApp({
+            os,
+            entries: [
+              createConditionEntry({ field: ConditionEntryField.SIGNER, value: 'Microsoft' }),
+            ],
+          });
+
+          expect(() => body.validate(bodyMsg3)).toThrow();
+        });
+      });
+
+      it('should validate `entry.type` does not accept unknown values', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [createConditionEntry({ type: 'invalid' })],
+        });
+        expect(() => body.validate(bodyMsg)).toThrow();
+      });
+
+      it('should validate `entry.type` accepts known values', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [createConditionEntry({ type: 'match' })],
+        });
+        expect(() => body.validate(bodyMsg)).not.toThrow();
+      });
+
+      it('should validate `entry.operator` does not accept unknown values', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [createConditionEntry({ operator: 'invalid' })],
+        });
+        expect(() => body.validate(bodyMsg)).toThrow();
+      });
+
+      it('should validate `entry.operator` accepts known values', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [createConditionEntry({ operator: 'included' })],
+        });
+        expect(() => body.validate(bodyMsg)).not.toThrow();
       });
 
       it('should validate `entry.value` required', () => {
-        const { value, ...entry } = getTrustedAppItemEntryItem();
-        const bodyMsg = {
-          ...getCreateTrustedAppItem(),
-          entries: [entry],
-        };
-        expect(() => body.validate(bodyMsg)).toThrow();
+        const { value, ...entry } = createConditionEntry();
+        expect(() => body.validate(createNewTrustedApp({ entries: [entry] }))).toThrow();
       });
 
       it('should validate `entry.value` is non-empty', () => {
-        const bodyMsg = {
-          ...getCreateTrustedAppItem(),
-          entries: [
-            {
-              ...getTrustedAppItemEntryItem(),
-              value: '',
-            },
-          ],
-        };
+        const bodyMsg = createNewTrustedApp({ entries: [createConditionEntry({ value: '' })] });
         expect(() => body.validate(bodyMsg)).toThrow();
       });
 
-      it('should validate that `entry.field` is used only once', () => {
-        let bodyMsg = {
-          ...getCreateTrustedAppItem(),
-          entries: [getTrustedAppItemEntryItem(), getTrustedAppItemEntryItem()],
-        };
+      it('should validate that `entry.field` path field value can only be used once', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [createConditionEntry(), createConditionEntry()],
+        });
         expect(() => body.validate(bodyMsg)).toThrow('[Path] field can only be used once');
+      });
 
-        bodyMsg = {
-          ...getCreateTrustedAppItem(),
+      it('should validate that `entry.field` hash field value can only be used once', () => {
+        const bodyMsg = createNewTrustedApp({
           entries: [
-            {
-              ...getTrustedAppItemEntryItem(),
+            createConditionEntry({
               field: ConditionEntryField.HASH,
               value: VALID_HASH_MD5,
-            },
-            {
-              ...getTrustedAppItemEntryItem(),
+            }),
+            createConditionEntry({
               field: ConditionEntryField.HASH,
               value: VALID_HASH_MD5,
-            },
+            }),
           ],
-        };
+        });
         expect(() => body.validate(bodyMsg)).toThrow('[Hash] field can only be used once');
+      });
+
+      it('should validate that `entry.field` signer field value can only be used once', () => {
+        const bodyMsg = createNewTrustedApp({
+          entries: [
+            createConditionEntry({
+              field: ConditionEntryField.SIGNER,
+              value: 'Microsoft',
+            }),
+            createConditionEntry({
+              field: ConditionEntryField.SIGNER,
+              value: 'Microsoft',
+            }),
+          ],
+        });
+        expect(() => body.validate(bodyMsg)).toThrow('[Signer] field can only be used once');
       });
 
       it('should validate Hash field valid value', () => {
         [VALID_HASH_MD5, VALID_HASH_SHA1, VALID_HASH_SHA256].forEach((value) => {
           expect(() => {
-            body.validate({
-              ...getCreateTrustedAppItem(),
-              entries: [
-                {
-                  ...getTrustedAppItemEntryItem(),
-                  field: ConditionEntryField.HASH,
-                  value,
-                },
-              ],
-            });
+            body.validate(
+              createNewTrustedApp({
+                entries: [createConditionEntry({ field: ConditionEntryField.HASH, value })],
+              })
+            );
           }).not.toThrow();
         });
       });
@@ -338,48 +299,28 @@ describe('When invoking Trusted Apps Schema', () => {
       it('should validate Hash value with invalid length', () => {
         ['xyz', VALID_HASH_SHA256 + VALID_HASH_MD5].forEach((value) => {
           expect(() => {
-            body.validate({
-              ...getCreateTrustedAppItem(),
-              entries: [
-                {
-                  ...getTrustedAppItemEntryItem(),
-                  field: ConditionEntryField.HASH,
-                  value,
-                },
-              ],
-            });
+            body.validate(
+              createNewTrustedApp({
+                entries: [createConditionEntry({ field: ConditionEntryField.HASH, value })],
+              })
+            );
           }).toThrow();
         });
       });
 
       it('should validate Hash value with invalid characters', () => {
         expect(() => {
-          body.validate({
-            ...getCreateTrustedAppItem(),
-            entries: [
-              {
-                ...getTrustedAppItemEntryItem(),
-                field: ConditionEntryField.HASH,
-                value: `G${VALID_HASH_MD5.substr(1)}`,
-              },
-            ],
-          });
+          body.validate(
+            createNewTrustedApp({
+              entries: [
+                createConditionEntry({
+                  field: ConditionEntryField.HASH,
+                  value: `G${VALID_HASH_MD5.substr(1)}`,
+                }),
+              ],
+            })
+          );
         }).toThrow();
-      });
-
-      it('should trim hash value before validation', () => {
-        expect(() => {
-          body.validate({
-            ...getCreateTrustedAppItem(),
-            entries: [
-              {
-                ...getTrustedAppItemEntryItem(),
-                field: ConditionEntryField.HASH,
-                value: `  ${VALID_HASH_MD5}  \r\n`,
-              },
-            ],
-          });
-        }).not.toThrow();
       });
     });
   });
