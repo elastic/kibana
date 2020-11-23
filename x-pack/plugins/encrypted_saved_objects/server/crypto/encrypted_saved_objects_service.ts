@@ -152,10 +152,10 @@ export class EncryptedSavedObjectsService {
    * saved object with a version specified, this will return "true".
    *
    * @param type Saved object type.
-   * @param type Saved object version number which changes on each successful write operation.
+   * @param version Saved object version number which changes on each successful write operation.
    * Can be used in conjunction with `overwrite` for implementing optimistic concurrency
    * control.
-   * @param type Overwrite existing documents.
+   * @param overwrite Overwrite existing documents.
    */
   public canSpecifyID(type: string, version?: string, overwrite?: boolean) {
     const typeDefinition = this.typeDefinitions.get(type);
