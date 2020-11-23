@@ -647,5 +647,41 @@ describe('createStreamingBatchedFunction()', () => {
         });
       });
     });
+
+    test('rejects with STREAM error on JSON parse error only pending promises', async () => {
+      const { fetchStreaming, stream } = setup();
+      const fn = createStreamingBatchedFunction({
+        url: '/test',
+        fetchStreaming,
+        maxItemAge: 5,
+        flushOnMaxItems: 3,
+      });
+
+      const promise1 = of(fn({ a: '1' }));
+      const promise2 = of(fn({ a: '2' }));
+
+      await new Promise((r) => setTimeout(r, 6));
+
+      stream.next(
+        JSON.stringify({
+          id: 1,
+          result: { b: '1' },
+        }) + '\n'
+      );
+
+      stream.next('Not a JSON\n');
+
+      await new Promise((r) => setTimeout(r, 1));
+
+      const [, error1] = await promise1;
+      const [result1] = await promise2;
+      expect(error1).toMatchObject({
+        message: 'Unexpected token N in JSON at position 0',
+        code: 'STREAM',
+      });
+      expect(result1).toMatchObject({
+        b: '1',
+      });
+    });
   });
 });
