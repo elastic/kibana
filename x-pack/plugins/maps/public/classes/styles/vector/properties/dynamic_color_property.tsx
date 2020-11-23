@@ -334,7 +334,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
             beginPercentile
           )}:  ${this.formatField(dynamicRound(colorStops[i]))}`;
           const endPercentile = userDefinedPercentiles[i / 2];
-          const end = `${endPercentile}${getOrdinalSuffix(endPercentile)}:  ${this.formatField(
+          const end = `<${endPercentile}${getOrdinalSuffix(endPercentile)}: ${this.formatField(
             dynamicRound(colorStops[i + 2])
           )}`;
           stop = `${begin} - ${end}`;
