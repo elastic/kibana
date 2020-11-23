@@ -89,8 +89,8 @@ Customize creation behavior with:
 
 - `override` --- if set to `true`, replaces an existing index pattern if an
   index pattern with the provided title already exists. Defaults to `false`.
-- `skip_field_refresh` --- if set to `true` skips reloading index pattern fields after
-  the index pattern is stored. Defaults to `false`.
+- `refresh_fields` --- if set to `false` skips reloading index pattern fields after
+  the index pattern is stored. Defaults to `true`.
 - `make_default` --- if set to `true`, makes the new index pattern the default
   index pattern. Defaults to `true`.
 
@@ -98,7 +98,7 @@ Customize creation behavior with:
 POST /api/index_patterns/index_pattern
 {
     "override": false,
-    "skip_field_refresh": false,
+    "refresh_fields": true,
     "make_default": true,
     "index_pattern": {
         "title": "hello"
