@@ -24,6 +24,7 @@ import {
   EuiSuperSelect,
   EuiLoadingSpinner,
   EuiBadge,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import { AlertActionParam, ResolvedActionGroup } from '../../../../../alerts/common';
 import {
@@ -251,25 +252,27 @@ export const ActionTypeForm = ({
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
-        <Suspense
-          fallback={
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          <ParamsFieldsComponent
-            actionParams={actionItem.params as any}
-            index={index}
-            errors={actionParamsErrors.errors}
-            editAction={setActionParamsProperty}
-            messageVariables={availableActionVariables}
-            defaultMessage={availableDefaultActionMessage}
-            actionConnector={actionConnector}
-          />
-        </Suspense>
+        <EuiErrorBoundary>
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <ParamsFieldsComponent
+              actionParams={actionItem.params as any}
+              index={index}
+              errors={actionParamsErrors.errors}
+              editAction={setActionParamsProperty}
+              messageVariables={availableActionVariables}
+              defaultMessage={availableDefaultActionMessage}
+              actionConnector={actionConnector}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
       ) : null}
     </Fragment>
   ) : (

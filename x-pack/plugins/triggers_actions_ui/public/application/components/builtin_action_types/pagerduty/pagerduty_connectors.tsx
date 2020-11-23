@@ -11,8 +11,8 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { PagerDutyActionConnector } from '.././types';
 import { useKibana } from '../../../../common/lib/kibana';
 
-const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  PagerDutyActionConnector
+const PagerDutyActionConnectorFields: React.FunctionComponent<
+  ActionConnectorFieldsProps<PagerDutyActionConnector>
 >> = ({ errors, action, editActionConfig, editActionSecrets, readOnly }) => {
   const { docLinks } = useKibana().services;
   const { apiUrl } = action.config;
