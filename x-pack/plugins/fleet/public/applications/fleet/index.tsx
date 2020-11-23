@@ -7,11 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect, Route, RouteProps } from 'react-router-dom';
 import { CoreStart, AppMountParameters } from 'src/core/public';
-import {
-  IngestManagerSetupDeps,
-  IngestManagerConfigType,
-  IngestManagerStartDeps,
-} from '../../plugin';
+import { FleetSetupDeps, FleetConfigType, FleetStartDeps } from '../../plugin';
 import { licenseService } from './hooks';
 import { UIExtensionsStorage } from './types';
 import { AppRoutes, FleetAppContext, WithPermissionsAndSetup } from './app';
@@ -41,9 +37,9 @@ const FleetApp = ({
 }: {
   basepath: string;
   coreStart: CoreStart;
-  setupDeps: IngestManagerSetupDeps;
-  startDeps: IngestManagerStartDeps;
-  config: IngestManagerConfigType;
+  setupDeps: FleetSetupDeps;
+  startDeps: FleetStartDeps;
+  config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
@@ -69,9 +65,9 @@ const FleetApp = ({
 export function renderApp(
   coreStart: CoreStart,
   { element, appBasePath, history }: AppMountParameters,
-  setupDeps: IngestManagerSetupDeps,
-  startDeps: IngestManagerStartDeps,
-  config: IngestManagerConfigType,
+  setupDeps: FleetSetupDeps,
+  startDeps: FleetStartDeps,
+  config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage
 ) {
@@ -94,7 +90,7 @@ export function renderApp(
   };
 }
 
-export const teardownIngestManager = (coreStart: CoreStart) => {
+export const teardownFleet = (coreStart: CoreStart) => {
   coreStart.chrome.docTitle.reset();
   coreStart.chrome.setBreadcrumbs([]);
   licenseService.stop();

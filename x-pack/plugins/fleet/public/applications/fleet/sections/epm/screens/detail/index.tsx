@@ -28,13 +28,13 @@ import {
   useLink,
   useCapabilities,
 } from '../../../../hooks';
-import { WithHeaderLayout } from '../../../../layouts';
+import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
 import { useSetPackageInstallStatus } from '../../hooks';
 import { IconPanel, LoadingIconPanel } from '../../components/icon_panel';
 import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from '../../components/release_badge';
 import { UpdateIcon } from '../../components/icons';
 import { Content } from './content';
-import { WithHeaderLayoutProps } from '../../../../layouts/with_header';
+import './index.scss';
 import { useUIExtension } from '../../../../hooks/use_ui_extension';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
@@ -58,16 +58,6 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
     defaultMessage: 'Custom',
   }),
 };
-
-const DetailWrapper = styled.div`
-  // Class name here is in sync with 'PanelWrapper' in 'IconPanel' component
-  .shiftNavTabs {
-    margin-left: ${(props) =>
-      parseFloat(props.theme.eui.euiSize) * 6 +
-      parseFloat(props.theme.eui.spacerSizes.xl) * 2 +
-      parseFloat(props.theme.eui.spacerSizes.l)}px;
-  }
-`;
 
 const Divider = styled.div`
   width: 0;
@@ -282,31 +272,29 @@ export function Detail() {
   }, [getHref, packageInfo, panel, showCustomTab, packageInfoData]);
 
   return (
-    <DetailWrapper>
-      <WithHeaderLayout
-        leftColumn={headerLeftContent}
-        rightColumn={headerRightContent}
-        rightColumnGrow={false}
-        tabs={tabs}
-        tabsClassName={'shiftNavTabs'}
-      >
-        {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
-        {packageInfoError ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.fleet.epm.loadingIntegrationErrorTitle"
-                defaultMessage="Error loading integration details"
-              />
-            }
-            error={packageInfoError}
-          />
-        ) : isLoading || !packageInfo ? (
-          <Loading />
-        ) : (
-          <Content {...packageInfo} panel={panel} />
-        )}
-      </WithHeaderLayout>
-    </DetailWrapper>
+    <WithHeaderLayout
+      leftColumn={headerLeftContent}
+      rightColumn={headerRightContent}
+      rightColumnGrow={false}
+      tabs={tabs}
+      tabsClassName="fleet__epm__shiftNavTabs"
+    >
+      {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
+      {packageInfoError ? (
+        <Error
+          title={
+            <FormattedMessage
+              id="xpack.fleet.epm.loadingIntegrationErrorTitle"
+              defaultMessage="Error loading integration details"
+            />
+          }
+          error={packageInfoError}
+        />
+      ) : isLoading || !packageInfo ? (
+        <Loading />
+      ) : (
+        <Content {...packageInfo} panel={panel} />
+      )}
+    </WithHeaderLayout>
   );
 }

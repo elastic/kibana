@@ -11,7 +11,7 @@ import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/reac
 import { i18n } from '@kbn/i18n';
 
 import { TelemetryLogic } from '../../../shared/telemetry';
-import { EuiLink } from '../../../shared/react_router_helpers';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
@@ -59,9 +59,9 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         defaultMessage: 'Name',
       }),
       render: (name: string) => (
-        <EuiLink data-test-subj="engineNameLink" {...engineLinkProps(name)}>
+        <EuiLinkTo data-test-subj="engineNameLink" {...engineLinkProps(name)}>
           {name}
-        </EuiLink>
+        </EuiLinkTo>
       ),
       width: '30%',
       truncateText: true,
@@ -122,12 +122,12 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       ),
       dataType: 'string',
       render: (name: string) => (
-        <EuiLink {...engineLinkProps(name)}>
+        <EuiLinkTo {...engineLinkProps(name)}>
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage"
             defaultMessage="Manage"
           />
-        </EuiLink>
+        </EuiLinkTo>
       ),
       align: 'right',
       width: '100px',

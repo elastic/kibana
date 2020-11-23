@@ -228,15 +228,58 @@ describe('when on the list page', () => {
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
 
-          [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE, HostStatus.UNENROLLING].forEach(
-            (status, index) => {
-              hostListData[index] = {
-                metadata: hostListData[index].metadata,
-                host_status: status,
-                query_strategy_version: queryStrategyVersion,
-              };
-            }
-          );
+          // add ability to change (immutable) policy
+          type DeepMutable<T> = { -readonly [P in keyof T]: DeepMutable<T[P]> };
+          type Policy = DeepMutable<NonNullable<HostInfo['policy_info']>>;
+
+          const makePolicy = (
+            applied: HostInfo['metadata']['Endpoint']['policy']['applied'],
+            cb: (policy: Policy) => Policy
+          ): Policy => {
+            return cb({
+              agent: {
+                applied: { id: 'xyz', revision: applied.version },
+                configured: { id: 'xyz', revision: applied.version },
+              },
+              endpoint: { id: applied.id, revision: applied.endpoint_policy_version },
+            });
+          };
+
+          [
+            { status: HostStatus.ERROR, policy: (p: Policy) => p },
+            {
+              status: HostStatus.ONLINE,
+              policy: (p: Policy) => {
+                p.endpoint.id = 'xyz'; // represents change in endpoint policy assignment
+                p.endpoint.revision = 1;
+                return p;
+              },
+            },
+            {
+              status: HostStatus.OFFLINE,
+              policy: (p: Policy) => {
+                p.endpoint.revision += 1; // changes made to endpoint policy
+                return p;
+              },
+            },
+            {
+              status: HostStatus.UNENROLLING,
+              policy: (p: Policy) => {
+                p.agent.configured.revision += 1; // agent policy change, not propagated to agent yet
+                return p;
+              },
+            },
+          ].forEach((setup, index) => {
+            hostListData[index] = {
+              metadata: hostListData[index].metadata,
+              host_status: setup.status,
+              policy_info: makePolicy(
+                hostListData[index].metadata.Endpoint.policy.applied,
+                setup.policy
+              ),
+              query_strategy_version: queryStrategyVersion,
+            };
+          });
           hostListData.forEach((item, index) => {
             generatedPolicyStatuses[index] = item.metadata.Endpoint.policy.applied.status;
           });
@@ -313,6 +356,20 @@ describe('when on the list page', () => {
               }]`
             )
           ).not.toBeNull();
+        });
+      });
+
+      it('should display policy out-of-date warning when changes pending', async () => {
+        const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+        const outOfDates = await renderResult.findAllByTestId('rowPolicyOutOfDate');
+        expect(outOfDates).toHaveLength(3);
+
+        outOfDates.forEach((item, index) => {
+          expect(item.textContent).toEqual('Out-of-date');
+          expect(item.querySelector(`[data-euiicon-type][color=warning]`)).not.toBeNull();
         });
       });
 
@@ -612,19 +669,19 @@ describe('when on the list page', () => {
     });
 
     it('should include the link to reassignment in Ingest', async () => {
-      coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
+      coreStart.application.getUrlForApp.mockReturnValue('/app/fleet');
       const renderResult = await renderAndWaitForData();
       const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
       expect(linkToReassign).not.toBeNull();
       expect(linkToReassign.textContent).toEqual('Reassign Policy');
       expect(linkToReassign.getAttribute('href')).toEqual(
-        `/app/ingestManager#/fleet/agents/${elasticAgentId}/activity?openReassignFlyout=true`
+        `/app/fleet#/fleet/agents/${elasticAgentId}/activity?openReassignFlyout=true`
       );
     });
 
     describe('when link to reassignment in Ingest is clicked', () => {
       beforeEach(async () => {
-        coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
+        coreStart.application.getUrlForApp.mockReturnValue('/app/fleet');
         const renderResult = await renderAndWaitForData();
         const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
         reactTestingLibrary.act(() => {
@@ -820,8 +877,8 @@ describe('when on the list page', () => {
         switch (appName) {
           case 'securitySolution':
             return '/app/security';
-          case 'ingestManager':
-            return '/app/ingestManager';
+          case 'fleet':
+            return '/app/fleet';
         }
         return appName;
       });
@@ -852,9 +909,7 @@ describe('when on the list page', () => {
       });
 
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
-      expect(agentPolicyLink.getAttribute('href')).toEqual(
-        `/app/ingestManager#/policies/${agentPolicyId}`
-      );
+      expect(agentPolicyLink.getAttribute('href')).toEqual(`/app/fleet#/policies/${agentPolicyId}`);
     });
     it('navigates to the Ingest Agent Details page', async () => {
       const renderResult = await renderAndWaitForData();
@@ -864,9 +919,7 @@ describe('when on the list page', () => {
       });
 
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
-      expect(agentDetailsLink.getAttribute('href')).toEqual(
-        `/app/ingestManager#/fleet/agents/${agentId}`
-      );
+      expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet#/fleet/agents/${agentId}`);
     });
   });
 });
