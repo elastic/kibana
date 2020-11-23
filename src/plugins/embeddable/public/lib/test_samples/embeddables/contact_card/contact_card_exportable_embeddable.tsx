@@ -17,10 +17,26 @@
  * under the License.
  */
 
-export * from './contact_card';
-export * from './contact_card_embeddable';
-export * from './contact_card_embeddable_factory';
-export * from './contact_card_exportable_embeddable';
-export * from './contact_card_exportable_embeddable_factory';
-export * from './contact_card_initializer';
-export * from './slow_contact_card_embeddable_factory';
+import { ContactCardEmbeddable } from './contact_card_embeddable';
+
+export class ContactCardExportableEmbeddable extends ContactCardEmbeddable {
+  public getInspectorAdapters = () => {
+    return {
+      layer1: {
+        type: 'datatable',
+        columns: [
+          { id: 'firstName', name: 'First Name' },
+          { id: 'originalLastName', name: 'Last Name' },
+        ],
+        rows: [
+          {
+            firstName: this.getInput().firstName,
+            orignialLastName: this.getInput().lastName,
+          },
+        ],
+      },
+    };
+  };
+}
+
+export const CONTACT_EXPORTABLE_USER_TRIGGER = 'CONTACT_EXPORTABLE_USER_TRIGGER';

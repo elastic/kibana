@@ -143,6 +143,11 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
         quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
         formatFactory,
       });
+
+      if (context.asString) {
+        return content;
+      }
+
       if (content) {
         return downloadMultipleAs(content);
       }

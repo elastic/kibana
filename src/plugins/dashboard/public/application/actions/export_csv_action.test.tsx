@@ -23,8 +23,8 @@ import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../embeddable
 import { DashboardContainer } from '../../application/embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../application/test_helpers';
 import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
+  CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
+  ContactCardExportableEmbeddableFactory,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
@@ -39,8 +39,8 @@ import { LINE_FEED_CHARACTER } from '../../../../data/public/exports/export_csv'
 describe('Export CSV action', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();
   setup.registerEmbeddableFactory(
-    CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
+    CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
+    new ContactCardExportableEmbeddableFactory((() => null) as any, {} as any)
   );
   const start = doStart();
 
@@ -73,7 +73,7 @@ describe('Export CSV action', () => {
       panels: {
         '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
           explicitInput: { firstName: 'Kibanana', id: '123' },
-          type: CONTACT_CARD_EMBEDDABLE,
+          type: CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
         }),
       },
     });
@@ -84,7 +84,7 @@ describe('Export CSV action', () => {
       ContactCardEmbeddableInput,
       ContactCardEmbeddableOutput,
       ContactCardEmbeddable
-    >(CONTACT_CARD_EMBEDDABLE, {
+    >(CONTACT_CARD_EXPORTABLE_EMBEDDABLE, {
       firstName: 'Kibana',
     });
 
@@ -109,9 +109,12 @@ describe('Export CSV action', () => {
     const action = new ExportCSVAction({ core: coreStart, data: dataMock });
     const result = ((await action.execute({ embeddable, asString: true })) as unknown) as
       | undefined
-      | Record<string, string>;
+      | Record<string, { content: string; type: string }>;
     expect(result).toEqual({
-      'Hello Kibana.csv': `First Name,Last Name${LINE_FEED_CHARACTER}Kibana,undefined${LINE_FEED_CHARACTER}`,
+      'Hello Kibana.csv': {
+        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibana,undefined${LINE_FEED_CHARACTER}`,
+        type: 'text/plain;charset=utf-8',
+      },
     });
   });
 
