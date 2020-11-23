@@ -78,4 +78,6 @@ const TagsComponent: React.FC<Props> = ({ isLoading }) => {
   );
 };
 
+TagsComponent.displayName = 'TagsComponent';
+
 export const Tags = memo(TagsComponent);

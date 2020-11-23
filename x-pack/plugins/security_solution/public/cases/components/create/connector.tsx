@@ -78,4 +78,6 @@ const ConnectorComponent: React.FC<Props> = ({ isLoading }) => {
   );
 };
 
+ConnectorComponent.displayName = 'ConnectorComponent';
+
 export const Connector = memo(ConnectorComponent);

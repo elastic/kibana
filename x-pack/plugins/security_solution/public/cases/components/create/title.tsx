@@ -27,4 +27,6 @@ const TitleComponent: React.FC<Props> = ({ isLoading }) => (
   />
 );
 
+TitleComponent.displayName = 'TitleComponent';
+
 export const Title = memo(TitleComponent);

@@ -26,4 +26,6 @@ const DescriptionComponent: React.FC<Props> = ({ isLoading }) => (
   />
 );
 
+DescriptionComponent.displayName = 'DescriptionComponent';
+
 export const Description = memo(DescriptionComponent);

@@ -30,8 +30,8 @@ interface Props {
 }
 
 export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
-  const { loading: isLoadingConnectors, connectors } = useConnectors();
-  const { caseData, isLoading, postCase } = usePostCase();
+  const { connectors } = useConnectors();
+  const { caseData, postCase } = usePostCase();
 
   const submitCase = useCallback(
     async ({ connectorId: dataConnectorId, fields, ...dataWithoutConnectorId }, isValid) => {
@@ -60,11 +60,7 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
     }
   }, [caseData, onSuccess]);
 
-  return (
-    <Form form={form} isLoading={isLoading || isLoadingConnectors}>
-      {children}
-    </Form>
-  );
+  return <Form form={form}>{children}</Form>;
 };
 
 FormContext.displayName = 'FormContext';
