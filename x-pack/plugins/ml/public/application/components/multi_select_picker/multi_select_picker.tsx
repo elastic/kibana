@@ -14,11 +14,10 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { FC, useEffect, useState } from 'react';
-// @ts-ignore
-import { FieldTypeIcon } from '../../../application/components/field_type_icon';
+import React, { FC, ReactNode, useEffect, useState } from 'react';
+
 export interface Option {
-  name: string;
+  name: string | ReactNode;
   checked?: 'on' | 'off';
   disabled?: boolean;
   type?: string;
@@ -113,14 +112,6 @@ export const MultiselectPicker: FC<{ options: Option[]; onChange: Function }> = 
               style={{ flexDirection: 'row' }}
             >
               {item.name}
-              {item.type && (
-                <FieldTypeIcon
-                  type={item.type}
-                  fieldNames={item.name}
-                  tooltipEnabled={false}
-                  needsaria={true}
-                />
-              )}
             </EuiFilterSelectItem>
           ))
         ) : (

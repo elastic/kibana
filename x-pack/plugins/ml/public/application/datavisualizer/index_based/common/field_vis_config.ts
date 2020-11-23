@@ -42,6 +42,7 @@ export interface FieldVisStats {
   topValues?: Array<{ key: number; doc_count: number }>;
   topValuesSampleSize?: number;
   topValuesSamplerShardSize?: number;
+  examples?: Array<string | object>;
 }
 
 // The internal representation of the configuration used to build the visuals
@@ -53,7 +54,7 @@ export interface FieldVisConfig {
   existsInDocs: boolean;
   aggregatable: boolean;
   loading: boolean;
-  stats?: any;
+  stats?: FieldVisStats;
   fieldFormat?: any;
   isUnsupportedType?: boolean;
 }

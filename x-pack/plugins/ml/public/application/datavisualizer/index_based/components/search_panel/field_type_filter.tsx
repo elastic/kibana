@@ -6,6 +6,7 @@
 
 import React, { FC, useMemo } from 'react';
 import { Option, MultiselectPicker } from '../../../../components/multi_select_picker';
+import { FieldTypeIcon } from '../../../../components/field_type_icon';
 
 export const ML_JOB_FIELD_TYPES = {
   BOOLEAN: 'boolean',
@@ -35,10 +36,27 @@ export const DatavisualizerFieldTypeFilter: FC<{
   indexedFieldTypes: MlJobFieldType[];
 }> = ({ indexedFieldTypes }) => {
   const options: Option[] = useMemo(() => {
-    return indexedFieldTypes.map((indexedFieldName) => ({
-      ...ML_JOB_FIELD_TYPES_OPTIONS[indexedFieldName],
-      type: indexedFieldName,
-    }));
+    return indexedFieldTypes.map((indexedFieldName) => {
+      const item = ML_JOB_FIELD_TYPES_OPTIONS[indexedFieldName];
+
+      return {
+        name: (
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <div style={{ width: 20 }}>
+              {indexedFieldName && (
+                <FieldTypeIcon
+                  type={indexedFieldName}
+                  fieldName={item.name}
+                  tooltipEnabled={false}
+                  needsAria={true}
+                />
+              )}
+            </div>
+            {item.name}
+          </div>
+        ),
+      };
+    });
   }, [indexedFieldTypes]);
   return <MultiselectPicker options={options} onChange={() => {}} />;
 };

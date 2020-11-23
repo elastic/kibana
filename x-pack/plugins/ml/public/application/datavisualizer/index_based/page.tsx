@@ -6,12 +6,9 @@
 
 import React, { createContext, FC, Fragment, useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContentBody,
@@ -50,7 +47,6 @@ import { getToastNotifications } from '../../util/dependency_cache';
 import { useUrlState } from '../../util/url_state';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
-import { FieldsPanel } from './components/fields_panel';
 import { SearchPanel } from './components/search_panel';
 import { DataLoader } from './data_loader';
 import { DocumentCountContent } from './components/field_data_card/content_types/document_count_content';
@@ -728,49 +724,8 @@ export const Page: FC = () => {
                     overallStats={overallStats}
                     indexedFieldTypes={indexedFieldTypes}
                   />
-                  <EuiHorizontalRule />
+                  <EuiSpacer size={'s'} />
                   <DataVisualizerDataGrid items={configs} />
-                  <EuiFlexGroup gutterSize="m">
-                    <EuiFlexItem>
-                      {totalMetricFieldCount > 0 && (
-                        <Fragment>
-                          <FieldsPanel
-                            title={i18n.translate(
-                              'xpack.ml.datavisualizer.page.metricsPanelTitle',
-                              {
-                                defaultMessage: 'Metrics',
-                              }
-                            )}
-                            totalFieldCount={totalMetricFieldCount}
-                            populatedFieldCount={populatedMetricFieldCount}
-                            fieldTypes={[ML_JOB_FIELD_TYPES.NUMBER]}
-                            showFieldType={ML_JOB_FIELD_TYPES.NUMBER}
-                            showAllFields={showAllMetrics}
-                            setShowAllFields={setShowAllMetrics}
-                            fieldSearchBarQuery={metricFieldQuery}
-                            setFieldSearchBarQuery={setMetricFieldQuery}
-                            fieldVisConfigs={metricConfigs}
-                          />
-                          <EuiSpacer size="xl" />
-                        </Fragment>
-                      )}
-                      <FieldsPanel
-                        title={i18n.translate('xpack.ml.datavisualizer.page.fieldsPanelTitle', {
-                          defaultMessage: 'Fields',
-                        })}
-                        totalFieldCount={totalNonMetricFieldCount}
-                        populatedFieldCount={populatedNonMetricFieldCount}
-                        showAllFields={showAllNonMetrics}
-                        setShowAllFields={setShowAllNonMetrics}
-                        fieldTypes={indexedFieldTypes}
-                        showFieldType={nonMetricShowFieldType}
-                        setShowFieldType={setNonMetricShowFieldType}
-                        fieldSearchBarQuery={nonMetricFieldQuery}
-                        setFieldSearchBarQuery={setNonMetricFieldQuery}
-                        fieldVisConfigs={nonMetricConfigs}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
                 </EuiPanel>
               </EuiFlexItem>
               {showActionsPanel === true && (

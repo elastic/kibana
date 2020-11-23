@@ -5,42 +5,23 @@
  */
 
 import React, { FC } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldDataCardProps } from '../field_data_card';
-import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 
 const TIME_FORMAT = 'MMM D YYYY, HH:mm:ss.SSS';
 
 export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
 
-  const { count, sampleCount, earliest, latest } = stats;
-  const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
+  const { earliest, latest } = stats;
 
   return (
     <div className="mlFieldDataCard__stats">
-      <div>
-        <EuiText size="xs" color="subdued" data-test-subj="mlFieldDataCardDocCount">
-          <EuiIcon type="document" />
-          &nbsp;
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardDate.documentsCountDescription"
-            defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-            values={{
-              count,
-              docsPercent,
-            }}
-          />
-        </EuiText>
-      </div>
-
-      <EuiSpacer size="m" />
-
       <div data-test-subj="mlFieldDataCardEarliest">
         <FormattedMessage
           id="xpack.ml.fieldDataCard.cardDate.earliestDescription"
