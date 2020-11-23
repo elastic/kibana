@@ -960,7 +960,7 @@ describe('config schema', () => {
         `);
       });
 
-      it('requires both `id` and `key` in extend `apiKey` format credentials', () => {
+      it('requires both `id` and `key` in extended `apiKey` format credentials', () => {
         expect(() =>
           ConfigSchema.validate({
             authc: {
