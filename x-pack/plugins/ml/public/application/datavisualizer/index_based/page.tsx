@@ -54,6 +54,7 @@ import { FieldsPanel } from './components/fields_panel';
 import { SearchPanel } from './components/search_panel';
 import { DataLoader } from './data_loader';
 import { DocumentCountContent } from './components/field_data_card/content_types/document_count_content';
+import { DataVisualizerDataGrid } from '../stats_datagrid';
 interface DataVisualizerPageState {
   searchQuery: Query['query'];
   searchString: Query['query'];
@@ -647,6 +648,11 @@ export const Page: FC = () => {
 
   const wizardPanelWidth = '280px';
 
+  const configs = useMemo(() => [...nonMetricConfigs, ...metricConfigs], [
+    nonMetricConfigs,
+    metricConfigs,
+  ]);
+
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
@@ -723,6 +729,7 @@ export const Page: FC = () => {
                     indexedFieldTypes={indexedFieldTypes}
                   />
                   <EuiHorizontalRule />
+                  <DataVisualizerDataGrid items={configs} />
                   <EuiFlexGroup gutterSize="m">
                     <EuiFlexItem>
                       {totalMetricFieldCount > 0 && (
