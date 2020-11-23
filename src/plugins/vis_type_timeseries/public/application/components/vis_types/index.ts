@@ -17,29 +17,31 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { PersistedState } from 'src/plugins/visualizations/public';
 
+import { TimeseriesVisParams } from '../../../metrics_fn';
+import { TimeseriesVisData } from '../../../../common/types';
+
 /**
- * TSVB visualizations are not typed yet.
+ * Lazy load each visualization type, since the only one is presented on the screen at the same time.
+ * Disable typescript errors since the components are not typed yet.
  */
 
 // @ts-expect-error
-import { TimeseriesVisualization as timeseries } from './timeseries/vis';
+const timeseries = lazy(() => import('./timeseries/vis'));
 // @ts-expect-error
-import { metric } from './metric/vis';
+const metric = lazy(() => import('./metric/vis'));
 // @ts-expect-error
-import { TopNVisualization as topN } from './top_n/vis';
+const topN = lazy(() => import('./top_n/vis'));
 // @ts-expect-error
-import { TableVis as table } from './table/vis';
+const table = lazy(() => import('./table/vis'));
 // @ts-expect-error
-import { gauge } from './gauge/vis';
+const gauge = lazy(() => import('./gauge/vis'));
 // @ts-expect-error
-import { MarkdownVisualization as markdown } from './markdown/vis';
-import { TimeseriesVisParams } from '../../../metrics_fn';
-import { TimeseriesVisData } from '../../../../common/types';
+const markdown = lazy(() => import('./markdown/vis'));
 
 export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVisProps>> = {
   timeseries,
