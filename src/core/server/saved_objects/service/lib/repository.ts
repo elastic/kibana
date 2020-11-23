@@ -701,7 +701,6 @@ export class SavedObjectsRepository {
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
-   * @property {object} [options.aggs] - see ./saved_object_aggs for more insight
    * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */

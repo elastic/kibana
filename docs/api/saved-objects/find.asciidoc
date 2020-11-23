@@ -54,12 +54,12 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
 
 `filter`::
   (Optional, string) The filter is a KQL string with the caveat that if you filter with an attribute from your type saved object.
-  It should look like that savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object like `updatedAt`,
+  It should look like that savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object like `updated_at`,
   you will have to define your filter like that savedObjectType.updatedAt > 2018-12-22.
 
 `aggs`::
   (Optional, string) The aggs will support aggregation string with the caveat that your field from the aggregation will have the attribute from your type saved object, 
-  it should look like this: savedObjectType.attributes.field. However, If you use a direct attribute of a saved object like updatedAt, you will have to define your filter like this: savedObjectType.updatedAt.
+  it should look like this: savedObjectType.attributes.field. However, If you use a direct attribute of a saved object like updatedAt, you will have to define your filter like this: savedObjectType.updated_at.
 
 NOTE: As objects change in {kib}, the results on each page of the response also
 change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.

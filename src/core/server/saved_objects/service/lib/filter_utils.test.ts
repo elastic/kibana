@@ -23,7 +23,7 @@ import { validateFilterKueryNode, validateConvertFilterToKueryNode } from './fil
 
 export const mockMappings = {
   properties: {
-    updatedAt: {
+    updated_at: {
       type: 'date',
     },
     foo: {
@@ -104,12 +104,12 @@ describe('Filter Utils', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo'],
-          'foo.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)',
+          'foo.updated_at: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)',
           mockMappings
         )
       ).toEqual(
         esKuery.fromKueryExpression(
-          '(type: foo and updatedAt: 5678654567) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or foo.description :*)'
+          '(type: foo and updated_at: 5678654567) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or foo.description :*)'
         )
       );
     });
@@ -118,12 +118,12 @@ describe('Filter Utils', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo', 'bar'],
-          'foo.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)',
+          'foo.updated_at: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)',
           mockMappings
         )
       ).toEqual(
         esKuery.fromKueryExpression(
-          '(type: foo and updatedAt: 5678654567) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or foo.description :*)'
+          '(type: foo and updated_at: 5678654567) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or foo.description :*)'
         )
       );
     });
@@ -132,12 +132,12 @@ describe('Filter Utils', () => {
       expect(
         validateConvertFilterToKueryNode(
           ['foo', 'bar'],
-          '(bar.updatedAt: 5678654567 OR foo.updatedAt: 5678654567) and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or bar.attributes.description :*)',
+          '(bar.updated_at: 5678654567 OR foo.updated_at: 5678654567) and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or bar.attributes.description :*)',
           mockMappings
         )
       ).toEqual(
         esKuery.fromKueryExpression(
-          '((type: bar and updatedAt: 5678654567) or (type: foo and updatedAt: 5678654567)) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or bar.description :*)'
+          '((type: bar and updated_at: 5678654567) or (type: foo and updated_at: 5678654567)) and foo.bytes > 1000 and foo.bytes < 8000 and foo.title: "best" and (foo.description: t* or bar.description :*)'
         )
       );
     });
@@ -156,11 +156,11 @@ describe('Filter Utils', () => {
       expect(() => {
         validateConvertFilterToKueryNode(
           ['foo', 'bar'],
-          'updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)',
+          'updated_at: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)',
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
-        `"This key 'updatedAt' need to be wrapped by a saved object type like foo,bar: Bad Request"`
+        `"This key 'updated_at' need to be wrapped by a saved object type like foo,bar: Bad Request"`
       );
     });
 
@@ -175,7 +175,7 @@ describe('Filter Utils', () => {
     test('Validate filter query through KueryNode - happy path', () => {
       const validationObject = validateFilterKueryNode({
         astFilter: esKuery.fromKueryExpression(
-          'foo.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
+          'foo.updated_at: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
         types: ['foo'],
         indexMapping: mockMappings,
@@ -186,7 +186,7 @@ describe('Filter Utils', () => {
           astPath: 'arguments.0',
           error: null,
           isSavedObjectAttr: true,
-          key: 'foo.updatedAt',
+          key: 'foo.updated_at',
           type: 'foo',
         },
         {
@@ -250,7 +250,7 @@ describe('Filter Utils', () => {
     test('Return Error if key is not wrapper by a saved object type', () => {
       const validationObject = validateFilterKueryNode({
         astFilter: esKuery.fromKueryExpression(
-          'updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
+          'updated_at: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
         types: ['foo'],
         indexMapping: mockMappings,
@@ -259,9 +259,9 @@ describe('Filter Utils', () => {
       expect(validationObject).toEqual([
         {
           astPath: 'arguments.0',
-          error: "This key 'updatedAt' need to be wrapped by a saved object type like foo",
+          error: "This key 'updated_at' need to be wrapped by a saved object type like foo",
           isSavedObjectAttr: true,
-          key: 'updatedAt',
+          key: 'updated_at',
           type: null,
         },
         {
@@ -305,7 +305,7 @@ describe('Filter Utils', () => {
     test('Return Error if key of a saved object type is not wrapped with attributes', () => {
       const validationObject = validateFilterKueryNode({
         astFilter: esKuery.fromKueryExpression(
-          'foo.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.description :*)'
+          'foo.updated_at: 5678654567 and foo.attributes.bytes > 1000 and foo.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.description :*)'
         ),
         types: ['foo'],
         indexMapping: mockMappings,
@@ -316,7 +316,7 @@ describe('Filter Utils', () => {
           astPath: 'arguments.0',
           error: null,
           isSavedObjectAttr: true,
-          key: 'foo.updatedAt',
+          key: 'foo.updated_at',
           type: 'foo',
         },
         {
@@ -362,7 +362,7 @@ describe('Filter Utils', () => {
     test('Return Error if filter is not using an allowed type', () => {
       const validationObject = validateFilterKueryNode({
         astFilter: esKuery.fromKueryExpression(
-          'bar.updatedAt: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
+          'bar.updated_at: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.title: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
         types: ['foo'],
         indexMapping: mockMappings,
@@ -373,7 +373,7 @@ describe('Filter Utils', () => {
           astPath: 'arguments.0',
           error: 'This type bar is not allowed',
           isSavedObjectAttr: true,
-          key: 'bar.updatedAt',
+          key: 'bar.updated_at',
           type: 'bar',
         },
         {
@@ -417,7 +417,7 @@ describe('Filter Utils', () => {
     test('Return Error if filter is using an non-existing key in the index patterns of the saved object type', () => {
       const validationObject = validateFilterKueryNode({
         astFilter: esKuery.fromKueryExpression(
-          'foo.updatedAt33: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.header: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
+          'foo.updated_at33: 5678654567 and foo.attributes.bytes > 1000 and foo.attributes.bytes < 8000 and foo.attributes.header: "best" and (foo.attributes.description: t* or foo.attributes.description :*)'
         ),
         types: ['foo'],
         indexMapping: mockMappings,
@@ -426,9 +426,9 @@ describe('Filter Utils', () => {
       expect(validationObject).toEqual([
         {
           astPath: 'arguments.0',
-          error: "This key 'foo.updatedAt33' does NOT exist in foo saved object index patterns",
+          error: "This key 'foo.updated_at33' does NOT exist in foo saved object index patterns",
           isSavedObjectAttr: false,
-          key: 'foo.updatedAt33',
+          key: 'foo.updated_at33',
           type: 'foo',
         },
         {

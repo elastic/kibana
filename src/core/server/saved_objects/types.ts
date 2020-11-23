@@ -113,8 +113,8 @@ export interface SavedObjectsFindOptions {
    * Specify an Elasticsearch aggregation to perform. This alpha API only supports a limited set of aggregation types: metrics, bucket. Additional aggregation types can be contributed to Core.
    * @alpha
    * @example
-   * aggs = { type_count: { max: { field: 'dashboard.attributes.version' } } };
-   * SavedObjects.find({type: 'dashboard', aggs: '%7B%22type_count%22%3A%7B%22max%22%3A%7B%22field%22%3A%22dashboard.attributes.version%22%7D%7D%7D'})
+   * aggs = { latest_version: { max: { field: 'dashboard.attributes.version' } } };
+   * SavedObjects.find({type: 'dashboard', aggs: '%7B%22latest_version%22%3A%7B%22max%22%3A%7B%22field%22%3A%22dashboard.attributes.version%22%7D%7D%7D'})
    */
   aggs?: Record<string, unknown>;
   namespaces?: string[];
