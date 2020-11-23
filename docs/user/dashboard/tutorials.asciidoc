@@ -336,20 +336,20 @@ Vega-Lite generates data using the names `source_0` and `data_0`. `source_0` con
 the results from the {es} query, and `data_0` contains the visually encoded results
 which are shown in the chart. To debug this problem, you need to compare both.
 
-To inspect data sets, go to *Inspect* and select *View: Vega debug*. You will see:
+To inspect data sets, go to *Inspect* and select *View: Vega debug*. You will see a menu with different data sources:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_3.png[Vega-Lite tutorial Inspector Data sets]
+image::visualize/images/vega_lite_tutorial_3.png[Data set selector showing root, source_0, data_0, and marks]
 
-To look closer at the source, select the matching option in the dropdown. It looks like:
-
-[role="screenshot"]
-image::visualize/images/vega_lite_tutorial_4.png[Vega-Lite tutorial Data sets source]
-
-To compare to the visually encoded data, change dropdown selection to `data_0`. You will see:
+To look closer at the raw data in Vega, select the option for `source_0` in the dropdown:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_5.png[Vega-Lite tutorial Data sets data]
+image::visualize/images/vega_lite_tutorial_4.png[Table for data_0 with columns key, doc_count and array of time_buckets]
+
+To compare to the visually encoded data, change the dropdown selection to `data_0`. You will see:
+
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_5.png[Table for data_0 where the key is NaN instead of a string]
 
 The issue seems to be that the `key` property is not being converted the right way,
 which makes sense because the `key` is now category (`Men's Clothing`, `Women's Clothing`, etc.) instead of a timestamp.
@@ -371,11 +371,11 @@ To fix this, try updating the `encoding` of your Vega-Lite spec to:
   }
 ```
 
-This will show more errors, and you can inspect `data_0` to
+This will show more errors, so you need to debug. Click *Inspect*, switch the view to *Vega Debug*, and switch to look at the visually encoded data in `data_0` to
 understand why. This now shows:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_6.png[Vega-Lite tutorial Data sets updated data]
+image::visualize/images/vega_lite_tutorial_6.png[Table for data_0 showing that the column time_buckets.buckets.key is undefined]
 
 It looks like the problem is that the `time_buckets` inner array is not being
 extracted by Vega. The solution is to use a Vega-lite
@@ -395,7 +395,7 @@ This does not yet produce the results you expect. Inspect the transformed data
 by selecting `data_0` in *Data sets* again:
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_7.png[Vega-Lite tutorial Data sets transformed data]
+image::visualize/images/vega_lite_tutorial_7.png[Table showing data_0 with multiple pages of results, but undefined values in the column time_buckets.buckets.key]
 
 The debug view shows `undefined` values where you would expect to see numbers, and
 the cause is that there are duplicate names which are confusing Vega-Lite. This can
@@ -533,6 +533,8 @@ and seeing the points respond to the nearest position:
 
 [role="screenshot"]
 image::visualize/images/vega_lite_tutorial_2.png[Vega-Lite tutorial selection enabled]
+
+The selection is controlled by a Vega signal, and can be viewed using the <<vega-inspector, Vega Inspector>>.
 
 The final result of this tutorial is this spec:
 
