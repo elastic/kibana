@@ -36,8 +36,7 @@ export const networkDns: SecuritySolutionFactory<NetworkQueries.dns> = {
     const { activePage, fakePossibleCount } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response.rawResponse);
     const edges: NetworkDnsEdges[] = getDnsEdges(response);
-    const fakeTotalCount =
-      fakePossibleCount != null && fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const inspect = {
       dsl: [inspectStringifyObject(buildDnsQuery(options))],
     };
