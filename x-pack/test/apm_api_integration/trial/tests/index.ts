@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 
 export default function observabilityApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('APM specs (trial)', function () {
-    this.tags('ciGroup1');
+    this.tags('ciGroup5');
 
     describe('Services', function () {
       loadTestFile(require.resolve('./services/annotations'));
