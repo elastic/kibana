@@ -63,7 +63,7 @@ export const alertInstancesTableColumns = (
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
       { defaultMessage: 'Status' }
     ),
-    width: '18%',
+    width: '15%',
     render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
       return (
         <EuiHealth color={value.healthColor} className="actionsInstanceList__health">
