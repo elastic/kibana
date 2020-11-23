@@ -19,6 +19,9 @@ import {
   EnvironmentField,
   IsAboveField,
 } from '../fields';
+import { useFetcher } from '../../../hooks/useFetcher';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { getParsedDate } from '../../../context/UrlParamsContext/helpers';
 
 interface AlertParams {
   windowSize: number;
@@ -42,6 +45,33 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
+
+  const { threshold, windowSize, windowUnit, environment } = alertParams;
+
+  const { data } = useFetcher(() => {
+    if (threshold && windowSize && windowUnit) {
+      return callApmApi({
+        endpoint: 'GET /api/apm/alerts/transaction_error_rate/chart_preview',
+        params: {
+          query: {
+            start: getParsedDate(`now-${windowSize}${windowUnit}`)!,
+            end: getParsedDate('now')!,
+            threshold: threshold / 100,
+            environment,
+            serviceName,
+            transactionType,
+          },
+        },
+      });
+    }
+  }, [
+    threshold,
+    windowSize,
+    windowUnit,
+    environment,
+    serviceName,
+    transactionType,
+  ]);
 
   if (serviceName && !transactionTypes.length) {
     return null;
@@ -100,6 +130,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       defaults={defaultParams}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}
+      chartPreviewData={data}
     />
   );
 }

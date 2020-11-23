@@ -96,6 +96,7 @@ import {
   rumVisitorsBreakdownRoute,
   rumWebCoreVitals,
 } from './rum_client';
+import { transactionErrorRateChartPreview } from './alerts/transaction_error_rate_chart_preview';
 
 const createApmApi = () => {
   const api = createApi()
@@ -199,7 +200,10 @@ const createApmApi = () => {
     .add(rumJSErrors)
     .add(rumUrlSearch)
     .add(rumLongTaskMetrics)
-    .add(rumHasDataRoute);
+    .add(rumHasDataRoute)
+
+    // Alerting
+    .add(transactionErrorRateChartPreview);
 
   return api;
 };

@@ -7,6 +7,8 @@
 import React, { useEffect } from 'react';
 import { EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
+import { Coordinate } from '../../../../typings/timeseries';
+import { ChartPreview } from '../chart_preview';
 
 interface Props {
   alertTypeName: string;
@@ -14,6 +16,7 @@ interface Props {
   setAlertProperty: (key: string, value: any) => void;
   defaults: Record<string, any>;
   fields: React.ReactNode[];
+  chartPreviewData?: Coordinate[];
 }
 
 export function ServiceAlertTrigger(props: Props) {
@@ -25,6 +28,7 @@ export function ServiceAlertTrigger(props: Props) {
     setAlertProperty,
     alertTypeName,
     defaults,
+    chartPreviewData = [],
   } = props;
 
   const params: Record<string, any> = {
@@ -61,6 +65,7 @@ export function ServiceAlertTrigger(props: Props) {
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>
+      <ChartPreview data={chartPreviewData} />
       <EuiSpacer size="m" />
     </>
   );
