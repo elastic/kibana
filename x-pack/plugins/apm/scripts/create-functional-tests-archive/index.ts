@@ -9,8 +9,11 @@ import { execSync } from 'child_process';
 import moment from 'moment';
 import path from 'path';
 import fs from 'fs';
+import { stampLogger } from '../shared/stamp-logger';
 
 async function run() {
+  stampLogger();
+
   const archiveName = 'apm_8.0.0';
 
   // include important APM data and ML data
