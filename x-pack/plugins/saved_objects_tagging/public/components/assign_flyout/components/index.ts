@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { parseQuery } from './parse_query';
-export { computeRequiredChanges } from './compute_changes';
+export { AssignFlyoutActionBar } from './action_bar';
+export { AssignFlyoutFooter } from './footer';
+export { AssignFlyoutResultList } from './result_list';
+export { AssignFlyoutSearchBar } from './search_bar';
