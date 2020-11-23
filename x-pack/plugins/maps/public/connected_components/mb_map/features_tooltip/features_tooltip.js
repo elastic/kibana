@@ -183,6 +183,7 @@ export class FeaturesTooltip extends Component {
           addFilters={this.props.addFilters}
           getFilterActions={this.props.getFilterActions}
           getActionContext={this.props.getActionContext}
+          onSingleValueTrigger={this.props.onSingleValueTrigger}
           showFilterActions={this._showFilterActionsView}
         />
         {this._renderActions(geoFields)}

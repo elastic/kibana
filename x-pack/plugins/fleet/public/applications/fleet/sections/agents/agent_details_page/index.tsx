@@ -28,13 +28,13 @@ import {
   useGetOneAgentPolicy,
   useLink,
   useBreadcrumbs,
-  useCore,
+  useStartServices,
   useKibanaVersion,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
 import { AgentRefreshContext } from './hooks';
-import { AgentEventsTable, AgentDetailsActionMenu, AgentDetailsContent } from './components';
+import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { isAgentUpgradeable } from '../../../services';
 
@@ -67,7 +67,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
   const {
     application: { navigateToApp },
-  } = useCore();
+  } = useStartServices();
   const routeState = useIntraAppState<AgentDetailsReassignPolicyAction>();
   const queryParams = new URLSearchParams(useLocation().search);
   const openReassignFlyoutOpenByDefault = queryParams.get('openReassignFlyout') === 'true';
@@ -224,20 +224,20 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   const headerTabs = useMemo(() => {
     return [
       {
-        id: 'activity_log',
-        name: i18n.translate('xpack.fleet.agentDetails.subTabs.activityLogTab', {
-          defaultMessage: 'Activity log',
-        }),
-        href: getHref('fleet_agent_details', { agentId, tabId: 'activity' }),
-        isSelected: !tabId || tabId === 'activity',
-      },
-      {
         id: 'details',
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
           defaultMessage: 'Agent details',
         }),
         href: getHref('fleet_agent_details', { agentId, tabId: 'details' }),
-        isSelected: tabId === 'details',
+        isSelected: !tabId || tabId === 'details',
+      },
+      {
+        id: 'logs',
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.logsTab', {
+          defaultMessage: 'Logs',
+        }),
+        href: getHref('fleet_agent_details', { agentId, tabId: 'logs' }),
+        isSelected: tabId === 'logs',
       },
     ];
   }, [getHref, agentId, tabId]);
@@ -305,15 +305,15 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   return (
     <Switch>
       <Route
-        path={PAGE_ROUTING_PATHS.fleet_agent_details_details}
+        path={PAGE_ROUTING_PATHS.fleet_agent_details_logs}
         render={() => {
-          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
+          return <AgentLogs agent={agent} />;
         }}
       />
       <Route
-        path={PAGE_ROUTING_PATHS.fleet_agent_details_events}
+        path={PAGE_ROUTING_PATHS.fleet_agent_details}
         render={() => {
-          return <AgentEventsTable agent={agent} />;
+          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
     </Switch>
