@@ -69,9 +69,9 @@ export class ExpressionRenderHandler {
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
     this.renderSubject = new Rx.BehaviorSubject(null as any | null);
-    this.render$ = this.renderSubject.asObservable().pipe(filter((_) => _ !== null)) as Observable<
-      any
-    >;
+    this.render$ = this.renderSubject
+      .asObservable()
+      .pipe(filter((_) => _ !== null)) as Observable<any>;
 
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable();
