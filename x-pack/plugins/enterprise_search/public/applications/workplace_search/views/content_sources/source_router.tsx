@@ -13,6 +13,11 @@ import { Route, Switch, useHistory, useParams } from 'react-router-dom';
 
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+
+import { NAV } from '../../constants';
+
 import {
   ENT_SEARCH_LICENSE_MANAGEMENT,
   REINDEX_JOB_PATH,
@@ -100,27 +105,39 @@ export const SourceRouter: React.FC = () => {
       {pageHeader}
       <Switch>
         <Route exact path={sourcePath(SOURCE_DETAILS_PATH, sourceId, isOrganization)}>
+          <SendTelemetry action="viewed" metric="source_overview" />
+          <SetPageChrome trail={[NAV.SOURCES, name || '...', NAV.OVERVIEW]} />
           <Overview />
         </Route>
         <Route exact path={sourcePath(SOURCE_CONTENT_PATH, sourceId, isOrganization)}>
+          <SendTelemetry action="viewed" metric="source_content" />
+          <SetPageChrome trail={[NAV.SOURCES, name || '...', NAV.CONTENT]} />
           <SourceContent />
         </Route>
         {isCustomSource && (
           <Route path={sourcePath(SOURCE_SCHEMAS_PATH, sourceId, isOrganization)}>
+            <SendTelemetry action="viewed" metric="source_schema" />
+            <SetPageChrome trail={[NAV.SOURCES, name || '...', NAV.SCHEMA]} />
             <Schema />
           </Route>
         )}
         {isCustomSource && (
           <Route path={getSourcesPath(REINDEX_JOB_PATH, isOrganization)}>
+            <SendTelemetry action="viewed" metric="source_schema" />
+            <SetPageChrome trail={[NAV.SOURCES, name || '...', NAV.SCHEMA]} />
             <SchemaChangeErrors />
           </Route>
         )}
         {isCustomSource && (
           <Route path={sourcePath(SOURCE_DISPLAY_SETTINGS_PATH, sourceId, isOrganization)}>
+            <SendTelemetry action="viewed" metric="source_display_settings" />
+            <SetPageChrome trail={[NAV.SOURCES, name || '...', NAV.DISPLAY_SETTINGS]} />
             <DisplaySettingsRouter />
           </Route>
         )}
         <Route exact path={sourcePath(SOURCE_SETTINGS_PATH, sourceId, isOrganization)}>
+          <SendTelemetry action="viewed" metric="source_settings" />
+          <SetPageChrome trail={[NAV.SOURCES, name || '...', NAV.SETTINGS]} />
           <SourceSettings />
         </Route>
       </Switch>

@@ -43,6 +43,9 @@ export const NAV = {
   SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.settings', {
     defaultMessage: 'Settings',
   }),
+  ADD_SOURCE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.addSource', {
+    defaultMessage: 'Add Source',
+  }),
   PERSONAL_DASHBOARD: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.nav.personalDashboard',
     {
