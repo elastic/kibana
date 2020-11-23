@@ -173,8 +173,8 @@ export function checksFactory(
     }
 
     if (
-      mlCapabilities.canDeleteJob === false ||
-      mlCapabilities.canDeleteDataFrameAnalytics === false
+      (jobType === 'anomaly-detector' && mlCapabilities.canDeleteJob === false) ||
+      (jobType === 'data-frame-analytics' && mlCapabilities.canDeleteDataFrameAnalytics === false)
     ) {
       // user does not have access to delete jobs.
       return jobIds.reduce((results, jobId) => {
