@@ -65,13 +65,6 @@ describe('MissingMonitoringDataAlert', () => {
         clusterUuid,
         gapDuration,
       },
-      {
-        stackProduct: 'kibana',
-        stackProductUuid: 'kibanaUuid1',
-        stackProductName: 'kibanaInstance1',
-        clusterUuid,
-        gapDuration: gapDuration + 10,
-      },
     ];
     const getUiSettingsService = () => ({
       asScopedToClient: jest.fn(),
@@ -184,22 +177,6 @@ describe('MissingMonitoringDataAlert', () => {
               severity: 'danger',
               resolvedMS: 0,
               triggeredMS: 1,
-              lastCheckedMS: 0,
-            },
-          },
-          {
-            ccs: undefined,
-            cluster: { clusterUuid, clusterName },
-            gapDuration: gapDuration + 10,
-            stackProduct: 'kibana',
-            stackProductName: 'kibanaInstance1',
-            stackProductUuid: 'kibanaUuid1',
-            ui: {
-              isFiring: false,
-              message: null,
-              severity: 'danger',
-              resolvedMS: 0,
-              triggeredMS: 0,
               lastCheckedMS: 0,
             },
           },
