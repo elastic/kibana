@@ -30,6 +30,7 @@ import {
   EuiRange,
   EuiIconTip,
   EuiText,
+  EuiFormLabel,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
@@ -49,6 +50,7 @@ import { AUTO_INTERVAL } from '../../../common/constants';
 import { UI_SETTINGS } from '../../../../data/common';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
+const LEVEL_OF_DETAIL_STEPS = 10;
 
 const validateIntervalValue = (intervalValue) => {
   const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
@@ -91,17 +93,11 @@ export const IndexPattern = ({
   const handleMaxBarsChange = useCallback(
     ({ target }) => {
       onChange({
-        [maxBarsName]: Math.round(maxBarsUiSettings * target.value * 0.01) || 1,
+        [maxBarsName]: Math.max(1, target.value),
       });
     },
-    [onChange, maxBarsName, maxBarsUiSettings]
+    [onChange, maxBarsName]
   );
-
-  const convertMaxBarsToPercents = (maxBars) => {
-    const rawPercents = (maxBars / maxBarsUiSettings) * 100;
-
-    return Math.round(rawPercents / 10) * 10 || 1;
-  };
 
   const timeRangeOptions = [
     {
@@ -268,15 +264,14 @@ export const IndexPattern = ({
                 <>
                   <FormattedMessage
                     id="visTypeTimeseries.indexPattern.detailLevel"
-                    defaultMessage="Level of detail %"
+                    defaultMessage="Level of detail"
                   />{' '}
                   <EuiIconTip
                     position="right"
                     content={
                       <FormattedMessage
                         id="visTypeTimeseries.indexPattern.detailLevelHelpText"
-                        defaultMessage="Intervals will be selected automatically based on the current timeframe and configuration property {histogramMaxBars}.
-A detail level of 100% means that the maximum number of bars can never be greater than the Advanced Setting's {histogramMaxBars}"
+                        defaultMessage="Intervals will be selected automatically based on the current timeframe and configuration property {histogramMaxBars}."
                         values={{ histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS }}
                       />
                     }
@@ -285,23 +280,45 @@ A detail level of 100% means that the maximum number of bars can never be greate
                 </>
               }
             >
-              <EuiRange
-                id={htmlIdGenerator()()}
-                value={convertMaxBarsToPercents(model[maxBarsName])}
-                onChange={handleMaxBarsChange}
-                disabled={
-                  disabled ||
-                  isEntireTimeRangeActive(model, isTimeSeries) ||
-                  !(model[intervalName] === AUTO_INTERVAL || !model[intervalName])
-                }
-                showTicks
-                min={0}
-                max={100}
-                step={10}
-                aria-label={i18n.translate('visTypeTimeseries.indexPattern.detailLevelAriaLabel', {
-                  defaultMessage: 'Level of detail',
-                })}
-              />
+              <EuiFlexGroup responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiFormLabel>
+                    <FormattedMessage
+                      id="visTypeTimeseries.indexPattern.сoarse"
+                      defaultMessage="Coarse"
+                    />
+                  </EuiFormLabel>
+                </EuiFlexItem>
+                <EuiFlexItem grow={true}>
+                  <EuiRange
+                    id={htmlIdGenerator()()}
+                    value={model[maxBarsName]}
+                    onChange={handleMaxBarsChange}
+                    disabled={
+                      disabled ||
+                      isEntireTimeRangeActive(model, isTimeSeries) ||
+                      !(model[intervalName] === AUTO_INTERVAL || !model[intervalName])
+                    }
+                    min={0}
+                    max={maxBarsUiSettings}
+                    step={maxBarsUiSettings / LEVEL_OF_DETAIL_STEPS}
+                    aria-label={i18n.translate(
+                      'visTypeTimeseries.indexPattern.detailLevelAriaLabel',
+                      {
+                        defaultMessage: 'Level of detail',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormLabel>
+                    <FormattedMessage
+                      id="visTypeTimeseries.indexPattern.finest"
+                      defaultMessage="Finest"
+                    />
+                  </EuiFormLabel>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
