@@ -19447,7 +19447,6 @@
     "xpack.stackAlerts.indexThreshold.actionVariableContextThresholdLabel": "しきい値として使用する値の配列。「between」と「notBetween」には2つの値が必要です。その他は1つの値が必要です。",
     "xpack.stackAlerts.indexThreshold.actionVariableContextTitleLabel": "アラートの事前構成タイトル。",
     "xpack.stackAlerts.indexThreshold.actionVariableContextValueLabel": "しきい値を超えた値。",
-    "xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription": "アラート{name}グループ{group}値{value}が{date}に{window}にわたってしきい値{function}を超えました",
     "xpack.stackAlerts.indexThreshold.alertTypeContextSubjectTitle": "アラート{name}グループ{group}がしきい値を超えました",
     "xpack.stackAlerts.indexThreshold.alertTypeTitle": "インデックスしきい値",
     "xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage": "無効なthresholdComparatorが指定されました: {comparator}",
