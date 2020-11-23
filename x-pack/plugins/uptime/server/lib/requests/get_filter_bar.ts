@@ -45,28 +45,8 @@ export const combineRangeWithFilters = (
   return filters;
 };
 
-type SupportedFields = 'locations' | 'ports' | 'schemes' | 'tags';
-
-export const extractFilterAggsResults = (
-  responseAggregations: Record<string, any>,
-  keys: SupportedFields[]
-): OverviewFilters => {
-  const values: OverviewFilters = {
-    locations: [],
-    ports: [],
-    schemes: [],
-    tags: [],
-  };
-  keys.forEach((key) => {
-    const buckets = responseAggregations?.[key]?.term?.buckets ?? [];
-    values[key] = buckets.map((item: { key: string | number }) => item.key);
-  });
-  return values;
-};
-
 export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFilters> = async ({
-  callES,
-  dynamicSettings,
+  uptimeEsClient,
   dateRangeStart,
   dateRangeEnd,
   search,
@@ -82,19 +62,24 @@ export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFi
     filterOptions
   );
   const filters = combineRangeWithFilters(dateRangeStart, dateRangeEnd, search);
-  const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      size: 0,
-      query: {
-        ...filters,
-      },
-      aggs,
+  const searchBody = {
+    size: 0,
+    query: {
+      ...filters,
     },
+    aggs,
   };
 
   const {
     body: { aggregations },
-  } = await callES.search(params);
-  return extractFilterAggsResults(aggregations, ['tags', 'locations', 'ports', 'schemes']);
+  } = await uptimeEsClient.search({ body: searchBody });
+
+  const { tags, locations, ports, schemes } = aggregations ?? {};
+
+  return {
+    locations: locations?.term?.buckets.map((item) => item.key as string),
+    ports: ports?.term?.buckets.map((item) => item.key as number),
+    schemes: schemes?.term?.buckets.map((item) => item.key as string),
+    tags: tags?.term?.buckets.map((item) => item.key as string),
+  };
 };
