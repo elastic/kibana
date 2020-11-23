@@ -7,9 +7,10 @@
 import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from 'src/core/server';
-import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
+import { executeEsQueryFactory, getShapesFilters } from './es_query_builder';
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
 import { ActionGroupId, GEO_CONTAINMENT_ID, GeoContainmentParams } from './alert_type';
+import { ResolvedActionGroup } from '../../../../alerts/common';
 
 interface LatestEntityLocation {
   location: number[];
@@ -72,86 +73,6 @@ export function transformResults(
         return accu;
       }, [])
       .value()
-  );
-}
-
-interface EntityMovementDescriptor {
-  entityName: string;
-  currLocation: {
-    location: number[];
-    shapeId: string;
-    date: string | null;
-    docId: string;
-  };
-  prevLocation: {
-    location: number[];
-    shapeId: string;
-    date: string | null;
-    docId: string;
-  };
-}
-
-export function getMovedEntities(
-  currLocationArr: LatestEntityLocation[],
-  prevLocationArr: LatestEntityLocation[],
-  trackingEvent: string
-): EntityMovementDescriptor[] {
-  return (
-    currLocationArr
-      // Check if shape has a previous location and has moved
-      .reduce(
-        (
-          accu: EntityMovementDescriptor[],
-          {
-            entityName,
-            shapeLocationId,
-            dateInShape,
-            location,
-            docId,
-          }: {
-            entityName: string;
-            shapeLocationId: string;
-            dateInShape: string | null;
-            location: number[];
-            docId: string;
-          }
-        ) => {
-          const prevLocationObj = prevLocationArr.find(
-            (locationObj: LatestEntityLocation) => locationObj.entityName === entityName
-          );
-          if (!prevLocationObj) {
-            return accu;
-          }
-          if (shapeLocationId !== prevLocationObj.shapeLocationId) {
-            accu.push({
-              entityName,
-              currLocation: {
-                location,
-                shapeId: shapeLocationId,
-                date: dateInShape,
-                docId,
-              },
-              prevLocation: {
-                location: prevLocationObj.location,
-                shapeId: prevLocationObj.shapeLocationId,
-                date: prevLocationObj.dateInShape,
-                docId: prevLocationObj.docId,
-              },
-            });
-          }
-          return accu;
-        },
-        []
-      )
-      // Do not track entries to or exits from 'other'
-      .filter((entityMovementDescriptor: EntityMovementDescriptor) => {
-        if (trackingEvent !== 'crossed') {
-          return trackingEvent === 'entered'
-            ? entityMovementDescriptor.currLocation.shapeId !== OTHER_CATEGORY
-            : entityMovementDescriptor.prevLocation.shapeId !== OTHER_CATEGORY;
-        }
-        return true;
-      })
   );
 }
 
@@ -247,63 +168,21 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       params.geoField
     );
 
-    const movedEntities: EntityMovementDescriptor[] = getMovedEntities(
-      currLocationArr,
-      state.prevLocationArr,
-      params.trackingEvent
-    );
-
-    // Create alert instances
-    movedEntities.forEach(({ entityName, currLocation, prevLocation }) => {
-      const toBoundaryName = shapesIdsNamesMap[currLocation.shapeId] || currLocation.shapeId;
-      const fromBoundaryName = shapesIdsNamesMap[prevLocation.shapeId] || prevLocation.shapeId;
-      let alertInstance;
-      if (params.trackingEvent === 'entered') {
-        alertInstance = `${entityName}-${toBoundaryName || currLocation.shapeId}`;
-      } else if (params.trackingEvent === 'exited') {
-        alertInstance = `${entityName}-${fromBoundaryName || prevLocation.shapeId}`;
-      } else {
-        // == 'crossed'
-        alertInstance = `${entityName}-${fromBoundaryName || prevLocation.shapeId}-${
-          toBoundaryName || currLocation.shapeId
-        }`;
-      }
-      services.alertInstanceFactory(alertInstance).scheduleActions(ActionGroupId, {
+    currLocationArr.forEach(({ location, shapeLocationId, entityName, dateInShape, docId }) => {
+      const context = {
         entityId: entityName,
-        timeOfDetection: new Date(currIntervalEndTime).getTime(),
-        crossingLine: `LINESTRING (${prevLocation.location[0]} ${prevLocation.location[1]}, ${currLocation.location[0]} ${currLocation.location[1]})`,
-
-        toEntityLocation: `POINT (${currLocation.location[0]} ${currLocation.location[1]})`,
-        toEntityDateTime: currLocation.date,
-        toEntityDocumentId: currLocation.docId,
-
-        toBoundaryId: currLocation.shapeId,
-        toBoundaryName,
-
-        fromEntityLocation: `POINT (${prevLocation.location[0]} ${prevLocation.location[1]})`,
-        fromEntityDateTime: prevLocation.date,
-        fromEntityDocumentId: prevLocation.docId,
-
-        fromBoundaryId: prevLocation.shapeId,
-        fromBoundaryName,
-      });
+        entityDocumentId: docId,
+        entityLocation: location,
+        containingShapeId: shapeLocationId,
+        date: dateInShape,
+      };
+      // If resolved, schedule resolved action
+      // Sub entity name-location for throttle break?
+      // Don't auto-resolve docs that don't have updates
+      services.alertInstanceFactory(entityName).scheduleActions(ResolvedActionGroup.id, context);
+      // If contained, schedule contained action
+      services.alertInstanceFactory(entityName).scheduleActions(ActionGroupId, context);
     });
 
-    // Combine previous results w/ current results for state of next run
-    const prevLocationArr = _.chain(currLocationArr)
-      .concat(state.prevLocationArr)
-      .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
-      .reduce((accu: LatestEntityLocation[], el: LatestEntityLocation) => {
-        if (!accu.length || el.entityName !== accu[accu.length - 1].entityName) {
-          accu.push(el);
-        }
-        return accu;
-      }, [])
-      .value();
-
-    return {
-      prevLocationArr,
-      shapesFilters,
-      shapesIdsNamesMap,
-    };
+    // Return state?
   };

@@ -19,7 +19,6 @@ export function getAlertType(): AlertTypeModel<GeoContainmentAlertParams, Alerts
       defaultMessage: 'Alert when an entity is contained within a geo boundary.',
     }),
     iconClass: 'globe',
-    // TODO: Add documentation for geo containment alert
     documentationUrl: null,
     alertParamsExpression: lazy(() => import('./query_builder')),
     validate: validateExpression,

@@ -24,8 +24,7 @@ import {
   getTimeOptions,
   AlertsContextValue,
 } from '../../../../../triggers_actions_ui/public';
-import { GeoContainmentAlertParams, TrackingEvent } from '../types';
-import { ExpressionWithPopover } from './util_components/expression_with_popover';
+import { GeoContainmentAlertParams } from '../types';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
@@ -51,11 +50,6 @@ const DEFAULT_VALUES = {
   BOUNDARY_NAME_FIELD: '',
   DELAY_OFFSET_WITH_UNITS: '0m',
 };
-
-const conditionOptions = Object.keys(TrackingEvent).map((key) => ({
-  text: TrackingEvent[key as TrackingEvent],
-  value: TrackingEvent[key as TrackingEvent],
-}));
 
 const labelForDelayOffset = (
   <>
@@ -95,7 +89,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
     geoField,
     entity,
     dateField,
-    trackingEvent,
     boundaryType,
     boundaryIndexTitle,
     boundaryIndexId,
@@ -172,7 +165,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
         indexId: indexId ?? DEFAULT_VALUES.INDEX_ID,
         entity: entity ?? DEFAULT_VALUES.ENTITY,
         dateField: dateField ?? DEFAULT_VALUES.DATE_FIELD,
-        trackingEvent: trackingEvent ?? DEFAULT_VALUES.TRACKING_EVENT,
         boundaryType: boundaryType ?? DEFAULT_VALUES.BOUNDARY_TYPE,
         geoField: geoField ?? DEFAULT_VALUES.GEO_FIELD,
         boundaryIndexTitle: boundaryIndexTitle ?? DEFAULT_VALUES.BOUNDARY_INDEX,
@@ -306,35 +298,6 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
           />
         </h5>
       </EuiTitle>
-      <EuiSpacer size="s" />
-      <ExpressionWithPopover
-        isInvalid={entity ? !trackingEvent : false}
-        defaultValue={'Select crossing option'}
-        value={trackingEvent}
-        popoverContent={
-          <EuiFormRow id="someSelect" fullWidth error={errors.index}>
-            <div>
-              <EuiSelect
-                data-test-subj="whenExpressionSelect"
-                value={
-                  (trackingEvent && trackingEvent) ||
-                  (entity &&
-                    setAlertParams('trackingEvent', conditionOptions[0].text) &&
-                    conditionOptions[0].text) ||
-                  undefined
-                }
-                fullWidth
-                onChange={(e) => setAlertParams('trackingEvent', e.target.value)}
-                options={conditionOptions}
-              />
-            </div>
-          </EuiFormRow>
-        }
-        expressionDescription={i18n.translate('xpack.stackAlerts.geoContainment.whenEntityLabel', {
-          defaultMessage: 'when entity',
-        })}
-      />
-
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>

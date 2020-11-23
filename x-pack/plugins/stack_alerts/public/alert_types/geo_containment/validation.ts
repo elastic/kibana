@@ -13,7 +13,6 @@ export const validateExpression = (alertParams: GeoContainmentAlertParams): Vali
     geoField,
     entity,
     dateField,
-    trackingEvent,
     boundaryType,
     boundaryIndexTitle,
     boundaryGeoField,
@@ -25,7 +24,6 @@ export const validateExpression = (alertParams: GeoContainmentAlertParams): Vali
     geoField: new Array<string>(),
     entity: new Array<string>(),
     dateField: new Array<string>(),
-    trackingEvent: new Array<string>(),
     boundaryType: new Array<string>(),
     boundaryIndexTitle: new Array<string>(),
     boundaryIndexId: new Array<string>(),
@@ -61,14 +59,6 @@ export const validateExpression = (alertParams: GeoContainmentAlertParams): Vali
     errors.dateField.push(
       i18n.translate('xpack.stackAlerts.geoContainment.error.requiredDateFieldText', {
         defaultMessage: 'Date field is required.',
-      })
-    );
-  }
-
-  if (!trackingEvent) {
-    errors.trackingEvent.push(
-      i18n.translate('xpack.stackAlerts.geoContainment.error.requiredTrackingEventText', {
-        defaultMessage: 'Tracking event is required.',
       })
     );
   }

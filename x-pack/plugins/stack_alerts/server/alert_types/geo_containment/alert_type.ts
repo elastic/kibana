@@ -19,7 +19,7 @@ import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
 export type TrackingEvent = 'entered' | 'exited';
-export const ActionGroupId = 'tracking containment met';
+export const ActionGroupId = 'Tracked entity contained';
 
 const actionVariableContextToEntityDateTimeLabel = i18n.translate(
   'xpack.stackAlerts.geoContainment.actionVariableContextToEntityDateTimeLabel',

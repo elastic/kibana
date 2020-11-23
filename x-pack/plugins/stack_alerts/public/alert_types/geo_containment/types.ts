@@ -6,19 +6,12 @@
 
 import { Query } from '../../../../../../src/plugins/data/common';
 
-export enum TrackingEvent {
-  entered = 'entered',
-  exited = 'exited',
-  crossed = 'crossed',
-}
-
 export interface GeoContainmentAlertParams {
   index: string;
   indexId: string;
   geoField: string;
   entity: string;
   dateField: string;
-  trackingEvent: string;
   boundaryType: string;
   boundaryIndexTitle: string;
   boundaryIndexId: string;
