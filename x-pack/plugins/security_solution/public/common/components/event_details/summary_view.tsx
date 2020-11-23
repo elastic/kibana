@@ -15,8 +15,8 @@ import { get, getOr } from 'lodash/fp';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { OverflowField } from '../tables/helpers';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import * as i18n from './translations';
+import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 
 type Summary = Array<{ title: string; description: JSX.Element }>;
 
@@ -33,15 +33,21 @@ const fields = [
 ];
 
 const SummaryViewComponent: React.FC<{
+  browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
-  columnHeaders: ColumnHeaderOptions[];
   timelineId: string;
-}> = ({ data, eventId, columnHeaders, timelineId }) => {
+}> = ({ data, eventId, timelineId, browserFields }) => {
   const summaryList = useMemo(() => {
-    return data.reduce<Summary>((acc, item) => {
-      const column = columnHeaders.find((c) => c.id === item.field);
+    return (data || []).reduce<Summary>((acc, item) => {
       const fieldValue = getOr(null, 'values.0', item);
+      const eventCategory = item.category;
+      const fieldType = getOr(
+        'string',
+        `${eventCategory}.fields.${item.field}.type`,
+        browserFields
+      );
+      const fieldFormat = get(`${eventCategory}.fields.${item.field}.format`, browserFields);
       return fields.indexOf(item.field) >= 0
         ? [
             ...acc,
@@ -51,9 +57,9 @@ const SummaryViewComponent: React.FC<{
                 <FormattedFieldValue
                   contextId={`alert-details-value-formatted-field-value-${timelineId}-${eventId}-${item.field}-${fieldValue}`}
                   eventId={eventId}
-                  fieldFormat={column?.format}
+                  fieldFormat={fieldFormat}
                   fieldName={item.field}
-                  fieldType={column?.type ?? 'string'}
+                  fieldType={fieldType}
                   value={fieldValue}
                 />
               ),
@@ -61,7 +67,7 @@ const SummaryViewComponent: React.FC<{
           ]
         : acc;
     }, []);
-  }, [data, columnHeaders, eventId, timelineId]);
+  }, [data, eventId, timelineId, browserFields]);
 
   const messageData = useMemo(() => (data || []).find((item) => item.field === 'message'), [data]);
   const message = get('values.0', messageData);
@@ -69,11 +75,11 @@ const SummaryViewComponent: React.FC<{
   return (
     <>
       <EuiSpacer />
-      <EuiDescriptionList type="responsiveColumn" listItems={summaryList} />
+      <EuiDescriptionList type="responsiveColumn" listItems={summaryList} compressed />
       {message && (
         <>
           <EuiSpacer />
-          <EuiDescriptionList>
+          <EuiDescriptionList compressed>
             <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               <OverflowField value={message} />

@@ -5,7 +5,7 @@
  */
 
 import { EuiLink, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { get } from 'lodash/fp';
@@ -49,13 +49,13 @@ Details.displayName = 'Details';
 
 export const EventDetails = React.memo<Props>(
   ({ browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn }) => {
-    const [view, setView] = useState<View>(EventsViewType.tableView);
-
-    const handleTabClick = useCallback((e) => setView(e.id), [setView]);
     const eventKindData = useMemo(() => (data || []).find((item) => item.field === 'event.kind'), [
       data,
     ]);
     const eventKind = get('values.0', eventKindData);
+    const [view, setView] = useState<View>(EventsViewType.tableView);
+    const handleTabClick = useCallback((e) => setView(e.id), [setView]);
+
     const alerts = useMemo(
       () => [
         {
@@ -66,13 +66,12 @@ export const EventDetails = React.memo<Props>(
               data={data}
               eventId={id}
               browserFields={browserFields}
-              columnHeaders={columnHeaders}
               timelineId={timelineId}
             />
           ),
         },
       ],
-      [data, id, browserFields, columnHeaders, timelineId]
+      [data, id, browserFields, timelineId]
     );
     const tabs: EuiTabbedContentTab[] = useMemo(
       () => [
@@ -110,6 +109,12 @@ export const EventDetails = React.memo<Props>(
         eventKind,
       ]
     );
+
+    useEffect(() => {
+      if (data != null && eventKind !== 'event') {
+        setView(EventsViewType.summaryView);
+      }
+    }, [data, eventKind]);
 
     const selectedTab = useMemo(() => tabs.find((tab) => tab.id === view), [tabs, view]);
 

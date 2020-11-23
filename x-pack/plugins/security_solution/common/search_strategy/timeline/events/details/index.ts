@@ -9,6 +9,7 @@ import { Inspect, Maybe } from '../../../common';
 import { TimelineRequestOptionsPaginated } from '../..';
 
 export interface TimelineEventsDetailsItem {
+  category: string;
   field: string;
   values?: Maybe<string[]>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
