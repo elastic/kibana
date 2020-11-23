@@ -19,6 +19,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { get } from 'lodash';
+import { string } from 'joi';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
 // @ts-expect-error no ts
@@ -120,7 +121,15 @@ export const validateFilterKueryNode = ({
   return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
     if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
       localNestedKeys = ast.value;
+    } else if (ast.type === 'literal' && ast.value && typeof ast.value === 'string') {
+      const key = ast.value.replace('.attributes', '');
+      const mappingKey = 'properties.' + key.split('.').join('.properties.');
+      const field = get(indexMapping, mappingKey);
+      if (field != null && field.type === 'nested') {
+        localNestedKeys = ast.value;
+      }
     }
+
     if (ast.arguments) {
       const myPath = `${path}.${index}`;
       return [
@@ -132,7 +141,7 @@ export const validateFilterKueryNode = ({
           storeValue: ast.type === 'function' && astFunctionType.includes(ast.function),
           path: `${myPath}.arguments`,
           hasNestedKey: ast.type === 'function' && ast.function === 'nested',
-          nestedKeys: localNestedKeys,
+          nestedKeys: localNestedKeys || nestedKeys,
         }),
       ];
     }
@@ -186,6 +195,7 @@ export const hasFilterKeyError = (
   types: string[],
   indexMapping: IndexMapping
 ): string | null => {
+  // console.log('hasFilterKeyError', indexMapping, key)
   if (key == null) {
     return `The key is empty and needs to be wrapped by a saved object type like ${types.join()}`;
   }

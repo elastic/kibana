@@ -494,5 +494,33 @@ describe('Filter Utils', () => {
         },
       ]);
     });
+
+    test('Validate multiple items nested filter query through KueryNode', () => {
+      const validationObject = validateFilterKueryNode({
+        astFilter: esKuery.fromKueryExpression(
+          'alert.attributes.actions:{ actionTypeId: ".server-log" AND actionRef: "foo" }'
+        ),
+        types: ['alert'],
+        indexMapping: mockMappings,
+      });
+
+      // nodes will have errors in the array
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.1.arguments.0',
+          error: null,
+          isSavedObjectAttr: false,
+          key: 'alert.attributes.actions.actionTypeId',
+          type: 'alert',
+        },
+        {
+          astPath: 'arguments.1.arguments.1',
+          error: null,
+          isSavedObjectAttr: false,
+          key: 'alert.attributes.actions.actionRef',
+          type: 'alert',
+        },
+      ]);
+    });
   });
 });
