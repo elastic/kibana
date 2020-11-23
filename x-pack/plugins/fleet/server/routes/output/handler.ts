@@ -29,9 +29,9 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   }
 };
 
-export const getOneOuputHandler: RequestHandler<TypeOf<
-  typeof GetOneOutputRequestSchema.params
->> = async (context, request, response) => {
+export const getOneOuputHandler: RequestHandler<
+  TypeOf<typeof GetOneOutputRequestSchema.params>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
     const output = await outputService.get(soClient, request.params.outputId);

@@ -45,9 +45,9 @@ export type InferFunctionDefinition<
   : never;
 
 // Shortcut for inferring args from a function definition.
-type FunctionArgs<FnDef extends AnyExpressionFunctionDefinition> = InferFunctionDefinition<
-  FnDef
->['arguments'];
+type FunctionArgs<
+  FnDef extends AnyExpressionFunctionDefinition
+> = InferFunctionDefinition<FnDef>['arguments'];
 
 // Gets a list of possible arg names for a given function.
 type FunctionArgName<FnDef extends AnyExpressionFunctionDefinition> = {

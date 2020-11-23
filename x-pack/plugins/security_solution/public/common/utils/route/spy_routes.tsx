@@ -35,6 +35,11 @@ export const SpyRouteComponent = memo<
           search,
         });
         setIsInitializing(false);
+      } else if (search !== '' && search !== route.search) {
+        dispatch({
+          type: 'updateSearch',
+          search,
+        });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
