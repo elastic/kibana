@@ -15,10 +15,11 @@ import {
 } from '../../../context/ApmPluginContext/MockApmPluginContext';
 import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
 import * as useDynamicIndexPatternHooks from '../../../hooks/useDynamicIndexPattern';
-import * as useFetcherHooks from '../../../hooks/useFetcher';
+import * as callApmApi from '../../../services/rest/createCallApmApi';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
+import { waitFor } from '@testing-library/dom';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiStats: () => {} },
@@ -52,30 +53,52 @@ function Wrapper({ children }: { children?: ReactNode }) {
 }
 
 describe('ServiceOverview', () => {
-  it('renders', () => {
+  it('renders', async () => {
     jest
       .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPattern')
       .mockReturnValue({
         indexPattern: undefined,
         status: FETCH_STATUS.SUCCESS,
       });
-    jest.spyOn(useFetcherHooks, 'useFetcher').mockReturnValue({
-      data: {
-        items: [],
-        tableOptions: {
-          pageIndex: 0,
-          sort: { direction: 'desc', field: 'test field' },
-        },
-        totalItemCount: 0,
+
+    const calls = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      'GET /api/apm/services/{serviceName}/error_groups': {
+        error_groups: [],
+        total_error_groups: 0,
       },
-      refetch: () => {},
-      status: FETCH_STATUS.SUCCESS,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      'GET /api/apm/services/{serviceName}/overview_transaction_groups': {
+        transactionGroups: [],
+        totalTransactionGroups: 0,
+        isAggregationAccurate: true,
+      },
+      'GET /api/apm/services/{serviceName}/dependencies': [],
+    };
+
+    jest.spyOn(callApmApi, 'createCallApmApi').mockImplementation(() => {});
+
+    jest.spyOn(callApmApi, 'callApmApi').mockImplementation(({ endpoint }) => {
+      const response = calls[endpoint as keyof typeof calls];
+
+      return response
+        ? Promise.resolve(response)
+        : Promise.reject(`Response for ${endpoint} is not defined`);
     });
 
-    expect(() =>
-      renderWithTheme(<ServiceOverview serviceName="test service name" />, {
+    const { findAllByText } = renderWithTheme(
+      <ServiceOverview serviceName="test service name" />,
+      {
         wrapper: Wrapper,
-      })
-    ).not.toThrowError();
+      }
+    );
+
+    await waitFor(() =>
+      expect(callApmApi.callApmApi).toHaveBeenCalledTimes(
+        Object.keys(calls).length
+      )
+    );
+
+    expect((await findAllByText('Latency')).length).toBeGreaterThan(0);
   });
 });

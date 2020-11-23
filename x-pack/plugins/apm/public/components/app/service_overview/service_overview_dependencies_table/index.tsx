@@ -11,7 +11,6 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   asDuration,
   asPercent,
@@ -95,8 +94,6 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             color="euiColorVis1"
             series={latency.timeseries ?? undefined}
             valueLabel={asDuration(latency.value)}
-            start={parseFloat(start!)}
-            end={parseFloat(end!)}
           />
         );
       },
@@ -114,11 +111,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       render: (_, { traffic }) => {
         return (
           <SparkPlotWithValueLabel
+            compact
             color="euiColorVis0"
             series={traffic.timeseries ?? undefined}
             valueLabel={asTransactionRate(traffic.value)}
-            start={parseFloat(start!)}
-            end={parseFloat(end!)}
           />
         );
       },
@@ -136,15 +132,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       render: (_, { error_rate: errorRate }) => {
         return (
           <SparkPlotWithValueLabel
+            compact
             color="euiColorVis7"
             series={errorRate.timeseries ?? undefined}
-            valueLabel={
-              errorRate.value !== null
-                ? asPercent(errorRate.value, 1)
-                : NOT_AVAILABLE_LABEL
-            }
-            start={parseFloat(start!)}
-            end={parseFloat(end!)}
+            valueLabel={asPercent(errorRate.value, 1)}
           />
         );
       },
@@ -176,7 +167,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
     }
 
     return callApmApi({
-      pathname: '/api/apm/services/{serviceName}/dependencies',
+      endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
       params: {
         path: {
           serviceName,
@@ -228,7 +219,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <TableFetchWrapper hasData={items.length > 0} status={status}>
+        <TableFetchWrapper status={status}>
           <EuiInMemoryTable
             columns={columns}
             items={items}

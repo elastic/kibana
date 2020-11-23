@@ -24,8 +24,7 @@ import { isEqual } from 'lodash';
 
 type JoinedReturnType<
   T extends Record<string, any>,
-  U extends UnionToIntersection<T>,
-  V extends keyof T & keyof U
+  U extends UnionToIntersection<T>
 > = Array<
   Partial<U> &
     {
@@ -37,13 +36,13 @@ export function joinByKey<
   T extends Record<string, any>,
   U extends UnionToIntersection<T>,
   V extends keyof T & keyof U
->(items: T[], key: V): JoinedReturnType<T, U, V>;
+>(items: T[], key: V): JoinedReturnType<T, U>;
 
 export function joinByKey<
   T extends Record<string, any>,
   U extends UnionToIntersection<T>,
   V extends keyof T & keyof U,
-  W extends JoinedReturnType<T, U, V>,
+  W extends JoinedReturnType<T, U>,
   X extends (a: T, b: T) => ValuesType<W>
 >(items: T[], key: V, mergeFn: X): W;
 

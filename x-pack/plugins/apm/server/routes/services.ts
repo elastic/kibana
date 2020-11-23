@@ -20,6 +20,7 @@ import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_trans
 import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
+import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -234,7 +235,6 @@ export const serviceErrorGroupsRoute = createRoute({
       path: { serviceName },
       query: { size, numBuckets, pageIndex, sortDirection, sortField },
     } = context.params;
-
     return getServiceErrorGroups({
       serviceName,
       setup,
@@ -243,6 +243,55 @@ export const serviceErrorGroupsRoute = createRoute({
       pageIndex,
       sortDirection,
       sortField,
+    });
+  },
+});
+
+export const serviceTransactionGroupsRoute = createRoute({
+  endpoint: 'GET /api/apm/services/{serviceName}/overview_transaction_groups',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([
+      rangeRt,
+      uiFiltersRt,
+      t.type({
+        size: toNumberRt,
+        numBuckets: toNumberRt,
+        pageIndex: toNumberRt,
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+        sortField: t.union([
+          t.literal('latency'),
+          t.literal('throughput'),
+          t.literal('errorRate'),
+          t.literal('impact'),
+        ]),
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    const {
+      path: { serviceName },
+      query: { size, numBuckets, pageIndex, sortDirection, sortField },
+    } = context.params;
+
+    return getServiceTransactionGroups({
+      setup,
+      serviceName,
+      pageIndex,
+      searchAggregatedTransactions,
+      size,
+      sortDirection,
+      sortField,
+      numBuckets,
     });
   },
 });
@@ -258,11 +307,15 @@ export const serviceDependenciesRoute = createRoute({
       t.type({ environment: t.string, numBuckets: toNumberRt }),
     ]),
   }),
+  options: {
+    tags: ['access:apm'],
+  },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
     const { serviceName } = context.params.path;
     const { environment, numBuckets } = context.params.query;
+
     return getServiceDependencies({
       serviceName,
       environment,
