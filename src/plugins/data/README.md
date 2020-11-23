@@ -210,12 +210,13 @@ POST /api/index_patterns/index_pattern
 }
 ```
 
-When you are updating fields, you can skip field refresh using `skip_field_refresh` flag.
+When you are updating fields, you can skip field refresh using `refresh_fields` flag.
+`refresh_fields` defaults to `true`.
 
 ```
 POST /api/index_patterns/index_pattern
 {
-    "skip_field_refresh": true,
+    "refresh_fields": false,
     "index_pattern": {
         "fields": {}
     }

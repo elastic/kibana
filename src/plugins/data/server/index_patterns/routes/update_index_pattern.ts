@@ -55,7 +55,7 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
           { unknowns: 'allow' }
         ),
         body: schema.object({
-          skip_field_refresh: schema.maybe(schema.boolean({ defaultValue: false })),
+          refresh_fields: schema.maybe(schema.boolean({ defaultValue: true })),
           index_pattern: indexPatternUpdateSchema,
         }),
       },
@@ -70,7 +70,7 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
 
           const {
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            skip_field_refresh = false,
+            refresh_fields = true,
             index_pattern: {
               title,
               timeFieldName,
@@ -133,7 +133,7 @@ export const registerUpdateIndexPatternRoute = (router: IRouter) => {
 
           await ip.updateSavedObject(indexPattern);
 
-          if (doRefreshFields && !skip_field_refresh) {
+          if (doRefreshFields && refresh_fields) {
             await ip.refreshFields(indexPattern);
           }
 
