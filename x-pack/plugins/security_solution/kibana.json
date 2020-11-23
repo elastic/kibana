@@ -20,7 +20,7 @@
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
-    "ingestManager",
+    "fleet",
     "ml",
     "newsfeed",
     "security",
@@ -33,5 +33,5 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["esUiShared", "ingestManager", "kibanaUtils", "kibanaReact", "lists", "ml"]
+  "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact", "lists", "ml"]
 }

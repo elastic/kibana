@@ -1054,6 +1054,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           indexPatternId: '1',
           columns: {},
           columnOrder: [],
+          incompleteColumns: {},
         },
       },
     });

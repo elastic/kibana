@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { termsOperation, TermsIndexPatternColumn } from './terms';
@@ -25,8 +26,13 @@ import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_
 import { countOperation, CountIndexPatternColumn } from './count';
 import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
 import { StateSetter, OperationMetadata } from '../../../types';
-import { BaseIndexPatternColumn } from './column_types';
-import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
+import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
+import {
+  IndexPatternPrivateState,
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternLayer,
+} from '../../types';
 import { DateRange } from '../../../../common';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { RangeIndexPatternColumn, rangeOperation } from './ranges';
@@ -51,6 +57,8 @@ export type IndexPatternColumn =
   | LastValueIndexPatternColumn;
 
 export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
+
+export { IncompleteColumn } from './column_types';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
@@ -109,6 +117,14 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    */
   displayName: string;
   /**
+   * The default label is assigned by the editor
+   */
+  getDefaultLabel: (
+    column: C,
+    indexPattern: IndexPattern,
+    columns: Record<string, IndexPatternColumn>
+  ) => string;
+  /**
    * This function is called if another column in the same layer changed or got removed.
    * Can be used to update references to other columns (e.g. for sorting).
    * Based on the current column and the other updated columns, this function has to
@@ -122,11 +138,6 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * React component for operation specific settings shown in the popover editor
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
-  /**
-   * Function turning a column into an agg config passed to the `esaggs` function
-   * together with the agg configs returned from other columns.
-   */
-  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
@@ -148,7 +159,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
 }
 
 interface BaseBuildColumnArgs {
-  columns: Partial<Record<string, IndexPatternColumn>>;
+  layer: IndexPatternLayer;
   indexPattern: IndexPattern;
 }
 
@@ -166,7 +177,12 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
    * Returns the meta data of the operation if applied. Undefined
    * if the field is not applicable.
    */
-  getPossibleOperation: () => OperationMetadata | undefined;
+  getPossibleOperation: () => OperationMetadata;
+  /**
+   * Function turning a column into an agg config passed to the `esaggs` function
+   * together with the agg configs returned from other columns.
+   */
+  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
 }
 
 interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
@@ -177,7 +193,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
    */
   getPossibleOperationForField: (field: IndexPatternField) => OperationMetadata | undefined;
   /**
-   * Builds the column object for the given parameters. Should include default p
+   * Builds the column object for the given parameters.
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
@@ -201,11 +217,76 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
    * @param field The field that the user changed to.
    */
   onFieldChange: (oldColumn: C, field: IndexPatternField) => C;
+  /**
+   * Function turning a column into an agg config passed to the `esaggs` function
+   * together with the agg configs returned from other columns.
+   */
+  toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
+}
+
+export interface RequiredReference {
+  // Limit the input types, usually used to prevent other references from being used
+  input: Array<GenericOperationDefinition['input']>;
+  // Function which is used to determine if the reference is bucketed, or if it's a number
+  validateMetadata: (metadata: OperationMetadata) => boolean;
+  // Do not use specificOperations unless you need to limit to only one or two exact
+  // operation types. The main use case is Cumulative Sum, where we need to only take the
+  // sum of Count or sum of Sum.
+  specificOperations?: OperationType[];
+}
+
+// Full reference uses one or more reference operations which are visible to the user
+// Partial reference is similar except that it uses the field selector
+interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
+  input: 'fullReference';
+  /**
+   * The filters provided here are used to construct the UI, transition correctly
+   * between operations, and validate the configuration.
+   */
+  requiredReferences: RequiredReference[];
+
+  /**
+   * The type of UI that is shown in the editor for this function:
+   * - full: List of sub-functions and fields
+   * - field: List of fields, selects first operation per field
+   */
+  selectionStyle: 'full' | 'field';
+
+  /**
+   * Builds the column object for the given parameters. Should include default p
+   */
+  buildColumn: (
+    arg: BaseBuildColumnArgs & {
+      referenceIds: string[];
+      previousColumn?: IndexPatternColumn;
+    }
+  ) => ReferenceBasedIndexPatternColumn & C;
+  /**
+   * Returns the meta data of the operation if applied. Undefined
+   * if the field is not applicable.
+   */
+  getPossibleOperation: () => OperationMetadata;
+  /**
+   * A chain of expression functions which will transform the table
+   */
+  toExpression: (
+    layer: IndexPatternLayer,
+    columnId: string,
+    indexPattern: IndexPattern
+  ) => ExpressionFunctionAST[];
+  /**
+   * Validate that the operation has the right preconditions in the state. For example:
+   *
+   * - Requires a date histogram operation somewhere before it in order
+   * - Missing references
+   */
+  getErrorMessage?: (layer: IndexPatternLayer, columnId: string) => string[] | undefined;
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
   field: FieldBasedOperationDefinition<C>;
   none: FieldlessOperationDefinition<C>;
+  fullReference: FullReferenceOperationDefinition<C>;
 }
 
 /**
@@ -230,7 +311,8 @@ export type OperationType = typeof internalOperationDefinitions[number]['type'];
  */
 export type GenericOperationDefinition =
   | OperationDefinition<IndexPatternColumn, 'field'>
-  | OperationDefinition<IndexPatternColumn, 'none'>;
+  | OperationDefinition<IndexPatternColumn, 'none'>
+  | OperationDefinition<IndexPatternColumn, 'fullReference'>;
 
 /**
  * List of all available operation definitions

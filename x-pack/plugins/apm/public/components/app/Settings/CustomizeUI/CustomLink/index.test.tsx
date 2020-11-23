@@ -21,7 +21,7 @@ import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
-import * as saveCustomLink from './CustomLinkFlyout/saveCustomLink';
+import * as saveCustomLink from './CreateEditCustomLinkFlyout/saveCustomLink';
 import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const data = [
@@ -41,7 +41,7 @@ const data = [
 
 describe('CustomLink', () => {
   beforeAll(() => {
-    jest.spyOn(apmApi, 'callApmApi').mockReturnValue({});
+    jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({});
   });
   afterAll(() => {
     jest.resetAllMocks();

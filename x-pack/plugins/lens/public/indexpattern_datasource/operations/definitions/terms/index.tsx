@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { IndexPatternColumn } from '../../../indexpattern';
-import { updateColumnParam } from '../../layer_helpers';
+import { updateColumnParam, isReferenced } from '../../layer_helpers';
 import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
@@ -82,13 +82,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
-  buildColumn({ columns, field, indexPattern }) {
-    const existingMetricColumn = Object.entries(columns)
-      .filter(([_columnId, column]) => column && isSortableByColumn(column))
+  buildColumn({ layer, field, indexPattern }) {
+    const existingMetricColumn = Object.entries(layer.columns)
+      .filter(
+        ([columnId, column]) => column && !column.isBucketed && !isReferenced(layer, columnId)
+      )
       .map(([id]) => id)[0];
 
-    const previousBucketsLength = Object.values(columns).filter((col) => col && col.isBucketed)
-      .length;
+    const previousBucketsLength = Object.values(layer.columns).filter(
+      (col) => col && col.isBucketed
+    ).length;
 
     return {
       label: ofName(field.displayName),
@@ -131,6 +134,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
+  getDefaultLabel: (column, indexPattern) =>
+    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
     if ('format' in newParams && field.type !== 'number') {

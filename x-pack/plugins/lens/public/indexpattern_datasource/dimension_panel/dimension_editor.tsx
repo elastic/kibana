@@ -429,7 +429,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 function getErrorMessage(
   selectedColumn: IndexPatternColumn | undefined,
   incompatibleSelectedOperationType: boolean,
-  input: 'none' | 'field' | undefined,
+  input: 'none' | 'field' | 'fullReference' | undefined,
   fieldInvalid: boolean
 ) {
   if (selectedColumn && incompatibleSelectedOperationType) {
