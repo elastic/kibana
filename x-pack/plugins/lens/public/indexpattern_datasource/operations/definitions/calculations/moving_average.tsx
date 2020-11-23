@@ -42,7 +42,7 @@ export const movingAverageOperation: OperationDefinition<
   'fullReference'
 > = {
   type: 'moving_average',
-  priority: 2,
+  priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.movingAverage', {
     defaultMessage: 'Moving Average',
   }),
@@ -51,8 +51,7 @@ export const movingAverageOperation: OperationDefinition<
   requiredReferences: [
     {
       input: ['field'],
-      validateMetadata: (metadata) =>
-        metadata.dataType === 'number' && metadata.isBucketed === false,
+      validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
   getPossibleOperation: () => {
@@ -93,7 +92,12 @@ export const movingAverageOperation: OperationDefinition<
     return hasDateField(newIndexPattern);
   },
   getErrorMessage: (layer: IndexPatternLayer) => {
-    return checkForDateHistogram(layer);
+    return checkForDateHistogram(
+      layer,
+      i18n.translate('xpack.lens.indexPattern.movingAverage', {
+        defaultMessage: 'Moving Average',
+      })
+    );
   },
 };
 

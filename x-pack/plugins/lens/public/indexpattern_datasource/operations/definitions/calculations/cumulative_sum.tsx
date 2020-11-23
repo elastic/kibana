@@ -33,7 +33,7 @@ export const cumulativeSumOperation: OperationDefinition<
   'fullReference'
 > = {
   type: 'cumulative_sum',
-  priority: 2,
+  priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
     defaultMessage: 'Cumulative sum',
   }),
@@ -43,8 +43,7 @@ export const cumulativeSumOperation: OperationDefinition<
     {
       input: ['field'],
       specificOperations: ['count', 'sum'],
-      validateMetadata: (metadata) =>
-        metadata.dataType === 'number' && metadata.isBucketed === false,
+      validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
   getPossibleOperation: () => {
@@ -82,6 +81,11 @@ export const cumulativeSumOperation: OperationDefinition<
     return true;
   },
   getErrorMessage: (layer: IndexPatternLayer) => {
-    return checkForDateHistogram(layer);
+    return checkForDateHistogram(
+      layer,
+      i18n.translate('xpack.lens.indexPattern.cumulativeSum', {
+        defaultMessage: 'Cumulative sum',
+      })
+    );
   },
 };

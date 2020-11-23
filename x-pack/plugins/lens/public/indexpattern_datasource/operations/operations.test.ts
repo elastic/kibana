@@ -243,6 +243,11 @@ describe('getOperationTypesForField', () => {
                 "type": "field",
               },
               Object {
+                "field": "bytes",
+                "operationType": "sum",
+                "type": "field",
+              },
+              Object {
                 "operationType": "cumulative_sum",
                 "type": "fullReference",
               },
@@ -257,11 +262,6 @@ describe('getOperationTypesForField', () => {
               Object {
                 "operationType": "moving_average",
                 "type": "fullReference",
-              },
-              Object {
-                "field": "bytes",
-                "operationType": "sum",
-                "type": "field",
               },
               Object {
                 "field": "bytes",

@@ -12,7 +12,7 @@ import { ReferenceBasedIndexPatternColumn } from '../column_types';
 /**
  * Checks whether the current layer includes a date histogram and returns an error otherwise
  */
-export function checkForDateHistogram(layer: IndexPatternLayer) {
+export function checkForDateHistogram(layer: IndexPatternLayer, name: string) {
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
   const hasDateHistogram = buckets.some(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
@@ -22,7 +22,11 @@ export function checkForDateHistogram(layer: IndexPatternLayer) {
   }
   return [
     i18n.translate('xpack.lens.indexPattern.calculations.dateHistogramErrorMessage', {
-      defaultMessage: 'Needs a date histogram to work',
+      defaultMessage:
+        '{name} requires a date histogram to work. Choose a different function or add a date histogram.',
+      values: {
+        name,
+      },
     }),
   ];
 }
@@ -55,6 +59,7 @@ export function dateBasedOperationToExpression(
         by: buckets,
         inputColumnId: [currentColumn.references[0]],
         outputColumnId: [columnId],
+        outputColumnName: [currentColumn.label],
         ...additionalArgs,
       },
     },

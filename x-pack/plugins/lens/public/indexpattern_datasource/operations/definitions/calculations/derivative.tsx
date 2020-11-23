@@ -12,7 +12,7 @@ import { OperationDefinition } from '..';
 
 const ofName = (name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.derivativeOf', {
-    defaultMessage: 'Derivative of {name}',
+    defaultMessage: 'Differences of {name}',
     values: {
       name:
         name ??
@@ -33,17 +33,16 @@ export const derivativeOperation: OperationDefinition<
   'fullReference'
 > = {
   type: 'derivative',
-  priority: 2,
+  priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.derivative', {
-    defaultMessage: 'Derivative',
+    defaultMessage: 'Differences',
   }),
   input: 'fullReference',
   selectionStyle: 'full',
   requiredReferences: [
     {
       input: ['field'],
-      validateMetadata: (metadata) =>
-        metadata.dataType === 'number' && metadata.isBucketed === false,
+      validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
   getPossibleOperation: () => {
@@ -81,6 +80,11 @@ export const derivativeOperation: OperationDefinition<
     return hasDateField(newIndexPattern);
   },
   getErrorMessage: (layer: IndexPatternLayer) => {
-    return checkForDateHistogram(layer);
+    return checkForDateHistogram(
+      layer,
+      i18n.translate('xpack.lens.indexPattern.derivative', {
+        defaultMessage: 'Differences',
+      })
+    );
   },
 };

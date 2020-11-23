@@ -33,7 +33,7 @@ export const counterRateOperation: OperationDefinition<
   'fullReference'
 > = {
   type: 'counter_rate',
-  priority: 2,
+  priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.counterRate', {
     defaultMessage: 'Counter rate',
   }),
@@ -43,8 +43,7 @@ export const counterRateOperation: OperationDefinition<
     {
       input: ['field'],
       specificOperations: ['max'],
-      validateMetadata: (metadata) =>
-        metadata.dataType === 'number' && metadata.isBucketed === false,
+      validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
   getPossibleOperation: () => {
@@ -54,10 +53,8 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
     };
   },
-  getDefaultLabel: () => {
-    return i18n.translate('xpack.lens.indexPattern.counterRate', {
-      defaultMessage: 'Counter rate',
-    });
+  getDefaultLabel: (column, indexPattern, columns) => {
+    return ofName(columns[column.references[0]]?.label);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
@@ -84,6 +81,11 @@ export const counterRateOperation: OperationDefinition<
     return hasDateField(newIndexPattern);
   },
   getErrorMessage: (layer: IndexPatternLayer) => {
-    return checkForDateHistogram(layer);
+    return checkForDateHistogram(
+      layer,
+      i18n.translate('xpack.lens.indexPattern.counterRate', {
+        defaultMessage: 'Counter rate',
+      })
+    );
   },
 };
