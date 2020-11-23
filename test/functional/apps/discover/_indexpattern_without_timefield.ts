@@ -20,6 +20,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
@@ -48,6 +49,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.selectIndexPattern('with-timefield');
       if (!(await PageObjects.timePicker.timePickerExists())) {
         throw new Error('Expected timepicker to exist');
+      }
+    });
+    it('should not display a timepicker after using history.back()', async () => {
+      // Navigating back to discover
+      await browser.goBack();
+      if (await PageObjects.timePicker.timePickerExists()) {
+        throw new Error('Expected timepicker not to exist');
       }
     });
   });
