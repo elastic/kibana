@@ -15,6 +15,7 @@ import { Cytoscape, Controls, JobMapLegend } from './components';
 import { ml } from '../../../services/ml_api_service';
 import { useMlKibana } from '../../../contexts/kibana';
 import { useRefDimensions } from './components/use_ref_dimensions';
+import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
 
 const cytoscapeDivStyle = {
   background: `linear-gradient(
@@ -36,22 +37,36 @@ ${theme.euiColorLightShade}`,
   marginTop: 0,
 };
 
-export const JobMapTitle: React.FC<{ analyticsId: string }> = ({ analyticsId }) => (
+export const JobMapTitle: React.FC<{ analyticsId?: string; modelId?: string }> = ({
+  analyticsId,
+  modelId,
+}) => (
   <EuiTitle size="xs">
     <span>
-      {i18n.translate('xpack.ml.dataframe.analyticsMap.analyticsIdTitle', {
-        defaultMessage: 'Map for analytics ID {analyticsId}',
-        values: { analyticsId },
-      })}
+      {analyticsId
+        ? i18n.translate('xpack.ml.dataframe.analyticsMap.analyticsIdTitle', {
+            defaultMessage: 'Map for analytics ID {analyticsId}',
+            values: { analyticsId },
+          })
+        : i18n.translate('xpack.ml.dataframe.analyticsMap.modelIdTitle', {
+            defaultMessage: 'Map for trained model ID {modelId}',
+            values: { modelId },
+          })}
     </span>
   </EuiTitle>
 );
 
-interface Props {
-  analyticsId: string;
+interface GetDataObjectParameter {
+  id: string;
+  type: string;
 }
 
-export const JobMap: FC<Props> = ({ analyticsId }) => {
+interface Props {
+  analyticsId?: string;
+  modelId?: string;
+}
+
+export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
   const [nodeDetails, setNodeDetails] = useState({});
   const [error, setError] = useState(undefined);
@@ -60,14 +75,33 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
     services: { notifications },
   } = useMlKibana();
 
-  const getData = async (id?: string) => {
+  const getDataWrapper = async (params?: GetDataObjectParameter) => {
+    const { id, type } = params ?? {};
     const treatAsRoot = id !== undefined;
-    const idToUse = treatAsRoot ? id : analyticsId;
-    // Pass in treatAsRoot flag - endpoint will take job destIndex to grab jobs created from it
+    let idToUse: string;
+
+    if (id !== undefined) {
+      idToUse = id;
+    } else if (modelId !== undefined) {
+      idToUse = modelId;
+    } else {
+      idToUse = analyticsId as string;
+    }
+
+    await getData(
+      idToUse,
+      treatAsRoot,
+      modelId !== undefined && treatAsRoot === false ? JOB_MAP_NODE_TYPES.TRAINED_MODEL : type
+    );
+  };
+
+  const getData = async (idToUse: string, treatAsRoot: boolean, type?: string) => {
+    // Pass in treatAsRoot flag - endpoint will take job or index to grab jobs created from it
     // TODO: update analyticsMap return type here
     const analyticsMap: any = await ml.dataFrameAnalytics.getDataFrameAnalyticsMap(
       idToUse,
-      treatAsRoot
+      treatAsRoot,
+      type
     );
 
     const { elements: nodeElements, details, error: fetchError } = analyticsMap;
@@ -86,7 +120,7 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
     }
 
     if (nodeElements && nodeElements.length > 0) {
-      if (id === undefined) {
+      if (treatAsRoot === false) {
         setElements(nodeElements);
         setNodeDetails(details);
       } else {
@@ -98,8 +132,8 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
   };
 
   useEffect(() => {
-    getData();
-  }, [analyticsId]);
+    getDataWrapper();
+  }, [analyticsId, modelId]);
 
   if (error !== undefined) {
     notifications.toasts.addDanger(
@@ -119,14 +153,19 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
       <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }} ref={ref}>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <JobMapTitle analyticsId={analyticsId} />
+            <JobMapTitle analyticsId={analyticsId} modelId={modelId} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <JobMapLegend />
           </EuiFlexItem>
         </EuiFlexGroup>
         <Cytoscape height={height} elements={elements} width={width} style={cytoscapeDivStyle}>
-          <Controls details={nodeDetails} getNodeData={getData} analyticsId={analyticsId} />
+          <Controls
+            details={nodeDetails}
+            getNodeData={getDataWrapper}
+            analyticsId={analyticsId}
+            modelId={modelId}
+          />
         </Cytoscape>
       </div>
     </>
