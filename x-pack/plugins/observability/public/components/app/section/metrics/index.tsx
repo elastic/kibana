@@ -13,13 +13,13 @@ import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useHasData } from '../../../../hooks/use_has_data';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 
 interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
   bucketSize?: string;
 }
 
@@ -46,19 +46,29 @@ const StyledProgress = styled.div<{ color?: string }>`
   }
 `;
 
-export function MetricsSection({ absoluteTime, relativeTime, bucketSize }: Props) {
+export function MetricsSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
+  const { forceUpdate, hasData } = useHasData();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
 
-  const { start, end } = absoluteTime;
-  const { data, status } = useFetcher(() => {
-    if (start && end && bucketSize) {
-      return getDataHandler('infra_metrics')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
-        bucketSize,
-      });
-    }
-  }, [start, end, bucketSize, relativeTime]);
+  const { data, status } = useFetcher(
+    () => {
+      if (bucketSize) {
+        return getDataHandler('infra_metrics')?.fetchData({
+          absoluteTime: { start: absoluteStart, end: absoluteEnd },
+          relativeTime: { start: relativeStart, end: relativeEnd },
+          bucketSize,
+        });
+      }
+    },
+    // Absolute times shouldn't be used here, since it would refetch on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [bucketSize, relativeStart, relativeEnd, forceUpdate]
+  );
+
+  if (!hasData.infra_metrics?.hasData) {
+    return null;
+  }
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
