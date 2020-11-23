@@ -202,22 +202,6 @@ export class IndexPatternsService {
     }
   };
 
-  private isFieldRefreshRequired(specs?: IndexPatternFieldMap): boolean {
-    if (!specs) {
-      return true;
-    }
-
-    return Object.values(specs).every((spec) => {
-      // See https://github.com/elastic/kibana/pull/8421
-      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
-
-      // See https://github.com/elastic/kibana/pull/11969
-      const hasDocValuesFlag = 'readFromDocValues' in spec;
-
-      return !hasFieldCaps || !hasDocValuesFlag;
-    });
-  }
-
   /**
    * Get field list by providing { pattern }
    * @param options
@@ -304,8 +288,8 @@ export class IndexPatternsService {
           values: { id, title },
         }),
       });
+      throw err;
     }
-    return fields;
   };
 
   /**
@@ -314,7 +298,11 @@ export class IndexPatternsService {
    */
   fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
-      collector[field.name] = { ...field, customLabel: fieldAttrs?.[field.name]?.customLabel };
+      collector[field.name] = {
+        ...field,
+        customLabel: fieldAttrs?.[field.name]?.customLabel,
+        count: fieldAttrs?.[field.name]?.count,
+      };
       return collector;
     }, {});
 
@@ -377,25 +365,20 @@ export class IndexPatternsService {
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
 
-    const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
-    let isSaveRequired = isFieldRefreshRequired;
     try {
-      spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecMap(
-            spec.fields || {},
-            id,
-            spec.title as string,
-            {
-              pattern: title as string,
-              metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-              type,
-              rollupIndex: typeMeta?.params?.rollupIndex,
-            },
-            spec.fieldAttrs
-          )
-        : spec.fields;
+      spec.fields = await this.refreshFieldSpecMap(
+        spec.fields || {},
+        id,
+        spec.title as string,
+        {
+          pattern: title as string,
+          metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+          type,
+          rollupIndex: typeMeta?.params?.rollup_index,
+        },
+        spec.fieldAttrs
+      );
     } catch (err) {
-      isSaveRequired = false;
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({
           title: (err as any).message,
@@ -417,22 +400,6 @@ export class IndexPatternsService {
       : {};
 
     const indexPattern = await this.create(spec, true);
-    if (isSaveRequired) {
-      try {
-        this.updateSavedObject(indexPattern);
-      } catch (err) {
-        this.onError(err, {
-          title: i18n.translate('data.indexPatterns.fetchFieldSaveErrorTitle', {
-            defaultMessage:
-              'Error saving after fetching fields for index pattern {title} (ID: {id})',
-            values: {
-              id: indexPattern.id,
-              title: indexPattern.title,
-            },
-          }),
-        });
-      }
-    }
 
     if (indexPattern.isUnsupportedTimePattern()) {
       this.onUnsupportedTimePattern({
@@ -441,7 +408,6 @@ export class IndexPatternsService {
         index: indexPattern.getIndex(),
       });
     }
-
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
   };
