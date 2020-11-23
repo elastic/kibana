@@ -41,6 +41,7 @@
 
 |  Function | Description |
 |  --- | --- |
+|  [datatableToCSV({ columns, rows }, { csvSeparator, quoteValues, formatFactory, raw })](./kibana-plugin-plugins-data-public.datatabletocsv.md) |  |
 |  [exportAsCSVs(filename, datatables, options)](./kibana-plugin-plugins-data-public.exportascsvs.md) |  |
 |  [getDefaultQuery(language)](./kibana-plugin-plugins-data-public.getdefaultquery.md) |  |
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
