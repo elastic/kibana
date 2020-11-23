@@ -20,6 +20,8 @@ import {
 import * as i18n from '../translations';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import { networkSelectors } from '../../store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 
@@ -53,6 +55,9 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   setQuery,
   type,
 }) => {
+  const getNetworkDnsSelector = networkSelectors.dnsSelector();
+  const { isPtrIncluded } = useShallowEqualSelector(getNetworkDnsSelector);
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -64,7 +69,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   const [
     loading,
     { totalCount, networkDns, pageInfo, loadPage, id, inspect, isInspected, refetch },
-    isPtrIncluded,
   ] = useNetworkDns({
     endDate,
     filterQuery,

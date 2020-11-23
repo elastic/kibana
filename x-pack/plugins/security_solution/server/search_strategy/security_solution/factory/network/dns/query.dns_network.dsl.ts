@@ -67,9 +67,9 @@ export const buildDnsQuery = ({
   defaultIndex,
   docValueFields,
   filterQuery,
-  isPtrIncluded = false,
+  isPtrIncluded,
   sort,
-  pagination,
+  pagination: { cursorStart, querySize },
   stackByField = 'dns.question.registered_domain',
   timerange: { from, to },
 }: NetworkDnsRequestOptions) => {
@@ -85,7 +85,6 @@ export const buildDnsQuery = ({
       },
     },
   ];
-  const { cursorStart, querySize } = pagination ?? {};
 
   const dslQuery = {
     allowNoIndices: true,

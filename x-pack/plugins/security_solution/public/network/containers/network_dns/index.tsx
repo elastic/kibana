@@ -60,7 +60,7 @@ export const useNetworkDns = ({
   skip,
   startDate,
   type,
-}: UseNetworkDns): [boolean, NetworkDnsArgs, boolean] => {
+}: UseNetworkDns): [boolean, NetworkDnsArgs] => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
   const { activePage, sort, isPtrIncluded, limit } = useShallowEqualSelector(getNetworkDnsSelector);
   const { data, notifications } = useKibana().services;
@@ -210,5 +210,5 @@ export const useNetworkDns = ({
     networkDnsSearch(networkDnsRequest);
   }, [networkDnsRequest, networkDnsSearch]);
 
-  return [loading, networkDnsResponse, isPtrIncluded];
+  return [loading, networkDnsResponse];
 };
