@@ -134,7 +134,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
         columnConfigurations={columnConfigurations}
         items={streamItems}
         scale="medium"
-        wrap={false}
+        wrap={true}
         isReloading={isReloading}
         isLoadingMore={isLoadingMore}
         hasMoreBeforeStart={hasMoreBefore}
