@@ -59,7 +59,8 @@ describe('EventLogger', () => {
     eventLogger.logEvent({});
     await waitForLogEvent(systemLogger);
     delay(WRITE_LOG_WAIT_MILLIS); // sleep a bit longer since event logging is async
-    expect(esContext.esAdapter.indexDocument).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.indexDocument).toHaveBeenCalled();
+    expect(esContext.esAdapter.indexDocuments).not.toHaveBeenCalled();
   });
 
   test('method logEvent() writes expected default values', async () => {
