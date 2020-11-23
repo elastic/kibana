@@ -22,16 +22,19 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('find_statuses', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
+      await esArchiver.load('auditbeat/hosts');
     });
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
       await deleteAllAlerts(supertest);
       await deleteAllRulesStatuses(es);
+      await esArchiver.unload('auditbeat/hosts');
     });
 
     it('should return an empty find statuses body correctly if no statuses are loaded', async () => {
