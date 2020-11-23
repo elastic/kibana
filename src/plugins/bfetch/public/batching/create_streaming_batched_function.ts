@@ -131,20 +131,27 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           method: 'POST',
           signal: abortController.signal,
         });
+
+        const handleStreamError = (error: any) => {
+          const normalizedError = normalizeError<BatchedFunctionProtocolError>(error);
+          normalizedError.code = 'STREAM';
+          for (const { future } of items) future.reject(normalizedError);
+        };
+
         stream.pipe(split('\n')).subscribe({
           next: (json: string) => {
-            const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
-            if (response.error) {
-              items[response.id].future.reject(response.error);
-            } else if (response.result !== undefined) {
-              items[response.id].future.resolve(response.result);
+            try {
+              const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
+              if (response.error) {
+                items[response.id].future.reject(response.error);
+              } else if (response.result !== undefined) {
+                items[response.id].future.resolve(response.result);
+              }
+            } catch (e) {
+              handleStreamError(e);
             }
           },
-          error: (error) => {
-            const normalizedError = normalizeError<BatchedFunctionProtocolError>(error);
-            normalizedError.code = 'STREAM';
-            for (const { future } of items) future.reject(normalizedError);
-          },
+          error: handleStreamError,
           complete: () => {
             if (!isBatchDone) {
               const error: BatchedFunctionProtocolError = {
