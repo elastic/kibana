@@ -11,18 +11,10 @@ import { FieldTypeIcon } from './field_type_icon';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 
 describe('FieldTypeIcon', () => {
-  test(`don't render component when type is undefined`, () => {
-    const typeIconComponent = shallow(<FieldTypeIcon />);
-    expect(typeIconComponent.isEmptyRender()).toBeTruthy();
-  });
-
-  test(`don't render component when type doesn't match a field type`, () => {
-    const typeIconComponent = shallow(<FieldTypeIcon type="foo" />);
-    expect(typeIconComponent.isEmptyRender()).toBeTruthy();
-  });
-
   test(`render component when type matches a field type`, () => {
-    const typeIconComponent = shallow(<FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} />);
+    const typeIconComponent = shallow(
+      <FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
+    );
     expect(typeIconComponent).toMatchSnapshot();
   });
 
@@ -31,9 +23,9 @@ describe('FieldTypeIcon', () => {
     jest.useFakeTimers();
 
     const typeIconComponent = mount(
-      <FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
+      <FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} needsAria={false} />
     );
-    const container = typeIconComponent.find({ className: 'field-type-icon-container' });
+    const container = typeIconComponent.find({ 'data-test-subj': 'mlFieldTypeIcon' });
 
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
 
@@ -55,12 +47,5 @@ describe('FieldTypeIcon', () => {
 
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();
-  });
-
-  test(`update component`, () => {
-    const typeIconComponent = shallow(<FieldTypeIcon />);
-    expect(typeIconComponent.isEmptyRender()).toBeTruthy();
-    typeIconComponent.setProps({ type: ML_JOB_FIELD_TYPES.IP });
-    expect(typeIconComponent).toMatchSnapshot();
   });
 });
