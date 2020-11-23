@@ -17,5 +17,3 @@ export {
 export const REACT_ROOT_ID = 'indexManagementReactRoot';
 
 export * from './ilm_url_generator';
-
-export { DELETE_INDEX_PRIVILEGE } from './privileges';

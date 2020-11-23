@@ -32,12 +32,7 @@ import {
   UIM_TEMPLATE_CLONE,
   UIM_TEMPLATE_SIMULATE,
 } from '../../../common/constants';
-import {
-  TemplateDeserialized,
-  TemplateListItem,
-  DataStream,
-  DataStreamPrivileges,
-} from '../../../common';
+import { TemplateDeserialized, TemplateListItem, DataStream } from '../../../common';
 import { IndexMgmtMetricsType } from '../../types';
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
@@ -66,23 +61,6 @@ export function useLoadDataStream(name: string) {
   return useRequest<DataStream>({
     path: `${API_BASE_PATH}/data_streams/${encodeURIComponent(name)}`,
     method: 'get',
-  });
-}
-
-export function useLoadDataStreamsPrivileges<T extends string>({
-  names,
-  privileges,
-}: {
-  names: string[];
-  privileges: string[];
-}) {
-  return useRequest<DataStreamPrivileges<T>>({
-    path: `${API_BASE_PATH}/data_streams_privileges`,
-    method: 'post',
-    body: JSON.stringify({
-      names,
-      privileges,
-    }),
   });
 }
 

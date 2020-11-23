@@ -65,5 +65,3 @@ export interface DataStreamIndex {
   name: string;
   uuid: string;
 }
-
-export type DataStreamPrivileges<K extends string> = Record<string, { [key in K]: boolean }>;
