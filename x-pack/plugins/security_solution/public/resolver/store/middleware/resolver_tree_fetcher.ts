@@ -90,7 +90,7 @@ export function ResolverTreeFetcher(
         // TODO: Enttities call should return the fields as [{ process: { entity_id: 'blargh' }}] to allow use of the schema.id field
         entityIDToFetch = matchingEntities[0].entity_id;
 
-        result = await dataAccessLayer.newResolverTree(
+        result = await dataAccessLayer.resolverTree(
           entityIDToFetch,
           treeRequestIDSchema,
           timerange,
@@ -111,7 +111,7 @@ export function ResolverTreeFetcher(
         }
       }
       if (result !== undefined) {
-        const newResolverTree: NewResolverTree = {
+        const resolverTree: NewResolverTree = {
           originId: entityIDToFetch,
           nodes: result,
         };
@@ -119,7 +119,7 @@ export function ResolverTreeFetcher(
         api.dispatch({
           type: 'serverReturnedResolverData',
           payload: {
-            result: newResolverTree,
+            result: resolverTree,
             parameters: databaseParameters,
           },
         });

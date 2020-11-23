@@ -718,7 +718,7 @@ export interface DataAccessLayer {
   /**
    * Fetch a ResolverTree for a given id
    */
-  newResolverTree: (
+  resolverTree: (
     dataId: string,
     schema: TreeIdSchema,
     timerange: Timerange,
