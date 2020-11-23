@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FactoryQueryTypes } from '../../common/search_strategy/security_solution';
-
 declare namespace Cypress {
   interface Chainable<Subject> {
     promisify(): Promise<Subject>;
     stubSearchStrategyApi(
       stubObject: Record<string, unknown>,
-      factoryQueryType?: FactoryQueryTypes,
+      factoryQueryType?: string,
       searchStrategyName?: string
     ): Chainable<Subject>;
     attachFile(fileName: string, fileType?: string): Chainable<JQuery>;
