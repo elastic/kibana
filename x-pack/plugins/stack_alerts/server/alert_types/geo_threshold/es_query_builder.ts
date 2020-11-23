@@ -7,12 +7,32 @@
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from 'src/core/server';
+import {
+  Query,
+  IIndexPattern,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  luceneStringToDsl,
+} from '../../../../../../src/plugins/data/common';
 
 export const OTHER_CATEGORY = 'other';
 // Consider dynamically obtaining from config?
 const MAX_TOP_LEVEL_QUERY_SIZE = 0;
 const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
+
+export const getEsFormattedQuery = (query: Query, indexPattern?: IIndexPattern) => {
+  let esFormattedQuery;
+
+  const queryLanguage = query.language;
+  if (queryLanguage === 'kuery') {
+    const ast = fromKueryExpression(query.query);
+    esFormattedQuery = toElasticsearchQuery(ast, indexPattern);
+  } else {
+    esFormattedQuery = luceneStringToDsl(query.query);
+  }
+  return esFormattedQuery;
+};
 
 export async function getShapesFilters(
   boundaryIndexTitle: string,
@@ -21,7 +41,8 @@ export async function getShapesFilters(
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'],
   log: Logger,
   alertId: string,
-  boundaryNameField?: string
+  boundaryNameField?: string,
+  boundaryIndexQuery?: Query
 ) {
   const filters: Record<string, unknown> = {};
   const shapesIdsNamesMap: Record<string, unknown> = {};
@@ -30,8 +51,10 @@ export async function getShapesFilters(
     index: boundaryIndexTitle,
     body: {
       size: MAX_SHAPES_QUERY_SIZE,
+      ...(boundaryIndexQuery ? { query: getEsFormattedQuery(boundaryIndexQuery) } : {}),
     },
   });
+
   boundaryData.hits.hits.forEach(({ _index, _id }) => {
     filters[_id] = {
       geo_shape: {
@@ -66,6 +89,7 @@ export async function executeEsQueryFactory(
     boundaryGeoField,
     geoField,
     boundaryIndexTitle,
+    indexQuery,
   }: {
     entity: string;
     index: string;
@@ -74,6 +98,7 @@ export async function executeEsQueryFactory(
     geoField: string;
     boundaryIndexTitle: string;
     boundaryNameField?: string;
+    indexQuery?: Query;
   },
   { callCluster }: { callCluster: ILegacyScopedClusterClient['callAsCurrentUser'] },
   log: Logger,
@@ -83,6 +108,19 @@ export async function executeEsQueryFactory(
     gteDateTime: Date | null,
     ltDateTime: Date | null
   ): Promise<SearchResponse<unknown> | undefined> => {
+    let esFormattedQuery;
+    if (indexQuery) {
+      const gteEpochDateTime = gteDateTime ? new Date(gteDateTime).getTime() : null;
+      const ltEpochDateTime = ltDateTime ? new Date(ltDateTime).getTime() : null;
+      const dateRangeUpdatedQuery =
+        indexQuery.language === 'kuery'
+          ? `(${dateField} >= "${gteEpochDateTime}" and ${dateField} < "${ltEpochDateTime}") and (${indexQuery.query})`
+          : `(${dateField}:[${gteDateTime} TO ${ltDateTime}]) AND (${indexQuery.query})`;
+      esFormattedQuery = getEsFormattedQuery({
+        query: dateRangeUpdatedQuery,
+        language: indexQuery.language,
+      });
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const esQuery: Record<string, any> = {
       index,
@@ -120,27 +158,29 @@ export async function executeEsQueryFactory(
             },
           },
         },
-        query: {
-          bool: {
-            must: [],
-            filter: [
-              {
-                match_all: {},
-              },
-              {
-                range: {
-                  [dateField]: {
-                    ...(gteDateTime ? { gte: gteDateTime } : {}),
-                    lt: ltDateTime, // 'less than' to prevent overlap between intervals
-                    format: 'strict_date_optional_time',
+        query: esFormattedQuery
+          ? esFormattedQuery
+          : {
+              bool: {
+                must: [],
+                filter: [
+                  {
+                    match_all: {},
                   },
-                },
+                  {
+                    range: {
+                      [dateField]: {
+                        ...(gteDateTime ? { gte: gteDateTime } : {}),
+                        lt: ltDateTime, // 'less than' to prevent overlap between intervals
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+                should: [],
+                must_not: [],
               },
-            ],
-            should: [],
-            must_not: [],
-          },
-        },
+            },
         stored_fields: ['*'],
         docvalue_fields: [
           {

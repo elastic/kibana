@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { CertResult, GetCertsParams } from '../../../common/runtime_types';
+import { CertResult, GetCertsParams, Ping } from '../../../common/runtime_types';
 
 enum SortFields {
   'issuer' = 'tls.server.x509.issuer.common_name',
@@ -15,8 +15,7 @@ enum SortFields {
 }
 
 export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = async ({
-  callES,
-  dynamicSettings,
+  uptimeEsClient,
   index,
   from,
   to,
@@ -29,92 +28,86 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
 }) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 
-  const params: any = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      from: index * size,
-      size,
-      sort: [
-        {
-          [sort]: {
-            order: direction,
-          },
+  const searchBody = {
+    from: index * size,
+    size,
+    sort: [
+      {
+        [sort]: {
+          order: direction as 'asc' | 'desc',
         },
-      ],
-      query: {
-        bool: {
-          filter: [
-            {
-              exists: {
-                field: 'tls.server',
-              },
-            },
-            {
-              range: {
-                'monitor.timespan': {
-                  gte: from,
-                  lte: to,
+      },
+    ],
+    query: {
+      bool: {
+        ...(search
+          ? {
+              minimum_should_match: 1,
+              should: [
+                {
+                  multi_match: {
+                    query: escape(search),
+                    type: 'phrase_prefix',
+                    fields: [
+                      'monitor.id.text',
+                      'monitor.name.text',
+                      'url.full.text',
+                      'tls.server.x509.subject.common_name.text',
+                      'tls.server.x509.issuer.common_name.text',
+                    ],
+                  },
                 },
+              ],
+            }
+          : {}),
+        filter: [
+          {
+            exists: {
+              field: 'tls.server',
+            },
+          },
+          {
+            range: {
+              'monitor.timespan': {
+                gte: from,
+                lte: to,
               },
             },
-          ],
-        },
+          },
+        ],
       },
-      _source: [
-        'monitor.id',
-        'monitor.name',
-        'tls.server.x509.issuer.common_name',
-        'tls.server.x509.subject.common_name',
-        'tls.server.hash.sha1',
-        'tls.server.hash.sha256',
-        'tls.server.x509.not_after',
-        'tls.server.x509.not_before',
-      ],
-      collapse: {
-        field: 'tls.server.hash.sha256',
-        inner_hits: {
-          _source: {
-            includes: ['monitor.id', 'monitor.name', 'url.full'],
-          },
-          collapse: {
-            field: 'monitor.id',
-          },
-          name: 'monitors',
-          sort: [{ 'monitor.id': 'asc' }],
+    },
+    _source: [
+      'monitor.id',
+      'monitor.name',
+      'tls.server.x509.issuer.common_name',
+      'tls.server.x509.subject.common_name',
+      'tls.server.hash.sha1',
+      'tls.server.hash.sha256',
+      'tls.server.x509.not_after',
+      'tls.server.x509.not_before',
+    ],
+    collapse: {
+      field: 'tls.server.hash.sha256',
+      inner_hits: {
+        _source: {
+          includes: ['monitor.id', 'monitor.name', 'url.full'],
         },
+        collapse: {
+          field: 'monitor.id',
+        },
+        name: 'monitors',
+        sort: [{ 'monitor.id': 'asc' }],
       },
-      aggs: {
-        total: {
-          cardinality: {
-            field: 'tls.server.hash.sha256',
-          },
+    },
+    aggs: {
+      total: {
+        cardinality: {
+          field: 'tls.server.hash.sha256',
         },
       },
     },
   };
-
-  if (!params.body.query.bool.should) {
-    params.body.query.bool.should = [];
-  }
-
-  if (search) {
-    params.body.query.bool.minimum_should_match = 1;
-    params.body.query.bool.should = [
-      {
-        multi_match: {
-          query: escape(search),
-          type: 'phrase_prefix',
-          fields: [
-            'monitor.id.text',
-            'monitor.name.text',
-            'url.full.text',
-            'tls.server.x509.subject.common_name.text',
-            'tls.server.x509.issuer.common_name.text',
-          ],
-        },
-      },
-    ];
-  }
 
   if (notValidBefore || notValidAfter) {
     const validityFilters: any = {
@@ -141,18 +134,17 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
       });
     }
 
-    params.body.query.bool.filter.push(validityFilters);
+    searchBody.query.bool.filter.push(validityFilters);
   }
 
   // console.log(JSON.stringify(params, null, 2));
-  const { body: result } = await callES.search(params);
+  const { body: result } = await uptimeEsClient.search({
+    body: searchBody,
+  });
 
-  const certs = (result?.hits?.hits ?? []).map((hit: any) => {
-    const {
-      _source: {
-        tls: { server },
-      },
-    } = hit;
+  const certs = (result?.hits?.hits ?? []).map((hit) => {
+    const ping = hit._source as Ping;
+    const server = ping.tls?.server!;
 
     const notAfter = server?.x509?.not_after;
     const notBefore = server?.x509?.not_before;
@@ -171,7 +163,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
       monitors,
       issuer,
       sha1,
-      sha256,
+      sha256: sha256 as string,
       not_after: notAfter,
       not_before: notBefore,
       common_name: commonName,

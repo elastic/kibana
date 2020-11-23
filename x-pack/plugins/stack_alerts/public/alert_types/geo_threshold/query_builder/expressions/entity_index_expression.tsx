@@ -8,7 +8,11 @@ import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { IErrorObject, AlertsContextValue } from '../../../../../../triggers_actions_ui/public';
+import {
+  IErrorObject,
+  AlertsContextValue,
+  AlertTypeParamsExpressionProps,
+} from '../../../../../../triggers_actions_ui/public';
 import { ES_GEO_FIELD_TYPES } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
@@ -23,7 +27,7 @@ interface Props {
   errors: IErrorObject;
   setAlertParamsDate: (date: string) => void;
   setAlertParamsGeoField: (geoField: string) => void;
-  setAlertProperty: (alertProp: string, alertParams: unknown) => void;
+  setAlertProperty: AlertTypeParamsExpressionProps['setAlertProperty'];
   setIndexPattern: (indexPattern: IIndexPattern) => void;
   indexPattern: IIndexPattern;
   isInvalid: boolean;
