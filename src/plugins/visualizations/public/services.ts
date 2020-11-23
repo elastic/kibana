@@ -83,9 +83,10 @@ export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsSt
 
 export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UiActions');
 
-export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] = createGetterSetter<
-  SavedVisualizationsLoader
->('SavedVisualisationsLoader');
+export const [
+  getSavedVisualizationsLoader,
+  setSavedVisualizationsLoader,
+] = createGetterSetter<SavedVisualizationsLoader>('SavedVisualisationsLoader');
 
 export const [getAggs, setAggs] = createGetterSetter<DataPublicPluginStart['search']['aggs']>(
   'AggConfigs'
