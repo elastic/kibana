@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const security = getService('security');
   const PageObjects = getPageObjects(['security', 'common']);
 
   describe('Basic functionality', function () {
@@ -71,8 +72,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(currentURL.pathname).to.eql('/app/management/security/users');
     });
 
+    it('can login anonymously preserving original URL', async () => {
+      await PageObjects.common.navigateToUrl('management', 'security/users', {
+        ensureCurrentUrl: false,
+        shouldLoginIfPrompted: false,
+        shouldUseHashForSubUrl: false,
+      });
+      await PageObjects.common.waitUntilUrlIncludes('next=');
+
+      await security.user.create('anonymous_user', {
+        password: 'changeme',
+        roles: ['superuser'],
+        full_name: 'Guest',
+      });
+      await PageObjects.security.loginSelector.login('anonymous', 'anonymous1');
+      await security.user.delete('anonymous_user');
+
+      // We need to make sure that both path and hash are respected.
+      const currentURL = parse(await browser.getCurrentUrl());
+      expect(currentURL.pathname).to.eql('/app/management/security/users');
+    });
+
     it('should show toast with error if SSO fails', async () => {
       await PageObjects.security.loginSelector.selectLoginMethod('saml', 'unknown_saml');
+
+      const toastTitle = await PageObjects.common.closeToast();
+      expect(toastTitle).to.eql('Could not perform login.');
+
+      await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
+    });
+
+    it('should show toast with error if anonymous login fails', async () => {
+      await PageObjects.security.loginSelector.selectLoginMethod('anonymous', 'anonymous1');
 
       const toastTitle = await PageObjects.common.closeToast();
       expect(toastTitle).to.eql('Could not perform login.');

@@ -18,15 +18,11 @@ import { DimensionEditor } from './dimension_editor';
 import { DateRange } from '../../../common';
 import { getOperationSupportMatrix } from './operation_support';
 
-export type IndexPatternDimensionTriggerProps = DatasourceDimensionTriggerProps<
-  IndexPatternPrivateState
-> & {
+export type IndexPatternDimensionTriggerProps = DatasourceDimensionTriggerProps<IndexPatternPrivateState> & {
   uniqueLabel: string;
 };
 
-export type IndexPatternDimensionEditorProps = DatasourceDimensionEditorProps<
-  IndexPatternPrivateState
-> & {
+export type IndexPatternDimensionEditorProps = DatasourceDimensionEditorProps<IndexPatternPrivateState> & {
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
   savedObjectsClient: SavedObjectsClientContract;

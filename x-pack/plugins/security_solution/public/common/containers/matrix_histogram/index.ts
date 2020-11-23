@@ -6,7 +6,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { getOr, noop } from 'lodash/fp';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import { inputsModel } from '../../../common/store';
@@ -63,50 +63,23 @@ export const useMatrixHistogram = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-
-  const options: MatrixHistogramRequestOptions = useMemo(
-    () =>
-      MatrixHistogramType.dns === histogramType
-        ? {
-            defaultIndex: indexNames,
-            factoryQueryType: MatrixHistogramQuery,
-            filterQuery: createFilter(filterQuery),
-            histogramType,
-            timerange: {
-              interval: '12h',
-              from: startDate,
-              to: endDate,
-            },
-            stackByField,
-            threshold,
-            isPtrIncluded,
-          }
-        : {
-            defaultIndex: indexNames,
-            factoryQueryType: MatrixHistogramQuery,
-            filterQuery: createFilter(filterQuery),
-            histogramType,
-            timerange: {
-              interval: '12h',
-              from: startDate,
-              to: endDate,
-            },
-            stackByField,
-            threshold,
-          },
-    [
-      endDate,
-      filterQuery,
-      histogramType,
-      indexNames,
-      isPtrIncluded,
-      stackByField,
-      startDate,
-      threshold,
-    ]
-  );
-
-  const [matrixHistogramRequest, setMatrixHistogramRequest] = useState(options);
+  const [
+    matrixHistogramRequest,
+    setMatrixHistogramRequest,
+  ] = useState<MatrixHistogramRequestOptions>({
+    defaultIndex: indexNames,
+    factoryQueryType: MatrixHistogramQuery,
+    filterQuery: createFilter(filterQuery),
+    histogramType,
+    timerange: {
+      interval: '12h',
+      from: startDate,
+      to: endDate,
+    },
+    stackByField,
+    threshold,
+    ...(histogramType === MatrixHistogramType.dns ? { isPtrIncluded } : {}),
+  });
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
     data: [],
@@ -187,14 +160,23 @@ export const useMatrixHistogram = ({
     setMatrixHistogramRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        ...options,
+        defaultIndex: indexNames,
+        filterQuery: createFilter(filterQuery),
+        histogramType,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+        stackByField,
+        ...(prevRequest.isPtrIncluded != null ? { isPtrIncluded } : {}),
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [options]);
+  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, isPtrIncluded]);
 
   useEffect(() => {
     if (!skip) {
