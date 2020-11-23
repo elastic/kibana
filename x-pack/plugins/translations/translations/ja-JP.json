@@ -4040,7 +4040,6 @@
     "visTypeTimeseries.movingAverage.windowSizeHint": "ウィンドウは、必ず、期間のサイズの 2 倍以上でなければなりません",
     "visTypeTimeseries.movingAverage.windowSizeLabel": "ウィンドウサイズ",
     "visTypeTimeseries.noButtonLabel": "いいえ",
-    "visTypeTimeseries.noDataDescription": "選択されたメトリックに表示するデータがありません",
     "visTypeTimeseries.percentile.aggregationLabel": "集約",
     "visTypeTimeseries.percentile.fieldLabel": "フィールド",
     "visTypeTimeseries.percentile.fillToLabel": "次の基準に合わせる:",
