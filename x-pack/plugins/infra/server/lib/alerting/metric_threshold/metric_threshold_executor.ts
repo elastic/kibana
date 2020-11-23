@@ -6,12 +6,14 @@
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { ResolvedActionGroup } from '../../../../../alerts/common';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
   buildNoDataAlertReason,
+  buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
 import { createFormatter } from '../../../../common/formatters';
@@ -40,6 +42,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const groups = Object.keys(first(alertResults)!);
     for (const group of groups) {
       const alertInstance = services.alertInstanceFactory(`${group}`);
+      const prevState = alertInstance.getState();
 
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
@@ -64,6 +67,10 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         reason = alertResults
           .map((result) => buildFiredAlertReason(formatAlertResult(result[group])))
           .join('\n');
+      } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
+        reason = alertResults
+          .map((result) => buildRecoveredAlertReason(formatAlertResult(result[group])))
+          .join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
@@ -81,7 +88,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       if (reason) {
         const firstResult = first(alertResults);
         const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
-        alertInstance.scheduleActions(FIRED_ACTIONS.id, {
+        const actionGroupId =
+          nextState === AlertStates.OK ? ResolvedActionGroup.id : FIRED_ACTIONS.id;
+        alertInstance.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
@@ -98,7 +107,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
       }
 
-      // Future use: ability to fetch display current alert state
       alertInstance.replaceState({
         alertState: nextState,
       });
