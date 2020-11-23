@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
-import { ResolvedActionGroup } from '../../../../../plugins/alerts/common';
+import { RecoveredActionGroup } from '../../../../../plugins/alerts/common';
 import { Space } from '../../../common/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -174,7 +174,7 @@ instanceStateValue: true
                 params: {},
               },
               {
-                group: ResolvedActionGroup.id,
+                group: RecoveredActionGroup.id,
                 id: indexRecordActionId,
                 params: {
                   index: ES_TEST_INDEX_NAME,
@@ -237,7 +237,7 @@ instanceStateValue: true
                 params: {},
               },
               {
-                group: ResolvedActionGroup.id,
+                group: RecoveredActionGroup.id,
                 id: indexRecordActionId,
                 params: {
                   index: ES_TEST_INDEX_NAME,
