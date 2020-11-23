@@ -60,7 +60,6 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
         body: schema.object({
           override: schema.maybe(schema.boolean({ defaultValue: false })),
           refresh_fields: schema.maybe(schema.boolean({ defaultValue: true })),
-          make_default: schema.maybe(schema.boolean({ defaultValue: true })),
           index_pattern: indexPatternSpecSchema,
         }),
       },
@@ -73,8 +72,7 @@ export const registerCreateIndexPatternRoute = (router: IRouter) => {
           const indexPattern = await ip.createAndSave(
             body.index_pattern as IndexPatternSpec,
             body.override,
-            !body.refresh_fields,
-            body.make_default
+            !body.refresh_fields
           );
 
           return res.ok({

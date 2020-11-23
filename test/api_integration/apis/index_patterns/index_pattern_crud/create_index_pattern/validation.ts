@@ -75,20 +75,5 @@ export default function ({ getService }: FtrProviderContext) {
         '[request body.refresh_fields]: expected value of type [boolean] but got [number]'
       );
     });
-
-    it('returns error when "make_default" parameter is not a boolean', async () => {
-      const response = await supertest.post('/api/index_patterns/index_pattern').send({
-        make_default: 123,
-        index_pattern: {
-          title: 'foo',
-        },
-      });
-
-      expect(response.status).to.be(400);
-      expect(response.body.statusCode).to.be(400);
-      expect(response.body.message).to.be(
-        '[request body.make_default]: expected value of type [boolean] but got [number]'
-      );
-    });
   });
 }
