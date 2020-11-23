@@ -55,6 +55,9 @@ export const SOURCE_STATUSES = {
 };
 
 export const SOURCE_NAMES = {
+  BOX: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.box', {
+    defaultMessage: 'Box',
+  }),
   CONFLUENCE: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.confluence',
     { defaultMessage: 'Confluence' }

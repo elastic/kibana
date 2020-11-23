@@ -10,6 +10,14 @@ interface TimestampFieldFromEs {
 
 type TimestampField = TimestampFieldFromEs;
 
+interface MetaFieldFromEs {
+  managed_by: string;
+  package: any;
+  managed: boolean;
+}
+
+type MetaField = MetaFieldFromEs;
+
 export type HealthFromEs = 'GREEN' | 'YELLOW' | 'RED';
 
 export interface DataStreamFromEs {
@@ -17,6 +25,7 @@ export interface DataStreamFromEs {
   timestamp_field: TimestampFieldFromEs;
   indices: DataStreamIndexFromEs[];
   generation: number;
+  _meta?: MetaFieldFromEs;
   status: HealthFromEs;
   template: string;
   ilm_policy?: string;
@@ -41,6 +50,7 @@ export interface DataStream {
   ilmPolicyName?: string;
   storageSize?: string;
   maxTimeStamp?: number;
+  _meta?: MetaField;
 }
 
 export interface DataStreamIndex {
