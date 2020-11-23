@@ -6,4 +6,14 @@
 
 import diffDefault from 'jest-diff';
 
-export const customMsg = (actual) => (expected) => diffDefault(actual, expected);
+export const assertionErrMsg = (actual) => (expected) => diffDefault(actual, expected);
+
+export const drop = dropped => x => x.replace(dropped, '');
+
+export const dropWhiteSpace = drop(/\s{1,}/gm)
+
+export const dropNewLines = drop(/\n/gm)
+
+const pipe = (...fns) => fns.reduce((f, g) => (...args) => g(f(...args)));
+
+export const dropAllNonAlphaNumeric = pipe(dropWhiteSpace, dropNewLines)

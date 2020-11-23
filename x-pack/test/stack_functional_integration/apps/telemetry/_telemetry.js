@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { customMsg } from '../../utils/utils';
+import { assertionErrMsg, dropAllNonAlphaNumeric } from '../../utils/utils';
 
 export default ({ getService, getPageObjects }) => {
   const log = getService('log');
@@ -25,8 +25,13 @@ export default ({ getService, getPageObjects }) => {
 To learn about how usage data helps us manage and improve our products and services, see our Privacy Statement. To stop collection, disable usage data here.
 Dismiss`;
       const actual = await PageObjects.monitoring.getWelcome();
+
       log.debug(`X-Pack message = ${actual}`);
-      expect(actual).to.be(expected, customMsg(actual)(expected));
+
+      const [ cleanActual, cleanExpected ] = [actual, expected]
+        .map(dropAllNonAlphaNumeric)
+
+      expect(cleanActual).to.be(cleanExpected, assertionErrMsg(actual)(expected));
     });
   });
 };
