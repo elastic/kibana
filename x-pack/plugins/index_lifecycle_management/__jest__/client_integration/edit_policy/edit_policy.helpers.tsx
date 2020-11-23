@@ -15,6 +15,7 @@ import { DataTierAllocationType } from '../../../public/application/sections/edi
 import { Phases as PolicyPhases } from '../../../common/types';
 
 import { KibanaContextProvider } from '../../../public/shared_imports';
+import { AppServicesContext } from '../../../public/types';
 import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 
 type Phases = keyof PolicyPhases;
@@ -53,10 +54,10 @@ const testBedConfig: TestBedConfig = {
 
 const breadcrumbService = createBreadcrumbsMock();
 
-const MyComponent = (props: any) => {
+const MyComponent = ({ appServicesContext, ...rest }: any) => {
   return (
-    <KibanaContextProvider services={{ breadcrumbService }}>
-      <EditPolicy {...props} />
+    <KibanaContextProvider services={{ breadcrumbService, ...appServicesContext }}>
+      <EditPolicy {...rest} />
     </KibanaContextProvider>
   );
 };
@@ -67,8 +68,8 @@ type SetupReturn = ReturnType<typeof setup>;
 
 export type EditPolicyTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setup = async () => {
-  const testBed = await initTestBed();
+export const setup = async (arg?: { appServicesContext: Partial<AppServicesContext> }) => {
+  const testBed = await initTestBed(arg);
 
   const { find, component, form } = testBed;
 
@@ -182,8 +183,11 @@ export const setup = async () => {
 
   const setFreeze = createFormToggleAction('freezeSwitch');
 
+  const toggleSearchableSnapshot = (phase: Phases) =>
+    createFormToggleAction(`searchableSnapshotField-${phase}.searchableSnapshotToggle`);
+
   const setSearchableSnapshot = (phase: Phases) => async (value: string) => {
-    await createFormToggleAction(`searchableSnapshotField-${phase}.searchableSnapshotToggle`)(true);
+    await toggleSearchableSnapshot(phase)(true);
     act(() => {
       find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
         { label: value },
@@ -207,6 +211,7 @@ export const setup = async () => {
         setBestCompression: setBestCompression('hot'),
         setIndexPriority: setIndexPriority('hot'),
         setSearchableSnapshot: setSearchableSnapshot('hot'),
+        toggleSearchableSnapshot: toggleSearchableSnapshot('hot'),
       },
       warm: {
         enable: enable('warm'),
@@ -232,6 +237,7 @@ export const setup = async () => {
         setFreeze,
         setIndexPriority: setIndexPriority('cold'),
         setSearchableSnapshot: setSearchableSnapshot('cold'),
+        toggleSearchableSnapshot: toggleSearchableSnapshot('cold'),
       },
       delete: {
         enable: enable('delete'),

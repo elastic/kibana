@@ -24,7 +24,7 @@ import {
   MinAgeInputField,
   DataTierAllocationField,
   SetPriorityInput,
-  SearchableSnapshotsField,
+  SearchableSnapshotField,
 } from '../shared_fields';
 
 const i18nTexts = {
@@ -98,7 +98,7 @@ export const ColdPhase: FunctionComponent = () => {
         </EuiDescribedFormGroup>
         {enabled && (
           <>
-            {!isUsingSearchableSnapshotInHotPhase && <SearchableSnapshotsField phase="cold" />}
+            {!isUsingSearchableSnapshotInHotPhase && <SearchableSnapshotField phase="cold" />}
             {/* Data tier allocation section */}
             <DataTierAllocationField
               description={i18nTexts.dataTierAllocation.description}

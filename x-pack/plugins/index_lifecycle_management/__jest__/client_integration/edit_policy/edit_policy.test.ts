@@ -374,6 +374,7 @@ describe('<EditPolicy />', () => {
         await actions.cold.setReplicas('123');
         await actions.cold.setFreeze(true);
         await actions.cold.setIndexPriority('123');
+        await actions.cold.setSearchableSnapshot('my-repo');
 
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -392,6 +393,9 @@ describe('<EditPolicy />', () => {
                     },
                   },
                   "freeze": Object {},
+                  "searchable_snapshot": Object {
+                    "snapshot_repository": "my-repo",
+                  },
                   "set_priority": Object {
                     "priority": 123,
                   },
@@ -602,6 +606,7 @@ describe('<EditPolicy />', () => {
         `);
       });
     });
+
     describe('node attr and none', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadPolicies([POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION]);
@@ -626,6 +631,39 @@ describe('<EditPolicy />', () => {
       test('detecting use of the "off" allocation type', () => {
         const { find } = testBed;
         expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');
+      });
+    });
+  });
+
+  describe('searchable snapshot', () => {
+    describe('on cloud', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+        httpRequestsMockHelpers.setListNodes({
+          isUsingDeprecatedDataRoleConfig: false,
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['123'] },
+        });
+        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+        await act(async () => {
+          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+
+      test('correctly sets snapshot repository default to "found-snapshots"', async () => {
+        const { actions } = testBed;
+        await actions.cold.enable(true);
+        await actions.cold.toggleSearchableSnapshot(true);
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+          'found-snapshots'
+        );
       });
     });
   });

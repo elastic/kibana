@@ -15,22 +15,40 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { UseField, ComboBoxField } from '../../../../../../shared_imports';
+import {
+  UseField,
+  ComboBoxField,
+  useKibana,
+  fieldValidators,
+} from '../../../../../../../shared_imports';
 
-import { useLoadSnapshotRepositories } from '../../../../../services/api';
+import { useLoadSnapshotRepositories } from '../../../../../../services/api';
 
-import { useEditPolicyContext } from '../../../edit_policy_context';
-import { useSearchableSnapshotState } from '../../../form';
+import { useEditPolicyContext } from '../../../../edit_policy_context';
+import { useSearchableSnapshotState } from '../../../../form';
 
-import { FieldLoadingError, DescribedFormField } from '../../';
+import { i18nTexts } from '../../../../i18n_texts';
+
+import { FieldLoadingError, DescribedFormField } from '../../../index';
 
 import './_searchable_snapshot_field.scss';
+
+const { emptyField } = fieldValidators;
 
 interface Props {
   phase: 'hot' | 'cold';
 }
 
-export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) => {
+/**
+ * This repository is provisioned by Elastic Cloud and will always
+ * exist as a "managed" repository.
+ */
+const CLOUD_DEFAULT_REPO = 'found-snapshots';
+
+export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => {
+  const {
+    services: { cloud },
+  } = useKibana();
   const { getUrlForApp, policy } = useEditPolicyContext();
   const { isUsingSearchableSnapshotInHotPhase } = useSearchableSnapshotState();
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
@@ -162,7 +180,16 @@ export const SearchableSnapshotsField: FunctionComponent<Props> = ({ phase }) =>
             <EuiSpacer size="s" />
           </>
         )}
-        <UseField<string> path={searchableSnapshotPath}>
+        <UseField<string>
+          config={{
+            defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
+            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+            validations: [
+              { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
+            ],
+          }}
+          path={searchableSnapshotPath}
+        >
           {(field) => {
             const singleSelectionArray: [selectedSnapshot?: string] = field.value
               ? [field.value]
