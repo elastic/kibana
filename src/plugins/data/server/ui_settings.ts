@@ -267,13 +267,14 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
     },
     [UI_SETTINGS.COURIER_BATCH_SEARCHES]: {
       name: i18n.translate('data.advancedSettings.courier.batchSearchesTitle', {
-        defaultMessage: 'Use legacy search',
+        defaultMessage: 'Batch concurrent searches',
       }),
       value: false,
       type: 'boolean',
       description: i18n.translate('data.advancedSettings.courier.batchSearchesText', {
-        defaultMessage: `Kibana uses a new search and batching infrastructure.
-           Enable this option if you prefer to fallback to the legacy synchronous behavior`,
+        defaultMessage: `When disabled, dashboard panels will load individually, and search requests will terminate when users navigate
+           away or update the query. When enabled, dashboard panels will load together when all of the data is loaded, and
+           searches will not terminate.`,
       }),
       deprecation: {
         message: i18n.translate('data.advancedSettings.courier.batchSearchesTextDeprecation', {

@@ -106,7 +106,7 @@ export class DataPublicPlugin
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    { bfetch, expressions, uiActions, usageCollection }: DataSetupDependencies
+    { expressions, uiActions, usageCollection }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
@@ -153,7 +153,6 @@ export class DataPublicPlugin
     );
 
     const searchService = this.searchService.setup(core, {
-      bfetch,
       usageCollection,
       expressions,
     });

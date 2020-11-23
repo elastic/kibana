@@ -19,7 +19,6 @@
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
@@ -50,7 +49,6 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
-  bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -72,7 +70,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     { http, getStartServices, notifications, uiSettings }: CoreSetup,
-    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
+    { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
@@ -82,7 +80,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      * all pending search requests, as well as getting the number of pending search requests.
      */
     this.searchInterceptor = new SearchInterceptor({
-      bfetch,
       toasts: notifications.toasts,
       http,
       uiSettings,
