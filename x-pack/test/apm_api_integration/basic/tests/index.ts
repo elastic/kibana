@@ -7,7 +7,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('APM specs (basic)', function () {
-    this.tags('ciGroup5');
+    this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./feature_controls'));
 
