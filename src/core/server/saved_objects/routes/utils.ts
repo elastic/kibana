@@ -26,7 +26,7 @@ import {
   createPromiseFromStreams,
   createListStream,
   createConcatStream,
-} from '@kbn/std';
+} from '@kbn/utils';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([

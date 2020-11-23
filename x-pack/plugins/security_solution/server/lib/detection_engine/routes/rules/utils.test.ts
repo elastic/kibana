@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Readable } from 'stream';
-import { createPromiseFromStreams } from '@kbn/std';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import {
   transformAlertToRule,

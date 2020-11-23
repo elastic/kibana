@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/std": "link:../kbn-std",
-    "@kbn/test": "link:../kbn-test"
+    "@kbn/test": "link:../kbn-test",
+    "@kbn/utils": "link:../kbn-utils"
   }
 }

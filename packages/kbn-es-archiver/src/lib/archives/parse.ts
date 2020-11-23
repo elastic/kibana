@@ -24,7 +24,7 @@ import {
   createSplitStream,
   createReplaceStream,
   createMapStream,
-} from '@kbn/std';
+} from '@kbn/utils';
 
 import { RECORD_SEPARATOR } from './constants';
 

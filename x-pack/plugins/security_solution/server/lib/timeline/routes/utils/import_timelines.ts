@@ -7,7 +7,7 @@
 import { has, chunk, omit } from 'lodash/fp';
 import { Readable } from 'stream';
 import uuid from 'uuid';
-import { createPromiseFromStreams } from '@kbn/std';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import {
   TimelineStatus,

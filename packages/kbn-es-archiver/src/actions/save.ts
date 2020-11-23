@@ -22,7 +22,7 @@ import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
 import { Client } from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
-import { createListStream, createPromiseFromStreams } from '@kbn/std';
+import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
 import {
   createStats,

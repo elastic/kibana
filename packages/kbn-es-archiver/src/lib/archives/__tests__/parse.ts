@@ -21,7 +21,7 @@ import Stream, { PassThrough, Readable, Writable, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
 import expect from '@kbn/expect';
-import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/std';
+import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
 
 import { createParseArchiveStreams } from '../parse';
 

@@ -7,7 +7,7 @@
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
-import { createPromiseFromStreams } from '@kbn/std';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '../../../../../common/validate';
 import {

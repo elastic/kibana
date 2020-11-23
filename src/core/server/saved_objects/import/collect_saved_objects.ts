@@ -23,7 +23,7 @@ import {
   createFilterStream,
   createMapStream,
   createPromiseFromStreams,
-} from '@kbn/std';
+} from '@kbn/utils';
 
 import { SavedObject } from '../types';
 import { createLimitStream } from './create_limit_stream';

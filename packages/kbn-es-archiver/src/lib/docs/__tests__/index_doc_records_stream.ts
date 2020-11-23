@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import { delay } from 'bluebird';
-import { createListStream, createPromiseFromStreams } from '@kbn/std';
+import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
 import { Progress } from '../../progress';
 import { createIndexDocRecordsStream } from '../index_doc_records_stream';

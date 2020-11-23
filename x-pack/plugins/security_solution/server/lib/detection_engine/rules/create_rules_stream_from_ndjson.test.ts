@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Readable } from 'stream';
-import { createPromiseFromStreams } from '@kbn/std';
+import { createPromiseFromStreams } from '@kbn/utils';
 import { createRulesStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import { BadRequestError } from '../errors/bad_request_error';
 import { ImportRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/import_rules_schema';

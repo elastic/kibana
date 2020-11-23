@@ -22,7 +22,7 @@ import { createReadStream } from 'fs';
 import { Readable, Writable } from 'stream';
 import { Client } from 'elasticsearch';
 import { ToolingLog, KbnClient } from '@kbn/dev-utils';
-import { createPromiseFromStreams } from '@kbn/std';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import {
   isGzip,

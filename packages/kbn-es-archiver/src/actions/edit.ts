@@ -23,7 +23,7 @@ import { createGunzip, createGzip, Z_BEST_COMPRESSION } from 'zlib';
 import { promisify } from 'util';
 import globby from 'globby';
 import { ToolingLog } from '@kbn/dev-utils';
-import { createPromiseFromStreams } from '@kbn/std';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 const unlinkAsync = promisify(Fs.unlink);
 

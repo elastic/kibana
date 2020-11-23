@@ -24,7 +24,7 @@ jest.mock('../../export', () => ({
 import * as exportMock from '../../export';
 import supertest from 'supertest';
 import type { UnwrapPromise } from '@kbn/utility-types';
-import { createListStream } from '@kbn/std';
+import { createListStream } from '@kbn/utils';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
 import { setupServer, createExportableType } from '../test_utils';

@@ -19,7 +19,7 @@
 
 import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
-import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/std';
+import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import { IRouter } from '../../http';
 import { SavedObjectConfig } from '../saved_objects_config';

@@ -7,7 +7,7 @@ import { Transform } from 'stream';
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import { createSplitStream, createMapStream, createConcatStream } from '@kbn/std';
+import { createSplitStream, createMapStream, createConcatStream } from '@kbn/utils';
 
 import { formatErrors } from '../../../../common/format_errors';
 import { importRuleValidateTypeDependents } from '../../../../common/detection_engine/schemas/request/import_rules_type_dependents';

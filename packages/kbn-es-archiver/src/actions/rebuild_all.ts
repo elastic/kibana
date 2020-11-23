@@ -22,7 +22,7 @@ import { stat, Stats, rename, createReadStream, createWriteStream } from 'fs';
 import { Readable, Writable } from 'stream';
 import { fromNode } from 'bluebird';
 import { ToolingLog } from '@kbn/dev-utils';
-import { createPromiseFromStreams } from '@kbn/std';
+import { createPromiseFromStreams } from '@kbn/utils';
 import {
   prioritizeMappings,
   readDirectory,

@@ -19,7 +19,7 @@
 
 import { Logger } from '../cli_plugin/lib/logger';
 import { confirm, question } from './utils';
-import { createPromiseFromStreams, createConcatStream } from '@kbn/std';
+import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
 /**
  * @param {Keystore} keystore

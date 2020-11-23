@@ -18,7 +18,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { createListStream } from '@kbn/std';
+import { createListStream } from '@kbn/utils';
 import {
   SavedObjectsClientContract,
   SavedObject,

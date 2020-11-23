@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import Chance from 'chance';
-import { createPromiseFromStreams, createConcatStream, createListStream } from '@kbn/std';
+import { createPromiseFromStreams, createConcatStream, createListStream } from '@kbn/utils';
 
 import { createCreateIndexStream } from '../create_index_stream';
 
