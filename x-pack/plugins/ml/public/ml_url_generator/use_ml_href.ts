@@ -17,8 +17,8 @@ export const useMlHref = (
   basePath: string | undefined,
   params: MlUrlGeneratorState
 ) => {
-  const [mlLink, setMlLink] = useState<string | null>(
-    basePath !== undefined ? `${basePath}/app/ml/${params.page}` : null
+  const [mlLink, setMlLink] = useState<string | undefined>(
+    basePath !== undefined ? `${basePath}/app/ml/${params.page}` : undefined
   );
 
   useEffect(() => {
