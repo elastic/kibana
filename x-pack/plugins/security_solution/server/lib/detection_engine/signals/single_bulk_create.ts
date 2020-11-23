@@ -7,7 +7,7 @@
 import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerts/server';
-import { SignalSearchResponse, BulkResponse, SignalHit, BaseSignalHit } from './types';
+import { SignalSearchResponse, BulkResponse, BaseSignalHit } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { generateId, makeFloatString, errorAggregator } from './utils';
@@ -68,9 +68,9 @@ export const filterDuplicateRules = (
  * @param ruleId The rule id
  * @param signals The candidate new signals
  */
-export const filterDuplicateSignals = (ruleId: string, signals: SignalHit[]) => {
+export const filterDuplicateSignals = (ruleId: string, signals: BaseSignalHit[]) => {
   return signals.filter(
-    (doc) => !doc.signal.ancestors.some((ancestor) => ancestor.rule === ruleId)
+    (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
   );
 };
 

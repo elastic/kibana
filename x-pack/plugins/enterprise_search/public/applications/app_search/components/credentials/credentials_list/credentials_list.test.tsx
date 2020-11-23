@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiBasicTable, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 
-import { IApiToken } from '../types';
+import { ApiToken } from '../types';
 import { ApiTokenTypes } from '../constants';
 
 import { HiddenText } from '../../../../shared/hidden_text';
@@ -18,7 +18,7 @@ import { Key } from './key';
 import { CredentialsList } from './credentials_list';
 
 describe('Credentials', () => {
-  const apiToken: IApiToken = {
+  const apiToken: ApiToken = {
     name: '',
     type: ApiTokenTypes.Private,
     read: true,
@@ -77,7 +77,7 @@ describe('Credentials', () => {
       });
       const wrapper = shallow(<CredentialsList />);
       const { items } = wrapper.find(EuiBasicTable).props();
-      expect(items.map((i: IApiToken) => i.id)).toEqual([undefined, 1, 2]);
+      expect(items.map((i: ApiToken) => i.id)).toEqual([undefined, 1, 2]);
     });
   });
 

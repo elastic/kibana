@@ -5,11 +5,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Redirect, Switch } from 'react-router-dom';
+import { Route, Redirect, Switch, useLocation } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
-import { IInitialAppData } from '../../../common/types';
+import { InitialAppData } from '../../../common/types';
 import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
 import { AppLogic } from './app_logic';
@@ -24,16 +24,27 @@ import { NotFound } from '../shared/not_found';
 import { Overview } from './views/overview';
 import { GroupsRouter } from './views/groups';
 
-export const WorkplaceSearch: React.FC<IInitialAppData> = (props) => {
+export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
   return !config.host ? <WorkplaceSearchUnconfigured /> : <WorkplaceSearchConfigured {...props} />;
 };
 
-export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
+export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
-  const { initializeAppData } = useActions(AppLogic);
+  const { initializeAppData, setContext } = useActions(AppLogic);
   const { renderHeaderActions } = useValues(KibanaLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
+
+  const { pathname } = useLocation();
+
+  /**
+   * Personal dashboard urls begin with /p/
+   * EX: http://localhost:5601/app/enterprise_search/workplace_search/p/sources
+   */
+  const personalSourceUrlRegex = /^\/p\//g; // matches '/p/*'
+
+  // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
+  const isOrganization = !pathname.match(personalSourceUrlRegex);
 
   useEffect(() => {
     if (!hasInitialized) {
@@ -41,6 +52,10 @@ export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
       renderHeaderActions(WorkplaceSearchHeaderActions);
     }
   }, [hasInitialized]);
+
+  useEffect(() => {
+    setContext(isOrganization);
+  }, [isOrganization]);
 
   return (
     <Switch>

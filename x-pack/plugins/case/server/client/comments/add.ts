@@ -9,15 +9,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
+import { decodeComment, flattenCaseSavedObject, transformNewComment } from '../../routes/api/utils';
 
-import {
-  throwErrors,
-  excess,
-  CaseResponseRt,
-  CommentRequestRt,
-  CaseResponse,
-} from '../../../common/api';
+import { throwErrors, CaseResponseRt, CommentRequestRt, CaseResponse } from '../../../common/api';
 import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
 
 import { CaseClientAddComment, CaseClientFactoryArguments } from '../types';
@@ -33,9 +27,12 @@ export const addComment = ({
   comment,
 }: CaseClientAddComment): Promise<CaseResponse> => {
   const query = pipe(
-    excess(CommentRequestRt).decode(comment),
+    // TODO: Excess CommentRequestRt when the excess() function supports union types
+    CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
+
+  decodeComment(comment);
 
   const myCase = await caseService.getCase({
     client: savedObjectsClient,
@@ -105,7 +102,7 @@ export const addComment = ({
           caseId: myCase.id,
           commentId: newComment.id,
           fields: ['comment'],
-          newValue: query.comment,
+          newValue: JSON.stringify(query),
         }),
       ],
     }),

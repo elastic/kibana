@@ -17,7 +17,7 @@ jest.mock('../../../../shared/flash_messages', () => ({
 }));
 import { flashAPIErrors } from '../../../../shared/flash_messages';
 
-import { ELogRetentionOptions } from './types';
+import { LogRetentionOptions } from './types';
 import { LogRetentionLogic } from './log_retention_logic';
 
 describe('LogRetentionLogic', () => {
@@ -87,11 +87,11 @@ describe('LogRetentionLogic', () => {
         it('should be set to the provided value', () => {
           mount();
 
-          LogRetentionLogic.actions.setOpenedModal(ELogRetentionOptions.Analytics);
+          LogRetentionLogic.actions.setOpenedModal(LogRetentionOptions.Analytics);
 
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
-            openedModal: ELogRetentionOptions.Analytics,
+            openedModal: LogRetentionOptions.Analytics,
           });
         });
       });
@@ -194,10 +194,10 @@ describe('LogRetentionLogic', () => {
       describe('openedModal', () => {
         it('should be reset to null', () => {
           mount({
-            openedModal: ELogRetentionOptions.Analytics,
+            openedModal: LogRetentionOptions.Analytics,
           });
 
-          LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
+          LogRetentionLogic.actions.saveLogRetention(LogRetentionOptions.Analytics, true);
 
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
@@ -211,7 +211,7 @@ describe('LogRetentionLogic', () => {
         const promise = Promise.resolve(TYPICAL_SERVER_LOG_RETENTION);
         http.put.mockReturnValue(promise);
 
-        LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
+        LogRetentionLogic.actions.saveLogRetention(LogRetentionOptions.Analytics, true);
 
         expect(http.put).toHaveBeenCalledWith('/api/app_search/log_settings', {
           body: JSON.stringify({
@@ -233,7 +233,7 @@ describe('LogRetentionLogic', () => {
         const promise = Promise.reject('An error occured');
         http.put.mockReturnValue(promise);
 
-        LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
+        LogRetentionLogic.actions.saveLogRetention(LogRetentionOptions.Analytics, true);
 
         try {
           await promise;
@@ -252,7 +252,7 @@ describe('LogRetentionLogic', () => {
             isLogRetentionUpdating: false,
           });
 
-          LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
+          LogRetentionLogic.actions.toggleLogRetention(LogRetentionOptions.Analytics);
 
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
@@ -264,17 +264,17 @@ describe('LogRetentionLogic', () => {
       it('will call setOpenedModal if already enabled', () => {
         mount({
           logRetention: {
-            [ELogRetentionOptions.Analytics]: {
+            [LogRetentionOptions.Analytics]: {
               enabled: true,
             },
           },
         });
         jest.spyOn(LogRetentionLogic.actions, 'setOpenedModal');
 
-        LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
+        LogRetentionLogic.actions.toggleLogRetention(LogRetentionOptions.Analytics);
 
         expect(LogRetentionLogic.actions.setOpenedModal).toHaveBeenCalledWith(
-          ELogRetentionOptions.Analytics
+          LogRetentionOptions.Analytics
         );
       });
     });
@@ -337,17 +337,17 @@ describe('LogRetentionLogic', () => {
     it('will call saveLogRetention if NOT already enabled', () => {
       mount({
         logRetention: {
-          [ELogRetentionOptions.Analytics]: {
+          [LogRetentionOptions.Analytics]: {
             enabled: false,
           },
         },
       });
       jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
 
-      LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
+      LogRetentionLogic.actions.toggleLogRetention(LogRetentionOptions.Analytics);
 
       expect(LogRetentionLogic.actions.saveLogRetention).toHaveBeenCalledWith(
-        ELogRetentionOptions.Analytics,
+        LogRetentionOptions.Analytics,
         true
       );
     });
@@ -359,7 +359,7 @@ describe('LogRetentionLogic', () => {
       jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
       jest.spyOn(LogRetentionLogic.actions, 'setOpenedModal');
 
-      LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.API);
+      LogRetentionLogic.actions.toggleLogRetention(LogRetentionOptions.API);
 
       expect(LogRetentionLogic.actions.saveLogRetention).not.toHaveBeenCalled();
       expect(LogRetentionLogic.actions.setOpenedModal).not.toHaveBeenCalled();

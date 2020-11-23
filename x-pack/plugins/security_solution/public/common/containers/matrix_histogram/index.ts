@@ -18,11 +18,8 @@ import {
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
 } from '../../../../common/search_strategy/security_solution';
-import {
-  AbortError,
-  isErrorResponse,
-  isCompleteResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -64,9 +61,10 @@ export const useMatrixHistogram = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [matrixHistogramRequest, setMatrixHistogramRequest] = useState<
-    MatrixHistogramRequestOptions
-  >({
+  const [
+    matrixHistogramRequest,
+    setMatrixHistogramRequest,
+  ] = useState<MatrixHistogramRequestOptions>({
     defaultIndex: indexNames,
     factoryQueryType: MatrixHistogramQuery,
     filterQuery: createFilter(filterQuery),

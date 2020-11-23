@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from 'kibana/server';
+import { SavedObjectAttribute, SavedObjectAttributes } from 'kibana/server';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlertTypeState = Record<string, any>;
@@ -37,6 +37,7 @@ export interface AlertExecutionStatus {
 }
 
 export type AlertActionParams = SavedObjectAttributes;
+export type AlertActionParam = SavedObjectAttribute;
 
 export interface AlertAction {
   group: string;
@@ -67,7 +68,7 @@ export interface Alert {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
-  notifyOnStateChange: boolean;
+  notifyOnlyOnActionGroupChange: boolean;
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;

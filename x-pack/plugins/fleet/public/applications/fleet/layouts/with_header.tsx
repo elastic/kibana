@@ -4,22 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import styled from 'styled-components';
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { Header, HeaderProps } from '../components';
+import { Page, ContentWrapper } from './without_header';
 
-const Page = styled(EuiPage)`
-  background: ${(props) => props.theme.eui.euiColorEmptyShade};
-`;
-
-interface Props extends HeaderProps {
+export interface WithHeaderLayoutProps extends HeaderProps {
   restrictWidth?: number;
   restrictHeaderWidth?: number;
   'data-test-subj'?: string;
   children?: React.ReactNode;
 }
 
-export const WithHeaderLayout: React.FC<Props> = ({
+export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
   restrictWidth,
   restrictHeaderWidth,
   children,
@@ -37,8 +33,10 @@ export const WithHeaderLayout: React.FC<Props> = ({
       data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
     >
       <EuiPageBody>
-        <EuiSpacer size="m" />
-        {children}
+        <ContentWrapper>
+          <EuiSpacer size="m" />
+          {children}
+        </ContentWrapper>
       </EuiPageBody>
     </Page>
   </Fragment>

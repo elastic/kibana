@@ -120,7 +120,7 @@ export const metricsItems = schema.object({
   type: stringRequired,
   value: stringOptionalNullable,
   values: schema.maybe(schema.nullable(schema.arrayOf(schema.nullable(schema.string())))),
-  size: stringOptionalNullable,
+  size: stringOrNumberOptionalNullable,
   agg_with: stringOptionalNullable,
   order: stringOptionalNullable,
   order_by: stringOptionalNullable,
@@ -251,7 +251,14 @@ export const panel = schema.object({
   ),
   time_field: stringOptionalNullable,
   time_range_mode: stringOptionalNullable,
-  type: stringRequired,
+  type: schema.oneOf([
+    schema.literal('table'),
+    schema.literal('gauge'),
+    schema.literal('markdown'),
+    schema.literal('top_n'),
+    schema.literal('timeseries'),
+    schema.literal('metric'),
+  ]),
 });
 
 export const visPayloadSchema = schema.object({
@@ -267,7 +274,6 @@ export const visPayloadSchema = schema.object({
       })
     ),
   }),
-  savedObjectId: schema.maybe(schema.string()),
   timerange: schema.object({
     timezone: stringRequired,
     min: stringRequired,

@@ -45,7 +45,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -116,7 +115,7 @@ async function update(success: boolean) {
     );
     return expectConflict(success, err, 'create');
   }
-  expectSuccess(success, 2, 'create');
+  expectSuccess(success, 3, 'create');
 
   // only checking the debug messages in this test
   expect(logger.debug).nthCalledWith(1, `alertsClient.update('alert-id') conflict, retrying ...`);
@@ -307,14 +306,6 @@ beforeEach(() => {
   jest.resetAllMocks();
 
   alertsClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
-  alertsClientParams.invalidateAPIKey.mockResolvedValue({
-    apiKeysEnabled: true,
-    result: {
-      invalidated_api_keys: [],
-      previously_invalidated_api_keys: [],
-      error_count: 0,
-    },
-  });
   alertsClientParams.getUserName.mockResolvedValue('elastic');
 
   taskManager.runNow.mockResolvedValue({ id: '' });

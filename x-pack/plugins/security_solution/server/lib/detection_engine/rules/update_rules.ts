@@ -4,180 +4,94 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable complexity */
+
+import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerts/server';
 import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
-import { calculateVersion } from './utils';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
+import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
+import { InternalRuleUpdate } from '../schemas/rule_schemas';
 
 export const updateRules = async ({
   alertsClient,
-  author,
-  buildingBlockType,
   savedObjectsClient,
-  description,
-  eventCategoryOverride,
-  falsePositives,
-  enabled,
-  query,
-  language,
-  license,
-  outputIndex,
-  savedId,
-  timelineId,
-  timelineTitle,
-  meta,
-  filters,
-  from,
-  id,
-  ruleId,
-  index,
-  interval,
-  maxSignals,
-  riskScore,
-  riskScoreMapping,
-  ruleNameOverride,
-  name,
-  severity,
-  severityMapping,
-  tags,
-  threat,
-  threshold,
-  threatFilters,
-  threatIndex,
-  threatQuery,
-  threatMapping,
-  threatLanguage,
-  concurrentSearches,
-  itemsPerSearch,
-  timestampOverride,
-  to,
-  type,
-  references,
-  version,
-  note,
-  exceptionsList,
-  anomalyThreshold,
-  machineLearningJobId,
-  actions,
+  defaultOutputIndex,
+  ruleUpdate,
 }: UpdateRulesOptions): Promise<PartialAlert | null> => {
-  const rule = await readRules({ alertsClient, ruleId, id });
-  if (rule == null) {
+  const existingRule = await readRules({
+    alertsClient,
+    ruleId: ruleUpdate.rule_id,
+    id: ruleUpdate.id,
+  });
+  if (existingRule == null) {
     return null;
   }
 
-  const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
-    author,
-    buildingBlockType,
-    description,
-    eventCategoryOverride,
-    falsePositives,
-    query,
-    language,
-    license,
-    outputIndex,
-    savedId,
-    timelineId,
-    timelineTitle,
-    meta,
-    filters,
-    from,
-    index,
-    interval,
-    maxSignals,
-    riskScore,
-    riskScoreMapping,
-    ruleNameOverride,
-    name,
-    severity,
-    severityMapping,
-    tags,
-    threat,
-    threshold,
-    threatFilters,
-    threatIndex,
-    threatQuery,
-    threatMapping,
-    threatLanguage,
-    concurrentSearches,
-    itemsPerSearch,
-    timestampOverride,
-    to,
-    type,
-    references,
-    version,
-    note,
-    anomalyThreshold,
-    machineLearningJobId,
-    exceptionsList,
-  });
+  const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
+  const throttle = ruleUpdate.throttle ?? null;
+  const enabled = ruleUpdate.enabled ?? true;
+  const newInternalRule: InternalRuleUpdate = {
+    name: ruleUpdate.name,
+    tags: addTags(ruleUpdate.tags ?? [], existingRule.params.ruleId, false),
+    params: {
+      author: ruleUpdate.author ?? [],
+      buildingBlockType: ruleUpdate.building_block_type,
+      description: ruleUpdate.description,
+      ruleId: existingRule.params.ruleId,
+      falsePositives: ruleUpdate.false_positives ?? [],
+      from: ruleUpdate.from ?? 'now-6m',
+      // Unlike the create route, immutable comes from the existing rule here
+      immutable: existingRule.params.immutable,
+      license: ruleUpdate.license,
+      outputIndex: ruleUpdate.output_index ?? defaultOutputIndex,
+      timelineId: ruleUpdate.timeline_id,
+      timelineTitle: ruleUpdate.timeline_title,
+      meta: ruleUpdate.meta,
+      maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
+      riskScore: ruleUpdate.risk_score,
+      riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
+      ruleNameOverride: ruleUpdate.rule_name_override,
+      severity: ruleUpdate.severity,
+      severityMapping: ruleUpdate.severity_mapping ?? [],
+      threat: ruleUpdate.threat ?? [],
+      timestampOverride: ruleUpdate.timestamp_override,
+      to: ruleUpdate.to ?? 'now',
+      references: ruleUpdate.references ?? [],
+      note: ruleUpdate.note,
+      // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
+      // increment the version of mutable rules by 1.
+      version:
+        ruleUpdate.version ?? existingRule.params.immutable
+          ? existingRule.params.version
+          : existingRule.params.version + 1,
+      exceptionsList: ruleUpdate.exceptions_list ?? [],
+      ...typeSpecificParams,
+    },
+    schedule: { interval: ruleUpdate.interval ?? '5m' },
+    actions: throttle === 'rule' ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction) : [],
+    throttle: null,
+  };
 
   const update = await alertsClient.update({
-    id: rule.id,
-    data: {
-      tags: addTags(tags, rule.params.ruleId, rule.params.immutable),
-      name,
-      schedule: { interval },
-      actions: actions.map(transformRuleToAlertAction),
-      throttle: null,
-      notifyOnStateChange: false,
-      params: {
-        author,
-        buildingBlockType,
-        description,
-        ruleId: rule.params.ruleId,
-        falsePositives,
-        from,
-        immutable: rule.params.immutable,
-        query,
-        language,
-        license,
-        outputIndex,
-        savedId,
-        timelineId,
-        timelineTitle,
-        meta,
-        filters,
-        index,
-        maxSignals,
-        riskScore,
-        riskScoreMapping,
-        ruleNameOverride,
-        severity,
-        severityMapping,
-        threat,
-        threshold,
-        threatFilters,
-        threatIndex,
-        threatQuery,
-        threatMapping,
-        threatLanguage,
-        timestampOverride,
-        to,
-        type,
-        references,
-        note,
-        version: calculatedVersion,
-        anomalyThreshold,
-        machineLearningJobId,
-        exceptionsList,
-      },
-    },
+    id: existingRule.id,
+    data: newInternalRule,
   });
 
-  if (rule.enabled && enabled === false) {
-    await alertsClient.disable({ id: rule.id });
-  } else if (!rule.enabled && enabled === true) {
-    await alertsClient.enable({ id: rule.id });
+  if (existingRule.enabled && enabled === false) {
+    await alertsClient.disable({ id: existingRule.id });
+  } else if (!existingRule.enabled && enabled === true) {
+    await alertsClient.enable({ id: existingRule.id });
 
     const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
     const ruleCurrentStatus = await ruleStatusClient.find({
       perPage: 1,
       sortField: 'statusDate',
       sortOrder: 'desc',
-      search: rule.id,
+      search: existingRule.id,
       searchFields: ['alertId'],
     });
 
@@ -190,6 +104,5 @@ export const updateRules = async ({
       });
     }
   }
-
   return { ...update, enabled };
 };

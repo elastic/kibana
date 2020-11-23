@@ -34,7 +34,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -198,6 +197,7 @@ describe('create()', () => {
       createdAt: '2019-02-12T21:01:22.479Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
       muteAll: false,
       mutedInstanceIds: [],
       actions: [
@@ -334,6 +334,7 @@ describe('create()', () => {
           "foo",
         ],
         "throttle": null,
+        "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
       }
     `);
@@ -380,9 +381,7 @@ describe('create()', () => {
         "scheduledTaskId": "task-123",
       }
     `);
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
-      ActionsClient
-    >;
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
   });
 
@@ -422,6 +421,7 @@ describe('create()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -559,6 +559,7 @@ describe('create()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -635,6 +636,7 @@ describe('create()', () => {
           bar: true,
         },
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -701,9 +703,7 @@ describe('create()', () => {
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
     // Reset from default behaviour
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
-      ActionsClient
-    >;
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
     alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
@@ -714,7 +714,7 @@ describe('create()', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
-  test('throws error and invalidates API key when create saved object fails', async () => {
+  test('throws error and add API key to invalidatePendingApiKey SO when create saved object fails', async () => {
     const data = getMockData();
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
@@ -734,11 +734,25 @@ describe('create()', () => {
       ],
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    const createdAt = new Date().toISOString();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '123',
+        createdAt,
+      },
+      references: [],
+    });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toStrictEqual({
+      apiKeyId: '123',
+      createdAt,
+    });
   });
 
   test('attempts to remove saved object if scheduling failed', async () => {
@@ -961,6 +975,7 @@ describe('create()', () => {
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
@@ -1083,6 +1098,7 @@ describe('create()', () => {
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: false,
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',

@@ -21,10 +21,10 @@ import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -78,9 +78,10 @@ export const useNetworkKpiUniquePrivateIps = ({
       : null
   );
 
-  const [networkKpiUniquePrivateIpsResponse, setNetworkKpiUniquePrivateIpsResponse] = useState<
-    NetworkKpiUniquePrivateIpsArgs
-  >({
+  const [
+    networkKpiUniquePrivateIpsResponse,
+    setNetworkKpiUniquePrivateIpsResponse,
+  ] = useState<NetworkKpiUniquePrivateIpsArgs>({
     uniqueDestinationPrivateIps: 0,
     uniqueDestinationPrivateIpsHistogram: null,
     uniqueSourcePrivateIps: 0,
