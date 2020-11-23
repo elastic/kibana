@@ -8,6 +8,7 @@ import { Logger } from 'src/core/server';
 import { AlertingSetup, StackAlertsStartDeps } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoThreshold } from './geo_threshold';
+import { register as registerGeoContainment } from './geo_containment';
 
 interface RegisterAlertTypesParams {
   logger: Logger;
@@ -18,4 +19,5 @@ interface RegisterAlertTypesParams {
 export function registerBuiltInAlertTypes(params: RegisterAlertTypesParams) {
   registerIndexThreshold(params);
   registerGeoThreshold(params);
+  registerGeoContainment(params);
 }

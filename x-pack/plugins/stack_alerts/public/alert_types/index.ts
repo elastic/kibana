@@ -5,6 +5,7 @@
  */
 
 import { getAlertType as getGeoThresholdAlertType } from './geo_threshold';
+import { getAlertType as getGeoContainmentAlertType } from './geo_containment';
 import { getAlertType as getThresholdAlertType } from './threshold';
 import { Config } from '../../common';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
@@ -18,6 +19,7 @@ export function registerAlertTypes({
 }) {
   if (config.enableGeoTrackingThresholdAlert) {
     alertTypeRegistry.register(getGeoThresholdAlertType());
+    alertTypeRegistry.register(getGeoContainmentAlertType());
   }
   alertTypeRegistry.register(getThresholdAlertType());
 }
