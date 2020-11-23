@@ -134,7 +134,7 @@ export function registerNodeAutoTranspilation() {
   installed = true;
 
   const cache = new Cache({
-    dir: Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache', UPSTREAM_BRANCH),
+    dir: Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache_v2', UPSTREAM_BRANCH),
     prefix: determineCachePrefix(),
     log: process.env.DEBUG_NODE_TRANSPILER_CACHE
       ? Fs.createWriteStream(Path.resolve(REPO_ROOT, 'node_auto_transpilation_cache.log'), {
