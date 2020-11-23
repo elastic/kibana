@@ -209,7 +209,7 @@ describe('IndexPatterns', () => {
       const title = 'kibana-*';
       indexPatterns.createSavedObject = jest.fn();
       indexPatterns.setDefault = jest.fn();
-      await indexPatterns.createAndSave({ title }, false, false, false);
+      await indexPatterns.createAndSave({ title }, false, false);
       expect(indexPatterns.createSavedObject).toBeCalled();
       expect(indexPatterns.setDefault).not.toBeCalled();
     });
