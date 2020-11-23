@@ -4,63 +4,80 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { FC } from 'react';
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToken, EuiToolTip } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
-import { i18n } from '@kbn/i18n';
 
-export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }) => {
+interface FieldTypeIconProps {
+  tooltipEnabled: boolean;
+  type: ML_JOB_FIELD_TYPES;
+  fieldName?: string;
+  needsAria: boolean;
+}
+
+interface FieldTypeIconContainerProps {
+  ariaLabel: string | null;
+  iconType: string;
+  color: string;
+  needsAria: boolean;
+  [key: string]: any;
+}
+
+export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
+  tooltipEnabled = false,
+  type,
+  fieldName,
+  needsAria = true,
+}) => {
   const ariaLabel = getMLJobTypeAriaLabel(type);
 
-  if (ariaLabel === null) {
-    // All ml job field types should have associated aria labels.
-    // Once it is missing, it means that the passed *type* is not a valid field type.
-    // if type doesn't match one of ML_JOB_FIELD_TYPES
-    // don't render the component at all
-    return null;
-  }
-
-  const iconClass = ['field-type-icon'];
-  let iconChar = '';
+  let iconType = 'questionInCircle';
+  let color = 'euiColorVis6';
 
   switch (type) {
-    // icon class names
+    // Set icon types and colors
     case ML_JOB_FIELD_TYPES.BOOLEAN:
-      iconClass.push('kuiIcon', 'fa-adjust');
+      iconType = 'tokenBoolean';
+      color = 'euiColorVis5';
       break;
     case ML_JOB_FIELD_TYPES.DATE:
-      iconClass.push('kuiIcon', 'fa-clock-o');
+      iconType = 'tokenDate';
+      color = 'euiColorVis7';
       break;
     case ML_JOB_FIELD_TYPES.GEO_POINT:
-      iconClass.push('kuiIcon', 'fa-globe');
+      iconType = 'tokenGeo';
+      color = 'euiColorVis8';
       break;
     case ML_JOB_FIELD_TYPES.TEXT:
-      iconClass.push('kuiIcon', 'fa-file-text-o');
+      iconType = 'document';
+      color = 'euiColorVis9';
       break;
     case ML_JOB_FIELD_TYPES.IP:
-      iconClass.push('kuiIcon', 'fa-laptop');
+      iconType = 'tokenIP';
+      color = 'euiColorVis3';
       break;
-
-    // icon chars
     case ML_JOB_FIELD_TYPES.KEYWORD:
-      iconChar = 't';
+      iconType = 'tokenText';
+      color = 'euiColorVis0';
       break;
     case ML_JOB_FIELD_TYPES.NUMBER:
-      iconChar = '#';
+      iconType = 'tokenNumber';
+      color = fieldName !== undefined ? 'euiColorVis1' : 'euiColorVis2';
       break;
     case ML_JOB_FIELD_TYPES.UNKNOWN:
-      iconChar = '?';
+      // Use defaults
       break;
   }
 
   const containerProps = {
     ariaLabel,
-    className: iconClass.join(' '),
-    iconChar,
+    iconType,
+    color,
     needsAria,
   };
 
@@ -84,28 +101,27 @@ export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }
   return <FieldTypeIconContainer {...containerProps} />;
 };
 
-FieldTypeIcon.propTypes = {
-  tooltipEnabled: PropTypes.bool,
-  type: PropTypes.string,
-};
-
 // If the tooltip is used, it will apply its events to its first inner child.
 // To pass on its properties we apply `rest` to the outer `span` element.
-function FieldTypeIconContainer({ ariaLabel, className, iconChar, needsAria, ...rest }) {
-  const wrapperProps = { className };
+const FieldTypeIconContainer: FC<FieldTypeIconContainerProps> = ({
+  ariaLabel,
+  iconType,
+  color,
+  needsAria,
+  ...rest
+}) => {
+  const wrapperProps: { className: string; 'aria-label'?: string } = {
+    className: 'field-type-icon',
+  };
   if (needsAria && ariaLabel) {
     wrapperProps['aria-label'] = ariaLabel;
   }
 
   return (
-    <span className="field-type-icon-container" {...rest}>
-      {iconChar === '' ? (
-        <span {...wrapperProps} />
-      ) : (
-        <span {...wrapperProps}>
-          <strong aria-hidden="true">{iconChar}</strong>
-        </span>
-      )}
+    <span data-test-subj="mlFieldTypeIcon" {...rest}>
+      <span {...wrapperProps}>
+        <EuiToken iconType={iconType} shape="square" size="s" color={color} />
+      </span>
     </span>
   );
-}
+};
