@@ -104,6 +104,7 @@ describe('Exceptions', () => {
         });
 
       goToOpenedAlerts();
+      waitForTheRuleToBeExecuted();
       refreshPage();
 
       cy.scrollTo('bottom');
@@ -186,6 +187,7 @@ describe('Exceptions', () => {
         });
 
       goToOpenedAlerts();
+      waitForTheRuleToBeExecuted();
       refreshPage();
 
       cy.scrollTo('bottom');
