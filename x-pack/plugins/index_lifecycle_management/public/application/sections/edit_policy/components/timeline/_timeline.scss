@@ -12,7 +12,7 @@ $phaseMinWidth: 100px;
   }
 
   &__hotPhase {
-    width: var(--ilm-hot-phase-width);
+    width: var(--ilm-phase-width);
     // min-width: $phaseMinWidth;
 
     &__colorBar {
@@ -24,8 +24,7 @@ $phaseMinWidth: 100px;
   }
 
   &__warmPhase {
-    width: var(--ilm-warm-phase-width);
-    // min-width: $phaseMinWidth;
+    width: var(--ilm-phase-width);
 
     &__colorBar {
       height: $colorBarHeight;
@@ -36,13 +35,23 @@ $phaseMinWidth: 100px;
   }
 
   &__coldPhase {
-    width: var(--ilm-cold-phase-width);
-    // min-width: $phaseMinWidth;
+    width: var(--ilm-phase-width);
 
     &__colorBar {
       height: $colorBarHeight;
       display: block;
       background-color: $euiColorVis1_behindText;
+      width: 100%;
+    }
+  }
+
+  &__deletePhase {
+    width: var(--ilm-phase-width);
+
+    &__colorBar {
+      height: $colorBarHeight;
+      display: block;
+      background-color: $euiColorLightShade;
       width: 100%;
     }
   }

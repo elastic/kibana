@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useMemo } from 'react';
 import moment from 'moment';
 import { flow } from 'fp-ts/lib/function';
@@ -16,23 +16,28 @@ import { splitSizeAndUnits } from '../../../../lib/policies';
 
 import './_timeline.scss';
 
-interface TimelineInputs {
-  warm?: {
+type MinAgePhase = 'warm' | 'cold' | 'delete';
+type Phase = 'hot' | MinAgePhase;
+const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'delete'];
+type TimelineInputs = [
+  hotPhase: {
+    min_age: undefined;
+    dataTierAllocationType: 'node_role';
+  },
+  warmPhase?: {
     min_age: string;
     dataTierAllocationType: DataTierAllocationType;
-  };
-  cold?: {
+  },
+  coldPhase?: {
     min_age: string;
     dataTierAllocationType: DataTierAllocationType;
-  };
-  delete?: {
+  },
+  deletePhase?: {
     min_age: string;
-  };
-}
+  }
+];
 
-type Phase = 'warm' | 'cold' | 'delete';
-
-const getMinAge = (phase: Phase, formData: FormInternal) => ({
+const getMinAge = (phase: MinAgePhase, formData: FormInternal) => ({
   min_age: formData.phases[phase]?.min_age
     ? formData.phases[phase]!.min_age! + formData._meta[phase].minAgeUnit
     : '0ms',
@@ -46,13 +51,14 @@ const getMinAgeAndAllocation = (phase: PhaseWithAllocation, formData: FormIntern
 const formDataToTimelineInputs = (formData: FormInternal): TimelineInputs => {
   const { _meta } = formData;
   if (!_meta) {
-    return {};
+    return [{ dataTierAllocationType: 'node_role', min_age: undefined }];
   }
-  return {
-    warm: _meta.warm.enabled ? getMinAgeAndAllocation('warm', formData) : undefined,
-    cold: _meta.cold.enabled ? getMinAgeAndAllocation('cold', formData) : undefined,
-    delete: _meta.delete.enabled ? getMinAge('delete', formData) : undefined,
-  };
+  return [
+    { dataTierAllocationType: 'node_role', min_age: undefined },
+    _meta.warm.enabled ? getMinAgeAndAllocation('warm', formData) : undefined,
+    _meta.cold.enabled ? getMinAgeAndAllocation('cold', formData) : undefined,
+    _meta.delete.enabled ? getMinAge('delete', formData) : undefined,
+  ];
 };
 
 const getPhaseMinAgeInMilliseconds = (phase: { min_age: string }): number => {
@@ -68,70 +74,62 @@ const getPhaseMinAgeInMilliseconds = (phase: { min_age: string }): number => {
   return milliseconds;
 };
 
-const toPercent = (value: number, total: number) => (value / total) * 100;
+type PhasesInMilliseconds = [hotPhase: number, warmPhase?: number, coldPhase?: number];
 
-const phasesMaps: Array<{ minAgeFor: Phase; maxAgeFor: 'hot' | 'warm' | 'cold' }> = [
-  { minAgeFor: 'warm', maxAgeFor: 'hot' },
-  { minAgeFor: 'cold', maxAgeFor: 'warm' },
-  { minAgeFor: 'delete', maxAgeFor: 'cold' },
-];
-
-type PhaseWidths = [hotPhase: number, warmPhase?: number, coldPhase?: number];
-
-const calculateWidths = (inputs: TimelineInputs): PhaseWidths => {
-  const { total, phases } = phasesMaps.reduce(
-    (acc, phaseMap) => {
-      const phase = inputs[phaseMap.minAgeFor];
-      if (phase) {
-        const phaseMinAge = getPhaseMinAgeInMilliseconds(phase);
-        return {
-          total: acc.total + phaseMinAge,
-          phases: {
-            ...acc.phases,
-            [phaseMap.maxAgeFor]: Math.max(phaseMinAge - acc.total, 0),
-          },
-        };
+const calculateMilliseconds = (inputs: TimelineInputs): PhasesInMilliseconds => {
+  const { total, phases } = inputs.reduce(
+    (acc, phase, idx) => {
+      if (!phase) {
+        return acc;
       }
-      return acc;
+      const nextPhase = inputs.slice(idx + 1).find(Boolean); // find the first existing next phase
+      const nextPhaseMinAge =
+        nextPhase?.min_age != null ? getPhaseMinAgeInMilliseconds(nextPhase) : Infinity;
+      return {
+        total: acc.total + nextPhaseMinAge,
+        phases: {
+          ...acc.phases,
+          [phaseOrder[idx]]: Math.max(nextPhaseMinAge - acc.total, 0), // get the max age for the current phase
+        },
+      };
     },
     {
       total: 0,
       phases: {
         hot: 0,
-        warm: inputs.warm ? 0 : undefined,
-        cold: inputs.cold ? 0 : undefined,
+        warm: inputs[1] ? 0 : undefined,
+        cold: inputs[2] ? 0 : undefined,
       },
     }
   );
 
   if (total === 0) {
-    return [100];
+    return [Infinity /* Hot always! */];
   }
-
-  return [
-    toPercent(phases.hot, total),
-    phases.warm && toPercent(phases.warm, total),
-    phases.cold && toPercent(phases.cold, total),
-  ];
+  return [phases.hot, phases.warm, phases.cold];
 };
 
-const MIN_WIDTH_BUFFER = 100;
-const normalizeToPercentageWidths = (
-  widths: PhaseWidths
-): [hotPhase: string, warmPhase?: string, coldPhase?: string] => {
-  const total =
-    widths.reduce<number>((acc, w) => (w ?? 0) + acc, 0) + widths.length * MIN_WIDTH_BUFFER;
-
-  return widths.flatMap((w) => {
-    return typeof w === 'number' ? [`${((w + MIN_WIDTH_BUFFER) / total) * 100}%`] : [];
-  }) as any;
+const millisecondsToDays = (milliseconds?: number): string | undefined => {
+  if (milliseconds == null) {
+    return;
+  }
+  if (!isFinite(milliseconds)) {
+    return 'Forever';
+  }
+  const days = milliseconds / 8.64e7;
+  return days < 1
+    ? 'Less than a day'
+    : `At least ${Math.floor(days)} ${days === 1 ? 'day' : 'days'}`;
 };
 
-const calculateWidthsFromFormData = flow(
-  formDataToTimelineInputs,
-  calculateWidths,
-  normalizeToPercentageWidths
-);
+const normalizeTimingsToHumanReadable = ([hot, warm, cold]: PhasesInMilliseconds) => {
+  return [millisecondsToDays(hot), millisecondsToDays(warm), millisecondsToDays(cold)];
+};
+
+const normalizeToMaxAge = flow(calculateMilliseconds, normalizeTimingsToHumanReadable);
+
+const calculateWidths = (inputs: TimelineInputs) =>
+  `${(1 / inputs.filter(Boolean).length ?? 1) * 100}%`;
 
 /**
  * This component calculates not-to-scale percentages so that phases with
@@ -142,18 +140,22 @@ const calculateWidthsFromFormData = flow(
 export const Timeline: FunctionComponent = () => {
   const [formData] = useFormData<FormInternal>();
 
-  const [hotWidth, warmWidth, coldWidth] = useMemo(() => calculateWidthsFromFormData(formData), [
-    formData,
+  const timelineInputs = useMemo(() => {
+    return formDataToTimelineInputs(formData);
+  }, [formData]);
+
+  const [hotDays, warmDays, coldDays] = useMemo(() => normalizeToMaxAge(timelineInputs), [
+    timelineInputs,
   ]);
+
+  const width = calculateWidths(timelineInputs);
 
   return (
     <div
       className="ilmTimeline"
       ref={(el) => {
         if (el) {
-          el.style.setProperty('--ilm-hot-phase-width', hotWidth);
-          el.style.setProperty('--ilm-warm-phase-width', warmWidth ?? null);
-          el.style.setProperty('--ilm-cold-phase-width', coldWidth ?? null);
+          el.style.setProperty('--ilm-phase-width', width);
         }
       }}
     >
@@ -166,16 +168,26 @@ export const Timeline: FunctionComponent = () => {
       </div>
       <div className="ilmTimeline__phase ilmTimeline__hotPhase">
         <div className="ilmTimeline__hotPhase__colorBar" />
-        <EuiText size="s">Hot phase</EuiText>
+        <EuiText size="s">Hot phase: {hotDays}</EuiText>
       </div>
-      <div className="ilmTimeline__phase ilmTimeline__warmPhase">
-        <div className="ilmTimeline__warmPhase__colorBar" />
-        <EuiText size="s">Warm phase</EuiText>
-      </div>
-      <div className="ilmTimeline__phase ilmTimeline__coldPhase">
-        <div className="ilmTimeline__coldPhase__colorBar" />
-        <EuiText size="s">Cold phase</EuiText>
-      </div>
+      {formData._meta?.warm.enabled && (
+        <div className="ilmTimeline__phase ilmTimeline__warmPhase">
+          <div className="ilmTimeline__warmPhase__colorBar" />
+          <EuiText size="s">Warm phase: {warmDays}</EuiText>
+        </div>
+      )}
+      {formData._meta?.cold.enabled && (
+        <div className="ilmTimeline__phase ilmTimeline__coldPhase">
+          <div className="ilmTimeline__coldPhase__colorBar" />
+          <EuiText size="s">Cold phase: {coldDays}</EuiText>
+        </div>
+      )}
+      {formData._meta?.delete.enabled && (
+        <div className="ilmTimeline__phase ilmTimeline__deletePhase">
+          <div className="ilmTimeline__deletePhase__colorBar" />
+          <EuiText size="s">Delete phase</EuiText>
+        </div>
+      )}
     </div>
   );
 };
