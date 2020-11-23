@@ -6,7 +6,7 @@
 
 import { CoreStart } from 'src/core/public';
 import { TagsCapabilities } from '../../../common';
-import { ITagInternalClient } from '../../tags';
+import { ITagInternalClient } from '../../services';
 import { TagBulkAction } from '../types';
 import { getBulkDeleteAction } from './bulk_delete';
 import { getBulkAssignAction } from './bulk_assign';

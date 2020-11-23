@@ -8,7 +8,7 @@ import {
   overlayServiceMock,
   notificationServiceMock,
 } from '../../../../../../src/core/public/mocks';
-import { tagClientMock } from '../../tags/tags_client.mock';
+import { tagClientMock } from '../../services/tags/tags_client.mock';
 import { TagBulkAction } from '../types';
 import { getBulkDeleteAction } from './bulk_delete';
 

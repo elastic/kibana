@@ -7,7 +7,7 @@
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { createTagCapabilities } from '../../../common/test_utils';
 import { TagsCapabilities } from '../../../common/capabilities';
-import { tagClientMock } from '../../tags/tags_client.mock';
+import { tagClientMock } from '../../services/tags/tags_client.mock';
 import { TagBulkAction } from '../types';
 
 import { getBulkActions } from './index';

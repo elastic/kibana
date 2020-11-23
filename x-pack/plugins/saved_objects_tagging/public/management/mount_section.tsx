@@ -11,7 +11,7 @@ import { CoreSetup, ApplicationStart } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { getTagsCapabilities } from '../../common';
 import { SavedObjectTaggingPluginStart } from '../types';
-import { ITagInternalClient } from '../tags';
+import { ITagInternalClient } from '../services';
 import { TagManagementPage } from './tag_management_page';
 
 interface MountSectionParams {

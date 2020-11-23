@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener, getEditModalOpener } from '../components/edition_modal';
-import { ITagInternalClient } from '../tags';
+import { ITagInternalClient } from '../services';
 import { TagBulkAction } from './types';
 import { Header, TagTable, ActionBar } from './components';
 import { getBulkActions } from './actions';

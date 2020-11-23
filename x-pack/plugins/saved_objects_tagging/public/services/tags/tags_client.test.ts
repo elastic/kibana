@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { httpServiceMock } from '../../../../../src/core/public/mocks';
-import { Tag } from '../../common/types';
-import { createTag, createTagAttributes } from '../../common/test_utils';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { Tag } from '../../../common/types';
+import { createTag, createTagAttributes } from '../../../common/test_utils';
 import { tagsCacheMock } from './tags_cache.mock';
 import { TagsClient, FindTagsOptions } from './tags_client';
 

@@ -11,7 +11,7 @@ import {
   ITagsClient,
   TagWithRelations,
   AssignableObject,
-} from '../../common/types';
+} from '../../../common/types';
 import { ITagsChangeListener } from './tags_cache';
 
 export interface TagsClientOptions {

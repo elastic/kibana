@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectSaveModalTagSelectorComponentProps } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { TagsCapabilities } from '../../../common';
 import { TagSelector } from '../base';
-import { ITagsCache } from '../../tags';
+import { ITagsCache } from '../../services';
 import { CreateModalOpener } from '../edition_modal';
 
 interface GetConnectedTagSelectorOptions {

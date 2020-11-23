@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TagValidation } from '../../common/validation';
+import { TagValidation } from '../../../common/validation';
 
 /**
  * Error returned from the server when attributes validation fails for `create` or `update` operations

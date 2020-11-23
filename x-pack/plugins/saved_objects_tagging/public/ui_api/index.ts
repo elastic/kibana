@@ -7,7 +7,7 @@
 import { OverlayStart } from 'src/core/public';
 import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { TagsCapabilities } from '../../common';
-import { ITagsCache, ITagInternalClient } from '../tags';
+import { ITagsCache, ITagInternalClient } from '../services';
 import { getTagIdsFromReferences, updateTagsReferences } from '../utils';
 import { getComponents } from './components';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';

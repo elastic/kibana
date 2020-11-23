@@ -6,7 +6,7 @@
 
 import { OverlayStart, NotificationsStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { ITagInternalClient } from '../../tags';
+import { ITagInternalClient } from '../../services';
 import { TagBulkAction } from '../types';
 import { getAssignFlyoutOpener } from '../../components/assign_flyout';
 

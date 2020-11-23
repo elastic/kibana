@@ -8,7 +8,7 @@ import React from 'react';
 import { OverlayStart, OverlayRef } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { taggableTypes } from '../../../common/constants';
-import { ITagInternalClient } from '../../tags';
+import { ITagInternalClient } from '../../services';
 
 export interface GetAssignFlyoutOpenerOptions {
   overlays: OverlayStart;

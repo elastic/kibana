@@ -7,7 +7,7 @@
 import React, { FC, useState, useCallback } from 'react';
 import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
 import { TagValidation } from '../../../common/validation';
-import { isServerValidationError } from '../../tags';
+import { isServerValidationError } from '../../services/tags';
 import { CreateOrEditModal } from './create_or_edit_modal';
 import { validateTag } from './utils';
 

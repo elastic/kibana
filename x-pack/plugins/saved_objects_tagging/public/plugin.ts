@@ -11,7 +11,7 @@ import { SavedObjectTaggingOssPluginSetup } from '../../../../src/plugins/saved_
 import { tagManagementSectionId } from '../common/constants';
 import { getTagsCapabilities } from '../common/capabilities';
 import { SavedObjectTaggingPluginStart } from './types';
-import { TagsClient, TagsCache } from './tags';
+import { TagsClient, TagsCache } from './services';
 import { getUiApi } from './ui_api';
 import { SavedObjectsTaggingClientConfig, SavedObjectsTaggingClientConfigRawType } from './config';
 

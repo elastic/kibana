@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { Tag, TagAttributes } from '../../common/types';
+import { Tag, TagAttributes } from '../../../common/types';
 import { TagsCache, CacheRefreshHandler } from './tags_cache';
 
 const createTag = (parts: Partial<Tag>): Tag => ({

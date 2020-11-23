@@ -11,8 +11,8 @@ import { managementPluginMock } from '../../../../src/plugins/management/public/
 import { savedObjectTaggingOssPluginMock } from '../../../../src/plugins/saved_objects_tagging_oss/public/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
 import { SavedObjectsTaggingClientConfigRawType } from './config';
-import { TagsCache } from './tags';
-import { tagsCacheMock } from './tags/tags_cache.mock';
+import { TagsCache } from './services';
+import { tagsCacheMock } from './services/tags/tags_cache.mock';
 
 jest.mock('./tags/tags_cache');
 const MockedTagsCache = (TagsCache as unknown) as jest.Mock<PublicMethodsOf<TagsCache>>;

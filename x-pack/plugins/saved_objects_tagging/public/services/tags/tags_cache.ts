@@ -7,7 +7,7 @@
 import { Duration } from 'moment';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Tag, TagAttributes } from '../../common/types';
+import { Tag, TagAttributes } from '../../../common/types';
 
 export interface ITagsCache {
   getState(): Tag[];
