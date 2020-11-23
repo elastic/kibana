@@ -491,7 +491,7 @@ describe('Workload Statistics Aggregator', () => {
       logger
     );
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       let errorWasThrowAt = 0;
       taskStore.aggregate.mockImplementation(async () => {
         if (errorWasThrowAt === 0) {
