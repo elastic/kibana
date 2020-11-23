@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
-import { EuiHealth, EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiHealth, EuiToolTip } from '@elastic/eui';
 import { Agent } from '../../../types';
 
 interface Props {
@@ -14,9 +14,9 @@ interface Props {
 
 const Status = {
   Online: (
-    <EuiBadge color="secondary">
-      <FormattedMessage id="xpack.fleet.agentHealth.healthyStatusText" defaultMessage="Healthy" />
-    </EuiBadge>
+    <EuiHealth color="success">
+      <FormattedMessage id="xpack.fleet.agentHealth.onlineStatusText" defaultMessage="Online" />
+    </EuiHealth>
   ),
   Offline: (
     <EuiHealth color="subdued">
@@ -89,9 +89,10 @@ function getStatusComponent(agent: Agent): React.ReactElement {
   }
 }
 
-export const AgentHealth: React.FunctionComponent<Props> = ({ agent, ...props }) => {
+export const AgentHealth: React.FunctionComponent<Props> = ({ agent }) => {
   const { last_checkin: lastCheckIn } = agent;
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
+
   return (
     <EuiToolTip
       position="top"
