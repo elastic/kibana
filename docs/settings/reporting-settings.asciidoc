@@ -261,7 +261,9 @@ For information about {kib} memory limits, see <<production, using {kib} in a pr
 [cols="2*<"]
 |===
 | `xpack.reporting.index`
-  | Reporting uses a weekly index in {es} to store the reporting job and
+  | *deprecated* This setting is deprecated and will be removed in 8.0. Multitenancy by changing
+  `kibana.index` will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy[8.0 Breaking Changes]
+  for more details. Reporting uses a weekly index in {es} to store the reporting job and
   the report content. The index is automatically created if it does not already
   exist. Configure this to a unique value, beginning with `.reporting-`, for every
   {kib} instance that has a unique <<kibana-index, `kibana.index`>> setting. Defaults to `.reporting`.
