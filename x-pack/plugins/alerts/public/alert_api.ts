@@ -5,9 +5,6 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-import * as t from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
 import { findFirst } from 'fp-ts/lib/Array';
 import { isNone } from 'fp-ts/lib/Option';
 
@@ -50,25 +47,4 @@ export async function loadAlert({
   alertId: string;
 }): Promise<Alert> {
   return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}`);
-}
-
-type EmptyHttpResponse = '';
-export async function loadAlertState({
-  http,
-  alertId,
-}: {
-  http: HttpSetup;
-  alertId: string;
-}): Promise<AlertTaskState> {
-  return await http
-    .get(`${BASE_ALERT_API_PATH}/alert/${alertId}/state`)
-    .then((state: AlertTaskState | EmptyHttpResponse) => (state ? state : {}))
-    .then((state: AlertTaskState) => {
-      return pipe(
-        alertStateSchema.decode(state),
-        fold((e: t.Errors) => {
-          throw new Error(`Alert "${alertId}" has invalid state`);
-        }, t.identity)
-      );
-    });
 }
