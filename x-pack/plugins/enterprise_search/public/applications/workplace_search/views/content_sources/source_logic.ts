@@ -146,6 +146,7 @@ interface PreContentSourceResponse {
 }
 
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
+  path: ['enterprise_search', 'workplace_search', 'source_logic'],
   actions: {
     onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
