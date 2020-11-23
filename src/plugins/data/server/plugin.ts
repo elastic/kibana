@@ -19,6 +19,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ConfigSchema } from '../config';
 import { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
@@ -51,6 +52,7 @@ export interface DataPluginStart {
 }
 
 export interface DataPluginSetupDependencies {
+  bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -85,7 +87,7 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { expressions, usageCollection }: DataPluginSetupDependencies
+    { bfetch, expressions, usageCollection }: DataPluginSetupDependencies
   ) {
     this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
@@ -96,6 +98,7 @@ export class DataServerPlugin
     core.uiSettings.register(getUiSettings());
 
     const searchSetup = this.searchService.setup(core, {
+      bfetch,
       expressions,
       usageCollection,
     });
