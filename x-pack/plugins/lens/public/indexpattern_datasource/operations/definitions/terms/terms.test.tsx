@@ -805,4 +805,37 @@ describe('terms', () => {
       });
     });
   });
+  describe('hasInvalidReferences', () => {
+    let indexPattern: IndexPattern;
+    let column: TermsIndexPatternColumn;
+    beforeEach(() => {
+      indexPattern = createMockedIndexPattern();
+      column = {
+        dataType: 'boolean',
+        isBucketed: true,
+        label: 'Top values of bytes',
+        operationType: 'terms',
+        params: {
+          missingBucket: false,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          otherBucket: true,
+          size: 5,
+        },
+        scale: 'ordinal',
+        sourceField: 'bytes',
+      };
+    });
+    it('returns false if sourceField exists in index pattern', () => {
+      expect(termsOperation.hasInvalidReferences!(column, indexPattern)).toEqual(false);
+    });
+    it('returns true if the sourceField does not exist in index pattern', () => {
+      expect(
+        termsOperation.hasInvalidReferences!(
+          { ...column, sourceField: 'notExisting' },
+          indexPattern
+        )
+      ).toEqual(true);
+    });
+  });
 });

@@ -233,7 +233,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
               ((currentColumn.params?.sortField
                 ? [
                     {
-                      label: currentColumn.params.sortField,
+                      label: currentIndexPattern.getFieldByName(currentColumn.params.sortField),
                       value: currentColumn.params.sortField,
                     },
                   ]

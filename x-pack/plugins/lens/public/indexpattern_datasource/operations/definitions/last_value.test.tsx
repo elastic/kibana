@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
@@ -254,14 +254,20 @@ describe('last_value', () => {
       const lastValueColumn = lastValueOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
 
-        layer: { columns: {  col1: {
-          label: 'Count',
-          dataType: 'number',
-          isBucketed: false,
-          sourceField: 'Records',
-          operationType: 'count',
-        },}, columnOrder: [], indexPatternId: '' },
-      
+        layer: {
+          columns: {
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+
         field: {
           aggregatable: true,
           searchable: true,
@@ -301,15 +307,21 @@ describe('last_value', () => {
       };
       const lastValueColumn = lastValueOperation.buildColumn({
         indexPattern: indexPatternNoTimeField,
-        
-        layer: { columns: {  col1: {
-          label: 'Count',
-          dataType: 'number',
-          isBucketed: false,
-          sourceField: 'Records',
-          operationType: 'count',
-        }}, columnOrder: [], indexPatternId: '' },
-      
+
+        layer: {
+          columns: {
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+
         field: {
           aggregatable: true,
           searchable: true,
@@ -366,7 +378,7 @@ describe('last_value', () => {
 
       const select = instance.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]');
 
-      expect(select.prop('value')).toEqual('datefield');
+      expect(select.prop('selectedOptions')).toEqual([{ value: 'datefield' }]);
     });
 
     it('should update state when changing sortField', () => {
@@ -382,11 +394,10 @@ describe('last_value', () => {
         />
       );
 
-      instance.find('[data-test-subj="lns-indexPattern-lastValue-sortField"]').prop('onChange')!({
-        target: {
-          value: 'datefield2',
-        },
-      } as React.ChangeEvent<HTMLSelectElement>);
+      instance
+        .find('[data-test-subj="lns-indexPattern-lastValue-sortField"]')
+        .find(EuiComboBox)
+        .prop('onChange')!([{ label: 'datefield2', value: 'datefield2' }]);
 
       expect(setStateSpy).toHaveBeenCalledWith({
         ...state,
@@ -469,6 +480,50 @@ describe('last_value', () => {
           },
         },
       });
+    });
+  });
+
+  describe('hasInvalidReferences', () => {
+    let indexPattern: IndexPattern;
+    let column: LastValueIndexPatternColumn;
+    beforeEach(() => {
+      indexPattern = createMockedIndexPattern();
+      column = {
+        dataType: 'boolean',
+        isBucketed: false,
+        label: 'Last value of test',
+        operationType: 'last_value',
+        params: { sortField: 'timestamp', sortOrder: 'desc' },
+        scale: 'ratio',
+        sourceField: 'bytes',
+      };
+    });
+    it('returns false if sourceField exists and sortField is of type date ', () => {
+      expect(lastValueOperation.hasInvalidReferences!(column, indexPattern)).toEqual(false);
+    });
+    it('returns true if the sourceField does not exist in index pattern', () => {
+      expect(
+        lastValueOperation.hasInvalidReferences!(
+          { ...column, sourceField: 'notExisting' },
+          indexPattern
+        )
+      ).toEqual(true);
+    });
+    it('returns true if the sortField does not exist in index pattern', () => {
+      expect(
+        lastValueOperation.hasInvalidReferences!(
+          { ...column, params: { ...column.params, sortField: 'notExisting' } },
+          indexPattern
+        )
+      ).toEqual(true);
+    });
+    it('returns true if the sortField is not date', () => {
+      expect(
+        lastValueOperation.hasInvalidReferences!(
+          { ...column, params: { ...column.params, sortField: 'bytes' } },
+          indexPattern
+        )
+      ).toEqual(true);
     });
   });
 });
