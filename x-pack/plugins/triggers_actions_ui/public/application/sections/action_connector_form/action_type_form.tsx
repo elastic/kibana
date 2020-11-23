@@ -25,7 +25,7 @@ import {
   EuiLoadingSpinner,
   EuiBadge,
 } from '@elastic/eui';
-import { AlertActionParam, ResolvedActionGroup } from '../../../../../alerts/common';
+import { AlertActionParam, RecoveredActionGroup } from '../../../../../alerts/common';
 import {
   IErrorObject,
   AlertAction,
@@ -38,7 +38,7 @@ import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_en
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
-import { resolvedActionGroupMessage } from '../../constants';
+import { recoveredActionGroupMessage } from '../../constants';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -106,8 +106,8 @@ export const ActionTypeForm = ({
   useEffect(() => {
     setAvailableActionVariables(getAvailableActionVariables(messageVariables, actionItem.group));
     const res =
-      actionItem.group === ResolvedActionGroup.id
-        ? resolvedActionGroupMessage
+      actionItem.group === RecoveredActionGroup.id
+        ? recoveredActionGroupMessage
         : defaultActionMessage;
     setAvailableDefaultActionMessage(res);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -370,7 +370,7 @@ function getAvailableActionVariables(
     return [];
   }
   const filteredActionVariables =
-    actionGroup === ResolvedActionGroup.id
+    actionGroup === RecoveredActionGroup.id
       ? { params: actionVariables.params, state: actionVariables.state }
       : actionVariables;
 

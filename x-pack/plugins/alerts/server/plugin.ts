@@ -82,7 +82,7 @@ export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeAction: 'execute-action',
   newInstance: 'new-instance',
-  resolvedInstance: 'resolved-instance',
+  recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
 };
 

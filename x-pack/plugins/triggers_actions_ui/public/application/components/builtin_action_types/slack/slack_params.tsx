@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { SlackActionParams } from '../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
-import { resolvedActionGroupMessage } from '../../../constants';
+import { recoveredActionGroupMessage } from '../../../constants';
 
 const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionParams>> = ({
   actionParams,
@@ -20,10 +20,10 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
 }) => {
   const { message } = actionParams;
   useEffect(() => {
-    if (defaultMessage === resolvedActionGroupMessage) {
+    if (defaultMessage === recoveredActionGroupMessage) {
       editAction('message', defaultMessage, index);
     } else if (
-      (!message || message === resolvedActionGroupMessage) &&
+      (!message || message === recoveredActionGroupMessage) &&
       defaultMessage &&
       defaultMessage.length > 0
     ) {

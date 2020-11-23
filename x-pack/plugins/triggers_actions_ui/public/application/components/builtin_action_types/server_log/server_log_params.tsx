@@ -9,7 +9,7 @@ import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
 import { ServerLogActionParams } from '.././types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
-import { resolvedActionGroupMessage } from '../../../constants';
+import { recoveredActionGroupMessage } from '../../../constants';
 
 export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
   ServerLogActionParams
@@ -32,10 +32,10 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
   }, []);
 
   useEffect(() => {
-    if (defaultMessage === resolvedActionGroupMessage) {
+    if (defaultMessage === recoveredActionGroupMessage) {
       editAction('message', defaultMessage, index);
     } else if (
-      (!message || message === resolvedActionGroupMessage) &&
+      (!message || message === recoveredActionGroupMessage) &&
       defaultMessage &&
       defaultMessage.length > 0
     ) {

@@ -105,8 +105,8 @@ describe('register()', () => {
           name: 'Default',
         },
         {
-          id: 'resolved',
-          name: 'Resolved',
+          id: 'recovered',
+          name: 'Recovered',
         },
       ],
       defaultActionGroupId: 'default',
@@ -117,7 +117,7 @@ describe('register()', () => {
 
     expect(() => registry.register(alertType)).toThrowError(
       new Error(
-        `Alert type [id="${alertType.id}"] cannot be registered. Action groups [resolved] are reserved by the framework.`
+        `Alert type [id="${alertType.id}"] cannot be registered. Action groups [recovered] are reserved by the framework.`
       )
     );
   });
@@ -229,8 +229,8 @@ describe('get()', () => {
             "name": "Default",
           },
           Object {
-            "id": "resolved",
-            "name": "Resolved",
+            "id": "recovered",
+            "name": "Recovered",
           },
         ],
         "actionVariables": Object {
@@ -287,8 +287,8 @@ describe('list()', () => {
               "name": "Test Action Group",
             },
             Object {
-              "id": "resolved",
-              "name": "Resolved",
+              "id": "recovered",
+              "name": "Recovered",
             },
           ],
           "actionVariables": Object {

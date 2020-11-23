@@ -566,7 +566,7 @@ export class EventsFactory {
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
-        action: EVENT_LOG_ACTIONS.resolvedInstance,
+        action: EVENT_LOG_ACTIONS.recoveredInstance,
       },
       kibana: { alerting: { instance_id: instanceId } },
     });
