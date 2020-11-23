@@ -19,3 +19,4 @@
 
 export * from './create_error';
 export * from './get_by_alias';
+export * from './tables_adapter';

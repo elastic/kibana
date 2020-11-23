@@ -31,6 +31,7 @@ import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { Setup as InspectorSetup } from '../../inspector/public';
 
 export interface DataPublicPluginEnhancements {
   search: SearchEnhancements;
@@ -40,6 +41,7 @@ export interface DataSetupDependencies {
   bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   uiActions: UiActionsSetup;
+  inspector: InspectorSetup;
   usageCollection?: UsageCollectionSetup;
 }
 

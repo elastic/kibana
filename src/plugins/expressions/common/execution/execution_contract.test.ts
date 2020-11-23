@@ -71,7 +71,7 @@ describe('ExecutionContract', () => {
     const execution = createExecution('foo bar=123');
     const contract = new ExecutionContract(execution);
     expect(contract.inspect()).toMatchObject({
-      data: expect.any(Object),
+      tables: expect.any(Object),
       requests: expect.any(Object),
     });
   });

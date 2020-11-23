@@ -95,7 +95,7 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
       }),
     },
   },
-  fn(input, args) {
+  fn(input, args, handlers) {
     const visParams = {
       scale: args.scale,
       orientation: args.orientation,
@@ -109,6 +109,9 @@ export const createTagCloudFn = (): TagcloudExpressionFunctionDefinition => ({
       visParams.bucket = args.bucket;
     }
 
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', input);
+    }
     return {
       type: 'render',
       as: 'tagloud_vis',

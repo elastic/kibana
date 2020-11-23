@@ -24,8 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { DataViewColumn, DataViewRow } from '../types';
-
-import { exportAsCsv } from '../lib/export_csv';
+import { exportAsCsv } from './export_csv';
 
 interface DataDownloadOptionsState {
   isPopoverOpen: boolean;
@@ -69,7 +68,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
   exportCsv = (customParams: any = {}) => {
     let filename = this.props.title;
     if (!filename || filename.length === 0) {
-      filename = i18n.translate('inspector.data.downloadOptionsUnsavedFilename', {
+      filename = i18n.translate('data.inspector.table.downloadOptionsUnsavedFilename', {
         defaultMessage: 'unsaved',
       });
     }
@@ -99,7 +98,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
     return (
       <EuiButton size="s" onClick={this.exportCsv}>
         <FormattedMessage
-          id="inspector.data.downloadCSVButtonLabel"
+          id="data.inspector.table.downloadCSVButtonLabel"
           defaultMessage="Download CSV"
         />
       </EuiButton>
@@ -110,7 +109,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
     const button = (
       <EuiButton iconType="arrowDown" iconSide="right" size="s" onClick={this.onTogglePopover}>
         <FormattedMessage
-          id="inspector.data.downloadCSVToggleButtonLabel"
+          id="data.inspector.table.downloadCSVToggleButtonLabel"
           defaultMessage="Download CSV"
         />
       </EuiButton>
@@ -121,14 +120,14 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
         onClick={this.exportFormattedCsv}
         toolTipContent={
           <FormattedMessage
-            id="inspector.data.formattedCSVButtonTooltip"
+            id="data.inspector.table.formattedCSVButtonTooltip"
             defaultMessage="Download the data in table format"
           />
         }
         toolTipPosition="left"
       >
         <FormattedMessage
-          id="inspector.data.formattedCSVButtonLabel"
+          id="data.inspector.table.formattedCSVButtonLabel"
           defaultMessage="Formatted CSV"
         />
       </EuiContextMenuItem>,
@@ -137,13 +136,13 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
         onClick={this.exportFormattedAsRawCsv}
         toolTipContent={
           <FormattedMessage
-            id="inspector.data.rawCSVButtonTooltip"
+            id="data.inspector.table.rawCSVButtonTooltip"
             defaultMessage="Download the data as provided, for example, dates as timestamps"
           />
         }
         toolTipPosition="left"
       >
-        <FormattedMessage id="inspector.data.rawCSVButtonLabel" defaultMessage="Raw CSV" />
+        <FormattedMessage id="data.inspector.table.rawCSVButtonLabel" defaultMessage="Raw CSV" />
       </EuiContextMenuItem>,
     ];
 

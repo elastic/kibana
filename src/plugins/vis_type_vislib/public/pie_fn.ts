@@ -59,9 +59,13 @@ export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition =
       help: 'vislib pie vis config',
     },
   },
-  fn(input, args) {
+  fn(input, args, handlers) {
     const visConfig = JSON.parse(args.visConfig) as PieVisParams;
     const visData = vislibSlicesResponseHandler(input, visConfig.dimensions);
+
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', input);
+    }
 
     return {
       type: 'render',

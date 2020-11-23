@@ -23,7 +23,7 @@ import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { abortSignalToPromise, Defer, now } from '../../../kibana_utils/common';
-import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/common';
+import { RequestAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstExpression,
@@ -34,11 +34,12 @@ import {
   ExpressionAstNode,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
-import { getType, ExpressionValue } from '../expression_types';
+import { getType, ExpressionValue, Datatable } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
+import { TablesAdapter } from '../util/tables_adapter';
 
 const createAbortErrorValue = () =>
   createError({
@@ -55,7 +56,7 @@ export interface ExecutionParams {
 
 const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
   requests: new RequestAdapter(),
-  data: new DataAdapter(),
+  tables: new TablesAdapter(),
 });
 
 export class Execution<
@@ -149,13 +150,19 @@ export class Execution<
       ast,
     });
 
+    const inspectorAdapters =
+      execution.params.inspectorAdapters || createDefaultInspectorAdapters();
+
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
       getSearchSessionId: () => execution.params.searchSessionId,
       variables: execution.params.variables || {},
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,
-      inspectorAdapters: execution.params.inspectorAdapters || createDefaultInspectorAdapters(),
+      inspectorAdapters,
+      logDatatable: (name: string, datatable: Datatable) => {
+        inspectorAdapters.tables[name] = datatable;
+      },
       ...(execution.params as any).extraContext,
     };
   }

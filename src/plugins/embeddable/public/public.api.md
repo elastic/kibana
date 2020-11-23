@@ -104,10 +104,6 @@ export const ACTION_EDIT_PANEL = "editPanel";
 export interface Adapters {
     // (undocumented)
     [key: string]: any;
-    // Warning: (ae-forgotten-export) The symbol "DataAdapter" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    data?: DataAdapter;
     // Warning: (ae-forgotten-export) The symbol "RequestAdapter" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

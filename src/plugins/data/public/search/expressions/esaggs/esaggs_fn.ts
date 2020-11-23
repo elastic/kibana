@@ -28,13 +28,11 @@ import { FormatFactory } from '../../../../common/field_formats/utils';
 import { IndexPatternsContract } from '../../../../common/index_patterns/index_patterns';
 import { ISearchStartSearchSource, AggsStart } from '../../../../common/search';
 
-import { AddFilters } from './build_tabular_inspector_data';
 import { handleRequest } from './request_handler';
 
 const name = 'esaggs';
 
 interface StartDependencies {
-  addFilters: AddFilters;
   aggs: AggsStart;
   deserializeFieldFormat: FormatFactory;
   indexPatterns: IndexPatternsContract;
@@ -86,7 +84,6 @@ export function getEsaggs({
     },
     async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
       const {
-        addFilters,
         aggs,
         deserializeFieldFormat,
         indexPatterns,
@@ -101,7 +98,6 @@ export function getEsaggs({
 
       const response = await handleRequest({
         abortSignal: (abortSignal as unknown) as AbortSignal,
-        addFilters,
         aggs: aggConfigs,
         deserializeFieldFormat,
         filters: get(input, 'filters', undefined),

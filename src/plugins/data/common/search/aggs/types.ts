@@ -62,6 +62,7 @@ import {
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
   BUCKET_TYPES,
+  AggConfig,
 } from './';
 
 export { IAggConfig, AggConfigSerialized } from './agg_config';
@@ -95,10 +96,14 @@ export interface AggsCommonStart {
   getDateMetaByDatatableColumn: (
     column: DatatableColumn
   ) => Promise<undefined | { timeZone: string; timeRange?: TimeRange; interval: string }>;
+  datatableUtilities: {
+    getIndexPattern: (column: DatatableColumn) => Promise<IndexPattern | undefined>;
+    getAggConfig: (column: DatatableColumn) => Promise<AggConfig | undefined>;
+    isFilterable: (column: DatatableColumn) => boolean;
+  };
   createAggConfigs: (
     indexPattern: IndexPattern,
-    configStates?: CreateAggConfigParams[],
-    schemas?: Record<string, any>
+    configStates?: CreateAggConfigParams[]
   ) => InstanceType<typeof AggConfigs>;
   types: ReturnType<AggTypesRegistry['start']>;
 }

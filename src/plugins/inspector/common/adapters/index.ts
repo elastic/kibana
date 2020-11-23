@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export * from './data';
 export * from './request';
 export * from './types';

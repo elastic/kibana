@@ -16,6 +16,5 @@ export interface Adapters
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [data](./kibana-plugin-plugins-embeddable-public.adapters.data.md) | <code>DataAdapter</code> |  |
 |  [requests](./kibana-plugin-plugins-embeddable-public.adapters.requests.md) | <code>RequestAdapter</code> |  |
 

@@ -52,7 +52,7 @@ function buildCsv(
   const header = columns.map((col) => escape(col.name, quoteValues));
 
   // Convert the array of row objects to an array of row arrays
-  const orderedFieldNames = columns.map((col) => col.field);
+  const orderedFieldNames = columns.map((col) => col.id);
   const csvRows = rows.map((row) => {
     return orderedFieldNames.map((field) =>
       escape(valueFormatter ? valueFormatter(row[field]) : row[field], quoteValues)

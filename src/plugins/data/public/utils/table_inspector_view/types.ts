@@ -17,32 +17,20 @@
  * under the License.
  */
 
-export interface TabularDataValue {
-  formatted: string;
-  raw: unknown;
-}
+import { Datatable, DatatableRow } from '../../../../expressions/common';
 
-export interface TabularDataColumn {
+type DataViewColumnRender = (value: string, _item: DatatableRow) => string;
+
+export interface DataViewColumn {
   name: string;
+  id: string;
   field: string;
-  filter?: (value: TabularDataValue) => void;
-  filterOut?: (value: TabularDataValue) => void;
+  sortable: (item: DatatableRow) => string | number;
+  render: DataViewColumnRender;
 }
 
-export type TabularDataRow = Record<TabularDataColumn['field'], TabularDataValue>;
+export type DataViewRow = DatatableRow;
 
-export interface TabularData {
-  columns: TabularDataColumn[];
-  rows: TabularDataRow[];
-}
-
-export type TabularCallback = () => TabularData | Promise<TabularData>;
-
-export interface TabularHolder {
-  data: TabularData | null;
-  options: TabularLoaderOptions;
-}
-
-export interface TabularLoaderOptions {
-  returnsFormattedValues?: boolean;
+export interface TableInspectorAdapter {
+  [key: string]: Datatable;
 }

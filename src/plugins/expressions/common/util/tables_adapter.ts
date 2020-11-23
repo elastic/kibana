@@ -17,6 +17,18 @@
  * under the License.
  */
 
-export class FormattedData {
-  constructor(public readonly raw: any, public readonly formatted: any) {}
+import { EventEmitter } from 'events';
+import { Datatable } from '../expression_types/specs';
+
+export class TablesAdapter extends EventEmitter {
+  private _tables: { [key: string]: Datatable } = {};
+
+  public logDatatable(name: string, datatable: Datatable): void {
+    this._tables[name] = datatable;
+    this.emit('change', this.tables);
+  }
+
+  public get tables() {
+    return this._tables;
+  }
 }

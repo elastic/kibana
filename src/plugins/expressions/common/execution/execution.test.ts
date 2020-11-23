@@ -208,10 +208,10 @@ describe('Execution', () => {
   });
 
   describe('inspector adapters', () => {
-    test('by default, "data" and "requests" inspector adapters are available', async () => {
+    test('by default, "tables" and "requests" inspector adapters are available', async () => {
       const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
       expect(result).toMatchObject({
-        data: expect.any(Object),
+        tables: expect.any(Object),
         requests: expect.any(Object),
       });
     });

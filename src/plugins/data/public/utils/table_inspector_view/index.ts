@@ -16,24 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from 'kibana/public';
+import { Adapters, InspectorViewDescription } from '../../../../inspector/public';
+import { getDataViewComponentWrapper } from './components/data_view_wrapper';
+import { UiActionsStart } from '../../../../ui_actions/public';
+import { FieldFormatsStart } from '../../field_formats';
+import { DatatableColumn } from '../../../../expressions/common/expression_types/specs';
 
-import { InspectorViewDescription } from '../../types';
-import { Adapters } from '../../../common';
-
-const DataViewComponent = lazy(() => import('./components/data_view'));
-
-export const getDataViewDescription = (): InspectorViewDescription => ({
-  title: i18n.translate('inspector.data.dataTitle', {
+export const getTableViewDescription = (
+  getStartServices: () => {
+    uiActions: UiActionsStart;
+    fieldFormats: FieldFormatsStart;
+    isFilterable: (column: DatatableColumn) => boolean;
+    uiSettings: IUiSettingsClient;
+  }
+): InspectorViewDescription => ({
+  title: i18n.translate('data.inspector.table.dataTitle', {
     defaultMessage: 'Data',
   }),
   order: 10,
-  help: i18n.translate('inspector.data.dataDescriptionTooltip', {
+  help: i18n.translate('data.inspector.table..dataDescriptionTooltip', {
     defaultMessage: 'View the data behind the visualization',
   }),
   shouldShow(adapters: Adapters) {
-    return Boolean(adapters.data);
+    return Boolean(adapters.tables);
   },
-  component: DataViewComponent,
+  component: getDataViewComponentWrapper(getStartServices),
 });

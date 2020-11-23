@@ -166,7 +166,7 @@ describe('ExpressionLoader', () => {
 
   it('inspect() returns correct inspector adapters', () => {
     const expressionDataHandler = new ExpressionLoader(element, expressionString, {});
-    expect(expressionDataHandler.inspect()).toHaveProperty('data');
+    expect(expressionDataHandler.inspect()).toHaveProperty('tables');
     expect(expressionDataHandler.inspect()).toHaveProperty('requests');
   });
 });
