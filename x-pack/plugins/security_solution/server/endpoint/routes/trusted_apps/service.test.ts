@@ -27,7 +27,7 @@ const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   description: 'Linux trusted app 1',
   entries: [
     createEntryMatch('process.executable.caseless', '/bin/malware'),
-    createEntryMatch('process.hash.md5', '1234234659AF249DDF3E40864E9FB241'),
+    createEntryMatch('process.hash.md5', '1234234659af249ddf3e40864e9fb241'),
   ],
   item_id: '123',
   list_id: 'endpoint_trusted_apps',
@@ -50,7 +50,7 @@ const TRUSTED_APP = {
   description: 'Linux trusted app 1',
   os: 'linux',
   entries: [
-    createConditionEntry(ConditionEntryField.HASH, '1234234659AF249DDF3E40864E9FB241'),
+    createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
     createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
   ],
 };
