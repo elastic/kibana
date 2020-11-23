@@ -9,8 +9,8 @@ import { findFirst } from 'fp-ts/lib/Array';
 import { isNone } from 'fp-ts/lib/Option';
 
 import { i18n } from '@kbn/i18n';
-import { BASE_ALERT_API_PATH, alertStateSchema } from '../common';
-import { Alert, AlertType, AlertTaskState } from '../common';
+import { BASE_ALERT_API_PATH } from '../common';
+import { Alert, AlertType } from '../common';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
