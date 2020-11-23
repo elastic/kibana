@@ -17,11 +17,25 @@
  * under the License.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('index_pattern_crud', () => {
-    loadTestFile(require.resolve('./create_index_pattern'));
-    loadTestFile(require.resolve('./get_index_pattern'));
+export default function ({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+
+  describe('main', () => {
+    it('can retrieve an index_pattern', async () => {
+      const title = `foo-${Date.now()}-${Math.random()}*`;
+      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
+        index_pattern: {
+          title,
+        },
+      });
+      const response2 = await supertest.get(
+        '/api/index_patterns/index_pattern/' + response1.body.index_pattern.id
+      );
+
+      expect(response2.body.index_pattern.title).to.be(title);
+    });
   });
 }

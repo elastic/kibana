@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('index_pattern_crud', () => {
-    loadTestFile(require.resolve('./create_index_pattern'));
-    loadTestFile(require.resolve('./get_index_pattern'));
+  describe('get_index_pattern', () => {
+    loadTestFile(require.resolve('./errors'));
+    loadTestFile(require.resolve('./main'));
   });
 }
