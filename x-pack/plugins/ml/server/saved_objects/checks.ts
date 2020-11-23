@@ -180,7 +180,7 @@ export function checksFactory(
       return jobIds.reduce((results, jobId) => {
         results[jobId] = {
           canDelete: false,
-          canUnTag: false,
+          canUntag: false,
         };
         return results;
       }, {} as DeleteJobCheckResponse);
@@ -191,7 +191,7 @@ export function checksFactory(
       return jobIds.reduce((results, jobId) => {
         results[jobId] = {
           canDelete: true,
-          canUnTag: false,
+          canUntag: false,
         };
         return results;
       }, {} as DeleteJobCheckResponse);
@@ -208,7 +208,7 @@ export function checksFactory(
         // job saved object not found
         results[jobId] = {
           canDelete: false,
-          canUnTag: false,
+          canUntag: false,
         };
         return results;
       }
@@ -220,8 +220,7 @@ export function checksFactory(
       if (canCreateGlobalJobs && isGlobalJob) {
         results[jobId] = {
           canDelete: true,
-          canUnTag: false,
-          // GLOBAL JOB BOOL????
+          canUntag: false,
         };
         return results;
       }
@@ -230,20 +229,20 @@ export function checksFactory(
       if (isGlobalJob) {
         results[jobId] = {
           canDelete: false,
-          canUnTag: false,
+          canUntag: false,
         };
         return results;
       }
 
       // jobs with are in individual spaces can only be untagged
       // from current space if the job is in more than 1 space
-      const canUnTag = namespaces.length > 1;
+      const canUntag = namespaces.length > 1;
 
       // job is in individual spaces, user cannot see all of them - untag only, no delete
       if (namespaces.includes('?')) {
         results[jobId] = {
           canDelete: false,
-          canUnTag,
+          canUntag,
         };
         return results;
       }
@@ -251,7 +250,7 @@ export function checksFactory(
       // job is individual spaces, user can see all of them - delete and option to untag
       results[jobId] = {
         canDelete: true,
-        canUnTag,
+        canUntag,
       };
       return results;
     }, {} as DeleteJobCheckResponse);

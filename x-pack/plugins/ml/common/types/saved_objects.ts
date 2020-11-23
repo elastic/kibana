@@ -34,5 +34,5 @@ export interface DeleteJobCheckResponse {
 
 export interface DeleteJobPermission {
   canDelete: boolean;
-  canUnTag: boolean;
+  canUntag: boolean;
 }
