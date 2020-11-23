@@ -23,7 +23,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlRoles();
 
       await ml.testResources.deleteIndexPatternByTitle('ft_module_apache');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_auditbeat');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_apm');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_heartbeat');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_logs');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_nginx');
       await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_ecommerce');
@@ -36,7 +38,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('ml/ecommerce');
       await esArchiver.unload('ml/categorization');
       await esArchiver.unload('ml/module_apache');
+      await esArchiver.unload('ml/module_auditbeat');
       await esArchiver.unload('ml/module_apm');
+      await esArchiver.unload('ml/module_heartbeat');
       await esArchiver.unload('ml/module_logs');
       await esArchiver.unload('ml/module_nginx');
       await esArchiver.unload('ml/module_sample_ecommerce');

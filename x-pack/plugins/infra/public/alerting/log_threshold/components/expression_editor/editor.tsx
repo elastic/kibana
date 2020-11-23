@@ -157,7 +157,6 @@ export const Editor: React.FC<Props> = (props) => {
     } else {
       return [];
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [sourceStatus]);
 
   const groupByFields = useMemo(() => {
@@ -168,7 +167,6 @@ export const Editor: React.FC<Props> = (props) => {
     } else {
       return [];
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [sourceStatus]);
 
   const updateThreshold = useCallback(
