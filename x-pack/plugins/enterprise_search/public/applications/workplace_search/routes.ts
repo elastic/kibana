@@ -122,8 +122,8 @@ export const getContentSourcePath = (
   sourceId: string,
   isOrganization: boolean
 ): string => generatePath(isOrganization ? path : `${PERSONAL_PATH}${path}`, { sourceId });
-export const getGroupPath = (groupId: string) => generatePath(GROUP_PATH, { groupId });
-export const getGroupSourcePrioritizationPath = (groupId: string) =>
+export const getGroupPath = (groupId: string): string => generatePath(GROUP_PATH, { groupId });
+export const getGroupSourcePrioritizationPath = (groupId: string): string =>
   `${GROUPS_PATH}/${groupId}/source_prioritization`;
-export const getSourcesPath = (path: string, isOrganization: boolean) =>
+export const getSourcesPath = (path: string, isOrganization: boolean): string =>
   isOrganization ? path : `${PERSONAL_PATH}${path}`;
