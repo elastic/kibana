@@ -184,7 +184,14 @@ export class VectorStyle implements IVectorStyle {
     const invalidDynamicProperties = (Object.keys(originalProperties) as VECTOR_STYLES[]).filter(
       (key) => {
         const dynamicOptions = getDynamicOptions(originalProperties, key);
-        return dynamicOptions && (!dynamicOptions.field || !dynamicOptions.field.name);
+        if (!dynamicOptions || !dynamicOptions.field || !dynamicOptions.field.name) {
+          return;
+        }
+
+        const matchingField = currentFields.find((field) => {
+          return dynamicOptions.field.name === field.getName();
+        });
+        return !matchingField;
       }
     );
 
@@ -223,6 +230,7 @@ export class VectorStyle implements IVectorStyle {
           if (newFieldDescriptor) {
             hasChanges = true;
             invalidDynamicProperties.splice(j, 1);
+            j--;
           }
         }
 
