@@ -12,13 +12,13 @@ import {
 import { exportFirstRule } from '../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
+import { removeSignalsIndex } from '../tasks/common';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
 const EXPECTED_EXPORTED_RULE_FILE_PATH = 'cypress/test_files/expected_rules_export.ndjson';
 
-// FLAKY: https://github.com/elastic/kibana/issues/69849
-describe.skip('Export rules', () => {
+describe('Export rules', () => {
   before(() => {
     esArchiverLoad('export_rule');
     cy.server();
@@ -30,6 +30,7 @@ describe.skip('Export rules', () => {
 
   after(() => {
     esArchiverUnload('export_rule');
+    removeSignalsIndex();
   });
 
   it('Exports a custom rule', () => {

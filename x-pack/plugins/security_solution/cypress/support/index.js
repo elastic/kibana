@@ -28,10 +28,7 @@ Cypress.Cookies.defaults({
 });
 
 Cypress.on('uncaught:exception', (err) => {
-  if (
-    err.message.includes('ResizeObserver loop limit exceeded') ||
-    err.message.includes('Unexpected end of JSON input')
-  ) {
+  if (err.message.includes('ResizeObserver loop limit exceeded')) {
     return false;
   }
 });

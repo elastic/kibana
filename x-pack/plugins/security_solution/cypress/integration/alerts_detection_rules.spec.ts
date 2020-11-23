@@ -29,7 +29,6 @@ import {
   waitForRuleToBeActivated,
 } from '../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
-import { removeSignalsIndex } from '../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { DEFAULT_RULE_REFRESH_INTERVAL_VALUE } from '../../common/constants';
 
@@ -42,7 +41,6 @@ describe('Alerts detection rules', () => {
 
   after(() => {
     esArchiverUnload('prebuilt_rules_loaded');
-    removeSignalsIndex();
     cy.clock().invoke('restore');
   });
 
