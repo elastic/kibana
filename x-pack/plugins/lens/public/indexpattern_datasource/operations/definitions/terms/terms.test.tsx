@@ -270,7 +270,7 @@ describe('terms', () => {
           name: 'test',
           displayName: 'test',
         },
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(termsColumn.dataType).toEqual('boolean');
     });
@@ -285,7 +285,7 @@ describe('terms', () => {
           name: 'test',
           displayName: 'test',
         },
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(termsColumn.params.otherBucket).toEqual(true);
     });
@@ -300,7 +300,7 @@ describe('terms', () => {
           name: 'test',
           displayName: 'test',
         },
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(termsColumn.params.otherBucket).toEqual(false);
     });
@@ -308,14 +308,18 @@ describe('terms', () => {
     it('should use existing metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
-        columns: {
-          col1: {
-            label: 'Count',
-            dataType: 'number',
-            isBucketed: false,
-            sourceField: 'Records',
-            operationType: 'count',
+        layer: {
+          columns: {
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
           },
+          columnOrder: [],
+          indexPatternId: '',
         },
         field: {
           aggregatable: true,
@@ -335,7 +339,7 @@ describe('terms', () => {
     it('should use the default size when there is an existing bucket', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
-        columns: state.layers.first.columns,
+        layer: state.layers.first,
         field: {
           aggregatable: true,
           searchable: true,
@@ -350,7 +354,7 @@ describe('terms', () => {
     it('should use a size of 5 when there are no other buckets', () => {
       const termsColumn = termsOperation.buildColumn({
         indexPattern: createMockedIndexPattern(),
-        columns: {},
+        layer: { columns: {}, columnOrder: [], indexPatternId: '' },
         field: {
           aggregatable: true,
           searchable: true,
