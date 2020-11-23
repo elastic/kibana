@@ -18,7 +18,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { FieldAttrs } from '../..';
+import { FieldAttrs, FieldAttrSet } from '../..';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -135,8 +135,19 @@ export class IndexPattern implements IIndexPattern {
     const newFieldAttrs = { ...this.fieldAttrs };
 
     this.fields.forEach((field) => {
+      const attrs: FieldAttrSet = {};
+      let hasAttr = false;
       if (field.customLabel) {
-        newFieldAttrs[field.name] = { customLabel: field.customLabel };
+        attrs.customLabel = field.customLabel;
+        hasAttr = true;
+      }
+      if (field.count) {
+        attrs.count = field.count;
+        hasAttr = true;
+      }
+
+      if (hasAttr) {
+        newFieldAttrs[field.name] = attrs;
       } else {
         delete newFieldAttrs[field.name];
       }
@@ -321,7 +332,9 @@ export class IndexPattern implements IIndexPattern {
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
-      fields: this.fields ? JSON.stringify(this.fields) : undefined,
+      fields: this.fields
+        ? JSON.stringify(this.fields.filter((field) => field.scripted))
+        : undefined,
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
