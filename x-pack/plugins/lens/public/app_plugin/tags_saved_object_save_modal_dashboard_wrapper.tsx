@@ -5,11 +5,11 @@
  */
 
 import React, { FC, useState, useMemo, useCallback } from 'react';
+import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 import {
   DashboardSaveModalProps,
   SavedObjectSaveModalDashboard,
-  OnSaveProps,
-} from '../../../../../src/plugins/saved_objects/public';
+} from '../../../../../src/plugins/presentation_util/public';
 import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 
 type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<DashboardSaveModalProps, 'onSave'> & {
