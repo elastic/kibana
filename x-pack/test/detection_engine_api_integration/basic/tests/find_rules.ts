@@ -23,7 +23,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('find_rules', () => {
     beforeEach(async () => {
@@ -32,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(es);
+      await deleteAllAlerts(supertest);
     });
 
     it('should return an empty find body correctly if no rules are loaded', async () => {
