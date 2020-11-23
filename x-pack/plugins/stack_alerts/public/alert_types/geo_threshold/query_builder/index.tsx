@@ -85,10 +85,9 @@ function validateQuery(query: Query) {
   return true;
 }
 
-export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
-  GeoThresholdAlertParams,
-  AlertsContextValue
->> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
+export const GeoThresholdAlertTypeExpression: React.FunctionComponent<
+  AlertTypeParamsExpressionProps<GeoThresholdAlertParams, AlertsContextValue>
+> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
   const {
     index,
     indexId,

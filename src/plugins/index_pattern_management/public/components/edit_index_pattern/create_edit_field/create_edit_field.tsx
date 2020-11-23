@@ -44,9 +44,12 @@ const newFieldPlaceholder = i18n.translate(
 
 export const CreateEditField = withRouter(
   ({ indexPattern, mode, fieldName, history }: CreateEditFieldProps) => {
-    const { uiSettings, chrome, notifications, data } = useKibana<
-      IndexPatternManagmentContext
-    >().services;
+    const {
+      uiSettings,
+      chrome,
+      notifications,
+      data,
+    } = useKibana<IndexPatternManagmentContext>().services;
     const spec =
       mode === 'edit' && fieldName
         ? indexPattern.fields.getByName(fieldName)?.spec
