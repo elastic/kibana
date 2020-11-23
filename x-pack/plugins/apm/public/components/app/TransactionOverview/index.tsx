@@ -29,7 +29,7 @@ import { useServiceTransactionTypes } from '../../../hooks/useServiceTransaction
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
@@ -123,10 +123,11 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   return (
     <>
       <SearchBar />
-      <Correlations />
+
       <EuiPage>
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
+            <Correlations />
             <LocalUIFilters {...localFiltersConfig}>
               <TransactionTypeFilter
                 transactionTypes={serviceTransactionTypes}

@@ -35,7 +35,7 @@ import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
-import { ActionGroup } from '../../../../../alerts/common';
+import { ActionGroup, AlertActionParam } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
 
 export interface ActionAccordionFormProps {
@@ -45,7 +45,7 @@ export interface ActionAccordionFormProps {
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setAlertProperty: (actions: AlertAction[]) => void;
-  setActionParamsProperty: (key: string, value: any, index: number) => void;
+  setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariables;
   defaultActionMessage?: string;
