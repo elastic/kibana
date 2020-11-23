@@ -27,8 +27,9 @@ const TEST_FILTER_COLUMN_NAMES = [
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const docTable = getService('docTable');
   const filterBar = getService('filterBar');
+  const dataGrid = getService('dataGrid');
+  const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
   const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
   const kibanaServer = getService('kibanaServer');
@@ -59,14 +60,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check the anchor timestamp in the context view
       await retry.waitFor('selected document timestamp matches anchor timestamp ', async () => {
         // get the timestamp of the first row
-        const discoverFields = await docTable.getFields();
+        const discoverFields = await dataGrid.getFields();
         const firstTimestamp = discoverFields[0][0];
 
         // navigate to the context view
-        await docTable.clickRowToggle({ rowIndex: 0 });
-        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
         await rowActions[0].click();
-        const contextFields = await docTable.getFields({ isAnchorRow: true });
+        // entering the context view (contains the legacy type)
+        const contextFields = await docTable.getFields();
         const anchorTimestamp = contextFields[0][0];
         return anchorTimestamp === firstTimestamp;
       });
