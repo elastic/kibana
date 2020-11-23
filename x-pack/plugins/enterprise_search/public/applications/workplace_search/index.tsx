@@ -16,13 +16,17 @@ import { AppLogic } from './app_logic';
 import { Layout } from '../shared/layout';
 import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 
-import { GROUPS_PATH, SETUP_GUIDE_PATH } from './routes';
+import { GROUPS_PATH, SETUP_GUIDE_PATH, SOURCES_PATH, PERSONAL_SOURCES_PATH } from './routes';
 
 import { SetupGuide } from './views/setup_guide';
 import { ErrorState } from './views/error_state';
 import { NotFound } from '../shared/not_found';
 import { Overview } from './views/overview';
 import { GroupsRouter } from './views/groups';
+import { SourcesRouter } from './views/content_sources';
+
+import { GroupSubNav } from './views/groups/components/group_sub_nav';
+import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -36,6 +40,10 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   const { pathname } = useLocation();
+
+  // We don't want so show the subnavs on the container root pages.
+  const showSourcesSubnav = pathname !== SOURCES_PATH && pathname !== PERSONAL_SOURCES_PATH;
+  const showGroupsSubnav = pathname !== GROUPS_PATH;
 
   /**
    * Personal dashboard urls begin with /p/
@@ -62,19 +70,32 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route exact path="/">
         {errorConnecting ? <ErrorState /> : <Overview />}
       </Route>
+      <Route path={SOURCES_PATH}>
+        <Layout
+          navigation={<WorkplaceSearchNav sourcesSubNav={showSourcesSubnav && <SourceSubNav />} />}
+          restrictWidth
+          readOnlyMode={readOnlyMode}
+        >
+          <SourcesRouter />
+        </Layout>
+      </Route>
+      <Route path={GROUPS_PATH}>
+        <Layout
+          navigation={<WorkplaceSearchNav groupsSubNav={showGroupsSubnav && <GroupSubNav />} />}
+          restrictWidth
+          readOnlyMode={readOnlyMode}
+        >
+          <GroupsRouter />
+        </Layout>
+      </Route>
       <Route>
         <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
           {errorConnecting ? (
             <ErrorState />
           ) : (
-            <Switch>
-              <Route path={GROUPS_PATH}>
-                <GroupsRouter />
-              </Route>
-              <Route>
-                <NotFound product={WORKPLACE_SEARCH_PLUGIN} />
-              </Route>
-            </Switch>
+            <Route>
+              <NotFound product={WORKPLACE_SEARCH_PLUGIN} />
+            </Route>
           )}
         </Layout>
       </Route>
