@@ -240,9 +240,9 @@ export const installPackageByUploadHandler: RequestHandler<
   }
 };
 
-export const deletePackageHandler: RequestHandler<TypeOf<
-  typeof DeletePackageRequestSchema.params
->> = async (context, request, response) => {
+export const deletePackageHandler: RequestHandler<
+  TypeOf<typeof DeletePackageRequestSchema.params>
+> = async (context, request, response) => {
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
