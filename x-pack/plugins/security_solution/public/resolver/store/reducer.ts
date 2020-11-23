@@ -11,7 +11,7 @@ import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
 import { ResolverAction } from './actions';
 import { ResolverState, ResolverUIState } from '../types';
-import { nodePosition } from '../models/indexed_graph/isometric_taxi_layout';
+import { nodePosition } from '../models/indexed_process_tree/isometric_taxi_layout';
 
 const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
   state = {

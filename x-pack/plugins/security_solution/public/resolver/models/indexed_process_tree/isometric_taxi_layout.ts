@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  IndexedGraph,
+  IndexedProcessTree,
   Vector2,
   EdgeLineSegment,
   ProcessWidths,
@@ -17,25 +17,27 @@ import {
 import * as nodeModel from '../../../../common/endpoint/models/node';
 import { ResolverNode } from '../../../../common/endpoint/types';
 import * as vector2 from '../vector2';
-import * as indexedGraphModel from './index';
+import * as indexedProcessTreeModel from './index';
 import { getFriendlyElapsedTime as elapsedTime } from '../../lib/date';
 
 /**
  * Graph the process tree
  */
-export function isometricTaxiLayoutFactory(indexedGraph: IndexedGraph): IsometricTaxiLayout {
+export function isometricTaxiLayoutFactory(
+  indexedProcessTree: IndexedProcessTree
+): IsometricTaxiLayout {
   /**
    * Walk the tree in reverse level order, calculating the 'width' of subtrees.
    */
-  const subgraphWidths: Map<ResolverNode, number> = calculateSubgraphWidths(indexedGraph);
+  const subTreeWidths: Map<ResolverNode, number> = calculateSubTreeWidths(indexedProcessTree);
 
   /**
    * Walk the tree in level order. Using the precalculated widths, calculate the position of nodes.
    * Nodes are positioned relative to their parents and preceding siblings.
    */
   const nodePositions: Map<ResolverNode, Vector2> = calculateNodePositions(
-    indexedGraph,
-    subgraphWidths
+    indexedProcessTree,
+    subTreeWidths
   );
 
   /**
@@ -43,8 +45,8 @@ export function isometricTaxiLayoutFactory(indexedGraph: IndexedGraph): Isometri
    * which connect them in a 'pitchfork' design.
    */
   const edgeLineSegments: EdgeLineSegment[] = calculateEdgeLineSegments(
-    indexedGraph,
-    subgraphWidths,
+    indexedProcessTree,
+    subTreeWidths,
     nodePositions
   );
 
@@ -77,17 +79,17 @@ export function isometricTaxiLayoutFactory(indexedGraph: IndexedGraph): Isometri
   return {
     processNodePositions: transformedPositions,
     edgeLineSegments: transformedEdgeLineSegments,
-    ariaLevels: ariaLevels(indexedGraph),
+    ariaLevels: ariaLevels(indexedProcessTree),
   };
 }
 
 /**
  * Calculate a level (starting at 1) for each node.
  */
-function ariaLevels(indexedGraph: IndexedGraph): Map<ResolverNode, number> {
+function ariaLevels(indexedProcessTree: IndexedProcessTree): Map<ResolverNode, number> {
   const map: Map<ResolverNode, number> = new Map();
-  for (const node of indexedGraphModel.levelOrder(indexedGraph)) {
-    const parentNode = indexedGraphModel.parent(indexedGraph, node);
+  for (const node of indexedProcessTreeModel.levelOrder(indexedProcessTree)) {
+    const parentNode = indexedProcessTreeModel.parent(indexedProcessTree, node);
     if (parentNode === undefined) {
       // nodes at the root have a level of 1
       map.set(node, 1);
@@ -143,19 +145,19 @@ function ariaLevels(indexedGraph: IndexedGraph): Map<ResolverNode, number> {
  *                   H
  *
  */
-function calculateSubgraphWidths(indexedGraph: IndexedGraph): ProcessWidths {
+function calculateSubTreeWidths(indexedProcessTree: IndexedProcessTree): ProcessWidths {
   const widths = new Map<ResolverNode, number>();
 
-  if (indexedGraphModel.size(indexedGraph) === 0) {
+  if (indexedProcessTreeModel.size(indexedProcessTree) === 0) {
     return widths;
   }
 
   const nodesInReverseLevelOrder: ResolverNode[] = [
-    ...indexedGraphModel.levelOrder(indexedGraph),
+    ...indexedProcessTreeModel.levelOrder(indexedProcessTree),
   ].reverse();
 
   for (const node of nodesInReverseLevelOrder) {
-    const children = indexedGraphModel.children(indexedGraph, nodeModel.nodeID(node));
+    const children = indexedProcessTreeModel.children(indexedProcessTree, nodeModel.nodeID(node));
 
     const sumOfWidthOfChildren = function sumOfWidthOfChildren() {
       return children.reduce(function sum(currentValue, child) {
@@ -180,12 +182,12 @@ function calculateSubgraphWidths(indexedGraph: IndexedGraph): ProcessWidths {
  * Layout the graph. Note: if any process events are missing the `entity_id`, this will throw an Error.
  */
 function calculateEdgeLineSegments(
-  indexedGraph: IndexedGraph,
+  indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths,
   positions: NodePositions
 ): EdgeLineSegment[] {
   const edgeLineSegments: EdgeLineSegment[] = [];
-  for (const metadata of levelOrderWithWidths(indexedGraph, widths)) {
+  for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
     /**
      * We only handle children, drawing lines back to their parents. The root has no parent, so we skip it
      */
@@ -244,7 +246,7 @@ function calculateEdgeLineSegments(
       metadata: edgeLineMetadata,
     };
 
-    const siblings = indexedGraphModel.children(indexedGraph, nodeModel.nodeID(parent));
+    const siblings = indexedProcessTreeModel.children(indexedProcessTree, nodeModel.nodeID(parent));
     const isFirstChild = node === siblings[0];
 
     if (metadata.isOnlyChild) {
@@ -306,7 +308,10 @@ function calculateEdgeLineSegments(
   return edgeLineSegments;
 }
 
-function calculateNodePositions(indexedGraph: IndexedGraph, widths: ProcessWidths): NodePositions {
+function calculateNodePositions(
+  indexedProcessTree: IndexedProcessTree,
+  widths: ProcessWidths
+): NodePositions {
   const positions = new Map<ResolverNode, Vector2>();
   /**
    * This algorithm iterates the tree in level order. It keeps counters that are reset for each parent.
@@ -325,7 +330,7 @@ function calculateNodePositions(indexedGraph: IndexedGraph, widths: ProcessWidth
   let numberOfPrecedingSiblings = 0;
   let runningWidthOfPrecedingSiblings = 0;
 
-  for (const metadata of levelOrderWithWidths(indexedGraph, widths)) {
+  for (const metadata of levelOrderWithWidths(indexedProcessTree, widths)) {
     // Handle root node
     if (metadata.parent === null) {
       const { node } = metadata;
@@ -393,11 +398,11 @@ function calculateNodePositions(indexedGraph: IndexedGraph, widths: ProcessWidth
   return positions;
 }
 function* levelOrderWithWidths(
-  indexedGraph: IndexedGraph,
+  indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths
 ): Iterable<ProcessWithWidthMetadata> {
-  for (const node of indexedGraphModel.levelOrder(indexedGraph)) {
-    const parent = indexedGraphModel.parent(indexedGraph, node);
+  for (const node of indexedProcessTreeModel.levelOrder(indexedProcessTree)) {
+    const parent = indexedProcessTreeModel.parent(indexedProcessTree, node);
     const width = widths.get(node);
 
     if (width === undefined) {
@@ -435,7 +440,10 @@ function* levelOrderWithWidths(
         parentWidth,
       };
 
-      const siblings = indexedGraphModel.children(indexedGraph, nodeModel.nodeID(parent));
+      const siblings = indexedProcessTreeModel.children(
+        indexedProcessTree,
+        nodeModel.nodeID(parent)
+      );
       if (siblings.length === 1) {
         metadata.isOnlyChild = true;
         metadata.lastChildWidth = width;

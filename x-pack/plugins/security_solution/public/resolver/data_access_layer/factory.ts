@@ -179,7 +179,7 @@ export function dataAccessLayerFactory(
      * @param {string[]} indices
      * @returns {Promise<ResolverNode[]>}
      */
-    async resolverGraph(
+    async newResolverTree(
       dataId: string,
       schema: TreeIdSchema,
       timerange: Timerange,

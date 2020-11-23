@@ -11,18 +11,18 @@ import * as nodeModel from '../../../common/endpoint/models/node';
 import { ResolverEvent, SafeResolverEvent, ResolverNode } from '../../../common/endpoint/types';
 import { ResolverProcessType } from '../types';
 
-// TODO: These should be handled external to resolver.
-// TODO:
 /**
  * Returns true if the process's eventType is either 'processCreated' or 'processRan'.
  * Resolver will only render 'graphable' process events.
- * TODO: Move out of resolver
+ * @deprecated
  */
 export function isGraphableProcess(passedEvent: SafeResolverEvent) {
   return eventType(passedEvent) === 'processCreated' || eventType(passedEvent) === 'processRan';
 }
 
-// TODO: Move out of resolver
+/**
+ * @deprecated - see getNodeState in data selector
+ */
 export function isTerminatedProcess(passedEvent: SafeResolverEvent) {
   return eventType(passedEvent) === 'processTerminated';
 }
@@ -42,7 +42,6 @@ export function datetime(node: ResolverNode): number | null {
 
 /**
  * Returns a custom event type for a process event based on the event's metadata.
- * TODO: move out of resolver
  */
 export function eventType(passedEvent: SafeResolverEvent): ResolverProcessType {
   if (eventModel.isLegacyEventSafeVersion(passedEvent)) {
@@ -85,8 +84,18 @@ export function eventType(passedEvent: SafeResolverEvent): ResolverProcessType {
 }
 
 /**
+ * Returns the process event's PID
+ */
+export function uniquePidForProcess(passedEvent: ResolverEvent): string {
+  if (eventModel.isLegacyEvent(passedEvent)) {
+    return String(passedEvent.endgame.unique_pid);
+  } else {
+    return passedEvent.process.entity_id;
+  }
+}
+
+/**
  * Returns the PID for the process on the host
- * TODO: move out of resolver
  */
 export function processPID(event: SafeResolverEvent): number | undefined {
   return firstNonNullValue(
@@ -95,8 +104,18 @@ export function processPID(event: SafeResolverEvent): number | undefined {
 }
 
 /**
+ * Returns the process event's parent PID
+ */
+export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | undefined {
+  if (eventModel.isLegacyEvent(passedEvent)) {
+    return String(passedEvent.endgame.unique_ppid);
+  } else {
+    return passedEvent.process.parent?.entity_id;
+  }
+}
+
+/**
  * Returns the process event's path on its host
- * TODO: move out of resolver
  */
 export function processPath(passedEvent: SafeResolverEvent): string | undefined {
   return firstNonNullValue(
@@ -108,7 +127,6 @@ export function processPath(passedEvent: SafeResolverEvent): string | undefined 
 
 /**
  * Returns the username for the account that ran the process
- * TODO: move out of resolver
  */
 export function userInfoForProcess(
   passedEvent: ResolverEvent
@@ -118,7 +136,6 @@ export function userInfoForProcess(
 
 /**
  * Returns the command line path and arguments used to run the `passedEvent` if any
- * TODO: move out of resolver
  *
  * @param {ResolverEvent} passedEvent The `ResolverEvent` to get the arguments value for
  * @returns {string | undefined} The arguments (including the path) used to run the process
@@ -134,7 +151,6 @@ export function argsForProcess(passedEvent: ResolverEvent): string | undefined {
 /**
  * used to sort events
  */
-// TODO: Replace with a more generalized sorter based on the data attribute to be sorted on selected by the user
 export function orderByTime(first: ResolverNode, second: ResolverNode): number {
   const firstDatetime: number | null = datetime(first);
   const secondDatetime: number | null = datetime(second);

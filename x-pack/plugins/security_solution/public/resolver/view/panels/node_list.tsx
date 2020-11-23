@@ -90,13 +90,13 @@ export const NodeList = memo(() => {
     useCallback((state: ResolverState) => {
       const { processNodePositions } = selectors.layout(state);
       const view: ProcessTableView[] = [];
-      for (const graphNode of processNodePositions.keys()) {
-        const name = nodeModel.nodeName(graphNode);
-        const nodeID = nodeModel.nodeID(graphNode);
+      for (const treeNode of processNodePositions.keys()) {
+        const name = nodeModel.nodeName(treeNode);
+        const nodeID = nodeModel.nodeID(treeNode);
         if (nodeID !== undefined) {
           view.push({
             name,
-            timestamp: nodeModel.timestampAsDate(graphNode),
+            timestamp: nodeModel.timestampAsDate(treeNode),
             nodeID,
           });
         }

@@ -8,9 +8,9 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import {
   ResolverEntityIndex,
   ResolverNode,
-  ResolverGraph,
+  NewResolverTree,
 } from '../../../../common/endpoint/types';
-import { ResolverState, DataAccessLayer, TreeIdSchema } from '../../types';
+import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 
@@ -51,7 +51,7 @@ export function ResolverTreeFetcher(
     //   endpoint: { id: 'process.entity_id', parent: 'process.parent.entitiy_id', ancestry: 'process.Ext.ancestry },
     // };
 
-    const graphRequestIdSchema = {
+    const treeRequestIDSchema = {
       id: 'process.entity_id',
       name: 'process.name',
       parent: 'process.parent.entity_id',
@@ -90,9 +90,9 @@ export function ResolverTreeFetcher(
         // TODO: Enttities call should return the fields as [{ process: { entity_id: 'blargh' }}] to allow use of the schema.id field
         entityIDToFetch = matchingEntities[0].entity_id;
 
-        result = await dataAccessLayer.resolverGraph(
+        result = await dataAccessLayer.newResolverTree(
           entityIDToFetch,
-          graphRequestIdSchema,
+          treeRequestIDSchema,
           timerange,
           databaseParameters.indices ?? []
         );
@@ -111,8 +111,7 @@ export function ResolverTreeFetcher(
         }
       }
       if (result !== undefined) {
-        const resolverGraph: ResolverGraph = {
-          // TODO: Should we store this ourselves or have the backend send it back?
+        const newResolverTree: NewResolverTree = {
           originId: entityIDToFetch,
           nodes: result,
         };
@@ -120,7 +119,7 @@ export function ResolverTreeFetcher(
         api.dispatch({
           type: 'serverReturnedResolverData',
           payload: {
-            result: resolverGraph,
+            result: newResolverTree,
             parameters: databaseParameters,
           },
         });

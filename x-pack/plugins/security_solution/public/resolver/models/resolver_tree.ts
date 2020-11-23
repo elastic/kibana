@@ -10,8 +10,28 @@ import {
   ResolverLifecycleNode,
   ResolverChildNode,
   SafeResolverEvent,
+  NewResolverTree,
+  ResolverNode,
+  EventStats,
 } from '../../../common/endpoint/types';
 import * as eventModel from '../../../common/endpoint/models/event';
+import * as nodeModel from '../../../common/endpoint/models/node';
+
+/**
+ * This returns a map of nodeIds to the associated stats provided by the datasource.
+ */
+
+export function nodeStats(tree: NewResolverTree): Map<ResolverNode['id'], EventStats> {
+  const stats = new Map();
+
+  for (const node of tree.nodes) {
+    if (node.stats) {
+      const nodeId = nodeModel.nodeID(node);
+      stats.set(nodeId, node.stats);
+    }
+  }
+  return stats;
+}
 
 /**
  * ResolverTree is a type returned by the server.
@@ -43,13 +63,13 @@ export function lifecycleEvents(tree: ResolverTree) {
  * This returns a map of entity_ids to stats for the related events and alerts.
  */
 export function relatedEventsStats(tree: ResolverTree): Map<string, ResolverNodeStats> {
-  const nodeStats: Map<string, ResolverNodeStats> = new Map();
+  const nodeRelatedEventStats: Map<string, ResolverNodeStats> = new Map();
   for (const node of lifecycleNodes(tree)) {
     if (node.stats) {
-      nodeStats.set(node.entityID, node.stats);
+      nodeRelatedEventStats.set(node.entityID, node.stats);
     }
   }
-  return nodeStats;
+  return nodeRelatedEventStats;
 }
 
 /**
@@ -119,14 +139,18 @@ export function mock({
 
 /**
  * `true` if there are more children to fetch.
+ * TODO: Going to need to use levelOrder or similar to identify ancestor count and child count and then compare against limit
  */
-export function hasMoreChildren(resolverTree: ResolverTree): boolean {
-  return resolverTree.children.nextChild !== null;
+export function hasMoreChildren(resolverTree: NewResolverTree): boolean {
+  return false;
+  // return resolverTree.children.nextChild !== null;
 }
 
 /**
  * `true` if there are more ancestors to fetch.
+ * TODO: Going to need to use levelOrder or similar to identify ancestor count and child count and then compare against limit
  */
-export function hasMoreAncestors(resolverTree: ResolverTree): boolean {
-  return resolverTree.ancestry.nextAncestor !== null;
+export function hasMoreAncestors(resolverTree: NewResolverTree): boolean {
+  return false;
+  // return resolverTree.ancestry.nextAncestor !== null;
 }
