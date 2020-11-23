@@ -49,6 +49,7 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
   const {
     parsedDefaultValue,
     multipleMappingsDeclared,
+    mappingsType,
   } = useMemo<MappingsEditorParsedMetadata>(() => {
     const mappingsDefinition = extractMappingsDefinition(value);
 
