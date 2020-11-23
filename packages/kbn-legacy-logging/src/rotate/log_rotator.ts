@@ -27,7 +27,7 @@ import { basename, dirname, join, sep } from 'path';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { promisify } from 'util';
-import { KibanaConfig } from '../../kbn_server';
+import { LegacyLoggingConfig } from '../schema';
 
 const mkdirAsync = promisify(fs.mkdir);
 const readdirAsync = promisify(fs.readdir);
@@ -37,7 +37,7 @@ const unlinkAsync = promisify(fs.unlink);
 const writeFileAsync = promisify(fs.writeFile);
 
 export class LogRotator {
-  private readonly config: KibanaConfig;
+  private readonly config: LegacyLoggingConfig;
   private readonly log: Server['log'];
   public logFilePath: string;
   public everyBytes: number;
@@ -52,19 +52,19 @@ export class LogRotator {
   private stalkerUsePollingPolicyTestTimeout: NodeJS.Timeout | null;
   public shouldUsePolling: boolean;
 
-  constructor(config: KibanaConfig, server: Server) {
+  constructor(config: LegacyLoggingConfig, server: Server) {
     this.config = config;
     this.log = server.log.bind(server);
-    this.logFilePath = config.get('logging.dest');
-    this.everyBytes = config.get('logging.rotate.everyBytes');
-    this.keepFiles = config.get('logging.rotate.keepFiles');
+    this.logFilePath = config.dest;
+    this.everyBytes = config.rotate.everyBytes;
+    this.keepFiles = config.rotate.keepFiles;
     this.running = false;
     this.logFileSize = 0;
     this.isRotating = false;
     this.throttledRotate = throttle(async () => await this._rotate(), 5000);
     this.stalker = null;
-    this.usePolling = config.get('logging.rotate.usePolling');
-    this.pollingInterval = config.get('logging.rotate.pollingInterval');
+    this.usePolling = config.rotate.usePolling;
+    this.pollingInterval = config.rotate.pollingInterval;
     this.shouldUsePolling = false;
     this.stalkerUsePollingPolicyTestTimeout = null;
   }
@@ -128,7 +128,10 @@ export class LogRotator {
         };
 
         // setup conditions that would fire the observable
-        this.stalkerUsePollingPolicyTestTimeout = setTimeout(() => completeFn(true), 15000);
+        this.stalkerUsePollingPolicyTestTimeout = setTimeout(
+          () => completeFn(true),
+          this.config.rotate.pollingPolicyTestTimeout || 15000
+        );
         testWatcher.on('change', () => completeFn(false));
         testWatcher.on('error', () => completeFn(true));
 
@@ -152,7 +155,7 @@ export class LogRotator {
   }
 
   async _startLogFileSizeMonitor() {
-    this.usePolling = this.config.get('logging.rotate.usePolling');
+    this.usePolling = this.config.rotate.usePolling;
     this.shouldUsePolling = await this._shouldUsePolling();
 
     if (this.usePolling && !this.shouldUsePolling) {

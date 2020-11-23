@@ -17,13 +17,15 @@
  * under the License.
  */
 
+import { ErrorEvent } from './log_events';
 import { LogInterceptor } from './log_interceptor';
 
-function stubClientErrorEvent(errorMeta) {
+function stubClientErrorEvent(errorMeta: Record<string, any>): ErrorEvent {
   const error = new Error();
   Object.assign(error, errorMeta);
   return {
     event: 'error',
+    url: '',
     pid: 1234,
     timestamp: Date.now(),
     tags: ['connection', 'client', 'error'],
@@ -35,7 +37,7 @@ const stubEconnresetEvent = () => stubClientErrorEvent({ code: 'ECONNRESET' });
 const stubEpipeEvent = () => stubClientErrorEvent({ errno: 'EPIPE' });
 const stubEcanceledEvent = () => stubClientErrorEvent({ errno: 'ECANCELED' });
 
-function assertDowngraded(transformed) {
+function assertDowngraded(transformed: Record<string, any>) {
   expect(!!transformed).toBe(true);
   expect(transformed).toHaveProperty('event', 'log');
   expect(transformed).toHaveProperty('tags');
@@ -47,13 +49,13 @@ describe('server logging LogInterceptor', () => {
     it('transforms ECONNRESET events', () => {
       const interceptor = new LogInterceptor();
       const event = stubEconnresetEvent();
-      assertDowngraded(interceptor.downgradeIfEconnreset(event));
+      assertDowngraded(interceptor.downgradeIfEconnreset(event)!);
     });
 
     it('does not match if the tags are not in order', () => {
       const interceptor = new LogInterceptor();
       const event = stubEconnresetEvent();
-      event.tags = [...event.tags.slice(1), event.tags[0]];
+      event.tags = [...event.tags!.slice(1), event.tags![0]];
       expect(interceptor.downgradeIfEconnreset(event)).toBe(null);
     });
 
@@ -75,13 +77,13 @@ describe('server logging LogInterceptor', () => {
     it('transforms EPIPE events', () => {
       const interceptor = new LogInterceptor();
       const event = stubEpipeEvent();
-      assertDowngraded(interceptor.downgradeIfEpipe(event));
+      assertDowngraded(interceptor.downgradeIfEpipe(event)!);
     });
 
     it('does not match if the tags are not in order', () => {
       const interceptor = new LogInterceptor();
       const event = stubEpipeEvent();
-      event.tags = [...event.tags.slice(1), event.tags[0]];
+      event.tags = [...event.tags!.slice(1), event.tags![0]];
       expect(interceptor.downgradeIfEpipe(event)).toBe(null);
     });
 
@@ -103,13 +105,13 @@ describe('server logging LogInterceptor', () => {
     it('transforms ECANCELED events', () => {
       const interceptor = new LogInterceptor();
       const event = stubEcanceledEvent();
-      assertDowngraded(interceptor.downgradeIfEcanceled(event));
+      assertDowngraded(interceptor.downgradeIfEcanceled(event)!);
     });
 
     it('does not match if the tags are not in order', () => {
       const interceptor = new LogInterceptor();
       const event = stubEcanceledEvent();
-      event.tags = [...event.tags.slice(1), event.tags[0]];
+      event.tags = [...event.tags!.slice(1), event.tags![0]];
       expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
     });
 
@@ -131,7 +133,7 @@ describe('server logging LogInterceptor', () => {
     it('transforms https requests when serving http errors', () => {
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ message: 'Parse Error', code: 'HPE_INVALID_METHOD' });
-      assertDowngraded(interceptor.downgradeIfHTTPSWhenHTTP(event));
+      assertDowngraded(interceptor.downgradeIfHTTPSWhenHTTP(event)!);
     });
 
     it('ignores non events', () => {
@@ -150,7 +152,7 @@ describe('server logging LogInterceptor', () => {
         '4584650176:error:1408F09C:SSL routines:ssl3_get_record:http request:../deps/openssl/openssl/ssl/record/ssl3_record.c:322:\n';
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ message });
-      assertDowngraded(interceptor.downgradeIfHTTPWhenHTTPS(event));
+      assertDowngraded(interceptor.downgradeIfHTTPWhenHTTPS(event)!);
     });
 
     it('ignores non events', () => {
