@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DEFAULT_META } from './default_meta';
-export * from './documentation_links';
+export { Overview } from './components/overview';
