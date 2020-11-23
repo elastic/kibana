@@ -81,7 +81,6 @@ import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/
 import { getControlsForDetector } from './get_controls_for_detector';
 import { SeriesControls } from './components/series_controls';
 import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/timeseries_chart_with_tooltip';
-import { PlotByFunctionControls } from './components/plot_function_controls';
 import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
 import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
@@ -1013,15 +1012,9 @@ export class TimeSeriesExplorer extends React.Component {
           selectedDetectorIndex={selectedDetectorIndex}
           selectedEntities={this.props.selectedEntities}
           bounds={bounds}
+          functionDescription={this.props.functionDescription}
+          setFunctionDescription={this.setFunctionDescription}
         >
-          <PlotByFunctionControls
-            selectedJobId={selectedJobId}
-            selectedDetectorIndex={selectedDetectorIndex}
-            selectedEntities={this.props.selectedEntities}
-            functionDescription={this.props.functionDescription}
-            setFunctionDescription={this.setFunctionDescription}
-          />
-
           {arePartitioningFieldsProvided && (
             <EuiFlexItem style={{ textAlign: 'right' }}>
               <EuiFormRow hasEmptyLabelSpace style={{ maxWidth: '100%' }}>

@@ -22,13 +22,11 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
   const _meta: FormInternal['_meta'] = {
     hot: {
       useRollover: Boolean(hot?.actions?.rollover),
-      forceMergeEnabled: Boolean(hot?.actions?.forcemerge),
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
     },
     warm: {
       enabled: Boolean(warm),
       warmPhaseOnRollover: Boolean(warm?.min_age === '0ms'),
-      forceMergeEnabled: Boolean(warm?.actions?.forcemerge),
       bestCompression: warm?.actions?.forcemerge?.index_codec === 'best_compression',
       dataTierAllocationType: determineDataTierAllocationType(warm?.actions),
     },

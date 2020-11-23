@@ -20,8 +20,7 @@ export interface SharedKey {
 }
 type SharedKeyString = string;
 
-type ArchiveFilelist = string[];
-const archiveFilelistCache: Map<SharedKeyString, ArchiveFilelist> = new Map();
+const archiveFilelistCache: Map<SharedKeyString, string[]> = new Map();
 export const getArchiveFilelist = (keyArgs: SharedKey) =>
   archiveFilelistCache.get(sharedKey(keyArgs));
 
@@ -44,6 +43,15 @@ export const getPackageInfo = (args: SharedKey) => {
   } else {
     throw new Error(`Unknown installSource: ${args.installSource}`);
   }
+};
+
+export const getArchivePackage = (args: SharedKey) => {
+  const packageInfo = getPackageInfo(args);
+  const paths = getArchiveFilelist(args);
+  return {
+    paths,
+    packageInfo,
+  };
 };
 
 export const setPackageInfo = ({
