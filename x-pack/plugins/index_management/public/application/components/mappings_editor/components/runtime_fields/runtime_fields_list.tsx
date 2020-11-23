@@ -15,12 +15,14 @@ import {
   RuntimeFieldEditorFlyoutContentProps,
 } from '../../shared_imports';
 import { EmptyPrompt } from './empty_prompt';
+import { RuntimeFieldsListItemContainer } from './runtimefields_list_item_container';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
 export const RuntimeFieldsList = () => {
   const runtimeFieldsDocsUri = documentationService.getRuntimeFields();
   const {
+    runtimeFields,
     runtimeFieldsList: { status },
   } = useMappingsState();
   const dispatch = useDispatch();
@@ -71,5 +73,18 @@ export const RuntimeFieldsList = () => {
     }
   }, [status, addContentToGlobalFlyout, removeContentFromGlobalFlyout, saveRuntimeField, exitEdit]);
 
-  return <EmptyPrompt createField={createField} runtimeFieldsDocsUri={runtimeFieldsDocsUri} />;
+  const fieldsToArray = Object.entries(runtimeFields);
+  const isEmpty = fieldsToArray.length === 0;
+
+  return isEmpty ? (
+    <EmptyPrompt createField={createField} runtimeFieldsDocsUri={runtimeFieldsDocsUri} />
+  ) : (
+    <>
+      <ul>
+        {fieldsToArray.map(([fieldId]) => (
+          <RuntimeFieldsListItemContainer key={fieldId} fieldId={fieldId} />
+        ))}
+      </ul>
+    </>
+  );
 };

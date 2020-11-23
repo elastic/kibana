@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed, findTestSubject } from '@kbn/test/jest';
 
 // This import needs to come first as it sets the jest.mock calls
 import { WithAppDependencies } from './setup_environment';
@@ -172,6 +171,24 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     component.update();
   };
 
+  const getRuntimeFieldInfo = (
+    testSubjectField: string
+  ): { name: string; type: string; doesShadowMappedField: boolean } => {
+    const name = find(`${testSubjectField}-fieldName` as TestSubjects).text();
+    const type = find(`${testSubjectField}-datatype` as TestSubjects).props()['data-type-value'];
+    return { name, type, doesShadowMappedField: false };
+  };
+
+  const getRuntimeFieldsList = () => {
+    const fields = find('runtimeFieldsListItem').map((wrapper) => wrapper);
+    return fields.map((field) => {
+      return {
+        name: findTestSubject(field, 'fieldName').text(),
+        type: findTestSubject(field, 'fieldType').text(),
+      };
+    });
+  };
+
   // --- Other ---
   const selectTab = async (tab: 'fields' | 'runtimeFields' | 'templates' | 'advanced') => {
     const index = ['fields', 'runtimeFields', 'templates', 'advanced'].indexOf(tab);
@@ -236,6 +253,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     getCheckboxValue,
     toggleFormRow,
     createRuntimeField,
+    getRuntimeFieldsList,
   };
 };
 

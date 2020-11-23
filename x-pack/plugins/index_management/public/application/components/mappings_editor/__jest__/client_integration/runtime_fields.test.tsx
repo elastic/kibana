@@ -5,7 +5,7 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed, DomFields } from './helpers';
+import { componentHelpers, MappingsEditorTestBed } from './helpers';
 
 const { setup } = componentHelpers.mappingsEditor;
 
@@ -60,60 +60,48 @@ describe('Mappings editor: runtime fields', () => {
     });
 
     describe.skip('when there are runtime fields', () => {
-      test('it should display an empty prompt', () => {
-        const defaultMappings = {
-          runtime: {
-            day_of_week: {
-              type: 'keyword',
-              script: {
-                source:
-                  "emit(doc['timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
-              },
-            },
-          },
-        };
-
-        test('should list the fields', async () => {
-          testBed = setup({
-            value: defaultMappings,
-            onChange: onChangeHandler,
-          });
-
-          const {
-            actions: { expandAllFieldsAndReturnMetadata },
-          } = testBed;
-
-          const domTreeMetadata = await expandAllFieldsAndReturnMetadata();
-
-          expect(domTreeMetadata).toEqual(defaultMappings.properties);
-        });
-
-        test('should allow to be controlled by parent component and update on prop change', async () => {
-          testBed = setup({
-            value: defaultMappings,
-            onChange: onChangeHandler,
-          });
-
-          const {
-            component,
-            setProps,
-            actions: { expandAllFieldsAndReturnMetadata },
-          } = testBed;
-
-          const newMappings = { properties: { hello: { type: 'text' } } };
-          let domTreeMetadata: DomFields = {};
-
-          await act(async () => {
-            // Change the `value` prop of our <MappingsEditor />
-            setProps({ value: newMappings });
-          });
-          component.update();
-
-          domTreeMetadata = await expandAllFieldsAndReturnMetadata();
-
-          expect(domTreeMetadata).toEqual(newMappings.properties);
-        });
-      });
+      // const defaultMappings = {
+      //   runtime: {
+      //     day_of_week: {
+      //       type: 'keyword',
+      //       script: {
+      //         source:
+      //           "emit(doc['timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+      //       },
+      //     },
+      //   },
+      // };
+      // test('should list the fields', async () => {
+      //   testBed = setup({
+      //     value: defaultMappings,
+      //     onChange: onChangeHandler,
+      //   });
+      //   const {
+      //     actions: { expandAllFieldsAndReturnMetadata },
+      //   } = testBed;
+      //   const domTreeMetadata = await expandAllFieldsAndReturnMetadata();
+      //   expect(domTreeMetadata).toEqual(defaultMappings.properties);
+      // });
+      // test('should allow to be controlled by parent component and update on prop change', async () => {
+      //   testBed = setup({
+      //     value: defaultMappings,
+      //     onChange: onChangeHandler,
+      //   });
+      //   const {
+      //     component,
+      //     setProps,
+      //     actions: { expandAllFieldsAndReturnMetadata },
+      //   } = testBed;
+      //   const newMappings = { properties: { hello: { type: 'text' } } };
+      //   let domTreeMetadata: DomFields = {};
+      //   await act(async () => {
+      //     // Change the `value` prop of our <MappingsEditor />
+      //     setProps({ value: newMappings });
+      //   });
+      //   component.update();
+      //   domTreeMetadata = await expandAllFieldsAndReturnMetadata();
+      //   expect(domTreeMetadata).toEqual(newMappings.properties);
+      // });
     });
 
     describe('Create / edit / delete runtime fields', () => {
@@ -144,6 +132,14 @@ describe('Mappings editor: runtime fields', () => {
 
         // Make sure editor is closed and the field is in the list
         expect(exists('runtimeFieldEditor')).toBe(false);
+        expect(exists('emptyList')).toBe(false);
+
+        const fields = actions.getRuntimeFieldsList();
+        expect(fields.length).toBe(1);
+
+        const [field] = fields;
+        expect(field.name).toBe('myField');
+        expect(field.type).toBeDefined(); // We don't assert on the default type as it will probably change overtime
       });
     });
   });

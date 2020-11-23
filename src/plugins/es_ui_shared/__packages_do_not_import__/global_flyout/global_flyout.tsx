@@ -46,7 +46,6 @@ const FlyoutMultiContentContext = createContext<Context | undefined>(undefined);
 
 const DEFAULT_FLYOUT_PROPS = {
   'data-test-subj': 'flyout',
-  ownFocus: true,
   size: 'm' as 'm',
   maxWidth: 500,
 };
