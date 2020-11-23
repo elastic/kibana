@@ -10,12 +10,7 @@ import { render as reactRender, RenderOptions, RenderResult } from '@testing-lib
 import { ScopedHistory } from 'kibana/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { FleetAppContext } from '../app';
-import {
-  IngestManagerConfigType,
-  IngestManagerSetupDeps,
-  IngestManagerStart,
-  IngestManagerStartDeps,
-} from '../../../plugin';
+import { FleetConfigType, FleetSetupDeps, FleetStartDeps, FleetStart } from '../../../plugin';
 import { createSetupDepsMock, createStartDepsMock } from './plugin_dependencies';
 import { createConfigurationMock } from './plugin_configuration';
 import { UIExtensionsStorage } from '../types';
@@ -26,10 +21,11 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
 export interface TestRenderer {
   history: ScopedHistory;
   coreStart: ReturnType<typeof coreMock.createStart>;
-  setupDeps: IngestManagerSetupDeps;
-  startDeps: IngestManagerStartDeps;
-  config: IngestManagerConfigType;
-  startInterface: IngestManagerStart;
+  setupDeps: FleetSetupDeps;
+  startDeps: FleetStartDeps;
+  config: FleetConfigType;
+  startInterface: FleetStart;
+  kibanaVersion: string;
   AppWrapper: React.FC<any>;
   render: UiRender;
 }
@@ -44,38 +40,37 @@ export const createTestRendererMock = (): TestRenderer => {
   const extensions: UIExtensionsStorage = {};
   const startInterface = createStartMock(extensions);
 
-  const AppWrapper: React.FC = memo(({ children }) => {
-    return (
-      <FleetAppContext
-        basepath={'/mock'}
-        coreStart={coreStart}
-        setupDeps={setupDeps}
-        startDeps={startDeps}
-        config={config}
-        history={history}
-        kibanaVersion={'8.0.0'}
-        extensions={extensions}
-      >
-        {children}
-      </FleetAppContext>
-    );
-  });
-
-  const render: UiRender = (ui, options) => {
-    return reactRender(ui, {
-      wrapper: AppWrapper,
-      ...options,
-    });
-  };
-
-  return {
+  const testRendererMocks: TestRenderer = {
     history,
     coreStart,
     setupDeps,
     startDeps,
     config,
     startInterface,
-    AppWrapper,
-    render,
+    kibanaVersion: '8.0.0',
+    AppWrapper: memo(({ children }) => {
+      return (
+        <FleetAppContext
+          basepath={'/mock'}
+          coreStart={coreStart}
+          setupDeps={setupDeps}
+          startDeps={startDeps}
+          config={config}
+          history={history}
+          kibanaVersion={testRendererMocks.kibanaVersion}
+          extensions={extensions}
+        >
+          {children}
+        </FleetAppContext>
+      );
+    }),
+    render: (ui, options) => {
+      return reactRender(ui, {
+        wrapper: testRendererMocks.AppWrapper,
+        ...options,
+      });
+    },
   };
+
+  return testRendererMocks;
 };
