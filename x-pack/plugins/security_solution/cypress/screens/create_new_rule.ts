@@ -27,7 +27,11 @@ export const MITRE_BTN = '[data-test-subj="addMitre"]';
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
 
+export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
+
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
+
+export const COMBO_BOX_RESULT = '.euiFilterSelectItem';
 
 export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
@@ -56,6 +60,8 @@ export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loa
 
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
+
+export const INDICATOR_MATCH_TYPE = '[data-test-subj="threatMatchRuleType"]';
 
 export const INPUT = '[data-test-subj="input"]';
 
