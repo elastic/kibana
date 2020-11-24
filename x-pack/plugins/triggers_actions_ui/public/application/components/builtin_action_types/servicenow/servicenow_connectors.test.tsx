@@ -5,9 +5,9 @@
  */
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { DocLinksStart } from 'kibana/public';
 import ServiceNowConnectorFields from './servicenow_connectors';
 import { ServiceNowActionConnector } from './types';
+jest.mock('../../../../common/lib/kibana');
 
 describe('ServiceNowActionConnectorFields renders', () => {
   test('alerting servicenow connector fields is rendered', () => {
@@ -24,16 +24,12 @@ describe('ServiceNowActionConnectorFields renders', () => {
         apiUrl: 'https://test/',
       },
     } as ServiceNowActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <ServiceNowConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], username: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -63,16 +59,12 @@ describe('ServiceNowActionConnectorFields renders', () => {
         isCaseOwned: true,
       },
     } as ServiceNowActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <ServiceNowConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], username: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
         consumer={'case'}
       />
@@ -91,16 +83,12 @@ describe('ServiceNowActionConnectorFields renders', () => {
       config: {},
       secrets: {},
     } as ServiceNowActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <ServiceNowConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], username: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -122,16 +110,12 @@ describe('ServiceNowActionConnectorFields renders', () => {
         apiUrl: 'https://test/',
       },
     } as ServiceNowActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
     const wrapper = mountWithIntl(
       <ServiceNowConnectorFields
         action={actionConnector}
         errors={{ apiUrl: [], username: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
