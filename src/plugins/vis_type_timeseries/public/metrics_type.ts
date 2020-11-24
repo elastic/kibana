@@ -25,6 +25,7 @@ import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
 import { INDEXES_SEPARATOR } from '../common/constants';
+import { IndexPattern } from '../../data/public';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -91,7 +92,7 @@ export const metricsVisDefinition = {
         await Promise.all(
           indexes.split(INDEXES_SEPARATOR).map((title) => indexPatterns.findByTitle(title))
         )
-      ).filter((index) => Boolean(index));
+      ).filter((index) => Boolean(index)) as IndexPattern[];
     }
 
     return [];

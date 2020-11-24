@@ -33,38 +33,6 @@ export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizatio
       private fireEvent: IInterpreterRenderHandlers['event']
     ) {}
 
-    /**
-     * Find index pattern by its title, of if not given, gets default
-     * @param {string} [index]
-     * @returns {Promise<string>} index id
-     */
-    async findIndex(index: string) {
-      const { indexPatterns } = this.dataPlugin;
-      let idxObj;
-
-      if (index) {
-        idxObj = await indexPatterns.findByTitle(index);
-        if (!idxObj) {
-          throw new Error(
-            i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
-              defaultMessage: 'Index {index} not found',
-              values: { index: `"${index}"` },
-            })
-          );
-        }
-      } else {
-        idxObj = await indexPatterns.getDefault();
-        if (!idxObj) {
-          throw new Error(
-            i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
-              defaultMessage: 'Unable to find default index',
-            })
-          );
-        }
-      }
-      return idxObj.id;
-    }
-
     async render(visData: VegaParser) {
       const { toasts } = getNotifications();
 
@@ -110,7 +78,6 @@ export const createVegaVisualization = ({ getServiceSettings }: VegaVisualizatio
           serviceSettings,
           filterManager,
           timefilter,
-          findIndex: this.findIndex.bind(this),
         };
 
         if (vegaParser.useMap) {

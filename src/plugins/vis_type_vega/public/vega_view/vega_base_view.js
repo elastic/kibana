@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../data/public';
 
-import { getEnableExternalUrls } from '../services';
+import { getEnableExternalUrls, getData } from '../services';
 
 vega.scheme('elastic', euiPaletteColorBlind());
 
@@ -65,7 +65,6 @@ export class VegaBaseView {
     this._filterManager = opts.filterManager;
     this._fireEvent = opts.fireEvent;
     this._timefilter = opts.timefilter;
-    this._findIndex = opts.findIndex;
     this._view = null;
     this._vegaViewConfig = null;
     this._$messages = null;
@@ -125,6 +124,38 @@ export class VegaBaseView {
     } catch (err) {
       this.onError(err);
     }
+  }
+
+  /**
+   * Find index pattern by its title, of if not given, gets default
+   * @param {string} [index]
+   * @returns {Promise<string>} index id
+   */
+  async findIndex(index) {
+    const { indexPatterns } = getData();
+    let idxObj;
+
+    if (index) {
+      idxObj = await indexPatterns.findByTitle(index);
+      if (!idxObj) {
+        throw new Error(
+          i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
+            defaultMessage: 'Index {index} not found',
+            values: { index: `"${index}"` },
+          })
+        );
+      }
+    } else {
+      idxObj = await indexPatterns.getDefault();
+      if (!idxObj) {
+        throw new Error(
+          i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
+            defaultMessage: 'Unable to find default index',
+          })
+        );
+      }
+    }
+    return idxObj.id;
   }
 
   createViewConfig() {
@@ -261,7 +292,7 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async addFilterHandler(query, index) {
-    const indexId = await this._findIndex(index);
+    const indexId = await this.findIndex(index);
     const filter = esFilters.buildQueryFilter(query, indexId);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
@@ -272,7 +303,7 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async removeFilterHandler(query, index) {
-    const indexId = await this._findIndex(index);
+    const indexId = await this.findIndex(index);
     const filterToRemove = esFilters.buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();
