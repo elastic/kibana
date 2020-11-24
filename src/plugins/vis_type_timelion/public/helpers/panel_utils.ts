@@ -19,7 +19,7 @@
 
 import { Subject } from 'rxjs';
 import moment, { Moment } from 'moment-timezone';
-import { Position } from '@elastic/charts';
+import { Position, PointerEvent } from '@elastic/charts';
 
 import { TimefilterContract } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'kibana/public';
@@ -56,13 +56,7 @@ interface TimeRangeBounds {
   max: Moment | undefined;
 }
 
-export interface TimelionEvent {
-  name: string;
-  data?: any;
-}
-
-const ACTIVE_CURSOR = 'ACTIVE_CURSOR_TIMELION';
-const eventBus = new Subject<TimelionEvent>();
+const activeCursor$ = new Subject<PointerEvent>();
 
 const colors = [
   '#01A4A4',
@@ -96,4 +90,4 @@ function createTickFormat(
   return (val: number) => moment(val).format(format);
 }
 
-export { createTickFormat, colors, ACTIVE_CURSOR, eventBus };
+export { createTickFormat, colors, activeCursor$ };

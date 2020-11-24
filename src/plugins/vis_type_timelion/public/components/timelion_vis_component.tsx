@@ -36,14 +36,7 @@ import { useKibana } from '../../../kibana_react/public';
 import { AreaSeriesComponent } from './area_series';
 import { BarSeriesComponent } from './bar_series';
 
-import {
-  createTickFormat,
-  colors,
-  Axis as IAxis,
-  ACTIVE_CURSOR,
-  eventBus,
-  TimelionEvent,
-} from '../helpers/panel_utils';
+import { createTickFormat, colors, Axis as IAxis, activeCursor$ } from '../helpers/panel_utils';
 import { tickFormatters } from '../helpers/tick_formatters';
 
 import { Series, Sheet } from '../helpers/timelion_request_handler';
@@ -61,7 +54,7 @@ interface TimelionVisComponentProps {
 }
 
 const handleCursorUpdate = (cursor: PointerEvent) => {
-  eventBus.next({ name: ACTIVE_CURSOR, data: cursor });
+  activeCursor$.next(cursor);
 };
 
 function TimelionVisComponent({
@@ -96,13 +89,13 @@ function TimelionVisComponent({
   };
 
   useEffect(() => {
-    const updateCursor = ({ name, data }: TimelionEvent) => {
-      if (chartRef.current && name === ACTIVE_CURSOR && data) {
-        chartRef.current.dispatchExternalPointerEvent(data);
+    const updateCursor = (cursor: PointerEvent) => {
+      if (chartRef.current) {
+        chartRef.current.dispatchExternalPointerEvent(cursor);
       }
     };
 
-    const subscription = eventBus.asObservable().subscribe(updateCursor);
+    const subscription = activeCursor$.subscribe(updateCursor);
 
     return () => {
       subscription.unsubscribe();
