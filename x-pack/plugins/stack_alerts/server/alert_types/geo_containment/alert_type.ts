@@ -18,93 +18,7 @@ import {
 import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
-export type TrackingEvent = 'entered' | 'exited';
 export const ActionGroupId = 'Tracked entity contained';
-
-const actionVariableContextToEntityDateTimeLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextToEntityDateTimeLabel',
-  {
-    defaultMessage: `The time the entity was detected in the current boundary`,
-  }
-);
-
-const actionVariableContextFromEntityDateTimeLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityDateTimeLabel',
-  {
-    defaultMessage: `The last time the entity was recorded in the previous boundary`,
-  }
-);
-
-const actionVariableContextToEntityLocationLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextToEntityLocationLabel',
-  {
-    defaultMessage: 'The most recently captured location of the entity',
-  }
-);
-
-const actionVariableContextCrossingLineLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextCrossingLineLabel',
-  {
-    defaultMessage:
-      'GeoJSON line connecting the two locations that were used to determine the crossing event',
-  }
-);
-
-const actionVariableContextFromEntityLocationLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityLocationLabel',
-  {
-    defaultMessage: 'The previously captured location of the entity',
-  }
-);
-
-const actionVariableContextToBoundaryIdLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextCurrentBoundaryIdLabel',
-  {
-    defaultMessage: 'The current boundary id containing the entity (if any)',
-  }
-);
-
-const actionVariableContextToBoundaryNameLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextToBoundaryNameLabel',
-  {
-    defaultMessage: 'The boundary (if any) the entity has crossed into and is currently located',
-  }
-);
-
-const actionVariableContextFromBoundaryNameLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextFromBoundaryNameLabel',
-  {
-    defaultMessage: 'The boundary (if any) the entity has crossed from and was previously located',
-  }
-);
-
-const actionVariableContextFromBoundaryIdLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextFromBoundaryIdLabel',
-  {
-    defaultMessage: 'The previous boundary id containing the entity (if any)',
-  }
-);
-
-const actionVariableContextToEntityDocumentIdLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextCrossingDocumentIdLabel',
-  {
-    defaultMessage: 'The id of the crossing entity document',
-  }
-);
-
-const actionVariableContextFromEntityDocumentIdLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityDocumentIdLabel',
-  {
-    defaultMessage: 'The id of the crossing entity document',
-  }
-);
-
-const actionVariableContextTimeOfDetectionLabel = i18n.translate(
-  'xpack.stackAlerts.geoContainment.actionVariableContextTimeOfDetectionLabel',
-  {
-    defaultMessage: 'The alert interval end time this change was recorded',
-  }
-);
 
 const actionVariableContextEntityIdLabel = i18n.translate(
   'xpack.stackAlerts.geoContainment.actionVariableContextEntityIdLabel',
@@ -113,33 +27,61 @@ const actionVariableContextEntityIdLabel = i18n.translate(
   }
 );
 
+const actionVariableContextEntityDateTimeLabel = i18n.translate(
+  'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityDateTimeLabel',
+  {
+    defaultMessage: `The date the entity was recorded in the boundary`,
+  }
+);
+
+const actionVariableContextEntityDocumentIdLabel = i18n.translate(
+  'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityDocumentIdLabel',
+  {
+    defaultMessage: 'The id of the contained entity document',
+  }
+);
+
+const actionVariableContextDetectionDateTimeLabel = i18n.translate(
+  'xpack.stackAlerts.geoContainment.actionVariableContextDetectionDateTimeLabel',
+  {
+    defaultMessage: 'The alert interval end time this change was recorded',
+  }
+);
+
+const actionVariableContextEntityLocationLabel = i18n.translate(
+  'xpack.stackAlerts.geoContainment.actionVariableContextFromEntityLocationLabel',
+  {
+    defaultMessage: 'The location of the entity',
+  }
+);
+
+const actionVariableContextContainingBoundaryIdLabel = i18n.translate(
+  'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryIdLabel',
+  {
+    defaultMessage: 'The id of the boundary containing the entity',
+  }
+);
+
+const actionVariableContextContainingBoundaryNameLabel = i18n.translate(
+  'xpack.stackAlerts.geoContainment.actionVariableContextContainingBoundaryNameLabel',
+  {
+    defaultMessage: 'The boundary the entity is currently located within',
+  }
+);
+
 const actionVariables = {
   context: [
     // Alert-specific data
     { name: 'entityId', description: actionVariableContextEntityIdLabel },
-    { name: 'timeOfDetection', description: actionVariableContextTimeOfDetectionLabel },
-    { name: 'crossingLine', description: actionVariableContextCrossingLineLabel },
-
-    // Corresponds to a specific document in the entity-index
-    { name: 'toEntityLocation', description: actionVariableContextToEntityLocationLabel },
+    { name: 'entityDateTime', description: actionVariableContextEntityDateTimeLabel },
+    { name: 'entityDocumentId', description: actionVariableContextEntityDocumentIdLabel },
+    { name: 'detectionDateTime', description: actionVariableContextDetectionDateTimeLabel },
+    { name: 'entityLocation', description: actionVariableContextEntityLocationLabel },
+    { name: 'containingBoundaryId', description: actionVariableContextContainingBoundaryIdLabel },
     {
-      name: 'toEntityDateTime',
-      description: actionVariableContextToEntityDateTimeLabel,
+      name: 'containingBoundaryName',
+      description: actionVariableContextContainingBoundaryNameLabel,
     },
-    { name: 'toEntityDocumentId', description: actionVariableContextToEntityDocumentIdLabel },
-
-    //  Corresponds to a specific document in the boundary-index
-    { name: 'toBoundaryId', description: actionVariableContextToBoundaryIdLabel },
-    { name: 'toBoundaryName', description: actionVariableContextToBoundaryNameLabel },
-
-    // Corresponds to a specific document in the entity-index (from)
-    { name: 'fromEntityLocation', description: actionVariableContextFromEntityLocationLabel },
-    { name: 'fromEntityDateTime', description: actionVariableContextFromEntityDateTimeLabel },
-    { name: 'fromEntityDocumentId', description: actionVariableContextFromEntityDocumentIdLabel },
-
-    // Corresponds to a specific document in the boundary-index (from)
-    { name: 'fromBoundaryId', description: actionVariableContextFromBoundaryIdLabel },
-    { name: 'fromBoundaryName', description: actionVariableContextFromBoundaryNameLabel },
   ],
 };
 

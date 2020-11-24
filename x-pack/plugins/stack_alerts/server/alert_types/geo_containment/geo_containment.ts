@@ -173,25 +173,26 @@ export const getGeoContainmentExecutor = (log: Logger) =>
     const activeAlertsList = state.activeAlertsList || {};
     _.forEach(activeAlertsList, (val, key) => {
       if (!currLocationMap.has(key)) {
-        const containingShapeName =
-          shapesIdsNamesMap[val.containingShapeId] || val.containingShapeId;
-        const alertInstanceId = `${val.entityName}-${containingShapeName}`;
+        const containingBoundaryName =
+          shapesIdsNamesMap[val.containingBoundaryId] || val.containingBoundaryId;
+        const alertInstanceId = `${val.entityName}-${containingBoundaryName}`;
         services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, val);
       }
     });
 
     // Cycle through new alert statuses and set active
     currLocationMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
-      const containingShapeName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
+      const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
       const context = {
         entityId: entityName,
+        entityDateTime: new Date(dateInShape),
         entityDocumentId: docId,
+        detectionDateTime: new Date(currIntervalEndTime),
         entityLocation: location,
-        containingShapeId: shapeLocationId,
-        containingShapeName,
-        date: dateInShape,
+        containingBoundaryId: shapeLocationId,
+        containingBoundaryName,
       };
-      const alertInstanceId = `${entityName}-${containingShapeName}`;
+      const alertInstanceId = `${entityName}-${containingBoundaryName}`;
       if (shapeLocationId !== OTHER_CATEGORY) {
         activeAlertsList[entityName] = context;
         services
