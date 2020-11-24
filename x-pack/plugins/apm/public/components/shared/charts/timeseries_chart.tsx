@@ -18,7 +18,6 @@ import {
   Position,
   ScaleType,
   Settings,
-  SettingsSpec,
   YDomainRange,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
@@ -26,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
@@ -68,6 +68,7 @@ export function TimeseriesChart({
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
   const { event, setEvent, annotations } = useChartsSync();
+  const chartTheme = useChartTheme();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
 
@@ -83,13 +84,6 @@ export function TimeseriesChart({
   const max = moment.utc(end).valueOf();
 
   const xFormatter = niceTimeFormatter([min, max]);
-
-  const chartTheme: SettingsSpec['theme'] = {
-    lineSeriesStyle: {
-      point: { visible: false },
-      line: { strokeWidth: 2 },
-    },
-  };
 
   const isEmpty = timeseries
     .map((serie) => serie.data)

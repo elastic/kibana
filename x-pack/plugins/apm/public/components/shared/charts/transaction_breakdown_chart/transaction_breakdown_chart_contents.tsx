@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useChartTheme } from '../../../../../../observability/public';
 import {
   asAbsoluteDateTime,
   asPercent,
@@ -35,17 +36,23 @@ import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../charts/chart_container';
 import { onBrushEnd } from '../../charts/helper/helper';
 
-const XY_HEIGHT = unit * 16;
-
 interface Props {
   fetchStatus: FETCH_STATUS;
+  height?: number;
+  showAnnotations: boolean;
   timeseries?: TimeSeries[];
 }
 
-export function TransactionBreakdownGraph({ fetchStatus, timeseries }: Props) {
+export function TransactionBreakdownChartContents({
+  fetchStatus,
+  height = unit * 16,
+  showAnnotations,
+  timeseries,
+}: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
   const { event, setEvent, annotations } = useChartsSync();
+  const chartTheme = useChartTheme();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
   const { start, end } = urlParams;
@@ -64,17 +71,14 @@ export function TransactionBreakdownGraph({ fetchStatus, timeseries }: Props) {
   const annotationColor = theme.eui.euiColorSecondary;
 
   return (
-    <ChartContainer
-      height={XY_HEIGHT}
-      hasData={!!timeseries}
-      status={fetchStatus}
-    >
+    <ChartContainer height={height} hasData={!!timeseries} status={fetchStatus}>
       <Chart ref={chartRef} id="timeSpentBySpan">
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
+          theme={chartTheme}
           xDomain={{ min, max }}
           flatLegend
           onPointerUpdate={(currEvent: any) => {
@@ -97,22 +101,24 @@ export function TransactionBreakdownGraph({ fetchStatus, timeseries }: Props) {
           tickFormat={(y: number) => asPercent(y ?? 0, 1)}
         />
 
-        <LineAnnotation
-          id="annotations"
-          domainType={AnnotationDomainTypes.XDomain}
-          dataValues={annotations.map((annotation) => ({
-            dataValue: annotation['@timestamp'],
-            header: asAbsoluteDateTime(annotation['@timestamp']),
-            details: `${i18n.translate('xpack.apm.chart.annotation.version', {
-              defaultMessage: 'Version',
-            })} ${annotation.text}`,
-          }))}
-          style={{
-            line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
-          }}
-          marker={<EuiIcon type="dot" color={annotationColor} />}
-          markerPosition={Position.Top}
-        />
+        {showAnnotations && (
+          <LineAnnotation
+            id="annotations"
+            domainType={AnnotationDomainTypes.XDomain}
+            dataValues={annotations.map((annotation) => ({
+              dataValue: annotation['@timestamp'],
+              header: asAbsoluteDateTime(annotation['@timestamp']),
+              details: `${i18n.translate('xpack.apm.chart.annotation.version', {
+                defaultMessage: 'Version',
+              })} ${annotation.text}`,
+            }))}
+            style={{
+              line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
+            }}
+            marker={<EuiIcon type="dot" color={annotationColor} />}
+            markerPosition={Position.Top}
+          />
+        )}
 
         {timeseries?.length ? (
           timeseries.map((serie) => {
