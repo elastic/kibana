@@ -16,11 +16,11 @@ import {
   Position,
   ScaleType,
   Settings,
-  SettingsSpec,
 } from '@elastic/charts';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useChartTheme } from '../../../../../observability/public';
 import { TimeSeries } from '../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -59,6 +59,7 @@ export function TimeseriesChart({
 }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
+  const chartTheme = useChartTheme();
   const { event, setEvent } = useChartsSync();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
@@ -73,13 +74,6 @@ export function TimeseriesChart({
   const max = moment.utc(end).valueOf();
 
   const xFormatter = niceTimeFormatter([min, max]);
-
-  const chartTheme: SettingsSpec['theme'] = {
-    lineSeriesStyle: {
-      point: { visible: false },
-      line: { strokeWidth: 2 },
-    },
-  };
 
   const isEmpty = timeseries
     .map((serie) => serie.data)
