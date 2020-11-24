@@ -154,7 +154,7 @@ export class Collector<
   public readonly extendFetchContext: CollectorOptionsFetchExtendedContext<any>;
   public readonly type: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>['type'];
   public readonly init?: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>['init'];
-  public readonly fetch: CollectorFetchMethod<boolean | undefined, TFetchReturn, ExtraOptions>;
+  public readonly fetch: CollectorFetchMethod<any, TFetchReturn, ExtraOptions>;
   public readonly isReady: CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, any>['isReady'];
   private readonly _formatForBulkUpload?: CollectorFormatForBulkUpload<
     TFetchReturn,
