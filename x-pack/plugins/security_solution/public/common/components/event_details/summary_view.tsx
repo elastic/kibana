@@ -3,17 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 
 import {
   EuiDescriptionList,
   EuiSpacer,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import styled from 'styled-components';
+
 import { get, getOr } from 'lodash/fp';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { OverflowField } from '../tables/helpers';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -31,6 +33,34 @@ const fields = [
   'source.ip',
   'destination.ip',
 ];
+const LINE_CLAMP = 3;
+
+const LineClamp = styled.div<{
+  line?: number | 'none';
+  maxHeight?: number | 'none';
+}>`
+  display: -webkit-box;
+  -webkit-line-clamp: ${({ line = LINE_CLAMP }) => line};
+  -webkit-box-orient: vertical;
+  overflow: scroll;
+  max-height: ${({ maxHeight = 'none' }) => (maxHeight === 'none' ? 'none' : `${maxHeight}em`)}};
+`;
+
+LineClamp.displayName = 'LineClamp';
+
+const StyledDescription = styled(EuiDescriptionListDescription)`
+  word-break: break-all;
+`;
+
+StyledDescription.displayName = 'StyledDescription';
+
+const ReadMore = styled(EuiButtonEmpty)`
+  span.euiButtonContent {
+    padding: 0;
+  }
+`;
+
+ReadMore.displayName = 'ReadMore';
 
 const SummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
@@ -71,6 +101,31 @@ const SummaryViewComponent: React.FC<{
 
   const messageData = useMemo(() => (data || []).find((item) => item.field === 'message'), [data]);
   const message = get('values.0', messageData);
+  const [lineClamp, setLineClamp] = useState<number | 'none'>(LINE_CLAMP);
+  const [lineClampHeight, setLineClampHeight] = useState<number | 'none'>(4.5);
+  const [readMoreButtonText, setReadMoreButtonText] = useState(i18n.READ_MORE);
+  const [isOverflow, setIsOverflow] = useState(false);
+  const descriptionRef = useRef<HTMLElement>();
+  const toggleReadMore = () => {
+    setLineClamp((prevState) => (prevState !== 'none' ? 'none' : LINE_CLAMP));
+    setLineClampHeight((prevState) => (prevState !== 'none' ? 'none' : 4.5));
+    setReadMoreButtonText((prevState) =>
+      prevState === i18n.READ_MORE ? i18n.READ_LESS : i18n.READ_MORE
+    );
+  };
+
+  useEffect(() => {
+    if (
+      message &&
+      descriptionRef &&
+      descriptionRef?.current &&
+      descriptionRef?.current?.scrollHeight != null &&
+      descriptionRef?.current?.clientHeight != null &&
+      descriptionRef?.current?.scrollHeight > descriptionRef?.current?.clientHeight
+    ) {
+      setIsOverflow(true);
+    }
+  }, [descriptionRef, message]);
 
   return (
     <>
@@ -81,10 +136,17 @@ const SummaryViewComponent: React.FC<{
           <EuiSpacer />
           <EuiDescriptionList compressed>
             <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <OverflowField value={message} />
-            </EuiDescriptionListDescription>
+            <StyledDescription>
+              <LineClamp line={lineClamp} maxHeight={lineClampHeight} ref={descriptionRef}>
+                {message}
+              </LineClamp>
+            </StyledDescription>
           </EuiDescriptionList>
+          {(isOverflow || readMoreButtonText === i18n.READ_LESS) && (
+            <ReadMore onClick={toggleReadMore} size="s">
+              {readMoreButtonText}
+            </ReadMore>
+          )}
         </>
       )}
     </>

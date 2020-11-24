@@ -17,6 +17,14 @@ export const INVESTIGATION_GUIDE = i18n.translate(
   }
 );
 
+export const READ_MORE = i18n.translate('xpack.securitySolution.alertDetails.summary.readMore', {
+  defaultMessage: 'Read More',
+});
+
+export const READ_LESS = i18n.translate('xpack.securitySolution.alertDetails.summary.readLess', {
+  defaultMessage: 'Read Less',
+});
+
 export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table', {
   defaultMessage: 'Table',
 });
