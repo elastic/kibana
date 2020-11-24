@@ -81,7 +81,10 @@ export const useMatrixHistogram = ({
     ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
   });
 
-  const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
+  const [
+    matrixHistogramResponse,
+    setMatrixHistogramResponse,
+  ] = useState<UseMatrixHistogramArgs>({
     data: [],
     inspect: {
       dsl: [],
