@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Subject } from 'rxjs';
 import {
   overlayServiceMock,
   notificationServiceMock,
@@ -18,6 +19,7 @@ describe('bulkDeleteAction', () => {
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
   let setLoading: jest.MockedFunction<(loading: boolean) => void>;
   let action: TagBulkAction;
+  let canceled$: Subject<void>;
 
   const tagIds = ['id-1', 'id-2', 'id-3'];
 
@@ -25,6 +27,7 @@ describe('bulkDeleteAction', () => {
     tagClient = tagClientMock.create();
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
+    canceled$ = new Subject();
     setLoading = jest.fn();
 
     action = getBulkDeleteAction({ tagClient, overlays, notifications, setLoading });
@@ -33,7 +36,7 @@ describe('bulkDeleteAction', () => {
   it('performs the operation if the confirmation is accepted', async () => {
     overlays.openConfirm.mockResolvedValue(true);
 
-    await action.execute(tagIds);
+    await action.execute(tagIds, { canceled$ });
 
     expect(overlays.openConfirm).toHaveBeenCalledTimes(1);
 
@@ -46,7 +49,7 @@ describe('bulkDeleteAction', () => {
   it('does not perform the operation if the confirmation is rejected', async () => {
     overlays.openConfirm.mockResolvedValue(false);
 
-    await action.execute(tagIds);
+    await action.execute(tagIds, { canceled$ });
 
     expect(overlays.openConfirm).toHaveBeenCalledTimes(1);
 
@@ -58,7 +61,7 @@ describe('bulkDeleteAction', () => {
     overlays.openConfirm.mockResolvedValue(true);
     tagClient.bulkDelete.mockRejectedValue(new Error('error calling bulkDelete'));
 
-    await expect(action.execute(tagIds)).rejects.toMatchInlineSnapshot(
+    await expect(action.execute(tagIds, { canceled$ })).rejects.toMatchInlineSnapshot(
       `[Error: error calling bulkDelete]`
     );
 

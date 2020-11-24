@@ -8,6 +8,7 @@ import { coreMock } from '../../../../../../src/core/public/mocks';
 import { createTagCapabilities } from '../../../common/test_utils';
 import { TagsCapabilities } from '../../../common/capabilities';
 import { tagClientMock } from '../../services/tags/tags_client.mock';
+import { assignmentServiceMock } from '../../services/assignments/assignment_service.mock';
 import { TagBulkAction } from '../types';
 
 import { getBulkActions } from './index';
@@ -15,12 +16,14 @@ import { getBulkActions } from './index';
 describe('getBulkActions', () => {
   let core: ReturnType<typeof coreMock.createStart>;
   let tagClient: ReturnType<typeof tagClientMock.create>;
+  let assignmentService: ReturnType<typeof assignmentServiceMock.create>;
   let clearSelection: jest.MockedFunction<() => void>;
   let setLoading: jest.MockedFunction<(loading: boolean) => void>;
 
   beforeEach(() => {
     core = coreMock.createStart();
     tagClient = tagClientMock.create();
+    assignmentService = assignmentServiceMock.create();
     clearSelection = jest.fn();
     setLoading = jest.fn();
   });
@@ -29,6 +32,7 @@ describe('getBulkActions', () => {
     getBulkActions({
       core,
       tagClient,
+      assignmentService,
       clearSelection,
       setLoading,
       capabilities: createTagCapabilities(caps),
