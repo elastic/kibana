@@ -14255,10 +14255,10 @@ gaze@^1.0.0, gaze@^1.1.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@^1.20.0:
-  version "1.20.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.20.0.tgz#cd16edb177b88e31affcb54b18a238cae88950a7"
-  integrity sha512-5nVF4ixR+ZGhVsc4udnVihA9RmSlO6guPV1d2HqxYsgAOUNh0HfzxbzG7E49w4ilXq/CSu87x9yWvrsOstrADQ==
+geckodriver@^1.21.0:
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.21.0.tgz#1f04780ebfb451ffd08fa8fddc25cc26e37ac4a2"
+  integrity sha512-NamdJwGIWpPiafKQIvGman95BBi/SBqHddRXAnIEpFNFCFToTW0sEA0nUckMKCBNn1DVIcLfULfyFq/sTn9bkA==
   dependencies:
     adm-zip "0.4.16"
     bluebird "3.7.2"
@@ -17972,15 +17972,6 @@ joi@13.x.x, joi@^13.5.2:
   integrity sha512-xuY5VkHfeOYK3Hdi91ulocfuFopwgbSORmIwzcwHKESQhC7w1kD5jaVSPnqDxS2I8t3RZ9omCKAxNwXN5zG1/Q==
   dependencies:
     hoek "5.x.x"
-    isemail "3.x.x"
-    topo "3.x.x"
-
-joi@14.x.x:
-  version "14.3.1"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-14.3.1.tgz#164a262ec0b855466e0c35eea2a885ae8b6c703c"
-  integrity sha512-LQDdM+pkOrpAn4Lp+neNIFV3axv1Vna3j38bisbQhETPMANYRbFJFUyOZcOClYvM/hppMhGWuKSFEK9vjrB+bQ==
-  dependencies:
-    hoek "6.x.x"
     isemail "3.x.x"
     topo "3.x.x"
 
@@ -22236,14 +22227,6 @@ pnp-webpack-plugin@1.6.4:
   integrity sha512-7Wjy+9E3WwLOEL30D+m8TSTF7qJJUJLONBnwQp0518siuMxUQUbgZwssaFX+QKlZkjHZcw/IpZCt/H0srrntSg==
   dependencies:
     ts-pnp "^1.1.6"
-
-podium@^3.1.2:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/podium/-/podium-3.2.0.tgz#2a7c579ddd5408f412d014c9ffac080c41d83477"
-  integrity sha512-rbwvxwVkI6gRRlxZQ1zUeafrpGxZ7QPHIheinehAvGATvGIPfWRkaTeWedc5P4YjXJXEV8ZbBxPtglNylF9hjw==
-  dependencies:
-    hoek "6.x.x"
-    joi "14.x.x"
 
 polished@^1.9.2:
   version "1.9.2"

@@ -23,6 +23,7 @@ import {
   ExpressionValue,
   ExpressionsService,
   SerializableState,
+  RenderMode,
 } from '../../common';
 
 /**
@@ -54,6 +55,7 @@ export interface IExpressionLoaderParams {
   inspectorAdapters?: Adapters;
   onRenderError?: RenderErrorHandlerFnType;
   searchSessionId?: string;
+  renderMode?: RenderMode;
 }
 
 export interface ExpressionRenderError extends Error {
