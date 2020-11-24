@@ -38,7 +38,7 @@ describe('AppContainer', () => {
   });
 
   const flushPromises = async () => {
-    await new Promise(async (resolve) => {
+    await new Promise<void>(async (resolve) => {
       setImmediate(() => resolve());
     });
   };

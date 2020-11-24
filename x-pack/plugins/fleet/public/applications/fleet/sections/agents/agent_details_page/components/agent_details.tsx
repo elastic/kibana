@@ -110,6 +110,17 @@ export const AgentDetailsContent: React.FunctionComponent<{
               : '-',
         },
         {
+          title: i18n.translate('xpack.fleet.agentDetails.logLevel', {
+            defaultMessage: 'Log level',
+          }),
+          description:
+            typeof agent.local_metadata.elastic === 'object' &&
+            typeof agent.local_metadata.elastic.agent === 'object' &&
+            typeof agent.local_metadata.elastic.agent.log_level === 'string'
+              ? agent.local_metadata.elastic.agent.log_level
+              : '-',
+        },
+        {
           title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
             defaultMessage: 'Platform',
           }),

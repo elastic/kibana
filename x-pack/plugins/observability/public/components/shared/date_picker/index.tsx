@@ -7,6 +7,7 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useHasData } from '../../../hooks/use_has_data';
 import { UI_SETTINGS, useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { fromQuery, toQuery } from '../../../utils/url';
@@ -36,6 +37,7 @@ export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval 
   const location = useLocation();
   const history = useHistory();
   const { plugins } = usePluginContext();
+  const { onRefreshTimeRange } = useHasData();
 
   useEffect(() => {
     plugins.data.query.timefilter.timefilter.setTime({
@@ -81,6 +83,7 @@ export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval 
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
     updateUrl({ rangeFrom: start, rangeTo: end });
+    onRefreshTimeRange();
   }
 
   return (
