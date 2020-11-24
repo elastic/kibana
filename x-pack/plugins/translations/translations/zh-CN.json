@@ -240,7 +240,6 @@
     "apmOss.tutorial.startServer.title": "启动 APM Server",
     "apmOss.tutorial.windowsServerInstructions.textPost": "注意：如果您的系统禁用了脚本执行，则需要为当前会话设置执行策略，以允许脚本运行。示例：{command}。",
     "apmOss.tutorial.windowsServerInstructions.textPre": "1.从[下载页面]({downloadPageLink})下载 APM Server Windows zip 文件。\n2.将 zip 文件的内容解压缩到 {zipFileExtractFolder}。\n3.将 {apmServerDirectory} 目录重命名为 `APM-Server`。\n4.以管理员身份打开 PowerShell 提示符（右键单击 PowerShell 图标，然后选择**以管理员身份运行**）。如果您正在运行 Windows XP，您可能需要下载并安装 PowerShell。\n5.从 PowerShell 提示符处，运行以下命令以将 APM Server 安装为 Windows 服务：",
-    "charts.advancedSettings.visualization.colorMappingText": "将值映射到可视化内的指定颜色",
     "charts.advancedSettings.visualization.colorMappingTitle": "颜色映射",
     "charts.colormaps.bluesText": "蓝色",
     "charts.colormaps.greensText": "绿色",
