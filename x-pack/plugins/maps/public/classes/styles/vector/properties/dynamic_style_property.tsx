@@ -42,7 +42,10 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldOrigin(): FIELD_ORIGIN | null;
   getRangeFieldMeta(): RangeFieldMeta | null;
   getCategoryFieldMeta(): CategoryFieldMeta | null;
-  getNumberOfCategories(): number;
+  /*
+   * Returns hash that signals style meta needs to be re-fetched when value changes
+   */
+  getStyleMetaHash(): string;
   isFieldMetaEnabled(): boolean;
   isOrdinal(): boolean;
   supportsFieldMeta(): boolean;
@@ -192,6 +195,21 @@ export class DynamicStyleProperty<T>
 
   getNumberOfCategories() {
     return 0;
+  }
+
+  getStyleMetaHash(): string {
+    const fieldMetaOptions = this.getFieldMetaOptions();
+    const parts: string[] = [fieldMetaOptions.isEnabled.toString()];
+    if (this.isOrdinal()) {
+      const stepFunction = this.getStepFunction();
+      parts.push(stepFunction);
+      if (stepFunction === STEP_FUNCTION.PERCENTILES && fieldMetaOptions.percentiles) {
+        parts.push(fieldMetaOptions.percentiles.join(''));
+      }
+    } else if (this.isCategorical()) {
+      parts.push(this.getNumberOfCategories());
+    }
+    return parts.join('');
   }
 
   isComplete() {
