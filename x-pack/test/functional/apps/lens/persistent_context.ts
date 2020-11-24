@@ -68,10 +68,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('keeps selected index pattern after refresh', async () => {
-      await PageObjects.lens.switchDataPanelIndexPattern('otherpattern');
+      await PageObjects.lens.switchDataPanelIndexPattern('log*');
       await browser.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('otherpattern');
+      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('log*');
     });
 
     it('keeps time range and pinned filters after refreshing directly after saving', async () => {
