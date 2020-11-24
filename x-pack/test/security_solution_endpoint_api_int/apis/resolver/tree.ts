@@ -5,8 +5,10 @@
  */
 import expect from '@kbn/expect';
 import { getNameField } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils/fetch';
-import { Schema } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils';
-import { ResolverNode } from '../../../../plugins/security_solution/common/endpoint/types';
+import {
+  ResolverNode,
+  ResolverSchema,
+} from '../../../../plugins/security_solution/common/endpoint/types';
 import {
   parentEntityIDSafeVersion,
   timestampSafeVersion,
@@ -44,18 +46,18 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  const schemaWithAncestry: Schema = {
+  const schemaWithAncestry: ResolverSchema = {
     ancestry: 'process.Ext.ancestry',
     id: 'process.entity_id',
     parent: 'process.parent.entity_id',
   };
 
-  const schemaWithoutAncestry: Schema = {
+  const schemaWithoutAncestry: ResolverSchema = {
     id: 'process.entity_id',
     parent: 'process.parent.entity_id',
   };
 
-  const schemaWithName: Schema = {
+  const schemaWithName: ResolverSchema = {
     id: 'process.entity_id',
     parent: 'process.parent.entity_id',
     name: 'process.name',

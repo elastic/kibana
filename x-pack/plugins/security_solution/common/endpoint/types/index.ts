@@ -871,11 +871,44 @@ export interface SafeLegacyEndpointEvent {
 }
 
 /**
+ * The fields to use to identify nodes within a resolver tree.
+ */
+export interface ResolverSchema {
+  /**
+   * the ancestry field should be set to a field that contains an order array representing
+   * the ancestors of a node.
+   */
+  ancestry?: string;
+  /**
+   * id represents the field to use as the unique ID for a node.
+   */
+  id: string;
+  /**
+   * field to use for the name of the node
+   */
+  name?: string;
+  /**
+   * parent represents the field that is the edge between two nodes.
+   */
+  parent: string;
+}
+
+/**
  * The response body for the resolver '/entity' index API
  */
 export type ResolverEntityIndex = Array<{
+  /**
+   * A name for the schema that is being used (e.g. endpoint, winlogbeat, etc)
+   */
   name: string;
-  schema: { id: string; parent: string; ancestry?: string };
+  /**
+   * The schema to pass to the /tree api and other backend requests, based on the contents of the document found using
+   * the _id
+   */
+  schema: ResolverSchema;
+  /**
+   * Unique ID value for the requested document using the `_id` field passed to the /entity route
+   */
   id: string;
 }>;
 

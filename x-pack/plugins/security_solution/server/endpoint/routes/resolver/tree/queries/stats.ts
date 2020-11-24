@@ -7,8 +7,8 @@ import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { EventStats } from '../../../../../../common/endpoint/types';
-import { NodeID, Schema, Timerange } from '../utils/index';
+import { EventStats, ResolverSchema } from '../../../../../../common/endpoint/types';
+import { NodeID, Timerange } from '../utils/index';
 
 interface AggBucket {
   key: string;
@@ -26,7 +26,7 @@ interface CategoriesAgg extends AggBucket {
 }
 
 interface StatsParams {
-  schema: Schema;
+  schema: ResolverSchema;
   indexPatterns: string | string[];
   timerange: Timerange;
 }
@@ -35,7 +35,7 @@ interface StatsParams {
  * Builds a query for retrieving descendants of a node.
  */
 export class StatsQuery {
-  private readonly schema: Schema;
+  private readonly schema: ResolverSchema;
   private readonly indexPatterns: string | string[];
   private readonly timerange: Timerange;
   constructor({ schema, indexPatterns, timerange }: StatsParams) {

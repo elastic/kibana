@@ -8,16 +8,23 @@ import { RequestHandler, SearchResponse } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { validateEntities } from '../../../../common/endpoint/schema/resolver';
-import { ResolverEntityIndex } from '../../../../common/endpoint/types';
+import { ResolverEntityIndex, ResolverSchema } from '../../../../common/endpoint/types';
 
 interface SupportedSchema {
+  /**
+   * A name for the schema being used
+   */
   name: string;
+
+  /**
+   * A constraint to search for in the documented returned by Elasticsearch
+   */
   constraint: { field: string; value: string };
-  schema: {
-    id: string;
-    parent: string;
-    ancestry?: string;
-  };
+
+  /**
+   * Schema to return to the frontend so that it can be passed in to call to the /tree API
+   */
+  schema: ResolverSchema;
 }
 
 /**
@@ -35,6 +42,7 @@ const supportedSchemas: SupportedSchema[] = [
       id: 'process.entity_id',
       parent: 'process.parent.entity_id',
       ancestry: 'process.Ext.ancestry',
+      name: 'process.name',
     },
   },
   {
@@ -46,6 +54,7 @@ const supportedSchemas: SupportedSchema[] = [
     schema: {
       id: 'process.entity_id',
       parent: 'process.parent.entity_id',
+      name: 'process.name',
     },
   },
 ];

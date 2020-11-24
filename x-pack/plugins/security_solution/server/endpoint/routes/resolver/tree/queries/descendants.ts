@@ -6,12 +6,12 @@
 import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { FieldsObject } from '../../../../../../common/endpoint/types';
+import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
 import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { NodeID, Schema, Timerange, docValueFields } from '../utils/index';
+import { NodeID, Timerange, docValueFields } from '../utils/index';
 
 interface DescendantsParams {
-  schema: Schema;
+  schema: ResolverSchema;
   indexPatterns: string | string[];
   timerange: Timerange;
 }
@@ -20,7 +20,7 @@ interface DescendantsParams {
  * Builds a query for retrieving descendants of a node.
  */
 export class DescendantsQuery {
-  private readonly schema: Schema;
+  private readonly schema: ResolverSchema;
   private readonly indexPatterns: string | string[];
   private readonly timerange: Timerange;
   private readonly docValueFields: JsonValue[];

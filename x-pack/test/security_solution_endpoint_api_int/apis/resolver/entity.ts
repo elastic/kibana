@@ -34,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: 'process.entity_id',
             parent: 'process.parent.entity_id',
             ancestry: 'process.Ext.ancestry',
+            name: 'process.name',
           },
           // this value is from the es archive
           id:

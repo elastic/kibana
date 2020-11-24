@@ -18,14 +18,17 @@ import { DescendantsQuery } from '../queries/descendants';
 import { StatsQuery } from '../queries/stats';
 import { IScopedClusterClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { FieldsObject, ResolverNode } from '../../../../../../common/endpoint/types';
-import { Schema } from './index';
+import {
+  FieldsObject,
+  ResolverNode,
+  ResolverSchema,
+} from '../../../../../../common/endpoint/types';
 
 jest.mock('../queries/descendants');
 jest.mock('../queries/lifecycle');
 jest.mock('../queries/stats');
 
-function formatResponse(results: FieldsObject[], schema: Schema): ResolverNode[] {
+function formatResponse(results: FieldsObject[], schema: ResolverSchema): ResolverNode[] {
   return results.map((node) => {
     return {
       id: getIDField(node, schema) ?? '',
