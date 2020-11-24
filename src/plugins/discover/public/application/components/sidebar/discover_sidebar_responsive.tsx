@@ -93,9 +93,9 @@ export interface DiscoverSidebarResponsiveProps {
    */
   useFlyout?: boolean;
   /**
-   * Additional classname
+   * Has been toggled closed
    */
-  sidebarClassName?: string;
+  isClosed?: boolean;
   /**
    * Metric tracking function
    * @param metricType
@@ -113,24 +113,18 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  if (!props.selectedIndexPattern) {
+  if (!props.selectedIndexPattern || props.isClosed) {
     return null;
   }
 
   return (
     <>
       <EuiHideFor sizes={['xs', 's']}>
-        <DiscoverSidebar
-          {...props}
-          className={`dscSidebar dscSidebar__desktop dscCollapsibleSidebar ${props.sidebarClassName}`}
-          fieldFilter={fieldFilter}
-          setFieldFilter={setFieldFilter}
-        />
+        <DiscoverSidebar {...props} fieldFilter={fieldFilter} setFieldFilter={setFieldFilter} />
       </EuiHideFor>
       <EuiShowFor sizes={['xs', 's']}>
-        <div className="dscSidebar dscSidebar__mobile">
+        <div className="dscSidebar__mobile">
           <section
-            className="sidebar-list dscSidebar__section "
             aria-label={i18n.translate(
               'discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
               {
@@ -166,7 +160,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           <EuiFlyout onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
             <EuiFlyoutHeader hasBorder>
               <EuiFlexGroup
-                className="dscSidebarFlyout__header"
+                className="dscSidebar__flyoutHeader"
                 gutterSize="none"
                 responsive={false}
               >

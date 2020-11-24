@@ -33,7 +33,7 @@ export function createInfiniteScrollDirective() {
        * and have therefore to be considered for calculation of infinite scrolling
        */
       const scrollDiv = $element.parents('.dscTable');
-      const scrollDivMobile = $element.parents('.dscApp__frame');
+      const scrollDivMobile = $element.parents('.dscPageBody');
 
       function onScroll() {
         if (!$scope.more) return;

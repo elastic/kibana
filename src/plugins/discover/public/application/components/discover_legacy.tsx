@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useRef } from 'react';
 import './discover.scss';
-import classNames from 'classnames';
+
+import React, { useState, useRef } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -135,7 +135,7 @@ export function DiscoverLegacy({
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const scrollableMobile = useRef<HTMLDivElement>(null);
-  const collapseIcon = useRef<HTMLDivElement>(null);
+  const collapseIcon = useRef<HTMLButtonElement>(null);
   const isMobile = () => {
     // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
     return collapseIcon && !collapseIcon.current;
@@ -152,13 +152,10 @@ export function DiscoverLegacy({
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
-  const sidebarClassName = classNames({
-    closed: isSidebarClosed,
-  });
 
   return (
     <I18nProvider>
-      <EuiPage className="dscAppContainer" data-fetch-counter={fetchCounter}>
+      <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
         <TopNavMenu
           appName="discover"
           config={topNavMenu}
@@ -175,7 +172,7 @@ export function DiscoverLegacy({
           useDefaultBehaviors={true}
         />
         <EuiPageBody
-          className="dscApp__frame"
+          className="dscPageBody"
           ref={scrollableMobile}
           aria-describedby="savedSearchTitle"
         >
@@ -195,22 +192,20 @@ export function DiscoverLegacy({
                 selectedIndexPattern={searchSource && searchSource.getField('index')}
                 services={services}
                 setIndexPattern={setIndexPattern}
-                sidebarClassName={sidebarClassName}
+                isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
-              <EuiFlexItem grow={false} ref={collapseIcon}>
+              <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                  iconSize="m"
-                  size="s"
                   onClick={() => setIsSidebarClosed(!isSidebarClosed)}
                   data-test-subj="collapseSideBarButton"
                   aria-controls="discover-sidebar"
                   aria-expanded={isSidebarClosed ? 'false' : 'true'}
                   aria-label="Toggle sidebar"
-                  className={`dscCollapsibleSidebar__collapseButton ${sidebarClassName}`}
+                  buttonRef={collapseIcon}
                 />
               </EuiFlexItem>
             </EuiHideFor>
@@ -292,9 +287,9 @@ export function DiscoverLegacy({
                       </EuiFlexItem>
                     )}
 
-                    <EuiFlexItem className="eui-yScroll dscResults">
+                    <EuiFlexItem className="eui-yScroll">
                       <section
-                        className="dscTable dscTableFixedScroll"
+                        className="dscTable"
                         aria-labelledby="documentsAriaLabel"
                         ref={scrollableDesktop}
                       >
@@ -305,7 +300,7 @@ export function DiscoverLegacy({
                           />
                         </h2>
                         {rows && rows.length && (
-                          <div className="dscDiscover">
+                          <div>
                             <DocTableLegacy
                               columns={state.columns || []}
                               indexPattern={indexPattern}

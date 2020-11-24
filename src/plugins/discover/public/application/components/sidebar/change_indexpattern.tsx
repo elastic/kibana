@@ -55,6 +55,7 @@ export function ChangeIndexPattern({
     const { label, title, ...rest } = trigger;
     return (
       <EuiButton
+        fullWidth
         color="text"
         iconSide="right"
         iconType="arrowDown"
@@ -62,7 +63,7 @@ export function ChangeIndexPattern({
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         {...rest}
       >
-        {label}
+        <strong>{label}</strong>
       </EuiButton>
     );
   };

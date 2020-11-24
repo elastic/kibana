@@ -1,73 +1,34 @@
 .dscSidebar {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.dscSidebar__contentWrapper {
-  flex: 1 0 100%;
-  overflow: hidden;
-  @include euiBreakpoint('xs', 's') {
-    padding-bottom: $euiSize * 4;
-  }
-
-  .dscSidebar__content {
-    @include euiBreakpoint('xs', 's') {
-      padding-top: 0;
-    }
-    width: 100%;
-    height: 100%;
-    padding: 0 $euiSize;
-  }
-}
-
-/**
- * 1. Don't cut off the shadow of the field items
- */
-
-.dscSidebar__scrollSection {
-  @include euiBreakpoint('xs', 's') {
-    padding-left: $euiSize;
-    padding-top: $euiSize;
-  }
-  @include euiOverflowShadow;
-  @include euiScrollBar;
-  margin-left: -$euiSize; /* 1 */
-  position: relative;
   flex-grow: 1;
-  overflow: auto;
+  padding-left: $euiSize;
+  width: $euiSize * 19;
+  height: 100%;
 }
 
-.dscSidebar__scrollSectionList {
-  @include euiBreakpoint('m', 'l', 'xl') {
-    padding-top: $euiSizeS;
-    position: absolute;
-    top: 0;
-    left: $euiSize; /* 1 */
-    right: $euiSizeXS; /* 1 */
+.dscSidebar__group {
+  height: 100%;
+}
+
+.dscSidebar__mobile {
+  width: 100%;
+  padding: 0 $euiSizeS $euiSizeS;
+  .dscSidebar__sectionStatic {
+    padding: 0;
+  }
+  .dscSidebar__mobileButton {
+    justify-content: space-between;
+  }
+  .dscSidebar__mobileBadge {
+    margin-left: $euiSizeXS;
   }
 }
 
-.dscSidebar__container {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  background-color: transparent;
-  border-right-color: transparent;
-  border-bottom-color: transparent;
+.dscSidebar__flyoutHeader {
+  align-items: center;
 }
 
-// .dscIndexPattern__container {
-//   display: flex;
-//   align-items: center;
-//   height: $euiSize * 3;
-//   margin-top: -$euiSizeS;
-// }
-
-.dscIndexPattern__triggerButton {
-  @include euiTitle('xs');
-  line-height: $euiSizeXXL;
-}
+/// MOVE
 
 .dscFieldList {
   list-style: none;
@@ -82,15 +43,6 @@
 
 .dscFieldList--popular {
   background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
-}
-
-.dscFieldChooser {
-  padding-left: $euiSize;
-}
-
-.dscFieldChooser__toggle {
-  color: $euiColorMediumShade;
-  margin-left: $euiSizeS !important;
 }
 
 .dscSidebarItem {
@@ -125,21 +77,4 @@
   .euiButton__content {
     padding: 0 4px;
   }
-}
-
-.dscFieldSearch {
-  padding: $euiSizeS;
-}
-
-.dscFieldSearch__filterWrapper {
-  width: 100%;
-}
-
-.dscFieldSearch__formWrapper {
-  padding: $euiSizeM;
-}
-
-.dscFieldDetails {
-  color: $euiTextColor;
-  margin-bottom: $euiSizeS;
 }
