@@ -231,15 +231,24 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       : undefined;
 
   useEffect(() => {
+    /**
+     * For the "View by" swim lane the limit is the cardinality of the influencer values,
+     * which is known after the initial fetch.
+     * When looking up for top influencers for selected range in Overall swim lane
+     * the result is filtered by top influencers values, hence there is no need ot set the limit.
+     */
+    const swimlaneLimit =
+      isViewBySwimLaneData(explorerState?.viewBySwimlaneData) && !selectedCells?.showTopFieldValues
+        ? explorerState?.viewBySwimlaneData.cardinality
+        : undefined;
+
     if (explorerState && explorerState.swimlaneContainerWidth > 0) {
       loadExplorerData({
         ...loadExplorerDataConfig,
-        swimlaneLimit: isViewBySwimLaneData(explorerState?.viewBySwimlaneData)
-          ? explorerState?.viewBySwimlaneData.cardinality
-          : undefined,
+        swimlaneLimit,
       });
     }
-  }, [JSON.stringify(loadExplorerDataConfig)]);
+  }, [JSON.stringify(loadExplorerDataConfig), selectedCells?.showTopFieldValues]);
 
   if (explorerState === undefined || refresh === undefined || showCharts === undefined) {
     return null;
