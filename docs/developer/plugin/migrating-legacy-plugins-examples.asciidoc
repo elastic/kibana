@@ -242,7 +242,7 @@ migration is complete:
 ----
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'kibana/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 export class DemoPlugin {
   public setup(core: CoreSetup) {
