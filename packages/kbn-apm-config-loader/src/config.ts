@@ -31,14 +31,14 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
     active: process.env.ELASTIC_APM_ACTIVE || false,
     environment: process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV || 'development',
 
-    serverUrl: 'https://b1e3b4b4233e44cdad468c127d0af8d8.apm.europe-west1.gcp.cloud.es.io:443',
+    serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
 
     // The secretToken below is intended to be hardcoded in this file even though
     // it makes it public. This is not a security/privacy issue. Normally we'd
     // instead disable the need for a secretToken in the APM Server config where
     // the data is transmitted to, but due to how it's being hosted, it's easier,
     // for now, to simply leave it in.
-    secretToken: '2OyjjaI6RVkzx2O5CV',
+    secretToken: 'ZQHYvrmXEx04ozge8F',
 
     logUncaughtExceptions: true,
     globalLabels: {},
