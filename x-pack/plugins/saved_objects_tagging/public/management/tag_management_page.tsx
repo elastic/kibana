@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener, getEditModalOpener } from '../components/edition_modal';
-import { ITagInternalClient, ITagAssignmentService } from '../services';
+import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
 import { TagBulkAction } from './types';
 import { Header, TagTable, ActionBar } from './components';
 import { getBulkActions } from './actions';
@@ -22,6 +22,7 @@ interface TagManagementPageParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   core: CoreStart;
   tagClient: ITagInternalClient;
+  tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
   capabilities: TagsCapabilities;
 }
@@ -30,6 +31,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   setBreadcrumbs,
   core,
   tagClient,
+  tagCache,
   assignmentService,
   capabilities,
 }) => {
@@ -58,11 +60,12 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       core,
       capabilities,
       tagClient,
+      tagCache,
       assignmentService,
       setLoading,
       clearSelection: () => setSelectedTags([]),
     });
-  }, [core, capabilities, tagClient, assignmentService]);
+  }, [core, capabilities, tagClient, tagCache, assignmentService]);
 
   const createModalOpener = useMemo(() => getCreateModalOpener({ overlays, tagClient }), [
     overlays,

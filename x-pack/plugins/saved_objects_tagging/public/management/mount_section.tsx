@@ -11,11 +11,12 @@ import { CoreSetup, ApplicationStart } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { getTagsCapabilities } from '../../common';
 import { SavedObjectTaggingPluginStart } from '../types';
-import { ITagInternalClient, ITagAssignmentService } from '../services';
+import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
 import { TagManagementPage } from './tag_management_page';
 
 interface MountSectionParams {
   tagClient: ITagInternalClient;
+  tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
   core: CoreSetup<{}, SavedObjectTaggingPluginStart>;
   mountParams: ManagementAppMountParams;
@@ -34,6 +35,7 @@ const RedirectToHomeIfUnauthorized: FC<{
 
 export const mountSection = async ({
   tagClient,
+  tagCache,
   assignmentService,
   core,
   mountParams,
@@ -49,6 +51,7 @@ export const mountSection = async ({
           setBreadcrumbs={setBreadcrumbs}
           core={coreStart}
           tagClient={tagClient}
+          tagCache={tagCache}
           assignmentService={assignmentService}
           capabilities={capabilities}
         />

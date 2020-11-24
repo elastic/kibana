@@ -8,11 +8,11 @@ import React from 'react';
 import { OverlayStart, OverlayRef } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { taggableTypes } from '../../../common/constants';
-import { ITagInternalClient, ITagAssignmentService } from '../../services';
+import { ITagAssignmentService, ITagsCache } from '../../services';
 
 export interface GetAssignFlyoutOpenerOptions {
   overlays: OverlayStart;
-  tagClient: ITagInternalClient;
+  tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
 }
 
@@ -24,6 +24,7 @@ export type AssignFlyoutOpener = (options: OpenAssignFlyoutOptions) => Promise<O
 
 export const getAssignFlyoutOpener = ({
   overlays,
+  tagCache,
   assignmentService,
 }: GetAssignFlyoutOpenerOptions): AssignFlyoutOpener => async ({ tagIds }) => {
   const { AssignFlyout } = await import('./assign_flyout');
@@ -31,6 +32,7 @@ export const getAssignFlyoutOpener = ({
     toMountPoint(
       <AssignFlyout
         tagIds={tagIds}
+        tagCache={tagCache}
         allowedTypes={taggableTypes}
         assignmentService={assignmentService}
         onClose={() => flyout.close()}

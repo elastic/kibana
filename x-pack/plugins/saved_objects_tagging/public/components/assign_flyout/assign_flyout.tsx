@@ -5,19 +5,19 @@
  */
 
 import React, { FC, useState, useEffect, useCallback } from 'react';
-import { EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle, EuiFlexItem, Query } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlyoutFooter, EuiFlyoutHeader, EuiFlexItem, Query } from '@elastic/eui';
 import { AssignableObject } from '../../../common/assignments';
-import { ITagAssignmentService } from '../../services';
+import { ITagAssignmentService, ITagsCache } from '../../services';
 import { parseQuery, computeRequiredChanges } from './lib';
 import { AssignmentOverrideMap, AssignmentStatus, AssignmentStatusMap } from './types';
 import {
+  AssignFlyoutHeader,
   AssignFlyoutSearchBar,
   AssignFlyoutResultList,
   AssignFlyoutFooter,
   AssignFlyoutActionBar,
 } from './components';
-import { getKey } from './utils';
+import { getKey, sortByStatusAndTitle } from './utils';
 
 import './assign_flyout.scss';
 
@@ -25,6 +25,7 @@ interface AssignFlyoutProps {
   tagIds: string[];
   allowedTypes: string[];
   assignmentService: ITagAssignmentService;
+  tagCache: ITagsCache;
   onClose: () => Promise<void>;
 }
 
@@ -37,6 +38,7 @@ const getObjectStatus = (object: AssignableObject, assignedTags: string[]): Assi
 
 export const AssignFlyout: FC<AssignFlyoutProps> = ({
   tagIds,
+  tagCache,
   allowedTypes,
   assignmentService,
   onClose,
@@ -70,7 +72,7 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
       const assignedCount = Object.values(fetchedStatus).filter((status) => status !== 'none')
         .length;
 
-      setResults(fetched);
+      setResults(sortByStatusAndTitle(fetched, fetchedStatus));
       setOverrides({});
       setInitialStatus(fetchedStatus);
       setInitiallyAssigned(assignedCount);
@@ -126,14 +128,7 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.savedObjectsTagging.assignFlyout.title"
-              defaultMessage="Manage tag assignments to saved objects"
-            />
-          </h3>
-        </EuiTitle>
+        <AssignFlyoutHeader tagIds={tagIds} tagCache={tagCache} />
       </EuiFlyoutHeader>
       <EuiFlyoutHeader hasBorder className="tagAssignFlyout_searchContainer">
         <AssignFlyoutSearchBar

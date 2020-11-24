@@ -4,19 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssignableObject } from '../../../common/assignments';
-import { AssignmentOverride, AssignmentStatus, AssignmentAction } from './types';
+import { sortBy } from 'lodash';
+import { AssignableObject, getKey } from '../../../common/assignments';
+import {
+  AssignmentOverride,
+  AssignmentStatus,
+  AssignmentAction,
+  AssignmentStatusMap,
+} from './types';
 
-// TODO: use from common/assignment instead
-export const getKey = ({ id, type }: AssignableObject) => `${type}|${id}`;
-
-export const parseKey = (key: string): { type: string; id: string } => {
-  const parts = key.split('|');
-  return {
-    type: parts[0],
-    id: parts[1],
-  };
-};
+export { getKey } from '../../../common/assignments';
 
 export const getOverriddenStatus = (
   initialStatus: AssignmentStatus,
@@ -42,4 +39,19 @@ export const getAssignmentAction = (
     }
   }
   return 'unchanged';
+};
+
+const statusPriority: Record<AssignmentStatus, number> = {
+  full: 1,
+  partial: 2,
+  none: 3,
+};
+
+export const sortByStatusAndTitle = (
+  objects: AssignableObject[],
+  statusMap: AssignmentStatusMap
+) => {
+  return sortBy<AssignableObject>(objects, [
+    (obj) => `${statusPriority[statusMap[getKey(obj)]]}-${obj.title}`,
+  ]);
 };

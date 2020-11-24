@@ -48,6 +48,7 @@ export class SavedObjectTaggingPlugin
         const { mountSection } = await import('./management');
         return mountSection({
           tagClient: this.tagClient!,
+          tagCache: this.tagCache!,
           assignmentService: this.assignmentService!,
           core,
           mountParams,

@@ -6,7 +6,7 @@
 
 import { CoreStart } from 'src/core/public';
 import { TagsCapabilities } from '../../../common';
-import { ITagInternalClient, ITagAssignmentService } from '../../services';
+import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
 import { TagBulkAction } from '../types';
 import { getBulkDeleteAction } from './bulk_delete';
 import { getBulkAssignAction } from './bulk_assign';
@@ -16,6 +16,7 @@ interface GetBulkActionOptions {
   core: CoreStart;
   capabilities: TagsCapabilities;
   tagClient: ITagInternalClient;
+  tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
   clearSelection: () => void;
   setLoading: (loading: boolean) => void;
@@ -25,6 +26,7 @@ export const getBulkActions = ({
   core: { notifications, overlays },
   capabilities,
   tagClient,
+  tagCache,
   assignmentService,
   clearSelection,
   setLoading,
@@ -33,7 +35,7 @@ export const getBulkActions = ({
 
   if (capabilities.assign) {
     actions.push(
-      getBulkAssignAction({ notifications, overlays, tagClient, assignmentService, setLoading })
+      getBulkAssignAction({ notifications, overlays, tagCache, assignmentService, setLoading })
     );
   }
   if (capabilities.delete) {

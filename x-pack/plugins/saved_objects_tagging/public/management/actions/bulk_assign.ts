@@ -8,14 +8,14 @@ import { from } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { OverlayStart, NotificationsStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { ITagInternalClient, ITagAssignmentService } from '../../services';
+import { ITagsCache, ITagAssignmentService } from '../../services';
 import { TagBulkAction } from '../types';
 import { getAssignFlyoutOpener } from '../../components/assign_flyout';
 
 interface GetBulkAssignActionOptions {
   overlays: OverlayStart;
   notifications: NotificationsStart;
-  tagClient: ITagInternalClient;
+  tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
   setLoading: (loading: boolean) => void;
 }
@@ -23,13 +23,13 @@ interface GetBulkAssignActionOptions {
 export const getBulkAssignAction = ({
   overlays,
   notifications,
-  tagClient,
+  tagCache,
   assignmentService,
   setLoading,
 }: GetBulkAssignActionOptions): TagBulkAction => {
   const openFlyout = getAssignFlyoutOpener({
     overlays,
-    tagClient,
+    tagCache,
     assignmentService,
   });
 
