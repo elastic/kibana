@@ -31,7 +31,7 @@ import {
 import { reportApplicationUsage } from './services/application_usage';
 
 export interface PublicConfigType {
-  uiMetric: {
+  uiCounters: {
     enabled: boolean;
     debug: boolean;
   };
@@ -73,7 +73,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
 
   public setup({ http }: CoreSetup): UsageCollectionSetup {
     const localStorage = new Storage(window.localStorage);
-    const debug = this.config.uiMetric.debug;
+    const debug = this.config.uiCounters.debug;
 
     this.reporter = createReporter({
       localStorage,
@@ -98,7 +98,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       throw new Error('Usage collection reporter not set up correctly');
     }
 
-    if (this.config.uiMetric.enabled && !isUnauthenticated(http)) {
+    if (this.config.uiCounters.enabled && !isUnauthenticated(http)) {
       this.reporter.start();
     }
 

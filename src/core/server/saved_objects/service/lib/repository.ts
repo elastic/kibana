@@ -101,6 +101,8 @@ export interface SavedObjectsRepositoryOptions {
  * @public
  */
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+  /** number to increment counter by, default 1 */
+  incrementBy?: number;
   migrationVersion?: SavedObjectsMigrationVersion;
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
@@ -1540,7 +1542,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const { migrationVersion, incrementBy = 1, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     const time = this._getCurrentTime();
@@ -1583,7 +1585,7 @@ export class SavedObjectsRepository {
             `,
           lang: 'painless',
           params: {
-            count: 1,
+            count: incrementBy,
             time,
             type,
             counterFieldName,

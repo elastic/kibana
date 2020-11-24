@@ -21,7 +21,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 export const reportSchema = schema.object({
-  reportVersion: schema.maybe(schema.literal(1)),
+  reportVersion: schema.maybe(schema.oneOf([schema.literal(1), schema.literal(2)])),
   userAgent: schema.maybe(
     schema.recordOf(
       schema.string(),
@@ -33,7 +33,7 @@ export const reportSchema = schema.object({
       })
     )
   ),
-  uiStatsMetrics: schema.maybe(
+  uiCounter: schema.maybe(
     schema.recordOf(
       schema.string(),
       schema.object({
@@ -45,12 +45,7 @@ export const reportSchema = schema.object({
         ]),
         appName: schema.string(),
         eventName: schema.string(),
-        stats: schema.object({
-          min: schema.number(),
-          sum: schema.number(),
-          max: schema.number(),
-          avg: schema.number(),
-        }),
+        total: schema.number(),
       })
     )
   ),

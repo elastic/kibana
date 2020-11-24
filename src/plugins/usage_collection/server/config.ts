@@ -22,7 +22,7 @@ import { PluginConfigDescriptor } from 'src/core/server';
 import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/constants';
 
 export const configSchema = schema.object({
-  uiMetric: schema.object({
+  uiCounters: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     debug: schema.boolean({ defaultValue: schema.contextRef('dev') }),
   }),
@@ -42,6 +42,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     renameFromRoot('usageCollection.uiMetric.debug', 'usageCollection.uiCounters.debug'),
   ],
   exposeToBrowser: {
-    uiMetric: true,
+    uiCounters: true,
   },
 };

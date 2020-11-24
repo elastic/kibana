@@ -17,16 +17,17 @@
  * under the License.
  */
 
-export { registerUiMetricUsageCollector } from './ui_metric';
-export { registerManagementUsageCollector } from './management';
-export { registerApplicationUsageCollector } from './application_usage';
-export { registerKibanaUsageCollector } from './kibana';
-export { registerOpsStatsCollector } from './ops_stats';
-export { registerCspCollector } from './csp';
-export { registerCoreUsageCollector } from './core';
-export { registerLocalizationUsageCollector } from './localization';
-export {
-  registerUiCountersUsageCollector,
-  registerUiCounterSavedObjectType,
-  registerUiCountersRollups,
-} from './ui_counters';
+/**
+ * Roll indices every 24h
+ */
+export const ROLL_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
+
+/**
+ * Start rolling indices after 5 minutes up
+ */
+export const ROLL_INDICES_START = 5 * 60 * 1000;
+
+/**
+ * Number of days to keep the UI counters saved object documents
+ */
+export const UI_COUNTERS_KEEP_DOCS_FOR_DAYS = 3;

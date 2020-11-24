@@ -22,7 +22,6 @@ import { UserAgentMetric } from './user_agent';
 import { ApplicationUsageCurrent } from './application_usage';
 
 export { UiCounterMetric, createUiCounterMetric, UiCounterMetricType } from './ui_counter';
-export { Stats } from './stats';
 export { trackUsageAgent } from './user_agent';
 export { ApplicationUsage, ApplicationUsageCurrent } from './application_usage';
 

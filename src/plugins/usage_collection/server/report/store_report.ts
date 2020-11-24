@@ -18,16 +18,21 @@
  */
 
 import { ISavedObjectsRepository, SavedObject } from 'src/core/server';
+import moment from 'moment';
 import { ReportSchemaType } from './schema';
 
 export async function storeReport(
   internalRepository: ISavedObjectsRepository,
   report: ReportSchemaType
 ) {
-  const uiStatsMetrics = report.uiStatsMetrics ? Object.entries(report.uiStatsMetrics) : [];
+  const uiCounters = report.uiCounter ? Object.entries(report.uiCounter) : [];
   const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
   const appUsage = report.application_usage ? Object.entries(report.application_usage) : [];
-  const timestamp = new Date();
+
+  const momentTimestamp = moment();
+  const timestamp = momentTimestamp.toDate();
+  const date = momentTimestamp.format('DDMMYYYY');
+
   return Promise.all<{ saved_objects: Array<SavedObject<any>> }>([
     ...userAgents.map(async ([key, metric]) => {
       const { userAgent } = metric;
@@ -45,12 +50,23 @@ export async function storeReport(
         ],
       };
     }),
-    ...uiStatsMetrics.map(async ([key, metric]) => {
+    ...uiCounters.map(async ([key, metric]) => {
       const { appName, eventName } = metric;
       const savedObjectId = `${appName}:${eventName}`;
       return {
         saved_objects: [
           await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count'),
+        ],
+      };
+    }),
+    ...uiCounters.map(async ([key, metric]) => {
+      const { appName, eventName, total, type } = metric;
+      const savedObjectId = `${appName}:${date}:${eventName}`;
+      return {
+        saved_objects: [
+          await internalRepository.incrementCounter('ui-counter', savedObjectId, type, {
+            incrementBy: total,
+          }),
         ],
       };
     }),

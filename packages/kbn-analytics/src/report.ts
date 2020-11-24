@@ -19,19 +19,19 @@
 
 import moment from 'moment-timezone';
 import { UnreachableCaseError, wrapArray } from './util';
-import { Metric, Stats, UiCounterMetricType, METRIC_TYPE } from './metrics';
-const REPORT_VERSION = 1;
+import { Metric, UiCounterMetricType, METRIC_TYPE } from './metrics';
+const REPORT_VERSION = 2;
 
 export interface Report {
   reportVersion: typeof REPORT_VERSION;
-  uiStatsMetrics?: Record<
+  uiCounter?: Record<
     string,
     {
       key: string;
       appName: string;
       eventName: string;
       type: UiCounterMetricType;
-      stats: Stats;
+      total: number;
     }
   >;
   userAgent?: Record<
@@ -65,25 +65,15 @@ export class ReportManager {
     this.report = ReportManager.createReport();
   }
   public isReportEmpty(): boolean {
-    const { uiStatsMetrics, userAgent, application_usage: appUsage } = this.report;
-    const noUiStats = !uiStatsMetrics || Object.keys(uiStatsMetrics).length === 0;
-    const noUserAgent = !userAgent || Object.keys(userAgent).length === 0;
+    const { uiCounter, userAgent, application_usage: appUsage } = this.report;
+    const noUiCounters = !uiCounter || Object.keys(uiCounter).length === 0;
+    const noUserAgents = !userAgent || Object.keys(userAgent).length === 0;
     const noAppUsage = !appUsage || Object.keys(appUsage).length === 0;
-    return noUiStats && noUserAgent && noAppUsage;
+    return noUiCounters && noUserAgents && noAppUsage;
   }
-  private incrementStats(count: number, stats?: Stats): Stats {
-    const { min = 0, max = 0, sum = 0 } = stats || {};
-    const newMin = Math.min(min, count);
-    const newMax = Math.max(max, count);
-    const newAvg = newMin + newMax / 2;
-    const newSum = sum + count;
-
-    return {
-      min: newMin,
-      max: newMax,
-      avg: newAvg,
-      sum: newSum,
-    };
+  private incrementTotal(count: number, currentTotal?: number): number {
+    const currentTotalNumber = typeof currentTotal === 'number' ? currentTotal : 0;
+    return count + currentTotalNumber;
   }
   assignReports(newMetrics: Metric | Metric[]) {
     wrapArray(newMetrics).forEach((newMetric) => this.assignReport(this.report, newMetric));
@@ -129,14 +119,14 @@ export class ReportManager {
       case METRIC_TYPE.LOADED:
       case METRIC_TYPE.COUNT: {
         const { appName, type, eventName, count } = metric;
-        report.uiStatsMetrics = report.uiStatsMetrics || {};
-        const existingStats = (report.uiStatsMetrics[key] || {}).stats;
-        report.uiStatsMetrics[key] = {
+        report.uiCounter = report.uiCounter || {};
+        const currentTotal = report.uiCounter[key]?.total;
+        report.uiCounter[key] = {
           key,
           appName,
           eventName,
           type,
-          stats: this.incrementStats(count, existingStats),
+          total: this.incrementTotal(count, currentTotal),
         };
         return;
       }

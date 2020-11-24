@@ -17,16 +17,29 @@
  * under the License.
  */
 
-export { registerUiMetricUsageCollector } from './ui_metric';
-export { registerManagementUsageCollector } from './management';
-export { registerApplicationUsageCollector } from './application_usage';
-export { registerKibanaUsageCollector } from './kibana';
-export { registerOpsStatsCollector } from './ops_stats';
-export { registerCspCollector } from './csp';
-export { registerCoreUsageCollector } from './core';
-export { registerLocalizationUsageCollector } from './localization';
-export {
-  registerUiCountersUsageCollector,
-  registerUiCounterSavedObjectType,
-  registerUiCountersRollups,
-} from './ui_counters';
+import { SavedObject, SavedObjectAttributes, SavedObjectsServiceSetup } from 'kibana/server';
+
+export interface UICounterSavedObjectAttributes extends SavedObjectAttributes {
+  loaded?: number;
+  click?: number;
+  count?: number;
+}
+
+export type UICounterSavedObject = SavedObject<UICounterSavedObjectAttributes>;
+
+export const UI_COUNTER_SAVED_OBJECT_TYPE = 'ui-counter';
+
+export function registerUiCounterSavedObjectType(savedObjectsSetup: SavedObjectsServiceSetup) {
+  savedObjectsSetup.registerType({
+    name: UI_COUNTER_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        click: { type: 'integer' },
+        loaded: { type: 'integer' },
+        count: { type: 'integer' },
+      },
+    },
+  });
+}
