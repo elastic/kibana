@@ -65,6 +65,7 @@ export function PieComponent(
   } = props.args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
+  const isDarkMode = chartsThemeService.useDarkMode();
 
   if (!hideLabels) {
     firstTable.columns.forEach((column) => {
@@ -125,7 +126,9 @@ export function PieComponent(
           if (shape === 'treemap') {
             // Only highlight the innermost color of the treemap, as it accurately represents area
             if (layerIndex < bucketColumns.length - 1) {
-              return 'rgba(0,0,0,0)';
+              // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
+              // therefore change it for dask mode
+              return isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
             }
             // only use the top level series layer for coloring
             if (seriesLayers.length > 1) {
@@ -256,6 +259,7 @@ export function PieComponent(
           theme={{
             ...chartTheme,
             background: {
+              ...chartTheme.background,
               color: undefined, // removes background for embeddables
             },
           }}
