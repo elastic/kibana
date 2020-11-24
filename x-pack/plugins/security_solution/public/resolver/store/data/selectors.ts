@@ -61,6 +61,21 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
+ * The number of requested ancestors from the server. If zero ancestors were requested
+ * then the server would still return the origin node.
+ */
+export function resolverRequestedAncestors(state: DataState): number {
+  return state.tree?.lastResponse?.parameters.requestedAncestors ?? 0;
+}
+
+/**
+ * The number of requested descendants from the server.
+ */
+export function resolverRequestedDescendants(state: DataState): number {
+  return state.tree?.lastResponse?.parameters.requestedAncestors ?? 0;
+}
+
+/**
  * The last NewResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
@@ -225,22 +240,34 @@ export const relatedEventCountByCategory: (
 );
 
 /**
- * `true` if there were more children than we got in the last request.
- * @deprecated
+ * Returns true if there might be more descendants in the graph that we didn't get because
+ * we reached the requested descendants limit.
+ *
+ * If we set a limit at 10 and we received 9, then we know there weren't anymore. If we received
+ * 10, there might be more.
  */
-export function hasMoreChildren(state: DataState): boolean {
-  const resolverTree = resolverTreeResponse(state);
-  return resolverTree ? resolverTreeModel.hasMoreChildren(resolverTree) : false;
-}
+export const hasMoreChildren: (state: DataState) => boolean = createSelector(
+  tree,
+  resolverRequestedDescendants,
+  (resolverTree, requestedDescendants) => {
+    return indexedProcessTreeModel.countChildren(resolverTree) >= requestedDescendants;
+  }
+);
 
 /**
- * `true` if there were more ancestors than we got in the last request.
- * @deprecated
+ * Returns true if there might be more ancestors in the graph that we didn't get because
+ * we reached the requested limit.
+ *
+ * If we set a limit at 10 and we received 9, then we know there weren't anymore. If we received
+ * 10, there might be more.
  */
-export function hasMoreAncestors(state: DataState): boolean {
-  const resolverTree = resolverTreeResponse(state);
-  return resolverTree ? resolverTreeModel.hasMoreAncestors(resolverTree) : false;
-}
+export const hasMoreAncestors: (state: DataState) => boolean = createSelector(
+  tree,
+  resolverRequestedAncestors,
+  (resolverTree, requestedAncestors) => {
+    return indexedProcessTreeModel.countAncestors(resolverTree) >= requestedAncestors;
+  }
+);
 
 /**
  * If the tree resource needs to be fetched then these are the parameters that should be used.

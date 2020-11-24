@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataAccessLayer, Timerange } from '../../types';
+import { DataAccessLayer, Timerange, TreeIdSchema } from '../../types';
 import {
   mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin,
   firstRelatedEventID,
@@ -15,6 +15,7 @@ import {
   ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
+  ResolverNode,
 } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 
@@ -174,7 +175,21 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(): Promise<ResolverTree> {
+      async resolverTree({
+        dataId,
+        schema,
+        timerange,
+        indices,
+        ancestors,
+        descendants,
+      }: {
+        dataId: string;
+        schema: TreeIdSchema;
+        timerange: Timerange;
+        indices: string[];
+        ancestors: number;
+        descendants: number;
+      }): Promise<ResolverNode[]> {
         return tree;
       },
 

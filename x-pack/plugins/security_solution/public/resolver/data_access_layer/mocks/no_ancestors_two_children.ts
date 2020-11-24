@@ -9,9 +9,11 @@ import {
   SafeResolverEvent,
   ResolverTree,
   ResolverEntityIndex,
+  NewResolverTree,
+  ResolverNode,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
-import { DataAccessLayer, Timerange } from '../../types';
+import { DataAccessLayer, Timerange, TreeIdSchema } from '../../types';
 
 interface Metadata {
   /**
@@ -123,7 +125,21 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
       /**
        * Fetch a ResolverTree for a entityID
        */
-      resolverTree(): Promise<ResolverTree> {
+      async resolverTree({
+        dataId,
+        schema,
+        timerange,
+        indices,
+        ancestors,
+        descendants,
+      }: {
+        dataId: string;
+        schema: TreeIdSchema;
+        timerange: Timerange;
+        indices: string[];
+        ancestors: number;
+        descendants: number;
+      }): Promise<ResolverNode[]> {
         return Promise.resolve(
           mockTreeWithNoAncestorsAnd2Children({
             originID: metadata.entityIDs.origin,

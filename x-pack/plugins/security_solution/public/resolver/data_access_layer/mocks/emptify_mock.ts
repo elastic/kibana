@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SafeResolverEvent } from './../../../../common/endpoint/types/index';
+import { ResolverNode, SafeResolverEvent } from './../../../../common/endpoint/types/index';
 
 import {
   ResolverRelatedEvents,
@@ -91,7 +91,7 @@ export function emptifyMock<T>(
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(...args): Promise<ResolverTree> {
+      async resolverTree(...args): Promise<ResolverNode[]> {
         return dataShouldBeEmpty.includes('resolverTree')
           ? Promise.resolve(mockTreeWithNoProcessEvents())
           : dataAccessLayer.resolverTree(...args);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataAccessLayer, Timerange } from '../../types';
+import { DataAccessLayer, Timerange, TreeIdSchema } from '../../types';
 import { mockTreeWithOneNodeAndTwoPagesOfRelatedEvents } from '../../mocks/resolver_tree';
 import {
   ResolverRelatedEvents,
@@ -134,7 +134,21 @@ export function oneNodeWithPaginatedEvents(): {
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(): Promise<ResolverNode[]> {
+      async resolverTree({
+        dataId,
+        schema,
+        timerange,
+        indices,
+        ancestors,
+        descendants,
+      }: {
+        dataId: string;
+        schema: TreeIdSchema;
+        timerange: Timerange;
+        indices: string[];
+        ancestors: number;
+        descendants: number;
+      }): Promise<ResolverNode[]> {
         return mockTree.treeResponse;
       },
 

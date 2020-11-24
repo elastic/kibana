@@ -24,7 +24,7 @@ import {
 } from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
 
-interface Metadata {
+export interface Metadata {
   /**
    * The `_id` of the document being analyzed.
    */
@@ -105,7 +105,6 @@ export function usingGenerator(
     ...treeOptions,
     alwaysGenMaxChildrenPerNode: true,
   });
-
   // ancestors: 5,
   // relatedEvents: relatedEventsToGen,
   // relatedAlerts,
@@ -219,12 +218,21 @@ export function usingGenerator(
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverGraph(
-        dataId: string,
-        schema: TreeIdSchema,
-        timerange: Timerange,
-        indices: string[]
-      ): Promise<ResolverNode[]> {
+      async resolverTree({
+        dataId,
+        schema,
+        timerange,
+        indices,
+        ancestors,
+        descendants,
+      }: {
+        dataId: string;
+        schema: TreeIdSchema;
+        timerange: Timerange;
+        indices: string[];
+        ancestors: number;
+        descendants: number;
+      }): Promise<ResolverNode[]> {
         /**
          * Creates an EventStats object from a generated TreeNOde.
          * @param node a TreeNode created by the EndpointDocGenerator

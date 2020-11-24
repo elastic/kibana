@@ -179,14 +179,25 @@ export function dataAccessLayerFactory(
      * @param {string[]} indices
      * @returns {Promise<ResolverNode[]>}
      */
-    async resolverTree(
-      dataId: string,
-      schema: TreeIdSchema,
-      timerange: Timerange,
-      indices: string[]
-    ): Promise<ResolverNode[]> {
+    async resolverTree({
+      dataId,
+      schema,
+      timerange,
+      indices,
+      ancestors,
+      descendants,
+    }: {
+      dataId: string;
+      schema: TreeIdSchema;
+      timerange: Timerange;
+      indices: string[];
+      ancestors: number;
+      descendants: number;
+    }): Promise<ResolverNode[]> {
       return context.services.http.post('/api/endpoint/resolver/tree', {
         body: JSON.stringify({
+          ancestors,
+          descendants,
           timerange,
           schema,
           nodes: [dataId],

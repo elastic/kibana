@@ -14,6 +14,9 @@ import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 
+const numberOfAncestors = 200;
+const numberOfDescendants = 1000;
+
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
  * This will make a request anytime the entityID changes (to something other than undefined.)
@@ -43,13 +46,6 @@ export function ResolverTreeFetcher(
       from,
       to,
     };
-
-    // TODO: Discuss whether or not we want to hardcode a schema like the below in the front end for now or backend....
-
-    // const schemas = {
-    //   winlog: { id: 'process.entity_id', parent: 'process.parent.entitiy_id' },
-    //   endpoint: { id: 'process.entity_id', parent: 'process.parent.entitiy_id', ancestry: 'process.Ext.ancestry },
-    // };
 
     const treeRequestIDSchema = {
       id: 'process.entity_id',
@@ -90,12 +86,14 @@ export function ResolverTreeFetcher(
         // TODO: Enttities call should return the fields as [{ process: { entity_id: 'blargh' }}] to allow use of the schema.id field
         entityIDToFetch = matchingEntities[0].entity_id;
 
-        result = await dataAccessLayer.resolverTree(
-          entityIDToFetch,
-          treeRequestIDSchema,
+        result = await dataAccessLayer.resolverTree({
+          dataId: entityIDToFetch,
+          schema: treeRequestIDSchema,
           timerange,
-          databaseParameters.indices ?? []
-        );
+          indices: databaseParameters.indices ?? [],
+          ancestors: numberOfAncestors,
+          descendants: numberOfDescendants,
+        });
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
         if (error instanceof DOMException && error.name === 'AbortError') {
@@ -120,7 +118,11 @@ export function ResolverTreeFetcher(
           type: 'serverReturnedResolverData',
           payload: {
             result: resolverTree,
-            parameters: databaseParameters,
+            parameters: {
+              ...databaseParameters,
+              requestedAncestors: numberOfAncestors,
+              requestedDescendants: numberOfDescendants,
+            },
           },
         });
       }
