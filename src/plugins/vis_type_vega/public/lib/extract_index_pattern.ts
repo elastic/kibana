@@ -18,19 +18,23 @@
  */
 
 import { getData } from '../services';
+
 import type { Data, VegaSpec } from '../data_model/types';
 import type { IndexPattern } from '../../../data/public';
 
 export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
   const { indexPatterns } = getData();
+  const data: Data[] = Array.isArray(spec.data) ? spec.data : [spec.data];
 
   return (
     await Promise.all(
-      (Array.isArray(spec.data) ? spec.data : [spec.data]).map((d: Data) => {
-        if (d?.url?.index) {
-          return indexPatterns.findByTitle(d.url.index);
+      data.reduce<Data[]>((accumulator, currentValue) => {
+        if (currentValue.url?.index) {
+          accumulator.push(indexPatterns.findByTitle(currentValue.url.index));
         }
-      })
+
+        return accumulator;
+      }, [])
     )
   ).filter((index) => Boolean(index)) as IndexPattern[];
 };
