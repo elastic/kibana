@@ -17,8 +17,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/81668
-  describe.skip('eventLog', () => {
+  describe('eventLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -73,26 +72,21 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: [
-            'execute',
-            'execute-action',
-            'new-instance',
-            'active-instance',
-            'resolved-instance',
-          ],
+          actions: new Map([
+            // make sure the counts of the # of events per type are as expected
+            ['execute', { gte: 4 }],
+            ['execute-action', { equal: 2 }],
+            ['new-instance', { equal: 1 }],
+            ['active-instance', { gte: 1 }],
+            ['resolved-instance', { equal: 1 }],
+          ]),
         });
       });
 
-      // make sure the counts of the # of events per type are as expected
       const executeEvents = getEventsByAction(events, 'execute');
       const executeActionEvents = getEventsByAction(events, 'execute-action');
       const newInstanceEvents = getEventsByAction(events, 'new-instance');
       const resolvedInstanceEvents = getEventsByAction(events, 'resolved-instance');
-
-      expect(executeEvents.length >= 4).to.be(true);
-      expect(executeActionEvents.length).to.be(2);
-      expect(newInstanceEvents.length).to.be(1);
-      expect(resolvedInstanceEvents.length).to.be(1);
 
       // make sure the events are in the right temporal order
       const executeTimes = getTimestamps(executeEvents);
@@ -182,7 +176,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: ['execute'],
+          actions: new Map([['execute', { gte: 1 }]]),
         });
       });
 
