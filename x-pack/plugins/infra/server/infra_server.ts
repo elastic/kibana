@@ -40,6 +40,7 @@ import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './r
 import { initSourceRoute } from './routes/source';
 import { initAlertPreviewRoute } from './routes/alerting';
 import { initGetLogAlertsChartPreviewDataRoute } from './routes/log_alerts';
+import { initProcessListRoute } from './routes/process_list';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -80,4 +81,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initLogSourceStatusRoutes(libs);
   initAlertPreviewRoute(libs);
   initGetLogAlertsChartPreviewDataRoute(libs);
+  initProcessListRoute(libs);
 };

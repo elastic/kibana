@@ -8,6 +8,8 @@ import { cloneDeep, findIndex } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { HttpLogic } from '../../../shared/http';
 
 import {
@@ -21,9 +23,6 @@ import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } 
 import { staticSourceData } from './source_data';
 
 import { AppLogic } from '../../app_logic';
-
-const ORG_SOURCES_PATH = '/api/workplace_search/org/sources';
-const ACCOUNT_SOURCES_PATH = '/api/workplace_search/account/sources';
 
 interface ServerStatuses {
   [key: string]: string;
@@ -163,7 +162,9 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   listeners: ({ actions, values }) => ({
     initializeSources: async () => {
       const { isOrganization } = AppLogic.values;
-      const route = isOrganization ? ORG_SOURCES_PATH : ACCOUNT_SOURCES_PATH;
+      const route = isOrganization
+        ? '/api/workplace_search/org/sources'
+        : '/api/workplace_search/account/sources';
 
       try {
         const response = await HttpLogic.values.http.get(route);
@@ -208,10 +209,25 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       }
     },
     setAddedSource: ({ addedSourceName, additionalConfiguration }) => {
+      const successfullyConnectedMessage = i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceConnected',
+        {
+          defaultMessage: 'Successfully connected {sourceName}.',
+          values: { sourceName: addedSourceName },
+        }
+      );
+
+      const additionalConfigurationMessage = i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.additionalConfigurationNeeded',
+        {
+          defaultMessage: 'This source requires additional configuration.',
+        }
+      );
+
       setSuccessMessage(
         [
-          `Successfully connected ${addedSourceName}.`,
-          additionalConfiguration ? 'This source requires additional configuration.' : '',
+          successfullyConnectedMessage,
+          additionalConfiguration ? additionalConfigurationMessage : '',
         ].join(' ')
       );
     },
@@ -222,7 +238,9 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
 });
 
 const fetchSourceStatuses = async (isOrganization: boolean) => {
-  const route = isOrganization ? ORG_SOURCES_PATH : ACCOUNT_SOURCES_PATH;
+  const route = isOrganization
+    ? '/api/workplace_search/org/sources/status'
+    : '/api/workplace_search/account/sources/status';
   let response;
 
   try {

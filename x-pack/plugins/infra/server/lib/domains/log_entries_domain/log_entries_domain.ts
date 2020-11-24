@@ -11,6 +11,7 @@ import {
   LogEntriesSummaryHighlightsBucket,
   LogEntry,
   LogColumn,
+  LogEntriesRequest,
 } from '../../../../common/http_api';
 import {
   InfraSourceConfiguration,
@@ -69,7 +70,8 @@ export class InfraLogEntriesDomain {
   public async getLogEntriesAround(
     requestContext: RequestHandlerContext,
     sourceId: string,
-    params: LogEntriesAroundParams
+    params: LogEntriesAroundParams,
+    columnOverrides?: LogEntriesRequest['columns']
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
     const { startTimestamp, endTimestamp, center, query, size, highlightTerm } = params;
 
@@ -93,7 +95,8 @@ export class InfraLogEntriesDomain {
         cursor: { before: center },
         size: Math.floor(halfSize),
         highlightTerm,
-      }
+      },
+      columnOverrides
     );
 
     /*
@@ -127,12 +130,15 @@ export class InfraLogEntriesDomain {
   public async getLogEntries(
     requestContext: RequestHandlerContext,
     sourceId: string,
-    params: LogEntriesParams
+    params: LogEntriesParams,
+    columnOverrides?: LogEntriesRequest['columns']
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext.core.savedObjects.client,
       sourceId
     );
+
+    const columnDefinitions = columnOverrides ?? configuration.logColumns;
 
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(configuration.fields.message)
@@ -151,7 +157,7 @@ export class InfraLogEntriesDomain {
       return {
         id: doc.id,
         cursor: doc.cursor,
-        columns: configuration.logColumns.map(
+        columns: columnDefinitions.map(
           (column): LogColumn => {
             if ('timestampColumn' in column) {
               return {

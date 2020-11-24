@@ -5,6 +5,8 @@
  */
 
 import expect from '@kbn/expect';
+import path from 'path';
+import fs from 'fs';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -21,6 +23,23 @@ export default function (providerContext: FtrProviderContext) {
   const experimentalPkgKey = `${experimentalPkgName}-${pkgVersion}`;
   const experimental2PkgName = 'experimental2';
   const experimental2PkgKey = `${experimental2PkgName}-${pkgVersion}`;
+
+  const uploadPkgKey = 'apache-0.1.4';
+
+  const installUploadPackage = async (pkg: string) => {
+    const buf = fs.readFileSync(testPkgArchiveZip);
+    await supertest
+      .post(`/api/fleet/epm/packages`)
+      .set('kbn-xsrf', 'xxxx')
+      .type('application/zip')
+      .send(buf)
+      .expect(200);
+  };
+
+  const testPkgArchiveZip = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/apache_0.1.4.zip'
+  );
 
   const uninstallPackage = async (pkg: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
@@ -40,11 +59,7 @@ export default function (providerContext: FtrProviderContext) {
     const uninstallingPackagesPromise = pkgs.map((pkg) => uninstallPackage(pkg));
     return Promise.all(uninstallingPackagesPromise);
   };
-  const expectPkgFieldToExist = async (
-    fields: any[],
-    fieldName: string,
-    exists: boolean = true
-  ) => {
+  const expectPkgFieldToExist = (fields: any[], fieldName: string, exists: boolean = true) => {
     const fieldExists = fields.find((field: { name: string }) => field.name === fieldName);
     if (exists) {
       expect(fieldExists).not.to.be(undefined);
@@ -57,12 +72,13 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       if (!server.enabled) return;
       await installPackages([pkgKey, experimentalPkgKey, experimental2PkgKey]);
+      await installUploadPackage(uploadPkgKey);
     });
     after(async () => {
       if (!server.enabled) return;
-      await uninstallPackages([pkgKey, experimentalPkgKey, experimental2PkgKey]);
+      await uninstallPackages([pkgKey, experimentalPkgKey]);
     });
-    it('should create index patterns from all installed packages, experimental or beta', async () => {
+    it('should create index patterns from all installed packages: uploaded, experimental, beta', async () => {
       const resIndexPatternLogs = await kibanaServer.savedObjects.get({
         type: 'index-pattern',
         id: 'logs-*',
@@ -73,6 +89,7 @@ export default function (providerContext: FtrProviderContext) {
       expectPkgFieldToExist(fieldsLogs, 'logs_test_name');
       expectPkgFieldToExist(fieldsLogs, 'logs_experimental_name');
       expectPkgFieldToExist(fieldsLogs, 'logs_experimental2_name');
+      expectPkgFieldToExist(fieldsLogs, 'apache.error.uploadtest');
       const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
         type: 'index-pattern',
         id: 'metrics-*',
@@ -81,6 +98,7 @@ export default function (providerContext: FtrProviderContext) {
       expectPkgFieldToExist(fieldsMetrics, 'metrics_test_name');
       expectPkgFieldToExist(fieldsMetrics, 'metrics_experimental_name');
       expectPkgFieldToExist(fieldsMetrics, 'metrics_experimental2_name');
+      expectPkgFieldToExist(fieldsMetrics, 'apache.status.uploadtest');
     });
     it('should correctly recreate index patterns when a package is uninstalled', async () => {
       await uninstallPackage(experimental2PkgKey);
@@ -88,10 +106,11 @@ export default function (providerContext: FtrProviderContext) {
         type: 'index-pattern',
         id: 'logs-*',
       });
-      const fields = JSON.parse(resIndexPatternLogs.attributes.fields);
-      expectPkgFieldToExist(fields, 'logs_test_name');
-      expectPkgFieldToExist(fields, 'logs_experimental_name');
-      expectPkgFieldToExist(fields, 'logs_experimental2_name', false);
+      const fieldsLogs = JSON.parse(resIndexPatternLogs.attributes.fields);
+      expectPkgFieldToExist(fieldsLogs, 'logs_test_name');
+      expectPkgFieldToExist(fieldsLogs, 'logs_experimental_name');
+      expectPkgFieldToExist(fieldsLogs, 'logs_experimental2_name', false);
+      expectPkgFieldToExist(fieldsLogs, 'apache.error.uploadtest');
       const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
         type: 'index-pattern',
         id: 'metrics-*',
@@ -101,6 +120,27 @@ export default function (providerContext: FtrProviderContext) {
       expectPkgFieldToExist(fieldsMetrics, 'metrics_test_name');
       expectPkgFieldToExist(fieldsMetrics, 'metrics_experimental_name');
       expectPkgFieldToExist(fieldsMetrics, 'metrics_experimental2_name', false);
+      expectPkgFieldToExist(fieldsMetrics, 'apache.status.uploadtest');
+    });
+    it('should correctly recreate index patterns when an uploaded package is uninstalled', async () => {
+      await uninstallPackage(uploadPkgKey);
+      const resIndexPatternLogs = await kibanaServer.savedObjects.get({
+        type: 'index-pattern',
+        id: 'logs-*',
+      });
+      const fieldsLogs = JSON.parse(resIndexPatternLogs.attributes.fields);
+      expectPkgFieldToExist(fieldsLogs, 'logs_test_name');
+      expectPkgFieldToExist(fieldsLogs, 'logs_experimental_name');
+      expectPkgFieldToExist(fieldsLogs, 'apache.error.uploadtest', false);
+      const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
+        type: 'index-pattern',
+        id: 'metrics-*',
+      });
+      const fieldsMetrics = JSON.parse(resIndexPatternMetrics.attributes.fields);
+
+      expectPkgFieldToExist(fieldsMetrics, 'metrics_test_name');
+      expectPkgFieldToExist(fieldsMetrics, 'metrics_experimental_name');
+      expectPkgFieldToExist(fieldsMetrics, 'apache.status.uploadtest', false);
     });
   });
 }
