@@ -69,7 +69,8 @@
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/plugins/apm_oss/  @elastic/apm-ui
-/src/apm.js @watson @vigneshshanmugam
+/src/apm.js @elastic/kibana-core @vigneshshanmugam
+/packages/kbn-apm-config-loader/ @elastic/kibana-core @vigneshshanmugam
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 

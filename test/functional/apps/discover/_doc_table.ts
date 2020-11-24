@@ -43,12 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('discover doc table');
       await PageObjects.common.navigateToApp('discover');
-    });
-
-    beforeEach(async function () {
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it('should show the first 50 rows by default', async function () {
@@ -68,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it(`should load up to ${rowsHardLimit} rows when scrolling at the end of the table`, async function () {
@@ -89,8 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await footer.getVisibleText()).to.have.string(rowsHardLimit);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/81632
-    describe.skip('expand a document row', function () {
+    describe('expand a document row', function () {
       const rowToInspect = 1;
       beforeEach(async function () {
         // close the toggle if open
