@@ -5,6 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters/framework';
+import { ESSearchBody } from '../../../../../typings/elasticsearch';
 
 interface GetJourneyScreenshotParams {
   checkGroup: string;
@@ -14,35 +15,32 @@ interface GetJourneyScreenshotParams {
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
   GetJourneyScreenshotParams,
   any
-> = async ({ callES, dynamicSettings, checkGroup, stepIndex }) => {
-  const params: any = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'monitor.check_group': checkGroup,
-              },
+> = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
+  const params: ESSearchBody = {
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'monitor.check_group': checkGroup,
             },
-            {
-              term: {
-                'synthetics.type': 'step/screenshot',
-              },
+          },
+          {
+            term: {
+              'synthetics.type': 'step/screenshot',
             },
-            {
-              term: {
-                'synthetics.step.index': stepIndex,
-              },
+          },
+          {
+            term: {
+              'synthetics.step.index': stepIndex,
             },
-          ],
-        },
+          },
+        ],
       },
-      _source: ['synthetics.blob'],
     },
+    _source: ['synthetics.blob'],
   };
-  const { body: result } = await callES.search(params);
+  const { body: result } = await uptimeEsClient.search({ body: params });
   if (!Array.isArray(result?.hits?.hits) || result.hits.hits.length < 1) {
     return null;
   }

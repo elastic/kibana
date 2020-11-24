@@ -385,7 +385,7 @@ export const InnerVisualizationWrapper = ({
     [dispatch]
   );
 
-  if (localState.configurationValidationError) {
+  if (localState.configurationValidationError?.length) {
     let showExtraErrors = null;
     if (localState.configurationValidationError.length > 1) {
       if (localState.expandError) {
@@ -445,7 +445,7 @@ export const InnerVisualizationWrapper = ({
     );
   }
 
-  if (localState.expressionBuildError) {
+  if (localState.expressionBuildError?.length) {
     return (
       <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
         <EuiFlexItem>

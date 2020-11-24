@@ -32,15 +32,15 @@ declare global {
   }
 }
 
-export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+export default function ({ getService }: PluginFunctionalProviderContext) {
   const appsMenu = getService('appsMenu');
   const browser = getService('browser');
+  const deployment = getService('deployment');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
 
   const navigateTo = async (path: string) =>
-    await browser.navigateTo(`${PageObjects.common.getHostPort()}${path}`);
+    await browser.navigateTo(`${deployment.getHostPort()}${path}`);
   const navigateToApp = async (title: string) => {
     await appsMenu.clickLink(title);
     return browser.execute(() => {

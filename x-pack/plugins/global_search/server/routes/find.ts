@@ -15,7 +15,11 @@ export const registerInternalFindRoute = (router: IRouter) => {
       path: '/internal/global_search/find',
       validate: {
         body: schema.object({
-          term: schema.string(),
+          params: schema.object({
+            term: schema.maybe(schema.string()),
+            types: schema.maybe(schema.arrayOf(schema.string())),
+            tags: schema.maybe(schema.arrayOf(schema.string())),
+          }),
           options: schema.maybe(
             schema.object({
               preference: schema.maybe(schema.string()),
@@ -25,10 +29,10 @@ export const registerInternalFindRoute = (router: IRouter) => {
       },
     },
     async (ctx, req, res) => {
-      const { term, options } = req.body;
+      const { params, options } = req.body;
       try {
         const allResults = await ctx
-          .globalSearch!.find(term, { ...options, aborted$: req.events.aborted$ })
+          .globalSearch!.find(params, { ...options, aborted$: req.events.aborted$ })
           .pipe(
             map((batch) => batch.results),
             reduce((acc, results) => [...acc, ...results])

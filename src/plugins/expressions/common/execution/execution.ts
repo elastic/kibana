@@ -359,9 +359,12 @@ export class Execution<
 
     // Check for missing required arguments.
     for (const argDef of Object.values(argDefs)) {
-      const { aliases, default: argDefault, name: argName, required } = argDef as ArgumentType<
-        any
-      > & { name: string };
+      const {
+        aliases,
+        default: argDefault,
+        name: argName,
+        required,
+      } = argDef as ArgumentType<any> & { name: string };
       if (
         typeof argDefault !== 'undefined' ||
         !required ||

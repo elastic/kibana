@@ -41,6 +41,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       };
     }
   },
+  getDefaultLabel: () => countLabel,
   buildColumn({ field, previousColumn }) {
     return {
       label: countLabel,
