@@ -166,7 +166,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     <EuiFilterButton
       aria-label={filterBtnAriaLabel}
       data-test-subj="toggleFieldFilterButton"
-      className="dscFieldSearch__toggleButton"
       iconType="arrowDown"
       isSelected={activeFiltersCount > 0}
       numFilters={0}

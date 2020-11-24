@@ -5,7 +5,7 @@
  */
 
 import { SearchParams, SearchResponse } from 'elasticsearch';
-import { AggregationResponseMap, AggregationInputMap } from './aggregations';
+import { AggregationResponseMap, AggregationInputMap, SortOptions } from './aggregations';
 export {
   AggregationInputMap,
   AggregationOptionsByType,
@@ -23,7 +23,13 @@ interface CollapseQuery {
   inner_hits: {
     name: string;
     size?: number;
-    sort?: [{ date: 'asc' | 'desc' }];
+    sort?: SortOptions;
+    _source?: {
+      includes: string[];
+    };
+    collapse?: {
+      field: string;
+    };
   };
   max_concurrent_group_searches?: number;
 }
@@ -31,9 +37,11 @@ interface CollapseQuery {
 export interface ESSearchBody {
   query?: any;
   size?: number;
+  from?: number;
   aggs?: AggregationInputMap;
   track_total_hits?: boolean | number;
   collapse?: CollapseQuery;
+  _source?: string | string[] | { excludes: string | string[] };
 }
 
 export type ESSearchRequest = Omit<SearchParams, 'body'> & {

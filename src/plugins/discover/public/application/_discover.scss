@@ -186,18 +186,6 @@ discover-app {
   display: inline;
 }
 
-.dscTableFixedScroll {
-  overflow-x: auto;
-  padding-bottom: 0;
-
-  + .dscTableFixedScroll__scroller {
-    position: fixed;
-    bottom: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-}
-
 .dscCollapsibleSidebar__collapseButton {
   align-self: flex-start;
   &:not(.closed) {

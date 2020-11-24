@@ -11,6 +11,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -25,6 +26,7 @@ import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   esFilters,
+  exporters,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   syncQueryStateWithUrl,
@@ -474,16 +476,50 @@ export function App({
   const { TopNavMenu } = navigation.ui;
 
   const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
+  const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
+    defaultMessage: 'unsaved',
+  });
   const topNavConfig = getLensTopNavConfig({
     showSaveAndReturn: Boolean(
       state.isLinkedToOriginatingApp &&
         // Temporarily required until the 'by value' paradigm is default.
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
+    enableExportToCSV: Boolean(
+      state.isSaveable && state.activeData && Object.keys(state.activeData).length
+    ),
     isByValueMode: getIsByValueMode(),
     showCancel: Boolean(state.isLinkedToOriginatingApp),
     savingPermitted,
     actions: {
+      exportToCSV: () => {
+        if (!state.activeData) {
+          return;
+        }
+        const datatables = Object.values(state.activeData);
+        const content = datatables.reduce<Record<string, { content: string; type: string }>>(
+          (memo, datatable, i) => {
+            // skip empty datatables
+            if (datatable) {
+              const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+
+              memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
+                content: exporters.datatableToCSV(datatable, {
+                  csvSeparator: uiSettings.get('csv:separator', ','),
+                  quoteValues: uiSettings.get('csv:quoteValues', true),
+                  formatFactory: data.fieldFormats.deserialize,
+                }),
+                type: exporters.CSV_MIME_TYPE,
+              };
+            }
+            return memo;
+          },
+          {}
+        );
+        if (content) {
+          downloadMultipleAs(content);
+        }
+      },
       saveAndReturn: () => {
         if (savingPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
@@ -605,12 +641,15 @@ export function App({
               onError,
               showNoDataPopover,
               initialContext,
-              onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
+              onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
                 if (isSaveable !== state.isSaveable) {
                   setState((s) => ({ ...s, isSaveable }));
                 }
                 if (!_.isEqual(state.persistedDoc, doc)) {
                   setState((s) => ({ ...s, lastKnownDoc: doc }));
+                }
+                if (!_.isEqual(state.activeData, activeData)) {
+                  setState((s) => ({ ...s, activeData }));
                 }
 
                 // Update the cached index patterns if the user made a change to any of them

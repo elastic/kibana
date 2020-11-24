@@ -170,7 +170,13 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 responsive={false}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon onClick={() => setIsFlyoutVisible(false)} iconType="arrowLeft" />
+                  <EuiButtonIcon
+                    aria-label={i18n.translate('discover.fieldList.flyoutBackIcon', {
+                      defaultMessage: 'Back',
+                    })}
+                    onClick={() => setIsFlyoutVisible(false)}
+                    iconType="arrowLeft"
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="s">
