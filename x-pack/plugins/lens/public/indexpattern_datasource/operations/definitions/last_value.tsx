@@ -11,7 +11,7 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
-import { fieldIsInvalid } from '../../utils';
+import { fieldIsInvalid } from '.';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.lastValueOf', {

@@ -23,6 +23,7 @@ export const {
   getOperationResultType,
   operationDefinitionMap,
   operationDefinitions,
+  fieldIsInvalid,
 } = actualOperations;
 
 export const {

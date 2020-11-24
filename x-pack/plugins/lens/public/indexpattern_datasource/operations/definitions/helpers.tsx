@@ -6,6 +6,9 @@
 
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { operationDefinitionMap } from '.';
+import { FieldBasedIndexPatternColumn } from './column_types';
+import { IndexPattern } from '../../types';
 
 export const useDebounceWithOptions = (
   fn: Function,
@@ -28,3 +31,19 @@ export const useDebounceWithOptions = (
     newDeps
   );
 };
+
+export function fieldIsInvalid(column: FieldBasedIndexPatternColumn, indexPattern: IndexPattern) {
+  const { sourceField, operationType } = column;
+  const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
+  const operationDefinition = operationType && operationDefinitionMap[operationType];
+
+  return Boolean(
+    sourceField &&
+      operationDefinition &&
+      !(
+        field &&
+        operationDefinition?.input === 'field' &&
+        operationDefinition.getPossibleOperationForField(field) !== undefined
+      )
+  );
+}

@@ -17,7 +17,7 @@ import { mergeLayer } from '../../../state_helpers';
 import { supportedFormats } from '../../../format_column';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../types';
-import { fieldIsInvalid } from '../../../utils';
+import { fieldIsInvalid } from '..';
 
 type RangeType = Omit<Range, 'type'>;
 // Try to cover all possible serialized states for ranges

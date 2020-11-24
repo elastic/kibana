@@ -7,11 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
-import { fieldIsInvalid } from '../../utils';
+import { fieldIsInvalid } from '.';
 
-type MetricColumn<T> = FormattedIndexPatternColumn &
+type MetricType = 'sum' | 'avg' | 'min' | 'max' | 'median';
+
+type MetricColumn<MetricType> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
-    operationType: T;
+    operationType: MetricType;
   };
 
 function buildMetricOperation<T extends MetricColumn<string>>({
@@ -30,7 +32,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     priority,
     displayName,
     input: 'field',
-    hasInvalidReferences: fieldIsInvalid,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&
@@ -83,6 +84,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         missing: 0,
       },
     }),
+    hasInvalidReferences: (column, _indexPattern) =>
+      fieldIsInvalid(column as MetricColumn<MetricType>, _indexPattern),
   } as OperationDefinition<T, 'field'>;
 }
 

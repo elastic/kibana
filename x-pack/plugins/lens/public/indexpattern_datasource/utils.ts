@@ -13,6 +13,8 @@ import {
 } from './operations/definitions/column_types';
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
+import { fieldIsInvalid as fieldIsInvalidHelper } from './operations/definitions';
+
 /**
  * Normalizes the specified operation type. (e.g. document operations
  * produce 'number')
@@ -69,28 +71,12 @@ export function getInvalidColumnsForLayer(
 
 export function isColumnInvalid(column: IndexPatternColumn, indexPattern: IndexPattern) {
   const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
-  return (
-    operationDefinition.hasInvalidReferences &&
-    operationDefinition.hasInvalidReferences(column, indexPattern)
-  );
+  return operationDefinition.hasInvalidReferences(column, indexPattern);
 }
 
 export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPattern: IndexPattern) {
   if (!column || !hasField(column)) {
     return false;
   }
-
-  const { sourceField, operationType } = column;
-  const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
-  const operationDefinition = operationType && operationDefinitionMap[operationType];
-
-  return Boolean(
-    sourceField &&
-      operationDefinition &&
-      !(
-        field &&
-        operationDefinition?.input === 'field' &&
-        operationDefinition.getPossibleOperationForField(field) !== undefined
-      )
-  );
+  return fieldIsInvalidHelper(column, indexPattern);
 }

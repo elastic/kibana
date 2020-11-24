@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
+import { fieldIsInvalid } from '.';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -25,6 +26,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     defaultMessage: 'Count',
   }),
   input: 'field',
+  hasInvalidReferences: fieldIsInvalid,
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,

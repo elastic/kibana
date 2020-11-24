@@ -25,8 +25,6 @@ import {
 import { createMockedRestrictedIndexPattern, createMockedIndexPattern } from './mocks';
 import { documentField } from './document_field';
 
-jest.mock('./operations');
-
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
     get: jest.fn().mockImplementation(() => lastData),

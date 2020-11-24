@@ -22,7 +22,7 @@ import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesRangeInput } from './values_range_input';
-import { fieldIsInvalid } from '../../../utils';
+import { fieldIsInvalid } from '..';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {

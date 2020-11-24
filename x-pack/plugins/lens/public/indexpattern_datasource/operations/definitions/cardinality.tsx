@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
-import { fieldIsInvalid } from '../../utils';
+import { fieldIsInvalid } from '.';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
