@@ -8,6 +8,10 @@ import React from 'react';
 
 import { camelCase } from 'lodash';
 
+import { EuiIcon } from '@elastic/eui';
+
+import './source_icon.scss';
+
 import { images } from '../assets/source_icons';
 import { imagesFull } from '../assets/sources_full_bleed';
 
@@ -27,14 +31,15 @@ export const SourceIcon: React.FC<SourceIconProps> = ({
   fullBleed = false,
 }) => {
   const icon = (
-    <img
-      src={fullBleed ? imagesFull[camelCase(serviceType)] : images[camelCase(serviceType)]}
-      alt={name}
+    <EuiIcon
+      type={fullBleed ? imagesFull[camelCase(serviceType)] : images[camelCase(serviceType)]}
+      title={name}
       className={className}
+      size="xxl"
     />
   );
   return wrapped ? (
-    <div className="user-group-source" title={name}>
+    <div className="wrapped-icon" title={name}>
       {icon}
     </div>
   ) : (
