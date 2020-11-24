@@ -85,3 +85,37 @@ export interface DataFrameAnalyticsConfig {
 }
 
 export type DataFrameAnalysisConfigType = typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
+
+interface ProgressSection {
+  phase: string;
+  progress_percent: number;
+}
+
+enum DATA_FRAME_TASK_STATE {
+  ANALYZING = 'analyzing',
+  FAILED = 'failed',
+  REINDEXING = 'reindexing',
+  STARTED = 'started',
+  STARTING = 'starting',
+  STOPPED = 'stopped',
+}
+
+export interface DataFrameAnalyticsStats {
+  assignment_explanation?: string;
+  id: DataFrameAnalyticsId;
+  memory_usage?: {
+    timestamp?: string;
+    peak_usage_bytes: number;
+    status: string;
+  };
+  node?: {
+    attributes: Record<string, any>;
+    ephemeral_id: string;
+    id: string;
+    name: string;
+    transport_address: string;
+  };
+  progress: ProgressSection[];
+  failure_reason?: string;
+  state: DATA_FRAME_TASK_STATE;
+}

@@ -29,9 +29,10 @@ import {
 
 import { deleteActionNameText, DeleteActionName } from './delete_action_name';
 
+type DataFrameAnalyticsListRowEssentials = Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>;
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
 export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
-  const [item, setItem] = useState<DataFrameAnalyticsListRow>();
+  const [item, setItem] = useState<DataFrameAnalyticsListRowEssentials>();
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [deleteItem, setDeleteItem] = useState(false);
@@ -132,7 +133,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const toggleDeleteIndex = () => setDeleteTargetIndex(!deleteTargetIndex);
   const toggleDeleteIndexPattern = () => setDeleteIndexPattern(!deleteIndexPattern);
 
-  const openModal = (newItem: DataFrameAnalyticsListRow) => {
+  const openModal = (newItem: DataFrameAnalyticsListRowEssentials) => {
     setItem(newItem);
     setModalVisible(true);
   };

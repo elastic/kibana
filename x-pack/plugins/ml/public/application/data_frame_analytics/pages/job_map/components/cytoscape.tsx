@@ -26,6 +26,7 @@ interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   height: number;
+  itemsDeleted: boolean;
   style?: CSSProperties;
   width: number;
 }
@@ -63,7 +64,14 @@ function getLayoutOptions(width: number, height: number) {
   };
 }
 
-export function Cytoscape({ children, elements, height, style, width }: CytoscapeProps) {
+export function Cytoscape({
+  children,
+  elements,
+  height,
+  itemsDeleted,
+  style,
+  width,
+}: CytoscapeProps) {
   const [ref, cy] = useCytoscape({
     ...cytoscapeOptions,
     elements,
@@ -98,7 +106,13 @@ export function Cytoscape({ children, elements, height, style, width }: Cytoscap
   // Trigger a custom "data" event when data changes
   useEffect(() => {
     if (cy) {
-      cy.add(elements);
+      if (itemsDeleted === false) {
+        cy.add(elements);
+      } else if (itemsDeleted === true) {
+        cy.elements().remove();
+        cy.add(elements);
+      }
+
       cy.trigger('data');
     }
   }, [cy, elements]);

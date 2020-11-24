@@ -189,8 +189,7 @@ export const Controls: FC<Props> = ({
             {nodeType === JOB_MAP_NODE_TYPES.ANALYTICS && (
               <EuiButton
                 onClick={() => {
-                  // @ts-ignore // TODO: update endpoint to return stats
-                  openModal({ config: details[nodeId], stats: { state: 'stopped' } });
+                  openModal({ config: details[nodeId], stats: details[nodeId]?.stats });
                 }}
                 iconType="trash"
                 color="danger"

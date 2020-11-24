@@ -69,7 +69,8 @@ interface Props {
 export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
   const [nodeDetails, setNodeDetails] = useState({});
-  const [error, setError] = useState(undefined);
+  const [error, setError] = useState();
+  const [itemsDeleted, setItemsDeleted] = useState<boolean>(false);
 
   const {
     services: { notifications },
@@ -114,7 +115,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
 
       return condition;
     });
-
+    setItemsDeleted(true);
     setElements(filteredElements);
   };
 
@@ -182,7 +183,13 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
             <JobMapLegend />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <Cytoscape height={height} elements={elements} width={width} style={cytoscapeDivStyle}>
+        <Cytoscape
+          height={height}
+          elements={elements}
+          width={width}
+          style={cytoscapeDivStyle}
+          itemsDeleted={itemsDeleted}
+        >
           <Controls
             details={nodeDetails}
             getNodeData={getDataWrapper}
