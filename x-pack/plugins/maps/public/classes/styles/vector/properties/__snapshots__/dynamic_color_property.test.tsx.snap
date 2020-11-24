@@ -1,8 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`categorical Should render categorical legend with breaks from custom 1`] = `""`;
+exports[`renderDataMappingPopover Should disable toggle when field is not backed by geojson source 1`] = `
+<OrdinalFieldMetaPopover
+  fieldMetaOptions={
+    Object {
+      "isEnabled": true,
+    }
+  }
+  onChange={[Function]}
+  stepFunction="EASING_BETWEEN_MIN_AND_MAX"
+  styleName="lineColor"
+  switchDisabled={true}
+/>
+`;
 
-exports[`categorical Should render categorical legend with breaks from default 1`] = `
+exports[`renderDataMappingPopover Should enable toggle when field is backed by geojson-source 1`] = `
+<OrdinalFieldMetaPopover
+  fieldMetaOptions={
+    Object {
+      "isEnabled": true,
+    }
+  }
+  onChange={[Function]}
+  stepFunction="EASING_BETWEEN_MIN_AND_MAX"
+  styleName="lineColor"
+  switchDisabled={false}
+/>
+`;
+
+exports[`renderLegendDetailRow categorical Should render categorical legend with breaks from custom 1`] = `""`;
+
+exports[`renderLegendDetailRow categorical Should render categorical legend with breaks from default 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"
@@ -82,7 +110,7 @@ exports[`categorical Should render categorical legend with breaks from default 1
 </div>
 `;
 
-exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
+exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with breaks 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"
@@ -145,59 +173,7 @@ exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
 </div>
 `;
 
-exports[`ordinal Should render only single band of last color when delta is 0 1`] = `
-<div>
-  <EuiFlexGroup
-    gutterSize="xs"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiToolTip
-        content="foobar_label"
-        delay="regular"
-        position="top"
-        title="Border color"
-      >
-        <EuiText
-          className="eui-textTruncate"
-          size="xs"
-          style={
-            Object {
-              "maxWidth": "180px",
-            }
-          }
-        >
-          <small>
-            <strong>
-              foobar_label
-            </strong>
-          </small>
-        </EuiText>
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="none"
-  >
-    <EuiFlexItem
-      key="0"
-    >
-      <Category
-        color="#6092c0"
-        isLinesOnly={false}
-        isPointsOnly={true}
-        label="100_format"
-        styleName="lineColor"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
-
-exports[`ordinal Should render ordinal legend as bands 1`] = `
+exports[`renderLegendDetailRow ordinal Should render easing bands 1`] = `
 <div>
   <EuiFlexGroup
     gutterSize="xs"
@@ -326,30 +302,161 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
 </div>
 `;
 
-exports[`renderDataMappingPopover Should disable toggle when field is not backed by geojson source 1`] = `
-<OrdinalFieldMetaPopover
-  fieldMetaOptions={
-    Object {
-      "isEnabled": true,
-    }
-  }
-  onChange={[Function]}
-  stepFunction="EASING_BETWEEN_MIN_AND_MAX"
-  styleName="lineColor"
-  switchDisabled={true}
-/>
+exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <Category
+        color="#e5ecf4"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="<50th: 5572_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <Category
+        color="#ccd9ea"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="50th: 5572_format - <75th: 8079_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="2"
+    >
+      <Category
+        color="#b2c7df"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="75th: 8079_format - <90th: 9607_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="3"
+    >
+      <Category
+        color="#98b5d5"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="90th: 9607_format - <95th: 10439_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="4"
+    >
+      <Category
+        color="#7da3ca"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="95th: 10439_format - <99th: 16857_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="5"
+    >
+      <Category
+        color="#6092c0"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label=">99th: 16857_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
 `;
 
-exports[`renderDataMappingPopover Should enable toggle when field is backed by geojson-source 1`] = `
-<OrdinalFieldMetaPopover
-  fieldMetaOptions={
-    Object {
-      "isEnabled": true,
-    }
-  }
-  onChange={[Function]}
-  stepFunction="EASING_BETWEEN_MIN_AND_MAX"
-  styleName="lineColor"
-  switchDisabled={false}
-/>
+exports[`renderLegendDetailRow ordinal Should render single band when easing range is 0 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Border color"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <Category
+        color="#6092c0"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="100_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
 `;
