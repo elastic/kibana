@@ -20,7 +20,9 @@ import {
   RecursivePartial,
   Position,
   Settings,
+  ElementClickListener,
 } from '@elastic/charts';
+import { RenderMode } from 'src/plugins/expressions';
 import { FormatFactory, LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
@@ -44,6 +46,7 @@ export function PieComponent(
     chartsThemeService: ChartsPluginSetup['theme'];
     paletteService: PaletteRegistry;
     onClickValue: (data: LensFilterEvent['data']) => void;
+    renderMode: RenderMode;
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
@@ -228,6 +231,12 @@ export function PieComponent(
       </EuiText>
     );
   }
+
+  const onElementClickHandler: ElementClickListener = (args) => {
+    const context = getFilterContext(args[0][0] as LayerValue[], groups, firstTable);
+
+    onClickValue(desanitizeFilterContext(context));
+  };
   return (
     <VisualizationContainer
       reportTitle={props.args.title}
@@ -248,11 +257,9 @@ export function PieComponent(
           }
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
-          onElementClick={(args) => {
-            const context = getFilterContext(args[0][0] as LayerValue[], groups, firstTable);
-
-            onClickValue(desanitizeFilterContext(context));
-          }}
+          onElementClick={
+            props.renderMode !== 'noInteractivity' ? onElementClickHandler : undefined
+          }
           theme={{
             ...chartTheme,
             background: {

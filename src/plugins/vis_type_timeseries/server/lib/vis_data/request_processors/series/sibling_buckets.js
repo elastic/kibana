@@ -28,11 +28,13 @@ export function siblingBuckets(
   series,
   esQueryConfig,
   indexPatternObject,
-  capabilities
+  capabilities,
+  { barTargetUiSettings }
 ) {
   return (next) => (doc) => {
     const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
-    const { bucketSize } = getBucketSize(req, interval, capabilities);
+    const { bucketSize } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
+
     series.metrics
       .filter((row) => /_bucket$/.test(row.type))
       .forEach((metric) => {
