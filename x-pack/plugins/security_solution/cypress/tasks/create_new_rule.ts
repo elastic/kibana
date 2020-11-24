@@ -64,7 +64,6 @@ import {
   QUERY_PREVIEW_BUTTON,
   EQL_QUERY_PREVIEW_HISTOGRAM,
   EQL_QUERY_VALIDATION_SPINNER,
-  TAGS_CLEAR_BUTTON,
 } from '../screens/create_new_rule';
 import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
 import { TIMELINE } from '../screens/timelines';
@@ -85,7 +84,6 @@ export const fillAboutRule = (rule: CustomRule | MachineLearningRule | Threshold
 
   cy.get(RISK_INPUT).clear({ force: true }).type(`${rule.riskScore}`, { force: true });
 
-  cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
   rule.tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
