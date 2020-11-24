@@ -11,9 +11,9 @@ import { fieldIsInvalid } from '.';
 
 type MetricType = 'sum' | 'avg' | 'min' | 'max' | 'median';
 
-type MetricColumn<MetricType> = FormattedIndexPatternColumn &
+type MetricColumn<T> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
-    operationType: MetricType;
+    operationType: T;
   };
 
 function buildMetricOperation<T extends MetricColumn<string>>({
