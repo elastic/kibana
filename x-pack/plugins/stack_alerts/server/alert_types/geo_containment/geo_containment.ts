@@ -21,11 +21,12 @@ interface LatestEntityLocation {
 }
 
 // Flatten agg results and get latest locations for each entity
+// TODO: Consider map where `entityName` maps to latest location array
 export function transformResults(
   results: SearchResponse<unknown> | undefined,
   dateField: string,
   geoField: string
-): LatestEntityLocation[] {
+): Map<string, EntityLocation> {
   if (!results) {
     return [];
   }
@@ -66,12 +67,13 @@ export function transformResults(
         });
       })
       .orderBy(['entityName', 'dateInShape'], ['asc', 'desc'])
-      .reduce((accu: LatestEntityLocation[], el: LatestEntityLocation) => {
-        if (!accu.length || el.entityName !== accu[accu.length - 1].entityName) {
-          accu.push(el);
+      .reduce((accu: Map<string, EntityLocation>, el: LatestEntityLocation) => {
+        const { entityName, ...locationData } = el;
+        if (!accu.size || entityName !== Array.from(accu)[accu.size - 1].entityName) {
+          accu.set(entityName, locationData);
         }
         return accu;
-      }, [])
+      }, new Map())
       .value()
   );
 }
@@ -162,26 +164,38 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       return state;
     }
 
-    const currLocationArr: LatestEntityLocation[] = transformResults(
+    const currLocationMap: Map<string, EntityLocation> = transformResults(
       currentIntervalResults,
       params.dateField,
       params.geoField
     );
 
-    currLocationArr.forEach(({ location, shapeLocationId, entityName, dateInShape, docId }) => {
+    currLocationMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
+      const containingShapeName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
       const context = {
         entityId: entityName,
         entityDocumentId: docId,
         entityLocation: location,
         containingShapeId: shapeLocationId,
+        containingShapeName,
         date: dateInShape,
       };
-      // If resolved, schedule resolved action
-      // Sub entity name-location for throttle break?
+      // No guarantee of uniqueness if this uses human-readable name?
+      const alertInstanceId = `${entityName}-${containingShapeName}`;
+      if (shapeLocationId === OTHER_CATEGORY) {
+        // Also need to resolve previously active entities that aren't in "other"
+        services
+          .alertInstanceFactory(alertInstanceId)
+          .scheduleActions(ResolvedActionGroup.id, context);
+      } else {
+        // Need to store what's active or retrieve from alerting api
+        services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
+      }
+      // if in shape (not other) contained and alert
+      // if in other, not contained and no alert
+      // if no update, not resolve but also no alert
       // Don't auto-resolve docs that don't have updates
-      services.alertInstanceFactory(entityName).scheduleActions(ResolvedActionGroup.id, context);
       // If contained, schedule contained action
-      services.alertInstanceFactory(entityName).scheduleActions(ActionGroupId, context);
     });
 
     // Return state?
