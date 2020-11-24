@@ -7,6 +7,7 @@
 import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
 import cytoscape from 'cytoscape';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import {
   EuiButton,
@@ -27,6 +28,8 @@ import { CytoscapeContext } from './cytoscape';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
+import { getIndexPatternIdFromName } from '../../../../util/index_utils';
 import {
   useDeleteAction,
   DeleteActionModal,
@@ -75,6 +78,10 @@ export const Controls: FC<Props> = ({
   const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
   const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
   const { deleteItem, deleteTargetIndex, isModalVisible, openModal } = deleteAction;
+  const {
+    services: { notifications },
+  } = useMlKibana();
+  const navigateToPath = useNavigateToPath();
 
   const cy = useContext(CytoscapeContext);
   const deselect = useCallback(() => {
@@ -88,6 +95,22 @@ export const Controls: FC<Props> = ({
   const nodeId = selectedNode?.data('id');
   const nodeLabel = selectedNode?.data('label');
   const nodeType = selectedNode?.data('type');
+
+  const onCreateJobClick = useCallback(async () => {
+    const indexId = getIndexPatternIdFromName(nodeLabel);
+
+    if (indexId) {
+      await navigateToPath(`/data_frame_analytics/new_job?index=${encodeURIComponent(indexId)}`);
+    } else {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.indexPatternMissingMessage', {
+          defaultMessage:
+            'To create a job from this index please create an index pattern for {indexTitle}.',
+          values: { indexTitle: nodeLabel },
+        })
+      );
+    }
+  }, [nodeLabel]);
 
   // Set up Cytoscape event handlers
   useEffect(() => {
@@ -198,6 +221,19 @@ export const Controls: FC<Props> = ({
                 <FormattedMessage
                   id="xpack.ml.dataframe.analyticsMap.flyout.deleteJobButton"
                   defaultMessage="Delete job"
+                />
+              </EuiButton>
+            )}
+            {nodeType === JOB_MAP_NODE_TYPES.INDEX && (
+              <EuiButton
+                onClick={onCreateJobClick}
+                iconType="plusInCircle"
+                color="primary"
+                size="s"
+              >
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsMap.flyout.createJobButton"
+                  defaultMessage="Create job from this index"
                 />
               </EuiButton>
             )}
