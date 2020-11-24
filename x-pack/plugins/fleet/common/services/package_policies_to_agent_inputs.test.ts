@@ -179,7 +179,6 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           },
         },
         inputVar: 'input-value',
-        streams: [],
       },
     ]);
   });

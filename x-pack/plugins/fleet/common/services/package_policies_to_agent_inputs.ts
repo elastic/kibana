@@ -34,20 +34,24 @@ export const storedPackagePoliciesToAgentInputs = (
           return acc;
         }, {} as { [k: string]: any }),
         ...(input.compiled_input || {}),
-        streams: input.streams
-          .filter((stream) => stream.enabled)
-          .map((stream) => {
-            const fullStream: FullAgentPolicyInputStream = {
-              id: stream.id,
-              data_stream: stream.data_stream,
-              ...stream.compiled_stream,
-              ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
-                acc[key] = value;
-                return acc;
-              }, {} as { [k: string]: any }),
-            };
-            return fullStream;
-          }),
+        ...(input.streams.length
+          ? {
+              streams: input.streams
+                .filter((stream) => stream.enabled)
+                .map((stream) => {
+                  const fullStream: FullAgentPolicyInputStream = {
+                    id: stream.id,
+                    data_stream: stream.data_stream,
+                    ...stream.compiled_stream,
+                    ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
+                      acc[key] = value;
+                      return acc;
+                    }, {} as { [k: string]: any }),
+                  };
+                  return fullStream;
+                }),
+            }
+          : {}),
       };
 
       if (packagePolicy.package) {

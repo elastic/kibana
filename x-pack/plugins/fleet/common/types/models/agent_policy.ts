@@ -49,7 +49,7 @@ export interface FullAgentPolicyInput {
     package?: Pick<PackagePolicyPackage, 'name' | 'version'>;
     [key: string]: unknown;
   };
-  streams: FullAgentPolicyInputStream[];
+  streams?: FullAgentPolicyInputStream[];
   [key: string]: any;
 }
 
