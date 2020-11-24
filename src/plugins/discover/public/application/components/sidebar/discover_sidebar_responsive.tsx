@@ -120,11 +120,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   return (
     <>
       <EuiHideFor sizes={['xs', 's']}>
-        <div
+        <DiscoverSidebar
+          {...props}
           className={`dscSidebar dscSidebar__desktop dscCollapsibleSidebar ${props.sidebarClassName}`}
-        >
-          <DiscoverSidebar {...props} fieldFilter={fieldFilter} setFieldFilter={setFieldFilter} />
-        </div>
+          fieldFilter={fieldFilter}
+          setFieldFilter={setFieldFilter}
+        />
       </EuiHideFor>
       <EuiShowFor sizes={['xs', 's']}>
         <div className="dscSidebar dscSidebar__mobile">

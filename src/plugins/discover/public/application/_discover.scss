@@ -1,70 +1,110 @@
-.dscAppWrapper {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  overflow: hidden;
-}
-
-.dscAppContainer {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  > * {
-    position: relative;
-  }
-}
-
 discover-app {
   flex-grow: 1;
 }
 
-.dscHitsCounter,
-.dscTimeChartHeader {
-  flex-grow: 0;
-}
-
-.dscApp {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
+.dscAppContainer {
+  height: calc(100vh - #{($euiHeaderHeightCompensation * 2)});
   flex-direction: column;
-  height: 100%;
   overflow: hidden;
-}
+  padding: 0;
 
-.dscApp__header {
-  border-bottom: $euiBorderThin;
-  margin-bottom: $euiSize;
-}
-
-.dscApp__frame {
-  position: relative;
-  flex-grow: 1;
-  display: flex;
-  overflow: hidden;
-  @include euiBreakpoint('xs', 's') {
-    flex-grow: 0;
-    flex-wrap: wrap;
-    margin-left: 0;
-    margin-right: 0;
-    overflow-y: auto;
+  .dscApp__frame {
+    overflow: hidden;
   }
 }
 
-.dscApp__content {
-  flex-grow: 1;
-  flex-direction: column;
-  display: flex;
+.dscPageBody__contents {
   overflow: hidden;
-  padding-right: $euiSizeS;
+  padding-top: $euiSizeXS / 2; // A little breathing room for the index pattern button
 }
+
+.eui-overflowHidden {
+  overflow: hidden;
+}
+
+.dscPageContent,
+.dscPageContent__inner {
+  height: 100%;
+}
+
+.dscPageSidebar {
+  margin: 0;
+  flex-grow: 1;
+  padding-left: $euiSize;
+  width: $euiSize * 19;
+}
+
+.dscPageSidebar__content {
+  height: 100%;
+}
+
+.dscPageContent__wrapper {
+  padding: 0 $euiSize $euiSize 0;
+}
+
+// .dscAppWrapper {
+//   display: flex;
+//   flex-direction: column;
+//   flex-grow: 1;
+//   overflow: hidden;
+// }
+
+// .dscAppContainer {
+//   position: absolute;
+//   left: 0;
+//   right: 0;
+//   top: 0;
+//   bottom: 0;
+//   display: flex;
+//   flex-direction: column;
+//   > * {
+//     position: relative;
+//   }
+// }
+
+// .dscHitsCounter,
+// .dscTimeChartHeader {
+//   flex-grow: 0;
+// }
+
+// .dscApp {
+//   position: absolute;
+//   top: 0;
+//   bottom: 0;
+//   left: 0;
+//   right: 0;
+//   display: flex;
+//   flex-direction: column;
+//   height: 100%;
+//   overflow: hidden;
+// }
+
+// .dscApp__header {
+//   border-bottom: $euiBorderThin;
+//   margin-bottom: $euiSize;
+// }
+
+// .dscApp__frame {
+//   position: relative;
+//   flex-grow: 1;
+//   display: flex;
+//   overflow: hidden;
+//   @include euiBreakpoint('xs', 's') {
+//     flex-grow: 0;
+//     flex-wrap: wrap;
+//     margin-left: 0;
+//     margin-right: 0;
+//     overflow-y: auto;
+//   }
+// }
+
+// .dscApp__content {
+//   flex-grow: 1;
+//   flex-direction: column;
+//   display: flex;
+//   overflow: hidden;
+//   padding-right: $euiSizeS;
+// }
 
 .dscHistogram {
   display: flex;
@@ -72,39 +112,39 @@ discover-app {
   padding: $euiSizeS;
 }
 
-// SASSTODO: replace the z-index value with a variable
-.dscWrapper {
-  padding-left: $euiSizeXL;
-  padding-right: $euiSizeS;
-  z-index: 1;
-  @include euiBreakpoint('xs', 's', 'm') {
-    padding-left: $euiSizeS;
-  }
-}
+// // SASSTODO: replace the z-index value with a variable
+// .dscWrapper {
+//   padding-left: $euiSizeXL;
+//   padding-right: $euiSizeS;
+//   z-index: 1;
+//   @include euiBreakpoint('xs', 's', 'm') {
+//     padding-left: $euiSizeS;
+//   }
+// }
 
-@include euiPanel('.dscWrapper__content');
+// @include euiPanel('.dscWrapper__content');
 
-.dscWrapper__content {
-  padding-top: $euiSizeXS;
-  background-color: $euiColorEmptyShade;
-  flex-grow: 1;
-  flex-direction: column;
-  display: flex;
-  overflow: hidden;
+// .dscWrapper__content {
+//   padding-top: $euiSizeXS;
+//   background-color: $euiColorEmptyShade;
+//   flex-grow: 1;
+//   flex-direction: column;
+//   display: flex;
+//   overflow: hidden;
 
-  @include euiBreakpoint('m', 'l', 'xl') {
-    margin-right: $euiSize;
-    margin-bottom: $euiSize;
-  }
+//   @include euiBreakpoint('m', 'l', 'xl') {
+//     margin-right: $euiSize;
+//     margin-bottom: $euiSize;
+//   }
 
-  @include euiBreakpoint('xs', 's') {
-    margin: $euiSizeS;
-  }
+//   @include euiBreakpoint('xs', 's') {
+//     margin: $euiSizeS;
+//   }
 
-  .kbn-table {
-    margin-bottom: 0;
-  }
-}
+//   .kbn-table {
+//     margin-bottom: 0;
+//   }
+// }
 
 .dscTimechart {
   display: block;
@@ -118,7 +158,8 @@ discover-app {
 }
 
 .dscResultCount {
-  padding: 0 $euiSizeS;
+  padding-left: $euiSizeS;
+  padding-right: $euiSizeS;
 }
 
 .dscTimechart__header {
@@ -128,21 +169,21 @@ discover-app {
   padding: $euiSizeXS 0;
 }
 
-.dscLoading {
-  text-align: center;
-  padding: $euiSizeL 0;
-}
+// .dscLoading {
+//   text-align: center;
+//   padding: $euiSizeL 0;
+// }
 
-.dscTable {
-  overflow: auto;
-  //will-change: transform;
+// .dscTable {
+//   overflow: auto;
+//   //will-change: transform;
 
-  // SASSTODO: add a monospace modifier to the doc-table component
-  .kbnDocTable__row {
-    font-family: $euiCodeFontFamily;
-    font-size: $euiFontSizeXS;
-  }
-}
+//   // SASSTODO: add a monospace modifier to the doc-table component
+//   .kbnDocTable__row {
+//     font-family: $euiCodeFontFamily;
+//     font-size: $euiFontSizeXS;
+//   }
+// }
 
 .dscTable__footer {
   background-color: $euiColorLightShade;
@@ -150,62 +191,62 @@ discover-app {
   text-align: center;
 }
 
-.dscResults {
-  flex-grow: 1;
-  flex-direction: column;
-  display: flex;
-  overflow: hidden;
-}
+// .dscResults {
+//   flex-grow: 1;
+//   flex-direction: column;
+//   display: flex;
+//   overflow: hidden;
+// }
 
-.dscResults__interval {
-  display: inline-block;
-  width: auto;
-}
+// .dscResults__interval {
+//   display: inline-block;
+//   width: auto;
+// }
 
-.dscApp .dscFormatSource {
-  word-break: break-word;
-}
+// .dscApp .dscFormatSource {
+//   word-break: break-word;
+// }
 
-.dscFormatSource__title {
-  background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
-  border-radius: $euiBorderRadius / 2;
-  color: $euiTextColor;
-  padding: ($euiSizeXS / 2) $euiSizeXS;
-  margin-right: $euiSizeXS;
-  word-break: normal;
-  display: inline;
-}
-.dscFormatSource__description {
-  display: inline;
-}
+// .dscFormatSource__title {
+//   background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
+//   border-radius: $euiBorderRadius / 2;
+//   color: $euiTextColor;
+//   padding: ($euiSizeXS / 2) $euiSizeXS;
+//   margin-right: $euiSizeXS;
+//   word-break: normal;
+//   display: inline;
+// }
+// .dscFormatSource__description {
+//   display: inline;
+// }
 
-.dscCollapsibleSidebar__collapseButton {
-  align-self: flex-start;
-  &:not(.closed) {
-    position: relative;
-    left: -$euiSizeS;
-  }
-}
+// .dscCollapsibleSidebar__collapseButton {
+//   align-self: flex-start;
+//   &:not(.closed) {
+//     position: relative;
+//     left: -$euiSizeS;
+//   }
+// }
 
-.dscCollapsibleSidebar {
-  position: relative;
-  z-index: $euiZLevel1;
+// .dscCollapsibleSidebar {
+//   position: relative;
+//   z-index: $euiZLevel1;
 
-  &.closed {
-    width: 0 !important;
-    border-right-width: 0;
-    border-left-width: 0;
-  }
-}
+//   &.closed {
+//     width: 0 !important;
+//     border-right-width: 0;
+//     border-left-width: 0;
+//   }
+// }
 
-@include euiBreakpoint('xs', 's', 'm') {
-  .dscCollapsibleSidebar {
-    &.closed {
-      display: none;
-    }
+// @include euiBreakpoint('xs', 's', 'm') {
+//   .dscCollapsibleSidebar {
+//     &.closed {
+//       display: none;
+//     }
 
-    .dscCollapsibleSidebar__collapseButton {
-      display: none;
-    }
-  }
-}
+//     .dscCollapsibleSidebar__collapseButton {
+//       display: none;
+//     }
+//   }
+// }

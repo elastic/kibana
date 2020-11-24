@@ -57,12 +57,12 @@
   border-bottom-color: transparent;
 }
 
-.dscIndexPattern__container {
-  display: flex;
-  align-items: center;
-  height: $euiSize * 3;
-  margin-top: -$euiSizeS;
-}
+// .dscIndexPattern__container {
+//   display: flex;
+//   align-items: center;
+//   height: $euiSize * 3;
+//   margin-top: -$euiSizeS;
+// }
 
 .dscIndexPattern__triggerButton {
   @include euiTitle('xs');

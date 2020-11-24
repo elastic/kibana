@@ -30,6 +30,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiNotificationBadge,
+  EuiPageSideBar,
 } from '@elastic/eui';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
@@ -199,8 +200,8 @@ export function DiscoverSidebar({
 
   return (
     <I18nProvider>
-      <section
-        className="sidebar-list dscSidebar__contentWrapper"
+      <EuiPageSideBar
+        className="sidebar-list dscPageSidebar"
         aria-label={i18n.translate('discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel', {
           defaultMessage: 'Index and fields',
         })}
@@ -208,13 +209,13 @@ export function DiscoverSidebar({
         data-test-subj="discover-sidebar"
       >
         <EuiFlexGroup
-          gutterSize="none"
-          responsive={false}
-          className="dscSidebar__content"
+          className="dscPageSidebar__content"
           direction="column"
+          alignItems="stretch"
+          gutterSize="s"
+          responsive={false}
         >
           <EuiFlexItem grow={false}>
-            {' '}
             <DiscoverIndexPattern
               selectedIndexPattern={selectedIndexPattern}
               setIndexPattern={setIndexPattern}
@@ -230,7 +231,7 @@ export function DiscoverSidebar({
               />
             </form>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem className="eui-yScroll">
             <div className="sidebar-list dscSidebar__scrollSection">
               <div className="dscSidebar__scrollSectionList">
                 {fields.length > 0 && (
@@ -385,7 +386,7 @@ export function DiscoverSidebar({
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </section>
+      </EuiPageSideBar>
     </I18nProvider>
   );
 }
