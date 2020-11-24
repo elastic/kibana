@@ -71,7 +71,7 @@ export type EditPolicyTestBed = SetupReturn extends Promise<infer U> ? U : Setup
 export const setup = async (arg?: { appServicesContext: Partial<AppServicesContext> }) => {
   const testBed = await initTestBed(arg);
 
-  const { find, component, form } = testBed;
+  const { find, component, form, exists } = testBed;
 
   const createFormToggleAction = (dataTestSubject: string) => async (checked: boolean) => {
     await act(async () => {
@@ -129,12 +129,15 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     component.update();
   };
 
-  const toggleForceMerge = (phase: Phases) => createFormToggleAction(`${phase}-forceMergeSwitch`);
-
-  const setForcemergeSegmentsCount = (phase: Phases) =>
-    createFormSetValueAction(`${phase}-selectedForceMergeSegments`);
-
-  const setBestCompression = (phase: Phases) => createFormToggleAction(`${phase}-bestCompression`);
+  const createForceMergeActions = (phase: Phases) => {
+    const toggleSelector = `${phase}-forceMergeSwitch`;
+    return {
+      forceMergeFieldExists: () => exists(toggleSelector),
+      toggleForceMerge: createFormToggleAction(toggleSelector),
+      setForcemergeSegmentsCount: createFormSetValueAction(`${phase}-selectedForceMergeSegments`),
+      setBestCompression: createFormToggleAction(`${phase}-bestCompression`),
+    };
+  };
 
   const setIndexPriority = (phase: Phases) =>
     createFormSetValueAction(`${phase}-phaseIndexPriority`);
@@ -181,19 +184,28 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     await createFormSetValueAction('warm-selectedPrimaryShardCount')(value);
   };
 
+  const shrinkExists = () => exists('shrinkSwitch');
+
   const setFreeze = createFormToggleAction('freezeSwitch');
+  const freezeExists = () => exists('freezeSwitch');
 
-  const toggleSearchableSnapshot = (phase: Phases) =>
-    createFormToggleAction(`searchableSnapshotField-${phase}.searchableSnapshotToggle`);
-
-  const setSearchableSnapshot = (phase: Phases) => async (value: string) => {
-    await toggleSearchableSnapshot(phase)(true);
-    act(() => {
-      find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
-        { label: value },
-      ]);
-    });
-    component.update();
+  const createSearchableSnapshotActions = (phase: Phases) => {
+    const fieldSelector = `searchableSnapshotField-${phase}`;
+    const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;
+    const toggleSearchableSnapshot = createFormToggleAction(toggleSelector);
+    return {
+      searchableSnapshotsExists: () => exists(fieldSelector),
+      toggleSearchableSnapshot,
+      setSearchableSnapshot: async (value: string) => {
+        await toggleSearchableSnapshot(true);
+        act(() => {
+          find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
+            { label: value },
+          ]);
+        });
+        component.update();
+      },
+    };
   };
 
   return {
@@ -206,12 +218,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setMaxDocs,
         setMaxAge,
         toggleRollover,
-        toggleForceMerge: toggleForceMerge('hot'),
-        setForcemergeSegments: setForcemergeSegmentsCount('hot'),
-        setBestCompression: setBestCompression('hot'),
+        ...createForceMergeActions('hot'),
         setIndexPriority: setIndexPriority('hot'),
-        setSearchableSnapshot: setSearchableSnapshot('hot'),
-        toggleSearchableSnapshot: toggleSearchableSnapshot('hot'),
+        ...createSearchableSnapshotActions('hot'),
       },
       warm: {
         enable: enable('warm'),
@@ -222,9 +231,8 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
         setShrink,
-        toggleForceMerge: toggleForceMerge('warm'),
-        setForcemergeSegments: setForcemergeSegmentsCount('warm'),
-        setBestCompression: setBestCompression('warm'),
+        shrinkExists,
+        ...createForceMergeActions('warm'),
         setIndexPriority: setIndexPriority('warm'),
       },
       cold: {
@@ -235,9 +243,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         setSelectedNodeAttribute: setSelectedNodeAttribute('cold'),
         setReplicas: setReplicas('cold'),
         setFreeze,
+        freezeExists,
         setIndexPriority: setIndexPriority('cold'),
-        setSearchableSnapshot: setSearchableSnapshot('cold'),
-        toggleSearchableSnapshot: toggleSearchableSnapshot('cold'),
+        ...createSearchableSnapshotActions('cold'),
       },
       delete: {
         enable: enable('delete'),

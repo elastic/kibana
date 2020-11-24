@@ -100,6 +100,11 @@ describe('<EditPolicy />', () => {
     describe('serialization', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+        httpRequestsMockHelpers.setListNodes({
+          nodesByRoles: {},
+          nodesByAttributes: { test: ['123'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
         httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
         await act(async () => {
@@ -117,7 +122,7 @@ describe('<EditPolicy />', () => {
         await actions.hot.setMaxDocs('123');
         await actions.hot.setMaxAge('123', 'h');
         await actions.hot.toggleForceMerge(true);
-        await actions.hot.setForcemergeSegments('123');
+        await actions.hot.setForcemergeSegmentsCount('123');
         await actions.hot.setSearchableSnapshot('my-repo');
         await actions.hot.setBestCompression(true);
         await actions.hot.setIndexPriority('123');
@@ -171,6 +176,25 @@ describe('<EditPolicy />', () => {
           }
         `);
       });
+
+      test('enabling searchable snapshot should hide force merge, freeze, shrink and searchable snapshot in subsequent phases', async () => {
+        const { actions } = testBed;
+
+        await actions.warm.enable(true);
+        await actions.cold.enable(true);
+
+        expect(actions.warm.forceMergeFieldExists()).toBeTruthy();
+        expect(actions.warm.shrinkExists()).toBeTruthy();
+        expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
+        expect(actions.cold.freezeExists()).toBeTruthy();
+
+        await actions.hot.setSearchableSnapshot('my-repo');
+
+        expect(actions.warm.forceMergeFieldExists()).toBeFalsy();
+        expect(actions.warm.shrinkExists()).toBeFalsy();
+        expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();
+        expect(actions.cold.freezeExists()).toBeFalsy();
+      });
     });
   });
 
@@ -221,7 +245,7 @@ describe('<EditPolicy />', () => {
         await actions.warm.setReplicas('123');
         await actions.warm.setShrink('123');
         await actions.warm.toggleForceMerge(true);
-        await actions.warm.setForcemergeSegments('123');
+        await actions.warm.setForcemergeSegmentsCount('123');
         await actions.warm.setBestCompression(true);
         await actions.warm.setIndexPriority('123');
         await actions.savePolicy();
@@ -363,7 +387,7 @@ describe('<EditPolicy />', () => {
         `);
       });
 
-      test('setting all values', async () => {
+      test('setting all values, excluding searchable snapshot', async () => {
         const { actions } = testBed;
 
         await actions.cold.enable(true);
@@ -374,7 +398,6 @@ describe('<EditPolicy />', () => {
         await actions.cold.setReplicas('123');
         await actions.cold.setFreeze(true);
         await actions.cold.setIndexPriority('123');
-        await actions.cold.setSearchableSnapshot('my-repo');
 
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
@@ -393,9 +416,6 @@ describe('<EditPolicy />', () => {
                     },
                   },
                   "freeze": Object {},
-                  "searchable_snapshot": Object {
-                    "snapshot_repository": "my-repo",
-                  },
                   "set_priority": Object {
                     "priority": 123,
                   },
@@ -417,6 +437,19 @@ describe('<EditPolicy />', () => {
             },
           }
         `);
+      });
+
+      // Setting searchable snapshot field disables setting replicas so we test this separately
+      test('setting searchable snapshot', async () => {
+        const { actions } = testBed;
+        await actions.cold.enable(true);
+        await actions.cold.setSearchableSnapshot('my-repo');
+        await actions.savePolicy();
+        const latestRequest2 = server.requests[server.requests.length - 1];
+        const entirePolicy2 = JSON.parse(JSON.parse(latestRequest2.requestBody).body);
+        expect(entirePolicy2.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+          'my-repo'
+        );
       });
     });
   });
