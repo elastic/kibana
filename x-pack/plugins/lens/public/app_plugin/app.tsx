@@ -69,7 +69,11 @@ export function App({
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       query: data.query.queryString.getQuery(),
-      filters: data.query.filterManager.getFilters(),
+      // Do not use app-specific filters from previous app,
+      // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+      filters: !initialContext
+        ? data.query.filterManager.getGlobalFilters()
+        : data.query.filterManager.getFilters(),
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
       dateRange: {
