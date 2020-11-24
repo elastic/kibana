@@ -400,11 +400,13 @@ class PackagePolicyService {
 
       for (const callback of externalCallbacks) {
         try {
-          // ensure that the returned value by the callback passes schema validation
           updatedNewData = NewPackagePolicySchema.validate(
             await callback(updatedNewData, context, request)
           );
         } catch (error) {
+          if (error.statusCode) {
+            error.statusCode = Number(error.statusCode);
+          }
           throw error;
         }
       }

@@ -175,17 +175,15 @@ export const getPackagePolicyUpdateCallback = (logger: Logger): ExternalCallback
     if (newPackagePolicy.package?.name !== 'endpoint') {
       return newPackagePolicy;
     }
+    const licenseError: Error & { statusCode?: number } = new Error('Requires Platinum license');
+    licenseError.statusCode = 403;
+    throw licenseError;
 
-    logger.warn(`READY TO RETURN...`);
-
-    if (!licenseService.isPlatinumPlus()) {
-      // grab correct verbiage
-      throw new Error('Requires Platinum license');
-    }
+    //    if (!licenseService.isPlatinumPlus()) {
+    // grab correct verbiage
+    //    throw new Error('Requires Platinum license');
+    //   }
     // return newPackagePolicy;
-    /* const myError = new Error('erro message');
-    error.statusCode = 403;
-    return myError;*/
   };
   return handlePackagePolicyUpdate;
 };

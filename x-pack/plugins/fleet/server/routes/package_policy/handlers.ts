@@ -91,6 +91,12 @@ export const createPackagePolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultIngestErrorHandler({ error, response });
   }
 };
