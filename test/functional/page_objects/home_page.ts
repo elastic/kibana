@@ -23,6 +23,7 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+  const deployment = getService('deployment');
   const PageObjects = getPageObjects(['common']);
   let isOss = true;
 
@@ -82,7 +83,7 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async launchSampleDashboard(id: string) {
       await this.launchSampleDataSet(id);
-      isOss = await PageObjects.common.isOss();
+      isOss = await deployment.isOss();
       if (!isOss) {
         await find.clickByLinkText('Dashboard');
       }

@@ -263,7 +263,101 @@ export const formattedSearchStrategyResponse = {
   ...mockSearchStrategyResponse,
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggs": {\n      "source": {\n        "filter": {\n          "term": {\n            "source.ip": "35.196.65.164"\n          }\n        },\n        "aggs": {\n          "firstSeen": {\n            "min": {\n              "field": "@timestamp"\n            }\n          },\n          "lastSeen": {\n            "max": {\n              "field": "@timestamp"\n            }\n          },\n          "as": {\n            "filter": {\n              "exists": {\n                "field": "source.as"\n              }\n            },\n            "aggs": {\n              "results": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": [\n                    "source.as"\n                  ],\n                  "sort": [\n                    {\n                      "@timestamp": "desc"\n                    }\n                  ]\n                }\n              }\n            }\n          },\n          "geo": {\n            "filter": {\n              "exists": {\n                "field": "source.geo"\n              }\n            },\n            "aggs": {\n              "results": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": [\n                    "source.geo"\n                  ],\n                  "sort": [\n                    {\n                      "@timestamp": "desc"\n                    }\n                  ]\n                }\n              }\n            }\n          }\n        }\n      },\n      "destination": {\n        "filter": {\n          "term": {\n            "destination.ip": "35.196.65.164"\n          }\n        },\n        "aggs": {\n          "firstSeen": {\n            "min": {\n              "field": "@timestamp"\n            }\n          },\n          "lastSeen": {\n            "max": {\n              "field": "@timestamp"\n            }\n          },\n          "as": {\n            "filter": {\n              "exists": {\n                "field": "destination.as"\n              }\n            },\n            "aggs": {\n              "results": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": [\n                    "destination.as"\n                  ],\n                  "sort": [\n                    {\n                      "@timestamp": "desc"\n                    }\n                  ]\n                }\n              }\n            }\n          },\n          "geo": {\n            "filter": {\n              "exists": {\n                "field": "destination.geo"\n              }\n            },\n            "aggs": {\n              "results": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": [\n                    "destination.geo"\n                  ],\n                  "sort": [\n                    {\n                      "@timestamp": "desc"\n                    }\n                  ]\n                }\n              }\n            }\n          }\n        }\n      },\n      "host": {\n        "filter": {\n          "term": {\n            "host.ip": "35.196.65.164"\n          }\n        },\n        "aggs": {\n          "results": {\n            "top_hits": {\n              "size": 1,\n              "_source": [\n                "host"\n              ],\n              "sort": [\n                {\n                  "@timestamp": "desc"\n                }\n              ]\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "should": []\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            docvalue_fields: mockOptions.docValueFields,
+            aggs: {
+              source: {
+                filter: { term: { 'source.ip': '35.196.65.164' } },
+                aggs: {
+                  firstSeen: { min: { field: '@timestamp' } },
+                  lastSeen: { max: { field: '@timestamp' } },
+                  as: {
+                    filter: { exists: { field: 'source.as' } },
+                    aggs: {
+                      results: {
+                        top_hits: {
+                          size: 1,
+                          _source: ['source.as'],
+                          sort: [{ '@timestamp': 'desc' }],
+                        },
+                      },
+                    },
+                  },
+                  geo: {
+                    filter: { exists: { field: 'source.geo' } },
+                    aggs: {
+                      results: {
+                        top_hits: {
+                          size: 1,
+                          _source: ['source.geo'],
+                          sort: [{ '@timestamp': 'desc' }],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              destination: {
+                filter: { term: { 'destination.ip': '35.196.65.164' } },
+                aggs: {
+                  firstSeen: { min: { field: '@timestamp' } },
+                  lastSeen: { max: { field: '@timestamp' } },
+                  as: {
+                    filter: { exists: { field: 'destination.as' } },
+                    aggs: {
+                      results: {
+                        top_hits: {
+                          size: 1,
+                          _source: ['destination.as'],
+                          sort: [{ '@timestamp': 'desc' }],
+                        },
+                      },
+                    },
+                  },
+                  geo: {
+                    filter: { exists: { field: 'destination.geo' } },
+                    aggs: {
+                      results: {
+                        top_hits: {
+                          size: 1,
+                          _source: ['destination.geo'],
+                          sort: [{ '@timestamp': 'desc' }],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              host: {
+                filter: { term: { 'host.ip': '35.196.65.164' } },
+                aggs: {
+                  results: {
+                    top_hits: { size: 1, _source: ['host'], sort: [{ '@timestamp': 'desc' }] },
+                  },
+                },
+              },
+            },
+            query: { bool: { should: [] } },
+            size: 0,
+            track_total_hits: false,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   networkDetails: {
@@ -370,6 +464,7 @@ export const expectedDsl = {
         },
       },
     },
+    docvalue_fields: mockOptions.docValueFields,
     query: { bool: { should: [] } },
     size: 0,
     track_total_hits: false,
