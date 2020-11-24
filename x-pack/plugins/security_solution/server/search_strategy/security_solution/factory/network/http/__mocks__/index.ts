@@ -9,12 +9,12 @@ import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/dat
 import {
   Direction,
   NetworkDnsFields,
-  NetworkDnsRequestOptions,
+  NetworkHttpRequestOptions,
   NetworkQueries,
   SortField,
 } from '../../../../../../../common/search_strategy';
 
-export const mockOptions: NetworkDnsRequestOptions = {
+export const mockOptions: NetworkHttpRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
     'auditbeat-*',
@@ -29,7 +29,7 @@ export const mockOptions: NetworkDnsRequestOptions = {
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
   sort: { direction: Direction.desc } as SortField<NetworkDnsFields>,
   timerange: { interval: '12h', from: '2020-09-13T09:00:43.249Z', to: '2020-09-14T09:00:43.249Z' },
-} as NetworkDnsRequestOptions;
+} as NetworkHttpRequestOptions;
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,
