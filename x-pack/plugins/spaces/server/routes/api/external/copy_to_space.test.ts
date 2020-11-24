@@ -22,8 +22,8 @@ import {
   coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { telemetryClientMock } from '../../../lib/telemetry_client/telemetry_client.mock';
-import { telemetryServiceMock } from '../../../telemetry_service/telemetry_service.mock';
+import { usageStatsClientMock } from '../../../usage_stats/usage_stats_client.mock';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
@@ -84,9 +84,9 @@ describe('copy to space', () => {
       basePath: httpService.basePath,
     });
 
-    const telemetryClient = telemetryClientMock.create();
-    const telemetryServicePromise = Promise.resolve(
-      telemetryServiceMock.createSetupContract(telemetryClient)
+    const usageStatsClient = usageStatsClientMock.create();
+    const usageStatsServicePromise = Promise.resolve(
+      usageStatsServiceMock.createSetupContract(usageStatsClient)
     );
 
     const clientServiceStart = clientService.start(coreStart);
@@ -102,7 +102,7 @@ describe('copy to space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
-      telemetryServicePromise,
+      usageStatsServicePromise,
     });
 
     const [
@@ -121,7 +121,7 @@ describe('copy to space', () => {
         routeHandler: resolveRouteHandler,
       },
       savedObjectsRepositoryMock,
-      telemetryClient,
+      usageStatsClient,
     };
   };
 
@@ -145,12 +145,12 @@ describe('copy to space', () => {
       });
     });
 
-    it(`records telemetry data`, async () => {
+    it(`records usageStats data`, async () => {
       const createNewCopies = Symbol();
       const overwrite = Symbol();
       const payload = { spaces: ['a-space'], objects: [], createNewCopies, overwrite };
 
-      const { copyToSpace, telemetryClient } = await setup();
+      const { copyToSpace, usageStatsClient } = await setup();
 
       const request = httpServerMock.createKibanaRequest({
         body: payload,
@@ -159,7 +159,7 @@ describe('copy to space', () => {
 
       await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-      expect(telemetryClient.incrementCopySavedObjects).toHaveBeenCalledWith({
+      expect(usageStatsClient.incrementCopySavedObjects).toHaveBeenCalledWith({
         createNewCopies,
         overwrite,
       });
@@ -301,11 +301,11 @@ describe('copy to space', () => {
       });
     });
 
-    it(`records telemetry data`, async () => {
+    it(`records usageStats data`, async () => {
       const createNewCopies = Symbol();
       const payload = { retries: {}, objects: [], createNewCopies };
 
-      const { resolveConflicts, telemetryClient } = await setup();
+      const { resolveConflicts, usageStatsClient } = await setup();
 
       const request = httpServerMock.createKibanaRequest({
         body: payload,
@@ -314,7 +314,7 @@ describe('copy to space', () => {
 
       await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-      expect(telemetryClient.incrementResolveCopySavedObjectsErrors).toHaveBeenCalledWith({
+      expect(usageStatsClient.incrementResolveCopySavedObjectsErrors).toHaveBeenCalledWith({
         createNewCopies,
       });
     });

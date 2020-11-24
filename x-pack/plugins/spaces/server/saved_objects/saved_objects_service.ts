@@ -5,11 +5,11 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { SpacesSavedObjectMappings, SpacesTelemetryMappings } from './mappings';
+import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
 import { migrateToKibana660 } from './migrations';
 import { spacesSavedObjectsClientWrapperFactory } from './saved_objects_client_wrapper_factory';
 import { SpacesServiceStart } from '../spaces_service';
-import { SPACES_TELEMETRY_TYPE } from '../constants';
+import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
 
 interface SetupDeps {
   core: Pick<CoreSetup, 'savedObjects' | 'getStartServices'>;
@@ -29,10 +29,10 @@ export class SpacesSavedObjectsService {
     });
 
     core.savedObjects.registerType({
-      name: SPACES_TELEMETRY_TYPE,
+      name: SPACES_USAGE_STATS_TYPE,
       hidden: true,
       namespaceType: 'agnostic',
-      mappings: SpacesTelemetryMappings,
+      mappings: UsageStatsMappings,
     });
 
     core.savedObjects.addClientWrapper(

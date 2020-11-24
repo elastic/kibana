@@ -17,16 +17,6 @@
  * under the License.
  */
 
-import { CoreTelemetryClient } from '.';
-
-const createTelemetryClientMock = () =>
-  (({
-    getTelemetryData: jest.fn().mockResolvedValue({}),
-    incrementSavedObjectsImport: jest.fn().mockResolvedValue(null),
-    incrementSavedObjectsResolveImportErrors: jest.fn().mockResolvedValue(null),
-    incrementSavedObjectsExport: jest.fn().mockResolvedValue(null),
-  } as unknown) as jest.Mocked<CoreTelemetryClient>);
-
-export const coreTelemetryClientMock = {
-  create: createTelemetryClientMock,
-};
+export { CoreUsageStatsClient } from './core_usage_stats_client';
+export { CoreUsageStatsService, CoreUsageStatsServiceSetup } from './core_usage_stats_service';
+export { CoreUsageStats } from './types';

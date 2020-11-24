@@ -10,8 +10,7 @@ import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_c
 import { Observable } from 'rxjs';
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { PluginsSetup } from '../plugin';
-import { SpacesTelemetry } from '../model/spaces_telemetry';
-import { TelemetryServiceSetup } from '../telemetry_service';
+import { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
 
 type CallCluster = <T = unknown>(
   endpoint: string,
@@ -36,7 +35,7 @@ interface SpacesAggregationResponse {
  * @param {string} kibanaIndex
  * @param {PluginsSetup['features']} features
  * @param {boolean} spacesAvailable
- * @return {UsageStats}
+ * @return {UsageData}
  */
 async function getSpacesUsage(
   callCluster: CallCluster,
@@ -112,22 +111,22 @@ async function getSpacesUsage(
     count,
     usesFeatureControls,
     disabledFeatures,
-  } as UsageStats;
+  } as UsageData;
 }
 
-async function getSpacesTelemetry(
-  telemetryServicePromise: Promise<TelemetryServiceSetup>,
+async function getUsageStats(
+  usageStatsServicePromise: Promise<UsageStatsServiceSetup>,
   spacesAvailable: boolean
 ) {
   if (!spacesAvailable) {
     return null;
   }
 
-  const telemetryClient = await telemetryServicePromise.then(({ getClient }) => getClient());
-  return telemetryClient.getTelemetryData();
+  const usageStatsClient = await usageStatsServicePromise.then(({ getClient }) => getClient());
+  return usageStatsClient.getUsageStats();
 }
 
-export interface UsageStats extends SpacesTelemetry {
+export interface UsageData extends UsageStats {
   available: boolean;
   enabled: boolean;
   count?: number;
@@ -158,12 +157,12 @@ interface CollectorDeps {
   kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
-  telemetryServicePromise: Promise<TelemetryServiceSetup>;
+  usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
 }
 
 interface BulkUpload {
   usage: {
-    spaces: UsageStats;
+    spaces: UsageData;
   };
 }
 /*
@@ -174,7 +173,7 @@ export function getSpacesUsageCollector(
   usageCollection: UsageCollectionSetup,
   deps: CollectorDeps
 ) {
-  return usageCollection.makeUsageCollector<UsageStats, BulkUpload>({
+  return usageCollection.makeUsageCollector<UsageData, BulkUpload>({
     type: 'spaces',
     isReady: () => true,
     schema: {
@@ -224,21 +223,21 @@ export function getSpacesUsageCollector(
       },
     },
     fetch: async ({ callCluster }: CollectorFetchContext) => {
-      const { licensing, kibanaIndexConfig$, features, telemetryServicePromise } = deps;
+      const { licensing, kibanaIndexConfig$, features, usageStatsServicePromise } = deps;
       const license = await licensing.license$.pipe(take(1)).toPromise();
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
 
       const kibanaIndex = (await kibanaIndexConfig$.pipe(take(1)).toPromise()).kibana.index;
 
-      const usageStats = await getSpacesUsage(callCluster, kibanaIndex, features, available);
-      const telemetryData = await getSpacesTelemetry(telemetryServicePromise, available);
+      const usageData = await getSpacesUsage(callCluster, kibanaIndex, features, available);
+      const usageStats = await getUsageStats(usageStatsServicePromise, available);
 
       return {
         available,
         enabled: available,
+        ...usageData,
         ...usageStats,
-        ...telemetryData,
-      } as UsageStats;
+      } as UsageData;
     },
 
     /*
@@ -246,7 +245,7 @@ export function getSpacesUsageCollector(
      * 1. Make this data part of the "kibana_stats" type
      * 2. Organize the payload in the usage.xpack.spaces namespace of the data payload
      */
-    formatForBulkUpload: (result: UsageStats) => {
+    formatForBulkUpload: (result: UsageData) => {
       return {
         type: KIBANA_STATS_TYPE_MONITORING,
         payload: {

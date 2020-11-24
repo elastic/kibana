@@ -25,16 +25,16 @@ import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectsErrorHelpers } from '../..';
-import { CoreTelemetryClient } from 'src/core/server/core_telemetry';
-import { coreTelemetryClientMock } from 'src/core/server/core_telemetry/core_telemetry_client.mock';
-import { coreTelemetryServiceMock } from 'src/core/server/core_telemetry/core_telemetry_service.mock';
+import { CoreUsageStatsClient } from 'src/core/server/core_usage_stats';
+import { coreUsageStatsClientMock } from 'src/core/server/core_usage_stats/core_usage_stats_client.mock';
+import { coreUsageStatsServiceMock } from 'src/core/server/core_usage_stats/core_usage_stats_service.mock';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;
-let coreTelemetryClient: jest.Mocked<CoreTelemetryClient>;
+let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 const URL = '/internal/saved_objects/_import';
 
 describe(`POST ${URL}`, () => {
@@ -75,9 +75,9 @@ describe(`POST ${URL}`, () => {
     savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
 
     const router = httpSetup.createRouter('/internal/saved_objects/');
-    coreTelemetryClient = coreTelemetryClientMock.create();
-    const coreTelemetry = coreTelemetryServiceMock.createSetupContract(coreTelemetryClient);
-    registerImportRoute(router, { config, coreTelemetry });
+    coreUsageStatsClient = coreUsageStatsClientMock.create();
+    const coreUsageStats = coreUsageStatsServiceMock.createSetupContract(coreUsageStatsClient);
+    registerImportRoute(router, { config, coreUsageStats });
 
     await server.start();
   });
@@ -86,7 +86,7 @@ describe(`POST ${URL}`, () => {
     await server.stop();
   });
 
-  it('formats successful response and records telemetry data', async () => {
+  it('formats successful response and records usage stats', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
       .query({ createNewCopies: false })
@@ -105,7 +105,7 @@ describe(`POST ${URL}`, () => {
 
     expect(result.body).toEqual({ success: true, successCount: 0 });
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
-    expect(coreTelemetryClient.incrementSavedObjectsImport).toHaveBeenCalledWith({
+    expect(coreUsageStatsClient.incrementSavedObjectsImport).toHaveBeenCalledWith({
       createNewCopies: false,
       overwrite: false,
     });

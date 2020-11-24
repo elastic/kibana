@@ -5,29 +5,29 @@
  */
 
 import { Logger, CoreSetup } from '../../../../../src/core/server';
-import { SPACES_TELEMETRY_TYPE } from '../constants';
-import { TelemetryClient } from '../lib/telemetry_client';
+import { UsageStatsClient } from './usage_stats_client';
+import { SPACES_USAGE_STATS_TYPE } from './constants';
 
-export interface TelemetryServiceSetup {
-  getClient(): Promise<TelemetryClient>;
+export interface UsageStatsServiceSetup {
+  getClient(): Promise<UsageStatsClient>;
 }
 
-interface TelemetryServiceDeps {
+interface UsageStatsServiceDeps {
   getStartServices: CoreSetup['getStartServices'];
 }
 
-export class TelemetryService {
+export class UsageStatsService {
   constructor(private readonly log: Logger) {}
 
-  public async setup({ getStartServices }: TelemetryServiceDeps): Promise<TelemetryServiceSetup> {
+  public async setup({ getStartServices }: UsageStatsServiceDeps): Promise<UsageStatsServiceSetup> {
     const internalRepositoryPromise = getStartServices().then(([coreStart]) =>
-      coreStart.savedObjects.createInternalRepository([SPACES_TELEMETRY_TYPE])
+      coreStart.savedObjects.createInternalRepository([SPACES_USAGE_STATS_TYPE])
     );
 
     const getClient = async () => {
       const internalRepository = await internalRepositoryPromise;
 
-      return new TelemetryClient((message: string) => {
+      return new UsageStatsClient((message: string) => {
         this.log.debug(message);
       }, internalRepository);
     };

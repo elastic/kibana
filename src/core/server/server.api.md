@@ -520,8 +520,23 @@ export interface CoreStatus {
     savedObjects: ServiceStatus;
 }
 
-// @internal (undocumented)
-export interface CoreTelemetry {
+// @internal
+export interface CoreUsageData extends CoreUsageStats {
+    // (undocumented)
+    config: CoreConfigUsageData;
+    // (undocumented)
+    environment: CoreEnvironmentUsageData;
+    // (undocumented)
+    services: CoreServicesUsageData;
+}
+
+// @internal
+export interface CoreUsageDataStart {
+    getCoreUsageData(): Promise<CoreUsageData>;
+}
+
+// @internal
+export interface CoreUsageStats {
     // (undocumented)
     apiCalls?: {
         savedObjectsImport?: {
@@ -550,21 +565,6 @@ export interface CoreTelemetry {
             };
         };
     };
-}
-
-// @internal
-export interface CoreUsageData extends CoreTelemetry {
-    // (undocumented)
-    config: CoreConfigUsageData;
-    // (undocumented)
-    environment: CoreEnvironmentUsageData;
-    // (undocumented)
-    services: CoreServicesUsageData;
-}
-
-// @internal
-export interface CoreUsageDataStart {
-    getCoreUsageData(): Promise<CoreUsageData>;
 }
 
 // @public (undocumented)

@@ -20,7 +20,7 @@
 import { deepFreeze } from '@kbn/std';
 
 /** @internal */
-export const CoreTelemetryMappings = deepFreeze({
+export const CoreUsageStatsMappings = deepFreeze({
   properties: {
     apiCalls: {
       type: 'object',

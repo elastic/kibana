@@ -18,31 +18,31 @@
  */
 
 import { savedObjectsRepositoryMock } from '../mocks';
-import { CORE_TELEMETRY_TYPE } from './constants';
-import { CoreTelemetry } from './types';
+import { CORE_USAGE_STATS_TYPE } from './constants';
+import { CoreUsageStats } from './types';
 import {
   IncrementSavedObjectsImportOptions,
   IncrementSavedObjectsResolveImportErrorsOptions,
   IncrementSavedObjectsExportOptions,
-} from './core_telemetry_client';
-import { CoreTelemetryClient } from '.';
+} from './core_usage_stats_client';
+import { CoreUsageStatsClient } from '.';
 
-describe('CoreTelemetryClient', () => {
+describe('CoreUsageStatsClient', () => {
   const setup = () => {
     const debugLoggerMock = jest.fn();
     const repositoryMock = savedObjectsRepositoryMock.create();
-    const telemetryClient = new CoreTelemetryClient(debugLoggerMock, repositoryMock);
-    return { telemetryClient, debugLoggerMock, repositoryMock };
+    const usageStatsClient = new CoreUsageStatsClient(debugLoggerMock, repositoryMock);
+    return { usageStatsClient, debugLoggerMock, repositoryMock };
   };
 
-  const createMockData = (attributes: CoreTelemetry) => ({
-    id: CORE_TELEMETRY_TYPE,
-    type: CORE_TELEMETRY_TYPE,
+  const createMockData = (attributes: CoreUsageStats) => ({
+    id: CORE_USAGE_STATS_TYPE,
+    type: CORE_USAGE_STATS_TYPE,
     attributes,
     references: [],
   });
 
-  const createOptions = { overwrite: true, id: CORE_TELEMETRY_TYPE };
+  const createOptions = { overwrite: true, id: CORE_USAGE_STATS_TYPE };
 
   // mock data for existing fields
   const savedObjectsImport = {
@@ -59,33 +59,33 @@ describe('CoreTelemetryClient', () => {
     allTypes: { yes: 8, no: 9 },
   };
 
-  describe('#getTelemetryData', () => {
+  describe('#getUsageStats', () => {
     it('returns empty object when encountering a repository error', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockRejectedValue(new Error('Oh no!'));
 
-      const result = await telemetryClient.getTelemetryData();
+      const result = await usageStatsClient.getUsageStats();
       expect(result).toEqual({});
     });
 
-    it('returns object attributes when telemetry data exists', async () => {
-      const { telemetryClient, repositoryMock } = setup();
-      const attributes = { foo: 'bar' } as CoreTelemetry;
+    it('returns object attributes when usage stats exist', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      const attributes = { foo: 'bar' } as CoreUsageStats;
       repositoryMock.get.mockResolvedValue(createMockData(attributes));
 
-      const result = await telemetryClient.getTelemetryData();
+      const result = await usageStatsClient.getUsageStats();
       expect(result).toEqual(attributes);
     });
   });
 
   describe('#incrementSavedObjectsImport', () => {
     it('creates fields if attributes are empty', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));
 
-      await telemetryClient.incrementSavedObjectsImport({} as IncrementSavedObjectsImportOptions);
+      await usageStatsClient.incrementSavedObjectsImport({} as IncrementSavedObjectsImportOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
-        CORE_TELEMETRY_TYPE,
+        CORE_USAGE_STATS_TYPE,
         {
           apiCalls: {
             savedObjectsImport: {
@@ -100,19 +100,19 @@ describe('CoreTelemetryClient', () => {
     });
 
     it('increments existing fields, leaves other fields unchanged, and handles createNewCopies=true / overwrite=true appropriately', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(
         createMockData({
           apiCalls: { savedObjectsImport, savedObjectsResolveImportErrors, savedObjectsExport },
         })
       );
 
-      await telemetryClient.incrementSavedObjectsImport({
+      await usageStatsClient.incrementSavedObjectsImport({
         createNewCopies: true,
         overwrite: true,
       } as IncrementSavedObjectsImportOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
-        CORE_TELEMETRY_TYPE,
+        CORE_USAGE_STATS_TYPE,
         {
           apiCalls: {
             // these fields are changed
@@ -139,14 +139,14 @@ describe('CoreTelemetryClient', () => {
 
   describe('#incrementSavedObjectsResolveImportErrors', () => {
     it('creates fields if attributes are empty', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));
 
-      await telemetryClient.incrementSavedObjectsResolveImportErrors(
+      await usageStatsClient.incrementSavedObjectsResolveImportErrors(
         {} as IncrementSavedObjectsResolveImportErrorsOptions
       );
       expect(repositoryMock.create).toHaveBeenCalledWith(
-        CORE_TELEMETRY_TYPE,
+        CORE_USAGE_STATS_TYPE,
         {
           apiCalls: {
             savedObjectsResolveImportErrors: {
@@ -160,18 +160,18 @@ describe('CoreTelemetryClient', () => {
     });
 
     it('increments existing fields, leaves other fields unchanged, and handles createNewCopies=true appropriately', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(
         createMockData({
           apiCalls: { savedObjectsImport, savedObjectsResolveImportErrors, savedObjectsExport },
         })
       );
 
-      await telemetryClient.incrementSavedObjectsResolveImportErrors({
+      await usageStatsClient.incrementSavedObjectsResolveImportErrors({
         createNewCopies: true,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
-        CORE_TELEMETRY_TYPE,
+        CORE_USAGE_STATS_TYPE,
         {
           apiCalls: {
             // these fields are changed
@@ -194,15 +194,15 @@ describe('CoreTelemetryClient', () => {
 
   describe('#incrementSavedObjectsExport', () => {
     it('creates fields if attributes are empty', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));
 
-      await telemetryClient.incrementSavedObjectsExport({
+      await usageStatsClient.incrementSavedObjectsExport({
         types: undefined,
         supportedTypes: ['foo', 'bar'],
       } as IncrementSavedObjectsExportOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
-        CORE_TELEMETRY_TYPE,
+        CORE_USAGE_STATS_TYPE,
         {
           apiCalls: {
             savedObjectsExport: {
@@ -216,19 +216,19 @@ describe('CoreTelemetryClient', () => {
     });
 
     it('increments existing fields, leaves other fields unchanged, and handles types appropriately', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(
         createMockData({
           apiCalls: { savedObjectsImport, savedObjectsResolveImportErrors, savedObjectsExport },
         })
       );
 
-      await telemetryClient.incrementSavedObjectsExport({
+      await usageStatsClient.incrementSavedObjectsExport({
         types: ['foo', 'bar'],
         supportedTypes: ['foo', 'bar'],
       } as IncrementSavedObjectsExportOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
-        CORE_TELEMETRY_TYPE,
+        CORE_USAGE_STATS_TYPE,
         {
           apiCalls: {
             // these fields are changed

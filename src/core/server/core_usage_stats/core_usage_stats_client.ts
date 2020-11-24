@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { CORE_TELEMETRY_TYPE } from './constants';
-import { CoreTelemetry } from './types';
+import { CORE_USAGE_STATS_TYPE } from './constants';
+import { CoreUsageStats } from './types';
 import {
   ISavedObjectsRepository,
   SavedObjectsImportOptions,
@@ -56,37 +56,37 @@ const SAVED_OBJECTS_EXPORT_DEFAULT = Object.freeze({
 });
 
 /** @internal */
-export class CoreTelemetryClient {
+export class CoreUsageStatsClient {
   constructor(
     private readonly debugLogger: (message: string) => void,
     private readonly repository: ISavedObjectsRepository
   ) {}
 
-  public async getTelemetryData() {
-    this.debugLogger('getTelemetryData() called');
-    let coreTelemetry: CoreTelemetry = {};
+  public async getUsageStats() {
+    this.debugLogger('getUsageStats() called');
+    let coreUsageStats: CoreUsageStats = {};
     try {
-      const result = await this.repository.get<CoreTelemetry>(
-        CORE_TELEMETRY_TYPE,
-        CORE_TELEMETRY_TYPE
+      const result = await this.repository.get<CoreUsageStats>(
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_TYPE
       );
-      coreTelemetry = result.attributes;
+      coreUsageStats = result.attributes;
     } catch (err) {
       // do nothing
     }
-    return coreTelemetry;
+    return coreUsageStats;
   }
 
   public async incrementSavedObjectsImport({
     createNewCopies,
     overwrite,
   }: IncrementSavedObjectsImportOptions) {
-    const coreTelemetry = await this.getTelemetryData();
-    const { apiCalls = {} } = coreTelemetry;
+    const coreUsageStats = await this.getUsageStats();
+    const { apiCalls = {} } = coreUsageStats;
     const { savedObjectsImport: current = SAVED_OBJECTS_IMPORT_DEFAULT } = apiCalls;
 
     const attributes = {
-      ...coreTelemetry,
+      ...coreUsageStats,
       apiCalls: {
         ...apiCalls,
         savedObjectsImport: {
@@ -96,20 +96,20 @@ export class CoreTelemetryClient {
         },
       },
     };
-    await this.updateTelemetryData(attributes);
+    await this.updateUsageStats(attributes);
   }
 
   public async incrementSavedObjectsResolveImportErrors({
     createNewCopies,
   }: IncrementSavedObjectsResolveImportErrorsOptions) {
-    const coreTelemetry = await this.getTelemetryData();
-    const { apiCalls = {} } = coreTelemetry;
+    const coreUsageStats = await this.getUsageStats();
+    const { apiCalls = {} } = coreUsageStats;
     const {
       savedObjectsResolveImportErrors: current = SAVED_OBJECTS_RESOLVE_IMPORT_ERRORS_DEFAULT,
     } = apiCalls;
 
     const attributes = {
-      ...coreTelemetry,
+      ...coreUsageStats,
       apiCalls: {
         ...apiCalls,
         savedObjectsResolveImportErrors: {
@@ -118,20 +118,20 @@ export class CoreTelemetryClient {
         },
       },
     };
-    await this.updateTelemetryData(attributes);
+    await this.updateUsageStats(attributes);
   }
 
   public async incrementSavedObjectsExport({
     types,
     supportedTypes,
   }: IncrementSavedObjectsExportOptions) {
-    const coreTelemetry = await this.getTelemetryData();
-    const { apiCalls = {} } = coreTelemetry;
+    const coreUsageStats = await this.getUsageStats();
+    const { apiCalls = {} } = coreUsageStats;
     const { savedObjectsExport: current = SAVED_OBJECTS_EXPORT_DEFAULT } = apiCalls;
     const isAllTypesSelected = !!types && supportedTypes.every((x) => types.includes(x));
 
     const attributes = {
-      ...coreTelemetry,
+      ...coreUsageStats,
       apiCalls: {
         ...apiCalls,
         savedObjectsExport: {
@@ -143,12 +143,12 @@ export class CoreTelemetryClient {
         },
       },
     };
-    await this.updateTelemetryData(attributes);
+    await this.updateUsageStats(attributes);
   }
 
-  private async updateTelemetryData(attributes: CoreTelemetry) {
-    const options = { id: CORE_TELEMETRY_TYPE, overwrite: true };
-    return this.repository.create(CORE_TELEMETRY_TYPE, attributes, options);
+  private async updateUsageStats(attributes: CoreUsageStats) {
+    const options = { id: CORE_USAGE_STATS_TYPE, overwrite: true };
+    return this.repository.create(CORE_USAGE_STATS_TYPE, attributes, options);
   }
 }
 

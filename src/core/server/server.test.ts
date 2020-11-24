@@ -23,7 +23,7 @@ import {
   mockLegacyService,
   mockPluginsService,
   mockConfigService,
-  mockCoreTelemetryService,
+  mockCoreUsageStatsService,
   mockSavedObjectsService,
   mockContextService,
   mockEnsureValidConfiguration,
@@ -67,7 +67,7 @@ test('sets up services on "setup"', async () => {
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
-  expect(mockCoreTelemetryService.setup).not.toHaveBeenCalled();
+  expect(mockCoreUsageStatsService.setup).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.setup).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
   expect(mockRenderingService.setup).not.toHaveBeenCalled();
@@ -82,7 +82,7 @@ test('sets up services on "setup"', async () => {
   expect(mockElasticsearchService.setup).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.setup).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
-  expect(mockCoreTelemetryService.setup).toHaveBeenCalledTimes(1);
+  expect(mockCoreUsageStatsService.setup).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.setup).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.setup).toHaveBeenCalledTimes(1);
   expect(mockRenderingService.setup).toHaveBeenCalledTimes(1);
@@ -188,7 +188,7 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
-  expect(mockCoreTelemetryService.setup).not.toHaveBeenCalled();
+  expect(mockCoreUsageStatsService.setup).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
   expect(mockRenderingService.setup).not.toHaveBeenCalled();
@@ -213,7 +213,7 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
-  expect(mockCoreTelemetryService.setup).not.toHaveBeenCalled();
+  expect(mockCoreUsageStatsService.setup).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
   expect(mockMetricsService.setup).not.toHaveBeenCalled();

@@ -28,9 +28,9 @@ import { UnwrapPromise } from '@kbn/utility-types';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
 import { setupServer, createExportableType } from '../test_utils';
-import { CoreTelemetryClient } from 'src/core/server/core_telemetry';
-import { coreTelemetryClientMock } from 'src/core/server/core_telemetry/core_telemetry_client.mock';
-import { coreTelemetryServiceMock } from 'src/core/server/core_telemetry/core_telemetry_service.mock';
+import { CoreUsageStatsClient } from 'src/core/server/core_usage_stats';
+import { coreUsageStatsClientMock } from 'src/core/server/core_usage_stats/core_usage_stats_client.mock';
+import { coreUsageStatsServiceMock } from 'src/core/server/core_usage_stats/core_usage_stats_service.mock';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
@@ -39,7 +39,7 @@ const config = {
   maxImportPayloadBytes: 26214400,
   maxImportExportSize: 10000,
 } as SavedObjectConfig;
-let coreTelemetryClient: jest.Mocked<CoreTelemetryClient>;
+let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: SetupServerReturn['server'];
@@ -53,9 +53,9 @@ describe('POST /api/saved_objects/_export', () => {
     );
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    coreTelemetryClient = coreTelemetryClientMock.create();
-    const coreTelemetry = coreTelemetryServiceMock.createSetupContract(coreTelemetryClient);
-    registerExportRoute(router, { config, coreTelemetry });
+    coreUsageStatsClient = coreUsageStatsClientMock.create();
+    const coreUsageStats = coreUsageStatsServiceMock.createSetupContract(coreUsageStatsClient);
+    registerExportRoute(router, { config, coreUsageStats });
 
     await server.start();
   });
@@ -65,7 +65,7 @@ describe('POST /api/saved_objects/_export', () => {
     await server.stop();
   });
 
-  it('formats successful response and records telemetry data', async () => {
+  it('formats successful response and records usage stats', async () => {
     const sortedObjects = [
       {
         id: '1',
@@ -116,7 +116,7 @@ describe('POST /api/saved_objects/_export', () => {
         types: ['search'],
       })
     );
-    expect(coreTelemetryClient.incrementSavedObjectsExport).toHaveBeenCalledWith({
+    expect(coreUsageStatsClient.incrementSavedObjectsExport).toHaveBeenCalledWith({
       types: ['search'],
       supportedTypes: ['index-pattern', 'search'],
     });

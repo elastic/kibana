@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TelemetryClient } from './telemetry_client';
+export { SPACES_USAGE_STATS_TYPE } from './constants';
+export { UsageStatsService, UsageStatsServiceSetup } from './usage_stats_service';
+export { UsageStats } from './types';

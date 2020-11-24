@@ -5,9 +5,9 @@
  */
 
 import { ISavedObjectsRepository } from 'src/core/server';
-import { SPACES_TELEMETRY_TYPE } from '../../constants';
-import { CopyOptions, ResolveConflictsOptions } from '../copy_to_spaces/types';
-import { SpacesTelemetry, BooleanCount } from '../../model/spaces_telemetry';
+import { SPACES_USAGE_STATS_TYPE } from './constants';
+import { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
+import { UsageStats } from './types';
 
 type IncrementCopySavedObjectsOptions = Pick<CopyOptions, 'createNewCopies' | 'overwrite'>;
 type IncrementResolveCopySavedObjectsErrorsOptions = Pick<
@@ -25,37 +25,37 @@ const RESOLVE_COPY_ERRORS_DEFAULT = Object.freeze({
   createNewCopies: Object.freeze({ enabled: 0, disabled: 0 }),
 });
 
-export class TelemetryClient {
+export class UsageStatsClient {
   constructor(
     private readonly debugLogger: (message: string) => void,
     private readonly repository: ISavedObjectsRepository
   ) {}
 
-  public async getTelemetryData() {
-    this.debugLogger('getTelemetryData() called');
-    let spacesTelemetry: SpacesTelemetry = {};
+  public async getUsageStats() {
+    this.debugLogger('getUsageStats() called');
+    let usageStats: UsageStats = {};
     try {
-      const result = await this.repository.get<SpacesTelemetry>(
-        SPACES_TELEMETRY_TYPE,
-        SPACES_TELEMETRY_TYPE
+      const result = await this.repository.get<UsageStats>(
+        SPACES_USAGE_STATS_TYPE,
+        SPACES_USAGE_STATS_TYPE
       );
-      spacesTelemetry = result.attributes;
+      usageStats = result.attributes;
     } catch (err) {
       // do nothing
     }
-    return spacesTelemetry;
+    return usageStats;
   }
 
   public async incrementCopySavedObjects({
     createNewCopies,
     overwrite,
   }: IncrementCopySavedObjectsOptions) {
-    const spacesTelemetry = await this.getTelemetryData();
-    const { apiCalls = {} } = spacesTelemetry;
+    const usageStats = await this.getUsageStats();
+    const { apiCalls = {} } = usageStats;
     const { copySavedObjects: current = COPY_DEFAULT } = apiCalls;
 
     const attributes = {
-      ...spacesTelemetry,
+      ...usageStats,
       apiCalls: {
         ...apiCalls,
         copySavedObjects: {
@@ -65,18 +65,18 @@ export class TelemetryClient {
         },
       },
     };
-    await this.updateTelemetryData(attributes);
+    await this.updateUsageStats(attributes);
   }
 
   public async incrementResolveCopySavedObjectsErrors({
     createNewCopies,
   }: IncrementResolveCopySavedObjectsErrorsOptions) {
-    const spacesTelemetry = await this.getTelemetryData();
-    const { apiCalls = {} } = spacesTelemetry;
+    const usageStats = await this.getUsageStats();
+    const { apiCalls = {} } = usageStats;
     const { resolveCopySavedObjectsErrors: current = RESOLVE_COPY_ERRORS_DEFAULT } = apiCalls;
 
     const attributes = {
-      ...spacesTelemetry,
+      ...usageStats,
       apiCalls: {
         ...apiCalls,
         resolveCopySavedObjectsErrors: {
@@ -85,16 +85,16 @@ export class TelemetryClient {
         },
       },
     };
-    await this.updateTelemetryData(attributes);
+    await this.updateUsageStats(attributes);
   }
 
-  private async updateTelemetryData(attributes: SpacesTelemetry) {
-    const options = { id: SPACES_TELEMETRY_TYPE, overwrite: true };
-    return this.repository.create(SPACES_TELEMETRY_TYPE, attributes, options);
+  private async updateUsageStats(attributes: UsageStats) {
+    const options = { id: SPACES_USAGE_STATS_TYPE, overwrite: true };
+    return this.repository.create(SPACES_USAGE_STATS_TYPE, attributes, options);
   }
 }
 
-function incrementBooleanCount(current: BooleanCount, value: boolean) {
+function incrementBooleanCount(current: { enabled: number; disabled: number }, value: boolean) {
   return {
     enabled: current.enabled + (value ? 1 : 0),
     disabled: current.disabled + (value ? 0 : 1),

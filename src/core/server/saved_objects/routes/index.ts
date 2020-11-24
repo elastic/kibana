@@ -18,7 +18,7 @@
  */
 
 import { InternalHttpServiceSetup } from '../../http';
-import { CoreTelemetryServiceSetup } from '../../core_telemetry';
+import { CoreUsageStatsServiceSetup } from '../../core_usage_stats';
 import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';
@@ -38,13 +38,13 @@ import { registerMigrateRoute } from './migrate';
 
 export function registerRoutes({
   http,
-  coreTelemetry,
+  coreUsageStats,
   logger,
   config,
   migratorPromise,
 }: {
   http: InternalHttpServiceSetup;
-  coreTelemetry: CoreTelemetryServiceSetup;
+  coreUsageStats: CoreUsageStatsServiceSetup;
   logger: Logger;
   config: SavedObjectConfig;
   migratorPromise: Promise<IKibanaMigrator>;
@@ -60,9 +60,9 @@ export function registerRoutes({
   registerBulkCreateRoute(router);
   registerBulkUpdateRoute(router);
   registerLogLegacyImportRoute(router, logger);
-  registerExportRoute(router, { config, coreTelemetry });
-  registerImportRoute(router, { config, coreTelemetry });
-  registerResolveImportErrorsRoute(router, { config, coreTelemetry });
+  registerExportRoute(router, { config, coreUsageStats });
+  registerImportRoute(router, { config, coreUsageStats });
+  registerResolveImportErrorsRoute(router, { config, coreUsageStats });
 
   const internalRouter = http.createRouter('/internal/saved_objects/');
 

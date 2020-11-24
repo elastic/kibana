@@ -5,27 +5,27 @@
  */
 
 import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
-import { SPACES_TELEMETRY_TYPE } from '../../constants';
-import { SpacesTelemetry } from '../../model/spaces_telemetry';
-import { CopyOptions, ResolveConflictsOptions } from '../copy_to_spaces/types';
-import { TelemetryClient } from './telemetry_client';
+import { SPACES_USAGE_STATS_TYPE } from './constants';
+import { UsageStats } from './types';
+import { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
+import { UsageStatsClient } from './usage_stats_client';
 
-describe('TelemetryClient', () => {
+describe('UsageStatsClient', () => {
   const setup = () => {
     const debugLoggerMock = jest.fn();
     const repositoryMock = savedObjectsRepositoryMock.create();
-    const telemetryClient = new TelemetryClient(debugLoggerMock, repositoryMock);
-    return { telemetryClient, debugLoggerMock, repositoryMock };
+    const usageStatsClient = new UsageStatsClient(debugLoggerMock, repositoryMock);
+    return { usageStatsClient, debugLoggerMock, repositoryMock };
   };
 
-  const createMockData = (attributes: SpacesTelemetry) => ({
-    id: SPACES_TELEMETRY_TYPE,
-    type: SPACES_TELEMETRY_TYPE,
+  const createMockData = (attributes: UsageStats) => ({
+    id: SPACES_USAGE_STATS_TYPE,
+    type: SPACES_USAGE_STATS_TYPE,
     attributes,
     references: [],
   });
 
-  const createOptions = { overwrite: true, id: SPACES_TELEMETRY_TYPE };
+  const createOptions = { overwrite: true, id: SPACES_USAGE_STATS_TYPE };
 
   // mock data for existing fields
   const copySavedObjects = {
@@ -38,33 +38,33 @@ describe('TelemetryClient', () => {
     createNewCopies: { enabled: 6, disabled: 7 },
   };
 
-  describe('#getTelemetryData', () => {
+  describe('#getUsageStats', () => {
     it('returns empty object when encountering a repository error', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockRejectedValue(new Error('Oh no!'));
 
-      const result = await telemetryClient.getTelemetryData();
+      const result = await usageStatsClient.getUsageStats();
       expect(result).toEqual({});
     });
 
-    it('returns object attributes when telemetry data exists', async () => {
-      const { telemetryClient, repositoryMock } = setup();
-      const attributes = { foo: 'bar' } as SpacesTelemetry;
+    it('returns object attributes when usageStats data exists', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      const attributes = { foo: 'bar' } as UsageStats;
       repositoryMock.get.mockResolvedValue(createMockData(attributes));
 
-      const result = await telemetryClient.getTelemetryData();
+      const result = await usageStatsClient.getUsageStats();
       expect(result).toEqual(attributes);
     });
   });
 
   describe('#incrementCopySavedObjects', () => {
     it('creates fields if attributes are empty', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));
 
-      await telemetryClient.incrementCopySavedObjects({} as CopyOptions);
+      await usageStatsClient.incrementCopySavedObjects({} as CopyOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
-        SPACES_TELEMETRY_TYPE,
+        SPACES_USAGE_STATS_TYPE,
         {
           apiCalls: {
             copySavedObjects: {
@@ -79,17 +79,17 @@ describe('TelemetryClient', () => {
     });
 
     it('increments existing fields, leaves other fields unchanged, and handles createNewCopies=true / overwrite=true appropriately', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(
         createMockData({ apiCalls: { copySavedObjects, resolveCopySavedObjectsErrors } })
       );
 
-      await telemetryClient.incrementCopySavedObjects({
+      await usageStatsClient.incrementCopySavedObjects({
         createNewCopies: true,
         overwrite: true,
       } as CopyOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
-        SPACES_TELEMETRY_TYPE,
+        SPACES_USAGE_STATS_TYPE,
         {
           apiCalls: {
             // these fields are changed
@@ -115,12 +115,12 @@ describe('TelemetryClient', () => {
 
   describe('#incrementResolveCopySavedObjectsErrors', () => {
     it('creates fields if attributes are empty', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));
 
-      await telemetryClient.incrementResolveCopySavedObjectsErrors({} as ResolveConflictsOptions);
+      await usageStatsClient.incrementResolveCopySavedObjectsErrors({} as ResolveConflictsOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
-        SPACES_TELEMETRY_TYPE,
+        SPACES_USAGE_STATS_TYPE,
         {
           apiCalls: {
             resolveCopySavedObjectsErrors: {
@@ -134,16 +134,16 @@ describe('TelemetryClient', () => {
     });
 
     it('increments existing fields, leaves other fields unchanged, and handles createNewCopies=true appropriately', async () => {
-      const { telemetryClient, repositoryMock } = setup();
+      const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(
         createMockData({ apiCalls: { copySavedObjects, resolveCopySavedObjectsErrors } })
       );
 
-      await telemetryClient.incrementResolveCopySavedObjectsErrors({
+      await usageStatsClient.incrementResolveCopySavedObjectsErrors({
         createNewCopies: true,
       } as ResolveConflictsOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
-        SPACES_TELEMETRY_TYPE,
+        SPACES_USAGE_STATS_TYPE,
         {
           apiCalls: {
             // these fields are changed

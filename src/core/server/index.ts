@@ -74,14 +74,14 @@ import {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
-import { CoreTelemetry } from './core_telemetry';
+import { CoreUsageStats } from './core_usage_stats';
 
 export {
   CoreUsageData,
   CoreConfigUsageData,
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
-  CoreTelemetry,
+  CoreUsageStats,
 };
 
 export { bootstrap } from './bootstrap';

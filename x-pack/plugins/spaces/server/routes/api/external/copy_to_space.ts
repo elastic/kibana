@@ -24,11 +24,11 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
   const {
     externalRouter,
     getSpacesService,
-    telemetryServicePromise,
+    usageStatsServicePromise,
     getImportExportObjectLimit,
     getStartServices,
   } = deps;
-  const telemetryClientPromise = telemetryServicePromise.then(({ getClient }) => getClient());
+  const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
 
   externalRouter.post(
     {
@@ -92,8 +92,8 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         createNewCopies,
       } = request.body;
 
-      const telemetryClient = await telemetryClientPromise;
-      await telemetryClient.incrementCopySavedObjects({ createNewCopies, overwrite });
+      const usageStatsClient = await usageStatsClientPromise;
+      await usageStatsClient.incrementCopySavedObjects({ createNewCopies, overwrite });
 
       const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
         startServices.savedObjects,
@@ -160,8 +160,8 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       const [startServices] = await getStartServices();
       const { objects, includeReferences, retries, createNewCopies } = request.body;
 
-      const telemetryClient = await telemetryClientPromise;
-      await telemetryClient.incrementResolveCopySavedObjectsErrors({ createNewCopies });
+      const usageStatsClient = await usageStatsClientPromise;
+      await usageStatsClient.incrementResolveCopySavedObjectsErrors({ createNewCopies });
 
       const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
         startServices.savedObjects,

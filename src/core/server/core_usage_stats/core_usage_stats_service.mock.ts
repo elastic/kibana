@@ -19,21 +19,21 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { coreTelemetryClientMock } from './core_telemetry_client.mock';
-import { CoreTelemetryService, CoreTelemetryServiceSetup } from '.';
+import { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
+import { CoreUsageStatsService, CoreUsageStatsServiceSetup } from '.';
 
-type CoreTelemetryServiceContract = PublicMethodsOf<CoreTelemetryService>;
+type CoreUsageStatsServiceContract = PublicMethodsOf<CoreUsageStatsService>;
 
-const createSetupContractMock = (telemetryClient = coreTelemetryClientMock.create()) => {
-  const setupContract: jest.Mocked<CoreTelemetryServiceSetup> = {
+const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {
+  const setupContract: jest.Mocked<CoreUsageStatsServiceSetup> = {
     registerTypeMappings: jest.fn(),
-    getClient: jest.fn().mockResolvedValue(telemetryClient),
+    getClient: jest.fn().mockResolvedValue(usageStatsClient),
   };
   return setupContract;
 };
 
-const createCoreTelemetryServiceMock = () => {
-  const mocked: jest.Mocked<CoreTelemetryServiceContract> = {
+const createCoreUsageStatsServiceMock = () => {
+  const mocked: jest.Mocked<CoreUsageStatsServiceContract> = {
     setup: jest.fn(),
   };
 
@@ -41,7 +41,7 @@ const createCoreTelemetryServiceMock = () => {
   return mocked;
 };
 
-export const coreTelemetryServiceMock = {
-  create: createCoreTelemetryServiceMock,
+export const coreUsageStatsServiceMock = {
+  create: createCoreUsageStatsServiceMock,
   createSetupContract: createSetupContractMock,
 };

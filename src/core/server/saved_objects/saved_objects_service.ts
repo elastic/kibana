@@ -27,7 +27,7 @@ import {
 } from './';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
-import { CoreTelemetryServiceSetup } from '../core_telemetry';
+import { CoreUsageStatsServiceSetup } from '../core_usage_stats';
 import {
   ElasticsearchClient,
   IClusterClient,
@@ -254,7 +254,7 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  coreTelemetry: CoreTelemetryServiceSetup;
+  coreUsageStats: CoreUsageStatsServiceSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -290,7 +290,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
-    const { http, elasticsearch, coreTelemetry } = setupDeps;
+    const { http, elasticsearch, coreUsageStats } = setupDeps;
 
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
@@ -302,11 +302,11 @@ export class SavedObjectsService
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
-    coreTelemetry.registerTypeMappings(this.typeRegistry);
+    coreUsageStats.registerTypeMappings(this.typeRegistry);
 
     registerRoutes({
       http,
-      coreTelemetry,
+      coreUsageStats,
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),

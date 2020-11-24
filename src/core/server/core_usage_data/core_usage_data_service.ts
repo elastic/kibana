@@ -23,7 +23,7 @@ import { takeUntil } from 'rxjs/operators';
 import { CoreService } from 'src/core/types';
 import { SavedObjectsServiceStart } from 'src/core/server';
 import { CoreContext } from '../core_context';
-import { CoreTelemetryClient, CoreTelemetryServiceSetup } from '../core_telemetry';
+import { CoreUsageStatsClient, CoreUsageStatsServiceSetup } from '../core_usage_stats';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType } from '../http';
 import { LoggingConfigType } from '../logging';
@@ -36,7 +36,7 @@ import { MetricsServiceSetup, OpsMetrics } from '..';
 
 export interface SetupDeps {
   metrics: MetricsServiceSetup;
-  coreTelemetry: CoreTelemetryServiceSetup;
+  coreUsageStats: CoreUsageStatsServiceSetup;
 }
 
 export interface StartDeps {
@@ -71,7 +71,7 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
   private stop$: Subject<void>;
   private opsMetrics?: OpsMetrics;
   private kibanaConfig?: KibanaConfigType;
-  private coreTelemetryClient?: CoreTelemetryClient;
+  private coreUsageStatsClient?: CoreUsageStatsClient;
 
   constructor(core: CoreContext) {
     this.configService = core.configService;
@@ -133,15 +133,15 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       throw new Error('Unable to read config values. Ensure that setup() has completed.');
     }
 
-    if (!this.coreTelemetryClient) {
+    if (!this.coreUsageStatsClient) {
       throw new Error(
-        'Core telemetry client is not initialized. Ensure that setup() has completed.'
+        'Core usage stats client is not initialized. Ensure that setup() has completed.'
       );
     }
 
     const es = this.elasticsearchConfig;
     const soUsageData = await this.getSavedObjectIndicesUsageData(savedObjects, elasticsearch);
-    const coreTelemetryData = await this.coreTelemetryClient.getTelemetryData();
+    const coreUsageStatsData = await this.coreUsageStatsClient.getUsageStats();
 
     const http = this.httpConfig;
     return {
@@ -235,18 +235,18 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
       services: {
         savedObjects: soUsageData,
       },
-      ...coreTelemetryData,
+      ...coreUsageStatsData,
     };
   }
 
-  setup({ metrics, coreTelemetry }: SetupDeps) {
+  setup({ metrics, coreUsageStats }: SetupDeps) {
     metrics
       .getOpsMetrics$()
       .pipe(takeUntil(this.stop$))
       .subscribe((opsMetrics) => (this.opsMetrics = opsMetrics));
 
-    coreTelemetry.getClient().then((coreTelemetryClient) => {
-      this.coreTelemetryClient = coreTelemetryClient;
+    coreUsageStats.getClient().then((coreUsageStatsClient) => {
+      this.coreUsageStatsClient = coreUsageStatsClient;
     });
 
     this.configService

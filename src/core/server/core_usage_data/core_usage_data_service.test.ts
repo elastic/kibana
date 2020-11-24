@@ -30,7 +30,7 @@ import { config as RawLoggingConfig } from '../logging/logging_config';
 import { config as RawKibanaConfig } from '../kibana_config';
 import { savedObjectsConfig as RawSavedObjectsConfig } from '../saved_objects/saved_objects_config';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
-import { coreTelemetryServiceMock } from '../core_telemetry/core_telemetry_service.mock';
+import { coreUsageStatsServiceMock } from '../core_usage_stats/core_usage_stats_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 
 import { CoreUsageDataService } from './core_usage_data_service';
@@ -68,8 +68,8 @@ describe('CoreUsageDataService', () => {
     describe('getCoreUsageData', () => {
       it('returns core metrics for default config', async () => {
         const metrics = metricsServiceMock.createInternalSetupContract();
-        const coreTelemetry = coreTelemetryServiceMock.createSetupContract();
-        service.setup({ metrics, coreTelemetry });
+        const coreUsageStats = coreUsageStatsServiceMock.createSetupContract();
+        service.setup({ metrics, coreUsageStats });
         const elasticsearch = elasticsearchServiceMock.createStart();
         elasticsearch.client.asInternalUser.cat.indices.mockResolvedValueOnce({
           body: [
@@ -99,7 +99,7 @@ describe('CoreUsageDataService', () => {
           { name: 'type 2', indexPattern: '.kibana_task_manager' },
         ] as any);
 
-        await coreTelemetry.getClient(); // wait for this to resolve, which happens before this service is started
+        await coreUsageStats.getClient(); // wait for this to resolve, which happens before this service is started
         const { getCoreUsageData } = service.start({
           savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
           elasticsearch,
@@ -246,9 +246,9 @@ describe('CoreUsageDataService', () => {
           observables.push(newObservable);
           return newObservable as Observable<any>;
         });
-        const coreTelemetry = coreTelemetryServiceMock.createSetupContract();
+        const coreUsageStats = coreUsageStatsServiceMock.createSetupContract();
 
-        service.setup({ metrics, coreTelemetry });
+        service.setup({ metrics, coreUsageStats });
 
         // Use the stopTimer$ to delay calling stop() until the third frame
         const stopTimer$ = cold('---a|');

@@ -21,14 +21,14 @@ import { Readable } from 'stream';
 import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
-import { CoreTelemetryServiceSetup } from '../../core_telemetry';
+import { CoreUsageStatsServiceSetup } from '../../core_usage_stats';
 import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
-  coreTelemetry: CoreTelemetryServiceSetup;
+  coreUsageStats: CoreUsageStatsServiceSetup;
 }
 
 interface FileStream extends Readable {
@@ -38,7 +38,7 @@ interface FileStream extends Readable {
 }
 
 export const registerImportRoute = (router: IRouter, deps: RouteDependencies) => {
-  const { config, coreTelemetry } = deps;
+  const { config, coreUsageStats } = deps;
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
   router.post(
@@ -73,8 +73,8 @@ export const registerImportRoute = (router: IRouter, deps: RouteDependencies) =>
     router.handleLegacyErrors(async (context, req, res) => {
       const { overwrite, createNewCopies } = req.query;
 
-      const telemetryClient = await coreTelemetry.getClient();
-      await telemetryClient.incrementSavedObjectsImport({ createNewCopies, overwrite });
+      const usageStatsClient = await coreUsageStats.getClient();
+      await usageStatsClient.incrementSavedObjectsImport({ createNewCopies, overwrite });
 
       const file = req.body.file as FileStream;
       const fileExtension = extname(file.hapi.filename).toLowerCase();

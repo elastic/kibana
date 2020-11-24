@@ -11,7 +11,7 @@ import { initGetAllSpacesApi } from './get_all';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
 import { SpacesServiceStart } from '../../../spaces_service';
-import { TelemetryServiceSetup } from '../../../telemetry_service';
+import { UsageStatsServiceSetup } from '../../../usage_stats';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { initShareToSpacesApi } from './share_to_space';
 
@@ -20,7 +20,7 @@ export interface ExternalRouteDeps {
   getStartServices: CoreSetup['getStartServices'];
   getImportExportObjectLimit: () => number;
   getSpacesService: () => SpacesServiceStart;
-  telemetryServicePromise: Promise<TelemetryServiceSetup>;
+  usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
   log: Logger;
 }
 

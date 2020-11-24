@@ -5,18 +5,18 @@
  */
 
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
-import { TelemetryService } from '.';
-import { TelemetryClient } from '../lib/telemetry_client';
-import { SPACES_TELEMETRY_TYPE } from '../constants';
+import { UsageStatsService } from '.';
+import { UsageStatsClient } from './usage_stats_client';
+import { SPACES_USAGE_STATS_TYPE } from './constants';
 
-describe('TelemetryService', () => {
+describe('UsageStatsService', () => {
   const mockLogger = loggingSystemMock.createLogger();
 
   describe('#setup', () => {
     const setup = async () => {
       const core = coreMock.createSetup();
-      const telemetryService = await new TelemetryService(mockLogger).setup(core);
-      return { core, telemetryService };
+      const usageStatsService = await new UsageStatsService(mockLogger).setup(core);
+      return { core, usageStatsService };
     };
 
     it('creates internal repository', async () => {
@@ -24,15 +24,15 @@ describe('TelemetryService', () => {
 
       const [{ savedObjects }] = await core.getStartServices();
       expect(savedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
-      expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([SPACES_TELEMETRY_TYPE]);
+      expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([SPACES_USAGE_STATS_TYPE]);
     });
 
     describe('#getClient', () => {
       it('returns client', async () => {
-        const { telemetryService } = await setup();
+        const { usageStatsService } = await setup();
 
-        const telemetryClient = await telemetryService.getClient();
-        expect(telemetryClient).toBeInstanceOf(TelemetryClient);
+        const usageStatsClient = await usageStatsService.getClient();
+        expect(usageStatsClient).toBeInstanceOf(UsageStatsClient);
       });
     });
   });

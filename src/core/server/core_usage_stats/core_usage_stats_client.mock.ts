@@ -17,5 +17,16 @@
  * under the License.
  */
 
-/** @internal */
-export const CORE_TELEMETRY_TYPE = 'core-telemetry';
+import { CoreUsageStatsClient } from '.';
+
+const createUsageStatsClientMock = () =>
+  (({
+    getUsageStats: jest.fn().mockResolvedValue({}),
+    incrementSavedObjectsImport: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsResolveImportErrors: jest.fn().mockResolvedValue(null),
+    incrementSavedObjectsExport: jest.fn().mockResolvedValue(null),
+  } as unknown) as jest.Mocked<CoreUsageStatsClient>);
+
+export const coreUsageStatsClientMock = {
+  create: createUsageStatsClientMock,
+};

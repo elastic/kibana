@@ -5,7 +5,7 @@
  */
 
 import { coreMock } from 'src/core/server/mocks';
-import { SPACES_TELEMETRY_TYPE } from '../constants';
+import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { SpacesSavedObjectsService } from './saved_objects_service';
 
@@ -25,7 +25,7 @@ describe('SpacesSavedObjectsService', () => {
       );
       expect(core.savedObjects.registerType).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ name: SPACES_TELEMETRY_TYPE })
+        expect.objectContaining({ name: SPACES_USAGE_STATS_TYPE })
       );
     });
 

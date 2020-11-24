@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export { CoreTelemetryClient } from './core_telemetry_client';
-export { CoreTelemetryService, CoreTelemetryServiceSetup } from './core_telemetry_service';
-export { CoreTelemetry } from './types';
+/** @internal */
+export const CORE_USAGE_STATS_TYPE = 'core-usage-stats';

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TelemetryService, TelemetryServiceSetup } from './telemetry_service';
+export const SPACES_USAGE_STATS_TYPE = 'spaces-usage-stats';

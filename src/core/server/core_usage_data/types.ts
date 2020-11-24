@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { CoreTelemetry } from '../core_telemetry';
+import { CoreUsageStats } from '../core_usage_stats';
 
 /**
  * Type describing Core's usage data payload
  * @internal
  */
-export interface CoreUsageData extends CoreTelemetry {
+export interface CoreUsageData extends CoreUsageStats {
   config: CoreConfigUsageData;
   services: CoreServicesUsageData;
   environment: CoreEnvironmentUsageData;

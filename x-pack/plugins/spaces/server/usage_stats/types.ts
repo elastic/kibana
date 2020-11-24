@@ -4,21 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface BooleanCount {
-  enabled: number;
-  disabled: number;
-}
-
-export interface SpacesTelemetry {
+export interface UsageStats {
   apiCalls?: {
     copySavedObjects?: {
       total: number;
-      createNewCopies: BooleanCount;
-      overwrite: BooleanCount;
+      createNewCopies: {
+        enabled: number;
+        disabled: number;
+      };
+      overwrite: {
+        enabled: number;
+        disabled: number;
+      };
     };
     resolveCopySavedObjectsErrors?: {
       total: number;
-      createNewCopies: BooleanCount;
+      createNewCopies: {
+        enabled: number;
+        disabled: number;
+      };
     };
   };
 }

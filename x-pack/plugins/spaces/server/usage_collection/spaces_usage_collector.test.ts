@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSpacesUsageCollector, UsageStats } from './spaces_usage_collector';
+import { getSpacesUsageCollector, UsageData } from './spaces_usage_collector';
 import * as Rx from 'rxjs';
 import { PluginsSetup } from '../plugin';
 import { KibanaFeature } from '../../../features/server';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
-import { telemetryClientMock } from '../lib/telemetry_client/telemetry_client.mock';
-import { SpacesTelemetry } from '../model/spaces_telemetry';
-import { telemetryServiceMock } from '../telemetry_service/telemetry_service.mock';
+import { UsageStats } from '../usage_stats';
+import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';
+import { usageStatsServiceMock } from '../usage_stats/usage_stats_service.mock';
 import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
@@ -20,7 +20,7 @@ interface SetupOpts {
   features?: KibanaFeature[];
 }
 
-const MOCK_TELEMETRY_DATA: SpacesTelemetry = {
+const MOCK_USAGE_STATS: UsageStats = {
   apiCalls: {
     copySavedObjects: {
       total: 5,
@@ -58,9 +58,9 @@ function setup({
     getKibanaFeatures: jest.fn().mockReturnValue(features),
   } as unknown) as PluginsSetup['features'];
 
-  const telemetryClient = telemetryClientMock.create();
-  telemetryClient.getTelemetryData.mockResolvedValue(MOCK_TELEMETRY_DATA);
-  const telemetryService = telemetryServiceMock.createSetupContract(telemetryClient);
+  const usageStatsClient = usageStatsClientMock.create();
+  usageStatsClient.getUsageStats.mockResolvedValue(MOCK_USAGE_STATS);
+  const usageStatsService = usageStatsServiceMock.createSetupContract(usageStatsClient);
 
   return {
     licensing,
@@ -68,8 +68,8 @@ function setup({
     usageCollection: {
       makeUsageCollector: (options: any) => new MockUsageCollector(options),
     },
-    telemetryService,
-    telemetryClient,
+    usageStatsService,
+    usageStatsClient,
   };
 }
 
@@ -100,28 +100,28 @@ const getMockFetchContext = (mockedCallCluster: jest.Mock) => {
 
 describe('error handling', () => {
   it('handles a 404 when searching for space usage', async () => {
-    const { features, licensing, usageCollection, telemetryService } = setup({
+    const { features, licensing, usageCollection, usageStatsService } = setup({
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
       features,
       licensing,
-      telemetryServicePromise: Promise.resolve(telemetryService),
+      usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
 
     await collector.fetch(getMockFetchContext(jest.fn().mockRejectedValue({ status: 404 })));
   });
 
   it('throws error for a non-404', async () => {
-    const { features, licensing, usageCollection, telemetryService } = setup({
+    const { features, licensing, usageCollection, usageStatsService } = setup({
       license: { isAvailable: true, type: 'basic' },
     });
     const collector = getSpacesUsageCollector(usageCollection as any, {
       kibanaIndexConfig$: Rx.of({ kibana: { index: '.kibana' } }),
       features,
       licensing,
-      telemetryServicePromise: Promise.resolve(telemetryService),
+      usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
 
     const statusCodes = [401, 402, 403, 500];
@@ -135,8 +135,8 @@ describe('error handling', () => {
 });
 
 describe('with a basic license', () => {
-  let usageStats: UsageStats;
-  const { features, licensing, usageCollection, telemetryService, telemetryClient } = setup({
+  let usageData: UsageData;
+  const { features, licensing, usageCollection, usageStatsService, usageStatsClient } = setup({
     license: { isAvailable: true, type: 'basic' },
   });
 
@@ -145,9 +145,9 @@ describe('with a basic license', () => {
       kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
-      telemetryServicePromise: Promise.resolve(telemetryService),
+      usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    usageStats = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
+    usageData = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
 
     expect(defaultCallClusterMock).toHaveBeenCalledWith('search', {
       body: {
@@ -165,36 +165,36 @@ describe('with a basic license', () => {
   });
 
   test('sets enabled to true', () => {
-    expect(usageStats.enabled).toBe(true);
+    expect(usageData.enabled).toBe(true);
   });
 
   test('sets available to true', () => {
-    expect(usageStats.available).toBe(true);
+    expect(usageData.available).toBe(true);
   });
 
   test('sets the number of spaces', () => {
-    expect(usageStats.count).toBe(2);
+    expect(usageData.count).toBe(2);
   });
 
   test('calculates feature control usage', () => {
-    expect(usageStats.usesFeatureControls).toBe(true);
-    expect(usageStats).toHaveProperty('disabledFeatures');
-    expect(usageStats.disabledFeatures).toEqual({
+    expect(usageData.usesFeatureControls).toBe(true);
+    expect(usageData).toHaveProperty('disabledFeatures');
+    expect(usageData.disabledFeatures).toEqual({
       feature1: 1,
       feature2: 0,
     });
   });
 
-  test('fetches telemetry data', () => {
-    expect(telemetryService.getClient).toHaveBeenCalledTimes(1);
-    expect(telemetryClient.getTelemetryData).toHaveBeenCalledTimes(1);
-    expect(usageStats).toEqual(expect.objectContaining(MOCK_TELEMETRY_DATA));
+  test('fetches usageStats data', () => {
+    expect(usageStatsService.getClient).toHaveBeenCalledTimes(1);
+    expect(usageStatsClient.getUsageStats).toHaveBeenCalledTimes(1);
+    expect(usageData).toEqual(expect.objectContaining(MOCK_USAGE_STATS));
   });
 });
 
 describe('with no license', () => {
-  let usageStats: UsageStats;
-  const { features, licensing, usageCollection, telemetryService, telemetryClient } = setup({
+  let usageData: UsageData;
+  const { features, licensing, usageCollection, usageStatsService, usageStatsClient } = setup({
     license: { isAvailable: false },
   });
 
@@ -203,37 +203,37 @@ describe('with no license', () => {
       kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
-      telemetryServicePromise: Promise.resolve(telemetryService),
+      usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    usageStats = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
+    usageData = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
   });
 
   test('sets enabled to false', () => {
-    expect(usageStats.enabled).toBe(false);
+    expect(usageData.enabled).toBe(false);
   });
 
   test('sets available to false', () => {
-    expect(usageStats.available).toBe(false);
+    expect(usageData.available).toBe(false);
   });
 
   test('does not set the number of spaces', () => {
-    expect(usageStats.count).toBeUndefined();
+    expect(usageData.count).toBeUndefined();
   });
 
   test('does not set feature control usage', () => {
-    expect(usageStats.usesFeatureControls).toBeUndefined();
+    expect(usageData.usesFeatureControls).toBeUndefined();
   });
 
-  test('does not fetch telemetry data', () => {
-    expect(telemetryService.getClient).not.toHaveBeenCalled();
-    expect(telemetryClient.getTelemetryData).not.toHaveBeenCalled();
-    expect(usageStats).not.toEqual(expect.objectContaining(MOCK_TELEMETRY_DATA));
+  test('does not fetch usageStats data', () => {
+    expect(usageStatsService.getClient).not.toHaveBeenCalled();
+    expect(usageStatsClient.getUsageStats).not.toHaveBeenCalled();
+    expect(usageData).not.toEqual(expect.objectContaining(MOCK_USAGE_STATS));
   });
 });
 
 describe('with platinum license', () => {
-  let usageStats: UsageStats;
-  const { features, licensing, usageCollection, telemetryService, telemetryClient } = setup({
+  let usageData: UsageData;
+  const { features, licensing, usageCollection, usageStatsService, usageStatsClient } = setup({
     license: { isAvailable: true, type: 'platinum' },
   });
 
@@ -242,34 +242,34 @@ describe('with platinum license', () => {
       kibanaIndexConfig$: pluginInitializerContextConfigMock({}).legacy.globalConfig$,
       features,
       licensing,
-      telemetryServicePromise: Promise.resolve(telemetryService),
+      usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    usageStats = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
+    usageData = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
   });
 
   test('sets enabled to true', () => {
-    expect(usageStats.enabled).toBe(true);
+    expect(usageData.enabled).toBe(true);
   });
 
   test('sets available to true', () => {
-    expect(usageStats.available).toBe(true);
+    expect(usageData.available).toBe(true);
   });
 
   test('sets the number of spaces', () => {
-    expect(usageStats.count).toBe(2);
+    expect(usageData.count).toBe(2);
   });
 
   test('calculates feature control usage', () => {
-    expect(usageStats.usesFeatureControls).toBe(true);
-    expect(usageStats.disabledFeatures).toEqual({
+    expect(usageData.usesFeatureControls).toBe(true);
+    expect(usageData.disabledFeatures).toEqual({
       feature1: 1,
       feature2: 0,
     });
   });
 
-  test('fetches telemetry data', () => {
-    expect(telemetryService.getClient).toHaveBeenCalledTimes(1);
-    expect(telemetryClient.getTelemetryData).toHaveBeenCalledTimes(1);
-    expect(usageStats).toEqual(expect.objectContaining(MOCK_TELEMETRY_DATA));
+  test('fetches usageStats data', () => {
+    expect(usageStatsService.getClient).toHaveBeenCalledTimes(1);
+    expect(usageStatsClient.getUsageStats).toHaveBeenCalledTimes(1);
+    expect(usageData).toEqual(expect.objectContaining(MOCK_USAGE_STATS));
   });
 });

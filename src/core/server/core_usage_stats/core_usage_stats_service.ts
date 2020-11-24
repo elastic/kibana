@@ -24,16 +24,16 @@ import {
   SavedObjectTypeRegistry,
 } from 'src/core/server';
 import { CoreContext } from '../core_context';
-import { CoreTelemetryClient } from './core_telemetry_client';
-import { CORE_TELEMETRY_TYPE } from './constants';
-import { CoreTelemetryMappings } from './mappings';
+import { CoreUsageStatsClient } from './core_usage_stats_client';
+import { CORE_USAGE_STATS_TYPE } from './constants';
+import { CoreUsageStatsMappings } from './mappings';
 
 /** @internal */
-export interface CoreTelemetryServiceSetup {
+export interface CoreUsageStatsServiceSetup {
   registerTypeMappings(
     typeRegistry: ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
   ): void;
-  getClient(): Promise<CoreTelemetryClient>;
+  getClient(): Promise<CoreUsageStatsClient>;
 }
 
 interface SetupDeps {
@@ -41,26 +41,26 @@ interface SetupDeps {
 }
 
 /** @internal */
-export class CoreTelemetryService {
+export class CoreUsageStatsService {
   private logger: Logger;
 
   constructor(coreContext: CoreContext) {
-    this.logger = coreContext.logger.get('core-telemetry-service');
+    this.logger = coreContext.logger.get('core-usage-stats-service');
   }
 
-  setup({ savedObjectsStartPromise }: SetupDeps): CoreTelemetryServiceSetup {
-    this.logger.debug('Setting up Core Telemetry service');
+  setup({ savedObjectsStartPromise }: SetupDeps): CoreUsageStatsServiceSetup {
+    this.logger.debug('Setting up Core Usage Stats service');
 
     const internalRepositoryPromise = savedObjectsStartPromise.then((savedObjects) =>
-      savedObjects.createInternalRepository([CORE_TELEMETRY_TYPE])
+      savedObjects.createInternalRepository([CORE_USAGE_STATS_TYPE])
     );
 
     const registerTypeMappings = (typeRegistry: SavedObjectTypeRegistry) => {
       typeRegistry.registerType({
-        name: CORE_TELEMETRY_TYPE,
+        name: CORE_USAGE_STATS_TYPE,
         hidden: true,
         namespaceType: 'agnostic',
-        mappings: CoreTelemetryMappings,
+        mappings: CoreUsageStatsMappings,
       });
     };
 
@@ -68,7 +68,7 @@ export class CoreTelemetryService {
       const internalRepository = await internalRepositoryPromise;
       const debugLogger = (message: string) => this.logger.debug(message);
 
-      return new CoreTelemetryClient(debugLogger, internalRepository);
+      return new CoreUsageStatsClient(debugLogger, internalRepository);
     };
 
     return { registerTypeMappings, getClient };

@@ -21,18 +21,18 @@ import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '../../utils/streams';
 import { IRouter } from '../../http';
-import { CoreTelemetryServiceSetup } from '../../core_telemetry';
+import { CoreUsageStatsServiceSetup } from '../../core_usage_stats';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { exportSavedObjectsToStream } from '../export';
 import { validateTypes, validateObjects } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
-  coreTelemetry: CoreTelemetryServiceSetup;
+  coreUsageStats: CoreUsageStatsServiceSetup;
 }
 
 export const registerExportRoute = (router: IRouter, deps: RouteDependencies) => {
-  const { config, coreTelemetry } = deps;
+  const { config, coreUsageStats } = deps;
   const { maxImportExportSize } = config;
 
   const referenceSchema = schema.object({
@@ -101,8 +101,8 @@ export const registerExportRoute = (router: IRouter, deps: RouteDependencies) =>
         }
       }
 
-      const telemetryClient = await coreTelemetry.getClient();
-      await telemetryClient.incrementSavedObjectsExport({ types, supportedTypes });
+      const usageStatsClient = await coreUsageStats.getClient();
+      await usageStatsClient.incrementSavedObjectsExport({ types, supportedTypes });
 
       const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,

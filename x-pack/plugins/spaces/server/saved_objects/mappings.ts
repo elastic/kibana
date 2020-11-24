@@ -39,7 +39,7 @@ export const SpacesSavedObjectMappings = deepFreeze({
   },
 });
 
-export const SpacesTelemetryMappings = deepFreeze({
+export const UsageStatsMappings = deepFreeze({
   properties: {
     apiCalls: {
       type: 'object',

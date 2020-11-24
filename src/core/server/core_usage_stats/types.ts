@@ -17,8 +17,13 @@
  * under the License.
  */
 
-/** @internal */
-export interface CoreTelemetry {
+/**
+ * @internal
+ *
+ * CoreUsageStats are collected over time while Kibana is running. This is related to CoreUsageData, which is a superset of this that also
+ * includes point-in-time configuration information.
+ * */
+export interface CoreUsageStats {
   apiCalls?: {
     savedObjectsImport?: {
       total: number;

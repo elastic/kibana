@@ -20,11 +20,11 @@
 import { mockCoreContext } from '../core_context.mock';
 import { savedObjectsServiceMock } from '../mocks';
 import { typeRegistryMock } from '../saved_objects/saved_objects_type_registry.mock';
-import { CoreTelemetryService, CoreTelemetryClient } from '.';
-import { CORE_TELEMETRY_TYPE } from './constants';
-import { CoreTelemetryMappings } from './mappings';
+import { CoreUsageStatsService, CoreUsageStatsClient } from '.';
+import { CORE_USAGE_STATS_TYPE } from './constants';
+import { CoreUsageStatsMappings } from './mappings';
 
-describe('CoreTelemetryService', () => {
+describe('CoreUsageStatsService', () => {
   const coreContext = mockCoreContext.create();
 
   describe('#setup', () => {
@@ -32,10 +32,10 @@ describe('CoreTelemetryService', () => {
       const savedObjectsStartPromise = Promise.resolve(
         savedObjectsServiceMock.createStartContract()
       );
-      const coreTelemetry = new CoreTelemetryService(coreContext).setup({
+      const coreUsageStats = new CoreUsageStatsService(coreContext).setup({
         savedObjectsStartPromise,
       });
-      return { savedObjectsStartPromise, coreTelemetry };
+      return { savedObjectsStartPromise, coreUsageStats };
     };
 
     it('creates internal repository', async () => {
@@ -43,31 +43,31 @@ describe('CoreTelemetryService', () => {
 
       const savedObjects = await savedObjectsStartPromise;
       expect(savedObjects.createInternalRepository).toHaveBeenCalledTimes(1);
-      expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([CORE_TELEMETRY_TYPE]);
+      expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([CORE_USAGE_STATS_TYPE]);
     });
 
     describe('#registerTypeMappings', () => {
-      it('registers core telemetry type', async () => {
-        const { coreTelemetry } = setup();
+      it('registers core usage stats type', async () => {
+        const { coreUsageStats } = setup();
         const typeRegistry = typeRegistryMock.create();
 
-        coreTelemetry.registerTypeMappings(typeRegistry);
+        coreUsageStats.registerTypeMappings(typeRegistry);
         expect(typeRegistry.registerType).toHaveBeenCalledTimes(1);
         expect(typeRegistry.registerType).toHaveBeenCalledWith({
-          name: CORE_TELEMETRY_TYPE,
+          name: CORE_USAGE_STATS_TYPE,
           hidden: true,
           namespaceType: 'agnostic',
-          mappings: CoreTelemetryMappings,
+          mappings: CoreUsageStatsMappings,
         });
       });
     });
 
     describe('#getClient', () => {
       it('returns client', async () => {
-        const { coreTelemetry } = setup();
+        const { coreUsageStats } = setup();
 
-        const telemetryClient = await coreTelemetry.getClient();
-        expect(telemetryClient).toBeInstanceOf(CoreTelemetryClient);
+        const usageStatsClient = await coreUsageStats.getClient();
+        expect(usageStatsClient).toBeInstanceOf(CoreUsageStatsClient);
       });
     });
   });
