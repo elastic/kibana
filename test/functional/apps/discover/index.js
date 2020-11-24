@@ -52,5 +52,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_data_grid'));
     loadTestFile(require.resolve('./_data_grid_context'));
     loadTestFile(require.resolve('./_data_grid_field_data'));
+    loadTestFile(require.resolve('./_data_grid_doc_navigation'));
   });
 }
