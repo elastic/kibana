@@ -8,22 +8,23 @@ import { Store, createStore } from 'redux';
 import { ResolverAction } from '../actions';
 import { resolverReducer } from '../reducer';
 import { ResolverState } from '../../types';
-import { LegacyEndpointEvent, SafeResolverEvent } from '../../../../common/endpoint/types';
+import { ResolverNode } from '../../../../common/endpoint/types';
 import { visibleNodesAndEdgeLines } from '../selectors';
-import { mockProcessEvent } from '../../models/process_event_test_helpers';
 import { mock as mockResolverTree } from '../../models/resolver_tree';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
+import { mockResolverNode } from '../../mocks/resolver_node';
 
 describe('resolver visible entities', () => {
-  let processA: LegacyEndpointEvent;
-  let processB: LegacyEndpointEvent;
-  let processC: LegacyEndpointEvent;
-  let processD: LegacyEndpointEvent;
-  let processE: LegacyEndpointEvent;
-  let processF: LegacyEndpointEvent;
-  let processG: LegacyEndpointEvent;
+  let nodeA: ResolverNode;
+  let nodeB: ResolverNode;
+  let nodeC: ResolverNode;
+  let nodeD: ResolverNode;
+  let nodeE: ResolverNode;
+  let nodeF: ResolverNode;
+  let nodeG: ResolverNode;
   let store: Store<ResolverState, ResolverAction>;
 
+  // TODO: Update ResolverNode so ID can be number or string
   beforeEach(() => {
     /*
      *          A
@@ -34,86 +35,69 @@ describe('resolver visible entities', () => {
      *          |
      *          D etc
      */
-    processA = mockProcessEvent({
-      endgame: {
-        process_name: '',
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 0,
-      },
+    nodeA = mockResolverNode({
+      name: '',
+      id: '0',
+      stats: { total: 0, byCategory: {} },
+      timestamp: 1582233383000,
     });
-    processB = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'already_running',
-        unique_pid: 1,
-        unique_ppid: 0,
-      },
+    nodeB = mockResolverNode({
+      id: '1',
+      name: '',
+      parentID: '0',
+      stats: { total: 0, byCategory: {} },
+      timestamp: 1582233383000,
     });
-    processC = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 2,
-        unique_ppid: 1,
-      },
+    nodeC = mockResolverNode({
+      id: '2',
+      name: '',
+      parentID: '1',
+      stats: { total: 0, byCategory: {} },
+      timestamp: 1582233383000,
     });
-    processD = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 3,
-        unique_ppid: 2,
-      },
+    nodeD = mockResolverNode({
+      id: '3',
+      name: '',
+      parentID: '2',
+      stats: { total: 0, byCategory: {} },
+      timestamp: 1582233383000,
     });
-    processE = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 4,
-        unique_ppid: 3,
-      },
+    nodeE = mockResolverNode({
+      id: '4',
+      name: '',
+      parentID: '3',
+      stats: { total: 0, byCategory: {} },
+      timestamp: 1582233383000,
     });
-    processF = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 5,
-        unique_ppid: 4,
-      },
+    nodeF = mockResolverNode({
+      id: '5',
+      name: '',
+      parentID: '4',
+      stats: { total: 0, byCategory: {} },
+      timestamp: 1582233383000,
     });
-    processF = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 6,
-        unique_ppid: 5,
-      },
+    nodeF = mockResolverNode({
+      id: '6',
+      name: '',
+      parentID: '5',
+      stats: { total: 0, byCategory: {} },
+      timestamp: 1582233383000,
     });
-    processG = mockProcessEvent({
-      endgame: {
-        event_type_full: 'process_event',
-        event_subtype_full: 'creation_event',
-        unique_pid: 7,
-        unique_ppid: 6,
-      },
+    nodeG = mockResolverNode({
+      id: '7',
+      name: '',
+      parentID: '6',
+      stats: { total: 0, byCategory: {} },
+      timestamp: 1582233383000,
     });
     store = createStore(resolverReducer, undefined);
   });
   describe('when rendering a large tree with a small viewport', () => {
     beforeEach(() => {
-      const events: SafeResolverEvent[] = [
-        processA,
-        processB,
-        processC,
-        processD,
-        processE,
-        processF,
-        processG,
-      ];
+      const nodes: ResolverNode[] = [nodeA, nodeB, nodeC, nodeD, nodeE, nodeF, nodeG];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: { result: mockResolverTree({ events })!, parameters: mockTreeFetcherParameters() },
+        payload: { result: mockResolverTree({ nodes })!, parameters: mockTreeFetcherParameters() },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [300, 200] };
       store.dispatch(action);
@@ -130,18 +114,10 @@ describe('resolver visible entities', () => {
   });
   describe('when rendering a large tree with a large viewport', () => {
     beforeEach(() => {
-      const events: SafeResolverEvent[] = [
-        processA,
-        processB,
-        processC,
-        processD,
-        processE,
-        processF,
-        processG,
-      ];
+      const nodes: ResolverNode[] = [nodeA, nodeB, nodeC, nodeD, nodeE, nodeF, nodeG];
       const action: ResolverAction = {
         type: 'serverReturnedResolverData',
-        payload: { result: mockResolverTree({ events })!, parameters: mockTreeFetcherParameters() },
+        payload: { result: mockResolverTree({ nodes })!, parameters: mockTreeFetcherParameters() },
       };
       const cameraAction: ResolverAction = { type: 'userSetRasterSize', payload: [2000, 2000] };
       store.dispatch(action);

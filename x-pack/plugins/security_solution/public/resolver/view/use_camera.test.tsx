@@ -13,18 +13,18 @@ import { useCamera } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { Matrix3, ResolverStore, SideEffectors, SideEffectSimulator } from '../types';
-import { SafeResolverEvent } from '../../../common/endpoint/types';
+import { ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../models/vector2';
 import { sideEffectSimulatorFactory } from './side_effect_simulator_factory';
-import { mockProcessEvent } from '../models/process_event_test_helpers';
 import { mock as mockResolverTree } from '../models/resolver_tree';
 import { ResolverAction } from '../store/actions';
 import { createStore } from 'redux';
 import { resolverReducer } from '../store/reducer';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
-import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
+import * as nodeModel from '../../../common/endpoint/models/node';
 import { act } from 'react-dom/test-utils';
+import { mockResolverNode } from '../mocks/resolver_node';
 
 describe('useCamera on an unpainted element', () => {
   /** Enzyme full DOM wrapper for the element the camera is attached to. */
@@ -247,25 +247,24 @@ describe('useCamera on an unpainted element', () => {
       expect(simulator.mock.requestAnimationFrame).not.toHaveBeenCalled();
     });
     describe('when the camera begins animation', () => {
-      let process: SafeResolverEvent;
+      let node: ResolverNode;
       beforeEach(async () => {
-        const events: SafeResolverEvent[] = [];
-        const numberOfEvents: number = 10;
+        const nodes: ResolverNode[] = [];
+        const numberOfNodes: number = 10;
 
-        for (let index = 0; index < numberOfEvents; index++) {
-          const uniquePpid = index === 0 ? undefined : index - 1;
-          events.push(
-            mockProcessEvent({
-              endgame: {
-                unique_pid: index,
-                unique_ppid: uniquePpid,
-                event_type_full: 'process_event',
-                event_subtype_full: 'creation_event',
-              },
+        for (let index = 0; index < numberOfNodes; index++) {
+          const parentID = index === 0 ? undefined : String(index - 1);
+          nodes.push(
+            mockResolverNode({
+              id: String(index),
+              name: '',
+              parentID,
+              timestamp: 1582233383000,
+              stats: { total: 0, byCategory: {} },
             })
           );
         }
-        const tree = mockResolverTree({ events });
+        const tree = mockResolverTree({ nodes });
         if (tree !== null) {
           const serverResponseAction: ResolverAction = {
             type: 'serverReturnedResolverData',
@@ -275,15 +274,15 @@ describe('useCamera on an unpainted element', () => {
         } else {
           throw new Error('failed to create tree');
         }
-        const processes: SafeResolverEvent[] = [
+        const resolverNodes: ResolverNode[] = [
           ...selectors.layout(store.getState()).processNodePositions.keys(),
         ];
-        process = processes[processes.length - 1];
+        node = resolverNodes[resolverNodes.length - 1];
         if (!process) {
           throw new Error('missing the process to bring into view');
         }
         simulator.controls.time = 0;
-        const nodeID = entityIDSafeVersion(process);
+        const nodeID = nodeModel.nodeID(node);
         if (!nodeID) {
           throw new Error('could not find nodeID for process');
         }

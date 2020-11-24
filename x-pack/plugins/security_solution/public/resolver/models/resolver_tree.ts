@@ -8,13 +8,11 @@ import {
   ResolverTree,
   ResolverNodeStats,
   ResolverLifecycleNode,
-  ResolverChildNode,
   SafeResolverEvent,
   NewResolverTree,
   ResolverNode,
   EventStats,
 } from '../../../common/endpoint/types';
-import * as eventModel from '../../../common/endpoint/models/event';
 import * as nodeModel from '../../../common/endpoint/models/node';
 
 /**
@@ -79,61 +77,24 @@ export function relatedEventsStats(tree: ResolverTree): Map<string, ResolverNode
  * make a malformed ResolverTree for the purposes of the tests, so long as it is flattened in a predictable way.
  */
 export function mock({
-  events,
-  cursors = { childrenNextChild: null, ancestryNextAncestor: null },
-  children = [],
+  nodes,
 }: {
   /**
    * Events represented by the ResolverTree.
    */
-  events: SafeResolverEvent[];
-  children?: ResolverChildNode[];
-  /**
-   * Optionally provide cursors for the 'children' and 'ancestry' edges.
-   */
-  cursors?: { childrenNextChild: string | null; ancestryNextAncestor: string | null };
-}): ResolverTree | null {
-  if (events.length === 0) {
+  nodes: ResolverNode[];
+}): NewResolverTree | null {
+  if (nodes.length === 0) {
     return null;
   }
-  const first = events[0];
-  const entityID = eventModel.entityIDSafeVersion(first);
-  if (!entityID) {
-    throw new Error('first mock event must include an entityID.');
+  const originNode = nodes[0];
+  const originId = nodeModel.nodeID(originNode);
+  if (!originId) {
+    throw new Error('first mock event must include an nodeID.');
   }
   return {
-    entityID,
-    // Required
-    children: {
-      childNodes: children,
-      nextChild: cursors.childrenNextChild,
-    },
-    // Required
-    relatedEvents: {
-      events: [],
-      nextEvent: null,
-    },
-    // Required
-    relatedAlerts: {
-      alerts: [],
-      nextAlert: null,
-    },
-    // Required
-    ancestry: {
-      ancestors: [],
-      nextAncestor: cursors.ancestryNextAncestor,
-    },
-    // Normally, this would have only certain events, but for testing purposes, it will have all events, since
-    // the position of events in the ResolverTree is irrelevant.
-    lifecycle: events,
-    // Required
-    stats: {
-      events: {
-        total: 0,
-        byCategory: {},
-      },
-      totalAlerts: 0,
-    },
+    originId,
+    nodes,
   };
 }
 

@@ -151,7 +151,7 @@ export const isNodeDataLoading: (state: DataState) => (id: string) => boolean = 
 export const graphableNodes = createSelector(resolverTreeResponse, function (treeResponse?) {
   // Keep track of each unique nodeID
   const nodes: Map<string, ResolverNode> = new Map();
-  if (treeResponse) {
+  if (treeResponse?.nodes) {
     for (const node of treeResponse.nodes) {
       const nodeId = nodeModel.nodeID(node);
       if (nodeId !== undefined) {
