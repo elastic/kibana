@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     return browser.executeAsync(async (term, cb) => {
       const { start } = window._coreProvider;
       const globalSearchTestApi: GlobalSearchTestApi = start.plugins.globalSearchTest;
-      globalSearchTestApi.findReal(term).then(cb);
+      globalSearchTestApi.find(term).then(cb);
     }, t);
   };
 
