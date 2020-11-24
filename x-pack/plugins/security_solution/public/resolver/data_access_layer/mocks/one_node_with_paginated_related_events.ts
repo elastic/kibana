@@ -110,6 +110,7 @@ export function oneNodeWithPaginatedEvents(): {
               id: 'process.entity_id',
               parent: 'process.parent.entity_id',
               ancestry: 'process.Ext.ancestry',
+              name: 'process.name',
             },
             id: metadata.entityIDs.origin,
           },
