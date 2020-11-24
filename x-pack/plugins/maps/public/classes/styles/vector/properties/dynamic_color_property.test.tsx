@@ -248,7 +248,7 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
   });
 
   const meta = colorStyle._pluckCategoricalStyleMetaFromFieldMetaData({
-    foobar: {
+    foobar_terms: {
       buckets: [
         {
           key: 'CN',

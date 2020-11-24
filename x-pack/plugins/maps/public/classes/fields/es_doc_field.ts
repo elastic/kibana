@@ -90,7 +90,7 @@ export class ESDocField extends AbstractField implements IField {
       metricAggConfig.field = this.getName();
     }
     return {
-      [this.getName()]: {
+      [`${this.getName()}_range`]: {
         extended_stats: metricAggConfig,
       },
     };
@@ -115,7 +115,7 @@ export class ESDocField extends AbstractField implements IField {
       metricAggConfig.field = this.getName();
     }
     return {
-      [this.getName()]: {
+      [`${this.getName()}_percentiles`]: {
         percentiles: metricAggConfig,
       },
     };
@@ -141,7 +141,7 @@ export class ESDocField extends AbstractField implements IField {
       topTerms.field = this.getName();
     }
     return {
-      [this.getName()]: {
+      [`${this.getName()}_terms`]: {
         terms: topTerms,
       },
     };

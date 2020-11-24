@@ -137,7 +137,7 @@ export class DynamicStyleProperty<T>
     }
 
     const styleMetaData = styleMetaDataRequest.getData() as StyleMetaData;
-    const percentiles = styleMetaData[this._field.getRootName()];
+    const percentiles = styleMetaData[`${this._field.getRootName()}_percentiles`];
     return percentiles !== undefined && 'values' in percentiles
       ? Object.keys(percentiles.values).map((key) => {
           return {
@@ -337,7 +337,7 @@ export class DynamicStyleProperty<T>
       return null;
     }
 
-    const stats = styleMetaData[this._field.getRootName()];
+    const stats = styleMetaData[`${this._field.getRootName()}_range`];
     if (!stats || !('avg' in stats)) {
       return null;
     }
@@ -361,7 +361,7 @@ export class DynamicStyleProperty<T>
       return null;
     }
 
-    const fieldMeta = styleMetaData[this._field.getRootName()];
+    const fieldMeta = styleMetaData[`${this._field.getRootName()}_terms`];
     if (!fieldMeta || !('buckets' in fieldMeta)) {
       return null;
     }
