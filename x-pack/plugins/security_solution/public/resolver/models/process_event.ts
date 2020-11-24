@@ -156,7 +156,7 @@ export function orderByTime(first: ResolverNode, second: ResolverNode): number {
   const secondDatetime: number | null = datetime(second);
 
   if (firstDatetime === secondDatetime) {
-    // break ties using an arbitrary (stable) comparison of `eventId` (which should be unique)
+    // break ties using an arbitrary (stable) comparison of `nodeID` (which should be unique)
     return String(nodeModel.nodeID(first)).localeCompare(String(nodeModel.nodeID(second)));
   } else if (firstDatetime === null || secondDatetime === null) {
     // sort `null`'s as higher than numbers

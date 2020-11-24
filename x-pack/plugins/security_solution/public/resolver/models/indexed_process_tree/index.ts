@@ -121,7 +121,7 @@ export function* levelOrder(tree: IndexedProcessTree) {
  */
 export function countChildren(tree: IndexedProcessTree) {
   // The children map includes the origin, so remove that
-  return !tree.originId ? 0 : tree.idToChildren.size - 1;
+  return tree.idToChildren.size - 1;
 }
 
 /**
