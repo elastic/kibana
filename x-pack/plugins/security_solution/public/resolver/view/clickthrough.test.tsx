@@ -13,6 +13,7 @@ import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_
 import { urlSearch } from '../test_utilities/url_search';
 import { Vector2, AABB } from '../types';
 import { usingGenerator } from '../data_access_layer/mocks/using_generator';
+import { ReactWrapper } from 'enzyme';
 
 let simulator: Simulator;
 let databaseDocumentID: string;
@@ -209,26 +210,57 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
   });
 });
 
-// TODO: What do we want to do here?
-// describe('Resolver, when panning or moving the view', () => {
-//   beforeEach(async () => {
-//     // create a mock data access layer with related events
-//     const { metadata: dataAccessLayerMetadata, dataAccessLayer } = usingGenerator();
+describe('Resolver, when using a generated tree with 20 generations, 4 children per child, and 10 ancestors', () => {
+  beforeEach(async () => {
+    // create a mock data access layer with related events
+    // const { metadata: dataAccessLayerMetadata, dataAccessLayer } = usingGenerator({
+    //   generations: 5,
+    //   children: 4,
+    //   ancestors: 10,
+    // });
 
-//     // save a reference to the `_id` supported by the mock data layer
-//     databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = usingGenerator({
+      ancestors: 3,
+      children: 3,
+      generations: 7,
+    });
+    // save a reference to the `_id` supported by the mock data layer
+    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+    // create a resolver simulator, using the data access layer and an arbitrary component instance ID
+    simulator = new Simulator({
+      databaseDocumentID,
+      dataAccessLayer,
+      resolverComponentInstanceID,
+      indices: [],
+    });
+  });
 
-//     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
-//     simulator = new Simulator({
-//       databaseDocumentID,
-//       dataAccessLayer,
-//       resolverComponentInstanceID,
-//       indices: [],
-//     });
-//   });
+  describe('when clicking on a node in the panel whose node data has not yet been loaded', () => {
+    let nodeToTest: ReactWrapper | undefined;
+    beforeEach(async () => {
+      nodeToTest = (
+        await simulator.resolveWrapper(() => simulator.testSubject('resolver:node-list:node-link'))
+      )
+        ?.findWhere((wrapper) => wrapper.prop('data-test-node-state') === 'loading')
+        ?.first();
 
-//   it('');
-// });
+      if (nodeToTest) {
+        nodeToTest.simulate('click', { button: 0 });
+      }
+    });
+
+    it('should load the node data', async () => {
+      await expect(
+        simulator.map(() => ({
+          nodeState: nodeToTest?.prop('data-test-node-state'),
+        }))
+      ).not.toYieldEqualTo({
+        // it should have 1 graph element, an no error or loading elements.
+        nodeState: 'loading',
+      });
+    });
+  });
+});
 
 describe('Resolver, when analyzing a tree that has 2 related registry and 1 related event of all other categories for the origin node', () => {
   beforeEach(async () => {

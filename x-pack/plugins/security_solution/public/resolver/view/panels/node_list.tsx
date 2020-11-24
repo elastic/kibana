@@ -160,7 +160,13 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
     [timestamp, linkProps, dispatch, nodeID]
   );
   return (
-    <EuiButtonEmpty onClick={handleOnClick} href={linkProps.href}>
+    <EuiButtonEmpty
+      onClick={handleOnClick}
+      href={linkProps.href}
+      data-test-subj="resolver:node-list:node-link"
+      data-test-node-lise-id={nodeID}
+      data-test-node-state={nodeState}
+    >
       {name === undefined ? (
         <EuiBadge color="warning">
           {i18n.translate(

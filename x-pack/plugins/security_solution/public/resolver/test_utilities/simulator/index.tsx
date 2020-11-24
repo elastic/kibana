@@ -243,6 +243,13 @@ export class Simulator {
   }
 
   /**
+   * The primary button (used to select a node) which contains a label for the node as its content.
+   */
+  public panelNodeByState(/** nodeID for the related node */ state: string): ReactWrapper {
+    return this.domNodes(`[data-test-node-state="${state}"]`);
+  }
+
+  /**
    * Return the node element with the given `entityID`.
    */
   public selectedProcessNode(entityID: string): ReactWrapper {
