@@ -6,7 +6,7 @@
 
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../common/constants';
 import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
-import { AbstractField } from '../../fields/field';
+import { AbstractField, IField } from '../../fields/field';
 
 class MockField extends AbstractField {
   private readonly _dataType: string;
@@ -27,7 +27,14 @@ class MockField extends AbstractField {
 
 describe('StyleFieldHelper', () => {
   describe('isFieldDataTypeCompatibleWithStyleType', () => {
-    async function createHelper(supportsAutoDomain: boolean): StyleFieldsHelper {
+    async function createHelper(
+      supportsAutoDomain: boolean
+    ): Promise<{
+      styleFieldHelper: StyleFieldsHelper;
+      stringField: IField;
+      numberField: IField;
+      dateField: IField;
+    }> {
       const stringField = new MockField({
         dataType: 'string',
         supportsAutoDomain,
