@@ -10,16 +10,11 @@ import { ToastsApi } from 'kibana/public';
 import { AlertInstancesRoute, getAlertInstanceSummary } from './alert_instances_route';
 import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
 import { EuiLoadingSpinner } from '@elastic/eui';
+jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
 
-jest.mock('../../../app_context', () => {
-  const toastNotifications = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({ toastNotifications })),
-  };
-});
 describe('alert_instance_summary_route', () => {
   it('render a loader while fetching data', () => {
     const alert = mockAlert();

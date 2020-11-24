@@ -10,9 +10,7 @@ import { IUrlParams } from '../context/UrlParamsContext/types';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 import { useFetcher } from './useFetcher';
 
-type TransactionsAPIResponse = APIReturnType<
-  'GET /api/apm/services/{serviceName}/transaction_groups'
->;
+type TransactionsAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups'>;
 
 const DEFAULT_RESPONSE: Partial<TransactionsAPIResponse> = {
   items: undefined,
