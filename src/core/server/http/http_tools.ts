@@ -16,11 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from '@hapi/hapi';
+import { Server } from '@hapi/hapi';
+import type {
+  Lifecycle,
+  Request,
+  ResponseToolkit,
+  RouteOptionsCors,
+  ServerOptions,
+  Util,
+} from '@hapi/hapi';
 import Hoek from '@hapi/hoek';
-import { ServerOptions as TLSOptions } from 'https';
-import { ValidationError } from 'joi';
+import type { ServerOptions as TLSOptions } from 'https';
+import type { ValidationError } from 'joi';
 import uuid from 'uuid';
 import { HttpConfig } from './http_config';
 import { validateObject } from './prototype_pollution';
@@ -29,6 +36,12 @@ import { validateObject } from './prototype_pollution';
  * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
  */
 export function getServerOptions(config: HttpConfig, { configureTLS = true } = {}) {
+  const cors: RouteOptionsCors | false = config.cors.enabled
+    ? {
+        credentials: config.cors.credentials,
+        origin: config.cors.origin,
+      }
+    : false;
   // Note that all connection options configured here should be exactly the same
   // as in the legacy platform server (see `src/legacy/server/http/index`). Any change
   // SHOULD BE applied in both places. The only exception is TLS-specific options,
@@ -41,7 +54,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
         privacy: 'private',
         otherwise: 'private, no-cache, no-store, must-revalidate',
       },
-      cors: config.cors,
+      cors,
       payload: {
         maxBytes: config.maxPayload.getValueInBytes(),
       },
