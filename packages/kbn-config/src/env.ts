@@ -101,7 +101,7 @@ export class Env {
   public readonly configs: readonly string[];
 
   /**
-   * Indicates that this Kibana instance is run as development Node Cluster master.
+   * Indicates that this Kibana instance is running in the parent process of the dev cli.
    * @internal
    */
   public readonly isDevCliParent: boolean;
