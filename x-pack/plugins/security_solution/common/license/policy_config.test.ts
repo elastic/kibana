@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEndpointPolicyValidForLicense } from './policy_check';
+import {
+  isEndpointPolicyValidForLicense,
+  unsetPolicyFeaturesAboveLicenseLevel,
+} from './policy_config';
 
-describe('policy_check licensed feature verification', () => {
+describe('isEndpointPolicyValidForLicense', () => {
   // mock license service
 
   it.todo('allows malware notification to be disabled with a Platinum license');
@@ -16,4 +19,9 @@ describe('policy_check licensed feature verification', () => {
   it.todo('blocks malware notification message changes below Platinum licenses');
 
   it.todo('allows default policyConfig with Basic');
+});
+
+describe('unsetPolicyFeaturesAboveLicenseLevel', () => {
+  it.todo('does not change any fields with a Platinum license');
+  it.todo('resets Platinum-paid fields for lower license tiers');
 });

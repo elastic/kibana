@@ -40,3 +40,14 @@ export const isEndpointPolicyValidForLicense = (
 
   return true;
 };
+
+/**
+ * Resets paid features in a PolicyConfig back to default values
+ * when unsupported by the given license level.
+ */
+export const unsetPolicyFeaturesAboveLicenseLevel = (
+  policy: PolicyConfig,
+  licence: LicenseService
+): PolicyConfig => {
+  return policy;
+};
