@@ -5,8 +5,7 @@
  */
 
 import { InstallablePackage } from '../../../types';
-import * as Registry from '../registry';
-import { getArchiveFilelist, getAsset } from '../archive';
+import { ArchiveEntry, getArchiveFilelist, getAsset } from '../archive';
 
 // paths from RegistryPackage are routes to the assets on EPR
 // e.g. `/package/nginx/1.2.0/data_stream/access/fields/fields.yml`
@@ -21,7 +20,8 @@ export function getAssets(
   datasetName?: string
 ): string[] {
   const assets: string[] = [];
-  const paths = getArchiveFilelist(packageInfo.name, packageInfo.version);
+  const { name, version } = packageInfo;
+  const paths = getArchiveFilelist({ name, version });
   // TODO: might be better to throw a PackageCacheError here
   if (!paths || paths.length === 0) return assets;
 
@@ -47,18 +47,16 @@ export function getAssets(
   return assets;
 }
 
+// ASK: Does getAssetsData need an installSource now?
+// if so, should it be an Installation vs InstallablePackage or add another argument?
 export async function getAssetsData(
   packageInfo: InstallablePackage,
   filter = (path: string): boolean => true,
   datasetName?: string
-): Promise<Registry.ArchiveEntry[]> {
-  // TODO: Needs to be called to fill the cache but should not be required
-
-  await Registry.ensureCachedArchiveInfo(packageInfo.name, packageInfo.version, 'registry');
-
+): Promise<ArchiveEntry[]> {
   // Gather all asset data
   const assets = getAssets(packageInfo, filter, datasetName);
-  const entries: Registry.ArchiveEntry[] = assets.map((path) => {
+  const entries: ArchiveEntry[] = assets.map((path) => {
     const buffer = getAsset(path);
 
     return { path, buffer };

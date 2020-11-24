@@ -19,7 +19,8 @@ import {
   ENGINES_PATH,
   ENGINE_PATH,
   ENGINE_ANALYTICS_PATH,
-  // ENGINE_DOCUMENTS_PATH,
+  ENGINE_DOCUMENTS_PATH,
+  ENGINE_DOCUMENT_DETAIL_PATH,
   // ENGINE_SCHEMA_PATH,
   // ENGINE_CRAWLER_PATH,
   // META_ENGINE_SOURCE_ENGINES_PATH,
@@ -31,8 +32,8 @@ import {
   // ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { ENGINES_TITLE } from '../engines';
+import { OVERVIEW_TITLE } from '../engine_overview';
 import {
-  OVERVIEW_TITLE,
   ANALYTICS_TITLE,
   // DOCUMENTS_TITLE,
   // SCHEMA_TITLE,
@@ -45,7 +46,11 @@ import {
   // API_LOGS_TITLE,
 } from './constants';
 
+import { Loading } from '../../../shared/loading';
+import { EngineOverview } from '../engine_overview';
+
 import { EngineLogic } from './';
+import { DocumentDetail, Documents } from '../documents';
 
 export const EngineRouter: React.FC = () => {
   const {
@@ -86,7 +91,7 @@ export const EngineRouter: React.FC = () => {
     return <Redirect to={ENGINES_PATH} />;
   }
 
-  if (dataLoading) return null;
+  if (dataLoading) return <Loading />;
 
   return (
     <Switch>
@@ -96,9 +101,15 @@ export const EngineRouter: React.FC = () => {
           <div data-test-subj="AnalyticsTODO">Just testing right now</div>
         </Route>
       )}
+      <Route path={ENGINE_PATH + ENGINE_DOCUMENT_DETAIL_PATH}>
+        <DocumentDetail engineBreadcrumb={engineBreadcrumb} />
+      </Route>
+      <Route path={ENGINE_PATH + ENGINE_DOCUMENTS_PATH}>
+        <Documents engineBreadcrumb={engineBreadcrumb} />
+      </Route>
       <Route>
         <SetPageChrome trail={[...engineBreadcrumb, OVERVIEW_TITLE]} />
-        <div data-test-subj="EngineOverviewTODO">Overview</div>
+        <EngineOverview />
       </Route>
     </Switch>
   );

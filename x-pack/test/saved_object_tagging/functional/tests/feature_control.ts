@@ -35,6 +35,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   };
 
+  const selectSomeTags = async () => {
+    if (await tagManagementPage.isSelectionColumnDisplayed()) {
+      await tagManagementPage.selectTagByName('tag-1');
+      await tagManagementPage.selectTagByName('tag-3');
+    }
+  };
+
   const addFeatureControlSuite = ({ user, description, privileges }: FeatureControlUserSuite) => {
     const testPrefix = (allowed: boolean) => (allowed ? `can` : `can't`);
 
@@ -55,6 +62,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`${testPrefix(privileges.delete)} delete tag`, async () => {
         expect(await tagManagementPage.isDeleteButtonVisible()).to.be(privileges.delete);
+      });
+
+      it(`${testPrefix(privileges.delete)} bulk delete tags`, async () => {
+        await selectSomeTags();
+        expect(await tagManagementPage.isActionPresent('delete')).to.be(privileges.delete);
       });
 
       it(`${testPrefix(privileges.create)} create tag`, async () => {

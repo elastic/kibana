@@ -91,7 +91,6 @@ export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: Htt
       fields: sourceStatus?.logIndexFields ?? [],
       title: sourceConfiguration?.configuration.name ?? 'unknown',
     }),
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [sourceConfiguration, sourceStatus]
   );
 

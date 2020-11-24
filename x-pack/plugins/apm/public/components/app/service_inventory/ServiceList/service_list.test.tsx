@@ -7,12 +7,13 @@
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ServiceList, SERVICE_COLUMNS } from './';
 import props from './__fixtures__/props.json';
+
+type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

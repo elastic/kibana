@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
+  const deployment = getService('deployment');
 
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
@@ -55,7 +56,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   };
 
   const navigateTo = async (path: string) =>
-    await browser.navigateTo(`${PageObjects.common.getHostPort()}${path}`);
+    await browser.navigateTo(`${deployment.getHostPort()}${path}`);
 
   describe('ui applications', function describeIndexTests() {
     before(async () => {
