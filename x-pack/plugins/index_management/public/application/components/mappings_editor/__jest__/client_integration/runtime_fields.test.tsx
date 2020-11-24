@@ -7,10 +7,15 @@ import { act } from 'react-dom/test-utils';
 
 import { componentHelpers, MappingsEditorTestBed } from './helpers';
 
-const { setup } = componentHelpers.mappingsEditor;
+const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 
 describe('Mappings editor: runtime fields', () => {
-  let onChangeHandler = jest.fn();
+  /**
+   * Variable to store the mappings data forwarded to the consumer component
+   */
+  let data: any;
+  let onChangeHandler: jest.Mock = jest.fn();
+  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -22,6 +27,7 @@ describe('Mappings editor: runtime fields', () => {
 
   beforeEach(() => {
     onChangeHandler = jest.fn();
+    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   });
 
   describe('<RuntimeFieldsList />', () => {
@@ -133,7 +139,7 @@ describe('Mappings editor: runtime fields', () => {
       });
 
       test('should add the runtime field to the list and remove the empty prompt', async () => {
-        const { exists, actions } = testBed;
+        const { exists, actions, component } = testBed;
 
         await actions.addRuntimeField({
           name: 'myField',
@@ -151,10 +157,24 @@ describe('Mappings editor: runtime fields', () => {
         const [field] = fields;
         expect(field.name).toBe('myField');
         expect(field.type).toBe('Boolean');
+
+        // Make sure the field has been added to forwarded data
+        ({ data } = await getMappingsEditorData(component));
+
+        expect(data).toEqual({
+          runtime: {
+            myField: {
+              type: 'boolean',
+              script: {
+                source: 'emit("hello")',
+              },
+            },
+          },
+        });
       });
 
       test('should remove the runtime field from the list', async () => {
-        const { actions } = testBed;
+        const { actions, component } = testBed;
 
         await actions.addRuntimeField({
           name: 'myField',
@@ -164,11 +184,18 @@ describe('Mappings editor: runtime fields', () => {
 
         let fields = actions.getRuntimeFieldsList();
         expect(fields.length).toBe(1);
+        ({ data } = await getMappingsEditorData(component));
+        expect(data).toBeDefined();
+        expect(data.runtime).toBeDefined();
 
         await actions.deleteRuntimeField('myField');
 
         fields = actions.getRuntimeFieldsList();
         expect(fields.length).toBe(0);
+
+        ({ data } = await getMappingsEditorData(component));
+
+        expect(data).toBeUndefined();
       });
 
       test('should edit the runtime field', async () => {
@@ -200,6 +227,19 @@ describe('Mappings editor: runtime fields', () => {
 
         expect(field.name).toBe('updatedName');
         expect(field.type).toBe('Date');
+
+        ({ data } = await getMappingsEditorData(component));
+
+        expect(data).toEqual({
+          runtime: {
+            updatedName: {
+              type: 'date',
+              script: {
+                source: 'new script',
+              },
+            },
+          },
+        });
       });
     });
   });

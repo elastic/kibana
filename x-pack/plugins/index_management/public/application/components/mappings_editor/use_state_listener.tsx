@@ -13,7 +13,13 @@ import {
   OnUpdateHandler,
   RuntimeFields,
 } from './types';
-import { normalize, deNormalize, stripUndefinedValues, normalizeRuntimeFields } from './lib';
+import {
+  normalize,
+  deNormalize,
+  stripUndefinedValues,
+  normalizeRuntimeFields,
+  deNormalizeRuntimeFields,
+} from './lib';
 import { useMappingsState, useDispatch } from './mappings_state_context';
 
 interface Args {
@@ -58,6 +64,9 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
             ? state.fieldsJsonEditor.format()
             : deNormalize(state.fields);
 
+        // Get the runtime fields
+        const runtime = deNormalizeRuntimeFields(state.runtimeFields);
+
         const configurationData = state.configuration.data.format();
         const templatesData = state.templates.data.format();
 
@@ -68,8 +77,14 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
           }),
         };
 
+        // Mapped fields
         if (fields && Object.keys(fields).length > 0) {
           output.properties = fields;
+        }
+
+        // Runtime fields
+        if (runtime && Object.keys(runtime).length > 0) {
+          output.runtime = runtime;
         }
 
         return Object.keys(output).length > 0 ? (output as Mappings) : undefined;

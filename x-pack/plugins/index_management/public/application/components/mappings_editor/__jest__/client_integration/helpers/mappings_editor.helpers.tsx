@@ -364,10 +364,12 @@ export const getMappingsEditorDataFactory = (onChangeHandler: jest.MockedFunctio
     const [arg] = mockCalls[mockCalls.length - 1];
     const { isValid, validate, getData } = arg;
 
-    let isMappingsValid = isValid;
+    let isMappingsValid: boolean = isValid;
 
     if (isMappingsValid === undefined) {
-      isMappingsValid = await act(validate);
+      await act(async () => {
+        isMappingsValid = await validate();
+      });
       component.update();
     }
 
