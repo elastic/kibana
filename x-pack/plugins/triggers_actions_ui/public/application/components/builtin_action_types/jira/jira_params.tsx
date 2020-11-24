@@ -30,6 +30,7 @@ import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
 import { extractActionVariable } from '../extract_action_variable';
 import { AlertProvidedActionVariables } from '../../../lib/action_variables';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionParams,
@@ -38,9 +39,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   errors,
   messageVariables,
   actionConnector,
-  http,
-  toastNotifications,
 }) => {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const { title, description, comments, issueType, priority, labels, parent, savedObjectId } =
     actionParams.subActionParams || {};
 
@@ -58,13 +61,13 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
 
   const { isLoading: isLoadingIssueTypes, issueTypes } = useGetIssueTypes({
     http,
-    toastNotifications,
+    toastNotifications: toasts,
     actionConnector,
   });
 
   const { isLoading: isLoadingFields, fields } = useGetFieldsByIssueType({
     http,
-    toastNotifications,
+    toastNotifications: toasts,
     actionConnector,
     issueType,
   });
@@ -211,7 +214,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   <SearchIssues
                     selectedValue={parent}
                     http={http}
-                    toastNotifications={toastNotifications}
+                    toastNotifications={toasts}
                     actionConnector={actionConnector}
                     onChange={(parentIssueKey) => {
                       editSubActionProperty('parent', parentIssueKey);

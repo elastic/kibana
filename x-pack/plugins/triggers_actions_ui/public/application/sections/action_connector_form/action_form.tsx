@@ -18,16 +18,15 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
-import { HttpSetup, ToastsSetup, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
-  ActionTypeRegistryContract,
   AlertAction,
   ActionTypeIndex,
   ActionConnector,
   ActionType,
   ActionVariables,
+  ActionTypeRegistryContract,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
@@ -37,6 +36,7 @@ import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
 import { ActionGroup, AlertActionParam } from '../../../../../alerts/common';
+import { useKibana } from '../../../common/lib/kibana';
 
 export interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -46,16 +46,12 @@ export interface ActionAccordionFormProps {
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setAlertProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
-  http: HttpSetup;
-  actionTypeRegistry: ActionTypeRegistryContract;
-  toastNotifications: ToastsSetup;
-  docLinks: DocLinksStart;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariables;
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
-  capabilities: ApplicationStart['capabilities'];
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 interface ActiveActionConnectorState {
@@ -71,17 +67,17 @@ export const ActionForm = ({
   setActionGroupIdByIndex,
   setAlertProperty,
   setActionParamsProperty,
-  http,
-  actionTypeRegistry,
   actionTypes,
   messageVariables,
   defaultActionMessage,
-  toastNotifications,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
-  capabilities,
-  docLinks,
+  actionTypeRegistry,
 }: ActionAccordionFormProps) => {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
@@ -111,7 +107,7 @@ export const ActionForm = ({
         }
         setActionTypesIndex(index);
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
             { defaultMessage: 'Unable to load action types' }
@@ -132,7 +128,7 @@ export const ActionForm = ({
         const loadedConnectors = await loadConnectors({ http });
         setConnectors(loadedConnectors);
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
             {
@@ -181,7 +177,7 @@ export const ActionForm = ({
 
   function addActionType(actionTypeModel: ActionTypeModel) {
     if (!defaultActionGroupId) {
-      toastNotifications!.addDanger({
+      toasts!.addDanger({
         title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
           defaultMessage: 'Unable to add action, because default action group is not defined',
         }),
@@ -302,7 +298,6 @@ export const ActionForm = ({
                 key={`action-form-action-at-${index}`}
                 actionTypeRegistry={actionTypeRegistry}
                 defaultActionGroupId={defaultActionGroupId}
-                capabilities={capabilities}
                 emptyActionsIds={emptyActionsIds}
                 onDeleteConnector={() => {
                   const updatedActions = actions.filter(
@@ -337,11 +332,6 @@ export const ActionForm = ({
               setActionParamsProperty={setActionParamsProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
-              http={http}
-              toastNotifications={toastNotifications}
-              docLinks={docLinks}
-              capabilities={capabilities}
-              actionTypeRegistry={actionTypeRegistry}
               defaultActionGroupId={defaultActionGroupId}
               defaultActionMessage={defaultActionMessage}
               messageVariables={messageVariables}
@@ -354,6 +344,7 @@ export const ActionForm = ({
               onConnectorSelected={(id: string) => {
                 setActionIdByIndex(id, index);
               }}
+              actionTypeRegistry={actionTypeRegistry}
               onDeleteAction={() => {
                 const updatedActions = actions.filter(
                   (_item: AlertAction, i: number) => i !== index
@@ -442,10 +433,6 @@ export const ActionForm = ({
             setActionIdByIndex(savedAction.id, activeActionItem.index);
           }}
           actionTypeRegistry={actionTypeRegistry}
-          http={http}
-          toastNotifications={toastNotifications}
-          docLinks={docLinks}
-          capabilities={capabilities}
         />
       ) : null}
     </Fragment>
