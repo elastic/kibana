@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -91,15 +91,13 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     sortOrder: 'asc',
     full: true,
   });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const agentPolicies = agentPoliciesData?.items || [];
-  const agentPoliciesById = agentPolicies.reduce(
-    (acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
+  const agentPolicies = useMemo(() => agentPoliciesData?.items || [], [agentPoliciesData?.items]);
+  const agentPoliciesById = useMemo(() => {
+    return agentPolicies.reduce((acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
       acc[policy.id] = policy;
       return acc;
-    },
-    {}
-  );
+    }, {});
+  }, [agentPolicies]);
 
   // Update parent package state
   useEffect(() => {
@@ -132,21 +130,24 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     }
   }, [selectedPolicyId, agentPolicy, updateAgentPolicy, setIsLoadingSecondStep]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const agentPolicyOptions: Array<EuiComboBoxOptionOption<string>> = packageInfoData
-    ? agentPolicies.map((agentConf) => {
-        const alreadyHasLimitedPackage =
-          (isLimitedPackage &&
-            doesAgentPolicyAlreadyIncludePackage(agentConf, packageInfoData.response.name)) ||
-          false;
-        return {
-          label: agentConf.name,
-          value: agentConf.id,
-          disabled: alreadyHasLimitedPackage,
-          'data-test-subj': 'agentPolicyItem',
-        };
-      })
-    : [];
+  const agentPolicyOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    () =>
+      packageInfoData
+        ? agentPolicies.map((agentConf) => {
+            const alreadyHasLimitedPackage =
+              (isLimitedPackage &&
+                doesAgentPolicyAlreadyIncludePackage(agentConf, packageInfoData.response.name)) ||
+              false;
+            return {
+              label: agentConf.name,
+              value: agentConf.id,
+              disabled: alreadyHasLimitedPackage,
+              'data-test-subj': 'agentPolicyItem',
+            };
+          })
+        : [],
+    [agentPolicies, isLimitedPackage, packageInfoData]
+  );
 
   const selectedAgentPolicyOption = agentPolicyOptions.find(
     (option) => option.value === selectedPolicyId
@@ -246,7 +247,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
                   defaultMessage="{count, plural, one {# agent} other {# agents}} are enrolled with the selected agent policy."
                   values={{
-                    count: agentPoliciesById[selectedPolicyId].agents || 0,
+                    count: agentPoliciesById[selectedPolicyId]?.agents || 0,
                   }}
                 />
               ) : null
