@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Readable } from 'stream';
+import { createPromiseFromStreams } from '@kbn/utils';
+
 import {
   transformAlertToRule,
   getIdError,
@@ -22,7 +24,6 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { PartialFilter, RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils';
 import { PartialAlert } from '../../../../../../alerts/server';
 import { SanitizedAlert } from '../../../../../../alerts/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';

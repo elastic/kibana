@@ -48,8 +48,8 @@ export const checkTimelinesStatus = async (
     readStream,
     <T>(timelinesFromFileSystem: T) => {
       if (Array.isArray(timelinesFromFileSystem)) {
-        const parsedTimelinesFromFileSystem = timelinesFromFileSystem.map((t: string) =>
-          JSON.parse(t)
+        const parsedTimelinesFromFileSystem = (timelinesFromFileSystem as readonly string[]).map(
+          (t) => JSON.parse(t)
         );
         const prepackagedTimelines = timeline.timeline ?? [];
         const timelinesToInstall = getTimelinesToInstall(

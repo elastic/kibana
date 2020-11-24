@@ -8,7 +8,7 @@ Core Plugin API Documentation:
  - [Core Server API](/docs/development/core/server/kibana-plugin-core-server.md)
  - [Conventions for Plugins](./CONVENTIONS.md)
  - [Testing Kibana Plugins](./TESTING.md)
- - [Migration guide for porting existing plugins](./MIGRATION.md)
+ - [Kibana Platform Plugin API](./docs/developer/architecture/kibana-platform-plugin-api.asciidoc )
  
 Internal Documentation:
  - [Saved Objects Migrations](./server/saved_objects/migrations/README.md)

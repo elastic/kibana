@@ -95,7 +95,7 @@
     "**/prismjs": "1.22.0",
     "**/request": "^2.88.2",
     "**/trim": "0.0.3",
-    "**/typescript": "4.0.2"
+    "**/typescript": "4.1.2"
   },
   "engines": {
     "node": "12.19.1",
@@ -106,7 +106,7 @@
     "@babel/runtime": "^7.11.2",
     "@elastic/datemath": "link:packages/elastic-datemath",
     "@elastic/elasticsearch": "7.10.0-rc.1",
-    "@elastic/ems-client": "7.10.0",
+    "@elastic/ems-client": "7.11.0",
     "@elastic/eui": "30.2.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
@@ -654,7 +654,7 @@
     "file-loader": "^4.2.0",
     "file-saver": "^1.3.8",
     "formsy-react": "^1.1.5",
-    "geckodriver": "^1.20.0",
+    "geckodriver": "^1.21.0",
     "glob-watcher": "5.0.3",
     "graphql-code-generator": "^0.18.2",
     "graphql-codegen-add": "^0.18.2",
@@ -827,7 +827,7 @@
     "topojson-client": "3.0.0",
     "ts-loader": "^7.0.5",
     "tsd": "^0.13.1",
-    "typescript": "4.0.2",
+    "typescript": "4.1.2",
     "typescript-fsa": "^3.0.0",
     "typescript-fsa-reducers": "^1.2.1",
     "unlazy-loader": "^0.1.3",

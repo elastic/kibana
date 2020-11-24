@@ -36,7 +36,7 @@ describe('createMonitoringStatsStream', () => {
   };
 
   it('returns the initial config used to configure Task Manager', async () => {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       createMonitoringStatsStream(of(), configuration)
         .pipe(take(1))
         .subscribe((firstValue) => {
@@ -49,7 +49,7 @@ describe('createMonitoringStatsStream', () => {
   it('incrementally updates the stats returned by the endpoint', async () => {
     const aggregatedStats$ = new Subject<AggregatedStat>();
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       createMonitoringStatsStream(aggregatedStats$, configuration)
         .pipe(take(3), bufferCount(3))
         .subscribe(([initialValue, secondValue, thirdValue]) => {
