@@ -33,10 +33,7 @@ export async function importFile(
 ) {
   const formData = new FormData();
   formData.append('file', file);
-  const query = {
-    createNewCopies,
-    ...(createNewCopies ? { overwrite: false } : { overwrite }),
-  };
+  const query = createNewCopies ? { createNewCopies } : { overwrite };
   return await http.post<ImportResponse>('/api/saved_objects/_import', {
     body: formData,
     headers: {

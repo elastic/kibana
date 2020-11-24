@@ -253,9 +253,9 @@ export function resolveImportErrorsTestSuiteFactory(
           const requestBody = test.request.objects
             .map((obj) => JSON.stringify({ ...obj, ...attrs }))
             .join('\n');
+          const query = test.createNewCopies ? '?createNewCopies=true' : '';
           await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors`)
-            .query({ createNewCopies: test.createNewCopies })
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors${query}`)
             .auth(user?.username, user?.password)
             .field('retries', JSON.stringify(test.request.retries))
             .attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson')

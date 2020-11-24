@@ -61,7 +61,6 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return 415 when no file passed in', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .query({ createNewCopies: false })
             .expect(415)
             .then((resp) => {
               expect(resp.body).to.eql({
@@ -75,7 +74,6 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return errors when conflicts exist', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .query({ createNewCopies: false })
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
@@ -94,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return 200 when conflicts exist but overwrite is passed in', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .query({ createNewCopies: false, overwrite: true })
+            .query({ overwrite: true })
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
@@ -117,7 +115,6 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await supertest
             .post('/api/saved_objects/_import')
-            .query({ createNewCopies: false })
             .attach('file', fileBuffer, 'export.ndjson')
             .expect(200)
             .then((resp) => {
@@ -147,7 +144,6 @@ export default function ({ getService }: FtrProviderContext) {
           );
           const resp = await supertest
             .post('/api/saved_objects/_import')
-            .query({ createNewCopies: false })
             .attach('file', fileBuffer, 'export.ndjson')
             .expect(200);
 
@@ -182,7 +178,6 @@ export default function ({ getService }: FtrProviderContext) {
           }
           await supertest
             .post('/api/saved_objects/_import')
-            .query({ createNewCopies: false })
             .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
             .expect(400)
             .then((resp) => {
@@ -216,7 +211,6 @@ export default function ({ getService }: FtrProviderContext) {
           ];
           await supertest
             .post('/api/saved_objects/_import')
-            .query({ createNewCopies: false })
             .attach('file', Buffer.from(objectsToImport.join('\n'), 'utf8'), 'export.ndjson')
             .expect(200)
             .then((resp) => {

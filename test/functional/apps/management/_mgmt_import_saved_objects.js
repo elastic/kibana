@@ -41,9 +41,8 @@ export default function ({ getService, getPageObjects }) {
 
     it('should import saved objects mgmt', async function () {
       await PageObjects.settings.clickKibanaSavedObjects();
-      await PageObjects.savedObjects.importLegacyFile(
-        path.join(__dirname, 'exports', 'mgmt_import_objects.json'),
-        false
+      await PageObjects.savedObjects.importFile(
+        path.join(__dirname, 'exports', 'mgmt_import_objects.json')
       );
       await PageObjects.settings.associateIndexPattern(
         '4c3f3c30-ac94-11e8-a651-614b2788174a',

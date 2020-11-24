@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Flyout conflicts should allow resolution of missing references 1`] = `
+exports[`Flyout conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
   onClose={[MockFunction]}
   size="s"
@@ -159,7 +159,7 @@ exports[`Flyout conflicts should allow resolution of missing references 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout conflicts should allow resolution of missing references 2`] = `
+exports[`Flyout conflicts should allow conflict resolution 2`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -219,7 +219,7 @@ exports[`Flyout conflicts should allow resolution of missing references 2`] = `
           },
           "importCount": 0,
           "importMode": Object {
-            "createNewCopies": true,
+            "createNewCopies": false,
             "overwrite": true,
           },
           "indexPatterns": Array [
@@ -270,7 +270,7 @@ exports[`Flyout conflicts should allow resolution of missing references 2`] = `
 }
 `;
 
-exports[`Flyout legacy conflicts should allow resolution of missing references 1`] = `
+exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
   onClose={[MockFunction]}
   size="s"
@@ -610,7 +610,7 @@ exports[`Flyout should render import step 1`] = `
         <ImportModeControl
           initialValues={
             Object {
-              "createNewCopies": true,
+              "createNewCopies": false,
               "overwrite": true,
             }
           }

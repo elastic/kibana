@@ -170,7 +170,7 @@ describe('Flyout', () => {
       }));
     });
 
-    it('should display missing references', async () => {
+    it('should figure out unmatchedReferences', async () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
@@ -182,7 +182,7 @@ describe('Flyout', () => {
       await component.instance().import();
 
       expect(importFileMock).toHaveBeenCalledWith(defaultProps.http, mockFile, {
-        createNewCopies: true,
+        createNewCopies: false,
         overwrite: true,
       });
       expect(component.state()).toMatchObject({
@@ -208,7 +208,7 @@ describe('Flyout', () => {
       });
     });
 
-    it('should allow resolution of missing references', async () => {
+    it('should allow conflict resolution', async () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
@@ -334,7 +334,7 @@ describe('Flyout', () => {
       }));
     });
 
-    it('should display missing references', async () => {
+    it('should figure out unmatchedReferences', async () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
@@ -389,7 +389,7 @@ describe('Flyout', () => {
       });
     });
 
-    it('should allow resolution of missing references', async () => {
+    it('should allow conflict resolution', async () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve

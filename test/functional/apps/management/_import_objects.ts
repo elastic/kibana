@@ -49,8 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should import saved objects', async function () {
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects.ndjson'),
-          { createNewCopies: false, overwrite: true }
+          path.join(__dirname, 'exports', '_import_objects.ndjson')
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
@@ -73,8 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should import saved objects with circular refs', async function () {
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_circular_refs.ndjson'),
-          { createNewCopies: false, overwrite: true }
+          path.join(__dirname, 'exports', '_import_objects_circular_refs.ndjson')
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
@@ -92,8 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_conflicts.ndjson'),
-          { createNewCopies: false, overwrite: true }
+          path.join(__dirname, 'exports', '_import_objects_conflicts.ndjson')
         );
         await PageObjects.savedObjects.checkImportConflictsWarning();
         await PageObjects.settings.associateIndexPattern(
@@ -113,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // so that we can override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_exists.ndjson'),
-          { createNewCopies: false, overwrite: false }
+          false
         );
 
         await PageObjects.savedObjects.checkImportConflictsWarning();
@@ -132,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // so that we can be prompted to override the existing visualization.
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_exists.ndjson'),
-          { createNewCopies: false, overwrite: false }
+          false
         );
 
         await PageObjects.savedObjects.checkImportConflictsWarning();
@@ -148,15 +145,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should import saved objects linked to saved searches', async function () {
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_saved_search.ndjson'),
-          { createNewCopies: false, overwrite: true }
+          path.join(__dirname, 'exports', '_import_objects_saved_search.ndjson')
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
 
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson'),
-          { createNewCopies: false, overwrite: true }
+          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson')
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
@@ -168,8 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson'),
-          { createNewCopies: false, overwrite: true }
+          path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson')
         );
         await PageObjects.savedObjects.checkNoneImported();
         await PageObjects.savedObjects.clickImportDone();
@@ -184,8 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.savedObjects.clickDelete();
 
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_with_saved_search.ndjson'),
-          { createNewCopies: false, overwrite: true }
+          path.join(__dirname, 'exports', '_import_objects_with_saved_search.ndjson')
         );
         // Wait for all the saves to happen
         await PageObjects.savedObjects.checkImportConflictsWarning();
@@ -200,8 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should import saved objects with index patterns when index patterns already exists', async () => {
         // First, import the objects
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson'),
-          { createNewCopies: false, overwrite: true }
+          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson')
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
@@ -218,8 +210,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Then, import the objects
         await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson'),
-          { createNewCopies: false, overwrite: true }
+          path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson')
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
@@ -244,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should import saved objects', async function () {
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects.json')
         );
         await PageObjects.savedObjects.checkImportSucceeded();
@@ -255,7 +246,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function () {
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects-conflicts.json')
         );
         await PageObjects.savedObjects.checkImportLegacyWarning();
@@ -275,7 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow the user to override duplicate saved objects', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_exists.json'),
           false
         );
@@ -295,7 +286,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow the user to cancel overriding duplicate saved objects', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can be prompted to override the existing visualization.
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_exists.json'),
           false
         );
@@ -315,7 +306,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow the user to confirm overriding multiple duplicate saved objects', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_multiple_exists.json'),
           false
         );
@@ -342,7 +333,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow the user to confirm overriding multiple duplicate index patterns', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_index_patterns_multiple_exists.json'),
           false
         );
@@ -361,13 +352,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should import saved objects linked to saved searches', async function () {
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_saved_search.json')
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
 
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
         );
         await PageObjects.savedObjects.checkImportSucceeded();
@@ -379,7 +370,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
         );
         await PageObjects.savedObjects.checkImportFailedWarning();
@@ -392,7 +383,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
         // First, import the saved search
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_saved_search.json')
         );
         // Wait for all the saves to happen
@@ -405,7 +396,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Last, import a saved object connected to the saved search
         // This should NOT show the conflicts
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
         );
         // Wait for all the saves to happen
@@ -419,7 +410,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should import saved objects with index patterns when index patterns already exists', async () => {
         // First, import the objects
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')
         );
         await PageObjects.savedObjects.clickImportDone();
@@ -430,7 +421,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should preserve index patterns selection when switching between pages', async () => {
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_missing_all_index_patterns.json')
         );
 
@@ -466,7 +457,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should display an explicit error message when importing object from a higher Kibana version', async () => {
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_higher_version.ndjson')
         );
 
@@ -483,7 +474,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // see --savedObjects.maxImportPayloadBytes in config file
         this.tags(['skipCloud']);
         it('should display an explicit error message when importing a file bigger than allowed', async () => {
-          await PageObjects.savedObjects.importLegacyFile(
+          await PageObjects.savedObjects.importFile(
             path.join(__dirname, 'exports', '_import_too_big.ndjson')
           );
 
@@ -496,7 +487,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should display an explicit error message when importing an invalid file', async () => {
-        await PageObjects.savedObjects.importLegacyFile(
+        await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_invalid_format.ndjson')
         );
 

@@ -89,7 +89,6 @@ describe(`POST ${URL}`, () => {
   it('formats successful response and records usage stats', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
-      .query({ createNewCopies: false })
       .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
       .send(
         [
@@ -116,7 +115,6 @@ describe(`POST ${URL}`, () => {
 
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
-      .query({ createNewCopies: false })
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -157,7 +155,6 @@ describe(`POST ${URL}`, () => {
 
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
-      .query({ createNewCopies: false })
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -205,7 +202,6 @@ describe(`POST ${URL}`, () => {
 
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
-      .query({ createNewCopies: false })
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -256,8 +252,7 @@ describe(`POST ${URL}`, () => {
     });
 
     const result = await supertest(httpSetup.server.listener)
-      .post(URL)
-      .query({ createNewCopies: false, overwrite: true })
+      .post(`${URL}?overwrite=true`)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -305,7 +300,6 @@ describe(`POST ${URL}`, () => {
 
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
-      .query({ createNewCopies: false })
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -369,7 +363,6 @@ describe(`POST ${URL}`, () => {
 
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
-      .query({ createNewCopies: false })
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -439,8 +432,7 @@ describe(`POST ${URL}`, () => {
     });
 
     const result = await supertest(httpSetup.server.listener)
-      .post(URL)
-      .query({ createNewCopies: false, overwrite: true })
+      .post(`${URL}?overwrite=true`)
       .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
       .send(
         [
@@ -510,8 +502,7 @@ describe(`POST ${URL}`, () => {
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [obj1, obj2] });
 
       const result = await supertest(httpSetup.server.listener)
-        .post(URL)
-        .query({ createNewCopies: true })
+        .post(`${URL}?createNewCopies=true`)
         .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
         .send(
           [

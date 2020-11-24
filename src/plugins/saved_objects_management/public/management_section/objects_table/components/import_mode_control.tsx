@@ -120,7 +120,7 @@ export const ImportModeControl = ({
       options={[overwriteEnabled, overwriteDisabled]}
       idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
       onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
-      disabled={createNewCopies && !isLegacyFile}
+      disabled={createNewCopies}
       data-test-subj={'savedObjectsManagement-importModeControl-overwriteRadioGroup'}
     />
   );
@@ -138,7 +138,6 @@ export const ImportModeControl = ({
           </EuiTitle>
         ),
       }}
-      data-test-subj="savedObjectsManagement-importModeControl"
     >
       <EuiCheckableCard
         id={createNewCopiesEnabled.id}
