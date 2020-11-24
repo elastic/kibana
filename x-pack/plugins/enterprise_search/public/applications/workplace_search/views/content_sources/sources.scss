@@ -4,5 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Overview } from './components/overview';
-export { SourcesRouter } from './sources_router';
+.source-grid-configured {
+
+  .source-card-configured {
+    padding: 8px;
+
+    &__icon {
+      width: 2em;
+      height: 2em;
+    }
+
+    &__not-connected-tooltip {
+      position: relative;
+      top: 3px;
+      left: 4px;
+    }
+  }
+}
