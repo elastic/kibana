@@ -24,8 +24,8 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
-export const EmailActionConnectorFields: React.FunctionComponent<
-  ActionConnectorFieldsProps<EmailActionConnector>
+export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  EmailActionConnector
 >> = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
   const { docLinks } = useKibana().services;
   const { from, host, port, secure, hasAuth } = action.config;

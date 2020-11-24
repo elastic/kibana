@@ -11,8 +11,8 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { TeamsActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
-const TeamsActionFields: React.FunctionComponent<
-  ActionConnectorFieldsProps<TeamsActionConnector>
+const TeamsActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  TeamsActionConnector
 >> = ({ action, editActionSecrets, errors, readOnly }) => {
   const { webhookUrl } = action.secrets;
   const { docLinks } = useKibana().services;
