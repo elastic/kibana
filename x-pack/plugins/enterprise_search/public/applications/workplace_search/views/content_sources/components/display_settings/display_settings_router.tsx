@@ -6,4 +6,33 @@
 
 import React from 'react';
 
-export const DisplaySettingsRouter: React.FC = () => <>Display Settings Placeholder</>;
+import { useValues } from 'kea';
+import { Route, Switch } from 'react-router-dom';
+
+import { AppLogic } from 'workplace_search/App/AppLogic';
+
+import {
+  DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
+  DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
+  getSourcesPath,
+} from 'workplace_search/utils/routePaths';
+
+import { DisplaySettings } from './DisplaySettings';
+
+export const DisplaySettingsRouter: React.FC = () => {
+  const { isOrganization } = useValues(AppLogic);
+  return (
+    <Switch>
+      <Route
+        exact
+        path={getSourcesPath(DISPLAY_SETTINGS_SEARCH_RESULT_PATH, isOrganization)}
+        render={() => <DisplaySettings tabId={0} />}
+      />
+      <Route
+        exact
+        path={getSourcesPath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, isOrganization)}
+        render={() => <DisplaySettings tabId={1} />}
+      />
+    </Switch>
+  );
+};
