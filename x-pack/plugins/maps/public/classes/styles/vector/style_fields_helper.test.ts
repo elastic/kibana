@@ -87,6 +87,24 @@ describe('StyleFieldHelper', () => {
       );
     });
 
+    test('Should not validate sizes if autodomain is not enabled', async () => {
+      const { styleFieldHelper, stringField, numberField, dateField } = await createHelper(false);
+
+      [VECTOR_STYLES.LINE_WIDTH, VECTOR_STYLES.LABEL_SIZE, VECTOR_STYLES.ICON_SIZE].forEach(
+        (styleType) => {
+          expect(
+            styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(stringField, styleType)
+          ).toEqual(false);
+          expect(
+            styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(numberField, styleType)
+          ).toEqual(false);
+          expect(
+            styleFieldHelper.isFieldDataTypeCompatibleWithStyleType(dateField, styleType)
+          ).toEqual(false);
+        }
+      );
+    });
+
     test('Should validate orientation only number types', async () => {
       const { styleFieldHelper, stringField, numberField, dateField } = await createHelper(true);
 
