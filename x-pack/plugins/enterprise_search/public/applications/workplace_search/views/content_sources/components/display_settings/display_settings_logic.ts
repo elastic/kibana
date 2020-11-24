@@ -10,7 +10,6 @@ import { DropResult } from 'react-beautiful-dnd';
 import { kea, MakeLogicType } from 'kea';
 import http from 'shared/http';
 
-import { euiSelectObjectFromValue } from 'shared/utils';
 import routes from 'workplace_search/routes';
 
 import { AppLogic } from 'workplace_search/App/AppLogic';
@@ -320,6 +319,8 @@ export const DisplaySettingsLogic = kea<
     },
   }),
 });
+
+const euiSelectObjectFromValue = (value: string) => ({ text: value, value });
 
 // By default, the color is `null` on the server. The color is a required field and the
 // EuiColorPicker components doesn't allow the field to be required so the form can be
