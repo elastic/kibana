@@ -30,9 +30,9 @@ import { WebhookActionConnector } from '../types';
 
 const HTTP_VERBS = ['post', 'put'];
 
-const WebhookActionConnectorFields: React.FunctionComponent<
-  ActionConnectorFieldsProps<WebhookActionConnector>
-> = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
+const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  WebhookActionConnector
+>> = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
   const { user, password } = action.secrets;
   const { method, url, headers, hasAuth } = action.config;
 

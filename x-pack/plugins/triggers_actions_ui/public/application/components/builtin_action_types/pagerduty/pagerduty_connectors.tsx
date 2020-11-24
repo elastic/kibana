@@ -9,10 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { PagerDutyActionConnector } from '.././types';
+import { useKibana } from '../../../../common/lib/kibana';
 
-const PagerDutyActionConnectorFields: React.FunctionComponent<
-  ActionConnectorFieldsProps<PagerDutyActionConnector>
-> = ({ errors, action, editActionConfig, editActionSecrets, docLinks, readOnly }) => {
+const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  PagerDutyActionConnector
+>> = ({ errors, action, editActionConfig, editActionSecrets, readOnly }) => {
+  const { docLinks } = useKibana().services;
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
   return (
