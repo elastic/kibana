@@ -91,7 +91,7 @@ export const TableVisBasic = memo(
       [columns, setSort]
     );
 
-    const ariaLabel =
+    const dataGridAriaLabel =
       title ||
       visConfig.title ||
       i18n.translate('visTypeTable.defaultAriaLabel', {
@@ -106,7 +106,7 @@ export const TableVisBasic = memo(
           </EuiTitle>
         )}
         <EuiDataGrid
-          aria-label={ariaLabel}
+          aria-label={dataGridAriaLabel}
           columns={gridColumns}
           gridStyle={{
             border: 'horizontal',
@@ -124,6 +124,7 @@ export const TableVisBasic = memo(
               showSortSelector: false,
               additionalControls: (
                 <TableVisControls
+                  dataGridAriaLabel={dataGridAriaLabel}
                   cols={columns}
                   rows={rows}
                   table={table}

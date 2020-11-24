@@ -20,6 +20,7 @@
 import React, { memo, useState, useCallback } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { DatatableRow } from 'src/plugins/expressions';
 import { CoreStart } from 'kibana/public';
@@ -29,13 +30,14 @@ import { Table } from '../table_vis_response_handler';
 import { exportAsCsv } from '../utils';
 
 interface TableVisControlsProps {
+  dataGridAriaLabel: string;
   filename?: string;
   cols: FormattedColumn[];
   rows: DatatableRow[];
   table: Table;
 }
 
-export const TableVisControls = memo((props: TableVisControlsProps) => {
+export const TableVisControls = memo(({ dataGridAriaLabel, ...props }: TableVisControlsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen((state) => !state), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -53,8 +55,16 @@ export const TableVisControls = memo((props: TableVisControlsProps) => {
     [props, uiSettings]
   );
 
+  const exportBtnAriaLabel = i18n.translate('visTypeTable.vis.controls.exportButtonAriaLabel', {
+    defaultMessage: 'Export {dataGridAriaLabel} as CSV',
+    values: {
+      dataGridAriaLabel,
+    },
+  });
+
   const button = (
     <EuiButtonEmpty
+      aria-label={exportBtnAriaLabel}
       size="xs"
       iconType="exportAction"
       color="text"
