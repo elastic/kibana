@@ -242,10 +242,10 @@ export function DiscoverLegacy({
                       >
                         {toggleOn ? 'Hide chart' : 'Show chart'}
                       </EuiButtonEmpty>
+                      <SkipBottomButton onClick={onSkipBottomButtonClick} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </div>
-                <SkipBottomButton onClick={onSkipBottomButtonClick} />
                 {toggleOn && opts.timefield && (
                   <section
                     aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
