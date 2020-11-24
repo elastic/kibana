@@ -51,6 +51,7 @@ import { UI_SETTINGS } from '../../../../data/common';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const LEVEL_OF_DETAIL_STEPS = 10;
+const LEVEL_OF_DETAIL_MIN_BUCKETS = 1;
 
 const validateIntervalValue = (intervalValue) => {
   const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
@@ -93,7 +94,7 @@ export const IndexPattern = ({
   const handleMaxBarsChange = useCallback(
     ({ target }) => {
       onChange({
-        [maxBarsName]: Math.max(1, target.value),
+        [maxBarsName]: Math.max(LEVEL_OF_DETAIL_MIN_BUCKETS, target.value),
       });
     },
     [onChange, maxBarsName]
