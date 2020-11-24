@@ -159,7 +159,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   /**
    * Returns true if column contains invalid references
    */
-  hasInvalidReferences: (column: C, indexPattern: IndexPattern) => boolean;
+  hasInvalidReferences?: (column: C, indexPattern: IndexPattern) => boolean;
 }
 
 interface BaseBuildColumnArgs {
