@@ -18,6 +18,7 @@ import { OnChangeItemsPerPage } from './events';
 import { Timeline } from './timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { activeTimeline } from '../../containers/active_timeline_context';
 
 export interface OwnProps {
   id: string;
@@ -98,7 +99,13 @@ const StatefulTimelineComponent = React.memo<Props>(
 
     useEffect(() => {
       if (createTimeline != null && !isTimelineExists) {
-        createTimeline({ id, columns: defaultHeaders, indexNames: selectedPatterns, show: false });
+        createTimeline({
+          id,
+          columns: defaultHeaders,
+          indexNames: selectedPatterns,
+          show: false,
+          expandedEvent: activeTimeline.getExpandedEvent(),
+        });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -226,7 +233,6 @@ const mapDispatchToProps = {
   createTimeline: timelineActions.createTimeline,
   removeColumn: timelineActions.removeColumn,
   updateColumns: timelineActions.updateColumns,
-  updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
   updateSort: timelineActions.updateSort,

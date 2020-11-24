@@ -5,23 +5,10 @@
  */
 
 import { useContext } from 'react';
-import {
-  ChartsSyncContext,
-  LegacyChartsSyncContext,
-} from '../context/charts_sync_context';
+import { ChartsSyncContext } from '../context/charts_sync_context';
 
 export function useChartsSync() {
   const context = useContext(ChartsSyncContext);
-
-  if (!context) {
-    throw new Error('Missing ChartsSync context provider');
-  }
-
-  return context;
-}
-
-export function useLegacyChartsSync() {
-  const context = useContext(LegacyChartsSyncContext);
 
   if (!context) {
     throw new Error('Missing ChartsSync context provider');
