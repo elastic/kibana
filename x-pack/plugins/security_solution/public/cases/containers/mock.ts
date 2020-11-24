@@ -9,7 +9,7 @@ import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } 
 import {
   CommentResponse,
   ServiceConnectorCaseResponse,
-  Status,
+  CaseStatus,
   UserAction,
   UserActionField,
   CaseResponse,
@@ -203,7 +203,7 @@ export const basicCommentSnake: CommentResponse = {
 
 export const basicCaseSnake: CaseResponse = {
   ...basicCase,
-  status: 'open' as Status,
+  status: 'open' as CaseStatus,
   closed_at: null,
   closed_by: null,
   comments: [basicCommentSnake],
