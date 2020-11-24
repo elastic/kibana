@@ -10,13 +10,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
+import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+
 import GettingStarted from './assets/getting_started.png';
 
-const GETTING_STARTED_LINK_URL =
-  'https://www.elastic.co/guide/en/workplace-search/current/workplace-search-getting-started.html';
+import { DOCS_PREFIX } from '../../routes';
+const GETTING_STARTED_LINK_URL = `${DOCS_PREFIX}/workplace-search-getting-started.html`;
 
 export const SetupGuide: React.FC = () => {
   return (
@@ -26,13 +27,7 @@ export const SetupGuide: React.FC = () => {
       standardAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#standard"
       elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#elasticsearch-native-realm"
     >
-      <SetPageChrome
-        trail={[
-          i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
-            defaultMessage: 'Setup Guide',
-          }),
-        ]}
-      />
+      <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
       <SendTelemetry action="viewed" metric="setup_guide" />
 
       <a href={GETTING_STARTED_LINK_URL} target="_blank" rel="noopener noreferrer">

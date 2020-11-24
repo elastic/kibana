@@ -60,6 +60,7 @@ const createApiUiMock = (): SavedObjectsTaggingApiUiMock => {
     convertNameToReference: jest.fn(),
     parseSearchQuery: jest.fn(),
     getTagIdsFromReferences: jest.fn(),
+    getTagIdFromName: jest.fn(),
     updateTagsReferences: jest.fn(),
   };
 
