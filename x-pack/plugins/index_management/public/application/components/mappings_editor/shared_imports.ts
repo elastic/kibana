@@ -61,3 +61,5 @@ export {
 } from '../../../../../runtime_fields/public';
 
 export { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+
+export { DocLinksStart } from '../../../../../../../src/core/public';

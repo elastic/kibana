@@ -15,6 +15,7 @@ import {
   RuntimeFieldEditorFlyoutContent,
   RuntimeFieldEditorFlyoutContentProps,
 } from '../../shared_imports';
+import { useConfig } from '../../config_context';
 import { EmptyPrompt } from './empty_prompt';
 import { RuntimeFieldsListItemContainer } from './runtimefields_list_item_container';
 
@@ -26,11 +27,17 @@ export const RuntimeFieldsList = () => {
     runtimeFields,
     runtimeFieldsList: { status, fieldToEdit },
   } = useMappingsState();
+
   const dispatch = useDispatch();
+
   const {
     addContent: addContentToGlobalFlyout,
     removeContent: removeContentFromGlobalFlyout,
   } = useGlobalFlyout();
+
+  const {
+    value: { docLinks },
+  } = useConfig();
 
   const createField = useCallback(() => {
     dispatch({ type: 'runtimeFieldsList.createField' });
@@ -66,11 +73,7 @@ export const RuntimeFieldsList = () => {
           onSave: saveRuntimeField,
           onCancel: exitEdit,
           defaultValue: fieldToEdit ? runtimeFields[fieldToEdit]?.source : undefined,
-          docLinks: {
-            DOC_LINK_VERSION: 'master',
-            ELASTIC_WEBSITE_URL: 'https://elastic.co',
-            links: {} as any,
-          },
+          docLinks: docLinks!,
         },
         flyoutProps: {
           'data-test-subj': 'runtimeFieldEditor',
@@ -87,6 +90,7 @@ export const RuntimeFieldsList = () => {
     status,
     fieldToEdit,
     runtimeFields,
+    docLinks,
     addContentToGlobalFlyout,
     removeContentFromGlobalFlyout,
     saveRuntimeField,

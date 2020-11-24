@@ -27,7 +27,8 @@ import {
 import { extractMappingsDefinition } from './lib';
 import { useMappingsState } from './mappings_state_context';
 import { useMappingsStateListener } from './use_state_listener';
-import { useIndexSettings } from './index_settings_context';
+import { useConfig } from './config_context';
+import { DocLinksStart } from './shared_imports';
 
 type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 
@@ -45,13 +46,13 @@ interface Props {
   onChange: OnUpdateHandler;
   value?: { [key: string]: any };
   indexSettings?: IndexSettings;
+  docLinks: DocLinksStart;
 }
 
-export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Props) => {
-  const {
-    parsedDefaultValue,
-    multipleMappingsDeclared,
-  } = useMemo<MappingsEditorParsedMetadata>(() => {
+export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSettings }: Props) => {
+  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<
+    MappingsEditorParsedMetadata
+  >(() => {
     const mappingsDefinition = extractMappingsDefinition(value);
 
     if (mappingsDefinition === null) {
@@ -100,12 +101,7 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
    */
   useMappingsStateListener({ onChange, value: parsedDefaultValue });
 
-  // Update the Index settings context so it is available in the Global flyout
-  const { update: updateIndexSettings } = useIndexSettings();
-  if (indexSettings !== undefined) {
-    updateIndexSettings(indexSettings);
-  }
-
+  const { update: updateConfig } = useConfig();
   const state = useMappingsState();
   const [selectedTab, selectTab] = useState<TabName>('fields');
 
@@ -119,6 +115,14 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
       });
     }
   }, [multipleMappingsDeclared, onChange, value]);
+
+  useEffect(() => {
+    // Update the the config context so it is available globally (e.g in our Global flyout)
+    updateConfig({
+      docLinks,
+      indexSettings: indexSettings ?? {},
+    });
+  }, [updateConfig, docLinks, indexSettings]);
 
   const changeTab = async (tab: TabName) => {
     if (selectedTab === 'advanced') {
