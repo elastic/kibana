@@ -271,8 +271,11 @@ export const IndexPattern = ({
                     content={
                       <FormattedMessage
                         id="visTypeTimeseries.indexPattern.detailLevelHelpText"
-                        defaultMessage="Intervals will be selected automatically based on the current timeframe and configuration property {histogramMaxBars}."
-                        values={{ histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS }}
+                        defaultMessage="Controls the auto interval based on the time range. The default interval is affected by the advanced settings {histogramTargetBars} and {histogramMaxBars}."
+                        values={{
+                          histogramTargetBars: UI_SETTINGS.HISTOGRAM_MAX_BARS,
+                          histogramMaxBars: UI_SETTINGS.HISTOGRAM_BAR_TARGET,
+                        }}
                       />
                     }
                     type="questionInCircle"
