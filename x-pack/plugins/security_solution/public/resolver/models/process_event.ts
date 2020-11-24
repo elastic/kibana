@@ -14,14 +14,14 @@ import { ResolverProcessType } from '../types';
 /**
  * Returns true if the process's eventType is either 'processCreated' or 'processRan'.
  * Resolver will only render 'graphable' process events.
- * @deprecated
+ *
  */
 export function isGraphableProcess(passedEvent: SafeResolverEvent) {
   return eventType(passedEvent) === 'processCreated' || eventType(passedEvent) === 'processRan';
 }
 
 /**
- * @deprecated - see getNodeState in data selector
+ *
  */
 export function isTerminatedProcess(passedEvent: SafeResolverEvent) {
   return eventType(passedEvent) === 'processTerminated';
