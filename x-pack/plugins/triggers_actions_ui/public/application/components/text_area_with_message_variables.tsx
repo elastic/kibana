@@ -63,7 +63,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
         fullWidth
         isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
         name={paramsProperty}
-        value={inputTargetValue}
+        value={inputTargetValue || ''}
         data-test-subj={`${paramsProperty}TextArea`}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
         onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {

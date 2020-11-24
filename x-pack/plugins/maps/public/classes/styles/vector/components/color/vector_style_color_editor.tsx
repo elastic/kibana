@@ -14,7 +14,11 @@ import { DynamicColorForm } from './dynamic_color_form';
 import { StaticColorForm } from './static_color_form';
 import { ColorDynamicOptions, ColorStaticOptions } from '../../../../../../common/descriptor_types';
 
-export function VectorStyleColorEditor(props: Props<ColorStaticOptions, ColorDynamicOptions>) {
+type ColorEditorProps = Omit<Props<ColorStaticOptions, ColorDynamicOptions>, 'children'> & {
+  swatches: string[];
+};
+
+export function VectorStyleColorEditor(props: ColorEditorProps) {
   const colorForm = props.styleProperty.isDynamic() ? (
     <DynamicColorForm {...props} />
   ) : (

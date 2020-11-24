@@ -10,7 +10,7 @@ import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { CoreSetup, CoreStart } from '../../../../../src/core/public';
 
-import { IngestManagerSetup } from '../../../fleet/public';
+import { FleetSetup } from '../../../fleet/public';
 import { IndexMgmtMetricsType } from '../types';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
@@ -25,7 +25,7 @@ export interface AppDependencies {
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
-    ingestManager?: IngestManagerSetup;
+    fleet?: FleetSetup;
   };
   services: {
     uiMetricService: UiMetricService<IndexMgmtMetricsType>;

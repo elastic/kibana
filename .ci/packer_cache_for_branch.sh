@@ -53,6 +53,8 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
 
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 
+.ci/build_docker.sh
+
 if [[ "$branch" != "master" ]]; then
   rm --preserve-root -rf "$checkoutDir"
 fi

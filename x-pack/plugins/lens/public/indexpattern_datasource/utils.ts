@@ -42,11 +42,11 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
   );
 }
 
-export function hasInvalidReference(state: IndexPatternPrivateState) {
-  return getInvalidReferences(state).length > 0;
+export function hasInvalidFields(state: IndexPatternPrivateState) {
+  return getInvalidLayers(state).length > 0;
 }
 
-export function getInvalidReferences(state: IndexPatternPrivateState) {
+export function getInvalidLayers(state: IndexPatternPrivateState) {
   return Object.values(state.layers).filter((layer) => {
     return layer.columnOrder.some((columnId) => {
       const column = layer.columns[columnId];
@@ -62,7 +62,7 @@ export function getInvalidReferences(state: IndexPatternPrivateState) {
   });
 }
 
-export function getInvalidFieldReferencesForLayer(
+export function getInvalidFieldsForLayer(
   layers: IndexPatternLayer[],
   indexPatternMap: Record<string, IndexPattern>
 ) {

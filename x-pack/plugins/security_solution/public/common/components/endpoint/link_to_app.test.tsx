@@ -31,12 +31,12 @@ describe('LinkToApp component', () => {
   });
 
   it('should render with minimum input', () => {
-    expect(render(<LinkToApp appId="ingestManager">{'link'}</LinkToApp>)).toMatchSnapshot();
+    expect(render(<LinkToApp appId="fleet">{'link'}</LinkToApp>)).toMatchSnapshot();
   });
   it('should render with href', () => {
     expect(
       render(
-        <LinkToApp appId="ingestManager" href="/app/ingest">
+        <LinkToApp appId="fleet" href="/app/fleet">
           {'link'}
         </LinkToApp>
       )
@@ -46,7 +46,7 @@ describe('LinkToApp component', () => {
     // Take `_event` (even though it is not used) so that `jest.fn` will have a type that expects to be called with an event
     const spyOnClickHandler: LinkToAppOnClickMock = jest.fn().mockImplementation((_event) => {});
     const renderResult = render(
-      <LinkToApp appId="ingestManager" href="/app/ingest" onClick={spyOnClickHandler}>
+      <LinkToApp appId="fleet" href="/app/fleet" onClick={spyOnClickHandler}>
         {'link'}
       </LinkToApp>
     );
@@ -57,19 +57,19 @@ describe('LinkToApp component', () => {
     expect(spyOnClickHandler).toHaveBeenCalled();
     expect(clickEventArg.preventDefault).toBeInstanceOf(Function);
     expect(clickEventArg.isDefaultPrevented()).toBe(true);
-    expect(fakeCoreStart.application.navigateToApp).toHaveBeenCalledWith('ingestManager', {
+    expect(fakeCoreStart.application.navigateToApp).toHaveBeenCalledWith('fleet', {
       path: undefined,
       state: undefined,
     });
   });
   it('should navigate to App with specific path', () => {
     const renderResult = render(
-      <LinkToApp appId="ingestManager" appPath="/some/path" href="/app/ingest">
+      <LinkToApp appId="fleet" appPath="/some/path" href="/app/fleet">
         {'link'}
       </LinkToApp>
     );
     renderResult.find('EuiLink').simulate('click', { button: 0 });
-    expect(fakeCoreStart.application.navigateToApp).toHaveBeenCalledWith('ingestManager', {
+    expect(fakeCoreStart.application.navigateToApp).toHaveBeenCalledWith('fleet', {
       path: '/some/path',
       state: undefined,
     });
@@ -77,9 +77,9 @@ describe('LinkToApp component', () => {
   it('should passes through EuiLinkProps', () => {
     const renderResult = render(
       <LinkToApp
-        appId="ingestManager"
+        appId="fleet"
         appPath="/some/path"
-        href="/app/ingest"
+        href="/app/fleet"
         className="my-class"
         color="primary"
         data-test-subj="my-test-subject"
@@ -92,7 +92,7 @@ describe('LinkToApp component', () => {
       className: 'my-class',
       color: 'primary',
       'data-test-subj': 'my-test-subject',
-      href: '/app/ingest',
+      href: '/app/fleet',
       onClick: expect.any(Function),
     });
   });
@@ -105,7 +105,7 @@ describe('LinkToApp component', () => {
     try {
     } catch (e) {
       const renderResult = render(
-        <LinkToApp appId="ingestManager" href="/app/ingest" onClick={spyOnClickHandler}>
+        <LinkToApp appId="fleet" href="/app/fleet" onClick={spyOnClickHandler}>
           {'link'}
         </LinkToApp>
       );
@@ -119,7 +119,7 @@ describe('LinkToApp component', () => {
       ev.preventDefault();
     });
     const renderResult = render(
-      <LinkToApp appId="ingestManager" href="/app/ingest" onClick={spyOnClickHandler}>
+      <LinkToApp appId="fleet" href="/app/fleet" onClick={spyOnClickHandler}>
         {'link'}
       </LinkToApp>
     );
@@ -127,13 +127,13 @@ describe('LinkToApp component', () => {
     expect(fakeCoreStart.application.navigateToApp).not.toHaveBeenCalled();
   });
   it('should not to navigate if it was not left click', () => {
-    const renderResult = render(<LinkToApp appId="ingestManager">{'link'}</LinkToApp>);
+    const renderResult = render(<LinkToApp appId="fleet">{'link'}</LinkToApp>);
     renderResult.find('EuiLink').simulate('click', { button: 1 });
     expect(fakeCoreStart.application.navigateToApp).not.toHaveBeenCalled();
   });
   it('should not to navigate if it includes an anchor target', () => {
     const renderResult = render(
-      <LinkToApp appId="ingestManager" target="_blank" href="/some/path">
+      <LinkToApp appId="fleet" target="_blank" href="/some/path">
         {'link'}
       </LinkToApp>
     );
@@ -142,7 +142,7 @@ describe('LinkToApp component', () => {
   });
   it('should not to navigate if if meta|alt|ctrl|shift keys are pressed', () => {
     const renderResult = render(
-      <LinkToApp appId="ingestManager" target="_blank">
+      <LinkToApp appId="fleet" target="_blank">
         {'link'}
       </LinkToApp>
     );

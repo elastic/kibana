@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { LayerTemplate } from './layer_template';
-import { ChoroplethLayerIcon } from './cloropleth_layer_icon';
+import { ChoroplethLayerIcon } from '../icons/cloropleth_layer_icon';
 
 export const choroplethLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

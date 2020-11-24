@@ -64,41 +64,29 @@ export function MetricEditor({
       return;
     }
 
-    // unset field when new agg type does not support currently selected field.
-    if ('field' in metric && metric.field && metricAggregationType !== AGG_TYPE.COUNT) {
-      const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
-      const found = fieldsForNewAggType.find((field) => {
-        return field.name === metric.field;
-      });
-      if (found) {
-        if (metricAggregationType === AGG_TYPE.PERCENTILE) {
-          const m = {
-            type: metricAggregationType,
-            label: metric.label,
-            field: metric.field,
-          };
-          if ('percentile' in metric) {
-            m.percentile = metric.percentile;
-          }
-          onChange(m);
-        } else {
-          onChange({
-            type: metricAggregationType,
-            label: metric.label,
-            field: metric.field,
-          });
-        }
-      } else {
-        onChange({
-          type: metricAggregationType,
-          label: metric.label,
-        });
-      }
-    } else {
+    const descriptor = {
+      type: metricAggregationType,
+      label: metric.label,
+    };
+
+    if (metricAggregationType === AGG_TYPE.COUNT || !('field' in metric) || !metric.field) {
+      onChange(descriptor);
+      return;
+    }
+
+    const fieldsForNewAggType = filterFieldsForAgg(fields, metricAggregationType);
+    const found = fieldsForNewAggType.find((field) => field.name === metric.field);
+    const newDescriptor = {
+      ...descriptor,
+      field: found ? metric.field : undefined,
+    };
+    if (metricAggregationType === AGG_TYPE.PERCENTILE) {
       onChange({
-        type: metricAggregationType,
-        label: metric.label,
+        ...newDescriptor,
+        percentile: 'percentile' in metric ? metric.percentile : DEFAULT_PERCENTILE,
       });
+    } else {
+      onChange(newDescriptor);
     }
   };
   const onFieldChange = (fieldName?: string) => {

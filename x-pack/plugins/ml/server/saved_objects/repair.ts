@@ -7,10 +7,21 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import type { JobObject, JobSavedObjectService } from './service';
-import { JobType } from '../../common/types/saved_objects';
+import {
+  JobType,
+  RepairSavedObjectResponse,
+  InitializeSavedObjectResponse,
+} from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
+import { getSavedObjectClientError } from './util';
 
 import { Datafeed } from '../../common/types/anomaly_detection_jobs';
+
+export interface JobSpaceOverrides {
+  overrides: {
+    [type in JobType]: { [jobId: string]: string[] };
+  };
+}
 
 export function repairFactory(
   client: IScopedClusterClient,
@@ -19,13 +30,7 @@ export function repairFactory(
   const { checkStatus } = checksFactory(client, jobSavedObjectService);
 
   async function repairJobs(simulate: boolean = false) {
-    type Result = Record<string, { success: boolean; error?: any }>;
-    const results: {
-      savedObjectsCreated: Result;
-      savedObjectsDeleted: Result;
-      datafeedsAdded: Result;
-      datafeedsRemoved: Result;
-    } = {
+    const results: RepairSavedObjectResponse = {
       savedObjectsCreated: {},
       savedObjectsDeleted: {},
       datafeedsAdded: {},
@@ -54,7 +59,7 @@ export function repairFactory(
             } catch (error) {
               results.savedObjectsCreated[job.jobId] = {
                 success: false,
-                error: error.body ?? error,
+                error: getSavedObjectClientError(error),
               };
             }
           });
@@ -75,7 +80,7 @@ export function repairFactory(
             } catch (error) {
               results.savedObjectsCreated[job.jobId] = {
                 success: false,
-                error: error.body ?? error,
+                error: getSavedObjectClientError(error),
               };
             }
           });
@@ -97,7 +102,7 @@ export function repairFactory(
             } catch (error) {
               results.savedObjectsDeleted[job.jobId] = {
                 success: false,
-                error: error.body ?? error,
+                error: getSavedObjectClientError(error),
               };
             }
           });
@@ -118,7 +123,7 @@ export function repairFactory(
             } catch (error) {
               results.savedObjectsDeleted[job.jobId] = {
                 success: false,
-                error: error.body ?? error,
+                error: getSavedObjectClientError(error),
               };
             }
           });
@@ -143,7 +148,10 @@ export function repairFactory(
               }
               results.datafeedsAdded[job.jobId] = { success: true };
             } catch (error) {
-              results.datafeedsAdded[job.jobId] = { success: false, error };
+              results.datafeedsAdded[job.jobId] = {
+                success: false,
+                error: getSavedObjectClientError(error),
+              };
             }
           });
         }
@@ -163,7 +171,10 @@ export function repairFactory(
               await jobSavedObjectService.deleteDatafeed(datafeedId);
               results.datafeedsRemoved[job.jobId] = { success: true };
             } catch (error) {
-              results.datafeedsRemoved[job.jobId] = { success: false, error: error.body ?? error };
+              results.datafeedsRemoved[job.jobId] = {
+                success: false,
+                error: getSavedObjectClientError(error),
+              };
             }
           });
         }
@@ -173,14 +184,17 @@ export function repairFactory(
     return results;
   }
 
-  async function initSavedObjects(simulate: boolean = false, namespaces: string[] = ['*']) {
-    const results: { jobs: Array<{ id: string; type: string }>; success: boolean; error?: any } = {
+  async function initSavedObjects(
+    simulate: boolean = false,
+    spaceOverrides?: JobSpaceOverrides
+  ): Promise<InitializeSavedObjectResponse> {
+    const results: InitializeSavedObjectResponse = {
       jobs: [],
       success: true,
     };
     const status = await checkStatus();
 
-    const jobs: JobObject[] = [];
+    const jobs: Array<{ job: JobObject; namespaces: string[] }> = [];
     const types: JobType[] = ['anomaly-detector', 'data-frame-analytics'];
 
     types.forEach((type) => {
@@ -190,16 +204,21 @@ export function repairFactory(
             results.jobs.push({ id: job.jobId, type });
           } else {
             jobs.push({
-              job_id: job.jobId,
-              datafeed_id: job.datafeedId ?? null,
-              type,
+              job: {
+                job_id: job.jobId,
+                datafeed_id: job.datafeedId ?? null,
+                type,
+              },
+              // allow some jobs to be assigned to specific spaces when initializing
+              namespaces: spaceOverrides?.overrides[type][job.jobId] ?? ['*'],
             });
           }
         }
       });
     });
+
     try {
-      const createResults = await jobSavedObjectService.bulkCreateJobs(jobs, namespaces);
+      const createResults = await jobSavedObjectService.bulkCreateJobs(jobs);
       createResults.saved_objects.forEach(({ attributes }) => {
         results.jobs.push({
           id: attributes.job_id,

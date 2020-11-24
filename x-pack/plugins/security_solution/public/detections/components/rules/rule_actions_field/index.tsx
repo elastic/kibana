@@ -12,17 +12,21 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
 import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../common/constants';
-import { SelectField, useFormContext } from '../../../../shared_imports';
+import { FieldHook, useFormContext } from '../../../../shared_imports';
 import {
   ActionForm,
   ActionType,
   loadActionTypes,
+  ActionVariables,
 } from '../../../../../../triggers_actions_ui/public';
 import { AlertAction } from '../../../../../../alerts/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
-type ThrottleSelectField = typeof SelectField;
+interface Props {
+  field: FieldHook;
+  messageVariables: ActionVariables;
+}
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
 const DEFAULT_ACTION_MESSAGE =
@@ -34,7 +38,7 @@ const FieldErrorsContainer = styled.div`
   }
 `;
 
-export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables }) => {
+export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const [supportedActionTypes, setSupportedActionTypes] = useState<ActionType[] | undefined>();
   const form = useFormContext();
@@ -42,9 +46,6 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
   const {
     http,
     triggersActionsUi: { actionTypeRegistry },
-    notifications,
-    docLinks,
-    application: { capabilities },
   } = useKibana().services;
 
   const actions: AlertAction[] = useMemo(
@@ -115,18 +116,14 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       ) : null}
       <ActionForm
         actions={actions}
-        docLinks={docLinks}
-        capabilities={capabilities}
         messageVariables={messageVariables}
         defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
         setActionIdByIndex={setActionIdByIndex}
         setAlertProperty={setAlertProperty}
         setActionParamsProperty={setActionParamsProperty}
-        http={http}
         actionTypeRegistry={actionTypeRegistry}
         actionTypes={supportedActionTypes}
         defaultActionMessage={DEFAULT_ACTION_MESSAGE}
-        toastNotifications={notifications.toasts}
       />
     </>
   );

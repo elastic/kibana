@@ -82,11 +82,12 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   ];
 
   return (
-    <>
+    <div data-test-subj="mlDFADecisionPathPopover">
       <div style={{ display: 'flex', width: 300 }}>
         <EuiTabs size={'s'}>
           {tabs.map((tab) => (
             <EuiTab
+              data-test-subj={`mlDFADecisionPathPopoverTab-${tab.id}`}
               isSelected={tab.id === selectedTabId}
               onClick={() => setSelectedTabId(tab.id)}
               key={tab.id}
@@ -146,6 +147,6 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
       {selectedTabId === DECISION_PATH_TABS.JSON && (
         <DecisionPathJSONViewer featureImportance={featureImportance} />
       )}
-    </>
+    </div>
   );
 };

@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./usage_collection'));
   });
 }

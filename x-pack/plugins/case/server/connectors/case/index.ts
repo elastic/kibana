@@ -33,7 +33,7 @@ export function getActionType({
 }: GetActionTypeParams): CaseActionType {
   return {
     id: CASE_ACTION_TYPE_ID,
-    minimumLicenseRequired: 'gold',
+    minimumLicenseRequired: 'basic',
     name: i18n.NAME,
     validate: {
       config: CaseConfigurationSchema,

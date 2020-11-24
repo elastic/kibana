@@ -126,14 +126,14 @@ const setup = (space: Space) => {
     {},
   ]);
 
-  const spacesService = spacesServiceMock.createSetupContract();
+  const spacesService = spacesServiceMock.createStartContract();
   spacesService.getActiveSpace.mockResolvedValue(space);
 
   const logger = loggingSystemMock.createLogger();
 
   const switcher = setupCapabilitiesSwitcher(
     (coreSetup as unknown) as CoreSetup<PluginsStart>,
-    spacesService,
+    () => spacesService,
     logger
   );
 

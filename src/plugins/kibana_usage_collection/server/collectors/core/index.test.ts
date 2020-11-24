@@ -18,20 +18,22 @@
  */
 
 import {
-  CollectorOptions,
+  Collector,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { registerCoreUsageCollector } from '.';
-import { coreUsageDataServiceMock } from '../../../../../core/server/mocks';
+import { coreUsageDataServiceMock, loggingSystemMock } from '../../../../../core/server/mocks';
 import { CoreUsageData } from 'src/core/server/';
 
+const logger = loggingSystemMock.createLogger();
+
 describe('telemetry_core', () => {
-  let collector: CollectorOptions;
+  let collector: Collector<unknown, unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
-    collector = config;
+    collector = new Collector(logger, config);
     return createUsageCollectionSetupMock().makeUsageCollector(config);
   });
 

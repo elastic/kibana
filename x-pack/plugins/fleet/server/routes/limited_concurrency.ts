@@ -11,7 +11,7 @@ import {
   OnPreAuthToolkit,
 } from 'kibana/server';
 import { LIMITED_CONCURRENCY_ROUTE_TAG } from '../../common';
-import { IngestManagerConfigType } from '../index';
+import { FleetConfigType } from '../index';
 
 export class MaxCounter {
   constructor(private readonly max: number = 1) {}
@@ -74,7 +74,7 @@ export function createLimitedPreAuthHandler({
   };
 }
 
-export function registerLimitedConcurrencyRoutes(core: CoreSetup, config: IngestManagerConfigType) {
+export function registerLimitedConcurrencyRoutes(core: CoreSetup, config: FleetConfigType) {
   const max = config.agents.maxConcurrentConnections;
   if (!max) return;
 

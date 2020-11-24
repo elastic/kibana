@@ -68,6 +68,7 @@ class CodeEditor extends Component<
 
   public render() {
     const {
+      name,
       id,
       label,
       isReadOnly,

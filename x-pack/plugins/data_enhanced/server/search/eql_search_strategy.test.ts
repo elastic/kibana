@@ -22,6 +22,8 @@ const getMockEqlResponse = () => ({
       sequences: [],
     },
   },
+  meta: {},
+  statusCode: 200,
 });
 
 describe('EQL search strategy', () => {
@@ -191,6 +193,21 @@ describe('EQL search strategy', () => {
 
         expect(mockEqlSearch).not.toHaveBeenCalled();
         expect(requestOptions).toEqual(expect.objectContaining({ ignore: [400] }));
+      });
+    });
+
+    describe('response', () => {
+      it('contains a rawResponse field containing the full search response', async () => {
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const response = await eqlSearch
+          .search({ id: 'my-search-id', options: { ignore: [400] } }, {}, mockDeps)
+          .toPromise();
+
+        expect(response).toEqual(
+          expect.objectContaining({
+            rawResponse: expect.objectContaining(getMockEqlResponse()),
+          })
+        );
       });
     });
   });

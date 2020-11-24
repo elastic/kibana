@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import d3 from 'd3';
-import { getTimezoneOffsetInMs } from '../CustomPlot/getTimezoneOffsetInMs';
+import { getTimezoneOffsetInMs } from './get_timezone_offset_in_ms';
 
 interface Params {
   domain: [number, number];

@@ -131,9 +131,6 @@ export class Server {
       await ensureValidConfiguration(this.configService, legacyConfigSetup);
     }
 
-    // setup i18n prior to any other service, to have translations ready
-    const i18nServiceSetup = await this.i18n.setup({ pluginPaths });
-
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
       // 1) Can access context from any KP plugin
@@ -148,6 +145,9 @@ export class Server {
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
     });
+
+    // setup i18n prior to any other service, to have translations ready
+    const i18nServiceSetup = await this.i18n.setup({ http: httpSetup, pluginPaths });
 
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 

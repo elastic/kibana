@@ -1,8 +1,6 @@
 // SASSTODO: There is a lot of very specific sizing in here that look brittle to touch
 .explorer-charts {
-
-   ml-explorer-charts-container {
-
+  ml-explorer-charts-container {
     .row {
       padding: 10px;
     }
@@ -42,7 +40,7 @@
         padding: 0px 0px 2px 0px;
       }
 
-      table tr>td:first-child {
+      table tr > td:first-child {
         padding-left: 2px;
         vertical-align: top;
       }
@@ -54,20 +52,13 @@
       td:nth-child(2) {
         padding-left: 5px;
       }
-
-      // Hide filtering icons until that functionality is available.
-      i.fa-search-plus, i.fa-search-minus {
-        display: none;
-      }
-
     }
-
   }
 }
 
 /* wrapper class for the top right alert icon and view button */
 .ml-explorer-chart-icons {
-  float:right;
+  float: right;
   padding-left: 5px;
   /* counter-margin for EuiButtonEmpty's padding */
   margin: 2px -8px 0 0;

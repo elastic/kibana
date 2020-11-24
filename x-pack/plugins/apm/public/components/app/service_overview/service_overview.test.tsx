@@ -17,6 +17,8 @@ import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/
 import * as useDynamicIndexPatternHooks from '../../../hooks/useDynamicIndexPattern';
 import * as useFetcherHooks from '../../../hooks/useFetcher';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import * as useAnnotationsHooks from '../../../hooks/use_annotations';
+import * as useTransactionBreakdownHooks from '../../../hooks/use_transaction_breakdown';
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
 
@@ -54,6 +56,9 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('ServiceOverview', () => {
   it('renders', () => {
     jest
+      .spyOn(useAnnotationsHooks, 'useAnnotations')
+      .mockReturnValue({ annotations: [] });
+    jest
       .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPattern')
       .mockReturnValue({
         indexPattern: undefined,
@@ -71,6 +76,13 @@ describe('ServiceOverview', () => {
       refetch: () => {},
       status: FETCH_STATUS.SUCCESS,
     });
+    jest
+      .spyOn(useTransactionBreakdownHooks, 'useTransactionBreakdown')
+      .mockReturnValue({
+        data: { timeseries: [] },
+        error: undefined,
+        status: FETCH_STATUS.SUCCESS,
+      });
 
     expect(() =>
       renderWithTheme(<ServiceOverview serviceName="test service name" />, {

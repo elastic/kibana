@@ -6,7 +6,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiButtonEmpty,
   EuiFormRow,
@@ -21,6 +20,7 @@ import { IFieldFormat } from 'src/plugins/data/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
+import { useDebounceWithOptions } from '../helpers';
 
 const BaseRangeEditor = ({
   maxBars,
@@ -37,10 +37,11 @@ const BaseRangeEditor = ({
 }) => {
   const [maxBarsValue, setMaxBarsValue] = useState(String(maxBars));
 
-  useDebounce(
+  useDebounceWithOptions(
     () => {
       onMaxBarsChange(Number(maxBarsValue));
     },
+    { skipFirstRender: true },
     TYPING_DEBOUNCE_TIME,
     [maxBarsValue]
   );
@@ -151,13 +152,14 @@ export const RangeEditor = ({
 }) => {
   const [isAdvancedEditor, toggleAdvancedEditor] = useState(params.type === MODES.Range);
 
-  // if the maxBars in the params is set to auto refresh it with the default value
-  // only on bootstrap
+  // if the maxBars in the params is set to auto refresh it with the default value only on bootstrap
   useEffect(() => {
-    if (params.maxBars !== maxBars) {
-      setParam('maxBars', maxBars);
+    if (!isAdvancedEditor) {
+      if (params.maxBars !== maxBars) {
+        setParam('maxBars', maxBars);
+      }
     }
-  }, [maxBars, params.maxBars, setParam]);
+  }, [maxBars, params.maxBars, setParam, isAdvancedEditor]);
 
   if (isAdvancedEditor) {
     return (

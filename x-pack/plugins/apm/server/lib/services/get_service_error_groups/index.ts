@@ -43,7 +43,7 @@ export async function getServiceErrorGroups({
 }) {
   const { apmEventClient, start, end, esFilter } = setup;
 
-  const { intervalString } = getBucketSize(start, end, numBuckets);
+  const { intervalString } = getBucketSize({ start, end, numBuckets });
 
   const response = await apmEventClient.search({
     apm: {

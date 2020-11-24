@@ -74,8 +74,6 @@ export const useEqlPreview = (): [
           .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse<EqlSearchResponse<Source>>>(
             {
               params: {
-                // @ts-expect-error allow_no_indices is missing on EqlSearch
-                allow_no_indices: true,
                 index: index.join(),
                 body: {
                   filter: {

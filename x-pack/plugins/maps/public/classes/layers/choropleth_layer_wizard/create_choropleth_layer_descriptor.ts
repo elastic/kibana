@@ -71,7 +71,7 @@ function createChoroplethLayerDescriptor({
       [VECTOR_STYLES.FILL_COLOR]: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
+          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
           field: {
             name: joinKey,
             origin: FIELD_ORIGIN.JOIN,
