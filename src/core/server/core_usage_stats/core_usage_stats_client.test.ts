@@ -79,6 +79,16 @@ describe('CoreUsageStatsClient', () => {
   });
 
   describe('#incrementSavedObjectsImport', () => {
+    it('does not throw an error if repository create operation fails', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      repositoryMock.create.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        usageStatsClient.incrementSavedObjectsImport({} as IncrementSavedObjectsImportOptions)
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.create).toHaveBeenCalled();
+    });
+
     it('creates fields if attributes are empty', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));
@@ -138,6 +148,18 @@ describe('CoreUsageStatsClient', () => {
   });
 
   describe('#incrementSavedObjectsResolveImportErrors', () => {
+    it('does not throw an error if repository create operation fails', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      repositoryMock.create.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        usageStatsClient.incrementSavedObjectsResolveImportErrors(
+          {} as IncrementSavedObjectsResolveImportErrorsOptions
+        )
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.create).toHaveBeenCalled();
+    });
+
     it('creates fields if attributes are empty', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));
@@ -193,6 +215,16 @@ describe('CoreUsageStatsClient', () => {
   });
 
   describe('#incrementSavedObjectsExport', () => {
+    it('does not throw an error if repository create operation fails', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      repositoryMock.create.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        usageStatsClient.incrementSavedObjectsExport({} as IncrementSavedObjectsExportOptions)
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.create).toHaveBeenCalled();
+    });
+
     it('creates fields if attributes are empty', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));

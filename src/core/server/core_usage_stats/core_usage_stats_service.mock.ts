@@ -26,7 +26,7 @@ type CoreUsageStatsServiceContract = PublicMethodsOf<CoreUsageStatsService>;
 
 const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {
   const setupContract: jest.Mocked<CoreUsageStatsServiceSetup> = {
-    registerTypeMappings: jest.fn(),
+    registerType: jest.fn(),
     getClient: jest.fn().mockResolvedValue(usageStatsClient),
   };
   return setupContract;

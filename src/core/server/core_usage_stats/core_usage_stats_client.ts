@@ -151,7 +151,11 @@ export class CoreUsageStatsClient {
 
   private async updateUsageStats(attributes: CoreUsageStats) {
     const options = { id: CORE_USAGE_STATS_TYPE, overwrite: true };
-    return this.repository.create(CORE_USAGE_STATS_TYPE, attributes, options);
+    try {
+      await this.repository.create(CORE_USAGE_STATS_TYPE, attributes, options);
+    } catch (err) {
+      // do nothing
+    }
   }
 }
 

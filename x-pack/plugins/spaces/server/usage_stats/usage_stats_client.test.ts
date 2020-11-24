@@ -61,6 +61,16 @@ describe('UsageStatsClient', () => {
   });
 
   describe('#incrementCopySavedObjects', () => {
+    it('does not throw an error if repository create operation fails', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      repositoryMock.create.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        usageStatsClient.incrementCopySavedObjects({} as IncrementCopySavedObjectsOptions)
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.create).toHaveBeenCalled();
+    });
+
     it('creates fields if attributes are empty', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));
@@ -117,6 +127,18 @@ describe('UsageStatsClient', () => {
   });
 
   describe('#incrementResolveCopySavedObjectsErrors', () => {
+    it('does not throw an error if repository create operation fails', async () => {
+      const { usageStatsClient, repositoryMock } = setup();
+      repositoryMock.create.mockRejectedValue(new Error('Oh no!'));
+
+      await expect(
+        usageStatsClient.incrementResolveCopySavedObjectsErrors(
+          {} as IncrementResolveCopySavedObjectsErrorsOptions
+        )
+      ).resolves.toBeUndefined();
+      expect(repositoryMock.create).toHaveBeenCalled();
+    });
+
     it('creates fields if attributes are empty', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));

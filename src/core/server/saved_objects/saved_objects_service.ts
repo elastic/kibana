@@ -302,7 +302,7 @@ export class SavedObjectsService
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
-    coreUsageStats.registerTypeMappings(this.typeRegistry);
+    coreUsageStats.registerType(this.typeRegistry);
 
     registerRoutes({
       http,

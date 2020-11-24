@@ -26,11 +26,10 @@ import {
 import { CoreContext } from '../core_context';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { CORE_USAGE_STATS_TYPE } from './constants';
-import { CoreUsageStatsMappings } from './mappings';
 
 /** @internal */
 export interface CoreUsageStatsServiceSetup {
-  registerTypeMappings(
+  registerType(
     typeRegistry: ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
   ): void;
   getClient(): Promise<CoreUsageStatsClient>;
@@ -55,12 +54,15 @@ export class CoreUsageStatsService {
       savedObjects.createInternalRepository([CORE_USAGE_STATS_TYPE])
     );
 
-    const registerTypeMappings = (typeRegistry: SavedObjectTypeRegistry) => {
+    const registerType = (typeRegistry: SavedObjectTypeRegistry) => {
       typeRegistry.registerType({
         name: CORE_USAGE_STATS_TYPE,
         hidden: true,
         namespaceType: 'agnostic',
-        mappings: CoreUsageStatsMappings,
+        mappings: {
+          dynamic: false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+          properties: {},
+        },
       });
     };
 
@@ -71,6 +73,6 @@ export class CoreUsageStatsService {
       return new CoreUsageStatsClient(debugLogger, internalRepository);
     };
 
-    return { registerTypeMappings, getClient };
+    return { registerType, getClient };
   }
 }

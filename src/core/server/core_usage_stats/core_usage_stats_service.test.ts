@@ -22,7 +22,6 @@ import { savedObjectsServiceMock } from '../mocks';
 import { typeRegistryMock } from '../saved_objects/saved_objects_type_registry.mock';
 import { CoreUsageStatsService, CoreUsageStatsClient } from '.';
 import { CORE_USAGE_STATS_TYPE } from './constants';
-import { CoreUsageStatsMappings } from './mappings';
 
 describe('CoreUsageStatsService', () => {
   const coreContext = mockCoreContext.create();
@@ -46,18 +45,18 @@ describe('CoreUsageStatsService', () => {
       expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([CORE_USAGE_STATS_TYPE]);
     });
 
-    describe('#registerTypeMappings', () => {
+    describe('#registerType', () => {
       it('registers core usage stats type', async () => {
         const { coreUsageStats } = setup();
         const typeRegistry = typeRegistryMock.create();
 
-        coreUsageStats.registerTypeMappings(typeRegistry);
+        coreUsageStats.registerType(typeRegistry);
         expect(typeRegistry.registerType).toHaveBeenCalledTimes(1);
         expect(typeRegistry.registerType).toHaveBeenCalledWith({
           name: CORE_USAGE_STATS_TYPE,
           hidden: true,
           namespaceType: 'agnostic',
-          mappings: CoreUsageStatsMappings,
+          mappings: expect.anything(),
         });
       });
     });

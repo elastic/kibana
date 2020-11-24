@@ -40,44 +40,6 @@ export const SpacesSavedObjectMappings = deepFreeze({
 });
 
 export const UsageStatsMappings = deepFreeze({
-  properties: {
-    apiCalls: {
-      type: 'object',
-      properties: {
-        copySavedObjects: {
-          type: 'object',
-          properties: {
-            total: { type: 'long' },
-            createNewCopiesEnabled: {
-              type: 'object',
-              properties: {
-                yes: { type: 'long' },
-                no: { type: 'long' },
-              },
-            },
-            overwriteEnabled: {
-              type: 'object',
-              properties: {
-                yes: { type: 'long' },
-                no: { type: 'long' },
-              },
-            },
-          },
-        },
-        resolveCopySavedObjectsErrors: {
-          type: 'object',
-          properties: {
-            total: { type: 'long' },
-            createNewCopiesEnabled: {
-              type: 'object',
-              properties: {
-                yes: { type: 'long' },
-                no: { type: 'long' },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
+  dynamic: false as false, // we aren't querying or aggregating over this data, so we don't need to specify any fields
+  properties: {},
 });

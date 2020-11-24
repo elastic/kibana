@@ -96,7 +96,11 @@ export class UsageStatsClient {
 
   private async updateUsageStats(attributes: UsageStats) {
     const options = { id: SPACES_USAGE_STATS_TYPE, overwrite: true };
-    return this.repository.create(SPACES_USAGE_STATS_TYPE, attributes, options);
+    try {
+      await this.repository.create(SPACES_USAGE_STATS_TYPE, attributes, options);
+    } catch (err) {
+      // do nothing
+    }
   }
 }
 
