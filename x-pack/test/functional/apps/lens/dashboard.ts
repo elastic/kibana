@@ -126,6 +126,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not carry over filters if creating a new lens visualization from within dashboard', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await filterBar.addFilter('geo.src', 'is', 'US');
+      await filterBar.toggleFilterPinned('geo.src');
+      await filterBar.addFilter('geo.dest', 'is', 'LS');
+
       await dashboardAddPanel.clickCreateNewLink();
       await dashboardAddPanel.clickVisType('lens');
       await PageObjects.header.waitUntilLoadingHasFinished();
