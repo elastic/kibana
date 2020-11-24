@@ -50,6 +50,7 @@ export interface EditorFrameProps {
     filterableIndexPatterns: string[];
     doc: Document;
     isSaveable: boolean;
+    activeData?: Record<string, Datatable>;
   }) => void;
   showNoDataPopover: () => void;
 }

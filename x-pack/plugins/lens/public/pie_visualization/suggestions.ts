@@ -24,6 +24,7 @@ export function suggestions({
   state,
   keptLayerIds,
   mainPalette,
+  subVisualizationId,
 }: SuggestionRequest<PieVisualizationState>): Array<
   VisualizationSuggestion<PieVisualizationState>
 > {
@@ -33,11 +34,17 @@ export function suggestions({
 
   const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
-  if (
-    groups.length === 0 ||
-    metrics.length !== 1 ||
-    groups.length > Math.max(MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS)
-  ) {
+  if (metrics.length > 1 || groups.length > Math.max(MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS)) {
+    return [];
+  }
+
+  const incompleteConfiguration = metrics.length === 0 || groups.length === 0;
+  const metricColumnId = metrics.length > 0 ? metrics[0].columnId : undefined;
+
+  if (incompleteConfiguration && state && !subVisualizationId) {
+    // reject incomplete configurations if the sub visualization isn't specifically requested
+    // this allows to switch chart types via switcher with incomplete configurations, but won't
+    // cause incomplete suggestions getting auto applied on dropped fields
     return [];
   }
 
@@ -65,12 +72,12 @@ export function suggestions({
                 ...state.layers[0],
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metrics[0].columnId,
+                metric: metricColumnId,
               }
             : {
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metrics[0].columnId,
+                metric: metricColumnId,
                 numberDisplay: 'percent',
                 categoryDisplay: 'default',
                 legendDisplay: 'default',
@@ -117,7 +124,7 @@ export function suggestions({
                 ...state.layers[0],
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metrics[0].columnId,
+                metric: metricColumnId,
                 categoryDisplay:
                   state.layers[0].categoryDisplay === 'inside'
                     ? 'default'
@@ -126,7 +133,7 @@ export function suggestions({
             : {
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metrics[0].columnId,
+                metric: metricColumnId,
                 numberDisplay: 'percent',
                 categoryDisplay: 'default',
                 legendDisplay: 'default',
@@ -140,5 +147,10 @@ export function suggestions({
     });
   }
 
-  return [...results].sort((a, b) => a.score - b.score);
+  return [...results]
+    .sort((a, b) => a.score - b.score)
+    .map((suggestion) => ({
+      ...suggestion,
+      hide: incompleteConfiguration || suggestion.hide,
+    }));
 }
