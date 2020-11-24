@@ -4,44 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Query } from 'src/plugins/data/public';
+import { Feature, GeoJsonProperties } from 'geojson';
 import { ESTermSource } from '../sources/es_term_source';
 import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 import {
   META_DATA_REQUEST_ID_SUFFIX,
   FORMATTERS_DATA_REQUEST_ID_SUFFIX,
 } from '../../../common/constants';
+import { JoinDescriptor } from '../../../common/descriptor_types';
+import { IVectorSource } from '../sources/vector_source';
+import { IField } from '../fields/field';
+import { PropertiesMap } from '../../../common/elasticsearch_util';
 
 export class InnerJoin {
-  constructor(joinDescriptor, leftSource) {
+  private readonly _descriptor: JoinDescriptor;
+  private readonly _rightSource?: ESTermSource;
+  private readonly _leftField?: IField;
+
+  constructor(joinDescriptor: JoinDescriptor, leftSource: IVectorSource) {
     this._descriptor = joinDescriptor;
     const inspectorAdapters = leftSource.getInspectorAdapters();
-    this._rightSource = new ESTermSource(joinDescriptor.right, inspectorAdapters);
-    this._leftField = this._descriptor.leftField
+    if (
+      joinDescriptor.right &&
+      'indexPatternId' in joinDescriptor.right &&
+      'term' in joinDescriptor.right
+    ) {
+      this._rightSource = new ESTermSource(joinDescriptor.right, inspectorAdapters);
+    }
+    this._leftField = joinDescriptor.leftField
       ? leftSource.createField({ fieldName: joinDescriptor.leftField })
-      : null;
+      : undefined;
   }
 
   destroy() {
-    this._rightSource.destroy();
+    if (this._rightSource) {
+      this._rightSource.destroy();
+    }
   }
 
   hasCompleteConfig() {
-    if (this._leftField && this._rightSource) {
-      return this._rightSource.hasCompleteConfig();
-    }
-
-    return false;
+    return this._leftField && this._rightSource ? this._rightSource.hasCompleteConfig() : false;
   }
 
   getJoinFields() {
-    return this._rightSource.getMetricFields();
+    return this._rightSource ? this._rightSource.getMetricFields() : [];
   }
 
   // Source request id must be static and unique because the re-fetch logic uses the id to locate the previous request.
   // Elasticsearch sources have a static and unique id so that requests can be modified in the inspector.
   // Using the right source id as the source request id because it meets the above criteria.
   getSourceDataRequestId() {
-    return `join_source_${this._rightSource.getId()}`;
+    return `join_source_${this._rightSource!.getId()}`;
   }
 
   getSourceMetaDataRequestId() {
@@ -52,11 +66,17 @@ export class InnerJoin {
     return `${this.getSourceDataRequestId()}_${FORMATTERS_DATA_REQUEST_ID_SUFFIX}`;
   }
 
-  getLeftField() {
+  getLeftField(): IField {
+    if (!this._leftField) {
+      throw new Error('Cannot get leftField from InnerJoin with incomplete config');
+    }
     return this._leftField;
   }
 
-  joinPropertiesToFeature(feature, propertiesMap) {
+  joinPropertiesToFeature(feature: Feature, propertiesMap: PropertiesMap): boolean {
+    if (!feature.properties || !this._leftField || !this._rightSource) {
+      return false;
+    }
     const rightMetricFields = this._rightSource.getMetricFields();
     // delete feature properties added by previous join
     for (let j = 0; j < rightMetricFields.length; j++) {
@@ -70,7 +90,7 @@ export class InnerJoin {
           featurePropertyKey.length >= stylePropertyPrefix.length &&
           featurePropertyKey.substring(0, stylePropertyPrefix.length) === stylePropertyPrefix
         ) {
-          delete feature.properties[featurePropertyKey];
+          delete feature.properties![featurePropertyKey];
         }
       });
     }
@@ -78,7 +98,7 @@ export class InnerJoin {
     const joinKey = feature.properties[this._leftField.getName()];
     const coercedKey =
       typeof joinKey === 'undefined' || joinKey === null ? null : joinKey.toString();
-    if (propertiesMap && coercedKey !== null && propertiesMap.has(coercedKey)) {
+    if (coercedKey !== null && propertiesMap.has(coercedKey)) {
       Object.assign(feature.properties, propertiesMap.get(coercedKey));
       return true;
     } else {
@@ -86,27 +106,30 @@ export class InnerJoin {
     }
   }
 
-  getRightJoinSource() {
+  getRightJoinSource(): ESTermSource {
+    if (!this._rightSource) {
+      throw new Error('Cannot get rightSource from InnerJoin with incomplete config');
+    }
     return this._rightSource;
   }
 
-  toDescriptor() {
+  toDescriptor(): JoinDescriptor {
     return this._descriptor;
   }
 
-  async getTooltipProperties(properties) {
-    return await this._rightSource.getTooltipProperties(properties);
+  async getTooltipProperties(properties: GeoJsonProperties) {
+    return await this.getRightJoinSource().getTooltipProperties(properties);
   }
 
   getIndexPatternIds() {
-    return this._rightSource.getIndexPatternIds();
+    return this.getRightJoinSource().getIndexPatternIds();
   }
 
   getQueryableIndexPatternIds() {
-    return this._rightSource.getQueryableIndexPatternIds();
+    return this.getRightJoinSource().getQueryableIndexPatternIds();
   }
 
-  getWhereQuery() {
-    return this._rightSource.getWhereQuery();
+  getWhereQuery(): Query | undefined {
+    return this.getRightJoinSource().getWhereQuery();
   }
 }
