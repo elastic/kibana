@@ -25,7 +25,7 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
+import { PointerEventContextProvider } from '../../../context/pointer_event_context';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -125,13 +125,13 @@ export function TransactionDetails({
             <LocalUIFilters {...localUIFiltersConfig} />
           </EuiFlexItem>
           <EuiFlexItem grow={7}>
-            <ChartsSyncContextProvider>
+            <PointerEventContextProvider>
               <TransactionCharts
                 fetchStatus={transactionChartsStatus}
                 charts={transactionChartsData}
                 urlParams={urlParams}
               />
-            </ChartsSyncContextProvider>
+            </PointerEventContextProvider>
 
             <EuiHorizontalRule size="full" margin="l" />
 

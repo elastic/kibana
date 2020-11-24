@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
-import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
+import { PointerEventContextProvider } from '../../../context/pointer_event_context';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
@@ -43,7 +43,7 @@ export function ServiceOverview({
   useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
 
   return (
-    <ChartsSyncContextProvider>
+    <PointerEventContextProvider>
       <SearchBar />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
@@ -170,6 +170,6 @@ export function ServiceOverview({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPage>
-    </ChartsSyncContextProvider>
+    </PointerEventContextProvider>
   );
 }

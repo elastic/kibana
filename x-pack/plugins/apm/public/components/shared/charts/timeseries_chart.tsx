@@ -24,7 +24,7 @@ import { useChartTheme } from '../../../../../observability/public';
 import { TimeSeries } from '../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useChartsSync } from '../../../hooks/use_charts_sync';
+import { usePointerEvent } from '../../../hooks/use_pointer_event';
 import { unit } from '../../../style/variables';
 import { Annotations } from './annotations';
 import { ChartContainer } from './chart_container';
@@ -60,15 +60,15 @@ export function TimeseriesChart({
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
   const chartTheme = useChartTheme();
-  const { event, setEvent } = useChartsSync();
+  const { pointerEvent, setPointerEvent } = usePointerEvent();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
 
   useEffect(() => {
-    if (event.chartId !== id && chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(event);
+    if (pointerEvent && pointerEvent?.chartId !== id && chartRef.current) {
+      chartRef.current.dispatchExternalPointerEvent(pointerEvent);
     }
-  }, [event, chartRef, id]);
+  }, [pointerEvent, chartRef, id]);
 
   const min = moment.utc(start).valueOf();
   const max = moment.utc(end).valueOf();
@@ -89,9 +89,7 @@ export function TimeseriesChart({
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           theme={chartTheme}
-          onPointerUpdate={(currEvent: any) => {
-            setEvent(currEvent);
-          }}
+          onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true, placement: Placement.Bottom },
           }}

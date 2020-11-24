@@ -23,7 +23,7 @@ import { asPercent } from '../../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useChartsSync as useChartsSync2 } from '../../../../hooks/use_charts_sync';
+import { usePointerEvent } from '../../../../hooks/use_pointer_event';
 import { unit } from '../../../../style/variables';
 import { Annotations } from '../../charts/annotations';
 import { ChartContainer } from '../../charts/chart_container';
@@ -45,15 +45,19 @@ export function TransactionBreakdownChartContents({
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
   const chartTheme = useChartTheme();
-  const { event, setEvent } = useChartsSync2();
+  const { pointerEvent, setPointerEvent } = usePointerEvent();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
 
   useEffect(() => {
-    if (event.chartId !== 'timeSpentBySpan' && chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(event);
+    if (
+      pointerEvent &&
+      pointerEvent.chartId !== 'timeSpentBySpan' &&
+      chartRef.current
+    ) {
+      chartRef.current.dispatchExternalPointerEvent(pointerEvent);
     }
-  }, [chartRef, event]);
+  }, [chartRef, pointerEvent]);
 
   const min = moment.utc(start).valueOf();
   const max = moment.utc(end).valueOf();
@@ -71,9 +75,7 @@ export function TransactionBreakdownChartContents({
           theme={chartTheme}
           xDomain={{ min, max }}
           flatLegend
-          onPointerUpdate={(currEvent: any) => {
-            setEvent(currEvent);
-          }}
+          onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true, placement: Placement.Bottom },
           }}

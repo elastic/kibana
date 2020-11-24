@@ -12,21 +12,23 @@ import React, {
   useState,
 } from 'react';
 
-export const ChartsSyncContext = createContext<{
-  event: any;
-  setEvent: Dispatch<SetStateAction<{}>>;
+import { PointerEvent } from '@elastic/charts';
+
+export const PointerEventContext = createContext<{
+  pointerEvent: PointerEvent | null;
+  setPointerEvent: Dispatch<SetStateAction<PointerEvent | null>>;
 } | null>(null);
 
-export function ChartsSyncContextProvider({
+export function PointerEventContextProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [event, setEvent] = useState({});
+  const [pointerEvent, setPointerEvent] = useState<PointerEvent | null>(null);
 
   return (
-    <ChartsSyncContext.Provider
-      value={{ event, setEvent }}
+    <PointerEventContext.Provider
+      value={{ pointerEvent, setPointerEvent }}
       children={children}
     />
   );
