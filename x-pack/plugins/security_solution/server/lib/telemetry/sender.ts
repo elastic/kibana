@@ -14,6 +14,11 @@ import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
 } from '../../../../../../src/plugins/telemetry/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../task_manager/server';
+import { TelemetryDiagTask } from './task';
 
 export type SearchTypes =
   | string
@@ -56,24 +61,38 @@ export class TelemetryEventsSender {
   private isSending = false;
   private queue: TelemetryEvent[] = [];
   private isOptedIn?: boolean = true; // Assume true until the first check
+  private diagTask?: TelemetryDiagTask;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup) {
+  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
     this.telemetrySetup = telemetrySetup;
+
+    if (taskManager) {
+      this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
+    }
   }
 
-  public start(core?: CoreStart, telemetryStart?: TelemetryPluginStart) {
+  public start(
+    core?: CoreStart,
+    telemetryStart?: TelemetryPluginStart,
+    taskManager?: TaskManagerStartContract
+  ) {
     this.telemetryStart = telemetryStart;
     this.core = core;
 
-    this.logger.debug(`Starting task`);
+    this.logger.debug(`Starting local task`);
     setTimeout(() => {
       this.sendIfDue();
       this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
     }, this.initialCheckDelayMs);
+
+    if (taskManager && this.diagTask) {
+      this.logger.debug(`Starting diag task`);
+      this.diagTask.start(taskManager);
+    }
   }
 
   public stop() {
