@@ -5,6 +5,10 @@
  */
 
 import { AgentName } from '../typings/es_schemas/ui/fields/agent';
+import {
+  TRANSACTION_PAGE_LOAD,
+  TRANSACTION_REQUEST,
+} from './transaction_types';
 
 /*
  * Agent names can be any string. This list only defines the official agents
@@ -46,14 +50,34 @@ export const RUM_AGENT_NAMES: AgentName[] = [
   'opentelemetry/webjs',
 ];
 
-export function isRumAgentName(
+function getDefaultTransactionTypeForAgentName(agentName?: string) {
+  return isRumAgentName(agentName)
+    ? TRANSACTION_PAGE_LOAD
+    : TRANSACTION_REQUEST;
+}
+
+export function getFirstTransactionType(
+  transactionTypes: string[],
   agentName?: string
-): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
-  return RUM_AGENT_NAMES.includes(agentName! as AgentName);
+) {
+  const defaultTransactionType = getDefaultTransactionTypeForAgentName(
+    agentName
+  );
+
+  return (
+    transactionTypes.find((type) => type === defaultTransactionType) ??
+    transactionTypes[0]
+  );
 }
 
 export function isJavaAgentName(
   agentName: string | undefined
 ): agentName is 'java' {
   return agentName === 'java';
+}
+
+export function isRumAgentName(
+  agentName?: string
+): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
+  return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }

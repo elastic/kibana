@@ -202,7 +202,7 @@ export class Simulator {
     while (timeoutCount < 10) {
       timeoutCount++;
       yield mapper();
-      await new Promise((resolve) => {
+      await new Promise<void>((resolve) => {
         setTimeout(() => {
           this.forceAutoSizerOpen();
           this.wrapper.update();
