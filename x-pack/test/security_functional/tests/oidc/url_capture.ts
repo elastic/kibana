@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
   const browser = getService('browser');
+  const deployment = getService('deployment');
   const PageObjects = getPageObjects(['common']);
 
   describe('URL capture', function () {
@@ -31,13 +32,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await browser.get(PageObjects.common.getHostPort() + '/logout');
+      await browser.get(deployment.getHostPort() + '/logout');
       await PageObjects.common.waitUntilUrlIncludes('logged_out');
     });
 
     it('can login preserving original URL', async () => {
       await browser.get(
-        PageObjects.common.getHostPort() + '/app/management/security/users#some=hash-value'
+        deployment.getHostPort() + '/app/management/security/users#some=hash-value'
       );
 
       await find.byCssSelector(
