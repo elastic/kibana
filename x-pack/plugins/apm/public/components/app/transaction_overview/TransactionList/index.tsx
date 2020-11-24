@@ -10,8 +10,8 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import {
-  asDecimal,
   asMillisecondDuration,
+  asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { ImpactBar } from '../../../shared/ImpactBar';
@@ -103,13 +103,7 @@ export function TransactionList({ items, isLoading }: Props) {
         ),
         sortable: true,
         dataType: 'number',
-        render: (value: number) =>
-          `${asDecimal(value)} ${i18n.translate(
-            'xpack.apm.transactionsTable.transactionsPerMinuteUnitLabel',
-            {
-              defaultMessage: 'tpm',
-            }
-          )}`,
+        render: (value: number) => asTransactionRate(value),
       },
       {
         field: 'impact',
