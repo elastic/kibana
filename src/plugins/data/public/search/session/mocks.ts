@@ -41,7 +41,7 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     getSession$: jest.fn(() => new BehaviorSubject(undefined).asObservable()),
     state$: new BehaviorSubject<SessionState>(SessionState.None).asObservable(),
     setSearchSessionRestorationInfoProvider: jest.fn(),
-    trackSearch: jest.fn((sessionId, searchDescriptor) => () => {}),
+    trackSearch: jest.fn((searchDescriptor) => () => {}),
     destroy: jest.fn(),
     onRefresh$: new Subject(),
     refresh: jest.fn(),
