@@ -107,7 +107,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       })
       .map((def) => def.type)
       .filter((type) => fieldByOperation[type]?.size || operationWithoutField.has(type));
-  }, [operationWithoutField]);
+  }, [fieldByOperation, operationWithoutField]);
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
