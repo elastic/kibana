@@ -28,6 +28,7 @@ import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../data/public';
 
 import { getEnableExternalUrls, getData } from '../services';
+import { extractIndexPatternsFromSpec } from '../default_spec';
 
 vega.scheme('elastic', euiPaletteColorBlind());
 
@@ -146,7 +147,14 @@ export class VegaBaseView {
         );
       }
     } else {
-      idxObj = await indexPatterns.getDefault();
+      [idxObj] = await extractIndexPatternsFromSpec(
+        this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec
+      );
+
+      if (!idxObj) {
+        idxObj = await indexPatterns.getDefault();
+      }
+
       if (!idxObj) {
         throw new Error(
           i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
@@ -155,6 +163,7 @@ export class VegaBaseView {
         );
       }
     }
+
     return idxObj.id;
   }
 

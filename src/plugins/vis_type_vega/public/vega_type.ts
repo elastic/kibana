@@ -18,21 +18,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
 import { parse } from 'hjson';
+import type { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
+
 import { DefaultEditorSize } from '../../vis_default_editor/public';
-import { VegaVisualizationDependencies } from './plugin';
+import type { VegaVisualizationDependencies } from './plugin';
 
 import { createVegaRequestHandler } from './vega_request_handler';
-import { getDefaultSpec } from './default_spec';
+import { getDefaultSpec, extractIndexPatternsFromSpec } from './default_spec';
 import { createInspectorAdapters } from './vega_inspector';
 import { VIS_EVENT_TO_TRIGGER, VisGroups } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';
-import { VisParams } from './vega_fn';
 import { getInfoMessage } from './components/experimental_map_vis_info';
 import { VegaVisEditorComponent } from './components/vega_vis_editor_lazy';
-import { getData } from './services';
-import { IndexPattern } from '../../data/public';
+
+import type { VegaSpec } from './data_model/types';
+import type { VisParams } from './vega_fn';
 
 export const createVegaTypeDefinition = (
   dependencies: VegaVisualizationDependencies
@@ -75,17 +76,8 @@ export const createVegaTypeDefinition = (
       if (visParams.spec) {
         try {
           const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
-          const { indexPatterns } = getData();
 
-          if (spec.data) {
-            return (
-              await Promise.all(
-                (Array.isArray(spec.data) ? spec.data : [spec.data]).map((d: any) =>
-                  indexPatterns.findByTitle(d.url?.index)
-                )
-              )
-            ).filter((index) => Boolean(index)) as IndexPattern[];
-          }
+          return extractIndexPatternsFromSpec(spec as VegaSpec);
         } catch (e) {
           // spec is invalid
         }
