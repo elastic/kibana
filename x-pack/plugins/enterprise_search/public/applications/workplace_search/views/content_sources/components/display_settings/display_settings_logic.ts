@@ -8,10 +8,14 @@ import { cloneDeep, isEqual, differenceBy } from 'lodash';
 import { DropResult } from 'react-beautiful-dnd';
 
 import { kea, MakeLogicType } from 'kea';
-import http from 'shared/http';
 
-import routes from 'workplace_search/routes';
-import { setSuccessMessage, FlashMessagesLogic } from '../../../../../shared/flash_messages';
+import { HttpLogic } from '../../../../../shared/http';
+
+import {
+  setSuccessMessage,
+  FlashMessagesLogic,
+  flashAPIErrors,
+} from '../../../../../shared/flash_messages';
 
 import { AppLogic } from '../../../../app_logic';
 import { SourceLogic } from '../../source_logic';
@@ -287,26 +291,39 @@ export const DisplaySettingsLogic = kea<
     ],
   }),
   listeners: ({ actions, values }) => ({
-    initializeDisplaySettings: () => {
+    initializeDisplaySettings: async () => {
       const { isOrganization } = AppLogic.values;
       const {
         contentSource: { id: sourceId },
       } = SourceLogic.values;
 
-      const serverRoute = isOrganization
-        ? routes.fritoPieOrganizationContentSourceDisplaySettingsConfigPath(sourceId)
-        : routes.fritoPieAccountContentSourceDisplaySettingsConfigPath(sourceId);
+      const route = isOrganization
+        ? `/api/workplace_search/org/sources/${sourceId}/display_settings/config`
+        : `/api/workplace_search/account/sources/${sourceId}/display_settings/config`;
 
-      http(serverRoute).then(({ data }) =>
-        actions.onInitializeDisplaySettings({ isOrganization, sourceId, serverRoute, ...data })
-      );
+      try {
+        const response = await HttpLogic.values.http.get(route);
+        actions.onInitializeDisplaySettings({
+          isOrganization,
+          sourceId,
+          serverRoute: route,
+          ...response,
+        });
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    setServerData: () => {
+    setServerData: async () => {
       const { searchResultConfig, serverRoute } = values;
-      http
-        .post(serverRoute, searchResultConfig)
-        .then(({ data }) => actions.setServerResponseData(data))
-        .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+
+      try {
+        const response = await HttpLogic.values.http.post(serverRoute, {
+          body: JSON.stringify({ ...searchResultConfig }),
+        });
+        actions.setServerResponseData(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     setServerResponseData: () => {
       setSuccessMessage(SUCCESS_MESSAGE);
