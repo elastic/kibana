@@ -5,7 +5,15 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiProgress } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldTypeIcon } from '../../../../components/field_type_icon';
@@ -28,7 +36,7 @@ export function FieldStatsCard({ field }) {
     <EuiPanel hasShadow={false} className="mlFieldDataCard">
       <div className="ml-field-data-card" data-test-subj="mlPageFileDataVisFieldDataCard">
         <div className={`ml-field-title-bar ${type}`}>
-          <FieldTypeIcon type={type} needsAria={false} />
+          <FieldTypeIcon type={type} needsAria={false} fieldName={field.name} />
           <div className="field-name" tabIndex="0" aria-label={`${cardTitleAriaLabel.join(', ')}`}>
             {field.name}
           </div>
@@ -38,29 +46,45 @@ export function FieldStatsCard({ field }) {
           {field.count > 0 && (
             <React.Fragment>
               <div className="stats">
-                <div className="stat">
-                  <i className="fa fa-files-o" aria-hidden="true" />
-                  &nbsp;
-                  <FormattedMessage
-                    id="xpack.ml.fileDatavisualizer.fieldStatsCard.documentsCountDescription"
-                    defaultMessage="{fieldCount, plural, zero {# document} one {# document} other {# documents}} ({fieldPercent}%)"
-                    values={{
-                      fieldCount: field.count,
-                      fieldPercent: field.percent,
-                    }}
-                  />
-                </div>
-                <div className="stat">
-                  <i className="fa fa-cubes" aria-hidden="true" />
-                  &nbsp;
-                  <FormattedMessage
-                    id="xpack.ml.fileDatavisualizer.fieldStatsCard.distinctCountDescription"
-                    defaultMessage="{fieldCardinality} distinct {fieldCardinality, plural, zero {value} one {value} other {values}}"
-                    values={{
-                      fieldCardinality: field.cardinality,
-                    }}
-                  />
-                </div>
+                <EuiFlexGroup
+                  gutterSize="xs"
+                  alignItems="center"
+                  justifyContent="center"
+                  className="stat"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="document" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.fieldStatsCard.documentsCountDescription"
+                      defaultMessage="{fieldCount, plural, zero {# document} one {# document} other {# documents}} ({fieldPercent}%)"
+                      values={{
+                        fieldCount: field.count,
+                        fieldPercent: field.percent,
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiFlexGroup
+                  gutterSize="xs"
+                  alignItems="center"
+                  justifyContent="center"
+                  className="stat"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="database" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.fieldStatsCard.distinctCountDescription"
+                      defaultMessage="{fieldCardinality} distinct {fieldCardinality, plural, zero {value} one {value} other {values}}"
+                      values={{
+                        fieldCardinality: field.cardinality,
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
                 {field.median_value && (
                   <React.Fragment>
