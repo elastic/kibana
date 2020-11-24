@@ -6,55 +6,53 @@
 import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
+  ConnectorBasicCaseParams,
   ConnectorMappingsAttributes,
   ConnectorTypes,
   EntityInformation,
   ExternalServiceParams,
+  ExternalServiceStringParams,
   Incident,
+  JiraPushToServiceApiParams,
+  MapIncident,
   PipedField,
   PrepareFieldsForTransformArgs,
   PushToServiceApiParams,
+  ResilientPushToServiceApiParams,
+  ServiceNowPushToServiceApiParams,
+  SimpleComment,
   Transformer,
   TransformerArgs,
   TransformFieldsArgs,
 } from '../../../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionsClient } from '../../../../../../actions/server/actions_client';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Comment } from '../../../../../../actions/server/builtin_action_types/case/types';
 
-export const mapFields = async (
+export const mapIncident = async (
   actionsClient: ActionsClient,
   connectorId: string,
   connectorType: string,
   mappings: ConnectorMappingsAttributes[],
-  params: PushToServiceApiParams
-) => {
-  console.log(
-    'mapFields',
-    JSON.stringify({
-      connectorId,
-      connectorType,
-      mappings,
-      params,
-    })
-  );
-  const { externalId } = params;
+  params: ConnectorBasicCaseParams
+): Promise<MapIncident> => {
+  const { comments: caseComments, externalId } = params;
   const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
-  let thirdPartyName;
-  if (connectorType === ConnectorTypes.jira) {
-    thirdPartyName = 'Jira';
-  } else if (connectorType === ConnectorTypes.resilient) {
-    thirdPartyName = 'Resilient';
-  } else if (connectorType === ConnectorTypes.servicenow) {
-    thirdPartyName = 'ServiceNow';
+  const service = serviceFormatter(connectorType, params);
+  if (service == null) {
+    throw new Error(`Invalid service`);
   }
+  const thirdPartyName = service.thirdPartyName;
+  let incident: Partial<PushToServiceApiParams['incident']> = service.incident; // : Incident;
   if (externalId) {
     try {
       currentIncident = ((await actionsClient.execute({
         actionId: connectorId,
         params: {
           subAction: 'getIncident',
-          subActionParams: params,
+          subActionParams: { externalId },
         },
       })) as unknown) as ExternalServiceParams | undefined;
     } catch (ex) {
@@ -64,40 +62,64 @@ export const mapFields = async (
     }
   }
 
-  let incident; // : Incident;
-  if (mappings) {
-    const fields = prepareFieldsForTransformation({
-      externalCase: params.externalObject,
-      mappings,
-      defaultPipes,
-    });
+  const deezParams = (params as unknown) as ExternalServiceStringParams;
+  const fields = prepareFieldsForTransformation({
+    defaultPipes,
+    mappings,
+    params: deezParams,
+  });
 
-    const transformedFields = transformFields<
-      PushToServiceApiParams,
-      ExternalServiceParams,
-      Incident
-    >({
-      params,
-      fields,
-      currentIncident,
-    });
-    console.log('INCIDENT FIELDS', JSON.stringify({ fields, transformedFields }));
-    incident = { fields, transformedFields };
+  const transformedFields = transformFields<
+    ConnectorBasicCaseParams,
+    ExternalServiceParams,
+    Incident
+  >({
+    params,
+    fields,
+    currentIncident,
+  });
+  incident = { ...incident, ...transformedFields, externalId };
+  let comments: SimpleComment[] = [];
+  if (caseComments && Array.isArray(caseComments) && caseComments.length > 0) {
+    const commentsMapping = mappings.find((m) => m.source === 'comments');
+    if (commentsMapping?.action_type !== 'nothing') {
+      comments = transformComments(caseComments, ['informationAdded']);
+    }
   }
-  return incident;
-  //   const { priority, labels, issueType, parent } = params;
-  //   incident = {
-  //     summary: transformedFields.summary,
-  //     description: transformedFields.description,
-  //     priority,
-  //     labels,
-  //     issueType,
-  //     parent,
-  //   };
-  // } else {
-  //   const { title, description, priority, labels, issueType, parent } = params;
-  //   incident = { summary: title, description, priority, labels, issueType, parent };
-  // }
+  return { incident, comments };
+};
+
+export const serviceFormatter = (
+  connectorType: string,
+  params: unknown
+): { thirdPartyName: string; incident: Partial<PushToServiceApiParams['incident']> } | null => {
+  switch (connectorType) {
+    case ConnectorTypes.jira:
+      const {
+        priority,
+        labels,
+        issueType,
+        parent,
+      } = params as JiraPushToServiceApiParams['incident'];
+      return {
+        incident: { priority, labels, issueType, parent },
+        thirdPartyName: 'Jira',
+      };
+    case ConnectorTypes.resilient:
+      const { incidentTypes, severityCode } = params as ResilientPushToServiceApiParams['incident'];
+      return {
+        incident: { incidentTypes, severityCode },
+        thirdPartyName: 'Resilient',
+      };
+    case ConnectorTypes.servicenow:
+      const { severity, urgency, impact } = params as ServiceNowPushToServiceApiParams['incident'];
+      return {
+        incident: { severity, urgency, impact },
+        thirdPartyName: 'ServiceNow',
+      };
+    default:
+      return null;
+  }
 };
 
 export const getEntity = (entity: EntityInformation): string =>
@@ -111,34 +133,6 @@ export const getEntity = (entity: EntityInformation): string =>
       : entity.createdBy.username
     : '') ?? '';
 
-export const prepareFieldsForTransformation = ({
-  externalCase,
-  mappings,
-  defaultPipes = ['informationCreated'],
-}: PrepareFieldsForTransformArgs): PipedField[] => {
-  console.log(
-    'prepareFieldsForTransformation',
-    JSON.stringify({
-      externalCase,
-      mappings,
-      defaultPipes,
-    })
-  );
-  return [];
-  // return Object.keys(externalCase)
-  //   .filter(
-  //     (p) => mappings.get(p)?.action_type != null && mappings.get(p)?.action_type !== 'nothing'
-  //   )
-  //   .map((p) => {
-  //     const action_type = mappings.get(p)?.action_type ?? 'nothing';
-  //     return {
-  //       key: p,
-  //       value: externalCase[p],
-  //       actionType: action_type,
-  //       pipes: action_type === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
-  //     };
-  //   });
-};
 export const FIELD_INFORMATION = (
   mode: string,
   date: string | undefined,
@@ -185,6 +179,29 @@ export const transformers: Record<string, Transformer> = {
     ...rest,
   }),
 };
+const prepareFieldsForTransformation = ({
+  defaultPipes,
+  mappings,
+  params,
+}: PrepareFieldsForTransformArgs): PipedField[] =>
+  mappings.reduce(
+    (acc: PipedField[], mapping) =>
+      mapping != null &&
+      mapping.target !== 'not_mapped' &&
+      mapping.action_type !== 'nothing' &&
+      mapping.source !== 'comments'
+        ? [
+            ...acc,
+            {
+              key: mapping.target,
+              value: params[mapping.source],
+              actionType: mapping.action_type,
+              pipes: mapping.action_type === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
+            },
+          ]
+        : acc,
+    []
+  );
 
 export const transformFields = <
   P extends EntityInformation,
@@ -208,3 +225,13 @@ export const transformFields = <
     };
   }, {} as R);
 };
+
+export const transformComments = (comments: Comment[], pipes: string[]): SimpleComment[] =>
+  comments.map((c) => ({
+    comment: flow(...pipes.map((p) => transformers[p]))({
+      value: c.comment,
+      date: c.updatedAt ?? c.createdAt,
+      user: getEntity(c),
+    }).value,
+    commentId: c.commentId,
+  }));

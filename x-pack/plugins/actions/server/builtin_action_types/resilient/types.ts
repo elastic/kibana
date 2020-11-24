@@ -23,7 +23,7 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
 
 import { IncidentConfigurationSchema } from '../case/schema';
-import { Comment } from '../case/types';
+import { SimpleComment } from '../case/types';
 
 export type ResilientPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
@@ -76,7 +76,7 @@ export interface ExternalServiceFields {
 export type GetCommonFieldsResponse = ExternalServiceFields[];
 
 export type Incident = Pick<
-  ExecutorSubActionPushParams,
+  ExecutorSubActionPushParams['incident'],
   'description' | 'incidentTypes' | 'severityCode'
 > & {
   name: string;
@@ -93,7 +93,7 @@ export interface UpdateIncidentParams {
 
 export interface CreateCommentParams {
   incidentId: string;
-  comment: Comment;
+  comment: SimpleComment;
 }
 
 export type GetIncidentTypesResponse = Array<{ id: string; name: string }>;
@@ -112,7 +112,6 @@ export interface ExternalService {
 export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
   externalObject: Record<string, any>;
 }
-
 export type ExecutorSubActionGetIncidentTypesParams = TypeOf<
   typeof ExecutorSubActionGetIncidentTypesParamsSchema
 >;

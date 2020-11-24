@@ -38,10 +38,10 @@ const pushToServiceHandler = async ({
   externalService,
   params,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
-  const { externalId, comments } = params;
+  const comments = params.comments;
   let res: PushToServiceResponse;
-  const { title, description, incidentTypes, severityCode } = params;
-  const incident: Incident = { name: title, description, incidentTypes, severityCode };
+  const { externalId, ...rest } = params.incident;
+  const incident: Incident = rest;
 
   if (externalId != null) {
     res = await externalService.updateIncident({

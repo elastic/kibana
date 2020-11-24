@@ -58,6 +58,7 @@ import {
   decodeCasesFindResponse,
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
+  decodeServiceConnectorCaseResponse,
 } from './utils';
 
 export const getCase = async (
@@ -240,9 +241,7 @@ export const pushToService = async (
   casePushParams: ServiceConnectorCaseParams,
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
-  // TO DO STEPH formatting here
-
-  const response = await KibanaServices.get().http.fetch(
+  const response = await KibanaServices.get().http.fetch<{ data: ServiceConnectorCaseResponse }>(
     `${getCaseConfigurePushUrl(connectorId)}`,
     {
       method: 'POST',
@@ -253,7 +252,7 @@ export const pushToService = async (
       signal,
     }
   );
-  return response;
+  return decodeServiceConnectorCaseResponse(response.data);
 };
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {
@@ -278,5 +277,5 @@ export const getFields = async (
       signal,
     }
   );
-  return response; // convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+  return response;
 };

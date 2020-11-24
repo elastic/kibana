@@ -90,7 +90,7 @@ export type ExecutorSubActionHandshakeParams = TypeOf<
 >;
 
 export type Incident = Pick<
-  ExecutorSubActionPushParams,
+  ExecutorSubActionPushParams['incident'],
   'description' | 'severity' | 'urgency' | 'impact'
 > & {
   short_description: string;

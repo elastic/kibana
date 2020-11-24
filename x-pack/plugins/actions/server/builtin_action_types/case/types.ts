@@ -16,7 +16,10 @@ export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
 export type MapRecord = TypeOf<typeof MapRecordSchema>;
 export type Comment = TypeOf<typeof CommentSchema>;
 export type EntityInformation = TypeOf<typeof EntityInformationSchema>;
-
+export interface SimpleComment {
+  comment: string;
+  commentId: string;
+}
 export interface ExternalServiceCommentResponse {
   commentId: string;
   pushedDate: string;

@@ -20,8 +20,12 @@ import {
   PushToServiceApiParams as ServiceNowPushToServiceApiParams,
   Incident as ServiceNowIncident,
 } from '../../../../actions/server/builtin_action_types/servicenow/types';
-// import { ServiceConnectorBasicCaseParamsRt } from '../cases';
 
+export {
+  JiraPushToServiceApiParams,
+  ResilientPushToServiceApiParams,
+  ServiceNowPushToServiceApiParams,
+};
 export type Incident = JiraIncident | ResilientIncident | ServiceNowIncident;
 export type PushToServiceApiParams =
   | JiraPushToServiceApiParams
@@ -78,6 +82,7 @@ export type GetFieldsResponse = rt.TypeOf<typeof GetFieldsResponseRt>;
 ///////////////////////////////////////////////////////////////////////
 
 export type ExternalServiceParams = Record<string, unknown>;
+export type ExternalServiceStringParams = Record<string, string>;
 
 export interface PipedField {
   actionType: string;
@@ -86,8 +91,9 @@ export interface PipedField {
   value: string;
 }
 export interface PrepareFieldsForTransformArgs {
-  defaultPipes?: string[];
-  externalCase: Record<string, string>;
+  defaultPipes: string[];
+  // params: PushToServiceApiParams;
+  params: Record<string, string>;
   mappings: ConnectorMappingsAttributes[];
 }
 export interface EntityInformation {
@@ -133,8 +139,29 @@ export const ConnectorBasicCaseParamsRt = rt.type({
   title: rt.string,
   updatedAt: rt.union([rt.string, rt.null]),
   updatedBy: rt.union([ConnectorUserParams, rt.null]),
+  // third party fields
+  incidentTypes: rt.union([rt.array(rt.number), rt.null, rt.undefined]),
+  severityCode: rt.union([rt.number, rt.null, rt.undefined]),
+  severity: rt.union([rt.string, rt.null, rt.undefined]),
+  urgency: rt.union([rt.string, rt.null, rt.undefined]),
+  impact: rt.union([rt.string, rt.null, rt.undefined]),
+  issueType: rt.union([rt.string, rt.null, rt.undefined]),
+  priority: rt.union([rt.string, rt.null, rt.undefined]),
+  labels: rt.union([rt.array(rt.string), rt.null, rt.undefined]),
+  parent: rt.union([rt.string, rt.null, rt.undefined]),
 });
+export type ConnectorBasicCaseParams = rt.TypeOf<typeof ConnectorBasicCaseParamsRt>;
 export const PostPushRequestRt = rt.type({
   connector_type: rt.string,
   params: ConnectorBasicCaseParamsRt,
 });
+
+export interface SimpleComment {
+  comment: string;
+  commentId: string;
+}
+
+export interface MapIncident {
+  incident: ExternalServiceParams;
+  comments: SimpleComment[];
+}

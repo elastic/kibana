@@ -15,10 +15,9 @@ import { CASE_CONFIGURE_PUSH_URL } from '../../../../../common/constants';
 import {
   ConnectorRequestParamsRt,
   PostPushRequestRt,
-  PushToServiceApiParams,
   throwErrors,
 } from '../../../../../common/api';
-import { mapFields } from './utils';
+import { mapIncident } from './utils';
 
 export function initPostPushToService({ router, connectorMappingsService }: RouteDeps) {
   router.post(
@@ -55,16 +54,23 @@ export function initPostPushToService({ router, connectorMappingsService }: Rout
           connectorType: body.connector_type,
         });
 
-        const maps = await mapFields(
+        const res = await mapIncident(
           actionsClient,
           params.connector_id,
           body.connector_type,
           myConnectorMappings,
-          body.params as PushToServiceApiParams
+          body.params
         );
+        const pushRes = await actionsClient.execute({
+          actionId: params.connector_id,
+          params: {
+            subAction: 'pushToService',
+            subActionParams: res,
+          },
+        });
 
         return response.ok({
-          body: maps,
+          body: pushRes,
         });
       } catch (error) {
         return response.customError(wrapError(error));

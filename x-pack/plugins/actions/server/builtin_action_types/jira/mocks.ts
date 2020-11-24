@@ -111,34 +111,23 @@ const externalServiceMock = {
 };
 
 const executorParams: ExecutorSubActionPushParams = {
-  savedObjectId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
-  externalId: 'incident-3',
-  createdAt: '2020-04-27T10:59:46.202Z',
-  createdBy: { fullName: 'Elastic User', username: 'elastic' },
-  updatedAt: '2020-04-27T10:59:46.202Z',
-  updatedBy: { fullName: 'Elastic User', username: 'elastic' },
-  title: 'Incident title',
-  description: 'Incident description',
-  labels: ['kibana', 'elastic'],
-  priority: 'High',
-  issueType: '10006',
-  parent: null,
+  incident: {
+    externalId: 'incident-3',
+    summary: 'Incident title',
+    description: 'Incident description',
+    labels: ['kibana', 'elastic'],
+    priority: 'High',
+    issueType: '10006',
+    parent: null,
+  },
   comments: [
     {
       commentId: 'case-comment-1',
       comment: 'A comment',
-      createdAt: '2020-04-27T10:59:46.202Z',
-      createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: '2020-04-27T10:59:46.202Z',
-      updatedBy: { fullName: 'Elastic User', username: 'elastic' },
     },
     {
       commentId: 'case-comment-2',
       comment: 'Another comment',
-      createdAt: '2020-04-27T10:59:46.202Z',
-      createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: '2020-04-27T10:59:46.202Z',
-      updatedBy: { fullName: 'Elastic User', username: 'elastic' },
     },
   ],
 };

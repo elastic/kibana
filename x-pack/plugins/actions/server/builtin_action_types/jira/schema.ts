@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CommentSchema, EntityInformation } from '../case/schema';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
@@ -34,17 +33,23 @@ export const ExecutorSubActionSchema = schema.oneOf([
 ]);
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
-  savedObjectId: schema.nullable(schema.string()),
-  title: schema.string(),
-  description: schema.nullable(schema.string()),
-  externalId: schema.nullable(schema.string()),
-  issueType: schema.nullable(schema.string()),
-  priority: schema.nullable(schema.string()),
-  labels: schema.nullable(schema.arrayOf(schema.string())),
-  parent: schema.nullable(schema.string()),
-  // TODO: modify later to string[] - need for support Case schema
-  comments: schema.nullable(schema.arrayOf(CommentSchema)),
-  ...EntityInformation,
+  incident: schema.object({
+    summary: schema.string(),
+    description: schema.nullable(schema.string()),
+    externalId: schema.nullable(schema.string()),
+    issueType: schema.nullable(schema.string()),
+    priority: schema.nullable(schema.string()),
+    labels: schema.nullable(schema.arrayOf(schema.string())),
+    parent: schema.nullable(schema.string()),
+  }),
+  comments: schema.nullable(
+    schema.arrayOf(
+      schema.object({
+        comment: schema.string(),
+        commentId: schema.string(),
+      })
+    )
+  ),
 });
 
 export const ExecutorSubActionGetIncidentParamsSchema = schema.object({

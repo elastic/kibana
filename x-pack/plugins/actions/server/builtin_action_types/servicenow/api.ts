@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  PushToServiceApiHandlerArgs,
-  HandshakeApiHandlerArgs,
-  GetIncidentApiHandlerArgs,
   ExternalServiceApi,
-  PushToServiceResponse,
   GetCommonFieldsHandlerArgs,
   GetCommonFieldsResponse,
+  GetIncidentApiHandlerArgs,
+  HandshakeApiHandlerArgs,
+  Incident,
+  PushToServiceApiHandlerArgs,
+  PushToServiceResponse,
 } from './types';
 
 const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
@@ -21,10 +22,10 @@ const pushToServiceHandler = async ({
   params,
   secrets,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
-  const { externalId, comments } = params;
+  const comments = params.comments;
   let res: PushToServiceResponse;
-
-  const incident = { ...params, short_description: params.title, comments: params.comment };
+  const { externalId, ...rest } = params.incident;
+  const incident: Incident = rest;
 
   if (externalId != null) {
     res = await externalService.updateIncident({
@@ -40,7 +41,6 @@ const pushToServiceHandler = async ({
     });
   }
 
-  // TODO: should temporary keep comments for a Case usage
   if (comments && Array.isArray(comments) && comments.length > 0) {
     res.comments = [];
 

@@ -22,7 +22,7 @@ import {
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { IncidentConfigurationSchema } from '../case/schema';
-import { Comment } from '../case/types';
+import { SimpleComment } from '../case/types';
 import { Logger } from '../../../../../../src/core/server';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
@@ -61,7 +61,7 @@ export interface ExternalServiceCommentResponse {
 export type ExternalServiceParams = Record<string, unknown>;
 
 export type Incident = Pick<
-  ExecutorSubActionPushParams,
+  ExecutorSubActionPushParams['incident'],
   'description' | 'priority' | 'labels' | 'issueType' | 'parent'
 > & { summary: string };
 
@@ -76,7 +76,7 @@ export interface UpdateIncidentParams {
 
 export interface CreateCommentParams {
   incidentId: string;
-  comment: Comment;
+  comment: SimpleComment;
 }
 
 export interface FieldsSchema {
