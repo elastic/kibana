@@ -219,6 +219,8 @@ export const EndpointList = () => {
 
   const NOOP = useCallback(() => {}, []);
 
+  const PAD_LEFT: React.CSSProperties = { paddingLeft: '6px' };
+
   const handleDeployEndpointsClick = useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>(
     'fleet',
     {
@@ -337,8 +339,22 @@ export const EndpointList = () => {
                   {policy.name}
                 </EndpointPolicyLink>
               </EuiToolTip>
+              {policy.endpoint_policy_version && (
+                <EuiText
+                  color="subdued"
+                  size="xs"
+                  style={{ whiteSpace: 'nowrap', ...PAD_LEFT }}
+                  data-test-subj="policyListRevNo"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.list.policy.revisionNumber"
+                    defaultMessage="rev. {revNumber}"
+                    values={{ revNumber: policy.endpoint_policy_version }}
+                  />
+                </EuiText>
+              )}
               {isPolicyOutOfDate(policy, item.policy_info) && (
-                <OutOfDate style={{ paddingLeft: '6px' }} data-test-subj="rowPolicyOutOfDate" />
+                <OutOfDate style={PAD_LEFT} data-test-subj="rowPolicyOutOfDate" />
               )}
             </>
           );

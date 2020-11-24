@@ -7271,7 +7271,6 @@
     "xpack.fleet.agentPolicyList.pageSubtitle": "使用代理策略管理代理及其收集的数据。",
     "xpack.fleet.agentPolicyList.pageTitle": "代理策略",
     "xpack.fleet.agentPolicyList.reloadAgentPoliciesButtonText": "重新加载",
-    "xpack.fleet.agentPolicyList.revisionNumber": "修订版 {revNumber}",
     "xpack.fleet.agentPolicyList.updatedOnColumnTitle": "上次更新时间",
     "xpack.fleet.agentReassignPolicy.cancelButtonLabel": "取消",
     "xpack.fleet.agentReassignPolicy.continueButtonLabel": "分配策略",
