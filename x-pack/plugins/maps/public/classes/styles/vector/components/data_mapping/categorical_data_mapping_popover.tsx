@@ -46,16 +46,13 @@ export function CategoricalDataMappingPopover(props: Props) {
                 <p>
                   <FormattedMessage
                     id="xpack.maps.styles.categoricalDataMapping.isEnabled.local"
-                    defaultMessage={`When disabled, categories are calculated from local data.
-                    Categories are re-calculated when layer data changes.
-                    Symbols might be inconsistent as users pan, zoom, and filter the map.`}
+                    defaultMessage="When disabled, categories are calculated from local data. Categories are re-calculated when layer data changes. Symbols might be inconsistent as users pan, zoom, and filter the map."
                   />
                 </p>
                 <p>
                   <FormattedMessage
                     id="xpack.maps.styles.categoricalDataMapping.isEnabled.server"
-                    defaultMessage={`When enabled, categories are calculated for the entire data set.
-                    Symbols are consistent as users pan, zoom, and filter the map.`}
+                    defaultMessage="When enabled, categories are calculated for the entire data set. Symbols are consistent as users pan, zoom, and filter the map."
                   />
                 </p>
               </EuiText>

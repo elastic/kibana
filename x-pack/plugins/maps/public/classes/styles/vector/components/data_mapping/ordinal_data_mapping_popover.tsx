@@ -173,17 +173,13 @@ export function OrdinalDataMappingPopover(props: Props) {
                   <p>
                     <FormattedMessage
                       id="xpack.maps.styles.ordinalDataMapping.isEnabled.local"
-                      defaultMessage={`When disabled, min and max are calculated from local data.
-                      Min and max are re-calculated when layer data changes.
-                      Style bands might be inconsistent as users pan, zoom, and filter the map.`}
+                      defaultMessage="When disabled, min and max are calculated from local data. Min and max are re-calculated when layer data changes. Style bands might be inconsistent as users pan, zoom, and filter the map."
                     />
                   </p>
                   <p>
                     <FormattedMessage
                       id="xpack.maps.styles.ordinalDataMapping.isEnabled.server"
-                      defaultMessage={`When enabled, min and max are calculated for the entire data set.
-                      Style bands are consistent as users pan, zoom, and filter the map.
-                      Min and max are clamped to the standard deviation (sigma) from the median to minimize outliers.`}
+                      defaultMessage="When enabled, min and max are calculated for the entire data set. Style bands are consistent as users pan, zoom, and filter the map. Min and max are clamped to the standard deviation (sigma) from the median to minimize outliers."
                     />
                   </p>
                 </EuiText>
