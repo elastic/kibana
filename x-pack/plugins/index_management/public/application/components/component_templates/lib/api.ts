@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import {
   ComponentTemplateListItem,
   ComponentTemplateDeserialized,
@@ -22,7 +22,7 @@ export const getApi = (
   useRequest: UseRequestHook,
   sendRequest: SendRequestHook,
   apiBasePath: string,
-  trackMetric: (type: METRIC_TYPE, eventName: string) => void
+  trackMetric: (type: UiCounterMetricType, eventName: string) => void
 ) => {
   function useLoadComponentTemplates() {
     return useRequest<ComponentTemplateListItem[], Error>({

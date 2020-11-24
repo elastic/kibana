@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 
 import { HttpSetup, DocLinksStart, NotificationsSetup, CoreStart } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
@@ -29,7 +29,7 @@ interface Context {
   api: ReturnType<typeof getApi>;
   documentation: ReturnType<typeof getDocumentation>;
   breadcrumbs: ReturnType<typeof getBreadcrumbs>;
-  trackMetric: (type: METRIC_TYPE, eventName: string) => void;
+  trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
 }

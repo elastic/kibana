@@ -20,16 +20,12 @@ export class UiMetricService {
     this.usageCollection = usageCollection;
   }
 
-  private track(type: UiCounterMetricType, name: string) {
+  public trackMetric(type: UiCounterMetricType, eventName: string) {
     if (!this.usageCollection) {
       // Usage collection might have been disabled in Kibana config.
       return;
     }
-    this.usageCollection.reportUiCounter(this.appName, type, name);
-  }
-
-  public trackMetric(type: UiCounterMetricType, eventName: string) {
-    return this.track(type, eventName);
+    return this.usageCollection.reportUiCounter(this.appName, type, name);
   }
 }
 
