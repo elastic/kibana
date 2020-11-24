@@ -104,7 +104,7 @@ const search = async (engineName: string): Promise<ISearchResponse> => {
 // Since the App Search API does not issue document receipts, the only way to tell whether or not documents
 // are fully indexed is to poll the search endpoint.
 export const waitForIndexedDocs = (engineName: string) => {
-  return new Promise(async function (resolve) {
+  return new Promise<void>(async function (resolve) {
     let isReady = false;
     while (!isReady) {
       const response = await search(engineName);

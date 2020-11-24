@@ -35,3 +35,4 @@ export * from './lib/ip_range';
 export * from './migrate_include_exclude_format';
 export * from './significant_terms';
 export * from './terms';
+export * from './lib/time_buckets/calc_auto_interval';

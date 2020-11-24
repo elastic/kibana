@@ -19,3 +19,23 @@ Object {
   "type": "expression",
 }
 `;
+
+exports[`timelion vis toExpressionAst function should not escape single quotes 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "expression": Array [
+          ".es(index=my*,timefield=\\"date\\",split='test field:3',metric='avg:value')",
+        ],
+        "interval": Array [
+          "auto",
+        ],
+      },
+      "function": "timelion_vis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

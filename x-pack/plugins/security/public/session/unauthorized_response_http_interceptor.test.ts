@@ -34,7 +34,7 @@ afterEach(() => {
 it(`logs out 401 responses`, async () => {
   const http = setupHttp('/foo');
   const sessionExpired = new SessionExpired(`${http.basePath}/logout`, tenant);
-  const logoutPromise = new Promise((resolve) => {
+  const logoutPromise = new Promise<void>((resolve) => {
     jest.spyOn(sessionExpired, 'logout').mockImplementation(() => resolve());
   });
   const interceptor = new UnauthorizedResponseHttpInterceptor(sessionExpired, http.anonymousPaths);
