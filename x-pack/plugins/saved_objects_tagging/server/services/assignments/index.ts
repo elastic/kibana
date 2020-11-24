@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TagsClient, savedObjectToTag, TagValidationError } from './tags';
-export { IAssignmentService, AssignmentService } from './assignments';
+export { AssignmentService, IAssignmentService } from './assignment_service';

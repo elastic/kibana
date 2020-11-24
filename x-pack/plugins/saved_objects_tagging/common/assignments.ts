@@ -11,3 +11,26 @@ export interface ObjectReference {
   type: string;
   id: string;
 }
+
+/**
+ * Represent an assignable saved object, as returned by the `_find_assignable_objects` API
+ */
+export interface AssignableObject extends ObjectReference {
+  icon?: string;
+  title: string;
+  tags: string[];
+}
+
+export interface UpdateTagAssignmentsOptions {
+  tags: string[];
+  assign: ObjectReference[];
+  unassign: ObjectReference[];
+}
+
+export interface FindAssignableObjectOptions {
+  search?: string;
+  maxResults?: number;
+  types?: string[];
+}
+
+export const getKey = ({ id, type }: ObjectReference) => `${type}|${id}`;

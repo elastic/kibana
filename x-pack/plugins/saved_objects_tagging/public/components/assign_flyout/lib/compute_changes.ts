@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssignableObject } from '../../../../common/types';
+import { AssignableObject } from '../../../../common/assignments';
 import { AssignmentStatusMap, AssignmentOverrideMap } from '../types';
 import { getAssignmentAction, getKey } from '../utils';
 

@@ -7,7 +7,7 @@
 import React, { FC, useState, useEffect, useCallback } from 'react';
 import { EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle, EuiFlexItem, Query } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AssignableObject } from '../../../common/types';
+import { AssignableObject } from '../../../common/assignments';
 import { ITagAssignmentService } from '../../services';
 import { parseQuery, computeRequiredChanges } from './lib';
 import { AssignmentOverrideMap, AssignmentStatus, AssignmentStatusMap } from './types';

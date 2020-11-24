@@ -5,8 +5,11 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { AssignableObject } from '../../../common/types';
-import { ObjectReference } from '../../../common/assignments';
+import {
+  UpdateTagAssignmentsOptions,
+  FindAssignableObjectOptions,
+  AssignableObject,
+} from '../../../common/assignments';
 
 export interface ITagAssignmentService {
   findAssignableObject(options: FindAssignableObjectOptions): Promise<AssignableObject[]>;
@@ -17,22 +20,8 @@ export interface TagAssignmentServiceOptions {
   http: HttpSetup;
 }
 
-export interface FindAssignableObjectOptions {
-  search?: string;
-  maxResults?: number;
-  types?: string[];
-}
-
-// TODO: move to common + use for response
 export interface FindAssignableObjectResponse {
   objects: AssignableObject[];
-  total: number;
-}
-
-export interface UpdateTagAssignmentsOptions {
-  tags: string[];
-  assign: ObjectReference[];
-  unassign: ObjectReference[];
 }
 
 export class TagAssignmentService implements ITagAssignmentService {

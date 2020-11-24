@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { EuiIcon, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
-import { AssignableObject } from '../../../../common/types';
+import { AssignableObject } from '../../../../common/assignments';
 import { AssignmentOverrideMap, AssignmentStatusMap } from '../types';
 import { getKey, getOverriddenStatus } from '../utils';
 
