@@ -80,28 +80,7 @@ export const createPackagePolicyHandler: RequestHandler<
   const logger = appContextService.getLogger();
   let newData = { ...request.body };
   try {
-    // If we have external callbacks, then process those now before creating the actual package policy
-    const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyCreate');
-    if (externalCallbacks && externalCallbacks.size > 0) {
-      let updatedNewData: NewPackagePolicy = newData;
-
-      for (const callback of externalCallbacks) {
-        try {
-          // ensure that the returned value by the callback passes schema validation
-          updatedNewData = CreatePackagePolicyRequestSchema.body.validate(
-            await callback(updatedNewData, context, request)
-          );
-        } catch (error) {
-          // Log the error, but keep going and process the other callbacks
-          logger.error(
-            'An external registered [packagePolicyCreate] callback failed when executed'
-          );
-          logger.error(error);
-        }
-      }
-
-      newData = updatedNewData;
-    }
+    newData = await packagePolicyService.runCreateExternalCallbacks(newData, context, request);
 
     // Create package policy
     const packagePolicy = await packagePolicyService.create(soClient, callCluster, newData, {

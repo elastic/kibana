@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'src/core/server';
+import { KibanaRequest, RequestHandlerContext, SavedObjectsClientContract } from 'src/core/server';
 import uuid from 'uuid';
 import { AuthenticatedUser } from '../../../security/server';
 import {
@@ -25,6 +25,7 @@ import {
   PackagePolicySOAttributes,
   RegistryPackage,
   CallESAsCurrentUser,
+  NewPackagePolicySchema,
 } from '../types';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
@@ -33,6 +34,7 @@ import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/p
 import { getAssetsData } from './epm/packages/assets';
 import { createStream } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
+import { appContextService } from '.';
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
@@ -384,6 +386,32 @@ class PackagePolicyService {
     );
 
     return Promise.all(inputsPromises);
+  }
+
+  public async runCreateExternalCallbacks(
+    newPackagePolicy: NewPackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<NewPackagePolicy> {
+    let newData = newPackagePolicy;
+    const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyCreate');
+    if (externalCallbacks && externalCallbacks.size > 0) {
+      let updatedNewData: NewPackagePolicy = newData;
+
+      for (const callback of externalCallbacks) {
+        try {
+          // ensure that the returned value by the callback passes schema validation
+          updatedNewData = NewPackagePolicySchema.validate(
+            await callback(updatedNewData, context, request)
+          );
+        } catch (error) {
+          throw error;
+        }
+      }
+
+      newData = updatedNewData;
+    }
+    return newData;
   }
 }
 
