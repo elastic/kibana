@@ -9,7 +9,7 @@ legacy APIs to their {kib} Platform equivalents.
 ==== Declaring config schema
 
 Declaring the schema of your configuration fields is similar to the
-Legacy Platform but uses the `@kbn/config-schema` package instead of
+Legacy Platform, but uses the `@kbn/config-schema` package instead of
 Joi. This package has full TypeScript support out-of-the-box.
 
 *Legacy config schema*
@@ -91,7 +91,7 @@ export class MyPlugin implements Plugin {
 }
 ----
 
-Additionally, some plugins need to access runtime env configuration
+Additionally, some plugins need to access the runtime env configuration.
 
 [source,typescript]
 ----
@@ -101,10 +101,10 @@ export class MyPlugin implements Plugin {
   }
 ----
 
-=== Create a {kib} Platform plugin
+=== Creating a {kib} Platform plugin
 
-For example, if wanted to move the legacy `demoplugin` plugin's
-configuration to the {kib} Platform, we could create {kib} Platform plugin with the
+For example, if you want to move the legacy `demoplugin` plugin's
+configuration to the {kib} Platform, you could create the {kib} Platform plugin with the
 same name in `plugins/demoplugin` with the following files:
 
 *plugins/demoplugin/kibana.json*
@@ -158,7 +158,7 @@ export class DemoPlugin implements Plugin<DemoPluginSetup> {
 === HTTP Routes
 
 In the legacy platform, plugins have direct access to the Hapi `server`
-object which gives full access to all of Hapi’s API. In the New
+object, which gives full access to all of Hapi’s API. In the New
 Platform, plugins have access to the
 {kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md[HttpServiceSetup]
 interface, which is exposed via the
@@ -170,7 +170,7 @@ This interface has a different API with slightly different behaviors.
 * All input (body, query parameters, and URL parameters) must be
 validated using the `@kbn/config-schema` package. If no validation
 schema is provided, these values will be empty objects.
-* All exceptions are thrown by handlers result in 500 errors. If you need a
+* All exceptions thrown by handlers result in 500 errors. If you need a
 specific HTTP error code, catch any exceptions in your handler and
 construct the appropriate response using the provided response factory.
 While you can continue using the `Boom` module internally in your
@@ -322,7 +322,7 @@ logic that may do some pre-work or validation. In {kib}, these are
 often used for license checks.
 
 The {kib} Platform’s HTTP interface does not provide this
-functionality, however, it is simple enough to port overusing a
+functionality. However, it is simple enough to port over using
 a higher-order function that can wrap the route handler.
 
 ==== Simple example
@@ -355,10 +355,10 @@ server.route({
 
 In the {kib} Platform, the same functionality can be achieved by
 creating a function that takes a route handler (or factory for a route
-handler) as an argument and either invoke it in the successful case or
-returns an error response in the failure case.
+handler) as an argument and either successfully invokes it or
+returns an error response.
 
-We’ll call this a `high-order handler` similar to the `high-order
+This a `high-order handler` similar to the `high-order
 component` pattern common in the React ecosystem.
 
 [source,typescript]
@@ -425,7 +425,7 @@ server.route({
 In many cases, it may be simpler to duplicate the function call to
 retrieve the data again in the main handler. In other cases, you
 can utilize a handler _factory_ rather than a raw handler as the
-argument to your high-order handler. This way the high-order handler can
+argument to your high-order handler. This way, the high-order handler can
 pass arbitrary arguments to the route handler.
 
 [source,typescript]
@@ -459,12 +459,12 @@ router.get(
 
 In the Legacy Platform, the `ui/chrome` import contained APIs for a very
 wide range of features. In the {kib} Platform, some of these APIs have
-changed or moved elsewhere. See <<client-side-core-migration-table>>
+changed or moved elsewhere. See <<client-side-core-migration-table>>.
 
 ==== Updating an application navlink
 
 In the legacy platform, the navlink could be updated using
-`chrome.navLinks.update`
+`chrome.navLinks.update`.
 
 [source,typescript]
 ----
@@ -576,7 +576,7 @@ httpResources.register(
 );
 ----
 
-You can also specify to exclude user data from the bundle metadata. User
+You can also exclude user data from the bundle metadata. User
 data comprises all UI Settings that are _user provided_, then injected
 into the page. You may wish to exclude fetching this data if not
 authorized or to slim the page size.
@@ -598,7 +598,7 @@ httpResources.register(
 In the legacy platform, saved object types were registered using static
 definitions in the `uiExports` part of the plugin manifest.
 
-In the {kib} Platform, all these registrations are to be performed
+In the {kib} Platform, all these registrations are performed
 programmatically during your plugin’s `setup` phase, using the core
 `savedObjects`’s `registerType` setup API.
 
@@ -609,7 +609,7 @@ new `SavedObjectsType` structure that is a superset of the legacy
 
 ==== Concrete example
 
-Let say we have the following in a legacy plugin:
+Suppose you have the following in a legacy plugin:
 
 *legacy/plugins/demoplugin/index.ts*
 [source,js]
@@ -702,8 +702,7 @@ export const migrations = {
 }
 ----
 
-To migrate this, we will have to regroup the declaration per-type. That
-would become:
+To migrate this, you have to regroup the declaration per-type.
 
 First type:
 *plugins/demoplugin/server/saved_objects/first_type.ts*
@@ -810,7 +809,7 @@ instead an enum of `single`, `multiple`, or `agnostic` (see
 accepts a string, as you can access the configuration during your
 plugin’s setup phase.
 * The `savedObjectsManagement.isImportableAndExportable` property has
-been renamed: `SavedObjectsType.management.importableAndExportable`
+been renamed: `SavedObjectsType.management.importableAndExportable`.
 * The migration function signature has changed: In legacy, it used to be
 [source,typescript]
 ----
@@ -895,38 +894,38 @@ client documentation]
 
 The most significant changes for the consumers are the following:
 
-* internal / current user client accessors has been renamed and are now
-properties instead of functions
+* Internal /current user client accessors has been renamed and are now
+properties instead of functions:
 ** `callAsInternalUser('ping')` -> `asInternalUser.ping()`
 ** `callAsCurrentUser('ping')` -> `asCurrentUser.ping()`
 * the API now reflects the `Client`’s instead of leveraging the
-string-based endpoint names the `LegacyAPICaller` was using
+string-based endpoint names the `LegacyAPICaller` was using.
 
-before:
+Before:
 
 [source,typescript]
 ----
 const body = await client.callAsInternalUser('indices.get', { index: 'id' });
 ----
 
-after:
+After:
 
 [source,typescript]
 ----
 const { body } = await client.asInternalUser.indices.get({ index: 'id' });
 ----
 
-* calling any ES endpoint now returns the whole response object instead
-of only the body payload
+* Calling any ES endpoint now returns the whole response object instead
+of only the body payload.
 
-before:
+Before:
 
 [source,typescript]
 ----
 const body = await legacyClient.callAsInternalUser('get', { id: 'id' });
 ----
 
-after:
+After:
 
 [source,typescript]
 ----
@@ -946,17 +945,17 @@ const {
 } = await client.asInternalUser.get({ id: 'id' });
 ----
 
-* all API methods are now generic to allow specifying the response body
+* All API methods are now generic to allow specifying the response body.
 type
 
-before:
+Before:
 
 [source,typescript]
 ----
 const body: GetResponse = await legacyClient.callAsInternalUser('get', { id: 'id' });
 ----
 
-after:
+After:
 
 [source,typescript]
 ----
@@ -966,13 +965,13 @@ const { body } = await client.asInternalUser.get<GetResponse>({ id: 'id' });
 const { body } = await client.asInternalUser.get({ id: 'id' });
 ----
 
-* the returned error types changed
+* The returned error types changed.
 
 There are no longer specific errors for every HTTP status code (such as
 `BadRequest` or `NotFound`). A generic `ResponseError` with the specific
 `statusCode` is thrown instead.
 
-before:
+Before:
 
 [source,typescript]
 ----
@@ -987,7 +986,7 @@ try {
 }
 ----
 
-after:
+After:
 
 [source,typescript]
 ----
@@ -1009,10 +1008,10 @@ try {
 
 * the parameter property names changed from camelCase to snake_case
 
-Even if technically, the javascript client accepts both formats, the
-typescript definitions are only defining snake_case properties.
+Even if technically, the JavaScript client accepts both formats, the
+TypeScript definitions are only defining snake_case properties.
 
-before:
+Before:
 
 [source,typescript]
 ----
@@ -1022,7 +1021,7 @@ legacyClient.callAsCurrentUser('get', {
 })
 ----
 
-after:
+After:
 
 [source,typescript]
 ----
@@ -1032,12 +1031,12 @@ client.asCurrentUser.get({
 })
 ----
 
-* the request abortion API changed
+* The request abortion API changed
 
 All promises returned from the client API calls now have an `abort`
 method that can be used to cancel the request.
 
-before:
+Before:
 
 [source,typescript]
 ----
@@ -1049,7 +1048,7 @@ legacyClient.callAsCurrentUser('ping', {}, {
 controller.abort();
 ----
 
-after:
+After:
 
 [source,typescript]
 ----
@@ -1058,7 +1057,7 @@ const request = client.asCurrentUser.ping();
 request.abort();
 ----
 
-* it is now possible to override headers when performing specific API
+* It is now possible to override headers when performing specific API
 calls.
 
 Note that doing so is strongly discouraged due to potential side effects
@@ -1075,10 +1074,10 @@ const request = client.asCurrentUser.ping({}, {
 });
 ----
 
-* the new client doesn’t provide exhaustive typings for the response
+* The new client doesn’t provide exhaustive typings for the response
 object yet. You might have to copy response type definitions from the
 Legacy Elasticsearch library until
-https://github.com/elastic/elasticsearch-js/pull/970 merged.
+https://github.com/elastic/elasticsearch-js/pull/970 is merged.
 
 [source,typescript]
 ----
@@ -1092,21 +1091,22 @@ const { body } = await client.info<Info>(...);
 ----
 
 * Functional tests are subject to migration to the new client as well.
-before:
+
+Before:
 
 [source,typescript]
 ----
 const client = getService('legacyEs');
 ----
 
-after:
+After:
 
 [source,typescript]
 ----
 const client = getService('es');
 ----
 
-Please refer to the
+Refer to the
 https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/breaking-changes.html[Breaking
 changes list] for more information about the changes between the legacy
 and new client.
@@ -1116,7 +1116,7 @@ and new client.
 Apart from the API format change, accessing the client from within a
 route handler did not change. As it was done for the legacy client, a
 preconfigured <<scoped-services, scoped client>> bound to an incoming request is accessible using
-`core` context provider:
+the `core` context provider:
 
 [source,typescript]
 ----
@@ -1143,7 +1143,7 @@ plugins should no longer be necessary.
 
 The API to create custom clients did not change much:
 
-before:
+Before:
 
 [source,typescript]
 ----
@@ -1154,7 +1154,7 @@ await customClient.callAsInternalUser('ping');
 customClient.close();
 ----
 
-after:
+After:
 
 [source,typescript]
 ----
@@ -1165,7 +1165,7 @@ await customClient.asInternalUser.ping();
 customClient.close();
 ----
 
-If, for any reasons, one still needs to reach an endpoint not listed on
+If, for any reasons, you still need to reach an endpoint not listed on
 the client API, using `request.transport` is still possible:
 
 [source,typescript]
