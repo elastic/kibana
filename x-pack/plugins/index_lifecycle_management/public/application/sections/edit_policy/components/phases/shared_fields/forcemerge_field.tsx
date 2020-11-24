@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
 
 import { UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
 
@@ -56,7 +56,6 @@ export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
         initialValue: initialToggleValue,
       }}
     >
-      <EuiSpacer />
       <div id="forcemergeContent" aria-live="polite" role="region">
         <UseField
           key={`phases.${phase}.actions.forcemerge.max_num_segments`}

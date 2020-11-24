@@ -14,6 +14,8 @@ import { determineDataTierAllocationType } from '../../../lib';
 
 import { FormInternal } from '../types';
 
+import { isUsingDefaultRolloverConfig } from './lib';
+
 export const deserializer = (policy: SerializedPolicy): FormInternal => {
   const {
     phases: { hot, warm, cold, delete: deletePhase },
@@ -22,6 +24,7 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
   const _meta: FormInternal['_meta'] = {
     hot: {
       useRollover: Boolean(hot?.actions?.rollover),
+      hasConfiguredRollover: !isUsingDefaultRolloverConfig(hot),
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
     },
     warm: {

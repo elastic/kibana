@@ -197,7 +197,6 @@ export const WarmPhase: FunctionComponent = () => {
               fullWidth
             >
               <div id="shrinkContent" aria-live="polite" role="region">
-                <EuiSpacer />
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <UseField

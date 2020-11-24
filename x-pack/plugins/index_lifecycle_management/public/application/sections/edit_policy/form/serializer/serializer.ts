@@ -14,6 +14,8 @@ import { defaultPolicy } from '../../../../constants';
 
 import { FormInternal } from '../../types';
 
+import { ROLLOVER_DEFAULT } from '../lib';
+
 import { serializeMigrateAndAllocateActions } from './serialize_migrate_and_allocate_actions';
 
 export const createSerializer = (originalPolicy?: SerializedPolicy) => (
@@ -43,12 +45,16 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     if (draft.phases.hot?.actions) {
       const hotPhaseActions = draft.phases.hot.actions;
       if (hotPhaseActions.rollover && _meta.hot.useRollover) {
-        if (hotPhaseActions.rollover.max_age) {
-          hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
-        }
+        if (_meta.hot.hasConfiguredRollover) {
+          if (hotPhaseActions.rollover.max_age) {
+            hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
+          }
 
-        if (hotPhaseActions.rollover.max_size) {
-          hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
+          if (hotPhaseActions.rollover.max_size) {
+            hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
+          }
+        } else {
+          hotPhaseActions.rollover = { ...ROLLOVER_DEFAULT };
         }
 
         if (!updatedPolicy.phases.hot!.actions?.forcemerge) {

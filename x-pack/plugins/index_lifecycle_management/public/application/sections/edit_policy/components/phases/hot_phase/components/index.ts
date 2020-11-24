@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { deserializer } from './deserializer';
-
-export { createSerializer } from './serializer';
-
-export { schema } from './schema';
-
-export * from './validations';
-
-export * from './lib';
+export { RolloverFields } from './rollover_fields';
