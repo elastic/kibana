@@ -45,54 +45,53 @@ const getFindRequestConfig = (searchStrategyName, factoryQueryType) => {
   };
 };
 
-Cypress.Commands.add('stubSearchStrategyApi', function (
-  stubObject,
-  factoryQueryType,
-  searchStrategyName = 'securitySolutionSearchStrategy'
-) {
-  cy.route2('POST', '/internal/bsearch', (req) => {
-    const bodyObj = JSON.parse(req.body);
-    const findRequestConfig = getFindRequestConfig(searchStrategyName, factoryQueryType);
+Cypress.Commands.add(
+  'stubSearchStrategyApi',
+  function (stubObject, factoryQueryType, searchStrategyName = 'securitySolutionSearchStrategy') {
+    cy.route2('POST', '/internal/bsearch', (req) => {
+      const bodyObj = JSON.parse(req.body);
+      const findRequestConfig = getFindRequestConfig(searchStrategyName, factoryQueryType);
 
-    const requestIndex = findIndex(findRequestConfig, bodyObj.batch);
+      const requestIndex = findIndex(findRequestConfig, bodyObj.batch);
 
-    if (requestIndex > -1) {
-      return req.reply((res) => {
-        const responseObjectsArray = res.body.split('\n').map((responseString) => {
-          try {
-            return JSON.parse(responseString);
-          } catch {
-            return responseString;
-          }
-        });
-        const responseIndex = findIndex({ id: requestIndex }, responseObjectsArray);
-
-        const stubbedResponseObjectsArray = [...responseObjectsArray];
-        stubbedResponseObjectsArray[responseIndex] = {
-          ...stubbedResponseObjectsArray[responseIndex],
-          result: {
-            ...stubbedResponseObjectsArray[responseIndex].result,
-            ...stubObject,
-          },
-        };
-
-        const stubbedResponse = stubbedResponseObjectsArray
-          .map((object) => {
+      if (requestIndex > -1) {
+        return req.reply((res) => {
+          const responseObjectsArray = res.body.split('\n').map((responseString) => {
             try {
-              return JSON.stringify(object);
+              return JSON.parse(responseString);
             } catch {
-              return object;
+              return responseString;
             }
-          })
-          .join('\n');
+          });
+          const responseIndex = findIndex({ id: requestIndex }, responseObjectsArray);
 
-        res.send(stubbedResponse);
-      });
-    }
+          const stubbedResponseObjectsArray = [...responseObjectsArray];
+          stubbedResponseObjectsArray[responseIndex] = {
+            ...stubbedResponseObjectsArray[responseIndex],
+            result: {
+              ...stubbedResponseObjectsArray[responseIndex].result,
+              ...stubObject,
+            },
+          };
 
-    req.reply();
-  });
-});
+          const stubbedResponse = stubbedResponseObjectsArray
+            .map((object) => {
+              try {
+                return JSON.stringify(object);
+              } catch {
+                return object;
+              }
+            })
+            .join('\n');
+
+          res.send(stubbedResponse);
+        });
+      }
+
+      req.reply();
+    });
+  }
+);
 
 Cypress.Commands.add(
   'attachFile',
