@@ -49,7 +49,7 @@ export const TableVisBasic = memo(
         sort.columnIndex !== null && sort.direction
           ? orderBy(rows, columns[sort.columnIndex]?.id, sort.direction)
           : rows,
-      [rows, sort]
+      [columns, rows, sort]
     );
 
     // renderCellValue is a component which renders a cell based on column and row indexes
@@ -74,7 +74,7 @@ export const TableVisBasic = memo(
         sort.columnIndex !== null && sort.direction
           ? [{ id: columns[sort.columnIndex]?.id, direction: sort.direction }]
           : [],
-      [sort]
+      [columns, sort]
     );
     const onSort = useCallback(
       (sortingCols: EuiDataGridSorting['columns'] | []) => {

@@ -36,7 +36,7 @@ export const useSort = (uiState: IInterpreterRenderHandlers['uiState']) => {
     (s: TableVisUiState['sort'] = defaultSort) => {
       uiState?.set('vis.params.sort', s);
     },
-    [uiState?.set]
+    [uiState]
   );
 
   useEffect(() => {
