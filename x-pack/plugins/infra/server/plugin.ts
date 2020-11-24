@@ -88,7 +88,7 @@ export class InfraServerPlugin {
   }
 
   async setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       this.config$.subscribe((configValue) => {
         this.config = configValue;
         resolve();
