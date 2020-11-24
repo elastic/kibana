@@ -59,5 +59,5 @@ export const DatavisualizerFieldTypeFilter: FC<{
       };
     });
   }, [indexedFieldTypes]);
-  return <MultiselectPicker options={options} onChange={() => {}} />;
+  return <MultiselectPicker title={'Field type'} options={options} onChange={() => {}} />;
 };

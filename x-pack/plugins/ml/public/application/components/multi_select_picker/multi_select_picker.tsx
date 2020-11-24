@@ -17,10 +17,12 @@ import {
 import React, { FC, ReactNode, useEffect, useState } from 'react';
 
 export interface Option {
-  name: string | ReactNode;
+  name?: string | ReactNode;
+  value: string;
   checked?: 'on' | 'off';
   disabled?: boolean;
   type?: string;
+  onChange?: (items: any[]) => void;
 }
 
 const NoFilterItems = () => {
@@ -35,10 +37,11 @@ const NoFilterItems = () => {
   );
 };
 
-export const MultiselectPicker: FC<{ options: Option[]; onChange: Function }> = ({
-  options,
-  onChange,
-}) => {
+export const MultiselectPicker: FC<{
+  options: Option[];
+  onChange: Function;
+  title?: string;
+}> = ({ options, onChange, title }) => {
   const [items, setItems] = useState<Option[]>(options);
 
   useEffect(() => {
@@ -75,7 +78,11 @@ export const MultiselectPicker: FC<{ options: Option[]; onChange: Function }> = 
         newItems[index].checked = 'on';
     }
 
-    setItems(newItems);
+    if (onChange) {
+      onChange(newItems, new Set(newItems.filter((i) => i.checked === 'on').map((i) => i.value)));
+    } else {
+      setItems(newItems);
+    }
   }
 
   const button = (
@@ -87,7 +94,7 @@ export const MultiselectPicker: FC<{ options: Option[]; onChange: Function }> = 
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}
       numActiveFilters={items.filter((item) => item.checked === 'on').length}
     >
-      Field name
+      {title}
     </EuiFilterButton>
   );
 

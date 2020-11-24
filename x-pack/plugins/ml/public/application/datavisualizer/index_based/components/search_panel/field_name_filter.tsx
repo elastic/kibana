@@ -33,5 +33,5 @@ export const DatavisualizerFieldNameFilter: FC<Props> = ({ overallStats }) => {
     setItems(options);
   }, [overallStats]);
 
-  return <MultiselectPicker options={items} onChange={() => {}} />;
+  return <MultiselectPicker title="Field name" options={items} onChange={() => {}} />;
 };
