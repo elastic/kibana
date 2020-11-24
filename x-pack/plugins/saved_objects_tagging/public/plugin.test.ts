@@ -14,7 +14,7 @@ import { SavedObjectsTaggingClientConfigRawType } from './config';
 import { TagsCache } from './services';
 import { tagsCacheMock } from './services/tags/tags_cache.mock';
 
-jest.mock('./tags/tags_cache');
+jest.mock('./services/tags/tags_cache');
 const MockedTagsCache = (TagsCache as unknown) as jest.Mock<PublicMethodsOf<TagsCache>>;
 
 describe('SavedObjectTaggingPlugin', () => {
