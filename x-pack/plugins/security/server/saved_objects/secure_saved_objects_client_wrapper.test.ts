@@ -12,6 +12,10 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { SavedObjectActions } from '../authorization/actions/saved_object';
 import { AuditEvent, EventOutcome } from '../audit';
 
+jest.mock('../../../../../src/core/server/saved_objects/serialization/serializer', () => ({
+  generateSavedObjectId: () => 'GENERATED_ID',
+}));
+
 let clientOpts: ReturnType<typeof createSecureSavedObjectsClientWrapperOptions>;
 let client: SecureSavedObjectsClientWrapper;
 const USERNAME = Symbol();
@@ -686,7 +690,7 @@ describe('#create', () => {
   });
 
   test(`throws decorated ForbiddenError when unauthorized`, async () => {
-    const options = { namespace };
+    const options = { id: 'GENERATED_ID', namespace };
     await expectForbiddenError(client.create, { type, attributes, options });
   });
 
@@ -694,8 +698,12 @@ describe('#create', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.create.mockResolvedValue(apiCallReturnValue as any);
 
-    const options = { namespace };
-    const result = await expectSuccess(client.create, { type, attributes, options });
+    const options = { id: 'GENERATED_ID', namespace };
+    const result = await expectSuccess(client.create, {
+      type,
+      attributes,
+      options,
+    });
     expect(result).toBe(apiCallReturnValue);
   });
 
@@ -721,7 +729,7 @@ describe('#create', () => {
   test(`adds audit event when successful`, async () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.create.mockResolvedValue(apiCallReturnValue as any);
-    const options = { namespace };
+    const options = { id: 'GENERATED_ID', namespace };
     await expectSuccess(client.create, { type, attributes, options });
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
     expectAuditEvent('saved_object_create', EventOutcome.UNKNOWN, { type, id: expect.any(String) });

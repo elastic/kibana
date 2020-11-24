@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from '@hapi/boom';
+
+import { i18n } from '@kbn/i18n';
+import { omitBy, isUndefined } from 'lodash';
 import {
   ILegacyScopedClusterClient,
   SavedObjectsClientContract,
@@ -12,10 +15,7 @@ import {
   KibanaRequest,
   generateSavedObjectId,
 } from '../../../../src/core/server';
-
-import { i18n } from '@kbn/i18n';
-import { omitBy, isUndefined } from 'lodash';
-import { AuditLogger, EventOutcome } from '../../security/server/audit';
+import { AuditLogger, EventOutcome } from '../../security/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';

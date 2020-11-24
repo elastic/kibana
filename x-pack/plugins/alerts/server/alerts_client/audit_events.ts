@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuditEvent, EventOutcome, EventCategory, EventType } from '../../../security/server/audit';
+import { AuditEvent, EventOutcome, EventCategory, EventType } from '../../../security/server';
 
 export enum AlertRuleAction {
   CREATE = 'alert_rule_create',
