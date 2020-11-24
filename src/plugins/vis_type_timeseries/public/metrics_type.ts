@@ -19,12 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
-import { metricsRequestHandler } from './request_handler';
 import { EditorController } from './application';
-// @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
-import { VisEditor } from './application/components/vis_editor_lazy';
+import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
 import { INDEXES_SEPARATOR } from '../common/constants';
@@ -73,7 +70,6 @@ export const metricsVisDefinition = {
       show_grid: 1,
       tooltip_mode: 'show_all',
     },
-    component: VisEditor,
   },
   editor: EditorController,
   options: {
@@ -81,7 +77,7 @@ export const metricsVisDefinition = {
     showFilterBar: false,
     showIndexSelection: false,
   },
-  requestHandler: metricsRequestHandler,
+  toExpressionAst,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },
@@ -100,5 +96,4 @@ export const metricsVisDefinition = {
 
     return [];
   },
-  responseHandler: 'none',
 };
