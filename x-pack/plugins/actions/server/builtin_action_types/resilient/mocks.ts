@@ -392,7 +392,6 @@ const executorParams: ExecutorSubActionPushParams = {
 
 const apiParams: PushToServiceApiParams = {
   ...executorParams,
-  externalObject: { name: 'Incident title', description: 'Incident description' },
 };
 
 const incidentTypes = [

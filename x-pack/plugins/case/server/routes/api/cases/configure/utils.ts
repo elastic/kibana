@@ -7,11 +7,11 @@ import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
   ConnectorBasicCaseParams,
+  ConnectorCommentParams,
   ConnectorMappingsAttributes,
   ConnectorTypes,
   EntityInformation,
   ExternalServiceParams,
-  ExternalServiceStringParams,
   Incident,
   JiraPushToServiceApiParams,
   MapIncident,
@@ -27,8 +27,6 @@ import {
 } from '../../../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionsClient } from '../../../../../../actions/server/actions_client';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comment } from '../../../../../../actions/server/builtin_action_types/case/types';
 
 export const mapIncident = async (
   actionsClient: ActionsClient,
@@ -62,11 +60,10 @@ export const mapIncident = async (
     }
   }
 
-  const deezParams = (params as unknown) as ExternalServiceStringParams;
   const fields = prepareFieldsForTransformation({
     defaultPipes,
     mappings,
-    params: deezParams,
+    params,
   });
 
   const transformedFields = transformFields<
@@ -179,7 +176,7 @@ export const transformers: Record<string, Transformer> = {
     ...rest,
   }),
 };
-const prepareFieldsForTransformation = ({
+export const prepareFieldsForTransformation = ({
   defaultPipes,
   mappings,
   params,
@@ -194,7 +191,7 @@ const prepareFieldsForTransformation = ({
             ...acc,
             {
               key: mapping.target,
-              value: params[mapping.source],
+              value: params[mapping.source] ?? '',
               actionType: mapping.action_type,
               pipes: mapping.action_type === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
             },
@@ -226,7 +223,10 @@ export const transformFields = <
   }, {} as R);
 };
 
-export const transformComments = (comments: Comment[], pipes: string[]): SimpleComment[] =>
+export const transformComments = (
+  comments: ConnectorCommentParams[],
+  pipes: string[]
+): SimpleComment[] =>
   comments.map((c) => ({
     comment: flow(...pipes.map((p) => transformers[p]))({
       value: c.comment,

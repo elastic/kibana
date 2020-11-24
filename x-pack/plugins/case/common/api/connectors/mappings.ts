@@ -20,6 +20,9 @@ import {
   PushToServiceApiParams as ServiceNowPushToServiceApiParams,
   Incident as ServiceNowIncident,
 } from '../../../../actions/server/builtin_action_types/servicenow/types';
+import { ResilientFieldsRT } from './resilient';
+import { ServiceNowFieldsRT } from './servicenow';
+import { JiraFieldsRT } from './jira';
 
 export {
   JiraPushToServiceApiParams,
@@ -92,9 +95,8 @@ export interface PipedField {
 }
 export interface PrepareFieldsForTransformArgs {
   defaultPipes: string[];
-  // params: PushToServiceApiParams;
-  params: Record<string, string>;
   mappings: ConnectorMappingsAttributes[];
+  params: ConnectorBasicCaseParams;
 }
 export interface EntityInformation {
   createdAt: string | null;
@@ -129,6 +131,8 @@ export const ConnectorCommentParamsRt = rt.type({
   updatedBy: rt.union([ConnectorUserParams, rt.null]),
 });
 
+export type ConnectorCommentParams = rt.TypeOf<typeof ConnectorCommentParamsRt>;
+
 export const ConnectorBasicCaseParamsRt = rt.type({
   comments: rt.union([rt.array(ConnectorCommentParamsRt), rt.null]),
   createdAt: rt.string,
@@ -140,15 +144,14 @@ export const ConnectorBasicCaseParamsRt = rt.type({
   updatedAt: rt.union([rt.string, rt.null]),
   updatedBy: rt.union([ConnectorUserParams, rt.null]),
   // third party fields
-  incidentTypes: rt.union([rt.array(rt.number), rt.null, rt.undefined]),
-  severityCode: rt.union([rt.number, rt.null, rt.undefined]),
-  severity: rt.union([rt.string, rt.null, rt.undefined]),
-  urgency: rt.union([rt.string, rt.null, rt.undefined]),
-  impact: rt.union([rt.string, rt.null, rt.undefined]),
-  issueType: rt.union([rt.string, rt.null, rt.undefined]),
-  priority: rt.union([rt.string, rt.null, rt.undefined]),
-  labels: rt.union([rt.array(rt.string), rt.null, rt.undefined]),
-  parent: rt.union([rt.string, rt.null, rt.undefined]),
+  incidentTypes: rt.union([ResilientFieldsRT.props.incidentTypes, rt.undefined]),
+  severityCode: rt.union([ResilientFieldsRT.props.severityCode, rt.undefined]),
+  severity: rt.union([ServiceNowFieldsRT.props.severity, rt.undefined]),
+  urgency: rt.union([ServiceNowFieldsRT.props.urgency, rt.undefined]),
+  impact: rt.union([ServiceNowFieldsRT.props.impact, rt.undefined]),
+  issueType: rt.union([JiraFieldsRT.props.issueType, rt.undefined]),
+  priority: rt.union([JiraFieldsRT.props.priority, rt.undefined]),
+  parent: rt.union([JiraFieldsRT.props.parent, rt.undefined]),
 });
 export type ConnectorBasicCaseParams = rt.TypeOf<typeof ConnectorBasicCaseParamsRt>;
 export const PostPushRequestRt = rt.type({

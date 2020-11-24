@@ -114,7 +114,6 @@ const executorParams: ExecutorSubActionPushParams = {
 
 const apiParams: PushToServiceApiParams = {
   ...executorParams,
-  externalObject: { short_description: 'Incident title', description: 'Incident description' },
 };
 
 export { externalServiceMock, mapping, executorParams, apiParams };
