@@ -82,6 +82,15 @@ describe('SearchSource', () => {
     });
   });
 
+  describe('#removeField()', () => {
+    test('remove property', () => {
+      const searchSource = new SearchSource({}, searchSourceDependencies);
+      searchSource.setField('aggs', 5);
+      searchSource.removeField('aggs');
+      expect(searchSource.getField('aggs')).toBeFalsy();
+    });
+  });
+
   describe(`#setField('index')`, () => {
     describe('auto-sourceFiltering', () => {
       describe('new index pattern assigned', () => {
