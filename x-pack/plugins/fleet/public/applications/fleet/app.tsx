@@ -7,7 +7,8 @@
 import React, { memo, useEffect, useState } from 'react';
 import { AppMountParameters } from 'kibana/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
-import { HashRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
+import { createHashHistory, History } from 'history';
+import { Router, Redirect, Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -182,35 +183,47 @@ export const FleetAppContext: React.FC<{
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
-}> = memo(({ children, startServices, config, history, kibanaVersion, extensions }) => {
-  const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+  /** For testing purposes only */
+  routerHistory?: History<any>;
+}> = memo(
+  ({
+    children,
+    startServices,
+    config,
+    history,
+    kibanaVersion,
+    extensions,
+    routerHistory = createHashHistory(),
+  }) => {
+    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
-  return (
-    <startServices.i18n.Context>
-      <KibanaContextProvider services={{ ...startServices }}>
-        <EuiErrorBoundary>
-          <ConfigContext.Provider value={config}>
-            <KibanaVersionContext.Provider value={kibanaVersion}>
-              <EuiThemeProvider darkMode={isDarkMode}>
-                <UIExtensionsContext.Provider value={extensions}>
-                  <FleetStatusProvider>
-                    <IntraAppStateProvider kibanaScopedHistory={history}>
-                      <Router>
-                        <PackageInstallProvider notifications={startServices.notifications}>
-                          {children}
-                        </PackageInstallProvider>
-                      </Router>
-                    </IntraAppStateProvider>
-                  </FleetStatusProvider>
-                </UIExtensionsContext.Provider>
-              </EuiThemeProvider>
-            </KibanaVersionContext.Provider>
-          </ConfigContext.Provider>
-        </EuiErrorBoundary>
-      </KibanaContextProvider>
-    </startServices.i18n.Context>
-  );
-});
+    return (
+      <startServices.i18n.Context>
+        <KibanaContextProvider services={{ ...startServices }}>
+          <EuiErrorBoundary>
+            <ConfigContext.Provider value={config}>
+              <KibanaVersionContext.Provider value={kibanaVersion}>
+                <EuiThemeProvider darkMode={isDarkMode}>
+                  <UIExtensionsContext.Provider value={extensions}>
+                    <FleetStatusProvider>
+                      <IntraAppStateProvider kibanaScopedHistory={history}>
+                        <Router history={routerHistory}>
+                          <PackageInstallProvider notifications={startServices.notifications}>
+                            {children}
+                          </PackageInstallProvider>
+                        </Router>
+                      </IntraAppStateProvider>
+                    </FleetStatusProvider>
+                  </UIExtensionsContext.Provider>
+                </EuiThemeProvider>
+              </KibanaVersionContext.Provider>
+            </ConfigContext.Provider>
+          </EuiErrorBoundary>
+        </KibanaContextProvider>
+      </startServices.i18n.Context>
+    );
+  }
+);
 
 export const AppRoutes = memo(() => {
   const { agents } = useConfig();
