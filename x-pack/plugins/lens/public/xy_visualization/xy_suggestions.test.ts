@@ -5,22 +5,19 @@
  */
 
 import { getSuggestions } from './xy_suggestions';
-import {
-  TableSuggestionColumn,
-  VisualizationSuggestion,
-  DataType,
-  TableSuggestion,
-} from '../types';
+import { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../types';
 import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { PaletteOutput } from 'src/plugins/charts/public';
 
 jest.mock('../id_generator');
 
 const xyVisualization = getXyVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
+  data: dataPluginMock.createStartContract(),
 });
 
 describe('xy_suggestions', () => {
@@ -87,12 +84,7 @@ describe('xy_suggestions', () => {
     jest.resetAllMocks();
   });
 
-  test('ignores invalid combinations', () => {
-    const unknownCol = () => {
-      const str = strCol('foo');
-      return { ...str, operation: { ...str.operation, dataType: 'wonkies' as DataType } };
-    };
-
+  test('partially maps invalid combinations, but hides them', () => {
     expect(
       ([
         {
@@ -109,19 +101,41 @@ describe('xy_suggestions', () => {
         },
         {
           isMultiRow: false,
-          columns: [strCol('foo'), numCol('bar')],
+          columns: [numCol('bar')],
           layerId: 'first',
           changeType: 'unchanged',
         },
+      ] as TableSuggestion[]).map((table) => {
+        const suggestions = getSuggestions({ table, keptLayerIds: [] });
+        expect(suggestions.every((suggestion) => suggestion.hide)).toEqual(true);
+        expect(suggestions).toHaveLength(10);
+      })
+    );
+  });
+
+  test('rejects incomplete configurations if there is a state already but no sub visualization id', () => {
+    expect(
+      ([
         {
           isMultiRow: true,
-          columns: [unknownCol(), numCol('bar')],
+          columns: [dateCol('a')],
           layerId: 'first',
-          changeType: 'unchanged',
+          changeType: 'reduced',
         },
-      ] as TableSuggestion[]).map((table) =>
-        expect(getSuggestions({ table, keptLayerIds: [] })).toEqual([])
-      )
+        {
+          isMultiRow: false,
+          columns: [numCol('bar')],
+          layerId: 'first',
+          changeType: 'reduced',
+        },
+      ] as TableSuggestion[]).map((table) => {
+        const suggestions = getSuggestions({
+          table,
+          keptLayerIds: [],
+          state: {} as XYState,
+        });
+        expect(suggestions).toHaveLength(0);
+      })
     );
   });
 
@@ -186,15 +200,15 @@ describe('xy_suggestions', () => {
     expect(suggestions).toHaveLength(visualizationTypes.length);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',
-      'line',
-      'area_percentage_stacked',
-      'area_stacked',
-      'area',
-      'bar_horizontal_percentage_stacked',
-      'bar_horizontal_stacked',
-      'bar_percentage_stacked',
-      'bar_horizontal',
       'bar',
+      'bar_horizontal',
+      'bar_percentage_stacked',
+      'bar_horizontal_stacked',
+      'bar_horizontal_percentage_stacked',
+      'area',
+      'area_stacked',
+      'area_percentage_stacked',
+      'line',
     ]);
   });
 
@@ -226,15 +240,15 @@ describe('xy_suggestions', () => {
     ]);
     expect(suggestions.map(({ state }) => xyVisualization.getVisualizationTypeId(state))).toEqual([
       'bar_stacked',
-      'line',
-      'area_percentage_stacked',
-      'area_stacked',
-      'area',
-      'bar_horizontal_percentage_stacked',
-      'bar_horizontal_stacked',
-      'bar_percentage_stacked',
-      'bar_horizontal',
       'bar',
+      'bar_horizontal',
+      'bar_percentage_stacked',
+      'bar_horizontal_stacked',
+      'bar_horizontal_percentage_stacked',
+      'area',
+      'area_stacked',
+      'area_percentage_stacked',
+      'line',
     ]);
   });
 
@@ -913,8 +927,9 @@ describe('xy_suggestions', () => {
         Object {
           "seriesType": "bar_stacked",
           "splitAccessor": undefined,
-          "x": "quantity",
+          "x": undefined,
           "y": Array [
+            "quantity",
             "price",
           ],
         },

@@ -81,19 +81,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'alert {{alertName}} group {{context.group}} value {{context.value}} exceeded threshold {{context.function}} over {{params.timeWindowSize}}{{params.timeWindowUnit}} on {{context.date}}'
+        `alert '{{alertName}}' is active for group '{{context.group}}':
+
+- Value: {{context.value}}
+- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+- Timestamp: {{context.date}}`
       );
       await testSubjects.setValue('messageTextArea', 'test message ');
       await testSubjects.click('messageAddVariableButton');
       await testSubjects.click('variableMenuButton-0');
-      expect(await messageTextArea.getAttribute('value')).to.eql('test message {{alertId}}');
+      expect(await messageTextArea.getAttribute('value')).to.eql(
+        'test message {{alertActionGroup}}'
+      );
       await messageTextArea.type(' some additional text ');
 
       await testSubjects.click('messageAddVariableButton');
       await testSubjects.click('variableMenuButton-1');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{alertId}} some additional text {{alertInstanceId}}'
+        'test message {{alertActionGroup}} some additional text {{alertId}}'
       );
 
       await testSubjects.click('saveAlertButton');

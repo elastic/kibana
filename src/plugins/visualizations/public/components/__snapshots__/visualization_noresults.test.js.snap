@@ -3,7 +3,7 @@
 exports[`VisualizationNoResults should render according to snapshot 1`] = `
 <div
   class="visError"
-  data-test-subj="visNoResults"
+  data-test-subj="visNoResult"
 >
   <div
     class="item top"

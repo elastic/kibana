@@ -32,7 +32,7 @@ interface VisualizationContainerProps {
 }
 
 export const VisualizationContainer = ({
-  ['data-test-subj']: dataTestSubj,
+  'data-test-subj': dataTestSubj = '',
   className,
   children,
   handlers,

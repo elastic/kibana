@@ -297,11 +297,10 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     // Table visualization
 
     public async getTableVisNoResult() {
-      return await testSubjects.find('tbvChartContainer>visNoResults');
+      return await testSubjects.find('tbvChartContainer>visNoResult');
     }
 
     public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
-      const headers = await dataGrid.getHeaders();
       const fieldColumnIndex = headers.indexOf(fieldName);
       const cell = await dataGrid.getCellElement(rowIndex, fieldColumnIndex + 1);
       return await cell.findByTagName('a');

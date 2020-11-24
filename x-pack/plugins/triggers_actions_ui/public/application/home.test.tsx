@@ -7,16 +7,14 @@
 import * as React from 'react';
 import { RouteComponentProps, Router } from 'react-router-dom';
 import { createMemoryHistory, createLocation } from 'history';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-
+import { mountWithIntl } from '@kbn/test/jest';
 import TriggersActionsUIHome, { MatchParams } from './home';
-import { AppContextProvider } from './app_context';
-import { getMockedAppDependencies } from './test_utils';
+import { useKibana } from '../common/lib/kibana';
+jest.mock('../common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('home', () => {
   it('renders the documentation link', async () => {
-    const deps = await getMockedAppDependencies();
-
     const props: RouteComponentProps<MatchParams> = {
       history: createMemoryHistory(),
       location: createLocation('/'),
@@ -29,11 +27,10 @@ describe('home', () => {
         },
       },
     };
+
     const wrapper = mountWithIntl(
-      <Router history={deps.history}>
-        <AppContextProvider appDeps={deps}>
-          <TriggersActionsUIHome {...props} />
-        </AppContextProvider>
+      <Router history={useKibanaMock().services.history}>
+        <TriggersActionsUIHome {...props} />
       </Router>
     );
     const documentationLink = wrapper.find('[data-test-subj="documentationLink"]');

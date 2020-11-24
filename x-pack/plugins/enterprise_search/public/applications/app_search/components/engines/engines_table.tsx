@@ -11,16 +11,19 @@ import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/reac
 import { i18n } from '@kbn/i18n';
 
 import { TelemetryLogic } from '../../../shared/telemetry';
-import { EuiLink } from '../../../shared/react_router_helpers';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
+import { UNIVERSAL_LANGUAGE } from '../../constants';
 
 interface EnginesTableData {
   name: string;
   created_at: string;
   document_count: number;
   field_count: number;
+  language: string | null;
+  isMeta: boolean;
 }
 interface EnginesTablePagination {
   totalEngines: number;
@@ -59,9 +62,9 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         defaultMessage: 'Name',
       }),
       render: (name: string) => (
-        <EuiLink data-test-subj="engineNameLink" {...engineLinkProps(name)}>
+        <EuiLinkTo data-test-subj="engineNameLink" {...engineLinkProps(name)}>
           {name}
-        </EuiLink>
+        </EuiLinkTo>
       ),
       width: '30%',
       truncateText: true,
@@ -84,9 +87,21 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       ),
       dataType: 'string',
       render: (dateString: string) => (
-        // e.g., January 1, 1970
-        <FormattedDate value={new Date(dateString)} year="numeric" month="long" day="numeric" />
+        // e.g., Jan 1, 1970
+        <FormattedDate value={new Date(dateString)} year="numeric" month="short" day="numeric" />
       ),
+    },
+    {
+      field: 'language',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.language',
+        {
+          defaultMessage: 'Language',
+        }
+      ),
+      dataType: 'string',
+      render: (language: string, engine: EnginesTableData) =>
+        engine.isMeta ? '' : language || UNIVERSAL_LANGUAGE,
     },
     {
       field: 'document_count',
@@ -122,12 +137,12 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       ),
       dataType: 'string',
       render: (name: string) => (
-        <EuiLink {...engineLinkProps(name)}>
+        <EuiLinkTo {...engineLinkProps(name)}>
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage"
             defaultMessage="Manage"
           />
-        </EuiLink>
+        </EuiLinkTo>
       ),
       align: 'right',
       width: '100px',

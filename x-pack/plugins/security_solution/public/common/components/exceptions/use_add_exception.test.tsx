@@ -37,16 +37,16 @@ mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 describe('useAddOrUpdateException', () => {
   let updateAlertStatus: jest.SpyInstance<ReturnType<typeof alertsApi.updateAlertStatus>>;
   let addExceptionListItem: jest.SpyInstance<ReturnType<typeof listsApi.addExceptionListItem>>;
-  let updateExceptionListItem: jest.SpyInstance<ReturnType<
-    typeof listsApi.updateExceptionListItem
-  >>;
+  let updateExceptionListItem: jest.SpyInstance<
+    ReturnType<typeof listsApi.updateExceptionListItem>
+  >;
   let getQueryFilter: jest.SpyInstance<ReturnType<typeof getQueryFilterHelper.getQueryFilter>>;
-  let buildAlertStatusFilter: jest.SpyInstance<ReturnType<
-    typeof buildFilterHelpers.buildAlertStatusFilter
-  >>;
-  let buildAlertsRuleIdFilter: jest.SpyInstance<ReturnType<
-    typeof buildFilterHelpers.buildAlertsRuleIdFilter
-  >>;
+  let buildAlertStatusFilter: jest.SpyInstance<
+    ReturnType<typeof buildFilterHelpers.buildAlertStatusFilter>
+  >;
+  let buildAlertsRuleIdFilter: jest.SpyInstance<
+    ReturnType<typeof buildFilterHelpers.buildAlertsRuleIdFilter>
+  >;
   let addOrUpdateItemsArgs: Parameters<AddOrUpdateExceptionItemsFunc>;
   let render: () => RenderHookResult<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>;
   const onError = jest.fn();

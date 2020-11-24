@@ -8,6 +8,7 @@ import { ApplicationStart } from 'kibana/public';
 import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
+export * from './os';
 export * from './trusted_apps';
 
 /**
@@ -298,6 +299,8 @@ export interface HostResultList {
   request_page_index: number;
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
+  /* policy IDs and versions */
+  policy_info?: HostInfo['policy_info'];
 }
 
 /**
@@ -519,9 +522,30 @@ export enum MetadataQueryStrategyVersions {
   VERSION_2 = 'v2',
 }
 
+export type PolicyInfo = Immutable<{
+  revision: number;
+  id: string;
+}>;
+
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
   host_status: HostStatus;
+  policy_info?: {
+    agent: {
+      /**
+       * As set in Kibana
+       */
+      configured: PolicyInfo;
+      /**
+       * Last reported running in agent (may lag behind configured)
+       */
+      applied: PolicyInfo;
+    };
+    /**
+     * Current intended 'endpoint' package policy
+     */
+    endpoint: PolicyInfo;
+  };
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
 }>;
@@ -557,6 +581,8 @@ export type HostMetadata = Immutable<{
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        endpoint_policy_version: number;
+        version: number;
       };
     };
   };
@@ -815,9 +841,7 @@ export type ResolverEntityIndex = Array<{ entity_id: string }>;
  * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
 export type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
-  ? KbnConfigSchemaInputObjectTypeOf<
-      T
-    > /** `schema.number()` accepts strings, so this type should accept them as well. */
+  ? KbnConfigSchemaInputObjectTypeOf<T> /** `schema.number()` accepts strings, so this type should accept them as well. */
   : number extends T
   ? T | string
   : T;
@@ -880,6 +904,9 @@ export interface PolicyConfig {
         enabled: boolean;
       };
     };
+    antivirus_registration: {
+      enabled: boolean;
+    };
   };
   mac: {
     advanced?: {};
@@ -919,7 +946,10 @@ export interface UIPolicyConfig {
   /**
    * Windows-specific policy configuration that is supported via the UI
    */
-  windows: Pick<PolicyConfig['windows'], 'events' | 'malware' | 'popup' | 'advanced'>;
+  windows: Pick<
+    PolicyConfig['windows'],
+    'events' | 'malware' | 'popup' | 'antivirus_registration' | 'advanced'
+  >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
@@ -1061,7 +1091,8 @@ export interface HostPolicyResponse {
   Endpoint: {
     policy: {
       applied: {
-        version: string;
+        version: number;
+        endpoint_policy_version: number;
         id: string;
         name: string;
         status: HostPolicyResponseActionStatus;
@@ -1094,4 +1125,15 @@ export interface HostPolicyResponse {
  */
 export interface GetHostPolicyResponse {
   policy_response: HostPolicyResponse;
+}
+
+/**
+ * REST API response for retrieving agent summary
+ */
+export interface GetAgentSummaryResponse {
+  summary_response: {
+    package: string;
+    policy_id?: string;
+    versions_count: { [key: string]: number };
+  };
 }

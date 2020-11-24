@@ -30,7 +30,7 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
 
   public render() {
     return (
-      <div data-test-subj="visNoResults" className="visError" ref={this.containerDiv}>
+      <div data-test-subj="visNoResult" className="visError" ref={this.containerDiv}>
         <div className="item top" />
         <div className="item">
           <EuiText size="xs" color="subdued">
