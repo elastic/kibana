@@ -33,11 +33,14 @@ export const eqlSearchStrategyProvider = (
       const client = esClient.asCurrentUser.eql;
 
       const search = async () => {
+        const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(
+          uiSettingsClient
+        );
         const params = id
           ? getDefaultAsyncGetParams()
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
-              ...(await getDefaultSearchParams(uiSettingsClient)),
+              ...defaultParams,
               ...getDefaultAsyncGetParams(),
               ...request.params,
             };
