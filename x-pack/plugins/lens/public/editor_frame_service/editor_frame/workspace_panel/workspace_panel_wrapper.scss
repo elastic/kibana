@@ -115,3 +115,7 @@
   75% { transform: translateY(15%); }
   100% { transform: translateY(10%); }
 }
+
+.lnsWorkspaceWarningButton {
+  color: $euiColorWarningText;
+}

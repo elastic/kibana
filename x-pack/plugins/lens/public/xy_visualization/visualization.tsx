@@ -369,6 +369,37 @@ export const getXyVisualization = ({
 
     return errors.length ? errors : undefined;
   },
+
+  getWarningMessages(state, frame) {
+    if (state?.layers.length === 0 || !frame.activeData) {
+      return;
+    }
+
+    const layers = state.layers;
+
+    const filteredLayers = layers.filter(({ accessors }: LayerConfig) => accessors.length > 0);
+    const accessorsWithArrayValues = [];
+    for (const layer of filteredLayers) {
+      const { layerId, accessors } = layer;
+      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      if (!rows) {
+        break;
+      }
+      const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layerId]);
+      for (const accessor of accessors) {
+        const hasArrayValues = rows.some((row) => Array.isArray(row[accessor]));
+        if (hasArrayValues) {
+          accessorsWithArrayValues.push(columnToLabel[accessor]);
+        }
+      }
+    }
+    return accessorsWithArrayValues.map((label) => (
+      <>
+        <strong>{label}</strong> contains array values. Your visualization may not render as
+        expected.
+      </>
+    ));
+  },
 });
 
 function getAccessorColorConfig(
