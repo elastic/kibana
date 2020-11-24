@@ -4,252 +4,254 @@
     "aliases": {},
     "index": ".kibana",
     "mappings": {
-      "dynamic": "strict",
-      "properties": {
-        "migrationVersion": {
-          "dynamic": "true",
-          "properties": {
-            "dashboard": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
+      "doc": {
+        "dynamic": "strict",
+        "properties": {
+          "migrationVersion": {
+            "dynamic": "true",
+            "properties": {
+              "dashboard": {
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
               },
-              "type": "text"
-            },
-            "index-pattern": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
+              "index-pattern": {
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
               },
-              "type": "text"
-            },
-            "search": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
+              "search": {
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
               },
-              "type": "text"
-            },
-            "visualization": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
-        },
-        "config": {
-          "dynamic": "true",
-          "properties": {
-            "buildNum": {
-              "type": "keyword"
-            },
-            "defaultIndex": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
-        },
-        "dashboard": {
-          "dynamic": "strict",
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
+              "visualization": {
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
               }
-            },
-            "optionsJSON": {
-              "type": "text"
-            },
-            "panelsJSON": {
-              "type": "text"
-            },
-            "refreshInterval": {
-              "properties": {
-                "display": {
-                  "type": "keyword"
-                },
-                "pause": {
-                  "type": "boolean"
-                },
-                "section": {
-                  "type": "integer"
-                },
-                "value": {
-                  "type": "integer"
-                }
-              }
-            },
-            "timeFrom": {
-              "type": "keyword"
-            },
-            "timeRestore": {
-              "type": "boolean"
-            },
-            "timeTo": {
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            },
-            "uiStateJSON": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
-        "index-pattern": {
-          "properties": {
-            "fieldFormatMap": {
-              "type": "text"
-            },
-            "fields": {
-              "type": "text"
-            },
-            "intervalName": {
-              "type": "keyword"
-            },
-            "notExpandable": {
-              "type": "boolean"
-            },
-            "sourceFilters": {
-              "type": "text"
-            },
-            "timeFieldName": {
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            }
-          }
-        },
-        "namespace": {
-          "type": "keyword"
-        },
-        "namespaces": {
-          "type": "keyword"
-        },
-        "originId": {
-          "type": "keyword"
-        },
-        "server": {
-          "properties": {
-            "uuid": {
-              "type": "keyword"
-            }
-          }
-        },
-        "tag": {
-          "properties": {
-            "name": {
-              "type": "text"
-            },
-            "description": {
-              "type": "text"
-            },
-            "color": {
-              "type": "text"
-            }
-          }
-        },
-        "space": {
-          "properties": {
-            "_reserved": {
-              "type": "boolean"
-            },
-            "color": {
-              "type": "keyword"
-            },
-            "description": {
-              "type": "text"
-            },
-            "disabledFeatures": {
-              "type": "keyword"
-            },
-            "initials": {
-              "type": "keyword"
-            },
-            "name": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 2048,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
-        },
-        "references": {
-          "properties": {
-            "id": {
-              "type": "keyword"
-            },
-            "name": {
-              "type": "keyword"
-            },
-            "type": {
-              "type": "keyword"
             }
           },
-          "type": "nested"
-        },
-        "type": {
-          "type": "keyword"
-        },
-        "updated_at": {
-          "type": "date"
-        },
-        "visualization": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
+          "config": {
+            "dynamic": "true",
+            "properties": {
+              "buildNum": {
+                "type": "keyword"
+              },
+              "defaultIndex": {
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 256,
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
+              }
+            }
+          },
+          "dashboard": {
+            "dynamic": "strict",
+            "properties": {
+              "description": {
+                "type": "text"
+              },
+              "hits": {
+                "type": "integer"
+              },
+              "kibanaSavedObjectMeta": {
+                "properties": {
+                  "searchSourceJSON": {
+                    "type": "text"
+                  }
                 }
+              },
+              "optionsJSON": {
+                "type": "text"
+              },
+              "panelsJSON": {
+                "type": "text"
+              },
+              "refreshInterval": {
+                "properties": {
+                  "display": {
+                    "type": "keyword"
+                  },
+                  "pause": {
+                    "type": "boolean"
+                  },
+                  "section": {
+                    "type": "integer"
+                  },
+                  "value": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "timeFrom": {
+                "type": "keyword"
+              },
+              "timeRestore": {
+                "type": "boolean"
+              },
+              "timeTo": {
+                "type": "keyword"
+              },
+              "title": {
+                "type": "text"
+              },
+              "uiStateJSON": {
+                "type": "text"
+              },
+              "version": {
+                "type": "integer"
+              }
+            }
+          },
+          "index-pattern": {
+            "properties": {
+              "fieldFormatMap": {
+                "type": "text"
+              },
+              "fields": {
+                "type": "text"
+              },
+              "intervalName": {
+                "type": "keyword"
+              },
+              "notExpandable": {
+                "type": "boolean"
+              },
+              "sourceFilters": {
+                "type": "text"
+              },
+              "timeFieldName": {
+                "type": "keyword"
+              },
+              "title": {
+                "type": "text"
+              }
+            }
+          },
+          "namespace": {
+            "type": "keyword"
+          },
+          "namespaces": {
+            "type": "keyword"
+          },
+          "originId": {
+            "type": "keyword"
+          },
+          "server": {
+            "properties": {
+              "uuid": {
+                "type": "keyword"
+              }
+            }
+          },
+          "tag": {
+            "properties": {
+              "name": {
+                "type": "text"
+              },
+              "description": {
+                "type": "text"
+              },
+              "color": {
+                "type": "text"
+              }
+            }
+          },
+          "space": {
+            "properties": {
+              "_reserved": {
+                "type": "boolean"
+              },
+              "color": {
+                "type": "keyword"
+              },
+              "description": {
+                "type": "text"
+              },
+              "disabledFeatures": {
+                "type": "keyword"
+              },
+              "initials": {
+                "type": "keyword"
+              },
+              "name": {
+                "fields": {
+                  "keyword": {
+                    "ignore_above": 2048,
+                    "type": "keyword"
+                  }
+                },
+                "type": "text"
+              }
+            }
+          },
+          "references": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
               }
             },
-            "savedSearchId": {
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            },
-            "uiStateJSON": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            },
-            "visState": {
-              "type": "text"
+            "type": "nested"
+          },
+          "type": {
+            "type": "keyword"
+          },
+          "updated_at": {
+            "type": "date"
+          },
+          "visualization": {
+            "properties": {
+              "description": {
+                "type": "text"
+              },
+              "kibanaSavedObjectMeta": {
+                "properties": {
+                  "searchSourceJSON": {
+                    "type": "text"
+                  }
+                }
+              },
+              "savedSearchId": {
+                "type": "keyword"
+              },
+              "title": {
+                "type": "text"
+              },
+              "uiStateJSON": {
+                "type": "text"
+              },
+              "version": {
+                "type": "integer"
+              },
+              "visState": {
+                "type": "text"
+              }
             }
           }
         }
