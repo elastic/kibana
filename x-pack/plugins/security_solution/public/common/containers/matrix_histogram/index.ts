@@ -63,10 +63,9 @@ export const useMatrixHistogram = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [
-    matrixHistogramRequest,
-    setMatrixHistogramRequest,
-  ] = useState<MatrixHistogramRequestOptions>({
+  const [matrixHistogramRequest, setMatrixHistogramRequest] = useState<
+    MatrixHistogramRequestOptions
+  >({
     defaultIndex: indexNames,
     factoryQueryType: MatrixHistogramQuery,
     filterQuery: createFilter(filterQuery),
@@ -171,7 +170,7 @@ export const useMatrixHistogram = ({
         },
         stackByField,
         threshold,
-        ...(prevRequest.isPtrIncluded != null ? { isPtrIncluded } : {}),
+        ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
         ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
       };
       if (!deepEqual(prevRequest, myRequest)) {
