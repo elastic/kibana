@@ -6,9 +6,9 @@
 
 import { validateTagMock } from './tags_client.test.mocks';
 
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { TagAttributes, TagSavedObject } from '../../common/types';
-import { TagValidation } from '../../common/validation';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { TagAttributes, TagSavedObject } from '../../../common/types';
+import { TagValidation } from '../../../common/validation';
 import { TagsClient } from './tags_client';
 import { TagValidationError } from './errors';
 

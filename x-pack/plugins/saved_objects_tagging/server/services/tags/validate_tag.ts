@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TagAttributes } from '../../common/types';
+import { TagAttributes } from '../../../common/types';
 import {
   TagValidation,
   validateTagColor,
   validateTagName,
   validateTagDescription,
-} from '../../common/validation';
+} from '../../../common/validation';
 
 export const validateTag = (attributes: TagAttributes): TagValidation => {
   const validation: TagValidation = {

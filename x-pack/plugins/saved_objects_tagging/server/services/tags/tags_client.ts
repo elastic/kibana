@@ -5,8 +5,8 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { TagSavedObject, TagAttributes, ITagsClient } from '../../common/types';
-import { tagSavedObjectTypeName } from '../../common/constants';
+import { TagSavedObject, TagAttributes, ITagsClient } from '../../../common/types';
+import { tagSavedObjectTypeName } from '../../../common/constants';
 import { TagValidationError } from './errors';
 import { validateTag } from './validate_tag';
 import { savedObjectToTag } from './utils';

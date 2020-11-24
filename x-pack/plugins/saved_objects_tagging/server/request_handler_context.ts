@@ -7,7 +7,7 @@
 import type { RequestHandlerContext } from 'src/core/server';
 import { ITagsClient } from '../common/types';
 import { ITagsRequestHandlerContext } from './types';
-import { TagsClient } from './tags';
+import { TagsClient } from './services';
 
 export class TagsRequestHandlerContext implements ITagsRequestHandlerContext {
   #client?: ITagsClient;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TagValidation } from '../../common';
+import { TagValidation } from '../../../common';
 
 /**
  * Error returned from {@link TagsClient#create} or {@link TagsClient#update} when tag

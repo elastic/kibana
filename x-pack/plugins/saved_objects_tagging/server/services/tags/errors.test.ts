@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TagValidation } from '../../common/validation';
+import { TagValidation } from '../../../common/validation';
 import { TagValidationError } from './errors';
 
 const createValidation = (errors: TagValidation['errors'] = {}): TagValidation => ({

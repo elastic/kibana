@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
-import { TagValidationError } from '../tags';
+import { TagValidationError } from '../../services/tags';
 
 export const registerCreateTagRoute = (router: IRouter) => {
   router.post(

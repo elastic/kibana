@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ITagsClient } from '../../common/types';
+import { ITagsClient } from '../../../common/types';
 
 const createClientMock = () => {
   const mock: jest.Mocked<ITagsClient> = {
