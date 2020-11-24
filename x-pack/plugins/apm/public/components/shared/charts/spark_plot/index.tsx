@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { ScaleType, Chart, Settings, AreaSeries } from '@elastic/charts';
+import {
+  ScaleType,
+  Chart,
+  Settings,
+  AreaSeries,
+  CurveType,
+} from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -15,16 +21,15 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 
 interface Props {
   color: string;
-  series: Array<{ x: number; y: number | null }>;
+  series?: Array<{ x: number; y: number | null }>;
+  width: string;
 }
 
 export function SparkPlot(props: Props) {
-  const { series, color } = props;
+  const { series, color, width } = props;
   const chartTheme = useChartTheme();
 
-  const isEmpty = series.every((point) => point.y === null);
-
-  if (isEmpty) {
+  if (!series || series.every((point) => point.y === null)) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -40,18 +45,8 @@ export function SparkPlot(props: Props) {
   }
 
   return (
-    <Chart size={{ height: px(24), width: px(64) }}>
-      <Settings
-        theme={{
-          ...chartTheme,
-          background: {
-            ...chartTheme.background,
-            color: 'transparent',
-          },
-        }}
-        showLegend={false}
-        tooltip="none"
-      />
+    <Chart size={{ height: px(24), width }}>
+      <Settings theme={chartTheme} showLegend={false} tooltip="none" />
       <AreaSeries
         id="area"
         xScaleType={ScaleType.Time}
@@ -60,6 +55,7 @@ export function SparkPlot(props: Props) {
         yAccessors={['y']}
         data={series}
         color={color}
+        curve={CurveType.CURVE_MONOTONE_X}
       />
     </Chart>
   );
