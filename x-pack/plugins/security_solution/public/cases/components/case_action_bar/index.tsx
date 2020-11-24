@@ -8,7 +8,6 @@ import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -34,11 +33,9 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 interface CaseActionBarProps {
   'data-test-subj': string;
   badgeColor: string;
-  buttonLabel: string;
   caseData: Case;
   currentExternalIncident: CaseService | null;
   disabled?: boolean;
-  icon: string;
   isLoading: boolean;
   isSelected: boolean;
   onRefresh: () => void;
@@ -50,11 +47,9 @@ interface CaseActionBarProps {
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   'data-test-subj': dataTestSubj,
   badgeColor,
-  buttonLabel,
   caseData,
   currentExternalIncident,
   disabled = false,
-  icon,
   isLoading,
   isSelected,
   onRefresh,
@@ -94,18 +89,6 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             <EuiButtonEmpty data-test-subj="case-refresh" iconType="refresh" onClick={onRefresh}>
               {i18n.CASE_REFRESH}
             </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButton
-              data-test-subj="toggle-case-status"
-              isDisabled={disabled}
-              iconType={icon}
-              isLoading={isLoading}
-              fill={isSelected}
-              onClick={handleToggleStatusCase}
-            >
-              {buttonLabel}
-            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <CaseViewActions
