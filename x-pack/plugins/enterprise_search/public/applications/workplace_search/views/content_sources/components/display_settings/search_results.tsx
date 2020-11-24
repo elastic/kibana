@@ -143,6 +143,7 @@ export const SearchResults: React.FC = () => {
                 A matching document will appear as a single bold card.
               </p>
             </div>
+            <EuiSpacer />
             <ExampleStandoutResult />
             <EuiSpacer />
             <div className="section-header">
@@ -153,6 +154,7 @@ export const SearchResults: React.FC = () => {
                 Somewhat matching documents will appear as a set.
               </p>
             </div>
+            <EuiSpacer />
             <ExampleSearchResultGroup />
           </EuiPanel>
         </EuiFlexItem>

@@ -10,6 +10,8 @@ import { History } from 'history';
 import { useActions, useValues } from 'kea';
 import { useHistory } from 'react-router-dom';
 
+import './display_settings.scss';
+
 import {
   EuiButton,
   EuiEmptyPrompt,
