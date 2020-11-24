@@ -892,9 +892,15 @@ client documentation]
 
 ==== Client API Changes
 
-The most significant changes for the consumers are the following:
+Refer to the
+https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/breaking-changes.html[Breaking
+changes list] for more information about the changes between the legacy
+and new client.
 
-* Internal /current user client accessors has been renamed and are now
+The most significant changes on the Kibana side for the consumers are the following:
+
+===== User client accessor
+Internal /current user client accessors has been renamed and are now
 properties instead of functions:
 ** `callAsInternalUser('ping')` -> `asInternalUser.ping()`
 ** `callAsCurrentUser('ping')` -> `asCurrentUser.ping()`
@@ -915,7 +921,8 @@ After:
 const { body } = await client.asInternalUser.indices.get({ index: 'id' });
 ----
 
-* Calling any ES endpoint now returns the whole response object instead
+===== Response object
+Calling any ES endpoint now returns the whole response object instead
 of only the body payload.
 
 Before:
@@ -945,7 +952,8 @@ const {
 } = await client.asInternalUser.get({ id: 'id' });
 ----
 
-* All API methods are now generic to allow specifying the response body.
+===== Response Type
+All API methods are now generic to allow specifying the response body.
 type
 
 Before:
@@ -965,7 +973,23 @@ const { body } = await client.asInternalUser.get<GetResponse>({ id: 'id' });
 const { body } = await client.asInternalUser.get({ id: 'id' });
 ----
 
-* The returned error types changed.
+The new client doesn’t provide exhaustive typings for the response
+object yet. You might have to copy response type definitions from the
+Legacy Elasticsearch library until the additional announcements.
+
+[source,typescript]
+----
+// Kibana provides a few typings for internal purposes
+import type { SearchResponse } from 'kibana/server';
+type SearchSource = {...};
+type SearchBody = SearchResponse<SearchSource>;
+const { body } = await client.search<SearchBody>(...);
+interface Info {...}
+const { body } = await client.info<Info>(...);
+----
+
+===== Errors
+The returned error types changed.
 
 There are no longer specific errors for every HTTP status code (such as
 `BadRequest` or `NotFound`). A generic `ResponseError` with the specific
@@ -1006,7 +1030,8 @@ try {
 }
 ----
 
-* the parameter property names changed from camelCase to snake_case
+===== Parameter naming format
+The parameter property names changed from camelCase to snake_case
 
 Even if technically, the JavaScript client accepts both formats, the
 TypeScript definitions are only defining snake_case properties.
@@ -1031,7 +1056,8 @@ client.asCurrentUser.get({
 })
 ----
 
-* The request abortion API changed
+===== Request abortion
+The request abortion API changed
 
 All promises returned from the client API calls now have an `abort`
 method that can be used to cancel the request.
@@ -1057,7 +1083,8 @@ const request = client.asCurrentUser.ping();
 request.abort();
 ----
 
-* It is now possible to override headers when performing specific API
+===== Headers
+It is now possible to override headers when performing specific API
 calls.
 
 Note that doing so is strongly discouraged due to potential side effects
@@ -1074,23 +1101,8 @@ const request = client.asCurrentUser.ping({}, {
 });
 ----
 
-* The new client doesn’t provide exhaustive typings for the response
-object yet. You might have to copy response type definitions from the
-Legacy Elasticsearch library until
-https://github.com/elastic/elasticsearch-js/pull/970 is merged.
-
-[source,typescript]
-----
-// platform provides a few typings for internal purposes
-import type { SearchResponse } from 'kibana/server';
-type SearchSource = {...};
-type SearchBody = SearchResponse<SearchSource>;
-const { body } = await client.search<SearchBody>(...);
-interface Info {...}
-const { body } = await client.info<Info>(...);
-----
-
-* Functional tests are subject to migration to the new client as well.
+===== Functional tests
+Functional tests are subject to migration to the new client as well.
 
 Before:
 
@@ -1105,11 +1117,6 @@ After:
 ----
 const client = getService('es');
 ----
-
-Refer to the
-https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/breaking-changes.html[Breaking
-changes list] for more information about the changes between the legacy
-and new client.
 
 ==== Accessing the client from a route handler
 
