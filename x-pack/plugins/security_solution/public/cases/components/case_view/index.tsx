@@ -29,7 +29,7 @@ import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
 import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
-import { CaseStatus } from '../case_status';
+import { CaseActionBar } from '../case_action_bar';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { usePushToService } from '../use_push_to_service';
@@ -329,7 +329,7 @@ export const CaseComponent = React.memo<CaseProps>(
             }
             title={caseData.title}
           >
-            <CaseStatus
+            <CaseActionBar
               currentExternalIncident={currentExternalIncident}
               caseData={caseData}
               disabled={!userCanCrud}

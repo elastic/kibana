@@ -31,7 +31,7 @@ const MyDescriptionList = styled(EuiDescriptionList)`
   `}
 `;
 
-interface CaseStatusProps {
+interface CaseActionBarProps {
   'data-test-subj': string;
   badgeColor: string;
   buttonLabel: string;
@@ -47,7 +47,7 @@ interface CaseStatusProps {
   toggleStatusCase: (status: boolean) => void;
   value: string | null;
 }
-const CaseStatusComp: React.FC<CaseStatusProps> = ({
+const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   'data-test-subj': dataTestSubj,
   badgeColor,
   buttonLabel,
@@ -120,4 +120,4 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
   );
 };
 
-export const CaseStatus = React.memo(CaseStatusComp);
+export const CaseActionBar = React.memo(CaseActionBarComponent);
