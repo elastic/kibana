@@ -9,6 +9,7 @@ import { ITagAssignmentService } from './assignment_service';
 const createAssignmentServiceMock = () => {
   const mock: jest.Mocked<ITagAssignmentService> = {
     findAssignableObject: jest.fn(),
+    updateTagAssignments: jest.fn(),
   };
 
   return mock;

@@ -5,26 +5,30 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { registerCreateTagRoute } from './create_tag';
-import { registerDeleteTagRoute } from './delete_tag';
-import { registerGetAllTagsRoute } from './get_all_tags';
-import { registerGetTagRoute } from './get_tag';
-import { registerUpdateTagRoute } from './update_tag';
 import {
-  registerInternalFindTagsRoute,
-  registerInternalBulkDeleteRoute,
-  registerInternalFindAssignableObjectsRoute,
-} from './internal';
+  registerUpdateTagRoute,
+  registerGetAllTagsRoute,
+  registerGetTagRoute,
+  registerDeleteTagRoute,
+  registerCreateTagRoute,
+} from './tags';
+import {
+  registerFindAssignableObjectsRoute,
+  registerUpdateTagsAssignmentsRoute,
+} from './assignments';
+import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
 
 export const registerRoutes = ({ router }: { router: IRouter }) => {
-  // public API
+  // tags API
   registerCreateTagRoute(router);
   registerUpdateTagRoute(router);
   registerDeleteTagRoute(router);
   registerGetAllTagsRoute(router);
   registerGetTagRoute(router);
+  // assignment API
+  registerFindAssignableObjectsRoute(router);
+  registerUpdateTagsAssignmentsRoute(router);
   // internal API
   registerInternalFindTagsRoute(router);
   registerInternalBulkDeleteRoute(router);
-  registerInternalFindAssignableObjectsRoute(router);
 };

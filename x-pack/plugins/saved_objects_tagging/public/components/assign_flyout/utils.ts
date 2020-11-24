@@ -5,7 +5,7 @@
  */
 
 import { AssignableObject } from '../../../common/types';
-import { AssignmentOverride, AssignmentStatus } from './types';
+import { AssignmentOverride, AssignmentStatus, AssignmentAction } from './types';
 
 export const getKey = ({ id, type }: AssignableObject) => `${type}|${id}`;
 
@@ -25,4 +25,20 @@ export const getOverriddenStatus = (
     return override === 'selected' ? 'full' : 'none';
   }
   return initialStatus;
+};
+
+export const getAssignmentAction = (
+  initialStatus: AssignmentStatus,
+  override: AssignmentOverride | undefined
+): AssignmentAction => {
+  const overriddenStatus = getOverriddenStatus(initialStatus, override);
+  if (initialStatus !== overriddenStatus) {
+    if (overriddenStatus === 'full') {
+      return 'added';
+    }
+    if (overriddenStatus === 'none') {
+      return 'removed';
+    }
+  }
+  return 'unchanged';
 };

@@ -8,7 +8,7 @@ import React, { FC, useState, useEffect, useCallback } from 'react';
 import { EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle, EuiFlexItem, Query } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AssignableObject } from '../../../common/types';
-import { ITagInternalClient, ITagAssignmentService } from '../../services';
+import { ITagAssignmentService } from '../../services';
 import { parseQuery, computeRequiredChanges } from './lib';
 import { AssignmentOverrideMap, AssignmentStatus, AssignmentStatusMap } from './types';
 import {
@@ -24,7 +24,6 @@ import './assign_flyout.scss';
 interface AssignFlyoutProps {
   tagIds: string[];
   allowedTypes: string[];
-  tagClient: ITagInternalClient;
   assignmentService: ITagAssignmentService;
   onClose: () => Promise<void>;
 }
@@ -39,7 +38,6 @@ const getObjectStatus = (object: AssignableObject, assignedTags: string[]): Assi
 export const AssignFlyout: FC<AssignFlyoutProps> = ({
   tagIds,
   allowedTypes,
-  tagClient,
   assignmentService,
   onClose,
 }) => {
@@ -76,10 +74,15 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
     refreshResults();
   }, [query, assignmentService, tagIds]);
 
-  const onSave = useCallback(() => {
+  const onSave = useCallback(async () => {
     const changes = computeRequiredChanges({ objects: results, initialStatus, overrides });
-    // TODO: wire.
-  }, [results, initialStatus, overrides]);
+    await assignmentService.updateTagAssignments({
+      tags: tagIds,
+      assign: changes.assigned.map(({ type, id }) => ({ type, id })),
+      unassign: changes.unassigned.map(({ type, id }) => ({ type, id })),
+    });
+    // TODO: close and stuff.
+  }, [tagIds, results, initialStatus, overrides, assignmentService]);
 
   const selectAll = useCallback(() => {
     setOverrides(

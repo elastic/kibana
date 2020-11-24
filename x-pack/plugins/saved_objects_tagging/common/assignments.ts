@@ -4,5 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerInternalFindTagsRoute } from './find_tags';
-export { registerInternalBulkDeleteRoute } from './bulk_delete';
+/**
+ * `type`+`id` tuple of a saved object.
+ */
+export interface ObjectReference {
+  type: string;
+  id: string;
+}

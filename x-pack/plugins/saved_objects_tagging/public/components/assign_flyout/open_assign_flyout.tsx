@@ -24,7 +24,6 @@ export type AssignFlyoutOpener = (options: OpenAssignFlyoutOptions) => Promise<O
 
 export const getAssignFlyoutOpener = ({
   overlays,
-  tagClient,
   assignmentService,
 }: GetAssignFlyoutOpenerOptions): AssignFlyoutOpener => async ({ tagIds }) => {
   const { AssignFlyout } = await import('./assign_flyout');
@@ -33,12 +32,11 @@ export const getAssignFlyoutOpener = ({
       <AssignFlyout
         tagIds={tagIds}
         allowedTypes={taggableTypes}
-        tagClient={tagClient}
         assignmentService={assignmentService}
         onClose={() => flyout.close()}
       />
     ),
-    { size: 'm', maxWidth: 560 }
+    { size: 'm', maxWidth: 600 }
   );
 
   return flyout;

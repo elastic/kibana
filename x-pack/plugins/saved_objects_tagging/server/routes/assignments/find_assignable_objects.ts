@@ -10,10 +10,10 @@ import { IRouter, SavedObject, SavedObjectsType } from 'src/core/server';
 import { tagSavedObjectTypeName, taggableTypes } from '../../../common/constants';
 import { AssignableObject } from '../../../common/types';
 
-export const registerInternalFindAssignableObjectsRoute = (router: IRouter) => {
+export const registerFindAssignableObjectsRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/internal/saved_objects_tagging/_find_assignable_objects',
+      path: '/api/saved_objects_tagging/assignments/_find_assignable_objects',
       validate: {
         query: schema.object({
           search: schema.maybe(schema.string()),

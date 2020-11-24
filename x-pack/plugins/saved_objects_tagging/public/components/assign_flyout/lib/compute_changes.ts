@@ -6,7 +6,7 @@
 
 import { AssignableObject } from '../../../../common/types';
 import { AssignmentStatusMap, AssignmentOverrideMap } from '../types';
-import { getOverriddenStatus, getKey } from '../utils';
+import { getAssignmentAction, getKey } from '../utils';
 
 export const computeRequiredChanges = ({
   objects,
@@ -17,28 +17,25 @@ export const computeRequiredChanges = ({
   initialStatus: AssignmentStatusMap;
   overrides: AssignmentOverrideMap;
 }) => {
-  const toAssign: AssignableObject[] = [];
-  const toUnassign: AssignableObject[] = [];
+  const assigned: AssignableObject[] = [];
+  const unassigned: AssignableObject[] = [];
 
   objects.forEach((object) => {
     const key = getKey(object);
     const status = initialStatus[key];
     const override = overrides[key];
 
-    const overriddenStatus = getOverriddenStatus(status, override);
-
-    if (status !== overriddenStatus) {
-      if (overriddenStatus === 'full') {
-        toAssign.push(object);
-      }
-      if (overriddenStatus === 'none') {
-        toUnassign.push(object);
-      }
+    const action = getAssignmentAction(status, override);
+    if (action === 'added') {
+      assigned.push(object);
+    }
+    if (action === 'removed') {
+      unassigned.push(object);
     }
   });
 
   return {
-    toAssign,
-    toUnassign,
+    assigned,
+    unassigned,
   };
 };

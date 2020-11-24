@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerInternalFindTagsRoute } from './find_tags';
-export { registerInternalBulkDeleteRoute } from './bulk_delete';
+export { registerFindAssignableObjectsRoute } from './find_assignable_objects';
+export { registerUpdateTagsAssignmentsRoute } from './update_tags_assignments';
