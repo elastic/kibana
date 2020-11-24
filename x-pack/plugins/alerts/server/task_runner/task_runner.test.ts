@@ -397,10 +397,13 @@ describe('Task Runner', () => {
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
     expect(eventLogger.logEvent).toHaveBeenCalledWith({
       event: {
-        action: 'execute',
-        outcome: 'success',
+        action: 'active-instance',
       },
       kibana: {
+        alerting: {
+          action_group_id: 'default',
+          instance_id: '1',
+        },
         saved_objects: [
           {
             id: '1',
@@ -410,16 +413,17 @@ describe('Task Runner', () => {
           },
         ],
       },
-      message: "alert executed: test:1: 'alert-name'",
+      message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
     });
     expect(eventLogger.logEvent).toHaveBeenCalledWith({
+      '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
-        action: 'active-instance',
+        action: 'execute',
+        outcome: 'success',
       },
       kibana: {
         alerting: {
-          instance_id: '1',
-          action_group_id: 'default',
+          status: 'active',
         },
         saved_objects: [
           {

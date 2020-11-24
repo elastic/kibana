@@ -277,6 +277,7 @@ describe('7.11.0', () => {
       attributes: {
         ...alert.attributes,
         updatedAt: alert.updated_at,
+        notifyOnlyOnActionGroupChange: false,
       },
     });
   });
@@ -289,6 +290,7 @@ describe('7.11.0', () => {
       attributes: {
         ...alert.attributes,
         updatedAt: alert.attributes.createdAt,
+        notifyOnlyOnActionGroupChange: false,
       },
     });
   });
@@ -300,6 +302,7 @@ describe('7.11.0', () => {
       ...alert,
       attributes: {
         ...alert.attributes,
+        updatedAt: alert.attributes.createdAt,
         notifyOnlyOnActionGroupChange: false,
       },
     });
