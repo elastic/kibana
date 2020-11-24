@@ -5,30 +5,56 @@
  */
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { setupSpacesAndUsers, tearDownUsers } from '..';
 
 // eslint-disable-next-line import/no-default-export
-export default function alertingTests({ loadTestFile }: FtrProviderContext) {
+export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerts', () => {
-    loadTestFile(require.resolve('./find'));
-    loadTestFile(require.resolve('./create'));
-    loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./disable'));
-    loadTestFile(require.resolve('./enable'));
-    loadTestFile(require.resolve('./execution_status'));
-    loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./get_alert_state'));
-    loadTestFile(require.resolve('./get_alert_instance_summary'));
-    loadTestFile(require.resolve('./list_alert_types'));
-    loadTestFile(require.resolve('./mute_all'));
-    loadTestFile(require.resolve('./mute_instance'));
-    loadTestFile(require.resolve('./unmute_all'));
-    loadTestFile(require.resolve('./unmute_instance'));
-    loadTestFile(require.resolve('./update'));
-    loadTestFile(require.resolve('./update_api_key'));
-    loadTestFile(require.resolve('./alerts'));
-    loadTestFile(require.resolve('./event_log'));
+    const securityService = getService('security');
+    const spacesService = getService('spaces');
+    const esArchiver = getService('esArchiver');
 
-    // note that this test will destroy existing spaces
-    loadTestFile(require.resolve('./rbac_legacy'));
+    describe('legacy alerts', () => {
+      before(async () => {
+        await setupSpacesAndUsers(spacesService, securityService);
+      });
+
+      after(async () => {
+        await tearDownUsers(securityService);
+        await esArchiver.unload('empty_kibana');
+      });
+
+      loadTestFile(require.resolve('./rbac_legacy'));
+    });
+
+    describe('alerts', () => {
+      before(async () => {
+        await setupSpacesAndUsers(spacesService, securityService);
+      });
+
+      after(async () => {
+        await tearDownUsers(securityService);
+        await esArchiver.unload('empty_kibana');
+      });
+
+      loadTestFile(require.resolve('./find'));
+      loadTestFile(require.resolve('./create'));
+      loadTestFile(require.resolve('./delete'));
+      loadTestFile(require.resolve('./disable'));
+      loadTestFile(require.resolve('./enable'));
+      loadTestFile(require.resolve('./execution_status'));
+      loadTestFile(require.resolve('./get'));
+      loadTestFile(require.resolve('./get_alert_state'));
+      loadTestFile(require.resolve('./get_alert_instance_summary'));
+      loadTestFile(require.resolve('./list_alert_types'));
+      loadTestFile(require.resolve('./mute_all'));
+      loadTestFile(require.resolve('./mute_instance'));
+      loadTestFile(require.resolve('./unmute_all'));
+      loadTestFile(require.resolve('./unmute_instance'));
+      loadTestFile(require.resolve('./update'));
+      loadTestFile(require.resolve('./update_api_key'));
+      loadTestFile(require.resolve('./alerts'));
+      loadTestFile(require.resolve('./event_log'));
+    });
   });
 }
