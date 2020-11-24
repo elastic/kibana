@@ -188,6 +188,7 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  calcAutoIntervalLessThan,
 } from '../common';
 
 export {
@@ -264,6 +265,7 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    calcAutoIntervalLessThan,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

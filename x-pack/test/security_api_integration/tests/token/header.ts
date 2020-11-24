@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Access token expiration is set to 15s for API integration tests.
       // Let's wait for 20s to make sure token expires.
-      await new Promise((resolve) => setTimeout(() => resolve(), 20000));
+      await new Promise((resolve) => setTimeout(resolve, 20000));
 
       await supertest
         .get('/internal/security/me')
