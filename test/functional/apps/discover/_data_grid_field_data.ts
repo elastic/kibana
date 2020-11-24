@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const expectedError =
           'Expected ":", "<", "<=", ">", ">=", AND, OR, end of input, ' +
           'whitespace but "(" found.';
-        await queryBar.setQuery('xxx(');
+        await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
         const { message } = await toasts.getErrorToast();
         expect(message).to.contain(expectedError);
