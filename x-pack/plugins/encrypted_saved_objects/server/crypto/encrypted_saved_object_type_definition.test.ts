@@ -113,3 +113,18 @@ it('correctly determines attribute properties', () => {
     }
   }
 });
+
+it('it correctly sets allowPredefinedID', () => {
+  const defaultTypeDefinition = new EncryptedSavedObjectAttributesDefinition({
+    type: 'so-type',
+    attributesToEncrypt: new Set(['attr#1', 'attr#2']),
+  });
+  expect(defaultTypeDefinition.allowPredefinedID).toBe(false);
+
+  const typeDefinitionWithPredefinedIDAllowed = new EncryptedSavedObjectAttributesDefinition({
+    type: 'so-type',
+    attributesToEncrypt: new Set(['attr#1', 'attr#2']),
+    allowPredefinedID: true,
+  });
+  expect(typeDefinitionWithPredefinedIDAllowed.allowPredefinedID).toBe(true);
+});
