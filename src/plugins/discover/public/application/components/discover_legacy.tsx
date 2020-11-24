@@ -173,7 +173,12 @@ export function DiscoverLegacy({
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
-        <main className="dscApp__frame" ref={scrollableMobile} aria-describedby="savedSearchTitle">
+        <main
+          className="dscApp__frame"
+          ref={scrollableMobile}
+          aria-describedby="savedSearchTitle"
+          tabIndex={-1}
+        >
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
             {savedSearch.title}
           </h1>
@@ -315,9 +320,8 @@ export function DiscoverLegacy({
 
                             <EuiButtonEmpty
                               onClick={() => {
-                                const skipToBottomBtn = document.getElementById('dscSkipButton');
-                                if (skipToBottomBtn) {
-                                  skipToBottomBtn.focus();
+                                if (scrollableMobile && scrollableMobile.current) {
+                                  scrollableMobile.current.focus();
                                 }
                                 // depending on screen size there are different elements to scroll
                                 if (!isMobile() && scrollableDesktop.current) {
