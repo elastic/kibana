@@ -7,4 +7,4 @@
 export const tagFeatureId = 'savedObjectsTagging';
 export const tagSavedObjectTypeName = 'tag';
 export const tagManagementSectionId = 'tags';
-export const taggableTypes = ['dashboard', 'visualization', 'map'];
+export const taggableTypes = ['dashboard', 'visualization', 'map', 'lens'];
