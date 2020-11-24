@@ -7269,7 +7269,6 @@
     "xpack.fleet.agentPolicyList.pageSubtitle": "エージェントポリシーを使用すると、エージェントとエージェントが収集するデータを管理できます。",
     "xpack.fleet.agentPolicyList.pageTitle": "エージェントポリシー",
     "xpack.fleet.agentPolicyList.reloadAgentPoliciesButtonText": "再読み込み",
-    "xpack.fleet.agentPolicyList.revisionNumber": "rev. {revNumber}",
     "xpack.fleet.agentPolicyList.updatedOnColumnTitle": "最終更新日",
     "xpack.fleet.agentReassignPolicy.cancelButtonLabel": "キャンセル",
     "xpack.fleet.agentReassignPolicy.continueButtonLabel": "ポリシーの割り当て",
