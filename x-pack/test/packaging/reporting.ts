@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('downloaded PDF has OK status', async function () {
-      // Generating and then comparing reports can take longer than the default 60s timeout
       this.timeout(180000);
 
       await pageObjects.common.navigateToApp('dashboards');
