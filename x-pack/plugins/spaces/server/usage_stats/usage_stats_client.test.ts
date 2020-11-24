@@ -7,8 +7,11 @@
 import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import { SPACES_USAGE_STATS_TYPE } from './constants';
 import { UsageStats } from './types';
-import { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
-import { UsageStatsClient } from './usage_stats_client';
+import {
+  UsageStatsClient,
+  IncrementCopySavedObjectsOptions,
+  IncrementResolveCopySavedObjectsErrorsOptions,
+} from './usage_stats_client';
 
 describe('UsageStatsClient', () => {
   const setup = () => {
@@ -62,7 +65,7 @@ describe('UsageStatsClient', () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));
 
-      await usageStatsClient.incrementCopySavedObjects({} as CopyOptions);
+      await usageStatsClient.incrementCopySavedObjects({} as IncrementCopySavedObjectsOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
         SPACES_USAGE_STATS_TYPE,
         {
@@ -87,7 +90,7 @@ describe('UsageStatsClient', () => {
       await usageStatsClient.incrementCopySavedObjects({
         createNewCopies: true,
         overwrite: true,
-      } as CopyOptions);
+      } as IncrementCopySavedObjectsOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
         SPACES_USAGE_STATS_TYPE,
         {
@@ -118,7 +121,9 @@ describe('UsageStatsClient', () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(createMockData({}));
 
-      await usageStatsClient.incrementResolveCopySavedObjectsErrors({} as ResolveConflictsOptions);
+      await usageStatsClient.incrementResolveCopySavedObjectsErrors(
+        {} as IncrementResolveCopySavedObjectsErrorsOptions
+      );
       expect(repositoryMock.create).toHaveBeenCalledWith(
         SPACES_USAGE_STATS_TYPE,
         {
@@ -141,7 +146,7 @@ describe('UsageStatsClient', () => {
 
       await usageStatsClient.incrementResolveCopySavedObjectsErrors({
         createNewCopies: true,
-      } as ResolveConflictsOptions);
+      } as IncrementResolveCopySavedObjectsErrorsOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
         SPACES_USAGE_STATS_TYPE,
         {

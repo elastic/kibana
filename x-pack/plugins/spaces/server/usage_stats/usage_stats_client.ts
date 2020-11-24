@@ -9,8 +9,8 @@ import { SPACES_USAGE_STATS_TYPE } from './constants';
 import { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
 import { UsageStats } from './types';
 
-type IncrementCopySavedObjectsOptions = Pick<CopyOptions, 'createNewCopies' | 'overwrite'>;
-type IncrementResolveCopySavedObjectsErrorsOptions = Pick<
+export type IncrementCopySavedObjectsOptions = Pick<CopyOptions, 'createNewCopies' | 'overwrite'>;
+export type IncrementResolveCopySavedObjectsErrorsOptions = Pick<
   ResolveConflictsOptions,
   'createNewCopies'
 >;
