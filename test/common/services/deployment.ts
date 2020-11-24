@@ -18,6 +18,7 @@
  */
 
 import { get } from 'lodash';
+// @ts-ignore
 import fetch from 'node-fetch';
 // @ts-ignore not TS yet
 import getUrl from '../../../src/test_utils/get_url';
