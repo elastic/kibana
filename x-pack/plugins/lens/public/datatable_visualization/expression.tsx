@@ -27,6 +27,7 @@ import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface DatatableColumns {
   columnIds: string[];
@@ -125,6 +126,7 @@ export const datatableColumns: ExpressionFunctionDefinition<
 };
 
 export const getDatatableRenderer = (dependencies: {
+  uiActions: UiActionsStart;
   formatFactory: Promise<FormatFactory>;
   getType: Promise<(name: string) => IAggType>;
 }): ExpressionRenderDefinition<DatatableProps> => ({
@@ -313,14 +315,17 @@ export function DatatableComponent(props: DatatableRenderProps) {
             name: 'Actions',
             actions: [
               {
-                name: i18n.translate('xpack.lens.tableRowMore', {
-                  defaultMessage: 'More',
-                }),
+                name: () => null,
+                // i18n.translate('xpack.lens.tableRowMore', {
+                //   defaultMessage: 'More',
+                // }),
                 description: i18n.translate('xpack.lens.tableRowMoreDescription', {
                   defaultMessage: 'Table row context menu',
                 }),
                 type: 'icon',
-                icon: 'boxesVertical',
+                icon: () => {
+                  return 'boxesVertical';
+                },
                 onClick: ({ rowIndex }) => {
                   onRowContextMenuClick({
                     rowIndex,

@@ -28,16 +28,16 @@ export class DatatableVisualization {
     { expressions, formatFactory, editorFrame }: DatatableVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const {
-        datatable,
-        datatableColumns,
-        getDatatableRenderer,
-        datatableVisualization,
-      } = await import('../async_services');
+      const [
+        { datatable, datatableColumns, getDatatableRenderer, datatableVisualization },
+        [, { uiActions }],
+      ] = await Promise.all([import('../async_services'), core.getStartServices()]);
+
       expressions.registerFunction(() => datatableColumns);
       expressions.registerFunction(() => datatable);
       expressions.registerRenderer(() =>
         getDatatableRenderer({
+          uiActions,
           formatFactory,
           getType: core
             .getStartServices()
