@@ -895,6 +895,71 @@ describe('Lens App', () => {
     });
   });
 
+  describe('download button', () => {
+    function getButton(inst: ReactWrapper): TopNavMenuData {
+      return (inst
+        .find('[data-test-subj="lnsApp_topNav"]')
+        .prop('config') as TopNavMenuData[]).find(
+        (button) => button.testId === 'lnsApp_downloadCSVButton'
+      )!;
+    }
+
+    it('should be disabled when no data is available', async () => {
+      const { component, frame } = mountWith({});
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      await act(async () =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({} as unknown) as Document,
+          isSaveable: true,
+        })
+      );
+      component.update();
+      expect(getButton(component).disableButton).toEqual(true);
+    });
+
+    it('should disable download when not saveable', async () => {
+      const { component, frame } = mountWith({});
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+
+      await act(async () =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({} as unknown) as Document,
+          isSaveable: false,
+          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+        })
+      );
+
+      component.update();
+      expect(getButton(component).disableButton).toEqual(true);
+    });
+
+    it('should still be enabled even if the user is missing save permissions', async () => {
+      const services = makeDefaultServices();
+      services.application = {
+        ...services.application,
+        capabilities: {
+          ...services.application.capabilities,
+          visualize: { save: false, saveQuery: false, show: true },
+        },
+      };
+
+      const { component, frame } = mountWith({ services });
+      const onChange = frame.mount.mock.calls[0][1].onChange;
+      await act(async () =>
+        onChange({
+          filterableIndexPatterns: [],
+          doc: ({} as unknown) as Document,
+          isSaveable: true,
+          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+        })
+      );
+      component.update();
+      expect(getButton(component).disableButton).toEqual(false);
+    });
+  });
+
   describe('query bar state management', () => {
     it('uses the default time and query language settings', () => {
       const { frame } = mountWith({});
