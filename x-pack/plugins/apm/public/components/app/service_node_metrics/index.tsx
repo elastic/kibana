@@ -59,7 +59,11 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, serviceNodeName } = match.params;
   const { agentName } = useAgentName();
-  const { data } = useServiceMetricCharts(urlParams, agentName);
+  const { data } = useServiceMetricCharts(
+    urlParams,
+    agentName,
+    serviceNodeName
+  );
   const { start, end } = urlParams;
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
@@ -176,25 +180,6 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
             />
           </EuiFlexItem>
         </MetadataFlexGroup>
-      )}
-      {agentName && (
-        <ChartsSyncContextProvider>
-          <EuiFlexGrid columns={2} gutterSize="s">
-            {data.charts.map((chart) => (
-              <EuiFlexItem key={chart.key}>
-                <EuiPanel>
-                  <MetricsChart
-                    start={start}
-                    end={end}
-                    chart={chart}
-                    fetchStatus={status}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-          <EuiSpacer size="xxl" />
-        </ChartsSyncContextProvider>
       )}
       <SearchBar />
       <EuiPage>
