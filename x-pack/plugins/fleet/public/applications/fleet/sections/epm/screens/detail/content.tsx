@@ -21,7 +21,7 @@ import { useLink } from '../../../../hooks';
 
 type ContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
 
-const SideNavColumn = styled(LeftColumn)`
+const LeftSideColumn = styled(LeftColumn)`
   /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
   &&& {
     margin-top: 77px;
@@ -34,15 +34,18 @@ const ContentFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export function Content(props: ContentProps) {
+  const showRightColumn = props.panel !== 'policies';
   return (
     <ContentFlexGroup>
-      <SideNavColumn />
-      <CenterColumn>
+      <LeftSideColumn {...(!showRightColumn ? { columnGrow: 1 } : undefined)} />
+      <CenterColumn {...(!showRightColumn ? { columnGrow: 6 } : undefined)}>
         <ContentPanel {...props} />
       </CenterColumn>
-      <RightColumn>
-        <RightColumnContent {...props} />
-      </RightColumn>
+      {showRightColumn && (
+        <RightColumn>
+          <RightColumnContent {...props} />
+        </RightColumn>
+      )}
     </ContentFlexGroup>
   );
 }

@@ -35,7 +35,7 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState
   const location = state.location;
 
   return (
-    state.active &&
+    Boolean(state.active) &&
     isOutdatedResourceState(currentPage, (data) => {
       return (
         data.pageIndex === location.page_index &&
