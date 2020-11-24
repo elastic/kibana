@@ -78,11 +78,7 @@ export const MultiselectPicker: FC<{
         newItems[index].checked = 'on';
     }
 
-    if (onChange) {
-      onChange(newItems, new Set(newItems.filter((i) => i.checked === 'on').map((i) => i.value)));
-    } else {
-      setItems(newItems);
-    }
+    setItems(newItems);
   }
 
   const button = (
