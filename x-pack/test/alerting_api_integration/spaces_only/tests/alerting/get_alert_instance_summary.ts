@@ -256,7 +256,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         type: 'alert',
         id,
         provider: 'alerting',
-        actions,
+        actions: new Map(actions.map((action) => [action, { gte: 1 }])),
       });
     });
   }

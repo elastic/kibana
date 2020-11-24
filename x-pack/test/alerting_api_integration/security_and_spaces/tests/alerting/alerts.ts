@@ -1096,11 +1096,9 @@ instanceStateValue: true
         type: 'alert',
         id: alertId,
         provider: 'alerting',
-        actions: ['execute'],
+        actions: new Map([['execute', { gte: 1 }]]),
       });
     });
-
-    expect(events.length).to.be.greaterThan(0);
 
     const event = events[0];
 

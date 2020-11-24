@@ -56,7 +56,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: alertId,
           provider: 'alerting',
-          actions: ['execute'],
+          actions: new Map([['execute', { gte: 1 }]]),
         });
         const errorEvents = someEvents.filter(
           (event) => event?.kibana?.alerting?.status === 'error'
