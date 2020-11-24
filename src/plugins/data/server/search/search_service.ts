@@ -106,12 +106,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly searchSourceService = new SearchSourceService();
   private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
-  private sessionService: BackgroundSessionService = new BackgroundSessionService();
+  private sessionService: BackgroundSessionService;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
     private readonly logger: Logger
-  ) {}
+  ) {
+    this.sessionService = new BackgroundSessionService(logger);
+  }
 
   public setup(
     core: CoreSetup<{}, DataPluginStart>,

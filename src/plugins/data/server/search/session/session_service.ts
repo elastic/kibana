@@ -17,7 +17,16 @@
  * under the License.
  */
 
-import { CoreStart, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import {
+  CoreStart,
+  KibanaRequest,
+  Logger,
+  SavedObject,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsServiceStart,
+} from 'src/core/server';
+import moment, { Moment } from 'moment';
 import {
   BackgroundSessionSavedObjectAttributes,
   IKibanaSearchRequest,
@@ -29,6 +38,9 @@ import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
 
 const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
+export const INMEM_TRACKING_INTERVAL = 2000;
+export const INMEM_TRACKING_TIMEOUT_SEC = 60;
+export const MAX_UPDATE_RETRIES = 3;
 
 export interface BackgroundSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -38,24 +50,127 @@ export type ISearchSessionClient = ReturnType<
   ReturnType<BackgroundSessionService['asScopedProvider']>
 >;
 
+export interface SessionInfo {
+  insertTime: Moment;
+  retryCount: number;
+  ids: Map<string, string>;
+}
+
 export class BackgroundSessionService {
   /**
    * Map of sessionId to { [requestHash]: searchId }
    * @private
    */
-  private sessionSearchMap = new Map<string, Map<string, string>>();
+  private sessionSearchMap = new Map<string, SessionInfo>();
+  private internalSavedObjectsClient!: SavedObjectsClientContract;
+  private monitorInterval!: NodeJS.Timeout;
 
-  constructor() {}
+  constructor(private readonly logger: Logger) {}
+
+  private setupMonitoring = (savedObjects: SavedObjectsServiceStart) => {
+    const internalRepo = savedObjects.createInternalRepository();
+    this.internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
+    this.monitorInterval = setInterval(this.monitorMappedIds.bind(this), INMEM_TRACKING_INTERVAL);
+  };
+
+  /**
+   * Gets all {@link SessionSavedObjectAttributes | Background Searches} that
+   * currently being tracked by the service.
+   *	   *
+   * @remarks
+   * Uses `internalSavedObjectsClient` as this is called asynchronously, not within the
+   * context of a user's session.
+   */
+  private async getAllMappedSavedObjects() {
+    const activeMappingIds = Array.from(this.sessionSearchMap.keys()).map((sessionId) => {
+      return {
+        id: sessionId,
+        type: BACKGROUND_SESSION_TYPE,
+      };
+    });
+    const res = await this.internalSavedObjectsClient.bulkGet<BackgroundSessionSavedObjectAttributes>(
+      activeMappingIds
+    );
+    return res.saved_objects;
+  }
+
+  private clearSessions = () => {
+    this.logger.debug(`clearSessions`);
+    const curTime = moment();
+    this.sessionSearchMap.forEach((sessionInfo, sessionId) => {
+      if (
+        moment.duration(curTime.diff(sessionInfo.insertTime)).asSeconds() >
+        INMEM_TRACKING_TIMEOUT_SEC
+      ) {
+        this.logger.debug(`Deleting expired session ${sessionId}`);
+        this.sessionSearchMap.delete(sessionId);
+      } else if (sessionInfo.retryCount >= MAX_UPDATE_RETRIES) {
+        this.logger.warn(`Deleting failed session ${sessionId}`);
+        this.sessionSearchMap.delete(sessionId);
+      }
+    });
+  };
+
+  private async monitorMappedIds() {
+    try {
+      this.logger.debug(`monitorMappedIds. Map contains ${this.sessionSearchMap.size} items`);
+      this.clearSessions();
+
+      if (!this.sessionSearchMap.size) return;
+
+      const savedSessions = await this.getAllMappedSavedObjects();
+      const updatedSessions = await this.updateAllSavedObjects(savedSessions);
+
+      updatedSessions.forEach((updatedSavedObject) => {
+        const sessionInfo = this.sessionSearchMap.get(updatedSavedObject.id)!;
+        if (updatedSavedObject.error) {
+          // Retry next time
+          sessionInfo.retryCount++;
+        } else if (updatedSavedObject.attributes.idMapping) {
+          // Delete the ids that we just saved, avoiding a potential new ids being lost (?)
+          Object.keys(updatedSavedObject.attributes.idMapping).forEach((key) => {
+            sessionInfo.ids.delete(key);
+          });
+          sessionInfo.retryCount = 0;
+        }
+      });
+    } catch (e) {
+      this.logger.error(`Error fetching sessions. ${e}`);
+    }
+  }
+
+  private async updateAllSavedObjects(
+    activeMappingObjects: Array<SavedObject<BackgroundSessionSavedObjectAttributes>>
+  ) {
+    if (!activeMappingObjects.length) return [];
+
+    const updatedSessions = activeMappingObjects?.map((sessionSavedObject) => {
+      const sessionInfo = this.sessionSearchMap.get(sessionSavedObject.id);
+      const idMapping = sessionInfo ? Object.fromEntries(sessionInfo.ids.entries()) : {};
+      sessionSavedObject.attributes.idMapping = {
+        ...sessionSavedObject.attributes.idMapping,
+        ...idMapping,
+      };
+      return sessionSavedObject;
+    });
+
+    const updateResults = await this.internalSavedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
+      updatedSessions
+    );
+    return updateResults.saved_objects;
+  }
 
   public setup = () => {};
 
   public start = (core: CoreStart) => {
+    this.setupMonitoring(core.savedObjects);
     return {
       asScoped: this.asScopedProvider(core),
     };
   };
 
   public stop = () => {
+    clearInterval(this.monitorInterval);
     this.sessionSearchMap.clear();
   };
 
@@ -75,8 +190,8 @@ export class BackgroundSessionService {
     if (!name) throw new Error('Name is required');
 
     // Get the mapping of request hash/search ID for this session
-    const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
-    const idMapping = Object.fromEntries(searchMap.entries());
+    const searchMap = this.sessionSearchMap.get(sessionId);
+    const idMapping = searchMap ? Object.fromEntries(searchMap.ids.entries()) : {};
     const attributes = { name, created, expires, status, initialState, restoreState, idMapping };
     const session = await savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
@@ -147,8 +262,12 @@ export class BackgroundSessionService {
       const attributes = { idMapping: { [requestHash]: searchId } };
       await this.update(sessionId, attributes, deps);
     } else {
-      const map = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
-      map.set(requestHash, searchId);
+      const map = this.sessionSearchMap.get(sessionId) ?? {
+        insertTime: moment(),
+        retryCount: 0,
+        ids: new Map<string, string>(),
+      };
+      map.ids.set(requestHash, searchId);
       this.sessionSearchMap.set(sessionId, map);
     }
   };
