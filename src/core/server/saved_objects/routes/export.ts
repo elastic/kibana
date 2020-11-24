@@ -19,7 +19,8 @@
 
 import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
-import { createPromiseFromStreams, createMapStream, createConcatStream } from '../../utils/streams';
+import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
+
 import { IRouter } from '../../http';
 import { CoreUsageStatsServiceSetup } from '../../core_usage_stats';
 import { SavedObjectConfig } from '../saved_objects_config';
