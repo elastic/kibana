@@ -578,12 +578,14 @@ if (doc['task.runAt'].size()!=0) {
 
       expect(script).toMatchObject({
         source: `
-  if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-      .join(' ')}
-  } else {
-    ctx._source.task.status = "failed";
+  if (params.registeredTaskTypes.contains(ctx._source.task.taskType)) {
+    if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+        .join(' ')}
+    } else {
+      ctx._source.task.status = "failed";
+    }
   }
   `,
         lang: 'painless',
@@ -593,6 +595,7 @@ if (doc['task.runAt'].size()!=0) {
             'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
             'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
           ],
+          registeredTaskTypes: ['foo', 'bar'],
           taskMaxAttempts: {
             bar: customMaxAttempts,
             foo: maxAttempts,
@@ -644,18 +647,21 @@ if (doc['task.runAt'].size()!=0) {
       });
       expect(script).toMatchObject({
         source: `
-  if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
-    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
-      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
-      .join(' ')}
-  } else {
-    ctx._source.task.status = "failed";
+  if (params.registeredTaskTypes.contains(ctx._source.task.taskType)) {
+    if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+        .join(' ')}
+    } else {
+      ctx._source.task.status = "failed";
+    }
   }
   `,
         lang: 'painless',
         params: {
           fieldUpdates,
           claimTasksById: [],
+          registeredTaskTypes: ['report', 'dernstraight', 'yawn'],
           taskMaxAttempts: {
             dernstraight: 2,
             report: 2,
