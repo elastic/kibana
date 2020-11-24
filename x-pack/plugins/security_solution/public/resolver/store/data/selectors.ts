@@ -64,15 +64,15 @@ export function resolverComponentInstanceID(state: DataState): string {
  * The number of requested ancestors from the server. If zero ancestors were requested
  * then the server would still return the origin node.
  */
-export function resolverRequestedAncestors(state: DataState): number {
-  return state.tree?.lastResponse?.parameters.requestedAncestors ?? 0;
+export function resolverRequestedAncestors(state: DataState): number | undefined {
+  return state.tree?.lastResponse?.parameters.requestedAncestors;
 }
 
 /**
  * The number of requested descendants from the server.
  */
-export function resolverRequestedDescendants(state: DataState): number {
-  return state.tree?.lastResponse?.parameters.requestedAncestors ?? 0;
+export function resolverRequestedDescendants(state: DataState): number | undefined {
+  return state.tree?.lastResponse?.parameters.requestedAncestors;
 }
 
 /**
@@ -250,7 +250,9 @@ export const hasMoreChildren: (state: DataState) => boolean = createSelector(
   tree,
   resolverRequestedDescendants,
   (resolverTree, requestedDescendants) => {
-    return indexedProcessTreeModel.countChildren(resolverTree) >= requestedDescendants;
+    return requestedDescendants !== undefined
+      ? indexedProcessTreeModel.countChildren(resolverTree) >= requestedDescendants
+      : false;
   }
 );
 
@@ -265,7 +267,9 @@ export const hasMoreAncestors: (state: DataState) => boolean = createSelector(
   tree,
   resolverRequestedAncestors,
   (resolverTree, requestedAncestors) => {
-    return indexedProcessTreeModel.countAncestors(resolverTree) >= requestedAncestors;
+    return requestedAncestors !== undefined
+      ? indexedProcessTreeModel.countAncestors(resolverTree) >= requestedAncestors
+      : false;
   }
 );
 
