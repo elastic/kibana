@@ -6,6 +6,7 @@
 
 import { LicenseService } from './license';
 import { PolicyConfig } from '../endpoint/types';
+import { DefaultMalwareMessage, factory } from '../endpoint/models/policy_config';
 
 /**
  * Given an endpoint package policy, verifies that all enabled features that
@@ -19,21 +20,21 @@ export const isEndpointPolicyValidForLicense = (
     return true; // currently, platinum allows all features
   }
 
+  const defaults = factory();
+
   // only platinum or higher may disable malware notification
   if (
-    policy.windows.popup.malware.enabled === false ||
-    policy.mac.popup.malware.enabled === false
+    policy.windows.popup.malware.enabled !== defaults.windows.popup.malware.enabled ||
+    policy.mac.popup.malware.enabled !== defaults.mac.popup.malware.enabled
   ) {
     return false;
   }
 
-  // todo: should/can this value be imported if the default ever changes?
-  // should this check against policy_config::factory?
-  const defaultMalwareNotificationMessage = 'Elastic Security { action } { filename }';
-
+  // Only Platinum or higher may change the malware message (which can be blank or what Endpoint defaults)
   if (
-    policy.windows.popup.malware.message !== defaultMalwareNotificationMessage ||
-    policy.mac.popup.malware.message !== defaultMalwareNotificationMessage
+    [policy.windows, policy.mac].some(
+      (p) => p.popup.malware.message !== '' && p.popup.malware.message !== DefaultMalwareMessage
+    )
   ) {
     return false;
   }
@@ -47,7 +48,18 @@ export const isEndpointPolicyValidForLicense = (
  */
 export const unsetPolicyFeaturesAboveLicenseLevel = (
   policy: PolicyConfig,
-  licence: LicenseService
+  license: LicenseService
 ): PolicyConfig => {
+  if (license.isPlatinumPlus()) {
+    return policy;
+  }
+
+  // set defaults
+  const defaults = factory();
+  policy.windows.popup.malware.enabled = defaults.windows.popup.malware.enabled;
+  policy.mac.popup.malware.enabled = defaults.mac.popup.malware.enabled;
+  policy.windows.popup.malware.message = defaults.windows.popup.malware.message;
+  policy.mac.popup.malware.message = defaults.mac.popup.malware.message;
+
   return policy;
 };
