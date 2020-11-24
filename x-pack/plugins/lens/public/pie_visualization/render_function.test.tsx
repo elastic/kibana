@@ -70,6 +70,7 @@ describe('PieVisualization component', () => {
         onClickValue: jest.fn(),
         chartsThemeService,
         paletteService: chartPluginMock.createPaletteRegistry(),
+        renderMode: 'display' as const,
       };
     }
 
@@ -264,6 +265,14 @@ describe('PieVisualization component', () => {
           ],
         }
       `);
+    });
+
+    test('does not set click listener on noInteractivity render mode', () => {
+      const defaultArgs = getDefaultArgs();
+      const component = shallow(
+        <PieComponent args={{ ...args }} {...defaultArgs} renderMode="noInteractivity" />
+      );
+      expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
     });
 
     test('it shows emptyPlaceholder for undefined grouped data', () => {
