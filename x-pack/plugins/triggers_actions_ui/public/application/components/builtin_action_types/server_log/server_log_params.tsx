@@ -10,9 +10,9 @@ import { ActionParamsProps } from '../../../../types';
 import { ServerLogActionParams } from '.././types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 
-export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
-  ServerLogActionParams
->> = ({ actionParams, editAction, index, errors, messageVariables, defaultMessage }) => {
+export const ServerLogParamsFields: React.FunctionComponent<
+  ActionParamsProps<ServerLogActionParams>
+> = ({ actionParams, editAction, index, errors, messageVariables, defaultMessage }) => {
   const { message, level } = actionParams;
   const levelOptions = [
     { value: 'trace', text: 'Trace' },
@@ -23,7 +23,7 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
     { value: 'fatal', text: 'Fatal' },
   ];
   useEffect(() => {
-    if (!actionParams?.level) {
+    if (!actionParams.level) {
       editAction('level', 'info', index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -48,7 +48,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
 }
 
 export interface ActionParamsProps<TParams> {
-  actionParams: TParams;
+  actionParams: Partial<TParams>;
   index: number;
   editAction: (key: string, value: AlertActionParam, index: number) => void;
   errors: IErrorObject;
