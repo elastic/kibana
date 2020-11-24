@@ -59,9 +59,23 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
   });
 
   result.push({
+    name: 'date',
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.dateLabel', {
+      defaultMessage: 'The date the alert scheduled the action.',
+    }),
+  });
+
+  result.push({
     name: 'alertInstanceId',
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertInstanceIdLabel', {
       defaultMessage: 'The alert instance id that scheduled actions for the alert.',
+    }),
+  });
+
+  result.push({
+    name: 'alertActionGroup',
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.alertActionGroupLabel', {
+      defaultMessage: 'The alert action group that was used to scheduled actions for the alert.',
     }),
   });
 

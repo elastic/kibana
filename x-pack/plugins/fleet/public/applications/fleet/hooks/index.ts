@@ -5,16 +5,16 @@
  */
 
 export { useCapabilities } from './use_capabilities';
-export { useCore } from './use_core';
+export { useStartServices } from './use_core';
 export { useConfig, ConfigContext } from './use_config';
 export { useKibanaVersion, KibanaVersionContext } from './use_kibana_version';
-export { useSetupDeps, useStartDeps, DepsContext } from './use_deps';
 export { licenseService, useLicense } from './use_license';
 export { useBreadcrumbs } from './use_breadcrumbs';
 export { useLink } from './use_link';
 export { useKibanaLink } from './use_kibana_link';
 export { usePackageIconType, UsePackageIconType } from './use_package_icon_type';
-export { usePagination, Pagination } from './use_pagination';
+export { usePagination, Pagination, PAGE_SIZE_OPTIONS } from './use_pagination';
+export { useUrlPagination } from './use_url_pagination';
 export { useSorting } from './use_sorting';
 export { useDebounce } from './use_debounce';
 export * from './use_request';

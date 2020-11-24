@@ -6,6 +6,7 @@
 
 import { mount, shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { encodeIpv6 } from '../../lib/helpers';
@@ -92,7 +93,7 @@ describe('Custom Links', () => {
       const wrapper = mountWithIntl(
         <GoogleLink link={'http://example.com/'}>{'Example Link'}</GoogleLink>
       );
-      expect(wrapper.text()).toEqual('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
     });
 
     test('it renders props passed in as link', () => {
@@ -448,7 +449,7 @@ describe('Custom Links', () => {
   describe('WhoisLink', () => {
     test('it renders ip passed in as domain', () => {
       const wrapper = mountWithIntl(<WhoIsLink domain={'192.0.2.0'}>{'Example Link'}</WhoIsLink>);
-      expect(wrapper.text()).toEqual('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
     });
 
     test('it renders correct href', () => {
@@ -473,7 +474,7 @@ describe('Custom Links', () => {
           {'Example Link'}
         </CertificateFingerprintLink>
       );
-      expect(wrapper.text()).toEqual('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
     });
 
     test('it renders correct href', () => {
@@ -504,7 +505,7 @@ describe('Custom Links', () => {
       const wrapper = mountWithIntl(
         <Ja3FingerprintLink ja3Fingerprint={'abcd'}>{'Example Link'}</Ja3FingerprintLink>
       );
-      expect(wrapper.text()).toEqual('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
     });
 
     test('it renders correct href', () => {
@@ -533,7 +534,7 @@ describe('Custom Links', () => {
       const wrapper = mountWithIntl(
         <PortOrServiceNameLink portOrServiceName={443}>{'Example Link'}</PortOrServiceNameLink>
       );
-      expect(wrapper.text()).toEqual('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
     });
 
     test('it renders correct href when port is a number', () => {

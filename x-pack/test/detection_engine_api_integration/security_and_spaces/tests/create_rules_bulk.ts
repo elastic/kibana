@@ -15,6 +15,7 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getRuleForSignalTesting,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -27,7 +28,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('create_rules_bulk', () => {
     describe('validation errors', () => {
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
        this pops up again elsewhere.
       */
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-        const simpleRule = getSimpleRule();
+        const simpleRule = getRuleForSignalTesting(['auditbeat-*']);
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
           .set('kbn-xsrf', 'true')
@@ -107,8 +107,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({ ids: [body[0].id] })
           .expect(200);
 
-        const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
         expect(statusBody[body[0].id].current_status.status).to.eql('succeeded');
       });
 

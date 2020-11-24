@@ -35,33 +35,37 @@ describe('DataAdapter', () => {
     });
 
     it('should call the provided callback and resolve with its value', async () => {
-      const spy = jest.fn(() => 'foo');
+      const data = { columns: [], rows: [] };
+      const spy = jest.fn(() => data);
       adapter.setTabularLoader(spy);
       expect(spy).not.toBeCalled();
       const result = await adapter.getTabular();
       expect(spy).toBeCalled();
-      expect(result.data).toBe('foo');
+      expect(result.data).toBe(data);
     });
 
     it('should pass through options specified via setTabularLoader', async () => {
-      adapter.setTabularLoader(() => 'foo', { returnsFormattedValues: true });
+      const data = { columns: [], rows: [] };
+      adapter.setTabularLoader(() => data, { returnsFormattedValues: true });
       const result = await adapter.getTabular();
       expect(result.options).toEqual({ returnsFormattedValues: true });
     });
 
     it('should return options set when starting loading data', async () => {
-      adapter.setTabularLoader(() => 'foo', { returnsFormattedValues: true });
+      const data = { columns: [], rows: [] };
+      adapter.setTabularLoader(() => data, { returnsFormattedValues: true });
       const waitForResult = adapter.getTabular();
-      adapter.setTabularLoader(() => 'bar', { returnsFormattedValues: false });
+      adapter.setTabularLoader(() => data, { returnsFormattedValues: false });
       const result = await waitForResult;
       expect(result.options).toEqual({ returnsFormattedValues: true });
     });
   });
 
   it('should emit a "tabular" event when a new tabular loader is specified', () => {
+    const data = { columns: [], rows: [] };
     const spy = jest.fn();
     adapter.once('change', spy);
-    adapter.setTabularLoader(() => 42);
+    adapter.setTabularLoader(() => data);
     expect(spy).toBeCalled();
   });
 });

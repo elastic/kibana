@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
@@ -48,16 +48,11 @@ export default function ({ getPageObjects, getService }) {
     });
 
     describe('panel actions', () => {
-      before(async () => {
+      beforeEach(async () => {
         await loadDashboardAndOpenTooltip();
       });
 
-      it('should display more actions button when tooltip is locked', async () => {
-        const exists = await testSubjects.exists('mapTooltipMoreActionsButton');
-        expect(exists).to.be(true);
-      });
-
-      it('should trigger drilldown action when clicked', async () => {
+      it('should trigger dashboard drilldown action when clicked', async () => {
         await testSubjects.click('mapTooltipMoreActionsButton');
         await testSubjects.click('mapFilterActionButton__drilldown1');
 
@@ -68,6 +63,16 @@ export default function ({ getPageObjects, getService }) {
 
         const hasJoinFilter = await filterBar.hasFilter('shape_name', 'charlie');
         expect(hasJoinFilter).to.be(true);
+      });
+
+      it('should trigger url drilldown action when clicked', async () => {
+        await testSubjects.click('mapTooltipMoreActionsButton');
+        await testSubjects.click('mapFilterActionButton__urlDrilldownToDiscover');
+
+        // Assert on discover with filter from action
+        await PageObjects.discover.waitForDiscoverAppOnScreen();
+        const hasFilter = await filterBar.hasFilter('name', 'charlie');
+        expect(hasFilter).to.be(true);
       });
     });
   });

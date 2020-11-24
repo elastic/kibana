@@ -298,9 +298,9 @@ describe('test transform install', () => {
     (getInstallationObject as jest.MockedFunction<
       typeof getInstallationObject
     >).mockReturnValueOnce(
-      Promise.resolve(({ attributes: { installed_es: [] } } as unknown) as SavedObject<
-        Installation
-      >)
+      Promise.resolve(({
+        attributes: { installed_es: [] },
+      } as unknown) as SavedObject<Installation>)
     );
     legacyScopedClusterClient.callAsCurrentUser = jest.fn();
     await installTransform(

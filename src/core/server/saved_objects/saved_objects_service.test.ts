@@ -215,9 +215,8 @@ describe('SavedObjectsService', () => {
       });
       await soService.setup(setupDeps);
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
-      ((setupDeps.elasticsearch.esNodesCompatibility$ as any) as BehaviorSubject<
-        NodesVersionCompatibility
-      >).next({
+      ((setupDeps.elasticsearch
+        .esNodesCompatibility$ as any) as BehaviorSubject<NodesVersionCompatibility>).next({
         isCompatible: true,
         incompatibleNodes: [],
         warningNodes: [],

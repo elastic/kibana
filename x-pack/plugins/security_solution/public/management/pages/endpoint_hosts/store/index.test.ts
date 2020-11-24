@@ -63,6 +63,7 @@ describe('EndpointList store concerns', () => {
         agentsWithEndpointsTotalError: undefined,
         endpointsTotalError: undefined,
         queryStrategyVersion: undefined,
+        policyVersionInfo: undefined,
       });
     });
 

@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "security"],
   "requiredPlugins": ["data", "features", "licensing", "taskManager", "securityOss"],
-  "optionalPlugins": ["home", "management", "usageCollection"],
+  "optionalPlugins": ["home", "management", "usageCollection", "spaces"],
   "server": true,
   "ui": true,
   "requiredBundles": [

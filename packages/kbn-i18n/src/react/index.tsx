@@ -18,9 +18,7 @@
  */
 
 import { InjectedIntl as _InjectedIntl, InjectedIntlProps as _InjectedIntlProps } from 'react-intl';
-
-export type InjectedIntl = _InjectedIntl;
-export type InjectedIntlProps = _InjectedIntlProps;
+export type { InjectedIntl, InjectedIntlProps } from 'react-intl';
 
 export {
   intlShape,

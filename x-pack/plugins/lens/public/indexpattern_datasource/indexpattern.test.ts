@@ -13,9 +13,15 @@ import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
+import {
+  operationDefinitionMap,
+  getErrorMessages,
+  createMockedReferenceOperation,
+} from './operations';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
+jest.mock('./operations');
 
 const fieldsOne = [
   {
@@ -489,6 +495,56 @@ describe('IndexPattern Data Source', () => {
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp']);
       expect(ast.chain[0].arguments.timeFields).not.toContain('timefield');
     });
+
+    describe('references', () => {
+      beforeEach(() => {
+        // @ts-expect-error we are inserting an invalid type
+        operationDefinitionMap.testReference = createMockedReferenceOperation();
+
+        // @ts-expect-error we are inserting an invalid type
+        operationDefinitionMap.testReference.toExpression.mockReturnValue(['mock']);
+      });
+
+      afterEach(() => {
+        delete operationDefinitionMap.testReference;
+      });
+
+      it('should collect expression references and append them', async () => {
+        const queryBaseState: IndexPatternBaseState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'Count of records',
+                  dataType: 'date',
+                  isBucketed: false,
+                  sourceField: 'timefield',
+                  operationType: 'cardinality',
+                },
+                col2: {
+                  label: 'Reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  // @ts-expect-error not a valid type
+                  operationType: 'testReference',
+                  references: ['col1'],
+                },
+              },
+            },
+          },
+        };
+
+        const state = enrichBaseState(queryBaseState);
+
+        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        // @ts-expect-error we can't isolate just the reference type
+        expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
+        expect(ast.chain[2]).toEqual('mock');
+      });
+    });
   });
 
   describe('#insertLayer', () => {
@@ -599,11 +655,33 @@ describe('IndexPattern Data Source', () => {
 
     describe('getTableSpec', () => {
       it('should include col1', () => {
-        expect(publicAPI.getTableSpec()).toEqual([
-          {
-            columnId: 'col1',
+        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col1' }]);
+      });
+
+      it('should skip columns that are being referenced', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  // @ts-ignore this is too little information for a real column
+                  col1: {
+                    dataType: 'number',
+                  },
+                  col2: {
+                    // @ts-expect-error update once we have a reference operation outside tests
+                    references: ['col1'],
+                  },
+                },
+              },
+            },
           },
-        ]);
+          layerId: 'first',
+        });
+
+        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col2' }]);
       });
     });
 
@@ -764,7 +842,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 isBucketed: false,
                 label: 'Foo',
-                operationType: 'document',
+                operationType: 'avg',
                 sourceField: 'bytes',
               },
             },
@@ -774,7 +852,7 @@ describe('IndexPattern Data Source', () => {
       };
       expect(
         indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState)
-      ).not.toBeDefined();
+      ).toBeUndefined();
     });
 
     it('should return no errors with layers with no columns', () => {
@@ -792,7 +870,31 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      expect(indexPatternDatasource.getErrorMessages(state)).not.toBeDefined();
+      expect(indexPatternDatasource.getErrorMessages(state)).toBeUndefined();
+    });
+
+    it('should bubble up invalid configuration from operations', () => {
+      (getErrorMessages as jest.Mock).mockClear();
+      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
+        { shortMessage: 'error 1', longMessage: '' },
+        { shortMessage: 'error 2', longMessage: '' },
+      ]);
+      expect(getErrorMessages).toHaveBeenCalledTimes(1);
     });
   });
 });

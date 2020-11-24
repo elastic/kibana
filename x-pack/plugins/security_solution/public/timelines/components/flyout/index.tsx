@@ -6,17 +6,14 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { State } from '../../../common/store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { FlyoutButton } from './button';
 import { Pane } from './pane';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/constants';
-import { StatefulTimeline } from '../timeline';
-import { TimelineById } from '../../store/timeline/types';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 export const Badge = (styled(EuiBadge)`
   position: absolute;
@@ -40,66 +37,41 @@ interface OwnProps {
   usersViewing: string[];
 }
 
-type Props = OwnProps & ProsFromRedux;
-
-export const FlyoutComponent = React.memo<Props>(
-  ({ dataProviders, show = true, showTimeline, timelineId, usersViewing, width }) => {
-    const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
-      showTimeline,
-      timelineId,
-    ]);
-    const handleOpen = useCallback(() => showTimeline({ id: timelineId, show: true }), [
-      showTimeline,
-      timelineId,
-    ]);
-
-    return (
-      <>
-        <Visible show={show}>
-          <Pane onClose={handleClose} timelineId={timelineId} width={width}>
-            <StatefulTimeline onClose={handleClose} usersViewing={usersViewing} id={timelineId} />
-          </Pane>
-        </Visible>
-        <FlyoutButton
-          dataProviders={dataProviders}
-          show={!show}
-          timelineId={timelineId}
-          onOpen={handleOpen}
-        />
-      </>
-    );
-  }
-);
-
-FlyoutComponent.displayName = 'FlyoutComponent';
-
 const DEFAULT_DATA_PROVIDERS: DataProvider[] = [];
 const DEFAULT_TIMELINE_BY_ID = {};
 
-const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-  const timelineById: TimelineById =
-    timelineSelectors.timelineByIdSelector(state) ?? DEFAULT_TIMELINE_BY_ID;
-  /*
-    In case timelineById[timelineId]?.dataProviders is an empty array it will cause unnecessary rerender
-    of StatefulTimeline which can be expensive, so to avoid that return DEFAULT_DATA_PROVIDERS
-  */
-  const dataProviders = timelineById[timelineId]?.dataProviders.length
-    ? timelineById[timelineId]?.dataProviders
-    : DEFAULT_DATA_PROVIDERS;
-  const show = timelineById[timelineId]?.show ?? false;
-  const width = timelineById[timelineId]?.width ?? DEFAULT_TIMELINE_WIDTH;
+const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, usersViewing }) => {
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const dispatch = useDispatch();
+  const { dataProviders = DEFAULT_DATA_PROVIDERS, show = false } = useDeepEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? DEFAULT_TIMELINE_BY_ID
+  );
+  const handleClose = useCallback(
+    () => dispatch(timelineActions.showTimeline({ id: timelineId, show: false })),
+    [dispatch, timelineId]
+  );
+  const handleOpen = useCallback(
+    () => dispatch(timelineActions.showTimeline({ id: timelineId, show: true })),
+    [dispatch, timelineId]
+  );
 
-  return { dataProviders, show, width };
+  return (
+    <>
+      <Visible show={show}>
+        <Pane onClose={handleClose} timelineId={timelineId} usersViewing={usersViewing} />
+      </Visible>
+      <FlyoutButton
+        dataProviders={dataProviders}
+        show={!show}
+        timelineId={timelineId}
+        onOpen={handleOpen}
+      />
+    </>
+  );
 };
 
-const mapDispatchToProps = {
-  showTimeline: timelineActions.showTimeline,
-};
+FlyoutComponent.displayName = 'FlyoutComponent';
 
-const connector = connect(mapStateToProps, mapDispatchToProps);
-
-type ProsFromRedux = ConnectedProps<typeof connector>;
-
-export const Flyout = connector(FlyoutComponent);
+export const Flyout = React.memo(FlyoutComponent);
 
 Flyout.displayName = 'Flyout';

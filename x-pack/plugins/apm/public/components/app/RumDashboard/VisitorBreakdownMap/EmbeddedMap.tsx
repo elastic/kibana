@@ -61,9 +61,9 @@ export function EmbeddedMapComponent() {
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<
-    HTMLDivElement
-  >(null);
+  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(
+    null
+  );
 
   const {
     services: { embeddable: embeddablePlugin },

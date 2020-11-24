@@ -7,45 +7,17 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
-import { Alert, ActionType, ValidationResult } from '../../../../types';
+import { Alert, ActionType, AlertTypeModel } from '../../../../types';
 import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { ViewInApp } from './view_in_app';
-import { coreMock } from 'src/core/public/mocks';
 import {
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerts/common';
+import { useKibana } from '../../../../common/lib/kibana';
+import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
 
-const mockes = coreMock.createSetup();
-
-jest.mock('../../../app_context', () => ({
-  useAppDependencies: jest.fn(() => ({
-    http: jest.fn(),
-    capabilities: {
-      get: jest.fn(() => ({})),
-    },
-    actionTypeRegistry: jest.fn(),
-    alertTypeRegistry: {
-      has: jest.fn().mockReturnValue(true),
-      register: jest.fn(),
-      get: jest.fn().mockReturnValue({
-        id: 'my-alert-type',
-        iconClass: 'test',
-        name: 'test-alert',
-        validate: (): ValidationResult => {
-          return { errors: {} };
-        },
-        requiresAppContext: false,
-      }),
-      list: jest.fn(),
-    },
-    toastNotifications: mockes.notifications.toasts,
-    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
-    uiSettings: mockes.uiSettings,
-    dataPlugin: jest.fn(),
-    charts: jest.fn(),
-  })),
-}));
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -61,6 +33,8 @@ jest.mock('../../../lib/capabilities', () => ({
   hasSaveAlertsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
 }));
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const alertTypeRegistry = alertTypeRegistryMock.create();
 
 const mockAlertApis = {
   muteAlert: jest.fn(),
@@ -631,6 +605,21 @@ describe('edit button', () => {
       minimumLicenseRequired: 'basic',
     },
   ];
+  alertTypeRegistry.has.mockReturnValue(true);
+  const alertTypeR = ({
+    id: 'my-alert-type',
+    iconClass: 'test',
+    name: 'test-alert',
+    description: 'Alert when testing',
+    documentationUrl: 'https://localhost.local/docs',
+    validate: () => {
+      return { errors: {} };
+    },
+    alertParamsExpression: () => {},
+    requiresAppContext: false,
+  } as unknown) as AlertTypeModel;
+  alertTypeRegistry.get.mockReturnValue(alertTypeR);
+  useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
   it('should render an edit button when alert and actions are editable', () => {
     const alert = mockAlert({
@@ -714,7 +703,7 @@ describe('edit button', () => {
     ).toBeFalsy();
   });
 
-  it('should render an edit button when alert editable but actions arent when there are no actions on the alert', () => {
+  it('should render an edit button when alert editable but actions arent when there are no actions on the alert', async () => {
     const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
     hasExecuteActionsCapability.mockReturnValue(false);
     const alert = mockAlert({

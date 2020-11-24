@@ -22,8 +22,6 @@ import { JobGroup } from '../job_group';
 import { useMlKibana } from '../../../../contexts/kibana';
 
 interface JobFilterBarProps {
-  jobId: string;
-  groupIds: string[];
   setFilters: (query: Query | null) => void;
   queryText?: string;
 }
@@ -75,7 +73,7 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
 
   useEffect(() => {
     setFilters(queryInstance);
-  }, []);
+  }, [queryText]);
 
   const filters: SearchFilterConfig[] = useMemo(
     () => [

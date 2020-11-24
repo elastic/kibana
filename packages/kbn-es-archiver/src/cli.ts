@@ -228,7 +228,7 @@ export function runCli() {
             output: process.stdout,
           });
 
-          await new Promise((resolveInput) => {
+          await new Promise<void>((resolveInput) => {
             rl.question(`Press enter when you're done`, () => {
               rl.close();
               resolveInput();

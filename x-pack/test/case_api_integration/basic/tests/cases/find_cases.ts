@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../plugins/case/common/constants';
-import { postCaseReq, postCommentReq, findCasesResp } from '../../../common/lib/mock';
+import { postCaseReq, postCommentUserReq, findCasesResp } from '../../../common/lib/mock';
 import { deleteCases, deleteComments, deleteCasesUserActions } from '../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -98,13 +98,13 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq)
+        .send(postCommentUserReq)
         .expect(200);
 
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq)
+        .send(postCommentUserReq)
         .expect(200);
 
       const { body } = await supertest

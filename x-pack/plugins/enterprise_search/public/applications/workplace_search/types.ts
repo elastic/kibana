@@ -8,6 +8,17 @@ export * from '../../../common/types/workplace_search';
 
 export type SpacerSizeTypes = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
+export interface MetaPage {
+  current: number;
+  size: number;
+  total_pages: number;
+  total_results: number;
+}
+
+export interface Meta {
+  page: MetaPage;
+}
+
 export interface Group {
   id: string;
   name: string;
@@ -77,6 +88,12 @@ export interface ContentSource {
   name: string;
 }
 
+export interface SourceContentItem {
+  id: string;
+  last_updated: string;
+  [key: string]: string;
+}
+
 export interface ContentSourceDetails extends ContentSource {
   status: string;
   statusMessage: string;
@@ -87,6 +104,42 @@ export interface ContentSourceDetails extends ContentSource {
   errorReason: number;
   allowsReauth: boolean;
   boost: number;
+}
+
+interface DescriptionList {
+  title: string;
+  description: string;
+}
+
+export interface DocumentSummaryItem {
+  count: number;
+  type: string;
+}
+
+interface SourceActivity {
+  details: string[];
+  event: string;
+  time: string;
+  status: string;
+}
+
+export interface ContentSourceFullData extends ContentSourceDetails {
+  activities: SourceActivity[];
+  details: DescriptionList[];
+  summary: DocumentSummaryItem[];
+  groups: Group[];
+  custom: boolean;
+  accessToken: string;
+  key: string;
+  urlField: string;
+  titleField: string;
+  licenseSupportsPermissions: boolean;
+  serviceTypeSupportsPermissions: boolean;
+  indexPermissions: boolean;
+  hasPermissions: boolean;
+  urlFieldIsLinkable: boolean;
+  createdAt: string;
+  serviceName: string;
 }
 
 export interface ContentSourceStatus {
@@ -120,4 +173,11 @@ export enum FeatureIds {
   Private = 'Private',
   GlobalAccessPermissions = 'GlobalAccessPermissions',
   DocumentLevelPermissions = 'DocumentLevelPermissions',
+}
+
+export interface CustomSource {
+  accessToken: string;
+  key: string;
+  name: string;
+  id: string;
 }

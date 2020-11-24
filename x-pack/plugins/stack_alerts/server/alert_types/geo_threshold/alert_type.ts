@@ -15,6 +15,7 @@ import {
   ActionVariable,
   AlertTypeState,
 } from '../../../../alerts/server';
+import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_THRESHOLD_ID = '.geo-threshold';
 export type TrackingEvent = 'entered' | 'exited';
@@ -155,6 +156,8 @@ export const ParamsSchema = schema.object({
   boundaryGeoField: schema.string({ minLength: 1 }),
   boundaryNameField: schema.maybe(schema.string({ minLength: 1 })),
   delayOffsetWithUnits: schema.maybe(schema.string({ minLength: 1 })),
+  indexQuery: schema.maybe(schema.any({})),
+  boundaryIndexQuery: schema.maybe(schema.any({})),
 });
 
 export interface GeoThresholdParams {
@@ -170,6 +173,8 @@ export interface GeoThresholdParams {
   boundaryGeoField: string;
   boundaryNameField?: string;
   delayOffsetWithUnits?: string;
+  indexQuery?: Query;
+  boundaryIndexQuery?: Query;
 }
 
 export function getAlertType(

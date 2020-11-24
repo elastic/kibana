@@ -203,6 +203,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const openAlertActionComponent = (
     <EuiContextMenuItem
       key="open-alert"
@@ -235,6 +236,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const closeAlertActionComponent = (
     <EuiContextMenuItem
       key="close-alert"
@@ -267,6 +269,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const inProgressAlertActionComponent = (
     <EuiContextMenuItem
       key="in-progress-alert"
@@ -296,6 +299,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal('endpoint');
   }, [closePopover]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const addEndpointExceptionComponent = (
     <EuiContextMenuItem
       key="add-endpoint-exception-menu-item"
@@ -320,6 +324,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     return !isMlRule(ruleType) && !isThresholdRule(ruleType);
   }, [ecsRowData]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const addExceptionComponent = (
     <EuiContextMenuItem
       key="add-exception-menu-item"

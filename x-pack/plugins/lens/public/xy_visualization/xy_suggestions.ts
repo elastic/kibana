@@ -39,33 +39,34 @@ export function getSuggestions({
   subVisualizationId,
   mainPalette,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
-  if (
-    // We only render line charts for multi-row queries. We require at least
-    // two columns: one for x and at least one for y, and y columns must be numeric.
-    // We reject any datasource suggestions which have a column of an unknown type.
+  const incompleteTable =
     !table.isMultiRow ||
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
-    table.columns.some((col) => !columnSortOrder.hasOwnProperty(col.operation.dataType))
-  ) {
-    if (table.changeType === 'unchanged' && state) {
-      // this isn't a table we would switch to, but we have a state already. In this case, just use the current state for all series types
-      return visualizationTypes.map((visType) => {
-        const seriesType = visType.id as SeriesType;
-        return {
-          seriesType,
-          score: 0,
-          state: {
-            ...state,
-            preferredSeriesType: seriesType,
-            layers: state.layers.map((layer) => ({ ...layer, seriesType })),
-          },
-          previewIcon: getIconForSeries(seriesType),
-          title: visType.label,
-          hide: true,
-        };
-      });
-    }
+    table.columns.some((col) => !columnSortOrder.hasOwnProperty(col.operation.dataType));
+  if (incompleteTable && table.changeType === 'unchanged' && state) {
+    // this isn't a table we would switch to, but we have a state already. In this case, just use the current state for all series types
+    return visualizationTypes.map((visType) => {
+      const seriesType = visType.id as SeriesType;
+      return {
+        seriesType,
+        score: 0,
+        state: {
+          ...state,
+          preferredSeriesType: seriesType,
+          layers: state.layers.map((layer) => ({ ...layer, seriesType })),
+        },
+        previewIcon: getIconForSeries(seriesType),
+        title: visType.label,
+        hide: true,
+      };
+    });
+  }
+
+  if (incompleteTable && state && !subVisualizationId) {
+    // reject incomplete configurations if the sub visualization isn't specifically requested
+    // this allows to switch chart types via switcher with incomplete configurations, but won't
+    // cause incomplete suggestions getting auto applied on dropped fields
     return [];
   }
 
@@ -108,13 +109,16 @@ function getSuggestionForColumns(
       mainPalette,
     });
   } else if (buckets.length === 0) {
-    const [x, ...yValues] = prioritizeColumns(values);
+    const [yValues, [xValue, splitBy]] = partition(
+      prioritizeColumns(values),
+      (col) => col.operation.dataType === 'number' && !col.operation.isBucketed
+    );
     return getSuggestionsForLayer({
       layerId: table.layerId,
       changeType: table.changeType,
-      xValue: x,
+      xValue,
       yValues,
-      splitBy: undefined,
+      splitBy,
       currentState,
       tableLabel: table.label,
       keptLayerIds,
@@ -241,9 +245,13 @@ function getSuggestionsForLayer({
     return visualizationTypes
       .map((visType) => {
         return {
-          ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
+          ...buildSuggestion({
+            ...options,
+            seriesType: visType.id as SeriesType,
+            // explicitly hide everything besides stacked bars, use default hiding logic for stacked bars
+            hide: visType.id === 'bar_stacked' ? undefined : true,
+          }),
           title: visType.label,
-          hide: visType.id !== 'bar_stacked',
         };
       })
       .sort((a, b) => (a.state.preferredSeriesType === 'bar_stacked' ? -1 : 1));
@@ -541,7 +549,11 @@ function buildSuggestion({
       // Only advertise very clear changes when XY chart is not active
       ((!currentState && changeType !== 'unchanged' && changeType !== 'extended') ||
         // Don't advertise removing dimensions
-        (currentState && changeType === 'reduced')),
+        (currentState && changeType === 'reduced') ||
+        // Don't advertise charts without y axis
+        yValues.length === 0 ||
+        // Don't advertise charts without at least one split
+        (!xValue && !splitBy)),
     state,
     previewIcon: getIconForSeries(seriesType),
   };

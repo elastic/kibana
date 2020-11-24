@@ -34,7 +34,8 @@
     "kibanaReact",
     "dashboard",
     "savedObjects",
-    "home"
+    "home",
+    "spaces"
   ],
   "extraPublicDirs": [
     "common"

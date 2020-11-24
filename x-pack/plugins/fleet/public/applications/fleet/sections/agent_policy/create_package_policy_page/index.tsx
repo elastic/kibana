@@ -28,7 +28,7 @@ import {
   useLink,
   useBreadcrumbs,
   sendCreatePackagePolicy,
-  useCore,
+  useStartServices,
   useConfig,
   sendGetAgentStatus,
 } from '../../../hooks';
@@ -60,7 +60,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const {
     notifications,
     application: { navigateToApp },
-  } = useCore();
+  } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -77,15 +77,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
   const [isLoadingSecondStep, setIsLoadingSecondStep] = useState<boolean>(false);
 
-  const agentPolicyId = agentPolicy?.id;
   // Retrieve agent count
+  const agentPolicyId = useMemo(() => agentPolicy?.id, [agentPolicy?.id]);
   useEffect(() => {
     const getAgentCount = async () => {
-      if (agentPolicyId) {
-        const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
-        if (data?.results.total) {
-          setAgentCount(data.results.total);
-        }
+      const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
+      if (data?.results.total !== undefined) {
+        setAgentCount(data.results.total);
       }
     };
 
