@@ -55,7 +55,32 @@ export const formattedSearchStrategyResponse = {
   loaded: 21,
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "docvalue_fields": [],\n    "aggregations": {\n      "firstSeen": {\n        "min": {\n          "field": "@timestamp"\n        }\n      },\n      "lastSeen": {\n        "max": {\n          "field": "@timestamp"\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          {\n            "term": {\n              "host.name": "siem-kibana"\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            aggregations: {
+              firstSeen: { min: { field: '@timestamp' } },
+              lastSeen: { max: { field: '@timestamp' } },
+            },
+            query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
+            size: 0,
+            track_total_hits: false,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   firstSeen: '2020-06-08T10:22:02.000Z',
@@ -75,7 +100,6 @@ export const expectedDsl = {
   ],
   ignoreUnavailable: true,
   body: {
-    docvalue_fields: [],
     aggregations: {
       firstSeen: { min: { field: '@timestamp' } },
       lastSeen: { max: { field: '@timestamp' } },

@@ -6,8 +6,10 @@
 import React, { memo, useState, useEffect } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_LOG_LEVELS, AGENT_LOG_INDEX_PATTERN, LOG_LEVEL_FIELD } from './constants';
 import { useStartServices } from '../../../../../hooks';
-import { AGENT_LOG_INDEX_PATTERN, LOG_LEVEL_FIELD } from './constants';
+
+const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
 
 export const LogLevelFilter: React.FunctionComponent<{
   selectedLevels: string[];
@@ -16,13 +18,13 @@ export const LogLevelFilter: React.FunctionComponent<{
   const { data } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [levelValues, setLevelValues] = useState<string[]>([]);
+  const [levelValues, setLevelValues] = useState<string[]>(LEVEL_VALUES);
 
   useEffect(() => {
     const fetchValues = async () => {
       setIsLoading(true);
       try {
-        const values = await data.autocomplete.getValueSuggestions({
+        const values: string[] = await data.autocomplete.getValueSuggestions({
           indexPattern: {
             title: AGENT_LOG_INDEX_PATTERN,
             fields: [LOG_LEVEL_FIELD],
@@ -30,7 +32,7 @@ export const LogLevelFilter: React.FunctionComponent<{
           field: LOG_LEVEL_FIELD,
           query: '',
         });
-        setLevelValues(values.sort());
+        setLevelValues([...new Set([...LEVEL_VALUES, ...values.sort()])]);
       } catch (e) {
         setLevelValues([]);
       }
