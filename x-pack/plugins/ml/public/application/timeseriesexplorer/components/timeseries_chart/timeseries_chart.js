@@ -1237,19 +1237,23 @@ class TimeseriesChartIntl extends Component {
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
-      .attr('x', contextXScale(handleBrushExtent[0]) - 10)
-      .html(
-        '<div class="brush-handle-inner brush-handle-inner-left"><i class="fa fa-caret-left"></i></div>'
-      );
+      .attr('x', contextXScale(handleBrushExtent[0]) - 10).html(`
+        <div class="brush-handle-inner brush-handle-inner-left" style="padding-top: 27px">
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="6" height="9">
+            <polygon points="5,0 5,8 0,4" />
+          </svg>
+        </div>`);
     const rightHandle = contextGroup
       .append('foreignObject')
       .attr('width', 10)
       .attr('height', 90)
       .attr('class', 'brush-handle')
-      .attr('x', contextXScale(handleBrushExtent[1]) + 0)
-      .html(
-        '<div class="brush-handle-inner brush-handle-inner-right"><i class="fa fa-caret-right"></i></div>'
-      );
+      .attr('x', contextXScale(handleBrushExtent[1]) + 0).html(`
+        <div class="brush-handle-inner brush-handle-inner-right" style="padding-top: 27px">
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="6" height="9">
+            <polygon points="0,0 0,8 5,4" />
+          </svg>
+        </div>`);
 
     function brushing() {
       const brushExtent = brush.extent();

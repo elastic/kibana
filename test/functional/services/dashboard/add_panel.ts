@@ -39,6 +39,11 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.common.sleep(500);
     }
 
+    async clickVisType(visType: string) {
+      log.debug('DashboardAddPanel.clickVisType');
+      await testSubjects.click(`visType-${visType}`);
+    }
+
     async clickAddNewEmbeddableLink(type: string) {
       await testSubjects.click('createNew');
       await testSubjects.click(`createNew-${type}`);
