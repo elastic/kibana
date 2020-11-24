@@ -25,6 +25,21 @@ const oAuthConfigSchema = schema.object({
   consumer_key: schema.string(),
 });
 
+const displayFieldSchema = schema.object({
+  fieldName: schema.string(),
+  label: schema.string(),
+});
+
+const displaySettingsSchema = schema.object({
+  titleField: schema.maybe(schema.string()),
+  subtitleField: schema.maybe(schema.string()),
+  descriptionField: schema.maybe(schema.string()),
+  urlField: schema.maybe(schema.string()),
+  color: schema.string(),
+  urlFieldIsLinkable: schema.boolean(),
+  detailFields: schema.oneOf([schema.arrayOf(displayFieldSchema), displayFieldSchema]),
+});
+
 export function registerAccountSourcesRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -309,17 +324,7 @@ export function registerAccountSourceDisplaySettingsConfig({
     {
       path: '/api/workplace_search/account/sources/{id}/display_settings/config',
       validate: {
-        body: schema.object({
-          titleField: schema.maybe(schema.string()),
-          subtitleField: schema.maybe(schema.string()),
-          descriptionField: schema.maybe(schema.string()),
-          urlField: schema.maybe(schema.string()),
-          color: schema.string(),
-          detailFields: schema.object({
-            fieldName: schema.string(),
-            label: schema.string(),
-          }),
-        }),
+        body: displaySettingsSchema,
         params: schema.object({
           id: schema.string(),
         }),
@@ -618,17 +623,7 @@ export function registerOrgSourceDisplaySettingsConfig({
     {
       path: '/api/workplace_search/org/sources/{id}/display_settings/config',
       validate: {
-        body: schema.object({
-          titleField: schema.maybe(schema.string()),
-          subtitleField: schema.maybe(schema.string()),
-          descriptionField: schema.maybe(schema.string()),
-          urlField: schema.maybe(schema.string()),
-          color: schema.string(),
-          detailFields: schema.object({
-            fieldName: schema.string(),
-            label: schema.string(),
-          }),
-        }),
+        body: displaySettingsSchema,
         params: schema.object({
           id: schema.string(),
         }),
