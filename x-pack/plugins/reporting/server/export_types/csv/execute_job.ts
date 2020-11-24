@@ -10,9 +10,9 @@ import { decryptJobHeaders } from '../common';
 import { createGenerateCsv } from './generate_csv';
 import { TaskPayloadCSV } from './types';
 
-export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<
-  TaskPayloadCSV
->> = function executeJobFactoryFn(reporting, parentLogger) {
+export const runTaskFnFactory: RunTaskFnFactory<
+  RunTaskFn<TaskPayloadCSV>
+> = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
 
   return async function runTask(jobId, job, cancellationToken) {

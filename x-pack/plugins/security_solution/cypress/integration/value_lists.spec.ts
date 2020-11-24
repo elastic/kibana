@@ -148,7 +148,7 @@ describe('value lists', () => {
 
       it('deletes a "ip_range" from an uploaded file', () => {
         const listName = 'cidr_list.txt';
-        importValueList(listName, 'ip_range');
+        importValueList(listName, 'ip_range', ['192.168.100.0']);
         openValueListsModal();
         deleteValueListsFile(listName);
         cy.get(VALUE_LISTS_TABLE)
@@ -209,7 +209,7 @@ describe('value lists', () => {
 
       it('exports a "ip_range" list from an uploaded file', () => {
         const listName = 'cidr_list.txt';
-        importValueList(listName, 'ip_range');
+        importValueList(listName, 'ip_range', ['192.168.100.0']);
         openValueListsModal();
         exportValueList();
         cy.wait('@exportList').then((xhr) => {

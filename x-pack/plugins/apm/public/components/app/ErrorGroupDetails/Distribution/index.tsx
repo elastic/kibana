@@ -22,9 +22,7 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/useTheme';
 
-type ErrorDistributionAPIResponse = APIReturnType<
-  'GET /api/apm/services/{serviceName}/errors/distribution'
->;
+type ErrorDistributionAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors/distribution'>;
 
 interface FormattedBucket {
   x0: number;

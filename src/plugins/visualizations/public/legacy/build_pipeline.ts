@@ -222,13 +222,6 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: (params) => {
     return `input_control_vis ${prepareJson('visConfig', params)}`;
   },
-  metrics: ({ title, ...params }, schemas, uiState = {}) => {
-    const paramsJson = prepareJson('params', params);
-    const uiStateJson = prepareJson('uiState', uiState);
-
-    const paramsArray = [paramsJson, uiStateJson].filter((param) => Boolean(param));
-    return `tsvb ${paramsArray.join(' ')}`;
-  },
   region_map: (params, schemas) => {
     const visConfig = {
       ...params,
