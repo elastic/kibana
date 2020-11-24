@@ -33,7 +33,6 @@ interface TableVisControlsProps {
   cols: FormattedColumn[];
   rows: DatatableRow[];
   table: Table;
-  splitRow?: FormattedColumn;
 }
 
 export const TableVisControls = memo((props: TableVisControlsProps) => {

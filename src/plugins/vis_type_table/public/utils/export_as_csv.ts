@@ -22,7 +22,7 @@ import { isObject } from 'lodash';
 import { saveAs } from '@elastic/filesaver';
 
 import { CoreStart } from 'kibana/public';
-import { DatatableRow, DatatableColumn } from 'src/plugins/expressions';
+import { DatatableRow } from 'src/plugins/expressions';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
 import { FormattedColumn } from '../types';
 import { Table } from '../table_vis_response_handler';
@@ -35,19 +35,12 @@ interface ToCsvData {
   cols: FormattedColumn[];
   rows: DatatableRow[];
   table: Table;
-  splitRow?: FormattedColumn;
   uiSettings: CoreStart['uiSettings'];
 }
 
-const toCsv = (formatted: boolean, { cols, rows, table, splitRow, uiSettings }: ToCsvData) => {
+const toCsv = (formatted: boolean, { cols, rows, table, uiSettings }: ToCsvData) => {
   const separator = uiSettings.get(CSV_SEPARATOR_SETTING);
   const quoteValues = uiSettings.get(CSV_QUOTE_VALUES_SETTING);
-  const rowsData = formatted ? rows : table.rows;
-  const columns = formatted ? cols : table.columns;
-
-  if (splitRow && formatted) {
-    (columns as FormattedColumn[]).unshift(splitRow);
-  }
 
   function escape(val: unknown) {
     if (!formatted && isObject(val)) val = val.valueOf();
@@ -58,11 +51,11 @@ const toCsv = (formatted: boolean, { cols, rows, table, splitRow, uiSettings }: 
     return val as string;
   }
 
-  let csvRows: string[][] = [];
+  const csvRows: string[][] = [];
 
-  for (const row of rowsData) {
+  for (const row of rows) {
     const rowArray: string[] = [];
-    for (const col of columns) {
+    for (const col of cols) {
       const value = row[col.id];
       const formattedValue =
         formatted && (col as FormattedColumn).formatter
@@ -70,21 +63,13 @@ const toCsv = (formatted: boolean, { cols, rows, table, splitRow, uiSettings }: 
           : escape(value);
       rowArray.push(formattedValue);
     }
-    csvRows = [...csvRows, rowArray];
+    csvRows.push(rowArray);
   }
 
-  // add the columns to the rows
-  csvRows.unshift(
-    (columns as Array<FormattedColumn | DatatableColumn>).map((col) =>
-      escape(formatted ? (col as FormattedColumn).title : (col as DatatableColumn).name)
-    )
-  );
+  // add headers to the rows
+  csvRows.unshift(cols.map(({ title }) => escape(title)));
 
-  return csvRows
-    .map(function (row) {
-      return row.join(separator) + '\r\n';
-    })
-    .join('');
+  return csvRows.map((row) => row.join(separator) + '\r\n').join('');
 };
 
 export const exportAsCsv = (formatted: boolean, data: ToCsvData) => {

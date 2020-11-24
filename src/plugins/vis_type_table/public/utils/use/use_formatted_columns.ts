@@ -26,23 +26,14 @@ import { getFormatService } from '../../services';
 import { addPercentageColumn } from '../add_percentage_column';
 
 export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConfig) => {
-  const {
-    formattedColumns: columns,
-    formattedRows: rows,
-    splitRowGlobal: splitRow,
-  } = useMemo(() => {
-    const { buckets, metrics, splitColumn, splitRow: splitRowLocal } = visConfig.dimensions;
-    // todo: use for split table by row/column
-    let splitRowGlobal: FormattedColumn | undefined;
+  const { formattedColumns: columns, formattedRows: rows } = useMemo(() => {
+    const { buckets, metrics } = visConfig.dimensions;
     let formattedRows = table.rows;
 
     let formattedColumns = table.columns
       .map<FormattedColumn | undefined>((col, i) => {
         const isBucket = buckets.find(({ accessor }) => accessor === i);
-        const isSplitColumn = splitColumn?.find(({ accessor }) => accessor === i);
-        const isSplitRow = splitRowLocal?.find(({ accessor }) => accessor === i);
-        const dimension =
-          isBucket || isSplitColumn || metrics.find(({ accessor }) => accessor === i);
+        const dimension = isBucket || metrics.find(({ accessor }) => accessor === i);
 
         const formatter = dimension ? getFormatService().deserialize(dimension.format) : undefined;
 
@@ -52,10 +43,6 @@ export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConf
           formatter,
           filterable: !!isBucket,
         };
-
-        if (isSplitRow) {
-          splitRowGlobal = formattedColumn;
-        }
 
         if (!dimension) return undefined;
 
@@ -133,8 +120,8 @@ export const useFormattedColumnsAndRows = (table: Table, visConfig: TableVisConf
       formattedColumns = cols;
     }
 
-    return { formattedColumns, formattedRows, splitRowGlobal };
+    return { formattedColumns, formattedRows };
   }, [table, visConfig.dimensions, visConfig.percentageCol, visConfig.totalFunc]);
 
-  return { columns, rows, splitRow };
+  return { columns, rows };
 };
