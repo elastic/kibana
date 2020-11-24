@@ -7,7 +7,6 @@
 import React from 'react';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
@@ -17,7 +16,6 @@ import { createConnectedBackgroundSessionIndicator } from './search';
 import { ConfigSchema } from '../config';
 
 export interface DataEnhancedSetupDependencies {
-  bfetch: BfetchPublicSetup;
   data: DataPublicPluginSetup;
 }
 export interface DataEnhancedStartDependencies {
@@ -35,7 +33,7 @@ export class DataEnhancedPlugin
 
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
-    { bfetch, data }: DataEnhancedSetupDependencies
+    { data }: DataEnhancedSetupDependencies
   ) {
     data.autocomplete.addQuerySuggestionProvider(
       KUERY_LANGUAGE_NAME,
@@ -43,7 +41,6 @@ export class DataEnhancedPlugin
     );
 
     this.enhancedSearchInterceptor = new EnhancedSearchInterceptor({
-      bfetch,
       toasts: core.notifications.toasts,
       http: core.http,
       uiSettings: core.uiSettings,
