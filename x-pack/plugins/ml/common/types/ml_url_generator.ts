@@ -66,7 +66,7 @@ export type AnomalyDetectionUrlState = MLPageState<
 >;
 export interface ExplorerAppState {
   mlExplorerSwimlane: {
-    selectedType?: string;
+    selectedType?: 'overall' | 'viewBy';
     selectedLanes?: string[];
     selectedTimes?: number[];
     showTopFieldValues?: boolean;
@@ -81,6 +81,7 @@ export interface ExplorerAppState {
     queryString?: string;
   };
   query?: any;
+  mlShowCharts?: boolean;
 }
 export interface ExplorerGlobalState {
   ml: { jobIds: JobId[] };
@@ -124,21 +125,21 @@ export interface TimeSeriesExplorerGlobalState {
 }
 
 export interface TimeSeriesExplorerAppState {
-  zoom?: {
-    from?: string;
-    to?: string;
-  };
   mlTimeSeriesExplorer?: {
     forecastId?: string;
     detectorIndex?: number;
     entities?: Record<string, string>;
+    zoom?: {
+      from?: string;
+      to?: string;
+    };
     functionDescription?: string;
   };
   query?: any;
 }
 
 export interface TimeSeriesExplorerPageState
-  extends Pick<TimeSeriesExplorerAppState, 'zoom' | 'query'>,
+  extends Pick<TimeSeriesExplorerAppState, 'query'>,
     Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
   jobIds?: JobId[];
   timeRange?: TimeRange;
