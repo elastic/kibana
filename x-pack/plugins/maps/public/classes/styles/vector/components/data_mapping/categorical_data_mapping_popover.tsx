@@ -11,14 +11,15 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DataMappingPopover } from './data_mapping_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 
-interface Props {
+interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;
-  onChange: (updatedOptions: unknown) => void;
+  onChange: (updatedOptions: DynamicOptions) => void;
   switchDisabled: boolean;
 }
 
-export function CategoricalDataMappingPopover(props: Props) {
+export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<DynamicOptions>) {
   const onIsEnabledChange = (event: EuiSwitchEvent) => {
+    // @ts-expect-error
     props.onChange({
       fieldMetaOptions: {
         ...props.fieldMetaOptions,

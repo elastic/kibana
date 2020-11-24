@@ -25,7 +25,7 @@ function isInvalidPercentile(percentile: unknown) {
     return true;
   }
 
-  return percentile <= 1 || percentile > 100;
+  return percentile <= 0 || percentile >= 100;
 }
 
 export class PercentilesForm extends Component<Props, State> {
@@ -37,25 +37,36 @@ export class PercentilesForm extends Component<Props, State> {
   }
 
   _onSubmit = () => {
-    this.props.onChange(this.state.percentiles);
+    this.props.onChange(this.state.percentiles as number[]);
   };
 
   render() {
-    const rows = this.state.percentiles.map((percentile: number, index: number) => {
+    const rows = this.state.percentiles.map((percentile: number | string, index: number) => {
       const onAdd = () => {
-        let delta = 25;
-        if (index === this.state.percentiles.length - 1) {
-          // Adding row to end of list.
-          if (index !== 0) {
-            const prevPercentile = this.state.percentiles[index - 1];
-            delta = percentile - prevPercentile;
+        let newPercentile: number | string = '';
+        if (typeof percentile === 'number') {
+          let delta = 1;
+          if (index === this.state.percentiles.length - 1) {
+            // Adding row to end of list.
+            if (index !== 0) {
+              const prevPercentile = this.state.percentiles[index - 1];
+              if (typeof prevPercentile === 'number') {
+                delta = percentile - prevPercentile;
+              }
+            }
+          } else {
+            // Adding row in middle of list.
+            const nextPercentile = this.state.percentiles[index + 1];
+            if (typeof nextPercentile === 'number') {
+              delta = (nextPercentile - percentile) / 2;
+            }
           }
-        } else {
-          // Adding row in middle of list.
-          const nextPercentile = this.state.percentiles[index + 1];
-          delta = (nextPercentile - percentile) / 2;
+          newPercentile = percentile + delta;
+          if (newPercentile >= 100) {
+            newPercentile = 99;
+          }
         }
-        const newPercentile = percentile + delta;
+
         const percentiles = [
           ...this.state.percentiles.slice(0, index + 1),
           newPercentile,
@@ -75,9 +86,8 @@ export class PercentilesForm extends Component<Props, State> {
         this.setState({ percentiles });
       };
 
-      const onPercentileChange = (e: ChangeEvent) => {
+      const onPercentileChange = (event: ChangeEvent<HTMLInputElement>) => {
         const sanitizedValue = parseFloat(event.target.value);
-        const newPercentile = isNaN(sanitizedValue) ? '' : sanitizedValue;
         const percentiles = [...this.state.percentiles];
         percentiles[index] = isNaN(sanitizedValue) ? '' : sanitizedValue;
         this.setState({ percentiles });
@@ -86,7 +96,7 @@ export class PercentilesForm extends Component<Props, State> {
       const isInvalid = isInvalidPercentile(percentile);
       const error = isInvalid
         ? i18n.translate('xpack.maps.styles.invalidPercentileMsg', {
-            defaultMessage: `Percentile must be a number between 0 and 100`,
+            defaultMessage: `Percentile must be a number between 0 and 100, exclusive`,
           })
         : null;
 

@@ -14,7 +14,6 @@ import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon } from '@elastic/eui';
-import { removeRow, isColorInvalid } from './color_stops_utils';
 
 const ADD_BUTTON_TITLE = i18n.translate('xpack.maps.addBtnTitle', {
   defaultMessage: 'Add',

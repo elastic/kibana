@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import React, { ChangeEvent, Fragment, MouseEvent } from 'react';
 import {
-  EuiFieldNumber,
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
@@ -75,16 +74,17 @@ const STEP_FUNCTION_OPTIONS = [
   },
 ];
 
-interface Props {
+interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;
   styleName: VECTOR_STYLES;
-  onChange: (updatedOptions: unknown) => void;
+  onChange: (updatedOptions: DynamicOptions) => void;
   switchDisabled: boolean;
   stepFunction: STEP_FUNCTION;
 }
 
-export function OrdinalDataMappingPopover(props: Props) {
+export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOptions>) {
   function onIsEnabledChange(event: EuiSwitchEvent) {
+    // @ts-expect-error
     props.onChange({
       fieldMetaOptions: {
         ...props.fieldMetaOptions,
@@ -94,6 +94,7 @@ export function OrdinalDataMappingPopover(props: Props) {
   }
 
   function onSigmaChange(event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) {
+    // @ts-expect-error
     props.onChange({
       fieldMetaOptions: {
         ...props.fieldMetaOptions,
@@ -118,6 +119,7 @@ export function OrdinalDataMappingPopover(props: Props) {
         : {
             stepFunction: value,
           };
+    // @ts-expect-error
     props.onChange(updatedOptions);
   }
 
@@ -197,6 +199,7 @@ export function OrdinalDataMappingPopover(props: Props) {
 
   function renderPercentilesForm() {
     function onPercentilesChange(percentiles: number[]) {
+      // @ts-expect-error
       props.onChange({
         fieldMetaOptions: {
           ...props.fieldMetaOptions,

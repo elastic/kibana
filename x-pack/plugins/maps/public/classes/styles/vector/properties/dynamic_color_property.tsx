@@ -325,30 +325,26 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         const hasNext = i < lastStopIndex;
         const stopValue = colorStops[i];
         const formattedStopValue = this.formatField(dynamicRound(stopValue));
-        const color = colorStops[i + 1];
+        const color = colorStops[i + 1] as string;
         const percentile = parseFloat(percentilesFieldMeta[i / 2].percentile);
         const percentileLabel = `${percentile}${getOrdinalSuffix(percentile)}`;
 
-        const nextStopValue = hasNext ? colorStops[i + 2] : null;
-        const formattedNextStopValue = hasNext
-          ? this.formatField(dynamicRound(nextStopValue))
-          : null;
-        const nextPercentile = hasNext
-          ? parseFloat(percentilesFieldMeta[i / 2 + 1].percentile)
-          : null;
-        const nextPercentileLabel = hasNext
-          ? `${nextPercentile}${getOrdinalSuffix(nextPercentile)}`
-          : null;
-
         let label = '';
-        if (i === 0) {
-          label = `<${nextPercentileLabel}: ${formattedNextStopValue}`;
-        } else if (!hasNext) {
+        if (!hasNext) {
           label = `>${percentileLabel}: ${formattedStopValue}`;
         } else {
-          const begin = `${percentileLabel}: ${formattedStopValue}`;
-          const end = `<${nextPercentileLabel}: ${formattedNextStopValue}`;
-          label = `${begin} - ${end}`;
+          const nextStopValue = colorStops[i + 2];
+          const formattedNextStopValue = this.formatField(dynamicRound(nextStopValue));
+          const nextPercentile = parseFloat(percentilesFieldMeta[i / 2 + 1].percentile);
+          const nextPercentileLabel = `${nextPercentile}${getOrdinalSuffix(nextPercentile)}`;
+
+          if (i === 0) {
+            label = `<${nextPercentileLabel}: ${formattedNextStopValue}`;
+          } else {
+            const begin = `${percentileLabel}: ${formattedStopValue}`;
+            const end = `<${nextPercentileLabel}: ${formattedNextStopValue}`;
+            label = `${begin} - ${end}`;
+          }
         }
 
         breaks.push({
@@ -393,7 +389,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getCategoricalBreaks(symbolId?: string): Break[] {
-    const breaks = [];
+    const breaks: Break[] = [];
     const { stops, defaultColor } = this._getColorPaletteStops();
     stops.forEach(({ stop, color }: { stop: string | number | null; color: string }) => {
       if (stop !== null) {
@@ -404,16 +400,18 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         });
       }
     });
-    breaks.push({
-      color: defaultColor,
-      label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
-      symbolId,
-    });
+    if (defaultColor) {
+      breaks.push({
+        color: defaultColor,
+        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        symbolId,
+      });
+    }
     return breaks;
   }
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
-    let breaks = [];
+    let breaks: Break[] = [];
     if (this.isOrdinal()) {
       breaks = this._getOrdinalBreaks(symbolId);
     } else if (this.isCategorical()) {

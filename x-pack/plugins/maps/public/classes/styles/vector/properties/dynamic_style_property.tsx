@@ -127,8 +127,11 @@ export class DynamicStyleProperty<T>
   }
 
   getPercentilesFieldMeta() {
-    const fieldName = this.getFieldName();
-    const dataRequestId = this._getStyleMetaDataRequestId(fieldName);
+    if (!this._field) {
+      return null;
+    }
+
+    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
     if (!dataRequestId) {
       return null;
     }
@@ -139,12 +142,14 @@ export class DynamicStyleProperty<T>
     }
 
     const styleMetaData = styleMetaDataRequest.getData() as StyleMetaData;
-    const percentiles = styleMetaData[`${this._field.getRootName()}_percentiles`];
-    return percentiles !== undefined && 'values' in percentiles
+    const percentiles = styleMetaData[`${this._field.getRootName()}_percentiles`] as
+      | undefined
+      | { values?: { [key: string]: number } };
+    return percentiles !== undefined && percentiles.values !== undefined
       ? Object.keys(percentiles.values).map((key) => {
           return {
             percentile: key,
-            value: percentiles.values[key],
+            value: percentiles.values![key],
           };
         })
       : null;
@@ -209,7 +214,7 @@ export class DynamicStyleProperty<T>
         parts.push(fieldMetaOptions.percentiles.join(''));
       }
     } else if (this.isCategorical()) {
-      parts.push(this.getNumberOfCategories());
+      parts.push(this.getNumberOfCategories().toString());
     }
     return parts.join('');
   }
@@ -270,7 +275,7 @@ export class DynamicStyleProperty<T>
 
   getStepFunction() {
     return 'stepFunction' in this._options
-      ? this._options.stepFunction
+      ? (this._options as T & { stepFunction: STEP_FUNCTION }).stepFunction
       : STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX;
   }
 
@@ -396,13 +401,13 @@ export class DynamicStyleProperty<T>
     const switchDisabled = !!this._field && !this._field.canReadFromGeoJson();
 
     return this.isCategorical() ? (
-      <CategoricalDataMappingPopover
+      <CategoricalDataMappingPopover<T>
         fieldMetaOptions={this.getFieldMetaOptions()}
         onChange={onChange}
         switchDisabled={switchDisabled}
       />
     ) : (
-      <OrdinalDataMappingPopover
+      <OrdinalDataMappingPopover<T>
         fieldMetaOptions={this.getFieldMetaOptions()}
         styleName={this.getStyleName()}
         onChange={onChange}
