@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
-import { first } from 'lodash';
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
@@ -29,6 +28,7 @@ import { useServiceTransactionTypes } from '../../../hooks/useServiceTransaction
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useTransactionType } from '../../../hooks/use_transaction_type';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -41,23 +41,22 @@ import { useRedirect } from './useRedirect';
 import { UserExperienceCallout } from './user_experience_callout';
 
 function getRedirectLocation({
-  urlParams,
   location,
-  serviceTransactionTypes,
+  transactionType,
+  urlParams,
 }: {
   location: Location;
+  transactionType?: string;
   urlParams: IUrlParams;
-  serviceTransactionTypes: string[];
 }): Location | undefined {
-  const { transactionType } = urlParams;
-  const firstTransactionType = first(serviceTransactionTypes);
+  const transactionTypeFromUrlParams = urlParams.transactionType;
 
-  if (!transactionType && firstTransactionType) {
+  if (!transactionTypeFromUrlParams && transactionType) {
     return {
       ...location,
       search: fromQuery({
         ...toQuery(location.search),
-        transactionType: firstTransactionType,
+        transactionType,
       }),
     };
   }
@@ -70,19 +69,11 @@ interface TransactionOverviewProps {
 export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { transactionType } = urlParams;
-
-  // TODO: fetching of transaction types should perhaps be lifted since it is needed in several places. Context?
+  const transactionType = useTransactionType();
   const serviceTransactionTypes = useServiceTransactionTypes(urlParams);
 
   // redirect to first transaction type
-  useRedirect(
-    getRedirectLocation({
-      urlParams,
-      location,
-      serviceTransactionTypes,
-    })
-  );
+  useRedirect(getRedirectLocation({ location, transactionType, urlParams }));
 
   const {
     data: transactionCharts,

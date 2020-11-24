@@ -18,6 +18,7 @@ import {
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useChartTheme } from '../../../../../../observability/public';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
@@ -28,16 +29,22 @@ import { Annotations } from '../../charts/annotations';
 import { ChartContainer } from '../../charts/chart_container';
 import { onBrushEnd } from '../../charts/helper/helper';
 
-const XY_HEIGHT = unit * 16;
-
 interface Props {
   fetchStatus: FETCH_STATUS;
+  height?: number;
+  showAnnotations: boolean;
   timeseries?: TimeSeries[];
 }
 
-export function TransactionBreakdownGraph({ fetchStatus, timeseries }: Props) {
+export function TransactionBreakdownChartContents({
+  fetchStatus,
+  height = unit * 16,
+  showAnnotations,
+  timeseries,
+}: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
+  const chartTheme = useChartTheme();
   const { event, setEvent } = useChartsSync2();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
@@ -54,17 +61,14 @@ export function TransactionBreakdownGraph({ fetchStatus, timeseries }: Props) {
   const xFormatter = niceTimeFormatter([min, max]);
 
   return (
-    <ChartContainer
-      height={XY_HEIGHT}
-      hasData={!!timeseries}
-      status={fetchStatus}
-    >
+    <ChartContainer height={height} hasData={!!timeseries} status={fetchStatus}>
       <Chart ref={chartRef} id="timeSpentBySpan">
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
+          theme={chartTheme}
           xDomain={{ min, max }}
           flatLegend
           onPointerUpdate={(currEvent: any) => {
@@ -87,7 +91,7 @@ export function TransactionBreakdownGraph({ fetchStatus, timeseries }: Props) {
           tickFormat={(y: number) => asPercent(y ?? 0, 1)}
         />
 
-        <Annotations />
+        {showAnnotations && <Annotations />}
 
         {timeseries?.length ? (
           timeseries.map((serie) => {
