@@ -18,7 +18,7 @@
  */
 
 import { ServerExtType, Server } from '@hapi/hapi';
-import Podium from 'podium';
+import Podium from '@hapi/podium';
 import { setupLogging } from './setup_logging';
 import { attachMetaData } from './metadata';
 import { legacyLoggingConfigSchema } from './schema';
