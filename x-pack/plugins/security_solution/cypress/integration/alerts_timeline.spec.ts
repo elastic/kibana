@@ -14,7 +14,6 @@ import {
 } from '../tasks/alerts';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
-import { removeSignalsIndex } from '../tasks/common';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -26,7 +25,6 @@ describe('Alerts timeline', () => {
 
   afterEach(() => {
     esArchiverUnload('timeline_alerts');
-    removeSignalsIndex();
   });
 
   it('Investigate alert in default timeline', () => {

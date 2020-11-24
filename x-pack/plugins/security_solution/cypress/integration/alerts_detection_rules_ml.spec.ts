@@ -61,7 +61,6 @@ import {
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { removeSignalsIndex } from '../tasks/common';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -83,7 +82,6 @@ describe('Detection rules, machine learning', () => {
   after(() => {
     deleteRule();
     esArchiverUnload('prebuilt_rules_loaded');
-    removeSignalsIndex();
   });
 
   it('Creates and activates a new ml rule', () => {

@@ -12,7 +12,6 @@ import {
 import { exportFirstRule } from '../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { removeSignalsIndex } from '../tasks/common';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -30,7 +29,6 @@ describe('Export rules', () => {
 
   after(() => {
     esArchiverUnload('export_rule');
-    removeSignalsIndex();
   });
 
   it('Exports a custom rule', () => {

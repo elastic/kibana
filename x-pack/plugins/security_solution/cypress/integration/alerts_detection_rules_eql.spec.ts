@@ -73,7 +73,6 @@ import {
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { removeSignalsIndex } from '../tasks/common';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -97,7 +96,6 @@ describe('Detection rules, EQL', () => {
   afterEach(() => {
     deleteRule();
     esArchiverUnload('timeline');
-    removeSignalsIndex();
   });
 
   it('Creates and activates a new EQL rule', () => {

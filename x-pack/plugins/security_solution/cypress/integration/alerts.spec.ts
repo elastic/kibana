@@ -27,7 +27,6 @@ import {
 } from '../tasks/alerts';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
-import { removeSignalsIndex } from '../tasks/common';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -40,7 +39,6 @@ describe('Alerts', () => {
 
     afterEach(() => {
       esArchiverUnload('alerts');
-      removeSignalsIndex();
     });
 
     it('Closes and opens alerts', () => {
@@ -173,7 +171,6 @@ describe('Alerts', () => {
 
     afterEach(() => {
       esArchiverUnload('closed_alerts');
-      removeSignalsIndex();
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
@@ -225,7 +222,6 @@ describe('Alerts', () => {
 
     afterEach(() => {
       esArchiverUnload('alerts');
-      removeSignalsIndex();
     });
 
     it('Mark one alert in progress when more than one open alerts are selected', () => {
