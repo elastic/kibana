@@ -106,7 +106,7 @@
     "@babel/runtime": "^7.11.2",
     "@elastic/datemath": "link:packages/elastic-datemath",
     "@elastic/elasticsearch": "7.10.0-rc.1",
-    "@elastic/ems-client": "7.10.0",
+    "@elastic/ems-client": "7.11.0",
     "@elastic/eui": "30.2.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",

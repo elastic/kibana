@@ -16,9 +16,9 @@ declare const TimeSeriesExplorer: FC<{
   lastRefresh: number;
   selectedJobId: string;
   selectedDetectorIndex: number;
-  selectedEntities: any[];
+  selectedEntities: Record<string, string> | undefined;
   selectedForecastId?: string;
   tableInterval: string;
   tableSeverity: number;
-  zoom?: { from: string; to: string };
+  zoom?: { from?: string; to?: string };
 }>;
