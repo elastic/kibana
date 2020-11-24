@@ -51,7 +51,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         throw new Error('Expected timepicker to exist');
       }
     });
-    it('should not display a timepicker after using history.back()', async () => {
+    it('should switch between with and without timefield using the browser back button', async () => {
+      await PageObjects.discover.selectIndexPattern('without-timefield');
+      if (await PageObjects.timePicker.timePickerExists()) {
+        throw new Error('Expected timepicker not to exist');
+      }
+
+      await PageObjects.discover.selectIndexPattern('with-timefield');
+      if (!(await PageObjects.timePicker.timePickerExists())) {
+        throw new Error('Expected timepicker to exist');
+      }
       // Navigating back to discover
       await browser.goBack();
       if (await PageObjects.timePicker.timePickerExists()) {
