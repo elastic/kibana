@@ -8,10 +8,10 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
 
-export async function setupSpacesAndUsers(
-  spacesService: ReturnType<FtrProviderContext['getService']>,
-  securityService: ReturnType<FtrProviderContext['getService']>
-) {
+export async function setupSpacesAndUsers(getService: FtrProviderContext['getService']) {
+  const securityService = getService('security');
+  const spacesService = getService('spaces');
+
   for (const space of Spaces) {
     await spacesService.create(space);
   }
@@ -36,7 +36,10 @@ export async function setupSpacesAndUsers(
   }
 }
 
-export async function tearDownUsers(securityService: ReturnType<FtrProviderContext['getService']>) {
+export async function tearDown(getService: FtrProviderContext['getService']) {
+  const securityService = getService('security');
+  const esArchiver = getService('esArchiver');
+
   for (const user of Users) {
     await securityService.user.delete(user.username);
 
@@ -47,13 +50,12 @@ export async function tearDownUsers(securityService: ReturnType<FtrProviderConte
       }
     }
   }
+
+  await esArchiver.unload('empty_kibana');
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function alertingApiIntegrationTests({
-  loadTestFile,
-  getService,
-}: FtrProviderContext) {
+export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('alerting api integration security and spaces enabled', function () {
     this.tags('ciGroup5');
 

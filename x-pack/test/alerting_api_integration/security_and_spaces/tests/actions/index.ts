@@ -5,22 +5,17 @@
  */
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { setupSpacesAndUsers, tearDownUsers } from '..';
+import { setupSpacesAndUsers, tearDown } from '..';
 
 // eslint-disable-next-line import/no-default-export
 export default function actionsTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Actions', () => {
-    const securityService = getService('security');
-    const spacesService = getService('spaces');
-    const esArchiver = getService('esArchiver');
-
     before(async () => {
-      await setupSpacesAndUsers(spacesService, securityService);
+      await setupSpacesAndUsers(getService);
     });
 
     after(async () => {
-      await tearDownUsers(securityService);
-      await esArchiver.unload('empty_kibana');
+      await tearDown(getService);
     });
 
     loadTestFile(require.resolve('./builtin_action_types/email'));

@@ -5,23 +5,18 @@
  */
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { setupSpacesAndUsers, tearDownUsers } from '..';
+import { setupSpacesAndUsers, tearDown } from '..';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerts', () => {
-    const securityService = getService('security');
-    const spacesService = getService('spaces');
-    const esArchiver = getService('esArchiver');
-
     describe('legacy alerts', () => {
       before(async () => {
-        await setupSpacesAndUsers(spacesService, securityService);
+        await setupSpacesAndUsers(getService);
       });
 
       after(async () => {
-        await tearDownUsers(securityService);
-        await esArchiver.unload('empty_kibana');
+        await tearDown(getService);
       });
 
       loadTestFile(require.resolve('./rbac_legacy'));
@@ -29,12 +24,11 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
 
     describe('alerts', () => {
       before(async () => {
-        await setupSpacesAndUsers(spacesService, securityService);
+        await setupSpacesAndUsers(getService);
       });
 
       after(async () => {
-        await tearDownUsers(securityService);
-        await esArchiver.unload('empty_kibana');
+        await tearDown(getService);
       });
 
       loadTestFile(require.resolve('./find'));
