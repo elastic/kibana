@@ -291,7 +291,7 @@ export function DiscoverSidebar({
                             })}
                           </ul>
                         </EuiAccordion>
-                        <EuiSpacer size="m" />{' '}
+                        <EuiSpacer size="xs" />{' '}
                       </>
                     ) : null}
                     <EuiAccordion
