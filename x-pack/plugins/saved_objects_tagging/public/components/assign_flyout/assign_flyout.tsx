@@ -46,7 +46,10 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
   const [initialStatus, setInitialStatus] = useState<AssignmentStatusMap>({});
   const [overrides, setOverrides] = useState<AssignmentOverrideMap>({});
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [initiallyAssigned, setInitiallyAssigned] = useState<number>(0);
+  const [pendingChangeCount, setPendingChangeCount] = useState<number>(0);
 
+  // refresh the results when `query` is updated
   useEffect(() => {
     const refreshResults = async () => {
       setLoading(true);
@@ -58,21 +61,31 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
         maxResults: 1000,
       });
 
+      const fetchedStatus = fetched.reduce((status, result) => {
+        return {
+          ...status,
+          [getKey(result)]: getObjectStatus(result, tagIds),
+        };
+      }, {} as AssignmentStatusMap);
+      const assignedCount = Object.values(fetchedStatus).filter((status) => status !== 'none')
+        .length;
+
       setResults(fetched);
       setOverrides({});
-      setInitialStatus(
-        fetched.reduce((status, result) => {
-          return {
-            ...status,
-            [getKey(result)]: getObjectStatus(result, tagIds),
-          };
-        }, {} as AssignmentStatusMap)
-      );
+      setInitialStatus(fetchedStatus);
+      setInitiallyAssigned(assignedCount);
+      setPendingChangeCount(0);
       setLoading(false);
     };
 
     refreshResults();
   }, [query, assignmentService, tagIds]);
+
+  // refresh the pending changes count when `overrides` is update
+  useEffect(() => {
+    const changes = computeRequiredChanges({ objects: results, initialStatus, overrides });
+    setPendingChangeCount(changes.assigned.length + changes.unassigned.length);
+  }, [initialStatus, overrides, results]);
 
   const onSave = useCallback(async () => {
     const changes = computeRequiredChanges({ objects: results, initialStatus, overrides });
@@ -81,8 +94,12 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
       assign: changes.assigned.map(({ type, id }) => ({ type, id })),
       unassign: changes.unassigned.map(({ type, id }) => ({ type, id })),
     });
-    // TODO: close and stuff.
+    // TODO: close the modal and stuff.
   }, [tagIds, results, initialStatus, overrides, assignmentService]);
+
+  const resetAll = useCallback(() => {
+    setOverrides({});
+  }, []);
 
   const selectAll = useCallback(() => {
     setOverrides(
@@ -118,7 +135,7 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
           </h3>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder className="tagAssignFlyout_searchContainer">
         <AssignFlyoutSearchBar
           onChange={({ query: newQuery }) => {
             setQuery(newQuery);
@@ -128,6 +145,9 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
         />
         <AssignFlyoutActionBar
           resultCount={results.length}
+          initiallyAssigned={initiallyAssigned}
+          pendingChanges={pendingChangeCount}
+          onReset={resetAll}
           onSelectAll={selectAll}
           onDeselectAll={deselectAll}
         />

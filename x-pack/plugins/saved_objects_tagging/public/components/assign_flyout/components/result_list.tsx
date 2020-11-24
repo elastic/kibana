@@ -5,10 +5,11 @@
  */
 
 import React, { FC } from 'react';
-import { EuiIcon, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
+import { EuiIcon, EuiSelectable, EuiSelectableOption, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { AssignableObject } from '../../../../common/assignments';
-import { AssignmentOverrideMap, AssignmentStatusMap } from '../types';
-import { getKey, getOverriddenStatus } from '../utils';
+import { AssignmentAction, AssignmentOverrideMap, AssignmentStatusMap } from '../types';
+import { getKey, getOverriddenStatus, getAssignmentAction } from '../utils';
 
 export interface AssignFlyoutResultListProps {
   isLoading: boolean;
@@ -35,6 +36,7 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
     const checkedStatus = overriddenStatus === 'full' ? 'on' : undefined;
     const statusIcon =
       overriddenStatus === 'full' ? 'check' : overriddenStatus === 'none' ? 'empty' : 'partial';
+    const assignmentAction = getAssignmentAction(initialStatus[key], overrides[key]);
 
     return {
       label: result.title,
@@ -48,6 +50,7 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
           <EuiIcon type={result.icon ?? 'empty'} title={result.type} />
         </>
       ),
+      append: <ResultActionLabel action={assignmentAction} />,
     } as EuiSelectableOption<ResultInternals>;
   });
 
@@ -73,5 +76,26 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
     >
       {(list) => list}
     </EuiSelectable>
+  );
+};
+
+const ResultActionLabel: FC<{ action: AssignmentAction }> = ({ action }) => {
+  if (action === 'unchanged') {
+    return null;
+  }
+  return (
+    <EuiText size="xs" color="subdued" style={{ display: 'inline-block' }}>
+      {action === 'added' ? (
+        <FormattedMessage
+          id="xpack.savedObjectsTagging.assignFlyout.resultList.addedLabel"
+          defaultMessage="Added"
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.savedObjectsTagging.assignFlyout.resultList.removedLabel"
+          defaultMessage="Removed"
+        />
+      )}
+    </EuiText>
   );
 };
