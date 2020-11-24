@@ -17,12 +17,36 @@
  * under the License.
  */
 
-export { isEsError, handleEsError, parseEsError } from './errors';
-
-/** dummy plugin*/
-export function plugin() {
-  return new (class EsUiSharedPlugin {
-    setup() {}
-    start() {}
-  })();
+interface ParsedError {
+  message: string;
+  cause: string[];
 }
+
+const getCause = (obj: any = {}, causes: string[] = []): string[] => {
+  const updated = [...causes];
+
+  if (obj.caused_by) {
+    updated.push(obj.caused_by.reason);
+
+    // Recursively find all the "caused by" reasons
+    return getCause(obj.caused_by, updated);
+  }
+
+  return updated.filter(Boolean);
+};
+
+export const parseEsError = (err: string): ParsedError => {
+  try {
+    const { error } = JSON.parse(err);
+    const cause = getCause(error);
+    return {
+      message: error.reason,
+      cause,
+    };
+  } catch (e) {
+    return {
+      message: err,
+      cause: [],
+    };
+  }
+};
