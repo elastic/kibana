@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { exception } from '../objects/exception';
+import { newRule } from '../objects/rule';
 
 import { RULE_STATUS } from '../screens/create_new_rule';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
@@ -16,7 +17,7 @@ import {
   waitForAlertsIndexToBeCreated,
 } from '../tasks/alerts';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';
-import { removeSignalsIndex } from '../tasks/common';
+import { createCustomRule, deleteCustomRule, removeSignalsIndex } from '../tasks/common';
 import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
@@ -38,42 +39,41 @@ const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = 2;
 
 describe('Exceptions', () => {
   beforeEach(() => {
-    esArchiverLoad('rule_for_exceptions');
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    waitForAlertsIndexToBeCreated();
+    createCustomRule(newRule);
+    goToManageAlertsDetectionRules();
+    goToRuleDetails();
+
+    cy.get(RULE_STATUS).should('have.text', '—');
+
+    esArchiverLoad('auditbeat_for_exceptions');
+    activatesRule();
+    waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
+    deactivatesRule();
+    refreshPage();
+
+    cy.scrollTo('bottom');
+    cy.get(SERVER_SIDE_EVENT_COUNT)
+      .invoke('text')
+      .then((numberOfInitialAlertsText) => {
+        cy.wrap(parseInt(numberOfInitialAlertsText, 10)).should(
+          'eql',
+          NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
+        );
+      });
   });
 
   afterEach(() => {
-    esArchiverUnload('rule_for_exceptions');
     esArchiverUnload('auditbeat_for_exceptions');
     esArchiverUnload('auditbeat_for_exceptions2');
     esArchiverUnload('auditbeat_for_exceptions3');
     removeSignalsIndex();
+    deleteCustomRule();
   });
   context('From rule', () => {
     it('Creates an exception and deletes it', () => {
-      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-      waitForAlertsIndexToBeCreated();
-      goToManageAlertsDetectionRules();
-      goToRuleDetails();
-
-      cy.get(RULE_STATUS).should('have.text', '—');
-
-      esArchiverLoad('auditbeat_for_exceptions');
-      activatesRule();
-      waitForTheRuleToBeExecuted();
-      waitForAlertsToPopulate();
-      deactivatesRule();
-      refreshPage();
-
-      cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((numberOfInitialAlertsText) => {
-          cy.wrap(parseInt(numberOfInitialAlertsText, 10)).should(
-            'eql',
-            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-          );
-        });
-
       goToExceptionsTab();
       addsExceptionFromRuleSettings(exception);
       activatesRule();
@@ -137,30 +137,6 @@ describe('Exceptions', () => {
 
   context('From alert', () => {
     it('Creates an exception and deletes it', () => {
-      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-      waitForAlertsIndexToBeCreated();
-      goToManageAlertsDetectionRules();
-      goToRuleDetails();
-
-      cy.get(RULE_STATUS).should('have.text', '—');
-
-      esArchiverLoad('auditbeat_for_exceptions');
-      activatesRule();
-      waitForTheRuleToBeExecuted();
-      waitForAlertsToPopulate();
-      deactivatesRule();
-      refreshPage();
-
-      cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((numberOfInitialAlertsText) => {
-          cy.wrap(parseInt(numberOfInitialAlertsText, 10)).should(
-            'eql',
-            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-          );
-        });
-
       addExceptionFromFirstAlert();
       addsException(exception);
       activatesRule();
