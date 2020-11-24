@@ -29,7 +29,7 @@ import { getServices, IndexPattern } from '../../kibana_services';
 import { DiscoverUninitialized, DiscoverHistogram } from '../angular/directives';
 import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
+import { DocTableLegacy, DocTableLegacyProps } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
 import {
   search,
@@ -49,6 +49,7 @@ import { SavedObject } from '../../../../../core/types';
 import { TopNavMenuData } from '../../../../navigation/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DocViewFilterFn, ElasticSearchHit } from '../doc_views/doc_views_types';
+import { DiscoverSidebarResponsiveProps } from './sidebar/discover_sidebar_responsive';
 
 export interface DiscoverProps {
   addColumn: (column: string) => void;
@@ -93,6 +94,13 @@ export interface DiscoverProps {
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   updateSavedQueryId: (savedQueryId?: string) => void;
 }
+
+export const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
+  <DocTableLegacy {...props} />
+));
+export const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps) => (
+  <DiscoverSidebarResponsive {...props} />
+));
 
 export function DiscoverLegacy({
   addColumn,
@@ -169,7 +177,7 @@ export function DiscoverLegacy({
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
             {savedSearch.title}
           </h1>
-          <DiscoverSidebarResponsive
+          <SidebarMemoized
             columns={state.columns || []}
             fieldCounts={fieldCounts}
             hits={rows}
@@ -279,7 +287,7 @@ export function DiscoverLegacy({
                     </h2>
                     {rows && rows.length && (
                       <div className="dscDiscover">
-                        <DocTableLegacy
+                        <DocTableLegacyMemoized
                           columns={state.columns || []}
                           indexPattern={indexPattern}
                           minimumVisibleRows={minimumVisibleRows}
