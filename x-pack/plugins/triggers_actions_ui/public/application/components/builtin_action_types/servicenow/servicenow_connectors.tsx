@@ -28,9 +28,9 @@ import { ServiceNowActionConnector } from './types';
 import { connectorConfiguration } from './config';
 import { useKibana } from '../../../../common/lib/kibana';
 
-const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
-  ServiceNowActionConnector
->> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
+const ServiceNowConnectorFields: React.FC<
+  ActionConnectorFieldsProps<ServiceNowActionConnector>
+> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
   const { docLinks } = useKibana().services;
 
   // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
