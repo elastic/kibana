@@ -18,7 +18,6 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
-import FlashMessages from 'shared/components/FlashMessages';
 import {
   DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
   DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
@@ -51,7 +50,6 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
 
   const {
     dataLoading,
-    flashMessages,
     sourceId,
     addFieldModalVisible,
     unsavedChanges,
@@ -117,7 +115,6 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
             ) : null
           }
         />
-        {!!flashMessages && <FlashMessages {...flashMessages} />}
         {hasDocuments ? (
           <EuiTabbedContent
             tabs={tabs}

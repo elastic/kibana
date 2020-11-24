@@ -9,9 +9,9 @@ import { DropResult } from 'react-beautiful-dnd';
 
 import { kea, MakeLogicType } from 'kea';
 import http from 'shared/http';
-import { IFlashMessagesProps } from 'shared/types';
 
 import routes from 'workplace_search/routes';
+import { setSuccessMessage, FlashMessagesLogic } from '../../../../../shared/flash_messages';
 
 import { AppLogic } from '../../../../app_logic';
 import { SourceLogic } from '../../source_logic';
@@ -41,7 +41,6 @@ interface DisplaySettingsActions {
   setServerResponseData(
     displaySettingsProps: DisplaySettingsResponseProps
   ): DisplaySettingsResponseProps;
-  setFlashMessages(flashMessages: IFlashMessagesProps): { flashMessages: IFlashMessagesProps };
   setTitleField(titleField: string | null): string | null;
   setUrlField(urlField: string): string;
   setSubtitleField(subtitleField: string | null): string | null;
@@ -71,7 +70,6 @@ interface DisplaySettingsValues {
   serverSearchResultConfig: SearchResultConfig;
   searchResultConfig: SearchResultConfig;
   serverRoute: string;
-  flashMessages: IFlashMessagesProps;
   editFieldIndex: number | null;
   dataLoading: boolean;
   addFieldModalVisible: boolean;
@@ -102,7 +100,6 @@ export const DisplaySettingsLogic = kea<
       displaySettingsProps,
     setServerResponseData: (displaySettingsProps: DisplaySettingsResponseProps) =>
       displaySettingsProps,
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({ flashMessages }),
     setTitleField: (titleField: string) => titleField,
     setUrlField: (urlField: string) => urlField,
     setSubtitleField: (subtitleField: string | null) => subtitleField,
@@ -214,15 +211,6 @@ export const DisplaySettingsLogic = kea<
         onInitializeDisplaySettings: (_, { serverRoute }) => serverRoute,
       },
     ],
-    flashMessages: [
-      {},
-      {
-        setServerResponseData: () => ({ success: [SUCCESS_MESSAGE] }),
-        setFlashMessages: (_, { flashMessages }) => flashMessages,
-        toggleFieldEditorModal: () => ({}),
-        resetDisplaySettingsState: () => ({}),
-      },
-    ],
     editFieldIndex: [
       null,
       {
@@ -319,6 +307,15 @@ export const DisplaySettingsLogic = kea<
         .post(serverRoute, searchResultConfig)
         .then(({ data }) => actions.setServerResponseData(data))
         .catch(({ response }) => actions.setFlashMessages({ error: response.data.errors }));
+    },
+    setServerResponseData: () => {
+      setSuccessMessage(SUCCESS_MESSAGE);
+    },
+    toggleFieldEditorModal: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
+    },
+    resetDisplaySettingsState: () => {
+      FlashMessagesLogic.actions.clearFlashMessages();
     },
   }),
 });
