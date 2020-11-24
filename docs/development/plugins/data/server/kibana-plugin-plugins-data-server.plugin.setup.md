@@ -11,7 +11,7 @@ setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { expressio
         __enhance: (enhancements: DataEnhancements) => void;
         search: ISearchSetup;
         fieldFormats: {
-            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
+            register: (customFieldFormat: import("../common").FieldFormatInstanceType) => number;
         };
     };
 ```
@@ -29,7 +29,7 @@ setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { expressio
         __enhance: (enhancements: DataEnhancements) => void;
         search: ISearchSetup;
         fieldFormats: {
-            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
+            register: (customFieldFormat: import("../common").FieldFormatInstanceType) => number;
         };
     }`
 

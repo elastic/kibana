@@ -4,22 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Operation, DimensionPriority } from '../../../types';
+import type { Operation } from '../../../types';
 
-/**
- * This is the root type of a column. If you are implementing a new
- * operation, extend your column type on `BaseIndexPatternColumn` to make
- * sure it's matching all the basic requirements.
- */
 export interface BaseIndexPatternColumn extends Operation {
   // Private
   operationType: string;
-  suggestedPriority?: DimensionPriority;
   customLabel?: boolean;
 }
 
 // Formatting can optionally be added to any column
-export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
+// export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
+export type FormattedIndexPatternColumn = BaseIndexPatternColumn & {
   params?: {
     format: {
       id: string;
@@ -28,8 +23,20 @@ export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
       };
     };
   };
-}
+};
 
 export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
+}
+
+export interface ReferenceBasedIndexPatternColumn
+  extends BaseIndexPatternColumn,
+    FormattedIndexPatternColumn {
+  references: string[];
+}
+
+// Used to store the temporary invalid state
+export interface IncompleteColumn {
+  operationType?: string;
+  sourceField?: string;
 }

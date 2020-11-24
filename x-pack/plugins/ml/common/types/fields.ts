@@ -89,3 +89,16 @@ export const mlCategory: Field = {
   type: ES_FIELD_TYPES.KEYWORD,
   aggregatable: false,
 };
+
+export interface FieldAggCardinality {
+  field: string;
+  percent?: any;
+}
+
+export interface ScriptAggCardinality {
+  script: any;
+}
+
+export interface AggCardinality {
+  cardinality: FieldAggCardinality | ScriptAggCardinality;
+}

@@ -6,6 +6,10 @@
 
 import { generatePath } from 'react-router-dom';
 
+import { CURRENT_MAJOR_VERSION } from '../../../common/version';
+
+export const DOCS_PREFIX = `https://www.elastic.co/guide/en/app-search/${CURRENT_MAJOR_VERSION}`;
+
 export const ROOT_PATH = '/';
 export const SETUP_GUIDE_PATH = '/setup_guide';
 export const SETTINGS_PATH = '/settings/account';

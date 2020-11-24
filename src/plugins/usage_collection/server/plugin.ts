@@ -25,7 +25,7 @@ import {
   CoreStart,
   ISavedObjectsRepository,
   Plugin,
-} from 'kibana/server';
+} from 'src/core/server';
 import { ConfigType } from './config';
 import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';

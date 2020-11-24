@@ -4,37 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqlRule } from '../../../../../common/detection_engine/utils';
-import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import {
-  createRulesSchema,
-  CreateRulesSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/create_rules_schema';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
-import { createRules } from '../../rules/create_rules';
 import { readRules } from '../../rules/read_rules';
-import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { transformError, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
-import { PartialFilter } from '../../types';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+import { newTransformValidate } from './validate';
+import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
+import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 
 export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation<typeof createRulesSchema, CreateRulesSchemaDecoded>(
-          createRulesSchema
-        ),
+        body: buildRouteValidation(createRulesSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -46,66 +37,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
-
-      const {
-        actions: actionsRest,
-        anomaly_threshold: anomalyThreshold,
-        author,
-        building_block_type: buildingBlockType,
-        description,
-        enabled,
-        event_category_override: eventCategoryOverride,
-        false_positives: falsePositives,
-        from,
-        query: queryOrUndefined,
-        language: languageOrUndefined,
-        license,
-        output_index: outputIndex,
-        saved_id: savedId,
-        timeline_id: timelineId,
-        timeline_title: timelineTitle,
-        meta,
-        machine_learning_job_id: machineLearningJobId,
-        filters: filtersRest,
-        rule_id: ruleId,
-        index,
-        interval,
-        max_signals: maxSignals,
-        risk_score: riskScore,
-        risk_score_mapping: riskScoreMapping,
-        rule_name_override: ruleNameOverride,
-        name,
-        severity,
-        severity_mapping: severityMapping,
-        tags,
-        threat,
-        threshold,
-        threat_filters: threatFilters,
-        threat_index: threatIndex,
-        threat_query: threatQuery,
-        threat_mapping: threatMapping,
-        threat_language: threatLanguage,
-        concurrent_searches: concurrentSearches,
-        items_per_search: itemsPerSearch,
-        throttle,
-        timestamp_override: timestampOverride,
-        to,
-        type,
-        references,
-        note,
-        exceptions_list: exceptionsList,
-      } = request.body;
       try {
-        const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
-
-        const language =
-          !isMlRule(type) && !isEqlRule(type) && languageOrUndefined == null
-            ? 'kuery'
-            : languageOrUndefined;
-
-        // TODO: Fix these either with an is conversion or by better typing them within io-ts
-        const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
-        const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
@@ -115,93 +47,56 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           return siemResponse.error({ statusCode: 404 });
         }
 
+        if (request.body.rule_id != null) {
+          const rule = await readRules({
+            alertsClient,
+            ruleId: request.body.rule_id,
+            id: undefined,
+          });
+          if (rule != null) {
+            return siemResponse.error({
+              statusCode: 409,
+              body: `rule_id: "${request.body.rule_id}" already exists`,
+            });
+          }
+        }
+
+        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
+
         const mlAuthz = buildMlAuthz({
           license: context.licensing.license,
           ml,
           request,
           savedObjectsClient,
         });
-        throwHttpError(await mlAuthz.validateRuleType(type));
+        throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
 
-        const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
-        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
+        const indexExists = await getIndexExists(
+          clusterClient.callAsCurrentUser,
+          internalRule.params.outputIndex
+        );
         if (!indexExists) {
           return siemResponse.error({
             statusCode: 400,
-            body: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
+            body: `To create a rule, the index must exist first. Index ${internalRule.params.outputIndex} does not exist`,
           });
         }
-        if (ruleId != null) {
-          const rule = await readRules({ alertsClient, ruleId, id: undefined });
-          if (rule != null) {
-            return siemResponse.error({
-              statusCode: 409,
-              body: `rule_id: "${ruleId}" already exists`,
-            });
-          }
-        }
+
         // This will create the endpoint list if it does not exist yet
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        const createdRule = await createRules({
-          alertsClient,
-          anomalyThreshold,
-          author,
-          buildingBlockType,
-          description,
-          enabled,
-          eventCategoryOverride,
-          falsePositives,
-          from,
-          immutable: false,
-          query,
-          language,
-          license,
-          outputIndex: finalIndex,
-          savedId,
-          timelineId,
-          timelineTitle,
-          meta,
-          machineLearningJobId,
-          filters,
-          ruleId,
-          index,
-          interval,
-          maxSignals,
-          name,
-          riskScore,
-          riskScoreMapping,
-          ruleNameOverride,
-          severity,
-          severityMapping,
-          tags,
-          to,
-          type,
-          threat,
-          threshold,
-          threatFilters,
-          threatIndex,
-          threatQuery,
-          threatMapping,
-          threatLanguage,
-          concurrentSearches,
-          itemsPerSearch,
-          timestampOverride,
-          references,
-          note,
-          version: 1,
-          exceptionsList,
-          actions: throttle === 'rule' ? actions : [], // Only enable actions if throttle is rule, otherwise we are a notification and should not enable it,
+        const createdRule = await alertsClient.create({
+          data: internalRule,
         });
 
         const ruleActions = await updateRulesNotifications({
           ruleAlertId: createdRule.id,
           alertsClient,
           savedObjectsClient,
-          enabled,
-          actions,
-          throttle,
-          name,
+          enabled: createdRule.enabled,
+          actions: request.body.actions,
+          throttle: request.body.throttle ?? null,
+          name: createdRule.name,
         });
 
         const ruleStatuses = await ruleStatusSavedObjectsClientFactory(savedObjectsClient).find({
@@ -211,7 +106,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        const [validated, errors] = transformValidate(
+        const [validated, errors] = newTransformValidate(
           createdRule,
           ruleActions,
           ruleStatuses.saved_objects[0]

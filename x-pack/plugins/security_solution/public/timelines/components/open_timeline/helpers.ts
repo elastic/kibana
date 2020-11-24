@@ -33,7 +33,10 @@ import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
 } from '../../../common/store/app/actions';
-import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
+import {
+  setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker,
+  setRelativeRangeDatePicker as dispatchSetRelativeRangeDatePicker,
+} from '../../../common/store/inputs/actions';
 import {
   setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
@@ -58,6 +61,10 @@ import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 import { sourcererActions } from '../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import {
+  DEFAULT_FROM_MOMENT,
+  DEFAULT_TO_MOMENT,
+} from '../../../common/utils/default_date_settings';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -252,6 +259,14 @@ export const defaultTimelineToTimelineModel = (
   const timelineEntries = {
     ...timeline,
     columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
+    dateRange:
+      timeline.status === TimelineStatus.immutable &&
+      timeline.timelineType === TimelineType.template
+        ? {
+            start: DEFAULT_FROM_MOMENT.toISOString(),
+            end: DEFAULT_TO_MOMENT.toISOString(),
+          }
+        : timeline.dateRange,
     dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
@@ -340,6 +355,7 @@ export const queryTimelineById = <TCache>({
           duplicate,
           timelineType
         );
+
         if (onOpenTimeline != null) {
           onOpenTimeline(timeline);
         } else if (updateTimeline) {
@@ -356,6 +372,7 @@ export const queryTimelineById = <TCache>({
               ...timeline,
               graphEventId,
               show: openTimeline,
+              dateRange: { start: from, end: to },
             },
             to,
           })();
@@ -384,7 +401,22 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
       eventType: timeline.eventType,
     })
   );
-  dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
+  if (
+    timeline.status === TimelineStatus.immutable &&
+    timeline.timelineType === TimelineType.template
+  ) {
+    dispatch(
+      dispatchSetRelativeRangeDatePicker({
+        id: 'timeline',
+        fromStr: 'now-24h',
+        toStr: 'now',
+        from: DEFAULT_FROM_MOMENT.toISOString(),
+        to: DEFAULT_TO_MOMENT.toISOString(),
+      })
+    );
+  } else {
+    dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
+  }
   dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
   if (
     timeline.kqlQuery != null &&

@@ -12,10 +12,12 @@ import { waitFor } from '@testing-library/react';
 
 import { AllRulesUtilityBar } from './utility_bar';
 
+const theme = () => ({ eui: euiDarkVars, darkMode: true });
+
 describe('AllRules', () => {
   it('renders AllRulesUtilityBar total rules and selected rules', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+      <ThemeProvider theme={theme}>
         <AllRulesUtilityBar
           userHasNoPermissions={false}
           onRefresh={jest.fn()}
@@ -36,7 +38,7 @@ describe('AllRules', () => {
 
   it('renders utility actions if user has permissions', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+      <ThemeProvider theme={theme}>
         <AllRulesUtilityBar
           userHasNoPermissions={false}
           onRefresh={jest.fn()}
@@ -54,7 +56,7 @@ describe('AllRules', () => {
 
   it('renders no utility actions if user has no permissions', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+      <ThemeProvider theme={theme}>
         <AllRulesUtilityBar
           userHasNoPermissions
           onRefresh={jest.fn()}
@@ -73,7 +75,7 @@ describe('AllRules', () => {
   it('invokes refresh on refresh action click', () => {
     const mockRefresh = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+      <ThemeProvider theme={theme}>
         <AllRulesUtilityBar
           userHasNoPermissions={false}
           onRefresh={mockRefresh}
@@ -94,7 +96,7 @@ describe('AllRules', () => {
   it('invokes onRefreshSwitch when auto refresh switch is clicked', async () => {
     const mockSwitch = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+      <ThemeProvider theme={theme}>
         <AllRulesUtilityBar
           userHasNoPermissions={false}
           onRefresh={jest.fn()}

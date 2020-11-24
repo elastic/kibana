@@ -23,15 +23,15 @@ import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
  * Types
  */
 
-interface IBreadcrumb {
+interface Breadcrumb {
   text: string;
   path?: string;
   // Used to navigate outside of the React Router basename,
   // i.e. if we need to go from App Search to Enterprise Search
   shouldNotCreateHref?: boolean;
 }
-export type TBreadcrumbs = IBreadcrumb[];
-export type TBreadcrumbTrail = string[]; // A trail of breadcrumb text
+export type Breadcrumbs = Breadcrumb[];
+export type BreadcrumbTrail = string[]; // A trail of breadcrumb text
 
 /**
  * Generate an array of breadcrumbs based on:
@@ -50,7 +50,7 @@ export type TBreadcrumbTrail = string[]; // A trail of breadcrumb text
  * > Source Prioritization (linked to `/groups/{example-group-id}/source_prioritization`)
  */
 
-export const useGenerateBreadcrumbs = (trail: TBreadcrumbTrail): TBreadcrumbs => {
+export const useGenerateBreadcrumbs = (trail: BreadcrumbTrail): Breadcrumbs => {
   const { history } = useValues(KibanaLogic);
   const pathArray = stripLeadingSlash(history.location.pathname).split('/');
 
@@ -65,7 +65,7 @@ export const useGenerateBreadcrumbs = (trail: TBreadcrumbTrail): TBreadcrumbs =>
  * https://elastic.github.io/eui/#/navigation/breadcrumbs
  */
 
-export const useEuiBreadcrumbs = (breadcrumbs: TBreadcrumbs): EuiBreadcrumb[] => {
+export const useEuiBreadcrumbs = (breadcrumbs: Breadcrumbs): EuiBreadcrumb[] => {
   const { navigateToUrl, history } = useValues(KibanaLogic);
   const { http } = useValues(HttpLogic);
 
@@ -89,7 +89,7 @@ export const useEuiBreadcrumbs = (breadcrumbs: TBreadcrumbs): EuiBreadcrumb[] =>
  * Product-specific breadcrumb helpers
  */
 
-export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
+export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
       text: ENTERPRISE_SEARCH_PLUGIN.NAME,
@@ -99,10 +99,10 @@ export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =
     ...breadcrumbs,
   ]);
 
-export const useAppSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
+export const useAppSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs([{ text: APP_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
 
-export const useWorkplaceSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
+export const useWorkplaceSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs([
     { text: WORKPLACE_SEARCH_PLUGIN.NAME, path: '/' },
     ...breadcrumbs,

@@ -8,7 +8,7 @@ import { act } from 'react-dom/test-utils';
 import { INVALID_NAME_CHARS } from '../../public/application/services/validation/validate_repository';
 import { getRepository } from '../../test/fixtures';
 import { RepositoryType } from '../../common/types';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
 import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 
 const { setup } = pageHelpers.repositoryAdd;
@@ -176,7 +176,7 @@ describe('<RepositoryAdd />', () => {
 
           await act(async () => {
             actions.clickBackButton();
-            await nextTick(100);
+            await delay(100);
             component.update();
           });
         };

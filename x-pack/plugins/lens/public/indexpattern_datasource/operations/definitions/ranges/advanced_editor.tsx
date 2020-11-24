@@ -8,7 +8,6 @@ import './advanced_editor.scss';
 
 import React, { useState, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDebounce } from 'react-use';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +30,7 @@ import {
   DraggableBucketContainer,
   LabelInput,
 } from '../shared_components';
+import { useDebounceWithOptions } from '../helpers';
 
 const generateId = htmlIdGenerator();
 
@@ -86,9 +86,12 @@ export const RangePopover = ({
   });
 
   const onSubmit = () => {
-    setIsPopoverOpen(false);
-    setIsOpenByCreation(false);
-    saveRangeAndReset(tempRange, true);
+    if (isOpenByCreation) {
+      setIsOpenByCreation(false);
+    }
+    if (isPopoverOpen) {
+      setIsPopoverOpen(false);
+    }
   };
 
   return (
@@ -100,8 +103,10 @@ export const RangePopover = ({
       button={
         <Button
           onClick={() => {
+            if (isOpenByCreation) {
+              setIsOpenByCreation(false);
+            }
             setIsPopoverOpen((isOpen) => !isOpen);
-            setIsOpenByCreation(false);
           }}
         />
       }
@@ -208,12 +213,13 @@ export const AdvancedRangeEditor = ({
 
   const lastIndex = localRanges.length - 1;
 
-  // Update locally all the time, but bounce the parents prop function
-  // to aviod too many requests
-  useDebounce(
+  // Update locally all the time, but bounce the parents prop function to avoid too many requests
+  // Avoid to trigger on first render
+  useDebounceWithOptions(
     () => {
       setRanges(localRanges.map(({ id, ...rest }) => ({ ...rest })));
     },
+    { skipFirstRender: true },
     TYPING_DEBOUNCE_TIME,
     [localRanges]
   );
@@ -249,7 +255,11 @@ export const AdvancedRangeEditor = ({
       <>
         <DragDropBuckets
           onDragEnd={setLocalRanges}
-          onDragStart={() => setIsOpenByCreation(false)}
+          onDragStart={() => {
+            if (isOpenByCreation) {
+              setIsOpenByCreation(false);
+            }
+          }}
           droppableId="RANGES_DROPPABLE_AREA"
           items={localRanges}
         >

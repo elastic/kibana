@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useAsync } from 'react-use';
+import useAsync from 'react-use/lib/useAsync';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 import type { Space } from '../../../spaces/public';
 

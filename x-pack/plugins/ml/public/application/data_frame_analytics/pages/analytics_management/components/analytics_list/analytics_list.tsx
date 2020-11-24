@@ -7,10 +7,10 @@
 import React, { FC, useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiInMemoryTable,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBasicTable,
   EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
@@ -30,15 +30,12 @@ import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
-import {
-  getSelectedIdFromUrl,
-  getGroupQueryText,
-} from '../../../../../jobs/jobs_list/components/utils';
 import { SourceSelection } from '../source_selection';
-import { filterAnalytics, AnalyticsSearchBar } from '../analytics_search_bar';
+import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from './empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
+import { ListingPageUrlState } from '../../../../../../../common/types/common';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -85,27 +82,38 @@ function getItemIdToExpandedRowMap(
 interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
+  spacesEnabled?: boolean;
   blockRefresh?: boolean;
+  pageState: ListingPageUrlState;
+  updatePageState: (update: Partial<ListingPageUrlState>) => void;
 }
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
   isMlEnabledInSpace = true,
+  spacesEnabled = false,
   blockRefresh = false,
+  pageState,
+  updatePageState,
 }) => {
+  const searchQueryText = pageState.queryText ?? '';
+  const setSearchQueryText = useCallback(
+    (value) => {
+      updatePageState({ queryText: value });
+    },
+    [updatePageState]
+  );
+
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filteredAnalytics, setFilteredAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
-  const [searchQueryText, setSearchQueryText] = useState('');
+  const [searchError, setSearchError] = useState<string | undefined>();
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
   );
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<DataFrameAnalyticsId[]>([]);
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
-  // Query text/job_id based on url but only after getAnalytics is done first
-  // selectedJobIdFromUrlInitialized makes sure the query is only run once since analytics is being refreshed constantly
-  const [selectedIdFromUrlInitialized, setSelectedIdFromUrlInitialized] = useState(false);
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
@@ -120,17 +128,20 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isManagementTable
   );
 
-  const updateFilteredItems = (queryClauses: any) => {
-    if (queryClauses.length) {
-      const filtered = filterAnalytics(analytics, queryClauses);
-      setFilteredAnalytics(filtered);
-    } else {
-      setFilteredAnalytics(analytics);
-    }
-  };
+  const updateFilteredItems = useCallback(
+    (queryClauses: any[]) => {
+      if (queryClauses.length) {
+        const filtered = filterAnalytics(analytics, queryClauses);
+        setFilteredAnalytics(filtered);
+      } else {
+        setFilteredAnalytics(analytics);
+      }
+    },
+    [analytics]
+  );
 
   const filterList = () => {
-    if (searchQueryText !== '' && selectedIdFromUrlInitialized === true) {
+    if (searchQueryText !== '') {
       // trigger table filtering with query for job id to trigger table filter
       const query = EuiSearchBar.Query.parse(searchQueryText);
       let clauses: any = [];
@@ -144,31 +155,13 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   };
 
   useEffect(() => {
-    if (selectedIdFromUrlInitialized === false && analytics.length > 0) {
-      const { jobId, groupIds } = getSelectedIdFromUrl(window.location.href);
-      let queryText = '';
-
-      if (groupIds !== undefined) {
-        queryText = getGroupQueryText(groupIds);
-      } else if (jobId !== undefined) {
-        queryText = jobId;
-      }
-
-      setSelectedIdFromUrlInitialized(true);
-      setSearchQueryText(queryText);
-    } else {
-      filterList();
-    }
-  }, [selectedIdFromUrlInitialized, analytics]);
-
-  useEffect(() => {
     filterList();
-  }, [selectedIdFromUrlInitialized, searchQueryText]);
+  }, [searchQueryText]);
 
   const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
-  useRefreshAnalyticsList(
+  const { refresh } = useRefreshAnalyticsList(
     {
       isLoading: setIsLoading,
       onRefresh: getAnalyticsCallback,
@@ -180,12 +173,26 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     expandedRowItemIds,
     setExpandedRowItemIds,
     isManagementTable,
-    isMlEnabledInSpace
+    isMlEnabledInSpace,
+    spacesEnabled,
+    refresh
   );
 
-  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<
-    DataFrameAnalyticsListRow
-  >(DataFrameAnalyticsListColumn.id, filteredAnalytics);
+  const { onTableChange, pagination, sorting } = useTableSettings<DataFrameAnalyticsListRow>(
+    filteredAnalytics,
+    pageState,
+    updatePageState
+  );
+
+  const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
+    if (search.error !== null) {
+      setSearchError(search.error.message);
+      return;
+    }
+
+    setSearchError(undefined);
+    setSearchQueryText(search.queryText);
+  };
 
   // Before the analytics have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No data frame analytics found' during the initial loading.
@@ -241,6 +248,15 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     </EuiFlexItem>
   );
 
+  const search: EuiSearchBarProps = {
+    query: searchQueryText,
+    onChange: handleSearchOnChange,
+    box: {
+      incremental: true,
+    },
+    filters,
+  };
+
   return (
     <div data-test-subj="mlAnalyticsJobList">
       {modals}
@@ -263,29 +279,25 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsTableContainer">
-        <AnalyticsSearchBar
-          filters={filters}
-          searchQueryText={searchQueryText}
-          setSearchQueryText={setSearchQueryText}
-        />
-        <EuiSpacer size="l" />
-        <EuiBasicTable<DataFrameAnalyticsListRow>
-          className="mlAnalyticsTable"
+        <EuiInMemoryTable<DataFrameAnalyticsListRow>
+          allowNeutralSort={false}
           columns={columns}
           hasActions={false}
           isExpandable={true}
-          isSelectable={false}
-          items={pageOfItems}
-          itemId={DataFrameAnalyticsListColumn.id}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isSelectable={false}
+          items={analytics}
+          itemId={DataFrameAnalyticsListColumn.id}
           loading={isLoading}
-          onChange={onTableChange}
-          pagination={pagination!}
+          onTableChange={onTableChange}
+          pagination={pagination}
           sorting={sorting}
+          search={search}
           data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
           rowProps={(item) => ({
             'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
           })}
+          error={searchError}
         />
       </div>
 

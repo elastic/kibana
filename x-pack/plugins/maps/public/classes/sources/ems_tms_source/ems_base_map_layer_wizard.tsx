@@ -13,18 +13,20 @@ import { EMSTMSSource, sourceTitle } from './ems_tms_source';
 import { VectorTileLayer } from '../../layers/vector_tile_layer/vector_tile_layer';
 // @ts-ignore
 import { TileServiceSelect } from './tile_service_select';
-import { getIsEmsEnabled } from '../../../kibana_services';
+import { getEMSSettings } from '../../../kibana_services';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { WorldMapLayerIcon } from '../../layers/icons/world_map_layer_icon';
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
-    return getIsEmsEnabled();
+    const emsSettings = getEMSSettings();
+    return emsSettings!.isEMSEnabled();
   },
   description: i18n.translate('xpack.maps.source.emsTileDescription', {
     defaultMessage: 'Tile map service from Elastic Maps Service',
   }),
-  icon: 'emsApp',
+  icon: WorldMapLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       const layerDescriptor = VectorTileLayer.createDescriptor({

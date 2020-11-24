@@ -65,7 +65,8 @@ export async function validateModelMemoryLimit(
       job.data_description.time_field,
       duration!.start as number,
       duration!.end as number,
-      true
+      true,
+      job.datafeed_config
     );
     // @ts-expect-error
     const mmlEstimateBytes: number = numeral(modelMemoryLimit).value();

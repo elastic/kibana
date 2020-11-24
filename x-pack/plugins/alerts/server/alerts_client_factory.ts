@@ -14,7 +14,7 @@ import { PluginStartContract as ActionsPluginStartContract } from '../../actions
 import { AlertsClient } from './alerts_client';
 import { ALERTS_FEATURE_ID } from '../common';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
-import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
@@ -94,7 +94,7 @@ export class AlertsClientFactory {
       alertTypeRegistry: this.alertTypeRegistry,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedWrappers: ['security'],
-        includedHiddenTypes: ['alert'],
+        includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
       }),
       authorization,
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),
@@ -127,22 +127,6 @@ export class AlertsClientFactory {
         return {
           apiKeysEnabled: true,
           result: createAPIKeyResult,
-        };
-      },
-      async invalidateAPIKey(params: InvalidateAPIKeyParams) {
-        if (!securityPluginSetup) {
-          return { apiKeysEnabled: false };
-        }
-        const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKeyAsInternalUser(
-          params
-        );
-        // Null when Elasticsearch security is disabled
-        if (!invalidateAPIKeyResult) {
-          return { apiKeysEnabled: false };
-        }
-        return {
-          apiKeysEnabled: true,
-          result: invalidateAPIKeyResult,
         };
       },
       async getActionsClient() {

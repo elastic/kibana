@@ -50,6 +50,10 @@ export const EQL_TYPE = '[data-test-subj="eqlRuleType"]';
 
 export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
+export const EQL_QUERY_PREVIEW_HISTOGRAM = '[data-test-subj="queryPreviewEqlHistogram"]';
+
+export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loading"]';
+
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
 
@@ -79,6 +83,8 @@ export const MITRE_TACTIC_DROPDOWN = '[data-test-subj="mitreTactic"]';
 
 export const MITRE_TECHNIQUES_INPUT =
   '[data-test-subj="mitreTechniques"] [data-test-subj="comboBoxSearchInput"]';
+
+export const QUERY_PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
 
 export const REFERENCE_URLS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] input';

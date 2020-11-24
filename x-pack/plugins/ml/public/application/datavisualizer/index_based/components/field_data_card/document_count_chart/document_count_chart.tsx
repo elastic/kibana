@@ -61,7 +61,7 @@ export const DocumentCountChart: FC<Props> = ({
   const EVENT_RATE_COLOR = themeName.euiColorVis2;
 
   return (
-    <div style={{ width, height }}>
+    <div style={{ width, height }} data-test-subj="mlFieldDataCardDocumentCountChart">
       <Chart>
         <Settings
           xDomain={xDomain}

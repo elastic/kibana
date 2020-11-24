@@ -23,7 +23,7 @@ jest.mock('../../../debounced_component', () => {
 });
 
 import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
 import { Ast } from '@kbn/interpreter/common';

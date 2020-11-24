@@ -18,7 +18,6 @@
  */
 
 import { NotificationsStart, CoreStart } from 'src/core/public';
-import { FieldFormatsStart } from './field_formats';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { IndexPatternsContract } from './index_patterns';
 import { DataPublicPluginStart } from './types';
@@ -31,19 +30,11 @@ export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSe
   'UiSettings'
 );
 
-export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
-  'FieldFormats'
-);
-
 export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays']>('Overlays');
 
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
   'IndexPatterns'
 );
-
-export const [getQueryService, setQueryService] = createGetterSetter<
-  DataPublicPluginStart['query']
->('Query');
 
 export const [getSearchService, setSearchService] = createGetterSetter<
   DataPublicPluginStart['search']

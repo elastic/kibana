@@ -189,10 +189,6 @@ export class MVTSingleLayerVectorSource
     return null;
   }
 
-  getApplyGlobalQuery(): boolean {
-    return false;
-  }
-
   isBoundsAware() {
     return false;
   }

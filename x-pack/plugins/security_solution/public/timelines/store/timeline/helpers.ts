@@ -23,9 +23,11 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/m
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
+  TimelineExpandedEvent,
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
+  TimelineStatus,
   TimelineId,
 } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
@@ -33,6 +35,10 @@ import { normalizeTimeRange } from '../../../common/components/url_state/normali
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
 import { TimelineById } from './types';
+import {
+  DEFAULT_FROM_MOMENT,
+  DEFAULT_TO_MOMENT,
+} from '../../../common/utils/default_date_settings';
 import { activeTimeline } from '../../containers/active_timeline_context';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -137,13 +143,21 @@ export const addTimelineToStore = ({
 }: AddTimelineParams): TimelineById => {
   if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
     activeTimeline.setActivePage(0);
-    activeTimeline.setExpandedEventIds({});
+    activeTimeline.setExpandedEvent({});
   }
   return {
     ...timelineById,
     [id]: {
       ...timeline,
       isLoading: timelineById[id].isLoading,
+      dateRange:
+        timeline.status === TimelineStatus.immutable &&
+        timeline.timelineType === TimelineType.template
+          ? {
+              start: DEFAULT_FROM_MOMENT.toISOString(),
+              end: DEFAULT_TO_MOMENT.toISOString(),
+            }
+          : timeline.dateRange,
     },
   };
 };
@@ -156,6 +170,7 @@ interface AddNewTimelineParams {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
+  expandedEvent?: TimelineExpandedEvent;
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
@@ -177,6 +192,7 @@ export const addNewTimeline = ({
   dataProviders = [],
   dateRange: maybeDateRange,
   excludedRowRendererIds = [],
+  expandedEvent = {},
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
@@ -205,6 +221,7 @@ export const addNewTimeline = ({
       columns,
       dataProviders,
       dateRange,
+      expandedEvent,
       excludedRowRendererIds,
       filters,
       itemsPerPage,
@@ -286,39 +303,6 @@ export const updateGraphEventId = ({
     [id]: {
       ...timeline,
       graphEventId,
-    },
-  };
-};
-
-interface ApplyDeltaToCurrentWidthParams {
-  id: string;
-  delta: number;
-  bodyClientWidthPixels: number;
-  minWidthPixels: number;
-  maxWidthPercent: number;
-  timelineById: TimelineById;
-}
-
-export const applyDeltaToCurrentWidth = ({
-  id,
-  delta,
-  bodyClientWidthPixels,
-  minWidthPixels,
-  maxWidthPercent,
-  timelineById,
-}: ApplyDeltaToCurrentWidthParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const requestedWidth = timeline.width + delta * -1; // raw change in width
-  const maxWidthPixels = (maxWidthPercent / 100) * bodyClientWidthPixels;
-  const clampedWidth = Math.min(requestedWidth, maxWidthPixels);
-  const width = Math.max(minWidthPixels, clampedWidth); // if the clamped width is smaller than the min, use the min
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      width,
     },
   };
 };

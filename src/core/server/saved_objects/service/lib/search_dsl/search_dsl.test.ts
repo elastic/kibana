@@ -76,7 +76,6 @@ describe('getSearchDsl', () => {
       getSearchDsl(mappings, registry, opts);
       expect(getQueryParams).toHaveBeenCalledTimes(1);
       expect(getQueryParams).toHaveBeenCalledWith({
-        mappings,
         registry,
         namespaces: opts.namespaces,
         type: opts.type,

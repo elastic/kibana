@@ -53,7 +53,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { CustomIconAndTooltipContent, ILayer } from '../layer';
-import { IJoin } from '../../joins/join';
+import { InnerJoin } from '../../joins/inner_join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
@@ -68,21 +68,21 @@ interface SourceResult {
 
 interface JoinState {
   dataHasChanged: boolean;
-  join: IJoin;
+  join: InnerJoin;
   propertiesMap?: PropertiesMap;
 }
 
 export interface VectorLayerArguments {
   source: IVectorSource;
-  joins?: IJoin[];
+  joins?: InnerJoin[];
   layerDescriptor: VectorLayerDescriptor;
 }
 
 export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
-  getJoins(): IJoin[];
-  getValidJoins(): IJoin[];
+  getJoins(): InnerJoin[];
+  getValidJoins(): InnerJoin[];
   getSource(): IVectorSource;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
@@ -93,7 +93,7 @@ export class VectorLayer extends AbstractLayer {
   static type = LAYER_TYPE.VECTOR;
 
   protected readonly _style: IVectorStyle;
-  private readonly _joins: IJoin[];
+  private readonly _joins: InnerJoin[];
 
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
@@ -254,6 +254,7 @@ export class VectorLayer extends AbstractLayer {
       timeFilters: searchFilters.timeFilters,
       filters: searchFilters.filters,
       applyGlobalQuery: searchFilters.applyGlobalQuery,
+      applyGlobalTime: searchFilters.applyGlobalTime,
     };
 
     let bounds = null;
@@ -315,6 +316,22 @@ export class VectorLayer extends AbstractLayer {
     return indexPatternIds;
   }
 
+  async isFilteredByGlobalTime(): Promise<boolean> {
+    if (this.getSource().getApplyGlobalTime() && (await this.getSource().isTimeAware())) {
+      return true;
+    }
+
+    const joinPromises = this.getValidJoins().map(async (join) => {
+      return (
+        join.getRightJoinSource().getApplyGlobalTime() &&
+        (await join.getRightJoinSource().isTimeAware())
+      );
+    });
+    return (await Promise.all(joinPromises)).some((isJoinTimeAware: boolean) => {
+      return isJoinTimeAware;
+    });
+  }
+
   async _syncJoin({
     join,
     startLoading,
@@ -322,7 +339,7 @@ export class VectorLayer extends AbstractLayer {
     onLoadError,
     registerCancelCallback,
     dataFilters,
-  }: { join: IJoin } & DataRequestContext): Promise<JoinState> {
+  }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
@@ -331,6 +348,7 @@ export class VectorLayer extends AbstractLayer {
       fieldNames: joinSource.getFieldNames(),
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: joinSource.getApplyGlobalQuery(),
+      applyGlobalTime: joinSource.getApplyGlobalTime(),
     };
     const prevDataRequest = this.getDataRequest(sourceDataId);
 
@@ -403,6 +421,7 @@ export class VectorLayer extends AbstractLayer {
       geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
       sourceQuery: sourceQuery ? sourceQuery : undefined,
       applyGlobalQuery: source.getApplyGlobalQuery(),
+      applyGlobalTime: source.getApplyGlobalTime(),
       sourceMeta: source.getSyncMeta(),
     };
   }
@@ -434,10 +453,9 @@ export class VectorLayer extends AbstractLayer {
       for (let j = 0; j < joinStates.length; j++) {
         const joinState = joinStates[j];
         const innerJoin = joinState.join;
-        const canJoinOnCurrent = innerJoin.joinPropertiesToFeature(
-          feature,
-          joinState.propertiesMap
-        );
+        const canJoinOnCurrent = joinState.propertiesMap
+          ? innerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap)
+          : false;
         isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
       }
 
@@ -540,7 +558,7 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  async _syncJoinStyleMeta(syncContext: DataRequestContext, join: IJoin, style: IVectorStyle) {
+  async _syncJoinStyleMeta(syncContext: DataRequestContext, join: InnerJoin, style: IVectorStyle) {
     const joinSource = join.getRightJoinSource();
     return this._syncStyleMeta({
       source: joinSource,
@@ -644,7 +662,7 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  async _syncJoinFormatters(syncContext: DataRequestContext, join: IJoin, style: IVectorStyle) {
+  async _syncJoinFormatters(syncContext: DataRequestContext, join: InnerJoin, style: IVectorStyle) {
     const joinSource = join.getRightJoinSource();
     return this._syncFormatters({
       source: joinSource,

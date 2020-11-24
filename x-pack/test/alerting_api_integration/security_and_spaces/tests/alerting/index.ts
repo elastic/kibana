@@ -26,6 +26,7 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./update_api_key'));
     loadTestFile(require.resolve('./alerts'));
+    loadTestFile(require.resolve('./event_log'));
 
     // note that this test will destroy existing spaces
     loadTestFile(require.resolve('./rbac_legacy'));

@@ -110,10 +110,10 @@ describe('Security Plugin', () => {
                     },
                   },
                   "getFeatures": [Function],
+                  "getType": [Function],
                   "isEnabled": [Function],
                   "isLicenseAvailable": [Function],
                 },
-                "registerSpacesService": [Function],
               }
             `);
     });

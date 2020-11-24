@@ -20,7 +20,7 @@
 import React from 'react';
 import { ContextAppLegacy } from './context_app_legacy';
 import { IIndexPattern } from '../../../../../data/common/index_patterns';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { DocTableLegacy } from '../../angular/doc_table/create_doc_table_react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';

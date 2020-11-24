@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
 
 describe('security flyout renders as expected', () => {

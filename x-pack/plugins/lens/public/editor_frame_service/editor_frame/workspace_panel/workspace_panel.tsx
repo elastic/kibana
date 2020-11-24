@@ -20,7 +20,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import {
+  DataPublicPluginStart,
+  ExecutionContextSearch,
+  TimefilterContract,
+} from 'src/plugins/data/public';
 import {
   ExpressionRendererEvent,
   ExpressionRenderError,
@@ -44,10 +48,6 @@ import {
   VisualizeFieldContext,
 } from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
-import {
-  DataPublicPluginStart,
-  TimefilterContract,
-} from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
 import { LensInspectorAdapters } from '../../types';
@@ -385,7 +385,7 @@ export const InnerVisualizationWrapper = ({
     [dispatch]
   );
 
-  if (localState.configurationValidationError) {
+  if (localState.configurationValidationError?.length) {
     let showExtraErrors = null;
     if (localState.configurationValidationError.length > 1) {
       if (localState.expandError) {
@@ -445,7 +445,7 @@ export const InnerVisualizationWrapper = ({
     );
   }
 
-  if (localState.expressionBuildError) {
+  if (localState.expressionBuildError?.length) {
     return (
       <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
         <EuiFlexItem>

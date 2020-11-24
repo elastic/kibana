@@ -58,5 +58,3 @@ export { runFailedTestsReporterCli } from './failed_tests_reporter';
 export { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 
 export * from './functional_test_runner';
-
-export * from './jest';

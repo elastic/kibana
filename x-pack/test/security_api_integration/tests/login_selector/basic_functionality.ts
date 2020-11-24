@@ -11,11 +11,11 @@ import url from 'url';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/types';
-import { getStateAndNonce } from '../../../oidc_api_integration/fixtures/oidc_tools';
+import { getStateAndNonce } from '../../fixtures/oidc/oidc_tools';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
-} from '../../../kerberos_api_integration/fixtures/kerberos_tools';
+} from '../../fixtures/kerberos/kerberos_tools';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -23,15 +23,14 @@ export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
+  const security = getService('security');
 
   const kibanaServerConfig = config.get('servers.kibana');
   const validUsername = kibanaServerConfig.username;
   const validPassword = kibanaServerConfig.password;
 
   const CA_CERT = readFileSync(CA_CERT_PATH);
-  const CLIENT_CERT = readFileSync(
-    resolve(__dirname, '../../../pki_api_integration/fixtures/first_client.p12')
-  );
+  const CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/pki/first_client.p12'));
 
   async function checkSessionCookie(
     sessionCookie: Cookie,
@@ -747,6 +746,69 @@ export default function ({ getService }: FtrProviderContext) {
           { type: 'pki', name: 'pki1' },
           { name: 'pki1', type: 'pki' },
           'token'
+        );
+      });
+    });
+
+    describe('Anonymous', () => {
+      before(async () => {
+        await security.user.create('anonymous_user', {
+          password: 'changeme',
+          roles: [],
+          full_name: 'Guest',
+        });
+      });
+
+      after(async () => {
+        await security.user.delete('anonymous_user');
+      });
+
+      it('should be able to log in from Login Selector', async () => {
+        const authenticationResponse = await supertest
+          .post('/internal/security/login')
+          .ca(CA_CERT)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'anonymous',
+            providerName: 'anonymous1',
+            currentURL: 'https://kibana.com/login?next=/abc/xyz/handshake?one=two%20three#/workpad',
+          })
+          .expect(200);
+
+        const cookies = authenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        await checkSessionCookie(
+          request.cookie(cookies[0])!,
+          'anonymous_user',
+          { type: 'anonymous', name: 'anonymous1' },
+          { name: 'native1', type: 'native' },
+          'realm'
+        );
+      });
+
+      it('should be able to log in from Login Selector even if client provides certificate and PKI is enabled', async () => {
+        const authenticationResponse = await supertest
+          .post('/internal/security/login')
+          .ca(CA_CERT)
+          .pfx(CLIENT_CERT)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'anonymous',
+            providerName: 'anonymous1',
+            currentURL: 'https://kibana.com/login?next=/abc/xyz/handshake?one=two%20three#/workpad',
+          })
+          .expect(200);
+
+        const cookies = authenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        await checkSessionCookie(
+          request.cookie(cookies[0])!,
+          'anonymous_user',
+          { type: 'anonymous', name: 'anonymous1' },
+          { name: 'native1', type: 'native' },
+          'realm'
         );
       });
     });

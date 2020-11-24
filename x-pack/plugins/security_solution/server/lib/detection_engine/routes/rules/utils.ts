@@ -10,7 +10,7 @@ import uuid from 'uuid';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { PartialAlert, FindResult } from '../../../../../../alerts/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
@@ -256,10 +256,7 @@ export const transformOrImportError = (
   }
 };
 
-export const getDuplicates = (
-  ruleDefinitions: CreateRulesBulkSchemaDecoded,
-  by: 'rule_id'
-): string[] => {
+export const getDuplicates = (ruleDefinitions: CreateRulesBulkSchema, by: 'rule_id'): string[] => {
   const mappedDuplicates = countBy(
     by,
     ruleDefinitions.filter((r) => r[by] != null)

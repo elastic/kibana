@@ -7,8 +7,8 @@
 import { set } from '@elastic/safer-lodash-set';
 import { get, merge } from 'lodash';
 
-import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
 import moment from 'moment';
+import { LegacyAPICaller } from 'kibana/server';
 import {
   LOGSTASH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
@@ -20,23 +20,19 @@ import { getKibanaStats, KibanaStats } from './get_kibana_stats';
 import { getBeatsStats, BeatsStatsByClusterUuid } from './get_beats_stats';
 import { getHighLevelStats, ClustersHighLevelStats } from './get_high_level_stats';
 
-export interface CustomContext {
-  maxBucketSize: number;
-}
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
  * Returns the array of clusters joined with the Kibana and Logstash instances.
  *
  */
-export const getAllStats: StatsGetter<CustomContext> = async (
-  clustersDetails,
-  { callCluster, timestamp },
-  { maxBucketSize }
-) => {
+export async function getAllStats(
+  clusterUuids: string[],
+  callCluster: LegacyAPICaller, // TODO: To be changed to the new ES client when the plugin migrates
+  timestamp: number,
+  maxBucketSize: number
+) {
   const start = moment(timestamp).subtract(USAGE_FETCH_INTERVAL, 'ms').toISOString();
   const end = moment(timestamp).toISOString();
-
-  const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
     getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
@@ -46,7 +42,7 @@ export const getAllStats: StatsGetter<CustomContext> = async (
   ]);
 
   return handleAllStats(esClusters, { kibana, logstash, beats });
-};
+}
 
 /**
  * Combine the statistics from the stack to create "cluster" stats that associate all products together based on the cluster

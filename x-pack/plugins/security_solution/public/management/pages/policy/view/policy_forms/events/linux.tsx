@@ -6,15 +6,19 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 import { EventsCheckbox } from './checkbox';
 import { OS } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { selectedLinuxEvents, totalLinuxEvents } from '../../../store/policy_details/selectors';
-import { ConfigForm } from '../config_form';
+import { ConfigForm, ConfigFormHeading } from '../../components/config_form';
 import { getIn, setIn } from '../../../models/policy_details_config';
 import { UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import {
+  COLLECTIONS_ENABLED_MESSAGE,
+  EVENTS_FORM_TYPE_LABEL,
+  EVENTS_HEADING,
+} from './translations';
 
 export const LinuxEvents = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedLinuxEvents);
@@ -59,14 +63,7 @@ export const LinuxEvents = React.memo(() => {
     ];
     return (
       <>
-        <EuiTitle size="xxs">
-          <h5>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyDetailsConfig.eventingEvents"
-              defaultMessage="Events"
-            />
-          </h5>
-        </EuiTitle>
+        <ConfigFormHeading>{EVENTS_HEADING}</ConfigFormHeading>
         <EuiSpacer size="s" />
         {items.map((item, index) => {
           return (
@@ -85,28 +82,16 @@ export const LinuxEvents = React.memo(() => {
     );
   }, []);
 
-  const collectionsEnabled = useMemo(() => {
-    return (
-      <EuiText size="s" color="subdued">
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.details.eventCollectionsEnabled"
-          defaultMessage="{selected} / {total} event collections enabled"
-          values={{ selected, total }}
-        />
-      </EuiText>
-    );
-  }, [selected, total]);
-
   return (
     <ConfigForm
-      type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
-        defaultMessage: 'Event Collection',
-      })}
-      supportedOss={i18n.translate('xpack.securitySolution.endpoint.policy.details.linux', {
-        defaultMessage: 'Linux',
-      })}
+      type={EVENTS_FORM_TYPE_LABEL}
+      supportedOss={['linux']}
       dataTestSubj="linuxEventingForm"
-      rightCorner={collectionsEnabled}
+      rightCorner={
+        <EuiText size="s" color="subdued">
+          {COLLECTIONS_ENABLED_MESSAGE(selected, total)}
+        </EuiText>
+      }
     >
       {checkboxes}
     </ConfigForm>

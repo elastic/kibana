@@ -39,17 +39,17 @@ Cypress.Commands.add('stubSecurityApi', function (dataFileName) {
   cy.route('POST', 'api/solutions/security/graphql', `@${dataFileName}JSON`);
 });
 
-Cypress.Commands.add('stubSearchStrategyApi', function (
-  dataFileName,
-  searchStrategyName = 'securitySolutionSearchStrategy'
-) {
-  cy.on('window:before:load', (win) => {
-    win.fetch = null;
-  });
-  cy.server();
-  cy.fixture(dataFileName).as(`${dataFileName}JSON`);
-  cy.route('POST', `internal/search/${searchStrategyName}`, `@${dataFileName}JSON`);
-});
+Cypress.Commands.add(
+  'stubSearchStrategyApi',
+  function (dataFileName, searchStrategyName = 'securitySolutionSearchStrategy') {
+    cy.on('window:before:load', (win) => {
+      win.fetch = null;
+    });
+    cy.server();
+    cy.fixture(dataFileName).as(`${dataFileName}JSON`);
+    cy.route('POST', `internal/search/${searchStrategyName}`, `@${dataFileName}JSON`);
+  }
+);
 
 Cypress.Commands.add(
   'attachFile',
@@ -58,7 +58,7 @@ Cypress.Commands.add(
   },
   (input, fileName, fileType = 'text/plain') => {
     cy.fixture(fileName).then((content) => {
-      const blob = Cypress.Blob.base64StringToBlob(content, fileType);
+      const blob = Cypress.Blob.base64StringToBlob(btoa(content), fileType);
       const testFile = new File([blob], fileName, { type: fileType });
       const dataTransfer = new DataTransfer();
 

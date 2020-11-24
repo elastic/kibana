@@ -12,9 +12,117 @@ import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { getFieldByNameFactory } from './pure_helpers';
+import {
+  operationDefinitionMap,
+  getErrorMessages,
+  createMockedReferenceOperation,
+} from './operations';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
+jest.mock('./operations');
+
+const fieldsOne = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'start_date',
+    displayName: 'start_date',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'dest',
+    displayName: 'dest',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+];
+
+const fieldsTwo = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      date_histogram: {
+        agg: 'date_histogram',
+        fixed_interval: '1d',
+        delay: '7d',
+        time_zone: 'UTC',
+      },
+    },
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      // Ignored in the UI
+      histogram: {
+        agg: 'histogram',
+        interval: 1000,
+      },
+      avg: {
+        agg: 'avg',
+      },
+      max: {
+        agg: 'max',
+      },
+      min: {
+        agg: 'min',
+      },
+      sum: {
+        agg: 'sum',
+      },
+    },
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      terms: {
+        agg: 'terms',
+      },
+    },
+  },
+];
 
 const expectedIndexPatterns = {
   1: {
@@ -22,111 +130,16 @@ const expectedIndexPatterns = {
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     hasRestrictions: false,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'start_date',
-        displayName: 'start_date',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'memory',
-        displayName: 'memory',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'dest',
-        displayName: 'dest',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-      },
-    ],
+    fields: fieldsOne,
+    getFieldByName: getFieldByNameFactory(fieldsOne),
   },
   2: {
     id: '2',
     title: 'my-fake-restricted-pattern',
     timeFieldName: 'timestamp',
     hasRestrictions: true,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          date_histogram: {
-            agg: 'date_histogram',
-            fixed_interval: '1d',
-            delay: '7d',
-            time_zone: 'UTC',
-          },
-        },
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          // Ignored in the UI
-          histogram: {
-            agg: 'histogram',
-            interval: 1000,
-          },
-          avg: {
-            agg: 'avg',
-          },
-          max: {
-            agg: 'max',
-          },
-          min: {
-            agg: 'min',
-          },
-          sum: {
-            agg: 'sum',
-          },
-        },
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          terms: {
-            agg: 'terms',
-          },
-        },
-      },
-    ],
+    fields: fieldsTwo,
+    getFieldByName: getFieldByNameFactory(fieldsTwo),
   },
 };
 
@@ -482,6 +495,56 @@ describe('IndexPattern Data Source', () => {
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp']);
       expect(ast.chain[0].arguments.timeFields).not.toContain('timefield');
     });
+
+    describe('references', () => {
+      beforeEach(() => {
+        // @ts-expect-error we are inserting an invalid type
+        operationDefinitionMap.testReference = createMockedReferenceOperation();
+
+        // @ts-expect-error we are inserting an invalid type
+        operationDefinitionMap.testReference.toExpression.mockReturnValue(['mock']);
+      });
+
+      afterEach(() => {
+        delete operationDefinitionMap.testReference;
+      });
+
+      it('should collect expression references and append them', async () => {
+        const queryBaseState: IndexPatternBaseState = {
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'Count of records',
+                  dataType: 'date',
+                  isBucketed: false,
+                  sourceField: 'timefield',
+                  operationType: 'cardinality',
+                },
+                col2: {
+                  label: 'Reference',
+                  dataType: 'number',
+                  isBucketed: false,
+                  // @ts-expect-error not a valid type
+                  operationType: 'testReference',
+                  references: ['col1'],
+                },
+              },
+            },
+          },
+        };
+
+        const state = enrichBaseState(queryBaseState);
+
+        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        // @ts-expect-error we can't isolate just the reference type
+        expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
+        expect(ast.chain[2]).toEqual('mock');
+      });
+    });
   });
 
   describe('#insertLayer', () => {
@@ -592,11 +655,33 @@ describe('IndexPattern Data Source', () => {
 
     describe('getTableSpec', () => {
       it('should include col1', () => {
-        expect(publicAPI.getTableSpec()).toEqual([
-          {
-            columnId: 'col1',
+        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col1' }]);
+      });
+
+      it('should skip columns that are being referenced', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  // @ts-ignore this is too little information for a real column
+                  col1: {
+                    dataType: 'number',
+                  },
+                  col2: {
+                    // @ts-expect-error update once we have a reference operation outside tests
+                    references: ['col1'],
+                  },
+                },
+              },
+            },
           },
-        ]);
+          layerId: 'first',
+        });
+
+        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col2' }]);
       });
     });
 
@@ -757,7 +842,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 isBucketed: false,
                 label: 'Foo',
-                operationType: 'document',
+                operationType: 'avg',
                 sourceField: 'bytes',
               },
             },
@@ -767,7 +852,7 @@ describe('IndexPattern Data Source', () => {
       };
       expect(
         indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState)
-      ).not.toBeDefined();
+      ).toBeUndefined();
     });
 
     it('should return no errors with layers with no columns', () => {
@@ -785,7 +870,31 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      expect(indexPatternDatasource.getErrorMessages(state)).not.toBeDefined();
+      expect(indexPatternDatasource.getErrorMessages(state)).toBeUndefined();
+    });
+
+    it('should bubble up invalid configuration from operations', () => {
+      (getErrorMessages as jest.Mock).mockClear();
+      (getErrorMessages as jest.Mock).mockReturnValueOnce(['error 1', 'error 2']);
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(indexPatternDatasource.getErrorMessages(state)).toEqual([
+        { shortMessage: 'error 1', longMessage: '' },
+        { shortMessage: 'error 2', longMessage: '' },
+      ]);
+      expect(getErrorMessages).toHaveBeenCalledTimes(1);
     });
   });
 });

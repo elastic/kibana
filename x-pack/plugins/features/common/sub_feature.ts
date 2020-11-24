@@ -5,6 +5,7 @@
  */
 
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { LicenseType } from '../../licensing/common/types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 
 /**
@@ -68,6 +69,13 @@ export interface SubFeaturePrivilegeConfig
    * `read` is also included in `all` automatically.
    */
   includeIn: 'all' | 'read' | 'none';
+
+  /**
+   * The minimum supported license level for this sub-feature privilege.
+   * If no license level is supplied, then this privilege will be available for all licences
+   * that are valid for the overall feature.
+   */
+  minimumLicense?: LicenseType;
 }
 
 export class SubFeature {

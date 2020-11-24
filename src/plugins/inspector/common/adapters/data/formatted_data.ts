@@ -17,8 +17,6 @@
  * under the License.
  */
 
-class FormattedData {
+export class FormattedData {
   constructor(public readonly raw: any, public readonly formatted: any) {}
 }
-
-export { FormattedData };

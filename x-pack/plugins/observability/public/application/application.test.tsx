@@ -11,13 +11,33 @@ import { ObservabilityPluginSetupDeps } from '../plugin';
 import { renderApp } from './';
 
 describe('renderApp', () => {
+  const originalConsole = global.console;
+  beforeAll(() => {
+    // mocks console to avoid poluting the test output
+    global.console = ({ error: jest.fn() } as unknown) as typeof console;
+  });
+
+  afterAll(() => {
+    global.console = originalConsole;
+  });
   it('renders', async () => {
     const plugins = ({
       usageCollection: { reportUiStats: () => {} },
+      data: {
+        query: {
+          timefilter: {
+            timefilter: { setTime: jest.fn(), getTime: jest.fn().mockImplementation(() => ({})) },
+          },
+        },
+      },
     } as unknown) as ObservabilityPluginSetupDeps;
     const core = ({
       application: { currentAppId$: new Observable(), navigateToUrl: () => {} },
-      chrome: { docTitle: { change: () => {} }, setBreadcrumbs: () => {} },
+      chrome: {
+        docTitle: { change: () => {} },
+        setBreadcrumbs: () => {},
+        setHelpExtension: () => {},
+      },
       i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
       uiSettings: { get: () => false },
       http: { basePath: { prepend: (path: string) => path } },
@@ -25,6 +45,7 @@ describe('renderApp', () => {
     const params = ({
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
+      setHeaderActionMenu: () => {},
     } as unknown) as AppMountParameters;
 
     expect(() => {

@@ -11,6 +11,7 @@ import {
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
 } from '../schema/trusted_apps';
+import { Linux, MacOS, Windows } from './os';
 
 /** API request params for deleting Trusted App entry */
 export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequestSchema.params>;
@@ -51,11 +52,11 @@ export type NewTrustedApp = {
   description?: string;
 } & (
   | {
-      os: 'linux' | 'macos';
+      os: Linux | MacOS;
       entries: MacosLinuxConditionEntry[];
     }
   | {
-      os: 'windows';
+      os: Windows;
       entries: WindowsConditionEntry[];
     }
 );

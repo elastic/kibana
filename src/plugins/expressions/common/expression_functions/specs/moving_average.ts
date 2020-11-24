@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable } from '../../expression_types';
-import { buildResultColumns, getBucketIdentifier } from './series_calculation_helpers';
+import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
 
 export interface MovingAverageArgs {
   by?: string[];

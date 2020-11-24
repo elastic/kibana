@@ -117,7 +117,7 @@ describe('Utils', () => {
     it('transforms correctly', () => {
       const comment = {
         comment: 'A comment',
-        type: CommentType.user,
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
@@ -140,7 +140,7 @@ describe('Utils', () => {
     it('transform correctly without optional fields', () => {
       const comment = {
         comment: 'A comment',
-        type: CommentType.user,
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
       };
 
@@ -161,7 +161,7 @@ describe('Utils', () => {
     it('transform correctly with optional fields as null', () => {
       const comment = {
         comment: 'A comment',
-        type: CommentType.user,
+        type: CommentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
         email: null,
         full_name: null,

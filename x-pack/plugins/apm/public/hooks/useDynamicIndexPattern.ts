@@ -13,7 +13,7 @@ export function useDynamicIndexPattern(
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi({
-        pathname: '/api/apm/index_pattern/dynamic',
+        endpoint: 'GET /api/apm/index_pattern/dynamic',
         isCachable: true,
         params: {
           query: {

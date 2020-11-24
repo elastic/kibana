@@ -5,7 +5,7 @@
  */
 
 import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request/create_rules_schema';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import {
   getListMock,

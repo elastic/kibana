@@ -13,9 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
 
 import { TruncatedContent } from '../../../../shared/truncate';
-import { EuiLink } from '../../../../shared/react_router_helpers';
+import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
-import { IGroup } from '../../../types';
+import { Group } from '../../../types';
 
 import { AppLogic } from '../../../app_logic';
 import { getGroupPath } from '../../../routes';
@@ -42,7 +42,7 @@ const dateDisplay = (date: string) =>
     ? moment(date).fromNow()
     : moment(date).format('MMMM D, YYYY');
 
-export const GroupRow: React.FC<IGroup> = ({
+export const GroupRow: React.FC<Group> = ({
   id,
   name,
   updatedAt,
@@ -64,9 +64,9 @@ export const GroupRow: React.FC<IGroup> = ({
     <EuiTableRow data-test-subj="GroupsRow">
       <EuiTableRowCell>
         <strong>
-          <EuiLink to={getGroupPath(id)}>
+          <EuiLinkTo to={getGroupPath(id)}>
             <TruncatedContent tooltipType="title" content={name} length={MAX_NAME_LENGTH} />
-          </EuiLink>
+          </EuiLinkTo>
         </strong>
         <br />
         <small>{GROUP_UPDATED_TEXT}</small>
@@ -93,9 +93,9 @@ export const GroupRow: React.FC<IGroup> = ({
       )}
       <EuiTableRowCell>
         <strong>
-          <EuiLink to={getGroupPath(id)}>
+          <EuiLinkTo to={getGroupPath(id)}>
             <EuiIcon type="pencil" />
-          </EuiLink>
+          </EuiLinkTo>
         </strong>
       </EuiTableRowCell>
     </EuiTableRow>

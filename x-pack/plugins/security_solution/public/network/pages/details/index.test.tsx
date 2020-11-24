@@ -26,8 +26,6 @@ import { NetworkDetails } from './index';
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 
-type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
-
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
@@ -85,7 +83,7 @@ describe('Network Details', () => {
       indicesExist: false,
       indexPattern: {},
     });
-    (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
+    global.fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
         json: () => {

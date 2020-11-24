@@ -6,12 +6,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { IRouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 
 export function registerSettingsRoutes({
   router,
   enterpriseSearchRequestHandler,
-}: IRouteDependencies) {
+}: RouteDependencies) {
   router.get(
     {
       path: '/api/app_search/log_settings',

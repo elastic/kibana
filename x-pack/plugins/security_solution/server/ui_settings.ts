@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { CoreSetup } from '../../../../src/core/server';
 import {
+  APP_ID,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
   DEFAULT_ANOMALY_SCORE,
@@ -47,7 +48,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
             '<p>Default refresh interval for the Security time filter, in milliseconds.</p>',
         }
       ),
-      category: ['securitySolution'],
+      category: [APP_ID],
       requiresPageReload: true,
       schema: schema.object({
         value: schema.number(),
@@ -66,7 +67,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultTimeRangeDescription', {
         defaultMessage: '<p>Default period of time in the Security time filter.</p>',
       }),
-      category: ['securitySolution'],
+      category: [APP_ID],
       requiresPageReload: true,
       schema: schema.object({
         from: schema.string(),
@@ -82,7 +83,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         defaultMessage:
           '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',
       }),
-      category: ['securitySolution'],
+      category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
     },
@@ -99,7 +100,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
             '<p>Value above which Machine Learning job anomalies are displayed in the Security app.</p><p>Valid values: 0 to 100.</p>',
         }
       ),
-      category: ['securitySolution'],
+      category: [APP_ID],
       requiresPageReload: true,
       schema: schema.number(),
     },
@@ -112,7 +113,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
         defaultMessage: '<p>Enables the News feed</p>',
       }),
       type: 'boolean',
-      category: ['securitySolution'],
+      category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
     },
@@ -133,7 +134,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
   "value": ${DEFAULT_RULE_REFRESH_INTERVAL_VALUE},
   "idleTimeout": ${DEFAULT_RULE_REFRESH_IDLE_VALUE}
 }`,
-      category: ['securitySolution'],
+      category: [APP_ID],
       requiresPageReload: true,
       schema: schema.object({
         idleTimeout: schema.number({ min: 300000 }),
@@ -149,7 +150,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       description: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrlDescription', {
         defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
       }),
-      category: ['securitySolution'],
+      category: [APP_ID],
       requiresPageReload: true,
       schema: schema.string(),
     },
@@ -166,7 +167,7 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
             'Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.',
         }
       ),
-      category: ['securitySolution'],
+      category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(
         schema.object({

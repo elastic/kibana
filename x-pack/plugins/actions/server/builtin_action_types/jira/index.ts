@@ -40,6 +40,7 @@ interface GetActionTypeParams {
 }
 
 const supportedSubActions: string[] = [
+  'getFields',
   'pushToService',
   'issueTypes',
   'fieldsByIssueType',
@@ -142,6 +143,13 @@ async function executor(
     data = await api.fieldsByIssueType({
       externalService,
       params: getFieldsByIssueTypeParams,
+    });
+  }
+
+  if (subAction === 'getFields') {
+    data = await api.getFields({
+      externalService,
+      params: subActionParams,
     });
   }
 

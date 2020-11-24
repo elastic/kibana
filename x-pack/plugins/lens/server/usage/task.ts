@@ -15,7 +15,7 @@ import {
 } from '../../../task_manager/server';
 
 import { getVisualizationCounts } from './visualization_counts';
-import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
+import { ESSearchResponse } from '../../../../typings/elasticsearch';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
 // into daily rolled-up documents, which will be used in reporting click stats

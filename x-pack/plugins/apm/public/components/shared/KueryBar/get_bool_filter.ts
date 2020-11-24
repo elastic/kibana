@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -12,7 +13,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { UIProcessorEvent } from '../../../../common/processor_event';
-import { ESFilter } from '../../../../typings/elasticsearch';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 
 export function getBoolFilter({
@@ -26,23 +26,7 @@ export function getBoolFilter({
   serviceName?: string;
   urlParams: IUrlParams;
 }) {
-  const { start, end } = urlParams;
-
-  if (!start || !end) {
-    throw new Error('Date range was not defined');
-  }
-
-  const boolFilter: ESFilter[] = [
-    {
-      range: {
-        '@timestamp': {
-          gte: new Date(start).getTime(),
-          lte: new Date(end).getTime(),
-          format: 'epoch_millis',
-        },
-      },
-    },
-  ];
+  const boolFilter: ESFilter[] = [];
 
   if (serviceName) {
     boolFilter.push({

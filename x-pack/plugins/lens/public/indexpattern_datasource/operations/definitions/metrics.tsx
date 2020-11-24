@@ -43,7 +43,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       }
     },
     isTransferable: (column, newIndexPattern) => {
-      const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+      const newField = newIndexPattern.getFieldByName(column.sourceField);
 
       return Boolean(
         newField &&
@@ -52,18 +52,19 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    buildColumn: ({ suggestedPriority, field, previousColumn }) => ({
+    getDefaultLabel: (column, indexPattern, columns) =>
+      ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
+    buildColumn: ({ field, previousColumn }) => ({
       label: ofName(field.displayName),
       dataType: 'number',
       operationType: type,
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
       params:
         previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
     }),
-    onFieldChange: (oldColumn, indexPattern, field) => {
+    onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,
         label: ofName(field.displayName),

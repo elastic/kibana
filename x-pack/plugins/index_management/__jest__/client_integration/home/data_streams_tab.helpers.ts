@@ -8,12 +8,7 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
 import { EuiDescriptionListDescription } from '@elastic/eui';
-import {
-  registerTestBed,
-  TestBed,
-  TestBedConfig,
-  findTestSubject,
-} from '../../../../../test_utils';
+import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
 import { DataStream } from '../../../common';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
@@ -24,12 +19,14 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
     clickIncludeStatsSwitch: () => void;
+    clickIncludeManagedSwitch: () => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
     clickDeleteActionAt: (index: number) => void;
     clickConfirmDelete: () => void;
     clickDeleteDataStreamButton: () => void;
+    clickDetailPanelIndexTemplateLink: () => void;
   };
   findDeleteActionAt: (index: number) => ReactWrapper;
   findDeleteConfirmationModal: () => ReactWrapper;
@@ -38,6 +35,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   findEmptyPromptIndexTemplateLink: () => ReactWrapper;
   findDetailPanelIlmPolicyLink: () => ReactWrapper;
   findDetailPanelIlmPolicyName: () => ReactWrapper;
+  findDetailPanelIndexTemplateLink: () => ReactWrapper;
 }
 
 export const setup = async (overridingDependencies: any = {}): Promise<DataStreamsTabTestBed> => {
@@ -81,6 +79,11 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
   const clickIncludeStatsSwitch = () => {
     const { find } = testBed;
     find('includeStatsSwitch').simulate('click');
+  };
+
+  const clickIncludeManagedSwitch = () => {
+    const { find } = testBed;
+    find('includeManagedSwitch').simulate('click');
   };
 
   const clickReloadButton = () => {
@@ -143,6 +146,17 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     find('deleteDataStreamButton').simulate('click');
   };
 
+  const clickDetailPanelIndexTemplateLink = async () => {
+    const { component, router, find } = testBed;
+    const indexTemplateLink = find('indexTemplateLink');
+
+    await act(async () => {
+      router.navigateTo(indexTemplateLink.props().href!);
+    });
+
+    component.update();
+  };
+
   const findDetailPanel = () => {
     const { find } = testBed;
     return find('dataStreamDetailPanel');
@@ -158,6 +172,11 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     return find('ilmPolicyLink');
   };
 
+  const findDetailPanelIndexTemplateLink = () => {
+    const { find } = testBed;
+    return find('indexTemplateLink');
+  };
+
   const findDetailPanelIlmPolicyName = () => {
     const descriptionList = testBed.component.find(EuiDescriptionListDescription);
     // ilm policy is the last in the details list
@@ -170,12 +189,14 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       goToDataStreamsList,
       clickEmptyPromptIndexTemplateLink,
       clickIncludeStatsSwitch,
+      clickIncludeManagedSwitch,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
       clickDeleteActionAt,
       clickConfirmDelete,
       clickDeleteDataStreamButton,
+      clickDetailPanelIndexTemplateLink,
     },
     findDeleteActionAt,
     findDeleteConfirmationModal,
@@ -184,11 +205,12 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     findEmptyPromptIndexTemplateLink,
     findDetailPanelIlmPolicyLink,
     findDetailPanelIlmPolicyName,
+    findDetailPanelIndexTemplateLink,
   };
 };
 
-export const createDataStreamPayload = (name: string): DataStream => ({
-  name,
+export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataStream => ({
+  name: 'my-data-stream',
   timeStampField: { name: '@timestamp' },
   indices: [
     {
@@ -201,6 +223,7 @@ export const createDataStreamPayload = (name: string): DataStream => ({
   indexTemplateName: 'indexTemplate',
   storageSize: '1b',
   maxTimeStamp: 420,
+  ...dataStream,
 });
 
 export const createDataStreamBackingIndex = (indexName: string, dataStreamName: string) => ({

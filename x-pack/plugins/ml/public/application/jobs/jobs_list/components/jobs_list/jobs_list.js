@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
 
-const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
@@ -32,11 +31,7 @@ export class JobsList extends Component {
 
     this.state = {
       jobsSummaryList: props.jobsSummaryList,
-      pageIndex: 0,
-      pageSize: PAGE_SIZE,
       itemIdToExpandedRowMap: {},
-      sortField: 'id',
-      sortDirection: 'asc',
     };
   }
 
@@ -54,7 +49,7 @@ export class JobsList extends Component {
 
     const { field: sortField, direction: sortDirection } = sort;
 
-    this.setState({
+    this.props.onJobsViewStateUpdate({
       pageIndex,
       pageSize,
       sortField,
@@ -88,7 +83,7 @@ export class JobsList extends Component {
       pageStart = Math.floor((listLength - 1) / size) * size;
       // set the state out of the render cycle
       setTimeout(() => {
-        this.setState({
+        this.props.onJobsViewStateUpdate({
           pageIndex: pageStart / size,
         });
       }, 0);
@@ -100,7 +95,7 @@ export class JobsList extends Component {
   }
 
   render() {
-    const { loading, isManagementTable } = this.props;
+    const { loading, isManagementTable, spacesEnabled } = this.props;
     const selectionControls = {
       selectable: (job) => job.deleting !== true,
       selectableMessage: (selectable, rowItem) =>
@@ -247,13 +242,22 @@ export class JobsList extends Component {
     ];
 
     if (isManagementTable === true) {
-      // insert before last column
-      columns.splice(columns.length - 1, 0, {
-        name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
-          defaultMessage: 'Spaces',
-        }),
-        render: (item) => <JobSpacesList spaces={item.spaces} />,
-      });
+      if (spacesEnabled === true) {
+        // insert before last column
+        columns.splice(columns.length - 1, 0, {
+          name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
+            defaultMessage: 'Spaces',
+          }),
+          render: (item) => (
+            <JobSpacesList
+              spaceIds={item.spaceIds}
+              jobId={item.id}
+              jobType="anomaly-detector"
+              refresh={this.props.refreshJobs}
+            />
+          ),
+        });
+      }
       // Remove actions if Ml not enabled in current space
       if (this.props.isMlEnabledInSpace === false) {
         columns.pop();
@@ -298,7 +302,7 @@ export class JobsList extends Component {
       });
     }
 
-    const { pageIndex, pageSize, sortField, sortDirection } = this.state;
+    const { pageIndex, pageSize, sortField, sortDirection } = this.props.jobsViewState;
 
     const { pageOfItems, totalItemCount } = this.getPageOfJobs(
       pageIndex,
@@ -368,6 +372,8 @@ JobsList.propTypes = {
   refreshJobs: PropTypes.func,
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,
+  jobsViewState: PropTypes.object,
+  onJobsViewStateUpdate: PropTypes.func,
 };
 JobsList.defaultProps = {
   isManagementTable: false,

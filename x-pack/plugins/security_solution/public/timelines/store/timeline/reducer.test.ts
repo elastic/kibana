@@ -14,10 +14,7 @@ import {
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import {
-  DEFAULT_COLUMN_MIN_WIDTH,
-  DEFAULT_TIMELINE_WIDTH,
-} from '../../../timelines/components/timeline/body/constants';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Direction } from '../../../graphql/types';
 import { defaultHeaders } from '../../../common/mock';
@@ -48,6 +45,14 @@ import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('../../../common/utils/default_date_settings', () => {
+  const actual = jest.requireActual('../../../common/utils/default_date_settings');
+  return {
+    ...actual,
+    DEFAULT_FROM_MOMENT: new Date('2020-10-27T11:37:31.655Z'),
+    DEFAULT_TO_MOMENT: new Date('2020-10-28T11:37:31.655Z'),
+  };
+});
 
 const basicDataProvider: DataProvider = {
   and: [],
@@ -73,6 +78,7 @@ const basicTimeline: TimelineModel = {
   description: '',
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
+  expandedEvent: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'foo',
@@ -104,7 +110,6 @@ const basicTimeline: TimelineModel = {
   timelineType: TimelineType.default,
   title: '',
   version: null,
-  width: DEFAULT_TIMELINE_WIDTH,
 };
 const timelineByIdMock: TimelineById = {
   foo: { ...basicTimeline },
@@ -137,6 +142,31 @@ describe('Timeline', () => {
       expect(update).toEqual({
         foo: {
           ...basicTimeline,
+          show: true,
+        },
+      });
+    });
+
+    test('should override timerange if adding an immutable template', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          status: TimelineStatus.immutable,
+          timelineType: TimelineType.template,
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update).toEqual({
+        foo: {
+          ...basicTimeline,
+          status: TimelineStatus.immutable,
+          timelineType: TimelineType.template,
+          dateRange: {
+            start: '2020-10-27T11:37:31.655Z',
+            end: '2020-10-28T11:37:31.655Z',
+          },
           show: true,
         },
       });

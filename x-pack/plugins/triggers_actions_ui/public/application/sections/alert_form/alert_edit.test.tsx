@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -13,7 +13,7 @@ import { AlertsContextProvider } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import AlertEdit from './alert_edit';
-import { AppContextProvider } from '../../app_context';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
@@ -122,7 +122,7 @@ describe('alert_edit', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={deps}>
         <AlertsContextProvider
           value={{
             reloadAlerts: () => {
@@ -139,7 +139,7 @@ describe('alert_edit', () => {
         >
           <AlertEdit onClose={() => {}} initialAlert={alert} />
         </AlertsContextProvider>
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {

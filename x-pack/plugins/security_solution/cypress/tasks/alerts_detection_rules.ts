@@ -125,7 +125,6 @@ export const waitForRulesToBeLoaded = () => {
   cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
 };
 
-// when using, ensure you've called cy.clock prior in test
 export const checkAutoRefresh = (ms: number, condition: string) => {
   cy.get(ASYNC_LOADING_PROGRESS).should('not.be.visible');
   cy.tick(ms);

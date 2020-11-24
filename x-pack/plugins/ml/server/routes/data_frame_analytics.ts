@@ -8,18 +8,25 @@ import { RequestHandlerContext, IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
+import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsJobUpdateSchema,
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
+  analyticsMapQuerySchema,
   stopsDataFrameAnalyticsJobQuerySchema,
   deleteDataFrameAnalyticsJobSchema,
+  jobsExistSchema,
 } from './schemas/data_analytics_schema';
+import { GetAnalyticsMapArgs, ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
+import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
+import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
+import type { MlClient } from '../lib/ml_client';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
@@ -29,6 +36,24 @@ function getIndexPatternId(context: RequestHandlerContext, patternName: string) 
 function deleteDestIndexPatternById(context: RequestHandlerContext, indexPatternId: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
   return iph.deleteIndexPatternById(indexPatternId);
+}
+
+function getAnalyticsMap(
+  mlClient: MlClient,
+  client: IScopedClusterClient,
+  idOptions: GetAnalyticsMapArgs
+) {
+  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
+  return analytics.getAnalyticsMap(idOptions);
+}
+
+function getExtendedMap(
+  mlClient: MlClient,
+  client: IScopedClusterClient,
+  idOptions: ExtendAnalyticsMapArgs
+) {
+  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
+  return analytics.extendAnalyticsMapForAnalyticsJob(idOptions);
 }
 
 /**
@@ -533,6 +558,106 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(client);
 
         const results = await getAnalyticsAuditMessages(analyticsId);
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/analytics/job_exists Check whether jobs exists in current or any space
+   * @apiName JobExists
+   * @apiDescription Checks if each of the jobs in the specified list of IDs exist.
+   *                 If allSpaces is true, the check will look across all spaces.
+   *
+   * @apiSchema (params) analyticsIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/jobs_exist',
+      validate: {
+        body: jobsExistSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { analyticsIds, allSpaces } = request.body;
+        const results: { [id: string]: boolean } = {};
+        for (const id of analyticsIds) {
+          try {
+            const { body } = allSpaces
+              ? await client.asInternalUser.ml.getDataFrameAnalytics<{
+                  data_frame_analytics: DataFrameAnalyticsConfig[];
+                }>({
+                  id,
+                })
+              : await mlClient.getDataFrameAnalytics<{
+                  data_frame_analytics: DataFrameAnalyticsConfig[];
+                }>({
+                  id,
+                });
+            results[id] = body.data_frame_analytics.length > 0;
+          } catch (error) {
+            if (error.statusCode !== 404) {
+              throw error;
+            }
+            results[id] = false;
+          }
+        }
+
+        return response.ok({
+          body: { results },
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/map/:analyticsId Get objects leading up to analytics job
+   * @apiName GetDataFrameAnalyticsIdMap
+   * @apiDescription Returns map of objects leading up to analytics job.
+   *
+   * @apiParam {String} analyticsId Analytics ID.
+   */
+  router.get(
+    {
+      path: '/api/ml/data_frame/analytics/map/{analyticsId}',
+      validate: {
+        params: analyticsIdSchema,
+        query: analyticsMapQuerySchema,
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
+      try {
+        const { analyticsId } = request.params;
+        const treatAsRoot = request.query?.treatAsRoot;
+        const type = request.query?.type;
+
+        let results;
+        if (treatAsRoot === 'true' || treatAsRoot === true) {
+          results = await getExtendedMap(mlClient, client, {
+            analyticsId: type !== JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
+            index: type === JOB_MAP_NODE_TYPES.INDEX ? analyticsId : undefined,
+          });
+        } else {
+          results = await getAnalyticsMap(mlClient, client, {
+            analyticsId: type !== JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
+            modelId: type === JOB_MAP_NODE_TYPES.TRAINED_MODEL ? analyticsId : undefined,
+          });
+        }
+
         return response.ok({
           body: results,
         });

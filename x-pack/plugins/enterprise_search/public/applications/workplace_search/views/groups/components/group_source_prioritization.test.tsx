@@ -12,7 +12,7 @@ import { groups } from '../../../__mocks__/groups.mock';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../components/shared/loading';
+import { Loading } from '../../../../shared/loading';
 
 import { GroupSourcePrioritization } from './group_source_prioritization';
 

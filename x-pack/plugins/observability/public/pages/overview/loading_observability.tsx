@@ -27,8 +27,6 @@ export function LoadingObservability() {
     <WithHeaderLayout
       headerColor={theme.eui.euiColorEmptyShade}
       bodyColor={theme.eui.euiPageBackgroundColor}
-      showAddData
-      showGiveFeedback
     >
       <CentralizedFlexGroup>
         <EuiFlexItem grow={false}>

@@ -9,9 +9,8 @@ import {
   ExecutionContext,
   Datatable,
   ExpressionFunctionDefinition,
-  ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
-import { search } from '../../../../../src/plugins/data/public';
+import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
 const { toAbsoluteDates } = search.aggs;
 
 import { LensMultiTable } from '../types';
@@ -27,7 +26,7 @@ export const mergeTables: ExpressionFunctionDefinition<
   ExpressionValueSearchContext | null,
   MergeTables,
   LensMultiTable,
-  ExecutionContext<LensInspectorAdapters>
+  ExecutionContext<LensInspectorAdapters, ExpressionValueSearchContext>
 > = {
   name: 'lens_merge_tables',
   type: 'lens_multitable',

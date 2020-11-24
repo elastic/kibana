@@ -37,6 +37,7 @@ export interface GeoJsonWithMeta {
 
 export interface BoundsFilters {
   applyGlobalQuery: boolean;
+  applyGlobalTime: boolean;
   filters: Filter[];
   query?: MapQuery;
   sourceQuery?: MapQuery;
@@ -61,7 +62,6 @@ export interface IVectorSource extends ISource {
   getLeftJoinFields(): Promise<IField[]>;
   getSyncMeta(): VectorSourceSyncMeta | null;
   getFieldNames(): string[];
-  getApplyGlobalQuery(): boolean;
   createField({ fieldName }: { fieldName: string }): IField;
   canFormatFeatureProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;

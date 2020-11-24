@@ -5,7 +5,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { getOr, noop } from 'lodash/fp';
+import { getOr, isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
@@ -18,11 +18,8 @@ import {
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
 } from '../../../../common/search_strategy/security_solution';
-import {
-  AbortError,
-  isErrorResponse,
-  isCompleteResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -46,11 +43,13 @@ export interface UseMatrixHistogramArgs {
 }
 
 export const useMatrixHistogram = ({
+  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
   histogramType,
   indexNames,
+  isPtrIncluded,
   stackByField,
   startDate,
   threshold,
@@ -64,9 +63,10 @@ export const useMatrixHistogram = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [matrixHistogramRequest, setMatrixHistogramRequest] = useState<
-    MatrixHistogramRequestOptions
-  >({
+  const [
+    matrixHistogramRequest,
+    setMatrixHistogramRequest,
+  ] = useState<MatrixHistogramRequestOptions>({
     defaultIndex: indexNames,
     factoryQueryType: MatrixHistogramQuery,
     filterQuery: createFilter(filterQuery),
@@ -78,6 +78,8 @@ export const useMatrixHistogram = ({
     },
     stackByField,
     threshold,
+    ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
+    ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
   });
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
@@ -169,13 +171,25 @@ export const useMatrixHistogram = ({
         },
         stackByField,
         threshold,
+        ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
+        ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, threshold]);
+  }, [
+    indexNames,
+    endDate,
+    filterQuery,
+    startDate,
+    stackByField,
+    histogramType,
+    threshold,
+    isPtrIncluded,
+    docValueFields,
+  ]);
 
   useEffect(() => {
     if (!skip) {

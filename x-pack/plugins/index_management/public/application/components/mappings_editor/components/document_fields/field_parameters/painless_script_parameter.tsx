@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { PainlessLang } from '@kbn/monaco';
 import { EuiFormRow, EuiDescribedFormGroup } from '@elastic/eui';
 
 import { CodeEditor, UseField } from '../../../shared_imports';
@@ -18,7 +19,7 @@ interface Props {
 
 export const PainlessScriptParameter = ({ stack }: Props) => {
   return (
-    <UseField path="script.source" config={getFieldConfig('script')}>
+    <UseField<string> path="script.source" config={getFieldConfig('script')}>
       {(scriptField) => {
         const error = scriptField.getErrorsMessages();
         const isInvalid = error ? Boolean(error.length) : false;
@@ -26,11 +27,10 @@ export const PainlessScriptParameter = ({ stack }: Props) => {
         const field = (
           <EuiFormRow label={scriptField.label} error={error} isInvalid={isInvalid} fullWidth>
             <CodeEditor
-              languageId="painless"
-              // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
-              width="99%"
+              languageId={PainlessLang.ID}
+              width="100%"
               height="400px"
-              value={scriptField.value as string}
+              value={scriptField.value}
               onChange={scriptField.setValue}
               options={{
                 fontSize: 12,

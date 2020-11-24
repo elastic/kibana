@@ -2,8 +2,7 @@
 
 exports[`formats %s patterns and indents multi-line messages correctly 1`] = `
 "         │ [32msucc[39m foo bar
-         │      { foo: { bar: { '1': [Array] } },
-         │        bar: { bar: { '1': [Array] } } }
+         │      { foo: { bar: { '1': [Array] } }, bar: { bar: { '1': [Array] } } }
          │
          │      Infinity
 "

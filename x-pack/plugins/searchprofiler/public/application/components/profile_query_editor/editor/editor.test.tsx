@@ -6,7 +6,7 @@
 import 'brace';
 import 'brace/mode/json';
 
-import { registerTestBed } from '../../../../../../../test_utils';
+import { registerTestBed } from '@kbn/test/jest';
 import { Editor, Props } from './editor';
 
 describe('Editor Component', () => {

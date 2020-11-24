@@ -82,8 +82,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       type: isValidStringConfig(descriptor.type) ? descriptor.type! : '',
       indexPatternId: descriptor.indexPatternId!,
       applyGlobalQuery:
-        // backfill old _.get usage
-        typeof descriptor.applyGlobalQuery !== 'undefined' ? !!descriptor.applyGlobalQuery : true,
+        typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
+      applyGlobalTime:
+        typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
     };
   }
 
@@ -94,6 +95,14 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   getId(): string {
     return this._descriptor.id;
+  }
+
+  getApplyGlobalQuery(): boolean {
+    return this._descriptor.applyGlobalQuery;
+  }
+
+  getApplyGlobalTime(): boolean {
+    return this._descriptor.applyGlobalTime;
   }
 
   isFieldAware(): boolean {
@@ -125,7 +134,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   destroy() {
     const inspectorAdapters = this.getInspectorAdapters();
-    if (inspectorAdapters) {
+    if (inspectorAdapters?.requests) {
       inspectorAdapters.requests.resetRequest(this.getId());
     }
   }
@@ -155,7 +164,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
     const inspectorAdapters = this.getInspectorAdapters();
     let inspectorRequest: RequestResponder | undefined;
-    if (inspectorAdapters) {
+    if (inspectorAdapters?.requests) {
       inspectorRequest = inspectorAdapters.requests.start(requestName, {
         id: requestId,
         description: requestDescription,
@@ -203,10 +212,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     initialSearchContext?: object
   ): Promise<ISearchSource> {
     const indexPattern = await this.getIndexPattern();
-    const isTimeAware = await this.isTimeAware();
-    const applyGlobalQuery =
-      typeof searchFilters.applyGlobalQuery === 'boolean' ? searchFilters.applyGlobalQuery : true;
-    const globalFilters: Filter[] = applyGlobalQuery ? searchFilters.filters : [];
+    const globalFilters: Filter[] = searchFilters.applyGlobalQuery ? searchFilters.filters : [];
     const allFilters: Filter[] = [...globalFilters];
     if (this.isFilterByMapBounds() && 'buffer' in searchFilters && searchFilters.buffer) {
       // buffer can be empty
@@ -226,7 +232,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       // @ts-expect-error
       allFilters.push(extentFilter);
     }
-    if (isTimeAware) {
+    if (searchFilters.applyGlobalTime && (await this.isTimeAware())) {
       const filter = getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters);
       if (filter) {
         allFilters.push(filter);
@@ -238,7 +244,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
-    if (applyGlobalQuery) {
+    if (searchFilters.applyGlobalQuery) {
       searchSource.setField('query', searchFilters.query);
     }
 

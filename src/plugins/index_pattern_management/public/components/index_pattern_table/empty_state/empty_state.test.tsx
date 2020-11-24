@@ -22,7 +22,7 @@ import { EmptyState } from '../empty_state';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { docLinksServiceMock } from '../../../../../../core/public/mocks';
 import { MlCardState } from '../../../types';
 

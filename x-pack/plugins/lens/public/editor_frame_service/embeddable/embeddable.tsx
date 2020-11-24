@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import {
+  ExecutionContextSearch,
   Filter,
   IIndexPattern,
   Query,
@@ -15,11 +16,11 @@ import {
   TimeRange,
   IndexPattern,
 } from 'src/plugins/data/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
 import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
+import { RenderMode } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -53,6 +54,7 @@ export type LensByValueInput = {
 export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
 export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
   palette?: PaletteOutput;
+  renderMode?: RenderMode;
 };
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
@@ -192,6 +194,7 @@ export class Embeddable
         variables={input.palette ? { theme: { palette: input.palette } } : {}}
         searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
+        renderMode={input.renderMode}
       />,
       domNode
     );

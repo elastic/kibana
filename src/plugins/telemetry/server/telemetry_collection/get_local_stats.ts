@@ -62,16 +62,16 @@ export type TelemetryLocalStats = ReturnType<typeof handleLocalStats>;
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
- * @param {Array} cluster uuids
- * @param {Object} config contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end
+ * @param {Array} cluster uuids array of cluster uuid's
+ * @param {Object} config contains the usageCollection, callCluster (deprecated), the esClient and Saved Objects client scoped to the request or the internal repository, and the kibana request
  * @param {Object} StatsCollectionContext contains logger and version (string)
  */
 export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
-  clustersDetails, // array of cluster uuid's
-  config, // contains the new esClient already scoped contains usageCollection, callCluster, esClient, start, end and the saved objects client scoped to the request or the internal repository
-  context // StatsCollectionContext contains logger and version (string)
+  clustersDetails,
+  config,
+  context
 ) => {
-  const { callCluster, usageCollection, esClient, soClient } = config;
+  const { callCluster, usageCollection, esClient, soClient, kibanaRequest } = config;
 
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
@@ -79,7 +79,7 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
         getClusterInfo(esClient), // cluster info
         getClusterStats(esClient), // cluster stats (not to be confused with cluster _state_)
         getNodesUsage(esClient), // nodes_usage info
-        getKibana(usageCollection, callCluster, esClient, soClient),
+        getKibana(usageCollection, callCluster, esClient, soClient, kibanaRequest),
         getDataTelemetry(esClient),
       ]);
       return handleLocalStats(

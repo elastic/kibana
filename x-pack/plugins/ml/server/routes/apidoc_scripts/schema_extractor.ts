@@ -90,65 +90,77 @@ export function extractDocumentation(
     return members;
   }
 
-  function resolveTypeArgument(type: ts.Type): ts.SymbolTable | string {
-    // required to extract members
-    type.getProperty('type');
-
-    // @ts-ignores
-    let members = type.members;
+  /**
+   * Extracts properties of the type.
+   * @param type
+   */
+  function resolveTypeProperties(type: ts.Type): ts.Symbol[] {
+    let props = type.getProperties();
 
     const typeArguments = checker.getTypeArguments((type as unknown) as ts.TypeReference);
 
     if (type.aliasTypeArguments) {
       // @ts-ignores
-      members = type.aliasTypeArguments[0].members;
+      props = type.aliasTypeArguments[0].getProperties();
     }
 
     if (typeArguments.length > 0) {
-      members = resolveTypeArgument(typeArguments[0]);
+      props = resolveTypeProperties(typeArguments[0]);
     }
 
-    if (members === undefined) {
-      members = checker.typeToString(type);
-    }
-
-    return members;
+    return props;
   }
 
   function serializeProperty(symbol: ts.Symbol): DocEntry {
     // @ts-ignore
     const typeOfSymbol = symbol.type;
-    const typeArguments = checker.getTypeArguments((typeOfSymbol as unknown) as ts.TypeReference);
-
-    let resultType: ts.Type = typeOfSymbol;
-
-    let members;
-    if (typeArguments.length > 0) {
-      members = resolveTypeArgument(typeArguments[0]);
-      resultType = typeArguments[0];
+    if (typeOfSymbol === undefined) {
+      return {
+        name: symbol.getName(),
+        documentation: getCommentString(symbol),
+        type: 'any',
+      };
     }
 
-    let typeAsString = checker.typeToString(resultType);
+    let targetType: ts.TypeReference | ts.Type =
+      typeOfSymbol.getProperty('type')?.type ?? typeOfSymbol;
 
+    const isArrayOf = targetType.symbol?.name === 'Array';
+    if (isArrayOf) {
+      targetType = checker.getTypeArguments(targetType as ts.TypeReference)[0];
+    }
+
+    let typeAsString = checker.typeToString(targetType);
     const nestedEntries: DocEntry[] = [];
-    if (members && typeof members !== 'string' && members.size > 0) {
-      // we hit an object or collection
-      typeAsString =
-        resultType.symbol.name === 'Array' || typeOfSymbol.symbol.name === 'Array'
-          ? `${symbol.getName()}[]`
-          : symbol.getName();
 
-      members.forEach((member) => {
-        nestedEntries.push(serializeProperty(member));
-      });
+    if (
+      targetType.aliasTypeArguments ||
+      checker.getTypeArguments(targetType as ts.TypeReference).length > 0
+    ) {
+      // Resolve complex types, objects and arrays, that contain nested properties
+      const typeProperties = resolveTypeProperties(targetType);
+
+      if (Array.isArray(typeProperties) && typeProperties.length > 0) {
+        // we hit an object or collection
+        typeAsString =
+          targetType.symbol?.name === 'Array' || typeOfSymbol.symbol?.name === 'Array'
+            ? `${symbol.getName()}[]`
+            : symbol.getName();
+
+        typeProperties.forEach((member) => {
+          nestedEntries.push(serializeProperty(member));
+        });
+      }
     }
 
-    return {
+    const res = {
       name: symbol.getName(),
       documentation: getCommentString(symbol),
-      type: typeAsString,
+      type: isArrayOf ? `${typeAsString}[]` : typeAsString,
       ...(nestedEntries.length > 0 ? { nested: nestedEntries } : {}),
     };
+
+    return res;
   }
 
   function getCommentString(symbol: ts.Symbol): string {

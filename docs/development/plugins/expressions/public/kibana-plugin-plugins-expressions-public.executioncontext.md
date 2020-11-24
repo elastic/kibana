@@ -9,7 +9,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters> 
+export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState = SerializableState> 
 ```
 
 ## Properties

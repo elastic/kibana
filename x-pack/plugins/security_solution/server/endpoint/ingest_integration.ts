@@ -6,9 +6,9 @@
 
 import { PluginStartContract as AlertsStartContract } from '../../../alerts/server';
 import { SecurityPluginSetup } from '../../../security/server';
-import { ExternalCallback } from '../../../ingest_manager/server';
+import { ExternalCallback } from '../../../fleet/server';
 import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
-import { NewPackagePolicy } from '../../../ingest_manager/common/types/models';
+import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
