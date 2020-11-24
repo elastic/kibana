@@ -27,6 +27,7 @@ interface CytoscapeProps {
   elements: cytoscape.ElementDefinition[];
   height: number;
   itemsDeleted: boolean;
+  resetCy: boolean;
   style?: CSSProperties;
   width: number;
 }
@@ -69,6 +70,7 @@ export function Cytoscape({
   elements,
   height,
   itemsDeleted,
+  resetCy,
   style,
   width,
 }: CytoscapeProps) {
@@ -84,7 +86,8 @@ export function Cytoscape({
   const dataHandler = useCallback<cytoscape.EventHandler>(
     (event) => {
       if (cy && height > 0) {
-        setTimeout(() => cy.layout(getLayoutOptions(width, height)).run(), 150);
+        cy.layout(getLayoutOptions(width, height)).run();
+        // setTimeout(() => cy.layout(getLayoutOptions(width, height)).run(), 150);
       }
     },
     [cy, height, width]
@@ -116,6 +119,13 @@ export function Cytoscape({
       cy.trigger('data');
     }
   }, [cy, elements]);
+
+  // Reset the graph to original zoom and pan
+  useEffect(() => {
+    if (cy) {
+      cy.reset();
+    }
+  }, [cy, resetCy]);
 
   return (
     <CytoscapeContext.Provider value={cy}>
