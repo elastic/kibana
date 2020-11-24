@@ -157,13 +157,13 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         ancestors: number;
         descendants: number;
       }): Promise<ResolverNode[]> {
-        return Promise.resolve(
-          mockTreeWithNoAncestorsAnd2Children({
-            originID: metadata.entityIDs.origin,
-            firstChildID: metadata.entityIDs.firstChild,
-            secondChildID: metadata.entityIDs.secondChild,
-          })
-        );
+        const { treeResponse } = mockTreeWithNoAncestorsAnd2Children({
+          originID: metadata.entityIDs.origin,
+          firstChildID: metadata.entityIDs.firstChild,
+          secondChildID: metadata.entityIDs.secondChild,
+        });
+
+        return Promise.resolve(treeResponse);
       },
 
       /**

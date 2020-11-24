@@ -93,7 +93,7 @@ export function emptifyMock<T>(
        */
       async resolverTree(...args): Promise<ResolverNode[]> {
         return dataShouldBeEmpty.includes('resolverTree')
-          ? Promise.resolve(mockTreeWithNoProcessEvents())
+          ? Promise.resolve(mockTreeWithNoProcessEvents().nodes)
           : dataAccessLayer.resolverTree(...args);
       },
 

@@ -13,11 +13,10 @@ import {
   mockTreeWithNoAncestorsAnd2Children,
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
-  mockTreeWithAllProcessesTerminated,
+  mockNodeDataWithAllProcessesTerminated,
   mockTreeWithNoProcessEvents,
 } from '../../mocks/resolver_tree';
-import * as eventModel from '../../../../common/endpoint/models/event';
-import { EndpointEvent } from '../../../../common/endpoint/types';
+import * as nodeModel from '../../../../common/endpoint/models/node';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 
 describe('data state', () => {
@@ -339,26 +338,26 @@ describe('data state', () => {
     const secondAncestorID = 'a';
     beforeEach(() => {
       actions.push({
-        type: 'serverReturnedResolverData',
+        type: 'serverReturnedNodeData',
         payload: {
-          result: mockTreeWithAllProcessesTerminated({
+          nodeData: mockNodeDataWithAllProcessesTerminated({
             originID,
             firstAncestorID,
             secondAncestorID,
           }),
-          // this value doesn't matter
-          parameters: mockTreeFetcherParameters(),
+          requestedIDs: new Set([originID, firstAncestorID, secondAncestorID]),
+          reachedLimit: false,
         },
       });
     });
     it('should have origin as terminated', () => {
-      expect(selectors.isProcessTerminated(state())(originID)).toBe(true);
+      expect(selectors.getNodeState(state())(originID)).toBe('terminated');
     });
     it('should have first ancestor as termianted', () => {
-      expect(selectors.isProcessTerminated(state())(firstAncestorID)).toBe(true);
+      expect(selectors.getNodeState(state())(firstAncestorID)).toBe('terminated');
     });
     it('should have second ancestor as terminated', () => {
-      expect(selectors.isProcessTerminated(state())(secondAncestorID)).toBe(true);
+      expect(selectors.getNodeState(state())(secondAncestorID)).toBe('terminated');
     });
   });
   describe('with a tree with 2 children and no ancestors', () => {
@@ -366,10 +365,15 @@ describe('data state', () => {
     const firstChildID = 'd';
     const secondChildID = 'e';
     beforeEach(() => {
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID,
+        firstChildID,
+        secondChildID,
+      });
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
-          result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
+          result: resolverTree,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
@@ -390,28 +394,26 @@ describe('data state', () => {
     const firstChildID = 'd';
     const secondChildID = 'e';
     beforeEach(() => {
-      const tree = mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID });
-      for (const event of tree.lifecycle) {
-        // delete the process.parent key, if present
-        // cast as `EndpointEvent` because `ResolverEvent` can also be `LegacyEndpointEvent` which has no `process` field
-        delete (event as EndpointEvent).process?.parent;
-      }
-
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID,
+        firstChildID,
+        secondChildID,
+      });
       actions.push({
         type: 'serverReturnedResolverData',
         payload: {
-          result: tree,
+          result: resolverTree,
           // this value doesn't matter
           parameters: mockTreeFetcherParameters(),
         },
       });
     });
     it('should be able to calculate the aria flowto candidates for all processes nodes', () => {
-      const graphables = selectors.graphableProcesses(state());
+      const graphables = selectors.graphableNodes(state());
       expect(graphables.length).toBe(3);
-      for (const event of graphables) {
+      for (const node of graphables) {
         expect(() => {
-          selectors.ariaFlowtoCandidate(state())(eventModel.entityIDSafeVersion(event)!);
+          selectors.ariaFlowtoCandidate(state())(nodeModel.nodeID(node)!);
         }).not.toThrow();
       }
     });
@@ -438,7 +440,7 @@ describe('data state', () => {
       });
     });
     it('should have 4 graphable processes', () => {
-      expect(selectors.graphableProcesses(state()).length).toBe(4);
+      expect(selectors.graphableNodes(state()).length).toBe(4);
     });
   });
   describe('with a tree with no process events', () => {

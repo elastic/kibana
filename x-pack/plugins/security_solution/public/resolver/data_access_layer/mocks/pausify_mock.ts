@@ -117,6 +117,7 @@ export function pausifyMock<T>({
         'eventsWithEntityIDAndCategory'
       );
       const resumeEventRequest = pausableRequests.includes('event');
+      const resumeNodeDataRequest = pausableRequests.includes('nodeData');
 
       if (resumeEntitiesRequest && entitiesResolver) {
         entitiesResolver();
@@ -137,6 +138,10 @@ export function pausifyMock<T>({
       if (resumeEventRequest && eventResolver) {
         eventResolver();
         eventResolver = null;
+      }
+      if (resumeNodeDataRequest && nodeDataResolver) {
+        nodeDataResolver();
+        nodeDataResolver = null;
       }
     },
     dataAccessLayer: {

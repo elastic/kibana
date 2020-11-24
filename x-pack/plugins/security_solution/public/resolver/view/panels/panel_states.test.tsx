@@ -129,7 +129,7 @@ describe('Resolver: panel loading and resolution states', () => {
     });
 
     describe('when navigating to the event categories panel', () => {
-      let resumeRequest: (pausableRequest: ['entities']) => void;
+      let resumeRequest: (pausableRequest: ['eventsWithEntityIDAndCategory']) => void;
       beforeEach(() => {
         const {
           metadata: { databaseDocumentID },
@@ -140,7 +140,7 @@ describe('Resolver: panel loading and resolution states', () => {
 
         resumeRequest = resume;
         memoryHistory = createMemoryHistory();
-        pause(['entities']);
+        pause(['eventsWithEntityIDAndCategory']);
 
         simulator = new Simulator({
           dataAccessLayer,
@@ -170,7 +170,7 @@ describe('Resolver: panel loading and resolution states', () => {
       });
 
       it('should successfully load the events in category panel', async () => {
-        await resumeRequest(['entities']);
+        await resumeRequest(['eventsWithEntityIDAndCategory']);
         await expect(
           simulator.map(() => ({
             resolverPanelLoading: simulator.testSubject('resolver:panel:loading').length,

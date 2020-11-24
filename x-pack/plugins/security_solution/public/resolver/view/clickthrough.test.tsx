@@ -209,25 +209,26 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
   });
 });
 
-describe('Resolver, when panning or moving the view', () => {
-  beforeEach(async () => {
-    // create a mock data access layer with related events
-    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = usingGenerator();
+// TODO: What do we want to do here?
+// describe('Resolver, when panning or moving the view', () => {
+//   beforeEach(async () => {
+//     // create a mock data access layer with related events
+//     const { metadata: dataAccessLayerMetadata, dataAccessLayer } = usingGenerator();
 
-    // save a reference to the `_id` supported by the mock data layer
-    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+//     // save a reference to the `_id` supported by the mock data layer
+//     databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
 
-    // create a resolver simulator, using the data access layer and an arbitrary component instance ID
-    simulator = new Simulator({
-      databaseDocumentID,
-      dataAccessLayer,
-      resolverComponentInstanceID,
-      indices: [],
-    });
-  });
+//     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
+//     simulator = new Simulator({
+//       databaseDocumentID,
+//       dataAccessLayer,
+//       resolverComponentInstanceID,
+//       indices: [],
+//     });
+//   });
 
-  it('');
-});
+//   it('');
+// });
 
 describe('Resolver, when analyzing a tree that has 2 related registry and 1 related event of all other categories for the origin node', () => {
   beforeEach(async () => {

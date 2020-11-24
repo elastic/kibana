@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FetchedNodeData } from './../types';
 import { mockEndpointEvent } from './endpoint_event';
 import {
-  ResolverTree,
   SafeResolverEvent,
   NewResolverTree,
   ResolverNode,
   ResolverRelatedEvents,
 } from '../../../common/endpoint/types';
 import * as eventModel from '../../../common/endpoint/models/event';
+import * as nodeModel from '../../../common/endpoint/models/node';
+import { mockResolverNode } from './resolver_node';
 
+// TODO: Rename to describe return more accurately..
 export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
   originID,
 }: {
@@ -40,16 +43,12 @@ export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
     events.push(newEvent);
   }
 
-  const originNode: ResolverNode = {
+  const originNode: ResolverNode = mockResolverNode({
     id: originID,
     name: nodeName,
+    timestamp,
     stats: { total: eventsToGenerate, byCategory: { registry: eventsToGenerate } },
-    data: {
-      '@timestamp': timestamp,
-      'process.entity_id': originID,
-      'process.name': nodeName,
-    },
-  };
+  });
 
   const treeResponse = [originNode];
 
@@ -76,42 +75,26 @@ export function mockTreeWith2AncestorsAndNoChildren({
   firstAncestorID: string;
   originID: string;
 }): NewResolverTree {
-  const secondAncestorNode: ResolverNode = {
+  const secondAncestorNode: ResolverNode = mockResolverNode({
     id: secondAncestorID,
     name: 'a',
-    data: {
-      '@timestamp': 1600863932317,
-      'process.entity_id': secondAncestorID,
-      'process.name': 'a',
-    },
-    stats: { total: 0, byCategory: {} },
-  };
+    timestamp: 1600863932317,
+  });
 
-  const firstAncestorNode: ResolverNode = {
+  const firstAncestorNode: ResolverNode = mockResolverNode({
     id: firstAncestorID,
     name: 'b',
-    parent: secondAncestorID,
-    data: {
-      '@timestamp': 1600863932317,
-      'process.entity_id': firstAncestorID,
-      'process.parent.entity_id': secondAncestorID,
-      'process.name': 'b',
-    },
-    stats: { total: 0, byCategory: {} },
-  };
+    parentID: secondAncestorID,
+    timestamp: 1600863932317,
+  });
 
-  const originNode: ResolverNode = {
+  const originNode: ResolverNode = mockResolverNode({
     id: originID,
     name: 'c',
-    parent: firstAncestorID,
-    data: {
-      '@timestamp': 1600863932318,
-      'process.entity_id': originID,
-      'process.parent.entity_id': firstAncestorID,
-      'process.name': 'c',
-    },
+    parentID: firstAncestorID,
+    timestamp: 1600863932318,
     stats: { total: 2, byCategory: {} },
-  };
+  });
 
   return {
     originId: originID,
@@ -119,7 +102,7 @@ export function mockTreeWith2AncestorsAndNoChildren({
   };
 }
 
-export function mockTreeWithAllProcessesTerminated({
+export function mockNodeDataWithAllProcessesTerminated({
   originID,
   firstAncestorID,
   secondAncestorID,
@@ -127,7 +110,7 @@ export function mockTreeWithAllProcessesTerminated({
   secondAncestorID: string;
   firstAncestorID: string;
   originID: string;
-}): ResolverTree {
+}): Map<string, FetchedNodeData> {
   const secondAncestor: SafeResolverEvent = mockEndpointEvent({
     entityID: secondAncestorID,
     processName: 'a',
@@ -167,19 +150,12 @@ export function mockTreeWithAllProcessesTerminated({
     timestamp: 1600863932318,
     eventType: 'end',
   });
-  return ({
-    entityID: originID,
-    children: {
-      childNodes: [],
-    },
-    ancestry: {
-      ancestors: [
-        { lifecycle: [secondAncestor, secondAncestorTermination] },
-        { lifecycle: [firstAncestor, firstAncestorTermination] },
-      ],
-    },
-    lifecycle: [originEvent, originEventTermination],
-  } as unknown) as ResolverTree;
+
+  return new Map([
+    [originID, { events: [originEvent, originEventTermination], terminated: true }],
+    [firstAncestorID, { events: [firstAncestor, firstAncestorTermination], terminated: true }],
+    [secondAncestorID, { events: [secondAncestor, secondAncestorTermination], terminated: true }],
+  ]);
 }
 
 /**
@@ -188,10 +164,12 @@ export function mockTreeWithAllProcessesTerminated({
 function withRelatedEventsOnOrigin(
   tree: NewResolverTree,
   events: SafeResolverEvent[],
+  nodeDataResponse: SafeResolverEvent[],
   originID: string
 ): {
   tree: NewResolverTree;
-  relatedEvents: Partial<ResolverRelatedEvents>;
+  relatedEvents: ResolverRelatedEvents;
+  nodeDataResponse: SafeResolverEvent[];
 } {
   const byCategory: Record<string, number> = {};
   const stats = {
@@ -213,9 +191,11 @@ function withRelatedEventsOnOrigin(
   return {
     tree,
     relatedEvents: {
+      entityID: originID,
       events,
       nextEvent: null,
     },
+    nodeDataResponse,
   };
 }
 
@@ -230,23 +210,26 @@ export function mockTreeWithNoAncestorsAnd2Children({
 }): {
   treeResponse: ResolverNode[];
   resolverTree: NewResolverTree;
-  relatedEvents: Partial<ResolverRelatedEvents>;
+  relatedEvents: ResolverRelatedEvents;
+  nodeDataResponse: SafeResolverEvent[];
 } {
-  const origin: SafeResolverEvent = mockEndpointEvent({
+  // TODO: Confirm we're no longer using this
+
+  const originProcessEvent: SafeResolverEvent = mockEndpointEvent({
     pid: 0,
     entityID: originID,
     processName: 'c.ext',
     parentEntityID: 'none',
     timestamp: 1600863932316,
   });
-  const firstChild: SafeResolverEvent = mockEndpointEvent({
+  const firstChildProcessEvent: SafeResolverEvent = mockEndpointEvent({
     pid: 1,
     entityID: firstChildID,
     processName: 'd',
     parentEntityID: originID,
     timestamp: 1600863932317,
   });
-  const secondChild: SafeResolverEvent = mockEndpointEvent({
+  const secondChildProcessEvent: SafeResolverEvent = mockEndpointEvent({
     pid: 2,
     entityID: secondChildID,
     processName:
@@ -255,44 +238,27 @@ export function mockTreeWithNoAncestorsAnd2Children({
     timestamp: 1600863932318,
   });
 
-  const originNode: ResolverNode = {
+  const originNode: ResolverNode = mockResolverNode({
     id: originID,
     name: 'c.ext',
     stats: { total: 2, byCategory: {} },
-    data: {
-      '@timestamp': 1600863932316,
-      'process.entity_id': originID,
-      'process.name': 'c.ext',
-    },
-  };
+    timestamp: 1600863932316,
+  });
 
-  const firstChildNode: ResolverNode = {
+  const firstChildNode: ResolverNode = mockResolverNode({
     id: firstChildID,
     name: 'd',
-    parent: originID,
-    stats: { total: 0, byCategory: {} },
-    data: {
-      '@timestamp': 1600863932317,
-      'process.entity_id': firstChildID,
-      'process.name': 'd',
-      'process.parent.entity_id': originID,
-    },
-  };
+    parentID: originID,
+    timestamp: 1600863932317,
+  });
 
-  const secondChildNode: ResolverNode = {
+  const secondChildNode: ResolverNode = mockResolverNode({
     id: secondChildID,
     name:
       'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
-    parent: originID,
-    stats: { total: 0, byCategory: {} },
-    data: {
-      '@timestamp': 1600863932318,
-      'process.entity_id': secondChildID,
-      'process.name':
-        'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
-      'process.parent.entity_id': originID,
-    },
-  };
+    parentID: originID,
+    timestamp: 1600863932318,
+  });
 
   const treeResponse = [originNode, firstChildNode, secondChildNode];
 
@@ -303,9 +269,11 @@ export function mockTreeWithNoAncestorsAnd2Children({
       nodes: treeResponse,
     },
     relatedEvents: {
+      entityID: originID,
       events: [],
       nextEvent: null,
     },
+    nodeDataResponse: [originProcessEvent, firstChildProcessEvent, secondChildProcessEvent],
   };
 }
 
@@ -322,101 +290,80 @@ export function mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents
   originID: string;
   firstChildID: string;
   secondChildID: string;
-}): ResolverTree {
-  const ancestor: SafeResolverEvent = mockEndpointEvent({
-    entityID: ancestorID,
-    processName: ancestorID,
+}): NewResolverTree {
+  const ancestor: ResolverNode = mockResolverNode({
+    id: ancestorID,
+    name: ancestorID,
     timestamp: 1600863932317,
-    parentEntityID: undefined,
+    parentID: undefined,
   });
-  const ancestorClone: SafeResolverEvent = mockEndpointEvent({
-    entityID: ancestorID,
-    processName: ancestorID,
+  const ancestorClone: ResolverNode = mockResolverNode({
+    id: ancestorID,
+    name: ancestorID,
     timestamp: 1600863932317,
-    parentEntityID: undefined,
+    parentID: undefined,
   });
-  const origin: SafeResolverEvent = mockEndpointEvent({
-    entityID: originID,
-    processName: originID,
-    parentEntityID: ancestorID,
+  const origin: ResolverNode = mockResolverNode({
+    id: originID,
+    name: originID,
+    parentID: ancestorID,
     timestamp: 1600863932316,
   });
-  const originClone: SafeResolverEvent = mockEndpointEvent({
-    entityID: originID,
-    processName: originID,
-    parentEntityID: ancestorID,
+  const originClone: ResolverNode = mockResolverNode({
+    id: originID,
+    name: originID,
+    parentID: ancestorID,
     timestamp: 1600863932316,
   });
-  const firstChild: SafeResolverEvent = mockEndpointEvent({
-    entityID: firstChildID,
-    processName: firstChildID,
-    parentEntityID: originID,
+  const firstChild: ResolverNode = mockResolverNode({
+    id: firstChildID,
+    name: firstChildID,
+    parentID: originID,
     timestamp: 1600863932317,
   });
-  const firstChildClone: SafeResolverEvent = mockEndpointEvent({
-    entityID: firstChildID,
-    processName: firstChildID,
-    parentEntityID: originID,
+  const firstChildClone: ResolverNode = mockResolverNode({
+    id: firstChildID,
+    name: firstChildID,
+    parentID: originID,
     timestamp: 1600863932317,
   });
-  const secondChild: SafeResolverEvent = mockEndpointEvent({
-    entityID: secondChildID,
-    processName: secondChildID,
-    parentEntityID: originID,
+  const secondChild: ResolverNode = mockResolverNode({
+    id: secondChildID,
+    name: secondChildID,
+    parentID: originID,
     timestamp: 1600863932318,
   });
-  const secondChildClone: SafeResolverEvent = mockEndpointEvent({
-    entityID: secondChildID,
-    processName: secondChildID,
-    parentEntityID: originID,
+  const secondChildClone: ResolverNode = mockResolverNode({
+    id: secondChildID,
+    name: secondChildID,
+    parentID: originID,
     timestamp: 1600863932318,
   });
 
-  return ({
-    entityID: originID,
-    children: {
-      childNodes: [
-        { lifecycle: [firstChild, firstChildClone] },
-        { lifecycle: [secondChild, secondChildClone] },
-      ],
-    },
-    ancestry: {
-      ancestors: [{ lifecycle: [ancestor, ancestorClone] }],
-    },
-    lifecycle: [origin, originClone],
-  } as unknown) as ResolverTree;
-}
+  // TODO: Worth testing, but this should never happen
+  const treeResponse = [
+    ancestor,
+    ancestorClone,
+    origin,
+    originClone,
+    firstChild,
+    firstChildClone,
+    secondChild,
+    secondChildClone,
+  ];
 
-export function mockTreeWithNoProcessEvents(): ResolverTree {
   return {
-    entityID: 'entityID',
-    children: {
-      childNodes: [],
-      nextChild: null,
-    },
-    relatedEvents: {
-      events: [],
-      nextEvent: null,
-    },
-    relatedAlerts: {
-      alerts: [],
-      nextAlert: null,
-    },
-    lifecycle: [],
-    ancestry: {
-      ancestors: [],
-      nextAncestor: null,
-    },
-    stats: {
-      totalAlerts: 0,
-      events: {
-        total: 0,
-        byCategory: {},
-      },
-    },
+    originId: originID,
+    nodes: treeResponse,
   };
 }
 
+export function mockTreeWithNoProcessEvents(): NewResolverTree {
+  return {
+    originId: 'entityID',
+    nodes: [],
+  };
+}
 /**
  * first ID (to check in the mock data access layer)
  */
@@ -435,12 +382,14 @@ export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
   firstChildID: string;
   secondChildID: string;
 }) {
-  const baseTree = mockTreeWithNoAncestorsAnd2Children({
+  const { resolverTree, nodeDataResponse } = mockTreeWithNoAncestorsAnd2Children({
     originID,
     firstChildID,
     secondChildID,
   });
-  const parentEntityID = eventModel.parentEntityIDSafeVersion(baseTree.lifecycle[0]);
+  const parentEntityID = nodeModel.parentId(
+    resolverTree.nodes.find((node) => node.id === originID)!
+  );
   const relatedEvents = [
     mockEndpointEvent({
       entityID: originID,
@@ -483,5 +432,5 @@ export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
       })
     );
   }
-  return withRelatedEventsOnOrigin(baseTree, relatedEvents);
+  return withRelatedEventsOnOrigin(resolverTree, relatedEvents, nodeDataResponse, originID);
 }

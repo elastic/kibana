@@ -13,7 +13,7 @@ import {
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWithNoAncestorsAnd2Children,
 } from '../mocks/resolver_tree';
-import { SafeResolverEvent } from '../../../common/endpoint/types';
+import { ResolverNode } from '../../../common/endpoint/types';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 
 describe('resolver selectors', () => {
@@ -73,10 +73,15 @@ describe('resolver selectors', () => {
       const firstChildID = 'd';
       const secondChildID = 'e';
       beforeEach(() => {
+        const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+          originID,
+          firstChildID,
+          secondChildID,
+        });
         actions.push({
           type: 'serverReturnedResolverData',
           payload: {
-            result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
+            result: resolverTree,
             // this value doesn't matter
             parameters: mockTreeFetcherParameters(),
           },
@@ -115,9 +120,9 @@ describe('resolver selectors', () => {
           const layout = selectors.layout(state());
 
           // find the position of the second child
-          const secondChild = selectors.processEventForID(state())(secondChildID);
+          const secondChild = selectors.graphNodeForID(state())(secondChildID);
           const positionOfSecondChild = layout.processNodePositions.get(
-            secondChild as SafeResolverEvent
+            secondChild as ResolverNode
           )!;
 
           // the child is indexed by an AABB that extends -720/2 to the left
@@ -132,27 +137,27 @@ describe('resolver selectors', () => {
           });
         });
         it('the origin should be in view', () => {
-          const origin = selectors.processEventForID(state())(originID)!;
+          const origin = selectors.graphNodeForID(state())(originID)!;
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)
-              .processNodePositions.has(origin as SafeResolverEvent)
+              .processNodePositions.has(origin as ResolverNode)
           ).toBe(true);
         });
         it('the first child should be in view', () => {
-          const firstChild = selectors.processEventForID(state())(firstChildID)!;
+          const firstChild = selectors.graphNodeForID(state())(firstChildID)!;
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)
-              .processNodePositions.has(firstChild as SafeResolverEvent)
+              .processNodePositions.has(firstChild as ResolverNode)
           ).toBe(true);
         });
         it('the second child should not be in view', () => {
-          const secondChild = selectors.processEventForID(state())(secondChildID)!;
+          const secondChild = selectors.graphNodeForID(state())(secondChildID)!;
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)
-              .processNodePositions.has(secondChild as SafeResolverEvent)
+              .processNodePositions.has(secondChild as ResolverNode)
           ).toBe(false);
         });
         it('should return nothing as the flowto for the first child', () => {

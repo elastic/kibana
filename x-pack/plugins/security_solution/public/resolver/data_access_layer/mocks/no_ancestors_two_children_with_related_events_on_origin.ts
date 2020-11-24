@@ -8,7 +8,6 @@ import { DataAccessLayer, Timerange, TreeIdSchema } from '../../types';
 import { mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin } from '../../mocks/resolver_tree';
 import {
   ResolverRelatedEvents,
-  ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
   ResolverNode,
@@ -47,7 +46,11 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
     databaseDocumentID: '_id',
     entityIDs: { origin: 'origin', firstChild: 'firstChild', secondChild: 'secondChild' },
   };
-  const tree = mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
+  const {
+    tree,
+    relatedEvents,
+    nodeDataResponse,
+  } = mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
     originID: metadata.entityIDs.origin,
     firstChildID: metadata.entityIDs.firstChild,
     secondChildID: metadata.entityIDs.secondChild,
@@ -71,7 +74,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         /**
          * Respond with the mocked related events when the origin's related events are fetched.
          **/
-        const events = entityID === metadata.entityIDs.origin ? tree.relatedEvents.events : [];
+        const events = entityID === metadata.entityIDs.origin ? relatedEvents.events : [];
 
         return {
           entityID,
@@ -100,7 +103,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
       }): Promise<{ events: SafeResolverEvent[]; nextEvent: string | null }> {
         const events =
           entityID === metadata.entityIDs.origin
-            ? tree.relatedEvents.events.filter((event) =>
+            ? relatedEvents.events.filter((event) =>
                 eventModel.eventCategory(event).includes(category)
               )
             : [];
@@ -122,9 +125,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         timerange: Timerange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
-        return (
-          tree.relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null
-        );
+        return relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null;
       },
 
       async nodeData({
@@ -138,7 +139,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         indexPatterns: string[];
         limit: number;
       }): Promise<SafeResolverEvent[]> {
-        return [];
+        return nodeDataResponse;
       },
 
       /**
@@ -159,7 +160,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         ancestors: number;
         descendants: number;
       }): Promise<ResolverNode[]> {
-        return tree;
+        return tree.nodes;
       },
 
       /**
