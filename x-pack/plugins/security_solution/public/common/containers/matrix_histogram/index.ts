@@ -5,7 +5,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { getOr, noop } from 'lodash/fp';
+import { getOr, isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
@@ -17,7 +17,6 @@ import {
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
-  MatrixHistogramType,
 } from '../../../../common/search_strategy/security_solution';
 import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
@@ -44,6 +43,7 @@ export interface UseMatrixHistogramArgs {
 }
 
 export const useMatrixHistogram = ({
+  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
@@ -78,7 +78,8 @@ export const useMatrixHistogram = ({
     },
     stackByField,
     threshold,
-    ...(histogramType === MatrixHistogramType.dns ? { isPtrIncluded } : {}),
+    ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
+    ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
   });
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
@@ -171,6 +172,7 @@ export const useMatrixHistogram = ({
         stackByField,
         threshold,
         ...(prevRequest.isPtrIncluded != null ? { isPtrIncluded } : {}),
+        ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
@@ -186,6 +188,7 @@ export const useMatrixHistogram = ({
     histogramType,
     threshold,
     isPtrIncluded,
+    docValueFields,
   ]);
 
   useEffect(() => {

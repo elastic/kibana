@@ -64,6 +64,7 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
+  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
@@ -140,6 +141,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     startDate,
     stackByField: selectedStackByOption.value,
     isPtrIncluded,
+    docValueFields,
   });
 
   const titleWithStackByField = useMemo(

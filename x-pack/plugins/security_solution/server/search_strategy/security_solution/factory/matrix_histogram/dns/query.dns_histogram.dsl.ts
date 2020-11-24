@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
+
 import moment from 'moment';
 
 import { Direction, MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy';
@@ -80,6 +82,7 @@ export const buildDnsHistogramQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
+      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {

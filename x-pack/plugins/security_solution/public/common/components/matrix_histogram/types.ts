@@ -12,6 +12,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { UpdateDateRange } from '../charts/common';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
+import { DocValueFields } from '../../../../common/search_strategy';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -57,6 +58,7 @@ interface MatrixHistogramBasicProps {
 }
 
 export interface MatrixHistogramQueryProps {
+  docValueFields?: DocValueFields[];
   endDate: string;
   errorMessage: string;
   indexNames: string[];

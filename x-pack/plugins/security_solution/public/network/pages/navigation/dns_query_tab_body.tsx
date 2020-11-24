@@ -98,6 +98,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
       <MatrixHistogram
         id={HISTOGRAM_ID}
         isPtrIncluded={isPtrIncluded}
+        docValueFields={docValueFields}
         endDate={endDate}
         filterQuery={filterQuery}
         indexNames={indexNames}
