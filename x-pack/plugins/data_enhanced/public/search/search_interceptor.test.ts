@@ -139,6 +139,7 @@ describe('EnhancedSearchInterceptor', () => {
           },
         },
       ];
+
       mockFetchImplementation(responses);
 
       const response = searchInterceptor.search({}, { pollInterval: 0 });
@@ -396,10 +397,7 @@ describe('EnhancedSearchInterceptor', () => {
   });
 
   describe('session', () => {
-    test('should track searches', async () => {
-      const untrack = jest.fn();
-      sessionService.trackSearch.mockImplementation(() => untrack);
-
+    beforeEach(() => {
       const responses = [
         {
           time: 10,
@@ -418,9 +416,18 @@ describe('EnhancedSearchInterceptor', () => {
           },
         },
       ];
-      mockFetchImplementation(responses);
 
-      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      mockFetchImplementation(responses);
+    });
+
+    test('should track searches', async () => {
+      const sessionId = 'sessionId';
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const response = searchInterceptor.search({}, { pollInterval: 0, sessionId });
       response.subscribe({ next, error });
       await timeTravel(10);
       expect(sessionService.trackSearch).toBeCalledTimes(1);
@@ -431,34 +438,18 @@ describe('EnhancedSearchInterceptor', () => {
     });
 
     test('session service should be able to cancel search', async () => {
+      const sessionId = 'sessionId';
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+
       const untrack = jest.fn();
       sessionService.trackSearch.mockImplementation(() => untrack);
 
-      const responses = [
-        {
-          time: 10,
-          value: {
-            isPartial: false,
-            isRunning: true,
-            id: 1,
-          },
-        },
-        {
-          time: 300,
-          value: {
-            isPartial: false,
-            isRunning: false,
-            id: 1,
-          },
-        },
-      ];
-      mockFetchImplementation(responses);
-      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      const response = searchInterceptor.search({}, { pollInterval: 0, sessionId });
       response.subscribe({ next, error });
       await timeTravel(10);
       expect(sessionService.trackSearch).toBeCalledTimes(1);
 
-      const abort = sessionService.trackSearch.mock.calls[0][1].abort;
+      const abort = sessionService.trackSearch.mock.calls[0][0].abort;
       expect(abort).toBeInstanceOf(Function);
 
       abort();
@@ -467,6 +458,45 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
+    });
+
+    test("don't track non current session searches", async () => {
+      const sessionId = 'sessionId';
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const response1 = searchInterceptor.search(
+        {},
+        { pollInterval: 0, sessionId: 'something different' }
+      );
+      response1.subscribe({ next, error });
+
+      const response2 = searchInterceptor.search({}, { pollInterval: 0, sessionId: undefined });
+      response2.subscribe({ next, error });
+
+      await timeTravel(10);
+      expect(sessionService.trackSearch).toBeCalledTimes(0);
+    });
+
+    test("don't track if no current session", async () => {
+      sessionService.getSessionId.mockImplementation(() => undefined);
+
+      const untrack = jest.fn();
+      sessionService.trackSearch.mockImplementation(() => untrack);
+
+      const response1 = searchInterceptor.search(
+        {},
+        { pollInterval: 0, sessionId: 'something different' }
+      );
+      response1.subscribe({ next, error });
+
+      const response2 = searchInterceptor.search({}, { pollInterval: 0, sessionId: undefined });
+      response2.subscribe({ next, error });
+
+      await timeTravel(10);
+      expect(sessionService.trackSearch).toBeCalledTimes(0);
     });
   });
 });

@@ -177,7 +177,8 @@ export class SearchInterceptor {
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
     // 1. The user manually aborts (via `cancelPending`)
     // 2. The request times out
-    // 3. abort() is called on `externalAbortController`
+    // 3. abort() is called on `externalAbortController` which is used by session service
+    // to cancel searches that belong to the currently tracked session
     // 4. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
     const signals = [
       this.abortController.signal,

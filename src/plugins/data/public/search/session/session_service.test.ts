@@ -63,39 +63,34 @@ describe('Session service', () => {
       expect(await emittedValues).toEqual(['1', '2', undefined]);
     });
 
-    it('Only tracks searches for current session', () => {
-      sessionService.trackSearch(undefined, { abort: () => {} });
+    it('Tracks searches for current session', () => {
+      expect(() => sessionService.trackSearch({ abort: () => {} })).toThrowError();
       expect(state$.getValue()).toBe(SessionState.None);
 
-      const id = sessionService.start();
-      sessionService.trackSearch(undefined, { abort: () => {} });
-      expect(state$.getValue()).toBe(SessionState.None);
-      sessionService.trackSearch('other_id', { abort: () => {} });
-      expect(state$.getValue()).toBe(SessionState.None);
-
-      const untrack = sessionService.trackSearch(id, { abort: () => {} });
+      sessionService.start();
+      const untrack1 = sessionService.trackSearch({ abort: () => {} });
       expect(state$.getValue()).toBe(SessionState.Loading);
-      untrack();
+      const untrack2 = sessionService.trackSearch({ abort: () => {} });
+      expect(state$.getValue()).toBe(SessionState.Loading);
+      untrack1();
+      expect(state$.getValue()).toBe(SessionState.Loading);
+      untrack2();
       expect(state$.getValue()).toBe(SessionState.Completed);
     });
 
     it('Cancels all tracked searches within current session', async () => {
-      const nonCurrentAbort = jest.fn();
-      const currentAbort = jest.fn();
+      const abort = jest.fn();
 
-      sessionService.trackSearch(undefined, { abort: nonCurrentAbort });
-      expect(state$.getValue()).toBe(SessionState.None);
+      sessionService.start();
+      sessionService.trackSearch({ abort });
+      sessionService.trackSearch({ abort });
+      sessionService.trackSearch({ abort });
+      const untrack = sessionService.trackSearch({ abort });
 
-      const id = sessionService.start();
-      sessionService.trackSearch(undefined, { abort: nonCurrentAbort });
-      sessionService.trackSearch('other_id', { abort: nonCurrentAbort });
-      sessionService.trackSearch(id, { abort: currentAbort });
-      sessionService.trackSearch(id, { abort: currentAbort });
-
+      untrack();
       await sessionService.cancel();
 
-      expect(nonCurrentAbort).not.toBeCalled();
-      expect(currentAbort).toBeCalledTimes(2);
+      expect(abort).toBeCalledTimes(3);
     });
   });
 });

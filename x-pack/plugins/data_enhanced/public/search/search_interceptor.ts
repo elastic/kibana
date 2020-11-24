@@ -75,7 +75,11 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-    const untrackSearch = this.deps.session.trackSearch(options.sessionId, { abort });
+    const isCurrentSession =
+      options.sessionId && options.sessionId === this.deps.session.getSessionId();
+
+    const untrackSearch = isCurrentSession && this.deps.session.trackSearch({ abort });
+
     return doPartialSearch<IEsSearchResponse>(
       () => this.runSearch(request, { ...options, strategy, abortSignal: combinedSignal }),
       (requestId) =>
@@ -104,7 +108,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
         abortedPromise.cleanup();
-        untrackSearch();
+        if (untrackSearch) {
+          untrackSearch();
+        }
       })
     );
   }

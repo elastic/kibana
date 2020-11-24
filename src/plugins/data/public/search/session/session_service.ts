@@ -108,16 +108,12 @@ export class SessionService implements ISessionService {
   /**
    * Used to track pending searches within current session
    *
-   * @param sessionId - sessionId that search belongs to. If not matching current session id, then search is not tracked
    * @param searchDescriptor - uniq object that will be used to untrack the search
    * @returns untrack function
    */
-  public trackSearch(
-    sessionId: string | undefined,
-    searchDescriptor: TrackSearchDescriptor
-  ): () => void {
-    if (!sessionId) return () => {};
-    if (sessionId !== this.getSessionId()) return () => {};
+  public trackSearch(searchDescriptor: TrackSearchDescriptor): () => void {
+    if (!this.getSessionId())
+      throw new Error("Can't track search because there is no current session");
     this.state.transitions.trackSearch(searchDescriptor);
     return () => {
       this.state.transitions.unTrackSearch(searchDescriptor);
