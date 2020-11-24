@@ -7,7 +7,13 @@ import * as React from 'react';
 import numeral from '@elastic/numeral';
 import styled from 'styled-components';
 import { useContext, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiStat,
+  EuiToolTip,
+  EuiIconTip,
+} from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { I18LABELS } from '../translations';
 import { useUxQuery } from '../hooks/useUxQuery';
@@ -47,7 +53,7 @@ export function ClientMetrics() {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          pathname: '/api/apm/rum/client-metrics',
+          endpoint: 'GET /api/apm/rum/client-metrics',
           params: {
             query: {
               ...uxQuery,
@@ -73,8 +79,32 @@ export function ClientMetrics() {
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="l"
+          title={formatTitle('ms', data?.totalPageLoadDuration?.value)}
+          description={
+            <>
+              {I18LABELS.totalPageLoad}
+              <EuiIconTip
+                content={I18LABELS.totalPageLoadTooltip}
+                type="questionInCircle"
+              />
+            </>
+          }
+          isLoading={status !== 'success'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={STAT_STYLE}>
+        <EuiStat
+          titleSize="l"
           title={formatTitle('ms', data?.backEnd?.value)}
-          description={I18LABELS.backEnd}
+          description={
+            <>
+              {I18LABELS.backEnd}
+              <EuiIconTip
+                content={I18LABELS.backEndTooltip}
+                type="questionInCircle"
+              />
+            </>
+          }
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
@@ -82,7 +112,15 @@ export function ClientMetrics() {
         <EuiStat
           titleSize="l"
           title={formatTitle('ms', data?.frontEnd?.value)}
-          description={I18LABELS.frontEnd}
+          description={
+            <>
+              {I18LABELS.frontEnd}
+              <EuiIconTip
+                content={I18LABELS.frontEndTooltip}
+                type="questionInCircle"
+              />
+            </>
+          }
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>

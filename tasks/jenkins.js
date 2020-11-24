@@ -29,7 +29,6 @@ module.exports = function (grunt) {
     'run:i18nCheck',
     'run:telemetryCheck',
     'run:checkFileCasing',
-    'run:checkLockfileSymlinks',
     'run:licenses',
     'run:verifyNotice',
     'run:mocha',

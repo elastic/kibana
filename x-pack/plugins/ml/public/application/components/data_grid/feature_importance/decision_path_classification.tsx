@@ -13,15 +13,21 @@ import {
   useDecisionPathData,
   getStringBasedClassName,
 } from './use_classification_path_data';
-import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
+import {
+  FeatureImportance,
+  FeatureImportanceBaseline,
+  TopClasses,
+} from '../../../../../common/types/feature_importance';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';
 
 interface ClassificationDecisionPathProps {
   predictedValue: string | boolean;
+  predictedProbability: number | undefined;
   predictionFieldName?: string;
   featureImportance: FeatureImportance[];
   topClasses: TopClasses;
+  baseline?: FeatureImportanceBaseline;
 }
 
 export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = ({
@@ -29,13 +35,17 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
   predictedValue,
   topClasses,
   predictionFieldName,
+  predictedProbability,
+  baseline,
 }) => {
   const [currentClass, setCurrentClass] = useState<string>(
     getStringBasedClassName(topClasses[0].class_name)
   );
   const { decisionPathData } = useDecisionPathData({
+    baseline,
     featureImportance,
     predictedValue: currentClass,
+    predictedProbability,
   });
   const options = useMemo(() => {
     const predictionValueStr = getStringBasedClassName(predictedValue);
@@ -88,6 +98,7 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
       </EuiTitle>
       {options !== undefined && (
         <EuiSuperSelect
+          data-test-subj="mlDFADecisionPathClassNameSelect"
           compressed={true}
           options={options}
           valueOfSelected={currentClass}
@@ -99,7 +110,6 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
         predictionFieldName={predictionFieldName}
         minDomain={domain.minDomain}
         maxDomain={domain.maxDomain}
-        showValues={false}
       />
     </>
   );

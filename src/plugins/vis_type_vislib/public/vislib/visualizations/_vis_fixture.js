@@ -53,20 +53,10 @@ afterEach(function () {
   count = 0;
 });
 
-const getDeps = () => {
-  const mockUiSettings = coreMock.createSetup().uiSettings;
-  const charts = chartPluginMock.createStartContract();
-
-  return {
-    uiSettings: mockUiSettings,
-    charts: charts,
-  };
-};
-
-export function getVis(visLibParams, element) {
+export function getVis(vislibParams, element) {
   return new Vis(
     element || $visCanvas.new(),
-    _.defaults({}, visLibParams || {}, {
+    _.defaults({}, vislibParams || {}, {
       addTooltip: true,
       addLegend: true,
       defaultYExtents: false,
@@ -74,6 +64,7 @@ export function getVis(visLibParams, element) {
       yAxis: {},
       type: 'histogram',
     }),
-    getDeps()
+    coreMock.createSetup(),
+    chartPluginMock.createStartContract()
   );
 }

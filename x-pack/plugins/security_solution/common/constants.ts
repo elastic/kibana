@@ -39,6 +39,9 @@ export const FILTERS_GLOBAL_HEIGHT = 109; // px
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
+export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
+export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
+export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 
 export enum SecurityPageName {
   detections = 'detections',
@@ -73,6 +76,9 @@ export const DEFAULT_INDEX_PATTERN = [
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed';
+
+/** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
+export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh';
 
 /** This Kibana Advanced Setting specifies the URL of the News feed widget */
 export const NEWS_FEED_URL_SETTING = 'securitySolution:newsFeedUrl';
@@ -159,6 +165,9 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.slack',
   '.pagerduty',
   '.webhook',
+  '.servicenow',
+  '.jira',
+  '.resilient',
 ];
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
@@ -179,3 +188,5 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+export const ENABLE_NEW_TIMELINE = false;

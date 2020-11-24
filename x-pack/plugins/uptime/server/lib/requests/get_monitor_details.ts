@@ -4,26 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { ESAPICaller, UMElasticsearchQueryFn } from '../adapters';
-import { MonitorDetails, MonitorError } from '../../../common/runtime_types';
+import { UMElasticsearchQueryFn } from '../adapters';
+import { MonitorDetails, Ping } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
+import { UptimeESClient } from '../lib';
+import { ESSearchBody } from '../../../../../typings/elasticsearch';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;
   dateStart: string;
   dateEnd: string;
   alertsClient: any;
-  esClient: ElasticsearchClient;
 }
 
-const getMonitorAlerts = async (
-  callES: ESAPICaller,
-  esClient: ElasticsearchClient,
-  dynamicSettings: any,
-  alertsClient: any,
-  monitorId: string
-) => {
+const getMonitorAlerts = async ({
+  uptimeEsClient,
+  alertsClient,
+  monitorId,
+}: {
+  uptimeEsClient: UptimeESClient;
+  alertsClient: any;
+  monitorId: string;
+}) => {
   const options: any = {
     page: 1,
     perPage: 500,
@@ -41,42 +43,37 @@ const getMonitorAlerts = async (
       monitorAlerts.push(currAlert);
       continue;
     }
-    const esParams: any = {
-      index: dynamicSettings.heartbeatIndices,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'monitor.id': monitorId,
-                },
+    const esParams: ESSearchBody = {
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'monitor.id': monitorId,
               },
-            ],
-          },
-        },
-        size: 0,
-        aggs: {
-          monitors: {
-            terms: {
-              field: 'monitor.id',
-              size: 1000,
             },
+          ],
+        },
+      },
+      size: 0,
+      aggs: {
+        monitors: {
+          terms: {
+            field: 'monitor.id',
+            size: 1000,
           },
         },
       },
     };
 
     const parsedFilters = await formatFilterString(
-      dynamicSettings,
-      callES,
-      esClient,
+      uptimeEsClient,
       currAlert.params.filters,
       currAlert.params.search
     );
-    esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters?.bool);
+    esParams.query.bool = Object.assign({}, esParams.query.bool, parsedFilters?.bool);
 
-    const result = await callES('search', esParams);
+    const { body: result } = await uptimeEsClient.search({ body: esParams });
 
     if (result.hits.total.value > 0) {
       monitorAlerts.push(currAlert);
@@ -88,7 +85,7 @@ const getMonitorAlerts = async (
 export const getMonitorDetails: UMElasticsearchQueryFn<
   GetMonitorDetailsParams,
   MonitorDetails
-> = async ({ callES, esClient, dynamicSettings, monitorId, dateStart, dateEnd, alertsClient }) => {
+> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd, alertsClient }) => {
   const queryFilters: any = [
     {
       range: {
@@ -106,48 +103,43 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
   ];
 
   const params = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      size: 1,
-      _source: ['error', '@timestamp'],
-      query: {
-        bool: {
-          must: [
-            {
-              exists: {
-                field: 'error',
-              },
+    size: 1,
+    _source: ['error', '@timestamp'],
+    query: {
+      bool: {
+        must: [
+          {
+            exists: {
+              field: 'error',
             },
-          ],
-          filter: queryFilters,
+          },
+        ],
+        filter: queryFilters,
+      },
+    },
+    sort: [
+      {
+        '@timestamp': {
+          order: 'desc',
         },
       },
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc',
-          },
-        },
-      ],
-    },
+    ],
   };
 
-  const result = await callES('search', params);
+  const { body: result } = await uptimeEsClient.search({ body: params });
 
-  const data = result.hits.hits[0]?._source;
+  const data = result.hits.hits[0]?._source as Ping & { '@timestamp': string };
 
-  const monitorError: MonitorError | undefined = data?.error;
   const errorTimestamp: string | undefined = data?.['@timestamp'];
-  const monAlerts = await getMonitorAlerts(
-    callES,
-    esClient,
-    dynamicSettings,
+  const monAlerts = await getMonitorAlerts({
+    uptimeEsClient,
     alertsClient,
-    monitorId
-  );
+    monitorId,
+  });
+
   return {
     monitorId,
-    error: monitorError,
+    error: data?.error,
     timestamp: errorTimestamp,
     alerts: monAlerts,
   };

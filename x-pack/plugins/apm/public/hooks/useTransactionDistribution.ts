@@ -9,13 +9,14 @@ import { useHistory, useParams } from 'react-router-dom';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { useUiFilters } from '../context/UrlParamsContext';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { maybe } from '../../common/utils/maybe';
+import { APIReturnType } from '../services/rest/createCallApmApi';
+
+type APIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups/distribution'>;
 
 const INITIAL_DATA = {
-  buckets: [] as TransactionDistributionAPIResponse['buckets'],
+  buckets: [] as APIResponse['buckets'],
   noHits: true,
   bucketSize: 0,
 };
@@ -38,8 +39,8 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
     async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
         const response = await callApmApi({
-          pathname:
-            '/api/apm/services/{serviceName}/transaction_groups/distribution',
+          endpoint:
+            'GET /api/apm/services/{serviceName}/transaction_groups/distribution',
           params: {
             path: {
               serviceName,

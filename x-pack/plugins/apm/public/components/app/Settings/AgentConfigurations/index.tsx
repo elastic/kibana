@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -25,7 +24,7 @@ import { AgentConfigurationList } from './List';
 export function AgentConfigurations() {
   const { refetch, data = [], status } = useFetcher(
     (callApmApi) =>
-      callApmApi({ pathname: '/api/apm/settings/agent-configuration' }),
+      callApmApi({ endpoint: 'GET /api/apm/settings/agent-configuration' }),
     [],
     { preservePreviousData: false, showToastOnError: false }
   );
@@ -37,6 +36,14 @@ export function AgentConfigurations() {
 
   return (
     <>
+      <EuiTitle size="l">
+        <h1>
+          {i18n.translate('xpack.apm.agentConfig.titleText', {
+            defaultMessage: 'Agent remote configuration',
+          })}
+        </h1>
+      </EuiTitle>
+      <EuiSpacer size="l" />
       <EuiPanel>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -44,7 +51,7 @@ export function AgentConfigurations() {
               <h2>
                 {i18n.translate(
                   'xpack.apm.agentConfig.configurationsPanelTitle',
-                  { defaultMessage: 'Agent remote configuration' }
+                  { defaultMessage: 'Configurations' }
                 )}
               </h2>
             </EuiTitle>

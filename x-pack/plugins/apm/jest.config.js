@@ -14,14 +14,9 @@ const { createJestConfig } = require('../../dev-tools/jest/create_jest_config');
 const { resolve } = require('path');
 
 const rootDir = resolve(__dirname, '.');
-const xPackKibanaDirectory = resolve(__dirname, '../..');
 const kibanaDirectory = resolve(__dirname, '../../..');
 
-const jestConfig = createJestConfig({
-  kibanaDirectory,
-  rootDir,
-  xPackKibanaDirectory,
-});
+const jestConfig = createJestConfig({ kibanaDirectory, rootDir });
 
 module.exports = {
   ...jestConfig,
@@ -29,7 +24,7 @@ module.exports = {
   roots: [`${rootDir}/common`, `${rootDir}/public`, `${rootDir}/server`],
   collectCoverage: true,
   collectCoverageFrom: [
-    ...jestConfig.collectCoverageFrom,
+    ...(jestConfig.collectCoverageFrom || []),
     '**/*.{js,mjs,jsx,ts,tsx}',
     '!**/*.stories.{js,mjs,ts,tsx}',
     '!**/dev_docs/**',

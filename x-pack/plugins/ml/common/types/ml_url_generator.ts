@@ -66,7 +66,7 @@ export type AnomalyDetectionUrlState = MLPageState<
 >;
 export interface ExplorerAppState {
   mlExplorerSwimlane: {
-    selectedType?: string;
+    selectedType?: 'overall' | 'viewBy';
     selectedLanes?: string[];
     selectedTimes?: number[];
     showTopFieldValues?: boolean;
@@ -81,6 +81,7 @@ export interface ExplorerAppState {
     queryString?: string;
   };
   query?: any;
+  mlShowCharts?: boolean;
 }
 export interface ExplorerGlobalState {
   ml: { jobIds: JobId[] };
@@ -124,20 +125,21 @@ export interface TimeSeriesExplorerGlobalState {
 }
 
 export interface TimeSeriesExplorerAppState {
-  zoom?: {
-    from?: string;
-    to?: string;
-  };
   mlTimeSeriesExplorer?: {
     forecastId?: string;
     detectorIndex?: number;
     entities?: Record<string, string>;
+    zoom?: {
+      from?: string;
+      to?: string;
+    };
+    functionDescription?: string;
   };
   query?: any;
 }
 
 export interface TimeSeriesExplorerPageState
-  extends Pick<TimeSeriesExplorerAppState, 'zoom' | 'query'>,
+  extends Pick<TimeSeriesExplorerAppState, 'query'>,
     Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
   jobIds?: JobId[];
   timeRange?: TimeRange;
@@ -145,6 +147,7 @@ export interface TimeSeriesExplorerPageState
   entities?: Record<string, string>;
   forecastId?: string;
   globalState?: MlCommonGlobalState;
+  functionDescription?: string;
 }
 
 export type TimeSeriesExplorerUrlState = MLPageState<
@@ -154,12 +157,13 @@ export type TimeSeriesExplorerUrlState = MLPageState<
 
 export interface DataFrameAnalyticsQueryState {
   jobId?: JobId | JobId[];
+  modelId?: string;
   groupIds?: string[];
   globalState?: MlCommonGlobalState;
 }
 
 export type DataFrameAnalyticsUrlState = MLPageState<
-  typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+  typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE | typeof ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
   DataFrameAnalyticsQueryState | undefined
 >;
 
@@ -168,6 +172,7 @@ export interface DataFrameAnalyticsExplorationQueryState {
     jobId: JobId;
     analysisType: DataFrameAnalysisConfigType;
     defaultIsTraining?: boolean;
+    modelId?: string;
   };
 }
 
@@ -178,6 +183,7 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
     analysisType: DataFrameAnalysisConfigType;
     globalState?: MlCommonGlobalState;
     defaultIsTraining?: boolean;
+    modelId?: string;
   }
 >;
 

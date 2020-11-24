@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
 import { RoleMapping, Role } from '../../../../common/model';
 import { EmptyPrompt } from './empty_prompt';
@@ -412,7 +413,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                                 'xpack.security.management.roleMappings.actionDeleteAriaLabel',
                                 {
                                   defaultMessage: `Delete '{name}'`,
-                                  values: { name },
+                                  values: { name: record.name },
                                 }
                               )}
                               iconType="trash"

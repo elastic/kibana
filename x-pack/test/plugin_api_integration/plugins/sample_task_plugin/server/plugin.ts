@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
 import { EventEmitter } from 'events';
 import { Subject } from 'rxjs';
@@ -102,6 +103,40 @@ export class SampleTaskManagerFixturePlugin
           'A sample task for testing the task_manager that fails on the first attempt to run.',
         // fail after the first failed run
         maxAttempts: 1,
+      },
+      sampleRecurringTaskTimingOut: {
+        title: 'Sample Recurring Task that Times Out',
+        description: 'A sample task that times out each run.',
+        maxAttempts: 3,
+        timeout: '1s',
+        createTaskRunner: () => ({
+          async run() {
+            return await new Promise((resolve) => {});
+          },
+        }),
+      },
+      sampleRecurringTaskWhichHangs: {
+        title: 'Sample Recurring Task that Hangs for a minute',
+        description: 'A sample task that Hangs for a minute on each run.',
+        maxAttempts: 3,
+        timeout: '60s',
+        createTaskRunner: () => ({
+          async run() {
+            return await new Promise((resolve) => {});
+          },
+        }),
+      },
+      sampleOneTimeTaskTimingOut: {
+        title: 'Sample One-Time Task that Times Out',
+        description: 'A sample task that times out each run.',
+        maxAttempts: 3,
+        timeout: '1s',
+        getRetry: (attempts: number, error: object) => new Date(Date.now() + _.random(2, 5) * 1000),
+        createTaskRunner: () => ({
+          async run() {
+            return await new Promise((resolve) => {});
+          },
+        }),
       },
     });
 

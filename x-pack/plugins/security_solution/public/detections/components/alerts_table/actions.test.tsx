@@ -47,7 +47,9 @@ describe('alert actions', () => {
     searchStrategyClient = {
       aggs: {} as ISearchStart['aggs'],
       showError: jest.fn(),
-      search: jest.fn().mockResolvedValue({ data: mockTimelineDetails }),
+      search: jest
+        .fn()
+        .mockImplementation(() => ({ toPromise: () => ({ data: mockTimelineDetails }) })),
       searchSource: {} as ISearchStart['searchSource'],
       session: dataPluginMock.createStartContract().search.session,
     };
@@ -188,6 +190,7 @@ describe('alert actions', () => {
             eventIdToNoteIds: {},
             eventType: 'all',
             excludedRowRendererIds: [],
+            expandedEvent: {},
             filters: [
               {
                 $state: {
@@ -251,7 +254,6 @@ describe('alert actions', () => {
             templateTimelineId: null,
             templateTimelineVersion: null,
             version: null,
-            width: 1100,
           },
           to: '2018-11-05T19:03:25.937Z',
           ruleNote: '# this is some markdown documentation',
@@ -382,6 +384,78 @@ describe('alert actions', () => {
           signal: {
             rule: {
               ...mockEcsDataWithAlert.signal?.rule!,
+              timeline_id: [''],
+            },
+          },
+        };
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMock,
+          nonEcsData: [],
+          updateTimelineIsLoading,
+          searchStrategyClient,
+        });
+
+        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
+        expect(createTimeline).toHaveBeenCalledTimes(1);
+        expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
+      });
+    });
+
+    describe('Eql', () => {
+      test(' with signal.group.id', async () => {
+        const ecsDataMock: Ecs = {
+          ...mockEcsDataWithAlert,
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert.signal?.rule!,
+              type: ['eql'],
+              timeline_id: [''],
+            },
+            group: {
+              id: ['my-group-id'],
+            },
+          },
+        };
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMock,
+          nonEcsData: [],
+          updateTimelineIsLoading,
+          searchStrategyClient,
+        });
+
+        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
+        expect(createTimeline).toHaveBeenCalledTimes(1);
+        expect(createTimeline).toHaveBeenCalledWith({
+          ...defaultTimelineProps,
+          timeline: {
+            ...defaultTimelineProps.timeline,
+            dataProviders: [
+              {
+                and: [],
+                enabled: true,
+                excluded: false,
+                id:
+                  'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
+                kqlQuery: '',
+                name: '1',
+                queryMatch: { field: 'signal.group.id', operator: ':', value: 'my-group-id' },
+              },
+            ],
+          },
+        });
+      });
+
+      test(' with NO  signal.group.id', async () => {
+        const ecsDataMock: Ecs = {
+          ...mockEcsDataWithAlert,
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert.signal?.rule!,
+              type: ['eql'],
               timeline_id: [''],
             },
           },

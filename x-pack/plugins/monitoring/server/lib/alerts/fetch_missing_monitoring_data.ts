@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertCluster, AlertMissingData } from '../../alerts/types';
+import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
 import {
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
@@ -101,7 +101,7 @@ export async function fetchMissingMonitoringData(
     'kibana_stats.kibana.name',
     'logstash_stats.logstash.host',
     'beats_stats.beat.name',
-    'beat_stats.beat.type',
+    'beats_stats.beat.type',
   ];
   const subAggs = {
     most_recent: {

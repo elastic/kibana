@@ -56,8 +56,6 @@ export interface TelemetryOptInStats {
 
 export interface BaseStatsGetterConfig {
   unencrypted: boolean;
-  start: string;
-  end: string;
   request?: KibanaRequest;
 }
 
@@ -77,10 +75,9 @@ export interface ClusterDetails {
 export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
   callCluster: LegacyAPICaller;
-  start: string | number;
-  end: string | number;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
 }
 
 export interface BasicStatsPayload {

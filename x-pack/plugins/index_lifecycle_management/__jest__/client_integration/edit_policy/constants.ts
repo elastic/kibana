@@ -14,17 +14,77 @@ export const DEFAULT_POLICY: PolicyFromES = {
   version: 1,
   modified_date: Date.now().toString(),
   policy: {
-    name: '',
+    name: 'my_policy',
     phases: {
       hot: {
-        min_age: '123ms',
+        min_age: '0ms',
         actions: {
-          rollover: {},
+          rollover: {
+            max_age: '30d',
+            max_size: '50gb',
+          },
         },
       },
     },
   },
-  name: '',
+  name: 'my_policy',
+};
+
+export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    name: 'my_policy',
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_age: '30d',
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {
+          migrate: { enabled: false },
+        },
+      },
+    },
+  },
+  name: 'my_policy',
+};
+
+export const POLICY_WITH_INCLUDE_EXCLUDE: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    name: 'my_policy',
+    phases: {
+      hot: {
+        min_age: '123ms',
+        actions: {
+          rollover: {
+            max_age: '30d',
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {
+          allocate: {
+            include: {
+              abc: '123',
+            },
+            exclude: {
+              def: '456',
+            },
+          },
+        },
+      },
+    },
+  },
+  name: 'my_policy',
 };
 
 export const DELETE_PHASE_POLICY: PolicyFromES = {
@@ -60,3 +120,116 @@ export const DELETE_PHASE_POLICY: PolicyFromES = {
   },
   name: POLICY_NAME,
 };
+
+export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    name: policyName,
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_age: '30d',
+            max_size: '50gb',
+          },
+        },
+      },
+    },
+  },
+  name: policyName,
+});
+
+export const POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {
+          allocate: {
+            require: {},
+            include: { test: '123' },
+            exclude: {},
+          },
+        },
+      },
+      cold: {
+        actions: {
+          migrate: { enabled: false },
+        },
+      },
+    },
+    name: POLICY_NAME,
+  },
+  name: POLICY_NAME,
+};
+
+export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {},
+      },
+    },
+    name: POLICY_NAME,
+  },
+  name: POLICY_NAME,
+};
+
+export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    foo: 'bar',
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            unknown_setting: 123,
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {
+          my_unfollow_action: {},
+          set_priority: {
+            priority: 22,
+            unknown_setting: true,
+          },
+        },
+      },
+      delete: {
+        wait_for_snapshot: {
+          policy: SNAPSHOT_POLICY_NAME,
+        },
+        delete: {
+          delete_searchable_snapshot: true,
+        },
+      },
+    },
+    name: POLICY_NAME,
+  },
+  name: POLICY_NAME,
+} as any) as PolicyFromES;

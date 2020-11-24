@@ -36,6 +36,13 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       try {
         policyItem = (await sendGetPackagePolicy(http, id)).item;
+        // sets default user notification message if policy config message is empty
+        if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
+          policyItem.inputs[0].config.policy.value.windows.popup.malware.message =
+            'Elastic Security { action } { filename }';
+          policyItem.inputs[0].config.policy.value.mac.popup.malware.message =
+            'Elastic Security { action } { filename }';
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',

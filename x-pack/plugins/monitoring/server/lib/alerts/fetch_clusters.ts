@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertCluster } from '../../alerts/types';
+import { AlertCluster } from '../../../common/types/alerts';
 
 interface RangeFilter {
   [field: string]: {

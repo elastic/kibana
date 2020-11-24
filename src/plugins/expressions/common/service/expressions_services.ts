@@ -24,9 +24,8 @@ import { ExecutionContract } from '../execution/execution_contract';
 import { AnyExpressionTypeDefinition } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState } from '../../../kibana_utils/common';
+import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
-import { ExecutionContextSearch } from '../execution';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -48,7 +47,7 @@ export type ExpressionsServiceSetup = Pick<
 >;
 
 export interface ExpressionExecutionParams {
-  searchContext?: ExecutionContextSearch;
+  searchContext?: SerializableState;
 
   variables?: Record<string, any>;
 
@@ -171,7 +170,7 @@ export interface ExpressionServiceParams {
  *
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
-export class ExpressionsService implements PersistableState<ExpressionAstExpression> {
+export class ExpressionsService implements PersistableStateService<ExpressionAstExpression> {
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
@@ -301,6 +300,16 @@ export class ExpressionsService implements PersistableState<ExpressionAstExpress
    */
   public readonly inject = (state: ExpressionAstExpression, references: SavedObjectReference[]) => {
     return this.executor.inject(state, references);
+  };
+
+  /**
+   * Runs the migration (if it exists) for specified version. This will run a single migration step (ie from 7.10.0 to 7.10.1)
+   * @param state expression AST to update
+   * @param version defines which migration version to run
+   * @returns new migrated expression AST
+   */
+  public readonly migrate = (state: SerializableState, version: string) => {
+    return this.executor.migrate(state, version);
   };
 
   /**

@@ -24,7 +24,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import realHits from 'fixtures/real_hits.js';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
@@ -51,8 +51,6 @@ jest.mock('../../../kibana_services', () => ({
       get: (key: string) => {
         if (key === 'fields:popularLimit') {
           return 5;
-        } else if (key === 'shortDots:enable') {
-          return false;
         }
       },
     },
@@ -101,6 +99,7 @@ function getCompProps() {
     selectedIndexPattern: indexPattern,
     setIndexPattern: jest.fn(),
     state: {},
+    trackUiMetric: jest.fn(),
   };
 }
 

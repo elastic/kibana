@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { TelemetryPluginConfig } from '../plugin';
@@ -121,17 +120,9 @@ export class TelemetryService {
   };
 
   public fetchTelemetry = async ({ unencrypted = false } = {}) => {
-    const now = moment();
     return this.http.post('/api/telemetry/v2/clusters/_stats', {
       body: JSON.stringify({
         unencrypted,
-        timeRange: {
-          min: now
-            .clone() // Need to clone it to avoid mutation (and max being the same value)
-            .subtract(20, 'minutes')
-            .toISOString(),
-          max: now.toISOString(),
-        },
       }),
     });
   };

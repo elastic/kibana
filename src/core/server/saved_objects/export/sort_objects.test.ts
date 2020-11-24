@@ -46,27 +46,27 @@ describe('sortObjects()', () => {
       },
     ];
     expect(sortObjects(docs)).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "attributes": Object {},
-    "id": "1",
-    "references": Array [],
-    "type": "index-pattern",
-  },
-  Object {
-    "attributes": Object {},
-    "id": "2",
-    "references": Array [
-      Object {
-        "id": "1",
-        "name": "ref1",
-        "type": "index-pattern",
-      },
-    ],
-    "type": "search",
-  },
-]
-`);
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "ref1",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "search",
+        },
+      ]
+    `);
   });
 
   test('should not mutate parameter', () => {
@@ -91,49 +91,49 @@ Array [
       },
     ];
     expect(sortObjects(docs)).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "attributes": Object {},
-    "id": "1",
-    "references": Array [],
-    "type": "index-pattern",
-  },
-  Object {
-    "attributes": Object {},
-    "id": "2",
-    "references": Array [
-      Object {
-        "id": "1",
-        "name": "ref1",
-        "type": "index-pattern",
-      },
-    ],
-    "type": "search",
-  },
-]
-`);
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "ref1",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "search",
+        },
+      ]
+    `);
     expect(docs).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "attributes": Object {},
-    "id": "2",
-    "references": Array [
-      Object {
-        "id": "1",
-        "name": "ref1",
-        "type": "index-pattern",
-      },
-    ],
-    "type": "search",
-  },
-  Object {
-    "attributes": Object {},
-    "id": "1",
-    "references": Array [],
-    "type": "index-pattern",
-  },
-]
-`);
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "ref1",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "search",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+      ]
+    `);
   });
 
   test('should sort unordered array', () => {
@@ -199,71 +199,71 @@ Array [
       },
     ];
     expect(sortObjects(docs)).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "attributes": Object {},
-    "id": "1",
-    "references": Array [],
-    "type": "index-pattern",
-  },
-  Object {
-    "attributes": Object {},
-    "id": "2",
-    "references": Array [
-      Object {
-        "id": "1",
-        "name": "ref1",
-        "type": "index-pattern",
-      },
-    ],
-    "type": "search",
-  },
-  Object {
-    "attributes": Object {},
-    "id": "3",
-    "references": Array [
-      Object {
-        "id": "2",
-        "name": "ref1",
-        "type": "search",
-      },
-    ],
-    "type": "visualization",
-  },
-  Object {
-    "attributes": Object {},
-    "id": "4",
-    "references": Array [
-      Object {
-        "id": "1",
-        "name": "ref1",
-        "type": "index-pattern",
-      },
-    ],
-    "type": "visualization",
-  },
-  Object {
-    "attributes": Object {},
-    "id": "5",
-    "references": Array [
-      Object {
-        "id": "3",
-        "name": "ref1",
-        "type": "visualization",
-      },
-      Object {
-        "id": "4",
-        "name": "ref2",
-        "type": "visualization",
-      },
-    ],
-    "type": "dashboard",
-  },
-]
-`);
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "ref1",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "search",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "3",
+          "references": Array [
+            Object {
+              "id": "2",
+              "name": "ref1",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "4",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "ref1",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "visualization",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "5",
+          "references": Array [
+            Object {
+              "id": "3",
+              "name": "ref1",
+              "type": "visualization",
+            },
+            Object {
+              "id": "4",
+              "name": "ref2",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        },
+      ]
+    `);
   });
 
-  test('detects circular dependencies', () => {
+  test('should not fail on circular dependencies', () => {
     const docs = [
       {
         id: '1',
@@ -290,8 +290,149 @@ Array [
         ],
       },
     ];
-    expect(() => sortObjects(docs)).toThrowErrorMatchingInlineSnapshot(
-      `"circular reference: [foo:1] ref-> [foo:2] ref-> [foo:1]"`
-    );
+
+    expect(sortObjects(docs)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "ref1",
+              "type": "foo",
+            },
+          ],
+          "type": "foo",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "2",
+              "name": "ref1",
+              "type": "foo",
+            },
+          ],
+          "type": "foo",
+        },
+      ]
+    `);
+  });
+  test('should not fail on complex circular dependencies', () => {
+    const docs = [
+      {
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [
+          {
+            name: 'ref12',
+            type: 'foo',
+            id: '2',
+          },
+          {
+            name: 'ref13',
+            type: 'baz',
+            id: '3',
+          },
+        ],
+      },
+      {
+        id: '2',
+        type: 'foo',
+        attributes: {},
+        references: [
+          {
+            name: 'ref13',
+            type: 'foo',
+            id: '3',
+          },
+        ],
+      },
+      {
+        id: '3',
+        type: 'baz',
+        attributes: {},
+        references: [
+          {
+            name: 'ref13',
+            type: 'xyz',
+            id: '4',
+          },
+        ],
+      },
+      {
+        id: '4',
+        type: 'xyz',
+        attributes: {},
+        references: [
+          {
+            name: 'ref14',
+            type: 'foo',
+            id: '1',
+          },
+        ],
+      },
+    ];
+
+    expect(sortObjects(docs)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "3",
+              "name": "ref13",
+              "type": "foo",
+            },
+          ],
+          "type": "foo",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "4",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "ref14",
+              "type": "foo",
+            },
+          ],
+          "type": "xyz",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "3",
+          "references": Array [
+            Object {
+              "id": "4",
+              "name": "ref13",
+              "type": "xyz",
+            },
+          ],
+          "type": "baz",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "2",
+              "name": "ref12",
+              "type": "foo",
+            },
+            Object {
+              "id": "3",
+              "name": "ref13",
+              "type": "baz",
+            },
+          ],
+          "type": "foo",
+        },
+      ]
+    `);
   });
 });

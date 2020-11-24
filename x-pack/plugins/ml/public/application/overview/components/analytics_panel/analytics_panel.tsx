@@ -52,6 +52,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
     setAnalyticsStats,
     setErrorMessage,
     setIsInitialized,
+    false,
     false
   );
 

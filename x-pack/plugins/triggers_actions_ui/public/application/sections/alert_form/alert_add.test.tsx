@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormLabel } from '@elastic/eui';
@@ -17,8 +17,9 @@ import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ReactWrapper } from 'enzyme';
-import { AppContextProvider } from '../../app_context';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
   health: jest.fn((async) => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
@@ -82,10 +83,10 @@ describe('alert_add', () => {
       toastNotifications: mocks.notifications.toasts,
       http: mocks.http,
       uiSettings: mocks.uiSettings,
-      dataPlugin: dataPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
+      actionTypeRegistry,
+      alertTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
 
@@ -98,6 +99,8 @@ describe('alert_add', () => {
       id: 'my-alert-type',
       iconClass: 'test',
       name: 'test-alert',
+      description: 'test',
+      documentationUrl: null,
       validate: (): ValidationResult => {
         return { errors: {} };
       },
@@ -128,7 +131,7 @@ describe('alert_add', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={{ ...deps }}>
         <AlertsContextProvider
           value={{
             reloadAlerts: () => {
@@ -158,7 +161,7 @@ describe('alert_add', () => {
             initialValues={initialValues}
           />
         </AlertsContextProvider>
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -179,8 +182,6 @@ describe('alert_add', () => {
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
 
     wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
-
-    expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
 
     expect(wrapper.find('input#alertName').props().value).toBe('');
 

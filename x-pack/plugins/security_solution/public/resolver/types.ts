@@ -5,7 +5,7 @@
  */
 
 /* eslint-disable no-duplicate-imports */
-
+import type React from 'react';
 import { Store } from 'redux';
 import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
@@ -502,9 +502,26 @@ export interface SideEffectors {
    * A function which returns the time since epoch in milliseconds. Injected because mocking Date is tedious.
    */
   timestamp: () => number;
+  /**
+   * Use instead of `window.requestAnimationFrame`
+   **/
   requestAnimationFrame: typeof window.requestAnimationFrame;
+  /**
+   * Use instead of `window.cancelAnimationFrame`
+   **/
   cancelAnimationFrame: typeof window.cancelAnimationFrame;
+  /**
+   * Use instead of the `ResizeObserver` global.
+   */
   ResizeObserver: ResizeObserverConstructor;
+  /**
+   * Use this instead of the Clipboard API's `writeText` method.
+   */
+  writeTextToClipboard(text: string): Promise<void>;
+  /**
+   * Use this instead of `Element.prototype.getBoundingClientRect` .
+   */
+  getBoundingClientRect(element: Element): DOMRect;
 }
 
 export interface SideEffectSimulator {
@@ -524,6 +541,16 @@ export interface SideEffectSimulator {
      * Trigger `ResizeObserver` callbacks for `element` and update the mocked value for `getBoundingClientRect`.
      */
     simulateElementResize: (element: Element, contentRect: DOMRect) => void;
+
+    /**
+     * Get the most recently written clipboard text. This is only updated when `confirmTextWrittenToClipboard` is called.
+     */
+    clipboardText: string;
+
+    /**
+     * Call this to resolve the promise returned by `writeText`.
+     */
+    confirmTextWrittenToClipboard: () => void;
   };
   /**
    * Mocked `SideEffectors`.

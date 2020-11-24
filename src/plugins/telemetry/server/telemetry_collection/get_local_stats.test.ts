@@ -24,7 +24,7 @@ import {
   usageCollectionPluginMock,
   createCollectorFetchContextMock,
 } from '../../../usage_collection/server/mocks';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
 
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -87,8 +87,8 @@ function mockStatsCollectionConfig(clusterInfo: any, clusterStats: any, kibana: 
     ...createCollectorFetchContextMock(),
     esClient: mockGetLocalStats(clusterInfo, clusterStats),
     usageCollection: mockUsageCollection(kibana),
-    start: '',
-    end: '',
+    kibanaRequest: httpServerMock.createKibanaRequest(),
+    timestamp: Date.now(),
   };
 }
 

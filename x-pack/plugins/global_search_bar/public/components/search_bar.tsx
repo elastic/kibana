@@ -5,7 +5,7 @@
  */
 
 import {
-  EuiBadge,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeaderSectionItemButton,
@@ -25,11 +25,18 @@ import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import { Subscription } from 'rxjs';
-import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_search/public';
+import {
+  GlobalSearchPluginStart,
+  GlobalSearchResult,
+  GlobalSearchFindParams,
+} from '../../../global_search/public';
+import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+import { parseSearchParams } from '../search_syntax';
 
 interface Props {
   globalSearch: GlobalSearchPluginStart['find'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
+  taggingApi?: SavedObjectTaggingPluginStart;
   trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
   basePathUrl: string;
   darkMode: boolean;
@@ -64,16 +71,16 @@ const sortByTitle = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
 
 const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewideOption => {
   const { id, title, url, icon, type, meta } = result;
+  // only displaying icons for applications
+  const useIcon = type === 'application';
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,
     url,
     type,
+    icon: { type: useIcon && icon ? icon : 'empty' },
+    'data-test-subj': `nav-search-option`,
   };
-
-  if (icon) {
-    option.icon = { type: icon };
-  }
 
   if (type === 'application') {
     option.meta = [{ text: meta?.categoryLabel as string }];
@@ -86,6 +93,7 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
 
 export function SearchBar({
   globalSearch,
+  taggingApi,
   navigateToUrl,
   trackUiMetric,
   basePathUrl,
@@ -119,8 +127,24 @@ export function SearchBar({
       }
 
       let arr: GlobalSearchResult[] = [];
-      if (searchValue.length !== 0) trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
-      searchSubscription.current = globalSearch(searchValue, {}).subscribe({
+      if (searchValue.length !== 0) {
+        trackUiMetric(METRIC_TYPE.COUNT, 'search_request');
+      }
+
+      const rawParams = parseSearchParams(searchValue);
+      const tagIds =
+        taggingApi && rawParams.filters.tags
+          ? rawParams.filters.tags.map(
+              (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? '__unknown__'
+            )
+          : undefined;
+      const searchParams: GlobalSearchFindParams = {
+        term: rawParams.term,
+        types: rawParams.filters.types,
+        tags: tagIds,
+      };
+
+      searchSubscription.current = globalSearch(searchParams, {}).subscribe({
         next: ({ results }) => {
           if (searchValue.length > 0) {
             arr = [...results, ...arr].sort(sortByScore);
@@ -159,23 +183,36 @@ export function SearchBar({
     }
   };
 
-  const onChange = (selected: EuiSelectableTemplateSitewideOption[]) => {
-    // @ts-ignore - ts error is "union type is too complex to express"
-    const { url, type, key } = selected.find(({ checked }) => checked === 'on');
+  const onChange = (selection: EuiSelectableTemplateSitewideOption[]) => {
+    const selected = selection.find(({ checked }) => checked === 'on');
+    if (!selected) {
+      return;
+    }
 
-    if (type === 'application') {
-      trackUiMetric(METRIC_TYPE.CLICK, [
-        'user_navigated_to_application',
-        `user_navigated_to_application_${key.toLowerCase().replaceAll(' ', '_')}`, // which application
-      ]);
-    } else {
-      trackUiMetric(METRIC_TYPE.CLICK, [
-        'user_navigated_to_saved_object',
-        `user_navigated_to_saved_object_${type}`, // which type of saved object
-      ]);
+    // @ts-ignore - ts error is "union type is too complex to express"
+    const { url, type } = selected;
+
+    // errors in tracking should not prevent selection behavior
+    try {
+      if (type === 'application') {
+        const key = selected.keys ?? 'unknown';
+        trackUiMetric(METRIC_TYPE.CLICK, [
+          'user_navigated_to_application',
+          `user_navigated_to_application_${key.toLowerCase().replaceAll(' ', '_')}`, // which application
+        ]);
+      } else {
+        trackUiMetric(METRIC_TYPE.CLICK, [
+          'user_navigated_to_saved_object',
+          `user_navigated_to_saved_object_${type}`, // which type of saved object
+        ]);
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('Error trying to track searchbar metrics', e);
     }
 
     navigateToUrl(url);
+
     (document.activeElement as HTMLElement).blur();
     if (searchRef) {
       clearField(searchRef);
@@ -184,7 +221,7 @@ export function SearchBar({
   };
 
   const emptyMessage = (
-    <EuiSelectableMessage style={{ minHeight: 300 }}>
+    <EuiSelectableMessage style={{ minHeight: 300 }} data-test-subj="nav-search-no-results">
       <EuiImage
         alt={i18n.translate('xpack.globalSearchBar.searchBar.noResultsImageAlt', {
           defaultMessage: 'Illustration of black hole',
@@ -218,6 +255,7 @@ export function SearchBar({
       onChange={onChange}
       options={options}
       popoverButtonBreakpoints={['xs', 's']}
+      singleSelection={true}
       popoverButton={
         <EuiHeaderSectionItemButton
           aria-label={i18n.translate(
@@ -229,9 +267,10 @@ export function SearchBar({
         </EuiHeaderSectionItemButton>
       }
       searchProps={{
+        onSearch: () => undefined,
         onKeyUpCapture: (e: React.KeyboardEvent<HTMLInputElement>) =>
           setSearchValue(e.currentTarget.value),
-        'data-test-subj': 'header-search',
+        'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: true,
         placeholder: i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
@@ -242,6 +281,8 @@ export function SearchBar({
         },
       }}
       popoverProps={{
+        'data-test-subj': 'nav-search-popover',
+        panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         buttonRef: setButtonRef,
       }}
@@ -251,42 +292,58 @@ export function SearchBar({
         <EuiText color="subdued" size="xs">
           <EuiFlexGroup
             alignItems="center"
-            justifyContent="flexEnd"
+            justifyContent="spaceBetween"
             gutterSize="s"
             responsive={false}
             wrap
           >
-            <FormattedMessage
-              id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail"
-              defaultMessage="{shortcutDescription}{commandDescription}"
-              values={{
-                shortcutDescription: (
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutInstructionDescription"
-                      defaultMessage="Shortcut"
-                    />
-                  </EuiFlexItem>
-                ),
-                commandDescription: (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>
-                      {isMac ? (
-                        <FormattedMessage
-                          id="xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription"
-                          defaultMessage="Command + /"
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription"
-                          defaultMessage="Control + /"
-                        />
-                      )}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                ),
-              }}
-            />
+            <EuiFlexItem>
+              <p style={{ marginBottom: 0 }}>
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.helpText.helpTextPrefix"
+                  defaultMessage="Filter by"
+                />
+                &nbsp;
+                <EuiCode>type:</EuiCode>&nbsp;
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.helpText.helpTextConjunction"
+                  defaultMessage="or"
+                />
+                &nbsp;
+                <EuiCode>tag:</EuiCode>
+              </p>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <p style={{ marginBottom: 0 }}>
+                <FormattedMessage
+                  id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutDetail"
+                  defaultMessage="{shortcutDescription} {commandDescription}"
+                  values={{
+                    shortcutDescription: (
+                      <FormattedMessage
+                        id="xpack.globalSearchBar.searchBar.shortcutDescription.shortcutInstructionDescription"
+                        defaultMessage="Shortcut"
+                      />
+                    ),
+                    commandDescription: (
+                      <EuiCode>
+                        {isMac ? (
+                          <FormattedMessage
+                            id="xpack.globalSearchBar.searchBar.shortcutDescription.macCommandDescription"
+                            defaultMessage="Command + /"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.globalSearchBar.searchBar.shortcutDescription.windowsCommandDescription"
+                            defaultMessage="Control + /"
+                          />
+                        )}
+                      </EuiCode>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiText>
       }

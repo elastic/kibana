@@ -22,7 +22,7 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { ExpressionRenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
-import { IInterpreterRenderHandlers, ExpressionAstExpression } from '../common';
+import { IInterpreterRenderHandlers, ExpressionAstExpression, RenderMode } from '../common';
 
 import { getRenderersRegistry } from './services';
 
@@ -30,6 +30,7 @@ export type IExpressionRendererExtraHandlers = Record<string, any>;
 
 export interface ExpressionRenderHandlerParams {
   onRenderError: RenderErrorHandlerFnType;
+  renderMode: RenderMode;
 }
 
 export interface ExpressionRendererEvent {
@@ -58,7 +59,7 @@ export class ExpressionRenderHandler {
 
   constructor(
     element: HTMLElement,
-    { onRenderError }: Partial<ExpressionRenderHandlerParams> = {}
+    { onRenderError, renderMode }: Partial<ExpressionRenderHandlerParams> = {}
   ) {
     this.element = element;
 
@@ -68,9 +69,9 @@ export class ExpressionRenderHandler {
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
     this.renderSubject = new Rx.BehaviorSubject(null as any | null);
-    this.render$ = this.renderSubject.asObservable().pipe(filter((_) => _ !== null)) as Observable<
-      any
-    >;
+    this.render$ = this.renderSubject
+      .asObservable()
+      .pipe(filter((_) => _ !== null)) as Observable<any>;
 
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable();
@@ -91,6 +92,9 @@ export class ExpressionRenderHandler {
       },
       event: (data) => {
         this.eventsSubject.next(data);
+      },
+      getRenderMode: () => {
+        return renderMode || 'display';
       },
     };
   }

@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * TODO:
+ * IMPORTANT: Please see how {@link BreadcrumbService} is set up for an example of how these services should be set up
+ * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
+ */
+
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 
@@ -13,9 +19,8 @@ import {
   UIM_CONFIG_FREEZE_INDEX,
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_WARM_PHASE,
-  defaultNewColdPhase,
-  defaultNewWarmPhase,
   defaultSetPriority,
+  defaultPhaseIndexPriority,
 } from '../constants';
 
 import { Phases } from '../../../common/types';
@@ -50,14 +55,12 @@ export function getUiMetricsForPhases(phases: Phases): string[] {
         const isWarmPhasePriorityChanged =
           phases.warm &&
           phases.warm.actions.set_priority &&
-          phases.warm.actions.set_priority.priority !==
-            parseInt(defaultNewWarmPhase.phaseIndexPriority, 10);
+          phases.warm.actions.set_priority.priority !== parseInt(defaultPhaseIndexPriority, 10);
 
         const isColdPhasePriorityChanged =
           phases.cold &&
           phases.cold.actions.set_priority &&
-          phases.cold.actions.set_priority.priority !==
-            parseInt(defaultNewColdPhase.phaseIndexPriority, 10);
+          phases.cold.actions.set_priority.priority !== parseInt(defaultPhaseIndexPriority, 10);
         // If the priority is different than the default, we'll consider it a user interaction,
         // even if the user has set it to undefined.
         return (

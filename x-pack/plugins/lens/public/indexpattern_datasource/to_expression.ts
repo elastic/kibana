@@ -7,88 +7,85 @@
 import { Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
-import { IndexPattern, IndexPatternPrivateState } from './types';
+import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
 
-function getExpressionForLayer(
-  indexPattern: IndexPattern,
-  columns: Record<string, IndexPatternColumn>,
-  columnOrder: string[]
-): Ast | null {
+function getExpressionForLayer(layer: IndexPatternLayer, indexPattern: IndexPattern): Ast | null {
+  const { columns, columnOrder } = layer;
+
   if (columnOrder.length === 0) {
     return null;
   }
 
-  function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
-    return operationDefinitionMap[column.operationType].toEsAggsConfig(
-      column,
-      columnId,
-      indexPattern
-    );
-  }
-
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
-  const bucketsCount = columnEntries.filter(([, entry]) => entry.isBucketed).length;
-  const metricsCount = columnEntries.length - bucketsCount;
 
   if (columnEntries.length) {
-    const aggs = columnEntries.map(([colId, col]) => {
-      return getEsAggsConfig(col, colId);
+    const aggs: unknown[] = [];
+    const expressions: ExpressionFunctionAST[] = [];
+    columnEntries.forEach(([colId, col]) => {
+      const def = operationDefinitionMap[col.operationType];
+      if (def.input === 'fullReference') {
+        expressions.push(...def.toExpression(layer, colId, indexPattern));
+      } else {
+        aggs.push(def.toEsAggsConfig(col, colId, indexPattern));
+      }
     });
 
-    /**
-     * Because we are turning on metrics at all levels, the sequence generation
-     * logic here is more complicated. Examples follow:
-     *
-     * Example 1: [Count]
-     * Output: [`col-0-count`]
-     *
-     * Example 2: [Terms, Terms, Count]
-     * Output: [`col-0-terms0`, `col-2-terms1`, `col-3-count`]
-     *
-     * Example 3: [Terms, Terms, Count, Max]
-     * Output: [`col-0-terms0`, `col-3-terms1`, `col-4-count`, `col-5-max`]
-     */
     const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
-      const newIndex = column.isBucketed
-        ? index * (metricsCount + 1) // Buckets are spaced apart by N + 1
-        : (index ? index + 1 : 0) - bucketsCount + (bucketsCount - 1) * (metricsCount + 1);
       return {
         ...currentIdMap,
-        [`col-${columnEntries.length === 1 ? 0 : newIndex}-${colId}`]: {
+        [`col-${columnEntries.length === 1 ? 0 : index}-${colId}`]: {
           ...column,
           id: colId,
         },
       };
     }, {} as Record<string, OriginalColumn>);
 
-    type FormattedColumn = Required<Extract<IndexPatternColumn, { params?: { format: unknown } }>>;
+    type FormattedColumn = Required<
+      Extract<
+        IndexPatternColumn,
+        | {
+            params?: {
+              format: unknown;
+            };
+          }
+        // when formatters are nested there's a slightly different format
+        | {
+            params: {
+              format?: unknown;
+              parentFormat?: unknown;
+            };
+          }
+      >
+    >;
 
     const columnsWithFormatters = columnEntries.filter(
-      ([, col]) => col.params && 'format' in col.params && col.params.format
+      ([, col]) =>
+        col.params &&
+        (('format' in col.params && col.params.format) ||
+          ('parentFormat' in col.params && col.params.parentFormat))
     ) as Array<[string, FormattedColumn]>;
-    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(([id, col]) => {
-      const format = (col as FormattedColumn).params!.format;
-      const base: ExpressionFunctionAST = {
-        type: 'function',
-        function: 'lens_format_column',
-        arguments: {
-          format: [format.id],
-          columnId: [id],
-        },
-      };
-      if (typeof format.params?.decimals === 'number') {
-        return {
-          ...base,
+    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(
+      ([id, col]: [string, FormattedColumn]) => {
+        // TODO: improve the type handling here
+        const parentFormat = 'parentFormat' in col.params ? col.params!.parentFormat! : undefined;
+        const format = (col as FormattedColumn).params!.format;
+
+        const base: ExpressionFunctionAST = {
+          type: 'function',
+          function: 'lens_format_column',
           arguments: {
-            ...base.arguments,
-            decimals: [format.params.decimals],
+            format: format ? [format.id] : [''],
+            columnId: [id],
+            decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
+            parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
           },
         };
+
+        return base;
       }
-      return base;
-    });
+    );
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
@@ -104,8 +101,8 @@ function getExpressionForLayer(
           function: 'esaggs',
           arguments: {
             index: [indexPattern.id],
-            metricsAtAllLevels: [true],
-            partialRows: [true],
+            metricsAtAllLevels: [false],
+            partialRows: [false],
             includeFormatHints: [true],
             timeFields: allDateHistogramFields,
             aggConfigs: [JSON.stringify(aggs)],
@@ -119,6 +116,7 @@ function getExpressionForLayer(
           },
         },
         ...formatterOverrides,
+        ...expressions,
       ],
     };
   }
@@ -129,9 +127,8 @@ function getExpressionForLayer(
 export function toExpression(state: IndexPatternPrivateState, layerId: string) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
-      state.indexPatterns[state.layers[layerId].indexPatternId],
-      state.layers[layerId].columns,
-      state.layers[layerId].columnOrder
+      state.layers[layerId],
+      state.indexPatterns[state.layers[layerId].indexPatternId]
     );
   }
 

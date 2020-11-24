@@ -18,16 +18,34 @@
  */
 
 import uuid from 'uuid';
-import { Subject, Subscription } from 'rxjs';
-import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
-import { ISessionService } from '../../common/search';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { HttpStart, PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
 import { ConfigSchema } from '../../config';
+import {
+  ISessionService,
+  BackgroundSessionSavedObjectAttributes,
+  SearchSessionFindOptions,
+} from '../../common';
 
 export class SessionService implements ISessionService {
-  private sessionId?: string;
-  private session$: Subject<string | undefined> = new Subject();
+  private session$ = new BehaviorSubject<string | undefined>(undefined);
+  private get sessionId() {
+    return this.session$.getValue();
+  }
   private appChangeSubscription$?: Subscription;
   private curApp?: string;
+  private http!: HttpStart;
+
+  /**
+   * Has the session already been stored (i.e. "sent to background")?
+   */
+  private _isStored: boolean = false;
+
+  /**
+   * Is this session a restored session (have these requests already been made, and we're just
+   * looking to re-use the previous search IDs)?
+   */
+  private _isRestore: boolean = false;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -37,6 +55,8 @@ export class SessionService implements ISessionService {
       Make sure that apps don't leave sessions open.
      */
     getStartServices().then(([coreStart]) => {
+      this.http = coreStart.http;
+
       this.appChangeSubscription$ = coreStart.application.currentAppId$.subscribe((appName) => {
         if (this.sessionId) {
           const message = `Application '${this.curApp}' had an open session while navigating`;
@@ -67,14 +87,63 @@ export class SessionService implements ISessionService {
     return this.session$.asObservable();
   }
 
+  public isStored() {
+    return this._isStored;
+  }
+
+  public isRestore() {
+    return this._isRestore;
+  }
+
   public start() {
-    this.sessionId = uuid.v4();
-    this.session$.next(this.sessionId);
-    return this.sessionId;
+    this._isStored = false;
+    this._isRestore = false;
+    this.session$.next(uuid.v4());
+    return this.sessionId!;
+  }
+
+  public restore(sessionId: string) {
+    this._isStored = true;
+    this._isRestore = true;
+    this.session$.next(sessionId);
+    return this.http.get(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
 
   public clear() {
-    this.sessionId = undefined;
-    this.session$.next(this.sessionId);
+    this._isStored = false;
+    this._isRestore = false;
+    this.session$.next(undefined);
+  }
+
+  public async save(name: string, url: string) {
+    const response = await this.http.post(`/internal/session`, {
+      body: JSON.stringify({
+        name,
+        url,
+        sessionId: this.sessionId,
+      }),
+    });
+    this._isStored = true;
+    return response;
+  }
+
+  public get(sessionId: string) {
+    return this.http.get(`/internal/session/${encodeURIComponent(sessionId)}`);
+  }
+
+  public find(options: SearchSessionFindOptions) {
+    return this.http.post(`/internal/session`, {
+      body: JSON.stringify(options),
+    });
+  }
+
+  public update(sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) {
+    return this.http.put(`/internal/session/${encodeURIComponent(sessionId)}`, {
+      body: JSON.stringify(attributes),
+    });
+  }
+
+  public delete(sessionId: string) {
+    return this.http.delete(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
 }

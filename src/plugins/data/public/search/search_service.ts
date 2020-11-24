@@ -23,15 +23,13 @@ import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
 import {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
+  kibana,
+  kibanaContext,
+  kibanaContextFunction,
   ISearchGeneric,
-  ISearchOptions,
-  SearchSourceService,
-  SearchSourceDependencies,
   ISessionService,
+  SearchSourceDependencies,
+  SearchSourceService,
 } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
@@ -90,6 +88,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       session: this.sessionService,
     });
 
+    expressions.registerFunction(kibana);
+    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerType(kibanaContext);
+
     expressions.registerFunction(esdsl);
     expressions.registerType(esRawResponse);
 
@@ -126,15 +128,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
-      search: <
-        SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-        SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-      >(
-        request: SearchStrategyRequest,
-        options: ISearchOptions
-      ) => {
-        return search<SearchStrategyRequest, SearchStrategyResponse>(request, options).toPromise();
-      },
+      search,
       onResponse: handleResponse,
       legacy: {
         callMsearch: getCallMsearch({ http }),
@@ -143,7 +137,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
 
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings }),
+      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
       search,
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);

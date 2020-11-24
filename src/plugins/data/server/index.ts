@@ -49,6 +49,16 @@ export const esFilters = {
   isFilterDisabled,
 };
 
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
+
 /*
  * esQuery and esKuery:
  */
@@ -134,6 +144,8 @@ export {
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
+  mergeCapabilitiesWithFields,
+  getCapabilitiesForRollupIndices,
 } from './index_patterns';
 
 export {
@@ -144,6 +156,7 @@ export {
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
+  IEsRawSearchResponse,
 } from '../common';
 
 /**
@@ -176,6 +189,14 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  // search
+  toSnakeCase,
+  shimAbortSignal,
+  doSearch,
+  includeTotalLoaded,
+  toKibanaSearchResponse,
+  getTotalLoaded,
+  calcAutoIntervalLessThan,
 } from '../common';
 
 export {
@@ -198,6 +219,12 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
   // search
   ISearchOptions,
   IEsSearchRequest,
@@ -213,19 +240,30 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
-  toSnakeCase,
-  getAsyncOptions,
+  SearchStrategyDependencies,
   getDefaultSearchParams,
   getShardTimeout,
-  getTotalLoaded,
   shimHitsTotal,
   usageProvider,
-  shimAbortSignal,
   SearchUsage,
 } from './search';
 
+import { trackSearchStatus } from './search';
+
 // Search namespace
 export const search = {
+  esSearch: {
+    utils: {
+      doSearch,
+      shimAbortSignal,
+      trackSearchStatus,
+      includeTotalLoaded,
+      toKibanaSearchResponse,
+      // utils:
+      getTotalLoaded,
+      toSnakeCase,
+    },
+  },
   aggs: {
     CidrMask,
     dateHistogramInterval,
@@ -245,6 +283,7 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    calcAutoIntervalLessThan,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

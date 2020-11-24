@@ -34,7 +34,7 @@ export const NOT_A_FAVORITE = i18n.translate(
 export const TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.properties.timelineTitleAriaLabel',
   {
-    defaultMessage: 'Timeline title',
+    defaultMessage: 'Title',
   }
 );
 
@@ -192,5 +192,12 @@ export const UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA = i18n.translate(
   'xpack.securitySolution.timeline.properties.unlockDatePickerDescription',
   {
     defaultMessage: 'Unlock date picker to global date picker',
+  }
+);
+
+export const OPTIONAL = i18n.translate(
+  'xpack.securitySolution.timeline.properties.timelineDescriptionOptional',
+  {
+    defaultMessage: 'Optional',
   }
 );

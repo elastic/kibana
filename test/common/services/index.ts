@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { DeploymentProvider } from './deployment';
 import { LegacyEsProvider } from './legacy_es';
 import { ElasticsearchProvider } from './elasticsearch';
 import { EsArchiverProvider } from './es_archiver';
@@ -26,6 +27,7 @@ import { RandomnessProvider } from './randomness';
 import { SecurityServiceProvider } from './security';
 
 export const services = {
+  deployment: DeploymentProvider,
   legacyEs: LegacyEsProvider,
   es: ElasticsearchProvider,
   esArchiver: EsArchiverProvider,

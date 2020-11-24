@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { WebhookActionConnector } from '../types';
 import WebhookActionConnectorFields from './webhook_connectors';
-import { DocLinksStart } from 'kibana/public';
 
 describe('WebhookActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
@@ -24,6 +23,7 @@ describe('WebhookActionConnectorFields renders', () => {
         method: 'PUT',
         url: 'http:\\test',
         headers: { 'content-type': 'text' },
+        hasAuth: true,
       },
     } as WebhookActionConnector;
     const wrapper = mountWithIntl(
@@ -32,7 +32,6 @@ describe('WebhookActionConnectorFields renders', () => {
         errors={{ url: [], method: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -50,7 +49,9 @@ describe('WebhookActionConnectorFields renders', () => {
       secrets: {},
       actionTypeId: '.webhook',
       isPreconfigured: false,
-      config: {},
+      config: {
+        hasAuth: true,
+      },
     } as WebhookActionConnector;
     const wrapper = mountWithIntl(
       <WebhookActionConnectorFields
@@ -58,7 +59,6 @@ describe('WebhookActionConnectorFields renders', () => {
         errors={{ url: [], method: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -80,6 +80,7 @@ describe('WebhookActionConnectorFields renders', () => {
         method: 'PUT',
         url: 'http:\\test',
         headers: { 'content-type': 'text' },
+        hasAuth: true,
       },
     } as WebhookActionConnector;
     const wrapper = mountWithIntl(
@@ -88,7 +89,6 @@ describe('WebhookActionConnectorFields renders', () => {
         errors={{ url: [], method: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );

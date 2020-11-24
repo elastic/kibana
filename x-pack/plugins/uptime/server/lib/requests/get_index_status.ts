@@ -8,13 +8,14 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { StatesIndexStatus } from '../../../common/runtime_types';
 
 export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({
-  callES,
-  dynamicSettings,
+  uptimeEsClient,
 }) => {
   const {
-    _shards: { total },
-    count,
-  } = await callES('count', { index: dynamicSettings.heartbeatIndices });
+    body: {
+      _shards: { total },
+      count,
+    },
+  } = await uptimeEsClient.count({});
   return {
     indexExists: total > 0,
     docCount: count,

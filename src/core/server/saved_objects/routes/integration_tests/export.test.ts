@@ -22,9 +22,9 @@ jest.mock('../../export', () => ({
 }));
 
 import * as exportMock from '../../export';
-import { createListStream } from '../../../utils/streams';
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
+import type { UnwrapPromise } from '@kbn/utility-types';
+import { createListStream } from '@kbn/utils';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
 import { setupServer, createExportableType } from '../test_utils';
@@ -33,7 +33,7 @@ type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
 const allowedTypes = ['index-pattern', 'search'];
 const config = {
-  maxImportPayloadBytes: 10485760,
+  maxImportPayloadBytes: 26214400,
   maxImportExportSize: 10000,
 } as SavedObjectConfig;
 

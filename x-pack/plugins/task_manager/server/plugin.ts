@@ -3,8 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext, Plugin, CoreSetup, Logger, CoreStart } from 'src/core/server';
-import { first } from 'rxjs/operators';
+import { combineLatest, Observable, Subject } from 'rxjs';
+import { first, map, distinctUntilChanged } from 'rxjs/operators';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  Logger,
+  CoreStart,
+  ServiceStatusLevels,
+  CoreStatus,
+} from '../../../../src/core/server';
 import { TaskDefinition } from './task';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
@@ -14,6 +23,8 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
+import { healthRoute } from './routes';
+import { createMonitoringStats, MonitoringStats } from './monitoring';
 
 export type TaskManagerSetupContract = { addMiddleware: (middleware: Middleware) => void } & Pick<
   TaskTypeDictionary,
@@ -34,6 +45,8 @@ export class TaskManagerPlugin
   private logger: Logger;
   private definitions: TaskTypeDictionary;
   private middleware: Middleware = createInitialMiddleware();
+  private elasticsearchAndSOAvailability$?: Observable<boolean>;
+  private monitoringStats$ = new Subject<MonitoringStats>();
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -41,13 +54,15 @@ export class TaskManagerPlugin
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
-  public async setup({ savedObjects }: CoreSetup): Promise<TaskManagerSetupContract> {
+  public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
     this.config = await this.initContext.config
       .create<TaskManagerConfig>()
       .pipe(first())
       .toPromise();
 
-    setupSavedObjects(savedObjects, this.config);
+    this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+
+    setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
 
     if (!this.taskManagerId) {
@@ -58,6 +73,26 @@ export class TaskManagerPlugin
     } else {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${this.taskManagerId}`);
     }
+
+    // Routes
+    const router = core.http.createRouter();
+    const serviceStatus$ = healthRoute(
+      router,
+      this.monitoringStats$,
+      this.logger,
+      this.taskManagerId,
+      this.config!
+    );
+
+    core.getStartServices().then(async () => {
+      core.status.set(
+        combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
+          map(([derivedStatus, serviceStatus]) =>
+            serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
+          )
+        )
+      );
+    });
 
     return {
       addMiddleware: (middleware: Middleware) => {
@@ -84,33 +119,38 @@ export class TaskManagerPlugin
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });
 
-    const { maxWorkersConfiguration$, pollIntervalConfiguration$ } = createManagedConfiguration({
+    const managedConfiguration = createManagedConfiguration({
       logger: this.logger,
       errors$: taskStore.errors$,
       startingMaxWorkers: this.config!.max_workers,
       startingPollInterval: this.config!.poll_interval,
     });
 
-    const taskPollingLifecycle = new TaskPollingLifecycle({
+    this.taskPollingLifecycle = new TaskPollingLifecycle({
       config: this.config!,
       definitions: this.definitions,
       logger: this.logger,
       taskStore,
       middleware: this.middleware,
-      maxWorkersConfiguration$,
-      pollIntervalConfiguration$,
+      elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+      ...managedConfiguration,
     });
-    this.taskPollingLifecycle = taskPollingLifecycle;
+
+    createMonitoringStats(
+      this.taskPollingLifecycle,
+      taskStore,
+      this.elasticsearchAndSOAvailability$!,
+      this.config!,
+      managedConfiguration,
+      this.logger
+    ).subscribe((stat) => this.monitoringStats$.next(stat));
 
     const taskScheduling = new TaskScheduling({
       logger: this.logger,
       taskStore,
       middleware: this.middleware,
-      taskPollingLifecycle,
+      taskPollingLifecycle: this.taskPollingLifecycle,
     });
-
-    // start polling for work
-    taskPollingLifecycle.start();
 
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
@@ -120,12 +160,6 @@ export class TaskManagerPlugin
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
     };
-  }
-
-  public stop() {
-    if (this.taskPollingLifecycle) {
-      this.taskPollingLifecycle.stop();
-    }
   }
 
   /**
@@ -139,4 +173,17 @@ export class TaskManagerPlugin
       throw new Error(`Cannot ${operation} after the task manager has started`);
     }
   }
+}
+
+export function getElasticsearchAndSOAvailability(
+  core$: Observable<CoreStatus>
+): Observable<boolean> {
+  return core$.pipe(
+    map(
+      ({ elasticsearch, savedObjects }) =>
+        elasticsearch.level === ServiceStatusLevels.available &&
+        savedObjects.level === ServiceStatusLevels.available
+    ),
+    distinctUntilChanged()
+  );
 }

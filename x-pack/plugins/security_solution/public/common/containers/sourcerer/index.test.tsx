@@ -86,7 +86,29 @@ jest.mock('../../utils/apollo_context', () => ({
 }));
 
 describe('Sourcerer Hooks', () => {
-  const state: State = mockGlobalState;
+  const state: State = {
+    ...mockGlobalState,
+    sourcerer: {
+      ...mockGlobalState.sourcerer,
+      sourcererScopes: {
+        ...mockGlobalState.sourcerer.sourcererScopes,
+        [SourcererScopeName.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+          indexPattern: {
+            fields: [],
+            title: '',
+          },
+        },
+        [SourcererScopeName.timeline]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          indexPattern: {
+            fields: [],
+            title: '',
+          },
+        },
+      },
+    },
+  };
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(
     state,

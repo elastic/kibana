@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(es);
+      await deleteAllAlerts(supertest);
       await deleteAllRulesStatuses(es);
     });
 
@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a single rule status when a single rule is loaded from a find status with defaults added', async () => {
-      const resBody = await createRule(supertest, getSimpleRule());
+      const resBody = await createRule(supertest, getSimpleRule('rule-1', true));
 
       await waitForRuleSuccess(supertest, resBody.id);
 

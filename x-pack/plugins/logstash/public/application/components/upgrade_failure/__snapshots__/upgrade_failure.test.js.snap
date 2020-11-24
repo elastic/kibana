@@ -123,7 +123,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
         paddingSize="l"
       >
         <div
-          className="euiPanel euiPanel--paddingLarge euiPageContent"
+          className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent"
         >
           <EuiEmptyPrompt
             actions={
@@ -266,6 +266,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                           onClick={[MockFunction]}
                         >
                           <EuiButtonDisplay
+                            baseClassName="euiButton"
                             element="button"
                             fill={true}
                             onClick={[MockFunction]}
@@ -274,6 +275,11 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                             <button
                               className="euiButton euiButton--primary euiButton--fill"
                               onClick={[MockFunction]}
+                              style={
+                                Object {
+                                  "minWidth": undefined,
+                                }
+                              }
                               type="button"
                             >
                               <EuiButtonContent
@@ -479,7 +485,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
         paddingSize="l"
       >
         <div
-          className="euiPanel euiPanel--paddingLarge euiPageContent"
+          className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent"
         >
           <EuiEmptyPrompt
             actions={
@@ -622,6 +628,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                           onClick={[MockFunction]}
                         >
                           <EuiButtonDisplay
+                            baseClassName="euiButton"
                             element="button"
                             fill={true}
                             onClick={[MockFunction]}
@@ -630,6 +637,11 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                             <button
                               className="euiButton euiButton--primary euiButton--fill"
                               onClick={[MockFunction]}
+                              style={
+                                Object {
+                                  "minWidth": undefined,
+                                }
+                              }
                               type="button"
                             >
                               <EuiButtonContent
@@ -835,7 +847,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
         paddingSize="l"
       >
         <div
-          className="euiPanel euiPanel--paddingLarge euiPageContent"
+          className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent"
         >
           <EuiEmptyPrompt
             actions={
@@ -978,6 +990,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                           onClick={[MockFunction]}
                         >
                           <EuiButtonDisplay
+                            baseClassName="euiButton"
                             element="button"
                             fill={true}
                             onClick={[MockFunction]}
@@ -986,6 +999,11 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                             <button
                               className="euiButton euiButton--primary euiButton--fill"
                               onClick={[MockFunction]}
+                              style={
+                                Object {
+                                  "minWidth": undefined,
+                                }
+                              }
                               type="button"
                             >
                               <EuiButtonContent

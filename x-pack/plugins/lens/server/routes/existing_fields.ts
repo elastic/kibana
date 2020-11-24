@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
 import { IndexPatternAttributes, UI_SETTINGS } from '../../../../../src/plugins/data/server';
+
+export function isBoomError(error: { isBoom?: boolean }): error is Boom {
+  return error.isBoom === true;
+}
 
 /**
  * The number of docs to sample to determine field empty status.
@@ -24,7 +28,7 @@ export interface Field {
   script?: string;
 }
 
-export async function existingFieldsRoute(setup: CoreSetup) {
+export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
   const router = setup.http.createRouter();
 
   router.post(
@@ -52,14 +56,17 @@ export async function existingFieldsRoute(setup: CoreSetup) {
           }),
         });
       } catch (e) {
+        logger.info(
+          `Field existence check failed: ${isBoomError(e) ? e.output.payload.message : e.message}`
+        );
         if (e.status === 404) {
-          return res.notFound();
+          return res.notFound({ body: e.message });
         }
-        if (e.isBoom) {
+        if (isBoomError(e)) {
           if (e.output.statusCode === 404) {
-            return res.notFound();
+            return res.notFound({ body: e.output.payload.message });
           }
-          return res.internalError(e.output.message);
+          return res.internalError({ body: e.output.payload.message });
         } else {
           return res.internalError({
             body: Boom.internal(e.message || e.name),

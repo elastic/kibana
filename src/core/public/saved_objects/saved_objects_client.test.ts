@@ -97,6 +97,57 @@ describe('SavedObjectsClient', () => {
       `);
     });
 
+    test('removes duplicates when calling `_bulk_get`', async () => {
+      // Await #get call to ensure batchQueue is empty and throttle has reset
+      await savedObjectsClient.get('type2', doc.id);
+      http.fetch.mockClear();
+
+      savedObjectsClient.get(doc.type, doc.id);
+      savedObjectsClient.get('some-type', 'some-id');
+      await savedObjectsClient.get(doc.type, doc.id);
+
+      expect(http.fetch).toHaveBeenCalledTimes(1);
+      expect(http.fetch.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "/api/saved_objects/_bulk_get",
+          Object {
+            "body": "[{\\"id\\":\\"AVwSwFxtcMV38qjDZoQg\\",\\"type\\":\\"config\\"},{\\"id\\":\\"some-id\\",\\"type\\":\\"some-type\\"}]",
+            "method": "POST",
+            "query": undefined,
+          },
+        ]
+      `);
+    });
+
+    test('resolves with correct object when there are duplicates present', async () => {
+      // Await #get call to ensure batchQueue is empty and throttle has reset
+      await savedObjectsClient.get('type2', doc.id);
+      http.fetch.mockClear();
+
+      const call1 = savedObjectsClient.get(doc.type, doc.id);
+      const objFromCall2 = await savedObjectsClient.get(doc.type, doc.id);
+      const objFromCall1 = await call1;
+
+      expect(objFromCall1.type).toBe(doc.type);
+      expect(objFromCall1.id).toBe(doc.id);
+
+      expect(objFromCall2.type).toBe(doc.type);
+      expect(objFromCall2.id).toBe(doc.id);
+    });
+
+    test('do not share instances or references between duplicate callers', async () => {
+      // Await #get call to ensure batchQueue is empty and throttle has reset
+      await savedObjectsClient.get('type2', doc.id);
+      http.fetch.mockClear();
+
+      const call1 = savedObjectsClient.get(doc.type, doc.id);
+      const objFromCall2 = await savedObjectsClient.get(doc.type, doc.id);
+      const objFromCall1 = await call1;
+
+      objFromCall1.set('title', 'new title');
+      expect(objFromCall2.get('title')).toEqual('Example title');
+    });
+
     test('resolves with SimpleSavedObject instance', async () => {
       const response = savedObjectsClient.get(doc.type, doc.id);
       await expect(response).resolves.toBeInstanceOf(SimpleSavedObject);
@@ -407,10 +458,7 @@ describe('SavedObjectsClient', () => {
                 "fields": Array [
                   "title",
                 ],
-                "has_reference": Object {
-                  "id": "1",
-                  "type": "reference",
-                },
+                "has_reference": "{\\"id\\":\\"1\\",\\"type\\":\\"reference\\"}",
                 "page": 10,
                 "per_page": 100,
                 "search": "what is the meaning of life?|life",

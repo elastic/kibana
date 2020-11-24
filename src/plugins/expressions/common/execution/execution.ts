@@ -22,8 +22,7 @@ import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { Defer, now } from '../../../kibana_utils/common';
-import { toPromise } from '../../../data/common/utils/abort_utils';
+import { abortSignalToPromise, Defer, now } from '../../../kibana_utils/common';
 import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
@@ -93,13 +92,13 @@ export class Execution<
   /**
    * Promise that rejects if/when abort controller sends "abort" signal.
    */
-  private readonly abortRejection = toPromise(this.abortController.signal);
+  private readonly abortRejection = abortSignalToPromise(this.abortController.signal);
 
   /**
    * Races a given promise against the "abort" event of `abortController`.
    */
   private race<T>(promise: Promise<T>): Promise<T> {
-    return Promise.race<T>([this.abortRejection, promise]);
+    return Promise.race<T>([this.abortRejection.promise, promise]);
   }
 
   /**
@@ -189,14 +188,18 @@ export class Execution<
       else reject(error);
     });
 
-    this.firstResultFuture.promise.then(
-      (result) => {
-        this.state.transitions.setResult(result);
-      },
-      (error) => {
-        this.state.transitions.setError(error);
-      }
-    );
+    this.firstResultFuture.promise
+      .then(
+        (result) => {
+          this.state.transitions.setResult(result);
+        },
+        (error) => {
+          this.state.transitions.setError(error);
+        }
+      )
+      .finally(() => {
+        this.abortRejection.cleanup();
+      });
   }
 
   async invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Promise<any> {
@@ -356,9 +359,12 @@ export class Execution<
 
     // Check for missing required arguments.
     for (const argDef of Object.values(argDefs)) {
-      const { aliases, default: argDefault, name: argName, required } = argDef as ArgumentType<
-        any
-      > & { name: string };
+      const {
+        aliases,
+        default: argDefault,
+        name: argName,
+        required,
+      } = argDef as ArgumentType<any> & { name: string };
       if (
         typeof argDefault !== 'undefined' ||
         !required ||

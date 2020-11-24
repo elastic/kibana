@@ -297,7 +297,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                     paddingSize="none"
                   >
                     <div
-                      className="euiPanel euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     >
                       <EuiImage
                         alt=""
@@ -673,6 +673,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
             >
               <EuiButtonDisplay
                 aria-label="Create new visualization button"
+                baseClassName="euiButton"
                 data-test-subj="addVisualizationButton"
                 element="button"
                 iconSide="left"
@@ -684,6 +685,11 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                   aria-label="Create new visualization button"
                   className="euiButton euiButton--primary euiButton--small"
                   data-test-subj="addVisualizationButton"
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
                   type="button"
                 >
                   <EuiButtonContent
@@ -1010,7 +1016,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                     paddingSize="none"
                   >
                     <div
-                      className="euiPanel euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+                      className="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
                     >
                       <EuiImage
                         alt=""

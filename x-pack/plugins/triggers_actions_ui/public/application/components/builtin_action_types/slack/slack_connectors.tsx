@@ -9,10 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { SlackActionConnector } from '../types';
+import { useKibana } from '../../../../common/lib/kibana';
 
-const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  SlackActionConnector
->> = ({ action, editActionSecrets, errors, readOnly, docLinks }) => {
+const SlackActionFields: React.FunctionComponent<
+  ActionConnectorFieldsProps<SlackActionConnector>
+> = ({ action, editActionSecrets, errors, readOnly }) => {
+  const { docLinks } = useKibana().services;
   const { webhookUrl } = action.secrets;
 
   return (
@@ -47,7 +49,6 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
             isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
             name="webhookUrl"
             readOnly={readOnly}
-            placeholder="Example: https://hooks.slack.com/services"
             value={webhookUrl || ''}
             data-test-subj="slackWebhookUrlInput"
             onChange={(e) => {

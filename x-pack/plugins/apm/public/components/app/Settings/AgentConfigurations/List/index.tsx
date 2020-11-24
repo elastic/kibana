@@ -16,9 +16,8 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentConfigurationListAPIResponse } from '../../../../../../server/lib/settings/agent_configuration/list_configurations';
 import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { useTheme } from '../../../../../hooks/useTheme';
@@ -32,7 +31,7 @@ import { ITableColumn, ManagedTable } from '../../../../shared/ManagedTable';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
-type Config = AgentConfigurationListAPIResponse[0];
+type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>[0];
 
 interface Props {
   status: FETCH_STATUS;
