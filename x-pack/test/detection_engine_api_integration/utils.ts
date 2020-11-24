@@ -689,7 +689,7 @@ export const waitFor = async (
   maxTimeout: number = 10000,
   timeoutWait: number = 10
 ): Promise<void> => {
-  await new Promise(async (resolve, reject) => {
+  await new Promise<void>(async (resolve, reject) => {
     let found = false;
     let numberOfTries = 0;
     while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
