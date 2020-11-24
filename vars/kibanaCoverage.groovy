@@ -249,6 +249,7 @@ def xpackProks() {
     'xpack-ciGroup8' : kibanaPipeline.xpackCiGroupProcess(8),
     'xpack-ciGroup9' : kibanaPipeline.xpackCiGroupProcess(9),
     'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
+    'xpack-ciGroup11': kibanaPipeline.xpackCiGroupProcess(11),
   ]
 }
 
