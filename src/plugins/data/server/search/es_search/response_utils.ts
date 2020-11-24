@@ -18,6 +18,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { shimHitsTotal } from '..';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
@@ -36,7 +37,7 @@ export function getTotalLoaded(response: SearchResponse<unknown>) {
  */
 export function toKibanaSearchResponse(rawResponse: SearchResponse<unknown>) {
   return {
-    rawResponse,
+    rawResponse: shimHitsTotal(rawResponse),
     isPartial: false,
     isRunning: false,
     ...getTotalLoaded(rawResponse),

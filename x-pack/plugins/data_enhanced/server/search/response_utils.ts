@@ -5,7 +5,7 @@
  */
 
 import { ApiResponse } from '@elastic/elasticsearch';
-import { getTotalLoaded } from '../../../../../src/plugins/data/server';
+import { getTotalLoaded, shimHitsTotal } from '../../../../../src/plugins/data/server';
 import { AsyncSearchResponse, EqlSearchResponse } from './types';
 import { EqlSearchStrategyResponse } from '../../common/search';
 
@@ -15,7 +15,7 @@ import { EqlSearchStrategyResponse } from '../../common/search';
 export function toAsyncKibanaSearchResponse(response: AsyncSearchResponse) {
   return {
     id: response.id,
-    rawResponse: response.response,
+    rawResponse: shimHitsTotal(response.response),
     isPartial: response.is_partial,
     isRunning: response.is_running,
     ...getTotalLoaded(response.response),
@@ -31,7 +31,7 @@ export function toEqlKibanaSearchResponse(
 ): EqlSearchStrategyResponse {
   return {
     id: response.body.id,
-    rawResponse: response,
+    rawResponse: shimHitsTotal(response.response),
     isPartial: response.body.is_partial,
     isRunning: response.body.is_running,
   };
