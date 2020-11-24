@@ -39,6 +39,8 @@ export const {
   isColumnTransferable,
   getErrorMessages,
   isReferenced,
+  adjustTimeScaleLabelSuffix,
+  DEFAULT_TIME_SCALE,
 } = actualHelpers;
 
 export const { createMockedReferenceOperation } = actualMocks;

@@ -22,6 +22,8 @@ import type {
 import { getSortScoreByPriority } from './operations';
 import { mergeLayer } from '../state_helpers';
 import { generateId } from '../../id_generator';
+import { TimeScaleUnit } from '../time_scale';
+import { unitSuffixesLong } from '../suffix_formatter';
 
 interface ColumnChange {
   op: OperationType;
@@ -237,11 +239,8 @@ export function replaceColumn({
     }
 
     if (operationDefinition.input === 'none') {
-      const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
-      if (previousColumn.customLabel) {
-        newColumn.customLabel = true;
-        newColumn.label = previousColumn.label;
-      }
+      let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
+      newColumn = adjustLabelAndTimeScale(newColumn, previousColumn);
 
       const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
       return {
@@ -255,12 +254,8 @@ export function replaceColumn({
       throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
     }
 
-    const newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
-
-    if (previousColumn.customLabel) {
-      newColumn.customLabel = true;
-      newColumn.label = previousColumn.label;
-    }
+    let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
+    newColumn = adjustLabelAndTimeScale(newColumn, previousColumn);
 
     const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
     return {
@@ -280,6 +275,8 @@ export function replaceColumn({
     if (previousColumn.customLabel) {
       newColumn.customLabel = true;
       newColumn.label = previousColumn.label;
+    } else {
+      newColumn.label = adjustTimeScaleLabelSuffix(newColumn.label, undefined, newColumn.timeScale);
     }
 
     const newColumns = { ...layer.columns, [columnId]: newColumn };
@@ -291,6 +288,35 @@ export function replaceColumn({
   } else {
     throw new Error('nothing changed');
   }
+}
+
+function adjustLabelAndTimeScale(
+  newColumn: IndexPatternColumn,
+  previousColumn: IndexPatternColumn
+) {
+  const adjustedColumn = { ...newColumn };
+  if (previousColumn.customLabel) {
+    adjustedColumn.customLabel = true;
+    adjustedColumn.label = previousColumn.label;
+  }
+  const newOperationTimeScaleMode =
+    operationDefinitionMap[newColumn.operationType].timeScalingMode || 'disabled';
+
+  if (
+    (previousColumn.timeScale && newOperationTimeScaleMode !== 'disabled') ||
+    newOperationTimeScaleMode === 'mandatory'
+  ) {
+    adjustedColumn.timeScale = previousColumn.timeScale || DEFAULT_TIME_SCALE;
+    if (!adjustedColumn.customLabel) {
+      adjustedColumn.label = adjustTimeScaleLabelSuffix(
+        adjustedColumn.label,
+        undefined,
+        previousColumn.timeScale
+      );
+    }
+  }
+
+  return adjustedColumn;
 }
 
 function addBucket(
@@ -330,6 +356,16 @@ function addMetric(
   column: IndexPatternColumn,
   addedColumnId: string
 ): IndexPatternLayer {
+  const timeScaledColumn = { ...column };
+  const operationDefinition = operationDefinitionMap[column.operationType];
+  if (operationDefinition.timeScalingMode === 'mandatory') {
+    timeScaledColumn.timeScale = DEFAULT_TIME_SCALE;
+    timeScaledColumn.label = adjustTimeScaleLabelSuffix(
+      timeScaledColumn.label,
+      undefined,
+      DEFAULT_TIME_SCALE
+    );
+  }
   return {
     ...layer,
     columns: {
@@ -611,4 +647,26 @@ function isOperationAllowedAsReference({
     (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
     hasValidMetadata
   );
+}
+
+export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
+
+export function adjustTimeScaleLabelSuffix(
+  oldLabel: string,
+  previousTimeScale: TimeScaleUnit | undefined,
+  newTimeScale: TimeScaleUnit | undefined
+) {
+  let cleanedLabel = oldLabel;
+  // remove added suffix if column had a time scale previously
+  if (previousTimeScale) {
+    const suffixPosition = oldLabel.lastIndexOf(` ${unitSuffixesLong[previousTimeScale]}`);
+    if (suffixPosition !== -1) {
+      cleanedLabel = oldLabel.substring(0, suffixPosition);
+    }
+  }
+  if (!newTimeScale) {
+    return cleanedLabel;
+  }
+  // add new suffix if column has a time scale now
+  return `${cleanedLabel} ${unitSuffixesLong[newTimeScale]}`;
 }

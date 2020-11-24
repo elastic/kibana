@@ -810,7 +810,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           col2: {
             dataType: 'number',
             isBucketed: false,
-            label: '',
+            label: 'Count of records',
             operationType: 'count',
             sourceField: 'Records',
             ...colOverrides,
@@ -869,7 +869,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columns: {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
-                timeScale: 'm',
+                timeScale: 's',
+                label: 'Count of records per second',
               }),
             },
           },
@@ -878,7 +879,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     it('should allow to change time scaling', () => {
-      const props = getProps({ timeScale: 's' });
+      const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper
         .find('[data-test-subj="indexPattern-time-scaling-unit"]')
@@ -895,6 +896,33 @@ describe('IndexPatternDimensionEditorPanel', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 'h',
+                label: 'Count of records per hour',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should not adjust label if it is custom', () => {
+      const props = getProps({ timeScale: 's', customLabel: true, label: 'My label' });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+        .find(EuiSelect)
+        .prop('onChange')!(({
+        target: { value: 'h' },
+      } as unknown) as ChangeEvent<HTMLSelectElement>);
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 'h',
+                label: 'My label',
               }),
             },
           },
@@ -903,7 +931,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     it('should allow to remove time scaling', () => {
-      const props = getProps({ timeScale: 's' });
+      const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper
         .find('[data-test-subj="indexPattern-time-scaling-remove"]')
@@ -921,6 +949,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: undefined,
+                label: 'Count of records',
               }),
             },
           },

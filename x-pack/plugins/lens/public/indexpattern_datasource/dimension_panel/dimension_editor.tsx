@@ -338,9 +338,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <TimeScaling
             selectedColumn={selectedColumn}
             columnId={columnId}
-            layerId={layerId}
-            state={state}
-            setState={setState}
+            layer={state.layers[layerId]}
+            updateLayer={(newLayer: IndexPatternLayer) =>
+              setState(mergeLayer({ layerId, state, newLayer }))
+            }
           />
         )}
 

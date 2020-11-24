@@ -88,7 +88,7 @@ export function getTimeScaleFunction(data: DataPublicPluginStart) {
         outputColumnId,
         inputColumnId,
         outputColumnName,
-        { allowColumnOverride: true }
+        { allowColumnOverwrite: true }
       );
 
       if (!resultColumns) {

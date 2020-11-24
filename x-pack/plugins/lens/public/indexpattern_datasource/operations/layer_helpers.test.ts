@@ -436,6 +436,8 @@ describe('state_helpers', () => {
         );
       });
     });
+
+    // TODO add test for mandatory time scale operation once counter rate is implemented
   });
 
   describe('replaceColumn', () => {
@@ -724,6 +726,101 @@ describe('state_helpers', () => {
           customLabel: true,
         })
       );
+    });
+
+    describe('time scale transition', () => {
+      it('should carry over time scale and adjust label on operation', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1'],
+              columns: {
+                col1: {
+                  label: 'Count of records per hour',
+                  timeScale: 'h',
+                  dataType: 'number',
+                  isBucketed: false,
+
+                  // Private
+                  operationType: 'count',
+                  sourceField: 'Records',
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'sum',
+            field: indexPattern.fields[2],
+          }).columns.col1
+        ).toEqual(
+          expect.objectContaining({
+            timeScale: 'h',
+            label: 'Sum of bytes per hour',
+          })
+        );
+      });
+
+      it('should carry over time scale and retain custom label', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1'],
+              columns: {
+                col1: {
+                  label: 'Custom label',
+                  customLabel: true,
+                  timeScale: 'h',
+                  dataType: 'number',
+                  isBucketed: false,
+
+                  // Private
+                  operationType: 'count',
+                  sourceField: 'Records',
+                },
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'sum',
+            field: indexPattern.fields[2],
+          }).columns.col1
+        ).toEqual(
+          expect.objectContaining({
+            timeScale: 'h',
+            label: 'Custom label',
+          })
+        );
+      });
+
+      it('should not carry over time scale if target does not support time scaling', () => {
+        const result = replaceColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: '',
+                timeScale: 'h',
+                dataType: 'number',
+                isBucketed: false,
+
+                // Private
+                operationType: 'count',
+                sourceField: 'Records',
+              },
+            },
+          },
+          indexPattern,
+          columnId: 'col1',
+          op: 'avg',
+          field: indexPattern.fields[2],
+        }).columns.col1;
+        expect(result.timeScale).toBeUndefined();
+      });
+
+      // TODO add test for mandatory time scale operation once counter rate is implemented
     });
 
     it('should execute adjustments for other columns', () => {

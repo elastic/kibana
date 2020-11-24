@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiToolTip } from '@elastic/eui';
 import {
   EuiLink,
   EuiFormRow,
@@ -18,30 +19,50 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { StateSetter } from '../../types';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
-import { mergeLayer } from '../state_helpers';
+import {
+  adjustTimeScaleLabelSuffix,
+  DEFAULT_TIME_SCALE,
+  IndexPatternColumn,
+  operationDefinitionMap,
+} from '../operations';
 import { unitSuffixesLong } from '../suffix_formatter';
 import { TimeScaleUnit } from '../time_scale';
-import { IndexPatternPrivateState } from '../types';
+import { IndexPatternLayer } from '../types';
 
-const DEFAULT_TIME_SCALE = 'm' as const;
+export function setTimeScaling(
+  columnId: string,
+  layer: IndexPatternLayer,
+  timeScale: TimeScaleUnit | undefined
+) {
+  const currentColumn = layer.columns[columnId];
+  const label = currentColumn.customLabel
+    ? currentColumn.label
+    : adjustTimeScaleLabelSuffix(currentColumn.label, currentColumn.timeScale, timeScale);
+  return {
+    ...layer,
+    columns: {
+      ...layer.columns,
+      [columnId]: {
+        ...layer.columns[columnId],
+        label,
+        timeScale,
+      },
+    },
+  };
+}
 
 export function TimeScaling({
   selectedColumn,
   columnId,
-  layerId,
-  state,
-  setState,
+  layer,
+  updateLayer,
 }: {
   selectedColumn: IndexPatternColumn;
   columnId: string;
-  layerId: string;
-  state: IndexPatternPrivateState;
-  setState: StateSetter<IndexPatternPrivateState>;
+  layer: IndexPatternLayer;
+  updateLayer: (newLayer: IndexPatternLayer) => void;
 }) {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const layer = state.layers[layerId];
   const hasDateHistogram = layer.columnOrder.some(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   );
@@ -85,26 +106,11 @@ export function TimeScaling({
               data-test-subj="indexPattern-time-scaling-enable"
               color="text"
               onClick={() => {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: {
-                      ...state.layers[layerId],
-                      columns: {
-                        ...state.layers[layerId].columns,
-                        [columnId]: {
-                          ...selectedColumn,
-                          timeScale: DEFAULT_TIME_SCALE,
-                        },
-                      },
-                    },
-                  })
-                );
+                updateLayer(setTimeScaling(columnId, layer, DEFAULT_TIME_SCALE));
               }}
             >
               {i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
-                defaultMessage: 'Show as rate',
+                defaultMessage: 'Show with normalized time units',
               })}
             </EuiLink>
           </EuiText>
@@ -117,9 +123,20 @@ export function TimeScaling({
     <EuiFormRow
       display="columnCompressed"
       fullWidth
-      label={i18n.translate('xpack.lens.indexPattern.timeScale.label', {
-        defaultMessage: 'Normalize by unit',
-      })}
+      label={
+        <EuiToolTip
+          content={i18n.translate('xpack.lens.indexPattern.timeScale.tooltip', {
+            defaultMessage:
+              'Normalized values are displayed as a rate, calculated from the date histogram interval. Values can scale down from a larger interval or scale up from a smaller interval. Partial intervals are handled correctly.',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.lens.indexPattern.timeScale.label', {
+              defaultMessage: 'Normalize by time unit',
+            })}
+          </span>
+        </EuiToolTip>
+      }
     >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
@@ -132,22 +149,7 @@ export function TimeScaling({
             data-test-subj="indexPattern-time-scaling-unit"
             value={selectedColumn.timeScale}
             onChange={(e) => {
-              setState(
-                mergeLayer({
-                  state,
-                  layerId,
-                  newLayer: {
-                    ...state.layers[layerId],
-                    columns: {
-                      ...state.layers[layerId].columns,
-                      [columnId]: {
-                        ...selectedColumn,
-                        timeScale: e.target.value as TimeScaleUnit,
-                      },
-                    },
-                  },
-                })
-              );
+              updateLayer(setTimeScaling(columnId, layer, e.target.value as TimeScaleUnit));
             }}
           />
         </EuiFlexItem>
@@ -157,25 +159,10 @@ export function TimeScaling({
               data-test-subj="indexPattern-time-scaling-remove"
               color="danger"
               aria-label={i18n.translate('xpack.lens.timeScale.removeLabel', {
-                defaultMessage: 'Remove normalizing by unit',
+                defaultMessage: 'Remove normalizing by time unit',
               })}
               onClick={() => {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: {
-                      ...state.layers[layerId],
-                      columns: {
-                        ...state.layers[layerId].columns,
-                        [columnId]: {
-                          ...selectedColumn,
-                          timeScale: undefined,
-                        },
-                      },
-                    },
-                  })
-                );
+                updateLayer(setTimeScaling(columnId, layer, undefined));
               }}
               iconType="cross"
             />
