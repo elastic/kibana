@@ -29,7 +29,7 @@ import { useConfigurationIssues } from '../../../../form';
 
 import { i18nTexts } from '../../../../i18n_texts';
 
-import { FieldLoadingError, DescribedFormField } from '../../../index';
+import { FieldLoadingError, DescribedFormField, LearnMoreLink } from '../../../index';
 
 import './_searchable_snapshot_field.scss';
 
@@ -130,7 +130,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
         'data-test-subj': 'searchableSnapshotToggle',
         label: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
-          { defaultMessage: 'Use searchable snapshot' }
+          { defaultMessage: 'Create searchable snapshot' }
         ),
         initialValue: Boolean(
           policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
@@ -145,12 +145,13 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
       }
       description={
         <EuiTextColor color="subdued">
-          {i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription',
-            {
-              defaultMessage: 'Take a snapshot of the index and mount it as a searchable snapshot.',
-            }
-          )}
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
+            defaultMessage="Take a snapshot of the managed index in the selected repository and mount it as a searchable snapshot. {learnMoreLink}."
+            values={{
+              learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
+            }}
+          />
         </EuiTextColor>
       }
       fullWidth
@@ -168,7 +169,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             >
               {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody', {
                 defaultMessage:
-                  'Force merge, shrink, freeze and searchable snapshots are not allowed when this action is enabled in the hot phase.',
+                  'Force merge, shrink, freeze and cold phase searchable snapshots are not allowed when searchable snapshots are enabled in the hot phase.',
               })}
             </EuiCallOut>
             <EuiSpacer size="s" />
