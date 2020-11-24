@@ -18,11 +18,6 @@
  */
 
 import { Subject } from 'rxjs';
+import { PointerEvent } from '@elastic/charts';
 
-export const ACTIVE_CURSOR = 'ACTIVE_CURSOR';
-
-interface ActiveCursor {
-  cursor: any;
-}
-
-export const activeCursor$ = new Subject<ActiveCursor>();
+export const activeCursor$ = new Subject<PointerEvent>();

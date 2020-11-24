@@ -54,7 +54,7 @@ const generateAnnotationData = (values, formatter) =>
 const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
 const handleCursorUpdate = (cursor) => {
-  activeCursor$.next({ cursor });
+  activeCursor$.next(cursor);
 };
 
 export const TimeSeries = ({
@@ -73,8 +73,8 @@ export const TimeSeries = ({
   const chartRef = useRef();
 
   useEffect(() => {
-    const updateCursor = ({ cursor }) => {
-      if (chartRef.current && cursor) {
+    const updateCursor = (cursor) => {
+      if (chartRef.current) {
         chartRef.current.dispatchExternalPointerEvent(cursor);
       }
     };
