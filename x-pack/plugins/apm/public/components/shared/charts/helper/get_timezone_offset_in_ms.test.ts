@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getTimezoneOffsetInMs } from './getTimezoneOffsetInMs';
+import { getTimezoneOffsetInMs } from './get_timezone_offset_in_ms';
 import moment from 'moment-timezone';
 
 // FAILING: https://github.com/elastic/kibana/issues/50005

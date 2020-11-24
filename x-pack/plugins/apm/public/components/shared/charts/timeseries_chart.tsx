@@ -5,8 +5,10 @@
  */
 
 import {
+  AreaSeries,
   Axis,
   Chart,
+  CurveType,
   LegendItemListener,
   LineSeries,
   niceTimeFormatter,
@@ -19,14 +21,14 @@ import {
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { TimeSeries } from '../../../../../typings/timeseries';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useChartsSync } from '../../../../hooks/use_charts_sync';
-import { unit } from '../../../../style/variables';
-import { Annotations } from '../annotations';
-import { ChartContainer } from '../chart_container';
-import { onBrushEnd } from '../helper/helper';
+import { TimeSeries } from '../../../../typings/timeseries';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useChartsSync } from '../../../hooks/use_charts_sync';
+import { unit } from '../../../style/variables';
+import { Annotations } from './annotations';
+import { ChartContainer } from './chart_container';
+import { onBrushEnd } from './helper/helper';
 
 interface Props {
   id: string;
@@ -45,7 +47,7 @@ interface Props {
   showAnnotations?: boolean;
 }
 
-export function LineChart({
+export function TimeseriesChart({
   id,
   height = unit * 16,
   fetchStatus,
@@ -127,8 +129,10 @@ export function LineChart({
         {showAnnotations && <Annotations />}
 
         {timeseries.map((serie) => {
+          const Series = serie.type === 'area' ? AreaSeries : LineSeries;
+
           return (
-            <LineSeries
+            <Series
               key={serie.title}
               id={serie.title}
               xScaleType={ScaleType.Time}
@@ -137,6 +141,7 @@ export function LineChart({
               yAccessors={['y']}
               data={isEmpty ? [] : serie.data}
               color={serie.color}
+              curve={CurveType.CURVE_MONOTONE_X}
             />
           );
         })}
