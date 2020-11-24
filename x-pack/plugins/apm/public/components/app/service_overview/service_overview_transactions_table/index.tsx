@@ -36,9 +36,7 @@ import { ImpactBar } from '../../../shared/ImpactBar';
 import { ServiceOverviewTable } from '../service_overview_table';
 
 type ServiceTransactionGroupItem = ValuesType<
-  APIReturnType<
-    'GET /api/apm/services/{serviceName}/overview_transaction_groups'
-  >['transactionGroups']
+  APIReturnType<'GET /api/apm/services/{serviceName}/overview_transaction_groups'>['transactionGroups']
 >;
 
 interface Props {
