@@ -71,7 +71,10 @@ export function getInvalidColumnsForLayer(
 
 export function isColumnInvalid(column: IndexPatternColumn, indexPattern: IndexPattern) {
   const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
-  return operationDefinition.hasInvalidReferences(column, indexPattern);
+  return !!(
+    operationDefinition.hasInvalidReferences &&
+    operationDefinition.hasInvalidReferences(column, indexPattern)
+  );
 }
 
 export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPattern: IndexPattern) {
