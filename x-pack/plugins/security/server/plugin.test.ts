@@ -114,7 +114,6 @@ describe('Security Plugin', () => {
                   "isEnabled": [Function],
                   "isLicenseAvailable": [Function],
                 },
-                "registerSpacesService": [Function],
               }
             `);
     });

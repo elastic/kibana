@@ -76,11 +76,9 @@ export interface ILayer {
   getType(): string | undefined;
   isVisible(): boolean;
   cloneDescriptor(): Promise<LayerDescriptor>;
-  renderStyleEditor({
-    onStyleDescriptorChange,
-  }: {
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
-  }): ReactElement<any> | null;
+  renderStyleEditor(
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+  ): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
   destroy: () => void;
@@ -437,16 +435,14 @@ export class AbstractLayer implements ILayer {
     return null;
   }
 
-  renderStyleEditor({
-    onStyleDescriptorChange,
-  }: {
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
-  }): ReactElement<any> | null {
+  renderStyleEditor(
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+  ): ReactElement<any> | null {
     const style = this.getStyleForEditing();
     if (!style) {
       return null;
     }
-    return style.renderEditor({ layer: this, onStyleDescriptorChange });
+    return style.renderEditor(onStyleDescriptorChange);
   }
 
   getIndexPatternIds(): string[] {

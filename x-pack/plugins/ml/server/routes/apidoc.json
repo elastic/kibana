@@ -17,6 +17,7 @@
     "UpdateDataFrameAnalytics",
     "DeleteDataFrameAnalytics",
     "JobsExist",
+    "GetDataFrameAnalyticsIdMap",
 
     "DataVisualizer",
     "GetOverallStats",

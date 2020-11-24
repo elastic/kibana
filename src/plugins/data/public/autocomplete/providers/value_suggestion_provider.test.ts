@@ -18,28 +18,9 @@
  */
 
 import { stubIndexPattern, stubFields } from '../../stubs';
+import { TimefilterSetup } from '../../query';
 import { setupValueSuggestionProvider, ValueSuggestionsGetFn } from './value_suggestion_provider';
 import { IUiSettingsClient, CoreSetup } from 'kibana/public';
-
-jest.mock('../../services', () => ({
-  getQueryService: () => ({
-    timefilter: {
-      timefilter: {
-        createFilter: () => {
-          return {
-            time: 'fake',
-          };
-        },
-        getTime: () => {
-          return {
-            to: 'now',
-            from: 'now-15m',
-          };
-        },
-      },
-    },
-  }),
-}));
 
 describe('FieldSuggestions', () => {
   let getValueSuggestions: ValueSuggestionsGetFn;
@@ -50,7 +31,23 @@ describe('FieldSuggestions', () => {
     const uiSettings = { get: (key: string) => shouldSuggestValues } as IUiSettingsClient;
     http = { fetch: jest.fn() };
 
-    getValueSuggestions = setupValueSuggestionProvider({ http, uiSettings } as CoreSetup);
+    getValueSuggestions = setupValueSuggestionProvider({ http, uiSettings } as CoreSetup, {
+      timefilter: ({
+        timefilter: {
+          createFilter: () => {
+            return {
+              time: 'fake',
+            };
+          },
+          getTime: () => {
+            return {
+              to: 'now',
+              from: 'now-15m',
+            };
+          },
+        },
+      } as unknown) as TimefilterSetup,
+    });
   });
 
   describe('with value suggestions disabled', () => {

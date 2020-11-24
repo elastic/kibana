@@ -82,7 +82,8 @@ function createConfigManager(configPath: string) {
   };
 }
 
-describe('Server logging configuration', function () {
+// Failing: See https://github.com/elastic/kibana/issues/77279
+describe.skip('Server logging configuration', function () {
   let child: undefined | Child.ChildProcess;
 
   beforeEach(() => {

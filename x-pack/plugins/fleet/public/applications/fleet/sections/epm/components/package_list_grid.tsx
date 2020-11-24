@@ -37,7 +37,7 @@ export function PackageListGrid({ isLoading, controls, title, list }: ListProps)
   const localSearchRef = useLocalSearch(list);
 
   const onQueryChange = ({
-    // eslint-disable-next-line no-shadow
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     query,
     queryText: userInput,
     error,

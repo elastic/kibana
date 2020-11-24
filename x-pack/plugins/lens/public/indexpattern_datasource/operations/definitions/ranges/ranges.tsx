@@ -122,9 +122,11 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       };
     }
   },
+  getDefaultLabel: (column, indexPattern) =>
+    indexPattern.getFieldByName(column.sourceField)!.displayName,
   buildColumn({ field }) {
     return {
-      label: field.name,
+      label: field.displayName,
       dataType: 'number', // string for Range
       operationType: 'range',
       sourceField: field.name,

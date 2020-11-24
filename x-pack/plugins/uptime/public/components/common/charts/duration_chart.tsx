@@ -27,6 +27,7 @@ import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
 import { UptimeThemeContext } from '../../../contexts';
+import { MONITOR_CHART_HEIGHT } from '../../monitor';
 
 interface DurationChartProps {
   /**
@@ -86,7 +87,7 @@ export const DurationChartComponent = ({
   };
 
   return (
-    <ChartWrapper height="400px" loading={loading}>
+    <ChartWrapper height={MONITOR_CHART_HEIGHT} loading={loading}>
       {hasLines ? (
         <Chart>
           <Settings

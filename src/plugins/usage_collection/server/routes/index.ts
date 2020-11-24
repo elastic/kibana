@@ -22,7 +22,7 @@ import {
   ISavedObjectsRepository,
   MetricsServiceSetup,
   ServiceStatus,
-} from 'kibana/server';
+} from 'src/core/server';
 import { Observable } from 'rxjs';
 import { CollectorSet } from '../collector';
 import { registerUiMetricRoute } from './report_metrics';

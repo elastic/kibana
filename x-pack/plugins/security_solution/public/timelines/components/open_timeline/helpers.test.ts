@@ -286,6 +286,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
+        expandedEvent: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -321,7 +322,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
 
@@ -385,6 +385,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
+        expandedEvent: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -420,7 +421,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
 
@@ -484,6 +484,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
+        expandedEvent: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -519,7 +520,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
 
@@ -581,6 +581,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
+        expandedEvent: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -616,7 +617,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
 
@@ -717,6 +717,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
+        expandedEvent: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -749,7 +750,6 @@ describe('helpers', () => {
           sortDirection: 'desc',
         },
         status: TimelineStatus.draft,
-        width: 1100,
         id: 'savedObject-1',
       });
     });
@@ -841,6 +841,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
+        expandedEvent: {},
         filters: [
           {
             $state: {
@@ -916,7 +917,6 @@ describe('helpers', () => {
           sortDirection: 'desc',
         },
         status: TimelineStatus.draft,
-        width: 1100,
         id: 'savedObject-1',
       });
     });
@@ -981,6 +981,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
+        expandedEvent: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -1016,7 +1017,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
 
@@ -1080,6 +1080,7 @@ describe('helpers', () => {
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
+        expandedEvent: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -1115,7 +1116,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
   });

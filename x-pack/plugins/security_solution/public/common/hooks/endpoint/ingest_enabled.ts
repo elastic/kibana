@@ -7,7 +7,7 @@
 import { ApplicationStart } from 'src/core/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 /**
- * Returns an object which ingest permissions are allowed
+ * Returns an object which fleet permissions are allowed
  */
 export const useIngestEnabledCheck = (): {
   allEnabled: boolean;
@@ -17,12 +17,12 @@ export const useIngestEnabledCheck = (): {
 } => {
   const { services } = useKibana<{ application: ApplicationStart }>();
 
-  // Check if Ingest Manager is present in the configuration
-  const show = Boolean(services.application.capabilities.ingestManager?.show);
-  const write = Boolean(services.application.capabilities.ingestManager?.write);
-  const read = Boolean(services.application.capabilities.ingestManager?.read);
+  // Check if Fleet is present in the configuration
+  const show = Boolean(services.application.capabilities.fleet?.show);
+  const write = Boolean(services.application.capabilities.fleet?.write);
+  const read = Boolean(services.application.capabilities.fleet?.read);
 
-  // Check if all Ingest Manager permissions are enabled
+  // Check if all Fleet permissions are enabled
   const allEnabled = show && read && write ? true : false;
 
   return {

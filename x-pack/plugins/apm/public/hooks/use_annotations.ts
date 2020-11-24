@@ -19,7 +19,7 @@ export function useAnnotations() {
   const { data = INITIAL_STATE } = useFetcher(() => {
     if (start && end && serviceName) {
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/annotation/search',
+        endpoint: 'GET /api/apm/services/{serviceName}/annotation/search',
         params: {
           path: {
             serviceName,

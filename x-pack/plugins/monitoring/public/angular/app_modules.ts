@@ -99,28 +99,31 @@ function createLocalStateModule(
 ) {
   angular
     .module('monitoring/State', ['monitoring/Private'])
-    .service('globalState', function (
-      Private: IPrivate,
-      $rootScope: ng.IRootScopeService,
-      $location: ng.ILocationService
-    ) {
-      function GlobalStateProvider(this: any) {
-        const state = new GlobalState(query, toasts, $rootScope, $location, this);
-        const initialState: any = state.getState();
-        for (const key in initialState) {
-          if (!initialState.hasOwnProperty(key)) {
-            continue;
+    .service(
+      'globalState',
+      function (
+        Private: IPrivate,
+        $rootScope: ng.IRootScopeService,
+        $location: ng.ILocationService
+      ) {
+        function GlobalStateProvider(this: any) {
+          const state = new GlobalState(query, toasts, $rootScope, $location, this);
+          const initialState: any = state.getState();
+          for (const key in initialState) {
+            if (!initialState.hasOwnProperty(key)) {
+              continue;
+            }
+            this[key] = initialState[key];
           }
-          this[key] = initialState[key];
+          this.save = () => {
+            const newState = { ...this };
+            delete newState.save;
+            state.setState(newState);
+          };
         }
-        this.save = () => {
-          const newState = { ...this };
-          delete newState.save;
-          state.setState(newState);
-        };
+        return Private(GlobalStateProvider);
       }
-      return Private(GlobalStateProvider);
-    });
+    );
 }
 
 function createMonitoringAppServices() {

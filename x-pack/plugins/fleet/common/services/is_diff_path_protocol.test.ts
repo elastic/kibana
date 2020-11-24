@@ -5,7 +5,7 @@
  */
 import { isDiffPathProtocol } from './is_diff_path_protocol';
 
-describe('Ingest Manager - isDiffPathProtocol', () => {
+describe('Fleet - isDiffPathProtocol', () => {
   it('returns true for different paths', () => {
     expect(
       isDiffPathProtocol([
