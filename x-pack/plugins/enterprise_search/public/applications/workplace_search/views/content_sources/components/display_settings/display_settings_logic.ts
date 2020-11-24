@@ -18,13 +18,13 @@ import { SourceLogic } from '../../source_logic';
 
 const SUCCESS_MESSAGE = 'Display Settings have been successfuly updated.';
 
-import { DetailField, SearchResultConfig, OptionValue } from '../../../../types';
+import { DetailField, SearchResultConfig, OptionValue, Result } from '../../../../types';
 
 export interface DisplaySettingsResponseProps {
   sourceName: string;
   searchResultConfig: SearchResultConfig;
   schemaFields: object;
-  exampleDocuments: object[];
+  exampleDocuments: Result[];
 }
 
 export interface DisplaySettingsInitialData extends DisplaySettingsResponseProps {
@@ -66,7 +66,7 @@ interface DisplaySettingsValues {
   sourceName: string;
   sourceId: string;
   schemaFields: object;
-  exampleDocuments: object[];
+  exampleDocuments: Result[];
   serverSearchResultConfig: SearchResultConfig;
   searchResultConfig: SearchResultConfig;
   serverRoute: string;
