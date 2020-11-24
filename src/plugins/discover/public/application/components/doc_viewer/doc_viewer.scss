@@ -45,10 +45,9 @@
   white-space: nowrap;
 }
 .kbnDocViewer__buttons {
-  width: 60px;
+  width: 96px;
 
   // Show all icons if one is focused,
-  // IE doesn't support, but the fallback is just the focused button becomes visible
   &:focus-within {
     .kbnDocViewer__actionButton {
       opacity: 1;
