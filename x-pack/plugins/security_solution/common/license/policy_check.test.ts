@@ -9,11 +9,11 @@ import { isEndpointPolicyValidForLicense } from './policy_check';
 describe('policy_check licensed feature verification', () => {
   // mock license service
 
-  it.skip('allows malware notification to be disabled with a Platinum license');
-  it.skip('blocks malware notification changes below Platinum licenses');
+  it.todo('allows malware notification to be disabled with a Platinum license');
+  it.todo('blocks malware notification changes below Platinum licenses');
 
-  it.skip('allows malware notification message changes with a Platinum license');
-  it.skip('blocks malware notification message changes below Platinum licenses');
+  it.todo('allows malware notification message changes with a Platinum license');
+  it.todo('blocks malware notification message changes below Platinum licenses');
 
-  it.skip('allows default policyConfig with Basic');
+  it.todo('allows default policyConfig with Basic');
 });
