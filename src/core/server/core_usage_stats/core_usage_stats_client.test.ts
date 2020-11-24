@@ -42,20 +42,24 @@ describe('CoreUsageStatsClient', () => {
     references: [],
   });
 
+  const firstPartyRequestHeaders = { 'kbn-version': 'a', origin: 'b', referer: 'c' }; // as long as these three header fields are truthy, this will be treated like a first-party request
   const createOptions = { overwrite: true, id: CORE_USAGE_STATS_TYPE };
 
   // mock data for existing fields
   const savedObjectsImport = {
     total: 5,
+    kibanaRequest: { yes: 5, no: 0 },
     createNewCopiesEnabled: { yes: 2, no: 3 },
     overwriteEnabled: { yes: 1, no: 4 },
   };
   const savedObjectsResolveImportErrors = {
     total: 13,
+    kibanaRequest: { yes: 13, no: 0 },
     createNewCopiesEnabled: { yes: 6, no: 7 },
   };
   const savedObjectsExport = {
     total: 17,
+    kibanaRequest: { yes: 17, no: 0 },
     allTypesSelected: { yes: 8, no: 9 },
   };
 
@@ -100,6 +104,7 @@ describe('CoreUsageStatsClient', () => {
           apiCalls: {
             savedObjectsImport: {
               total: 1,
+              kibanaRequest: { yes: 0, no: 1 },
               createNewCopiesEnabled: { yes: 0, no: 1 },
               overwriteEnabled: { yes: 0, no: 1 },
             },
@@ -109,7 +114,7 @@ describe('CoreUsageStatsClient', () => {
       );
     });
 
-    it('increments existing fields, leaves other fields unchanged, and handles createNewCopies=true / overwrite=true appropriately', async () => {
+    it('increments existing fields, leaves other fields unchanged, and handles options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(
         createMockData({
@@ -118,6 +123,7 @@ describe('CoreUsageStatsClient', () => {
       );
 
       await usageStatsClient.incrementSavedObjectsImport({
+        headers: firstPartyRequestHeaders,
         createNewCopies: true,
         overwrite: true,
       } as IncrementSavedObjectsImportOptions);
@@ -128,6 +134,10 @@ describe('CoreUsageStatsClient', () => {
             // these fields are changed
             savedObjectsImport: {
               total: savedObjectsImport.total + 1,
+              kibanaRequest: {
+                yes: savedObjectsImport.kibanaRequest.yes + 1,
+                no: savedObjectsImport.kibanaRequest.no,
+              },
               createNewCopiesEnabled: {
                 yes: savedObjectsImport.createNewCopiesEnabled.yes + 1,
                 no: savedObjectsImport.createNewCopiesEnabled.no,
@@ -173,6 +183,7 @@ describe('CoreUsageStatsClient', () => {
           apiCalls: {
             savedObjectsResolveImportErrors: {
               total: 1,
+              kibanaRequest: { yes: 0, no: 1 },
               createNewCopiesEnabled: { yes: 0, no: 1 },
             },
           },
@@ -181,7 +192,7 @@ describe('CoreUsageStatsClient', () => {
       );
     });
 
-    it('increments existing fields, leaves other fields unchanged, and handles createNewCopies=true appropriately', async () => {
+    it('increments existing fields, leaves other fields unchanged, and handles options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(
         createMockData({
@@ -190,6 +201,7 @@ describe('CoreUsageStatsClient', () => {
       );
 
       await usageStatsClient.incrementSavedObjectsResolveImportErrors({
+        headers: firstPartyRequestHeaders,
         createNewCopies: true,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
@@ -199,6 +211,10 @@ describe('CoreUsageStatsClient', () => {
             // these fields are changed
             savedObjectsResolveImportErrors: {
               total: savedObjectsResolveImportErrors.total + 1,
+              kibanaRequest: {
+                yes: savedObjectsResolveImportErrors.kibanaRequest.yes + 1,
+                no: savedObjectsResolveImportErrors.kibanaRequest.no,
+              },
               createNewCopiesEnabled: {
                 yes: savedObjectsResolveImportErrors.createNewCopiesEnabled.yes + 1,
                 no: savedObjectsResolveImportErrors.createNewCopiesEnabled.no,
@@ -239,6 +255,7 @@ describe('CoreUsageStatsClient', () => {
           apiCalls: {
             savedObjectsExport: {
               total: 1,
+              kibanaRequest: { yes: 0, no: 1 },
               allTypesSelected: { yes: 0, no: 1 },
             },
           },
@@ -247,7 +264,7 @@ describe('CoreUsageStatsClient', () => {
       );
     });
 
-    it('increments existing fields, leaves other fields unchanged, and handles types appropriately', async () => {
+    it('increments existing fields, leaves other fields unchanged, and handles options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(
         createMockData({
@@ -256,6 +273,7 @@ describe('CoreUsageStatsClient', () => {
       );
 
       await usageStatsClient.incrementSavedObjectsExport({
+        headers: firstPartyRequestHeaders,
         types: ['foo', 'bar'],
         supportedTypes: ['foo', 'bar'],
       } as IncrementSavedObjectsExportOptions);
@@ -266,6 +284,10 @@ describe('CoreUsageStatsClient', () => {
             // these fields are changed
             savedObjectsExport: {
               total: savedObjectsExport.total + 1,
+              kibanaRequest: {
+                yes: savedObjectsExport.kibanaRequest.yes + 1,
+                no: savedObjectsExport.kibanaRequest.no,
+              },
               allTypesSelected: {
                 yes: savedObjectsExport.allTypesSelected.yes + 1,
                 no: savedObjectsExport.allTypesSelected.no,

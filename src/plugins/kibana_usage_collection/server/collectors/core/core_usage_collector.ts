@@ -118,6 +118,10 @@ export function getCoreUsageCollector(
       apiCalls: {
         savedObjectsImport: {
           total: { type: 'long' },
+          kibanaRequest: {
+            yes: { type: 'long' },
+            no: { type: 'long' },
+          },
           createNewCopiesEnabled: {
             yes: { type: 'long' },
             no: { type: 'long' },
@@ -129,6 +133,10 @@ export function getCoreUsageCollector(
         },
         savedObjectsResolveImportErrors: {
           total: { type: 'long' },
+          kibanaRequest: {
+            yes: { type: 'long' },
+            no: { type: 'long' },
+          },
           createNewCopiesEnabled: {
             yes: { type: 'long' },
             no: { type: 'long' },
@@ -136,6 +144,10 @@ export function getCoreUsageCollector(
         },
         savedObjectsExport: {
           total: { type: 'long' },
+          kibanaRequest: {
+            yes: { type: 'long' },
+            no: { type: 'long' },
+          },
           allTypesSelected: {
             yes: { type: 'long' },
             no: { type: 'long' },

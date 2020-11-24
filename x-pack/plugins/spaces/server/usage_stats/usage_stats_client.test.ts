@@ -28,16 +28,19 @@ describe('UsageStatsClient', () => {
     references: [],
   });
 
+  const firstPartyRequestHeaders = { 'kbn-version': 'a', origin: 'b', referer: 'c' }; // as long as these three header fields are truthy, this will be treated like a first-party request
   const createOptions = { overwrite: true, id: SPACES_USAGE_STATS_TYPE };
 
   // mock data for existing fields
   const copySavedObjects = {
     total: 5,
+    kibanaRequest: { yes: 5, no: 0 },
     createNewCopiesEnabled: { yes: 2, no: 3 },
     overwriteEnabled: { yes: 1, no: 4 },
   };
   const resolveCopySavedObjectsErrors = {
     total: 13,
+    kibanaRequest: { yes: 13, no: 0 },
     createNewCopiesEnabled: { yes: 6, no: 7 },
   };
 
@@ -82,6 +85,7 @@ describe('UsageStatsClient', () => {
           apiCalls: {
             copySavedObjects: {
               total: 1,
+              kibanaRequest: { yes: 0, no: 1 },
               createNewCopiesEnabled: { yes: 0, no: 1 },
               overwriteEnabled: { yes: 0, no: 1 },
             },
@@ -91,13 +95,14 @@ describe('UsageStatsClient', () => {
       );
     });
 
-    it('increments existing fields, leaves other fields unchanged, and handles createNewCopies=true / overwrite=true appropriately', async () => {
+    it('increments existing fields, leaves other fields unchanged, and handles options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(
         createMockData({ apiCalls: { copySavedObjects, resolveCopySavedObjectsErrors } })
       );
 
       await usageStatsClient.incrementCopySavedObjects({
+        headers: firstPartyRequestHeaders,
         createNewCopies: true,
         overwrite: true,
       } as IncrementCopySavedObjectsOptions);
@@ -108,6 +113,10 @@ describe('UsageStatsClient', () => {
             // these fields are changed
             copySavedObjects: {
               total: copySavedObjects.total + 1,
+              kibanaRequest: {
+                yes: copySavedObjects.kibanaRequest.yes + 1,
+                no: copySavedObjects.kibanaRequest.no,
+              },
               createNewCopiesEnabled: {
                 yes: copySavedObjects.createNewCopiesEnabled.yes + 1,
                 no: copySavedObjects.createNewCopiesEnabled.no,
@@ -152,6 +161,7 @@ describe('UsageStatsClient', () => {
           apiCalls: {
             resolveCopySavedObjectsErrors: {
               total: 1,
+              kibanaRequest: { yes: 0, no: 1 },
               createNewCopiesEnabled: { yes: 0, no: 1 },
             },
           },
@@ -160,13 +170,14 @@ describe('UsageStatsClient', () => {
       );
     });
 
-    it('increments existing fields, leaves other fields unchanged, and handles createNewCopies=true appropriately', async () => {
+    it('increments existing fields, leaves other fields unchanged, and handles options appropriately', async () => {
       const { usageStatsClient, repositoryMock } = setup();
       repositoryMock.get.mockResolvedValue(
         createMockData({ apiCalls: { copySavedObjects, resolveCopySavedObjectsErrors } })
       );
 
       await usageStatsClient.incrementResolveCopySavedObjectsErrors({
+        headers: firstPartyRequestHeaders,
         createNewCopies: true,
       } as IncrementResolveCopySavedObjectsErrorsOptions);
       expect(repositoryMock.create).toHaveBeenCalledWith(
@@ -176,6 +187,10 @@ describe('UsageStatsClient', () => {
             // these fields are changed
             resolveCopySavedObjectsErrors: {
               total: resolveCopySavedObjectsErrors.total + 1,
+              kibanaRequest: {
+                yes: resolveCopySavedObjectsErrors.kibanaRequest.yes + 1,
+                no: resolveCopySavedObjectsErrors.kibanaRequest.no,
+              },
               createNewCopiesEnabled: {
                 yes: resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes + 1,
                 no: resolveCopySavedObjectsErrors.createNewCopiesEnabled.no,

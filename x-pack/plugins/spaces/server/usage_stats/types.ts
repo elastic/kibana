@@ -8,6 +8,10 @@ export interface UsageStats {
   apiCalls?: {
     copySavedObjects?: {
       total: number;
+      kibanaRequest: {
+        yes: number;
+        no: number;
+      };
       createNewCopiesEnabled: {
         yes: number;
         no: number;
@@ -19,6 +23,10 @@ export interface UsageStats {
     };
     resolveCopySavedObjectsErrors?: {
       total: number;
+      kibanaRequest: {
+        yes: number;
+        no: number;
+      };
       createNewCopiesEnabled: {
         yes: number;
         no: number;

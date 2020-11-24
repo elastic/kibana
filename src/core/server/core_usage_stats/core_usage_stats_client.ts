@@ -20,38 +20,40 @@
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStats } from './types';
 import {
+  Headers,
   ISavedObjectsRepository,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsExportOptions,
 } from '..';
 
+interface BaseIncrementOptions {
+  headers?: Headers;
+}
 /** @internal */
-export type IncrementSavedObjectsImportOptions = Pick<
-  SavedObjectsImportOptions,
-  'createNewCopies' | 'overwrite'
->;
+export type IncrementSavedObjectsImportOptions = BaseIncrementOptions &
+  Pick<SavedObjectsImportOptions, 'createNewCopies' | 'overwrite'>;
 /** @internal */
-export type IncrementSavedObjectsResolveImportErrorsOptions = Pick<
-  SavedObjectsResolveImportErrorsOptions,
-  'createNewCopies'
->;
+export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptions &
+  Pick<SavedObjectsResolveImportErrorsOptions, 'createNewCopies'>;
 /** @internal */
-export type IncrementSavedObjectsExportOptions = Pick<SavedObjectsExportOptions, 'types'> & {
-  supportedTypes: string[];
-};
+export type IncrementSavedObjectsExportOptions = BaseIncrementOptions &
+  Pick<SavedObjectsExportOptions, 'types'> & { supportedTypes: string[] };
 
 const SAVED_OBJECTS_IMPORT_DEFAULT = Object.freeze({
   total: 0,
+  kibanaRequest: Object.freeze({ yes: 0, no: 0 }),
   createNewCopiesEnabled: Object.freeze({ yes: 0, no: 0 }),
   overwriteEnabled: Object.freeze({ yes: 0, no: 0 }),
 });
 const SAVED_OBJECTS_RESOLVE_IMPORT_ERRORS_DEFAULT = Object.freeze({
   total: 0,
+  kibanaRequest: Object.freeze({ yes: 0, no: 0 }),
   createNewCopiesEnabled: Object.freeze({ yes: 0, no: 0 }),
 });
 const SAVED_OBJECTS_EXPORT_DEFAULT = Object.freeze({
   total: 0,
+  kibanaRequest: Object.freeze({ yes: 0, no: 0 }),
   allTypesSelected: Object.freeze({ yes: 0, no: 0 }),
 });
 
@@ -78,6 +80,7 @@ export class CoreUsageStatsClient {
   }
 
   public async incrementSavedObjectsImport({
+    headers,
     createNewCopies,
     overwrite,
   }: IncrementSavedObjectsImportOptions) {
@@ -91,6 +94,7 @@ export class CoreUsageStatsClient {
         ...apiCalls,
         savedObjectsImport: {
           total: current.total + 1,
+          kibanaRequest: incrementKibanaRequestCounter(current.kibanaRequest, headers),
           createNewCopiesEnabled: incrementBooleanCounter(
             current.createNewCopiesEnabled,
             createNewCopies
@@ -103,6 +107,7 @@ export class CoreUsageStatsClient {
   }
 
   public async incrementSavedObjectsResolveImportErrors({
+    headers,
     createNewCopies,
   }: IncrementSavedObjectsResolveImportErrorsOptions) {
     const coreUsageStats = await this.getUsageStats();
@@ -117,6 +122,7 @@ export class CoreUsageStatsClient {
         ...apiCalls,
         savedObjectsResolveImportErrors: {
           total: current.total + 1,
+          kibanaRequest: incrementKibanaRequestCounter(current.kibanaRequest, headers),
           createNewCopiesEnabled: incrementBooleanCounter(
             current.createNewCopiesEnabled,
             createNewCopies
@@ -128,6 +134,7 @@ export class CoreUsageStatsClient {
   }
 
   public async incrementSavedObjectsExport({
+    headers,
     types,
     supportedTypes,
   }: IncrementSavedObjectsExportOptions) {
@@ -142,6 +149,7 @@ export class CoreUsageStatsClient {
         ...apiCalls,
         savedObjectsExport: {
           total: current.total + 1,
+          kibanaRequest: incrementKibanaRequestCounter(current.kibanaRequest, headers),
           allTypesSelected: incrementBooleanCounter(current.allTypesSelected, isAllTypesSelected),
         },
       },
@@ -157,6 +165,16 @@ export class CoreUsageStatsClient {
       // do nothing
     }
   }
+}
+
+function incrementKibanaRequestCounter(current: { yes: number; no: number }, headers?: Headers) {
+  // The presence of these three request headers gives us a good indication that this is a first-party request from the Kibana client.
+  // We can't be 100% certain, but this is a reasonable attempt.
+  const isKibanaRequest = headers && headers['kbn-version'] && headers.origin && headers.referer;
+  return {
+    yes: current.yes + (isKibanaRequest ? 1 : 0),
+    no: current.no + (isKibanaRequest ? 0 : 1),
+  };
 }
 
 function incrementBooleanCounter(current: { yes: number; no: number }, value: boolean) {

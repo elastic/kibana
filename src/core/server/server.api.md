@@ -541,6 +541,10 @@ export interface CoreUsageStats {
     apiCalls?: {
         savedObjectsImport?: {
             total: number;
+            kibanaRequest: {
+                yes: number;
+                no: number;
+            };
             createNewCopiesEnabled: {
                 yes: number;
                 no: number;
@@ -552,6 +556,10 @@ export interface CoreUsageStats {
         };
         savedObjectsResolveImportErrors?: {
             total: number;
+            kibanaRequest: {
+                yes: number;
+                no: number;
+            };
             createNewCopiesEnabled: {
                 yes: number;
                 no: number;
@@ -559,6 +567,10 @@ export interface CoreUsageStats {
         };
         savedObjectsExport?: {
             total: number;
+            kibanaRequest: {
+                yes: number;
+                no: number;
+            };
             allTypesSelected: {
                 yes: number;
                 no: number;

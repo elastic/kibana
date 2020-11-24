@@ -3389,6 +3389,16 @@
                 "total": {
                   "type": "long"
                 },
+                "kibanaRequest": {
+                  "properties": {
+                    "yes": {
+                      "type": "long"
+                    },
+                    "no": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "createNewCopiesEnabled": {
                   "properties": {
                     "yes": {
@@ -3415,6 +3425,16 @@
               "properties": {
                 "total": {
                   "type": "long"
+                },
+                "kibanaRequest": {
+                  "properties": {
+                    "yes": {
+                      "type": "long"
+                    },
+                    "no": {
+                      "type": "long"
+                    }
+                  }
                 },
                 "createNewCopiesEnabled": {
                   "properties": {

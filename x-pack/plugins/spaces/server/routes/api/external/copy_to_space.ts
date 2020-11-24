@@ -92,8 +92,9 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         createNewCopies,
       } = request.body;
 
+      const { headers } = request;
       const usageStatsClient = await usageStatsClientPromise;
-      await usageStatsClient.incrementCopySavedObjects({ createNewCopies, overwrite });
+      await usageStatsClient.incrementCopySavedObjects({ headers, createNewCopies, overwrite });
 
       const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
         startServices.savedObjects,
@@ -160,8 +161,9 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       const [startServices] = await getStartServices();
       const { objects, includeReferences, retries, createNewCopies } = request.body;
 
+      const { headers } = request;
       const usageStatsClient = await usageStatsClientPromise;
-      await usageStatsClient.incrementResolveCopySavedObjectsErrors({ createNewCopies });
+      await usageStatsClient.incrementResolveCopySavedObjectsErrors({ headers, createNewCopies });
 
       const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
         startServices.savedObjects,

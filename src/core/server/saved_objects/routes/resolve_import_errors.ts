@@ -81,8 +81,9 @@ export const registerResolveImportErrorsRoute = (router: IRouter, deps: RouteDep
     router.handleLegacyErrors(async (context, req, res) => {
       const { createNewCopies } = req.query;
 
+      const { headers } = req;
       const usageStatsClient = await coreUsageStats.getClient();
-      await usageStatsClient.incrementSavedObjectsResolveImportErrors({ createNewCopies });
+      await usageStatsClient.incrementSavedObjectsResolveImportErrors({ headers, createNewCopies });
 
       const file = req.body.file as FileStream;
       const fileExtension = extname(file.hapi.filename).toLowerCase();

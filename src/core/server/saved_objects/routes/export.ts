@@ -102,8 +102,9 @@ export const registerExportRoute = (router: IRouter, deps: RouteDependencies) =>
         }
       }
 
+      const { headers } = req;
       const usageStatsClient = await coreUsageStats.getClient();
-      await usageStatsClient.incrementSavedObjectsExport({ types, supportedTypes });
+      await usageStatsClient.incrementSavedObjectsExport({ headers, types, supportedTypes });
 
       const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,

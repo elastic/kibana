@@ -160,6 +160,7 @@ describe('copy to space', () => {
       await copyToSpace.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(usageStatsClient.incrementCopySavedObjects).toHaveBeenCalledWith({
+        headers: request.headers,
         createNewCopies,
         overwrite,
       });
@@ -315,6 +316,7 @@ describe('copy to space', () => {
       await resolveConflicts.routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
       expect(usageStatsClient.incrementResolveCopySavedObjectsErrors).toHaveBeenCalledWith({
+        headers: request.headers,
         createNewCopies,
       });
     });

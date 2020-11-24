@@ -24,11 +24,13 @@ const MOCK_USAGE_STATS: UsageStats = {
   apiCalls: {
     copySavedObjects: {
       total: 5,
+      kibanaRequest: { yes: 5, no: 0 },
       createNewCopiesEnabled: { yes: 2, no: 3 },
       overwriteEnabled: { yes: 1, no: 4 },
     },
     resolveCopySavedObjectsErrors: {
       total: 13,
+      kibanaRequest: { yes: 13, no: 0 },
       createNewCopiesEnabled: { yes: 6, no: 7 },
     },
   },

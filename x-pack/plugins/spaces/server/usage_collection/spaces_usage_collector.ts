@@ -204,6 +204,10 @@ export function getSpacesUsageCollector(
       apiCalls: {
         copySavedObjects: {
           total: { type: 'long' },
+          kibanaRequest: {
+            yes: { type: 'long' },
+            no: { type: 'long' },
+          },
           createNewCopiesEnabled: {
             yes: { type: 'long' },
             no: { type: 'long' },
@@ -215,6 +219,10 @@ export function getSpacesUsageCollector(
         },
         resolveCopySavedObjectsErrors: {
           total: { type: 'long' },
+          kibanaRequest: {
+            yes: { type: 'long' },
+            no: { type: 'long' },
+          },
           createNewCopiesEnabled: {
             yes: { type: 'long' },
             no: { type: 'long' },

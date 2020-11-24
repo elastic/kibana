@@ -120,7 +120,7 @@ export const ImportModeControl = ({
       options={[overwriteEnabled, overwriteDisabled]}
       idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
       onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
-      disabled={createNewCopies}
+      disabled={createNewCopies && !isLegacyFile}
       data-test-subj={'savedObjectsManagement-importModeControl-overwriteRadioGroup'}
     />
   );
@@ -140,15 +140,6 @@ export const ImportModeControl = ({
       }}
     >
       <EuiCheckableCard
-        id={createNewCopiesEnabled.id}
-        label={createLabel(createNewCopiesEnabled)}
-        checked={createNewCopies}
-        onChange={() => onChange({ createNewCopies: true })}
-      />
-
-      <EuiSpacer size="s" />
-
-      <EuiCheckableCard
         id={createNewCopiesDisabled.id}
         label={createLabel(createNewCopiesDisabled)}
         checked={!createNewCopies}
@@ -156,6 +147,15 @@ export const ImportModeControl = ({
       >
         {overwriteRadio}
       </EuiCheckableCard>
+
+      <EuiSpacer size="s" />
+
+      <EuiCheckableCard
+        id={createNewCopiesEnabled.id}
+        label={createLabel(createNewCopiesEnabled)}
+        checked={createNewCopies}
+        onChange={() => onChange({ createNewCopies: true })}
+      />
     </EuiFormFieldset>
   );
 };
