@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ChangeEvent, Fragment } from 'react';
+import React, { ChangeEvent, Fragment, MouseEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -99,7 +99,8 @@ export function MetricEditor({
       field: fieldName,
     });
   };
-  const onPercentileChange = (e: MouseEvent<HTMLButtonElement, MouseEvent>) => {
+
+  const onPercentileChange = (e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
     if (metric.type !== AGG_TYPE.PERCENTILE) {
       return;
     }
