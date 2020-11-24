@@ -149,6 +149,11 @@ export class SavedObjectsSerializer {
   }
 }
 
+/**
+ * Generates a random id for saved objects.
+ *
+ * @public
+ */
 export function generateSavedObjectId() {
   return uuid.v1();
 }

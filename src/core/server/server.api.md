@@ -739,6 +739,9 @@ export interface FakeRequest {
 }
 
 // @public
+export function generateSavedObjectId(): string;
+
+// @public
 export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHeaders | undefined;
 
 // @public
