@@ -30,6 +30,7 @@ import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_fram
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 import { getIndexPatternIdFromName } from '../../../../util/index_utils';
+import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
   useDeleteAction,
   DeleteActionModal,
@@ -82,6 +83,7 @@ export const Controls: FC<Props> = ({
     services: { notifications },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
+  const navigateToWizardWithClonedJob = useNavigateToWizardWithClonedJob();
 
   const cy = useContext(CytoscapeContext);
   const deselect = useCallback(() => {
@@ -111,6 +113,10 @@ export const Controls: FC<Props> = ({
       );
     }
   }, [nodeLabel]);
+
+  const onCloneJobClick = useCallback(async () => {
+    navigateToWizardWithClonedJob({ config: details[nodeId], stats: details[nodeId]?.stats });
+  }, [nodeId]);
 
   // Set up Cytoscape event handlers
   useEffect(() => {
@@ -210,19 +216,31 @@ export const Controls: FC<Props> = ({
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>{nodeDataButton}</EuiFlexItem>
             {nodeType === JOB_MAP_NODE_TYPES.ANALYTICS && (
-              <EuiButton
-                onClick={() => {
-                  openModal({ config: details[nodeId], stats: details[nodeId]?.stats });
-                }}
-                iconType="trash"
-                color="danger"
-                size="s"
-              >
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsMap.flyout.deleteJobButton"
-                  defaultMessage="Delete job"
-                />
-              </EuiButton>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      openModal({ config: details[nodeId], stats: details[nodeId]?.stats });
+                    }}
+                    iconType="trash"
+                    color="danger"
+                    size="s"
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analyticsMap.flyout.deleteJobButton"
+                      defaultMessage="Delete job"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={onCloneJobClick} iconType="copy" color="primary" size="s">
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analyticsMap.flyout.cloneJobButton"
+                      defaultMessage="Clone job"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
             {nodeType === JOB_MAP_NODE_TYPES.INDEX && (
               <EuiButton
