@@ -41,8 +41,18 @@ export class ChartsServerPlugin implements Plugin<object, object> {
         }),
         type: 'json',
         description: i18n.translate('charts.advancedSettings.visualization.colorMappingText', {
-          defaultMessage: 'Maps values to specified colors within visualizations',
+          defaultMessage:
+            'Maps values to specific colors in <strong>Visualize</strong> charts and <strong>TSVB</strong>. This setting does not apply to <strong>Lens.</strong>',
         }),
+        deprecation: {
+          message: i18n.translate(
+            'charts.advancedSettings.visualization.colorMappingTextDeprecation',
+            {
+              defaultMessage: 'This setting is deprecated and will not be supported as of 8.0.',
+            }
+          ),
+          docLinksKey: 'visualizationSettings',
+        },
         category: ['visualization'],
         schema: schema.string(),
       },

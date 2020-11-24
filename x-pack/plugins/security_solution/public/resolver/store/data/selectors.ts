@@ -83,21 +83,22 @@ export const originID: (state: DataState) => string | undefined = createSelector
 /**
  * Process events that will be displayed as terminated.
  */
-export const terminatedProcesses = createSelector(resolverTreeResponse, function (
-  tree?: ResolverTree
-) {
-  if (!tree) {
-    return new Set();
+export const terminatedProcesses = createSelector(
+  resolverTreeResponse,
+  function (tree?: ResolverTree) {
+    if (!tree) {
+      return new Set();
+    }
+    return new Set(
+      resolverTreeModel
+        .lifecycleEvents(tree)
+        .filter(isTerminatedProcess)
+        .map((terminatedEvent) => {
+          return eventModel.entityIDSafeVersion(terminatedEvent);
+        })
+    );
   }
-  return new Set(
-    resolverTreeModel
-      .lifecycleEvents(tree)
-      .filter(isTerminatedProcess)
-      .map((terminatedEvent) => {
-        return eventModel.entityIDSafeVersion(terminatedEvent);
-      })
-  );
-});
+);
 
 /**
  * A function that given an entity id returns a boolean indicating if the id is in the set of terminated processes.

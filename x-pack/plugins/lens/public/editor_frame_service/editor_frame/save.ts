@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
+import { Datatable } from 'src/plugins/expressions';
 import { EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
@@ -28,6 +29,7 @@ export function getSavedObjectFormat({
   doc: Document;
   filterableIndexPatterns: string[];
   isSaveable: boolean;
+  activeData: Record<string, Datatable> | undefined;
 } {
   const datasourceStates: Record<string, unknown> = {};
   const references: SavedObjectReference[] = [];
@@ -74,5 +76,6 @@ export function getSavedObjectFormat({
     },
     filterableIndexPatterns: uniqueFilterableIndexPatternIds,
     isSaveable: expression !== null,
+    activeData: state.activeData,
   };
 }

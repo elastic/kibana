@@ -13,9 +13,7 @@ import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { maybe } from '../../common/utils/maybe';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 
-type APIResponse = APIReturnType<
-  'GET /api/apm/services/{serviceName}/transaction_groups/distribution'
->;
+type APIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups/distribution'>;
 
 const INITIAL_DATA = {
   buckets: [] as APIResponse['buckets'],

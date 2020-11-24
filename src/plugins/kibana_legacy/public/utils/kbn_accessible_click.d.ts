@@ -19,9 +19,6 @@
 
 import { Injectable, IDirectiveFactory, IScope, IAttributes, IController } from 'angular';
 
-export const KbnAccessibleClickProvider: Injectable<IDirectiveFactory<
-  IScope,
-  JQLite,
-  IAttributes,
-  IController
->>;
+export const KbnAccessibleClickProvider: Injectable<
+  IDirectiveFactory<IScope, JQLite, IAttributes, IController>
+>;

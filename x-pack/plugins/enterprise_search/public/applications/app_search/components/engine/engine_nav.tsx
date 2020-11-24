@@ -111,8 +111,8 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewEngineDocuments && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(engineRoute + ENGINE_DOCUMENTS_PATH)}
+          to={engineRoute + ENGINE_DOCUMENTS_PATH}
+          shouldShowActiveForSubroutes={true}
           data-test-subj="EngineDocumentsLink"
         >
           {DOCUMENTS_TITLE}

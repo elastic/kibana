@@ -378,9 +378,7 @@ describe('create()', () => {
         "scheduledTaskId": "task-123",
       }
     `);
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
-      ActionsClient
-    >;
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
   });
 
@@ -702,9 +700,7 @@ describe('create()', () => {
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
     // Reset from default behaviour
-    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
-      ActionsClient
-    >;
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
     alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
