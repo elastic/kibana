@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { Subscription } from 'rxjs';
+
 import {
   KibanaRequest,
   Logger,
@@ -21,7 +24,8 @@ import { licenseService } from '../../../lib/license/license';
 export class PolicyWatcher {
   private logger: Logger;
   private soClient: SavedObjectsClientContract;
-  private policyService?: PackagePolicyServiceInterface;
+  private policyService: PackagePolicyServiceInterface;
+  private subscription: Subscription | undefined;
   constructor(
     policyService: PackagePolicyServiceInterface,
     soStart: SavedObjectsServiceStart,
@@ -44,6 +48,16 @@ export class PolicyWatcher {
     return soStart.getScopedClient(fakeRequest, { excludedWrappers: ['security'] });
   }
 
+  public start() {
+    this.subscription = licenseService.getLicenseInformation$()?.subscribe(this.watch.bind(this));
+  }
+
+  public stop() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
   public async watch(license: ILicense) {
     let packagePolicies: PackagePolicy[];
     if (!this.policyService) {
@@ -53,6 +67,7 @@ export class PolicyWatcher {
       return;
     }
 
+    // @todo: actually page and fetch them ALL
     try {
       packagePolicies = (
         await this.policyService.list(this.soClient, {

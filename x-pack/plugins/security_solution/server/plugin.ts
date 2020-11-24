@@ -128,6 +128,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
+  private policyWatcher?: PolicyWatcher;
 
   private manifestTask: ManifestTask | undefined;
   private exceptionsCache: LRU<string, Buffer>;
@@ -371,9 +372,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.telemetryEventsSender.start(core, plugins.telemetry);
     this.licensing$ = plugins.licensing.license$;
     licenseService.start(this.licensing$);
-    const policyWatcher = new PolicyWatcher(plugins.fleet?.packagePolicyService);
-    licenseService.getLicenseInformation$()?.subscribe(policyWatcher.watch);
-
+    this.policyWatcher = new PolicyWatcher(
+      plugins.fleet!.packagePolicyService,
+      core.savedObjects,
+      this.logger
+    );
+    this.policyWatcher.start();
     return {};
   }
 
@@ -381,6 +385,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('Stopping plugin');
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
+    this.policyWatcher?.stop();
     licenseService.stop();
   }
 }
