@@ -174,7 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(cookies).to.have.length(1);
         checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(logoutResponse.headers.location).to.be('/security/logged_out');
+        expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
 
         // Old cookie should be invalidated and not allow API access.
         const apiResponse = await supertest

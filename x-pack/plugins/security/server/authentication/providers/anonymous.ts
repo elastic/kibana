@@ -147,7 +147,7 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
       return DeauthenticationResult.notHandled();
     }
 
-    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**
