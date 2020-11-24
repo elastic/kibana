@@ -23,14 +23,15 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const deployment = getService('deployment');
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'visualize']);
+  const PageObjects = getPageObjects(['visualize']);
   let isOss = true;
 
   describe('chart types', function () {
     before(async function () {
       log.debug('navigateToApp visualize');
-      isOss = await PageObjects.common.isOss();
+      isOss = await deployment.isOss();
       await PageObjects.visualize.navigateToNewVisualization();
     });
 
@@ -50,18 +51,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let expectedChartTypes = [
         'Area',
         'Coordinate Map',
-        'Data Table',
+        'Data table',
         'Gauge',
         'Goal',
-        'Heat Map',
-        'Horizontal Bar',
+        'Heat map',
+        'Horizontal bar',
         'Line',
         'Metric',
         'Pie',
         'Region Map',
-        'Tag Cloud',
+        'Tag cloud',
         'Timelion',
-        'Vertical Bar',
+        'Vertical bar',
       ];
       if (!isOss) {
         expectedChartTypes = _.remove(expectedChartTypes, function (n) {

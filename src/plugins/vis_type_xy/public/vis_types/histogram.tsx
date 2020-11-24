@@ -49,11 +49,11 @@ export const getHistogramVisTypeDefinition = (
 ): XyVisTypeDefinition => ({
   name: 'histogram',
   title: i18n.translate('visTypeXy.histogram.histogramTitle', {
-    defaultMessage: 'Vertical Bar',
+    defaultMessage: 'Vertical bar',
   }),
   icon: 'visBarVertical',
   description: i18n.translate('visTypeXy.histogram.histogramDescription', {
-    defaultMessage: 'Assign a continuous variable to each axis',
+    defaultMessage: 'Present data in vertical bars on an axis.',
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],

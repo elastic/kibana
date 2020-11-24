@@ -29,13 +29,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'share', 'timePicker']);
   const browser = getService('browser');
   const toasts = getService('toasts');
+  const deployment = getService('deployment');
 
   // FLAKY: https://github.com/elastic/kibana/issues/80104
   describe.skip('shared links', function describeIndexTests() {
     let baseUrl: string;
 
     async function setup({ storeStateInSessionStorage }: { storeStateInSessionStorage: boolean }) {
-      baseUrl = PageObjects.common.getHostPort();
+      baseUrl = deployment.getHostPort();
       log.debug('baseUrl = ' + baseUrl);
       // browsers don't show the ':port' if it's 80 or 443 so we have to
       // remove that part so we can get a match in the tests.

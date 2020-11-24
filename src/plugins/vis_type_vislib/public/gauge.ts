@@ -62,7 +62,7 @@ export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   title: i18n.translate('visTypeVislib.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
   description: i18n.translate('visTypeVislib.gauge.gaugeDescription', {
-    defaultMessage: 'Gauges indicate the status of a metric.',
+    defaultMessage: 'Show the status of a metric.',
   }),
   toExpressionAst,
   visConfig: {

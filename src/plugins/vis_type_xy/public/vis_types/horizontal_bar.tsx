@@ -49,11 +49,11 @@ export const getHorizontalBarVisTypeDefinition = (
 ): XyVisTypeDefinition => ({
   name: 'horizontal_bar',
   title: i18n.translate('visTypeXy.horizontalBar.horizontalBarTitle', {
-    defaultMessage: 'Horizontal Bar',
+    defaultMessage: 'Horizontal bar',
   }),
   icon: 'visBarHorizontal',
   description: i18n.translate('visTypeXy.horizontalBar.horizontalBarDescription', {
-    defaultMessage: 'Assign a continuous variable to each axis',
+    defaultMessage: 'Present data in horizontal bars on an axis.',
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],

@@ -51,7 +51,7 @@ export const getLineVisTypeDefinition = (
   title: i18n.translate('visTypeXy.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',
   description: i18n.translate('visTypeXy.line.lineDescription', {
-    defaultMessage: 'Emphasize trends',
+    defaultMessage: 'Display data as a series of points.',
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],

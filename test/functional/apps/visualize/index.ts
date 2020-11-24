@@ -20,12 +20,12 @@
 import { FtrProviderContext } from '../../ftr_provider_context.d';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 
-export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common']);
+  const deployment = getService('deployment');
   let isOss = true;
 
   describe('visualize app', () => {
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         defaultIndex: 'logstash-*',
         [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       });
-      isOss = await PageObjects.common.isOss();
+      isOss = await deployment.isOss();
     });
 
     // TODO: Remove when vislib is removed
