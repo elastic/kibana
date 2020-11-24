@@ -23,3 +23,5 @@ export * from './indexpattern_datasource/indexpattern';
 export * from './editor_frame_service/editor_frame';
 export * from './editor_frame_service/embeddable';
 export * from './app_plugin/mounter';
+export * from './lens_attribute_service';
+export * from './lens_ui_telemetry';

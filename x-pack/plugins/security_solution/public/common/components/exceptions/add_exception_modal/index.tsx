@@ -106,6 +106,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   alertStatus,
 }: AddExceptionModalProps) {
   const { http } = useKibana().services;
+  const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
   const { rule: maybeRule } = useRuleAsync(ruleId);
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
@@ -158,10 +159,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
+      errorExists,
     }: {
       exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
-    }): void => {
+      errorExists: boolean;
+    }) => {
       setExceptionItemsToAdd(exceptionItems);
+      setErrorExists(errorExists);
     },
     [setExceptionItemsToAdd]
   );
@@ -310,8 +314,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const isSubmitButtonDisabled = useMemo(
     (): boolean =>
       fetchOrCreateListError != null ||
-      exceptionItemsToAdd.every((item) => item.entries.length === 0),
-    [fetchOrCreateListError, exceptionItemsToAdd]
+      exceptionItemsToAdd.every((item) => item.entries.length === 0) ||
+      errorsExist,
+    [fetchOrCreateListError, exceptionItemsToAdd, errorsExist]
   );
 
   const addExceptionMessage =
@@ -386,6 +391,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   data-test-subj="alert-exception-builder"
                   id-aria="alert-exception-builder"
                   onChange={handleBuilderOnChange}
+                  ruleType={maybeRule?.type}
                 />
 
                 <EuiSpacer />

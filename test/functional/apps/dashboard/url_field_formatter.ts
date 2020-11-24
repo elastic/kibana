@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const fieldName = 'clientip';
+  const deployment = getService('deployment');
 
   const clickFieldAndCheckUrl = async (fieldLink: WebElementWrapper) => {
     const fieldValue = await fieldLink.getVisibleText();
@@ -42,11 +43,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(windowHandlers.length).to.equal(2);
     await browser.switchToWindow(windowHandlers[1]);
     const currentUrl = await browser.getCurrentUrl();
-    const fieldUrl = common.getHostPort() + '/app/' + fieldValue;
+    const fieldUrl = deployment.getHostPort() + '/app/' + fieldValue;
     expect(currentUrl).to.equal(fieldUrl);
   };
 
-  describe('Changing field formatter to Url', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/79463
+  describe.skip('Changing field formatter to Url', () => {
     before(async function () {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({

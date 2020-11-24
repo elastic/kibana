@@ -66,16 +66,13 @@ const DescriptionListDescription = styled(EuiDescriptionListDescription)`
 interface ItemDetailsPropertySummaryProps {
   name: ReactNode | ReactNode[];
   value: ReactNode | ReactNode[];
-  title?: string;
 }
 
-export const ItemDetailsPropertySummary: FC<ItemDetailsPropertySummaryProps> = memo(
-  ({ name, value, title = '' }) => (
+export const ItemDetailsPropertySummary = memo<ItemDetailsPropertySummaryProps>(
+  ({ name, value }) => (
     <>
       <DescriptionListTitle>{name}</DescriptionListTitle>
-      <DescriptionListDescription>
-        <span title={title}>{value}</span>
-      </DescriptionListDescription>
+      <DescriptionListDescription>{value}</DescriptionListDescription>
     </>
   )
 );
@@ -83,12 +80,12 @@ export const ItemDetailsPropertySummary: FC<ItemDetailsPropertySummaryProps> = m
 ItemDetailsPropertySummary.displayName = 'ItemPropertySummary';
 
 export const ItemDetailsAction: FC<PropsForButton<EuiButtonProps>> = memo(
-  ({ children, ...rest }) => (
-    <EuiFlexGroup direction="column" alignItems="flexEnd" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>
-        <EuiButton {...rest}>{children}</EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+  ({ children, className = '', ...rest }) => (
+    <div>
+      <EuiButton className={`eui-fullWidth ${className}`} {...rest}>
+        {children}
+      </EuiButton>
+    </div>
   )
 );
 
@@ -102,32 +99,30 @@ export const ItemDetailsCard: FC = memo(({ children }) => {
 
   return (
     <EuiPanel paddingSize="none">
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>
-          <EuiFlexGroup direction="row">
-            <SummarySection grow={2}>
-              <EuiDescriptionList compressed type="column">
-                {childElements.get(ItemDetailsPropertySummary)}
-              </EuiDescriptionList>
-            </SummarySection>
-            <DetailsSection grow={5}>
-              <EuiFlexGroup direction="column" gutterSize="m">
-                <EuiFlexItem grow={false}>{childElements.get(OTHER_NODES)}</EuiFlexItem>
-                {childElements.has(ItemDetailsAction) && (
-                  <EuiFlexItem grow={1}>
-                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                      {childElements.get(ItemDetailsAction)?.map((action, index) => (
-                        <EuiFlexItem grow={false} key={index}>
-                          {action}
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </DetailsSection>
+      <EuiFlexGroup direction="row">
+        <SummarySection grow={2}>
+          <EuiDescriptionList compressed type="column">
+            {childElements.get(ItemDetailsPropertySummary)}
+          </EuiDescriptionList>
+        </SummarySection>
+        <DetailsSection grow={5}>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem grow={1}>
+              <div>{childElements.get(OTHER_NODES)}</div>
+            </EuiFlexItem>
+            {childElements.has(ItemDetailsAction) && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                  {childElements.get(ItemDetailsAction)?.map((action, index) => (
+                    <EuiFlexItem grow={false} key={index}>
+                      {action}
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
-        </EuiFlexItem>
+        </DetailsSection>
       </EuiFlexGroup>
     </EuiPanel>
   );

@@ -6,6 +6,7 @@
 
 import { FeatureRegistry } from './feature_registry';
 import { ElasticsearchFeatureConfig, KibanaFeatureConfig } from '../common';
+import { licensingMock } from '../../licensing/server/mocks';
 
 describe('FeatureRegistry', () => {
   describe('Kibana Features', () => {
@@ -33,11 +34,9 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
         name: 'Test Feature',
         excludeFromBasePrivileges: true,
-        icon: 'addDataApp',
-        navLinkId: 'someNavLink',
         app: ['app1'],
         category: { id: 'foo', label: 'foo' },
-        validLicenses: ['standard', 'basic', 'gold', 'platinum'],
+        minimumLicense: 'platinum',
         catalogue: ['foo'],
         management: {
           foo: ['bar'],
@@ -421,20 +420,6 @@ describe('FeatureRegistry', () => {
     });
 
     ['contains space', 'contains_invalid()_chars', ''].forEach((prohibitedChars) => {
-      it(`prevents features from being registered with a navLinkId of "${prohibitedChars}"`, () => {
-        const featureRegistry = new FeatureRegistry();
-        expect(() =>
-          featureRegistry.registerKibanaFeature({
-            id: 'foo',
-            name: 'some feature',
-            navLinkId: prohibitedChars,
-            app: [],
-            category: { id: 'foo', label: 'foo' },
-            privileges: null,
-          })
-        ).toThrowErrorMatchingSnapshot();
-      });
-
       it(`prevents features from being registered with a management id of "${prohibitedChars}"`, () => {
         const featureRegistry = new FeatureRegistry();
         expect(() =>
@@ -1296,6 +1281,123 @@ describe('FeatureRegistry', () => {
       );
     });
 
+    it('allows independent sub-feature privileges to register a minimumLicense', () => {
+      const feature1: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'foo',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'foo',
+                    name: 'foo',
+                    minimumLicense: 'platinum',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      featureRegistry.registerKibanaFeature(feature1);
+    });
+
+    it('prevents mutually exclusive sub-feature privileges from registering a minimumLicense', () => {
+      const feature1: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'foo',
+            privilegeGroups: [
+              {
+                groupType: 'mutually_exclusive',
+                privileges: [
+                  {
+                    id: 'foo',
+                    name: 'foo',
+                    minimumLicense: 'platinum',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                  },
+                  {
+                    id: 'bar',
+                    name: 'Bar',
+                    minimumLicense: 'platinum',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      expect(() => {
+        featureRegistry.registerKibanaFeature(feature1);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"child \\"subFeatures\\" fails because [\\"subFeatures\\" at position 0 fails because [child \\"privilegeGroups\\" fails because [\\"privilegeGroups\\" at position 0 fails because [child \\"privileges\\" fails because [\\"privileges\\" at position 0 fails because [child \\"minimumLicense\\" fails because [\\"minimumLicense\\" is not allowed]]]]]]]"`
+      );
+    });
+
     it('cannot register feature after getAll has been called', () => {
       const feature1: KibanaFeatureConfig = {
         id: 'test-feature',
@@ -1320,6 +1422,89 @@ describe('FeatureRegistry', () => {
       }).toThrowErrorMatchingInlineSnapshot(
         `"Features are locked, can't register new features. Attempt to register test-feature-2 failed."`
       );
+    });
+    describe('#getAllKibanaFeatures', () => {
+      const features: KibanaFeatureConfig[] = [
+        {
+          id: 'gold-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          minimumLicense: 'gold',
+          privileges: null,
+        },
+        {
+          id: 'unlicensed-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: null,
+        },
+        {
+          id: 'with-sub-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: { savedObject: { all: [], read: [] }, ui: [] },
+            read: { savedObject: { all: [], read: [] }, ui: [] },
+          },
+          minimumLicense: 'platinum',
+          subFeatures: [
+            {
+              name: 'licensed-sub-feature',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'sub-feature',
+                      includeIn: 'all',
+                      minimumLicense: 'enterprise',
+                      name: 'sub feature',
+                      savedObject: { all: [], read: [] },
+                      ui: [],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      const registry = new FeatureRegistry();
+      features.forEach((f) => registry.registerKibanaFeature(f));
+
+      it('returns all features and sub-feature privileges by default', () => {
+        const result = registry.getAllKibanaFeatures();
+        expect(result).toHaveLength(3);
+        const [, , withSubFeature] = result;
+        expect(withSubFeature.subFeatures).toHaveLength(1);
+        expect(withSubFeature.subFeatures[0].privilegeGroups).toHaveLength(1);
+        expect(withSubFeature.subFeatures[0].privilegeGroups[0].privileges).toHaveLength(1);
+      });
+
+      it('returns features which are satisfied by the current license', () => {
+        const license = licensingMock.createLicense({ license: { type: 'gold' } });
+        const result = registry.getAllKibanaFeatures(license);
+        expect(result).toHaveLength(2);
+        const ids = result.map((f) => f.id);
+        expect(ids).toEqual(['gold-feature', 'unlicensed-feature']);
+      });
+
+      it('filters out sub-feature privileges which do not match the current license', () => {
+        const license = licensingMock.createLicense({ license: { type: 'platinum' } });
+        const result = registry.getAllKibanaFeatures(license);
+        expect(result).toHaveLength(3);
+        const ids = result.map((f) => f.id);
+        expect(ids).toEqual(['gold-feature', 'unlicensed-feature', 'with-sub-feature']);
+
+        const [, , withSubFeature] = result;
+        expect(withSubFeature.subFeatures).toHaveLength(1);
+        expect(withSubFeature.subFeatures[0].privilegeGroups).toHaveLength(1);
+        expect(withSubFeature.subFeatures[0].privilegeGroups[0].privileges).toHaveLength(0);
+      });
     });
   });
 

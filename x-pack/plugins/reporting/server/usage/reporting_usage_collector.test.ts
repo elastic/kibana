@@ -6,7 +6,8 @@
 
 import * as Rx from 'rxjs';
 import sinon from 'sinon';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import { ReportingConfig, ReportingCore } from '../';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockConfig, createMockConfigSchema, createMockReportingCore } from '../test_helpers';
@@ -56,6 +57,11 @@ function getPluginsMock(
 
 const getResponseMock = (base = {}) => base;
 
+const getMockFetchClients = (resp: any) => {
+  const fetchParamsMock = createCollectorFetchContextMock();
+  fetchParamsMock.callCluster.mockResolvedValue(resp);
+  return fetchParamsMock;
+};
 describe('license checks', () => {
   let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
@@ -68,8 +74,7 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'basic' });
-      const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
-      const { fetch } = getReportingUsageCollector(
+      const collector = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
         getLicenseMock('basic'),
@@ -78,7 +83,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(callClusterMock as any);
+      usageStats = await collector.fetch(getMockFetchClients(getResponseMock()));
     });
 
     test('sets enables to true', async () => {
@@ -98,8 +103,7 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'none' });
-      const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
-      const { fetch } = getReportingUsageCollector(
+      const collector = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
         getLicenseMock('none'),
@@ -108,7 +112,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(callClusterMock as any);
+      usageStats = await collector.fetch(getMockFetchClients(getResponseMock()));
     });
 
     test('sets enables to true', async () => {
@@ -128,8 +132,7 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'platinum' });
-      const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
-      const { fetch } = getReportingUsageCollector(
+      const collector = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
         getLicenseMock('platinum'),
@@ -138,7 +141,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(callClusterMock as any);
+      usageStats = await collector.fetch(getMockFetchClients(getResponseMock()));
     });
 
     test('sets enables to true', async () => {
@@ -158,8 +161,7 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'basic' });
-      const callClusterMock = jest.fn(() => Promise.resolve({}));
-      const { fetch } = getReportingUsageCollector(
+      const collector = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
         getLicenseMock('basic'),
@@ -168,7 +170,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(callClusterMock as any);
+      usageStats = await collector.fetch(getMockFetchClients({}));
     });
 
     test('sets enables to true', async () => {
@@ -184,13 +186,14 @@ describe('license checks', () => {
 describe('data modeling', () => {
   let mockConfig: ReportingConfig;
   let mockCore: ReportingCore;
+  let collectorFetchContext: CollectorFetchContext;
   beforeAll(async () => {
     mockConfig = createMockConfig(createMockConfigSchema());
     mockCore = await createMockReportingCore(mockConfig);
   });
   test('with normal looking usage data', async () => {
     const plugins = getPluginsMock();
-    const { fetch } = getReportingUsageCollector(
+    const collector = getReportingUsageCollector(
       mockCore,
       plugins.usageCollection,
       getLicenseMock(),
@@ -199,50 +202,48 @@ describe('data modeling', () => {
         return Promise.resolve(true);
       }
     );
-    const callClusterMock = jest.fn(() =>
-      Promise.resolve(
-        getResponseMock({
-          aggregations: {
-            ranges: {
-              buckets: {
-                all: {
-                  doc_count: 12,
-                  jobTypes: { buckets: [ { doc_count: 9, key: 'printable_pdf' }, { doc_count: 3, key: 'PNG' }, ], },
-                  layoutTypes: { doc_count: 9, pdf: { buckets: [{ doc_count: 9, key: 'preserve_layout' }] }, },
-                  objectTypes: { doc_count: 9, pdf: { buckets: [ { doc_count: 6, key: 'canvas workpad' }, { doc_count: 3, key: 'visualization' }, ], }, },
-                  statusByApp: { buckets: [ { doc_count: 10, jobTypes: { buckets: [ { appNames: { buckets: [ { doc_count: 6, key: 'canvas workpad' }, { doc_count: 3, key: 'visualization' }, ], }, doc_count: 9, key: 'printable_pdf', }, { appNames: { buckets: [{ doc_count: 1, key: 'visualization' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed', }, { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'failed', }, ], },
-                  statusTypes: { buckets: [ { doc_count: 10, key: 'completed' }, { doc_count: 1, key: 'completed_with_warnings' }, { doc_count: 1, key: 'failed' }, ], },
-                },
-                last7Days: {
-                  doc_count: 1,
-                  jobTypes: { buckets: [{ doc_count: 1, key: 'PNG' }] },
-                  layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
-                  objectTypes: { doc_count: 0, pdf: { buckets: [] } },
-                  statusByApp: { buckets: [ { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, ], },
-                  statusTypes: { buckets: [{ doc_count: 1, key: 'completed_with_warnings' }] },
-                },
-                lastDay: {
-                  doc_count: 1,
-                  jobTypes: { buckets: [{ doc_count: 1, key: 'PNG' }] },
-                  layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
-                  objectTypes: { doc_count: 0, pdf: { buckets: [] } },
-                  statusByApp: { buckets: [ { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, ], },
-                  statusTypes: { buckets: [{ doc_count: 1, key: 'completed_with_warnings' }] },
-                },
+    collectorFetchContext = getMockFetchClients(
+      getResponseMock(
+      {
+        aggregations: {
+          ranges: {
+            buckets: {
+              all: {
+                doc_count: 12,
+                jobTypes: { buckets: [ { doc_count: 9, key: 'printable_pdf' }, { doc_count: 3, key: 'PNG' }, ], },
+                layoutTypes: { doc_count: 9, pdf: { buckets: [{ doc_count: 9, key: 'preserve_layout' }] }, },
+                objectTypes: { doc_count: 9, pdf: { buckets: [ { doc_count: 6, key: 'canvas workpad' }, { doc_count: 3, key: 'visualization' }, ], }, },
+                statusByApp: { buckets: [ { doc_count: 10, jobTypes: { buckets: [ { appNames: { buckets: [ { doc_count: 6, key: 'canvas workpad' }, { doc_count: 3, key: 'visualization' }, ], }, doc_count: 9, key: 'printable_pdf', }, { appNames: { buckets: [{ doc_count: 1, key: 'visualization' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed', }, { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'failed', }, ], },
+                statusTypes: { buckets: [ { doc_count: 10, key: 'completed' }, { doc_count: 1, key: 'completed_with_warnings' }, { doc_count: 1, key: 'failed' }, ], },
+              },
+              last7Days: {
+                doc_count: 1,
+                jobTypes: { buckets: [{ doc_count: 1, key: 'PNG' }] },
+                layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
+                objectTypes: { doc_count: 0, pdf: { buckets: [] } },
+                statusByApp: { buckets: [ { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, ], },
+                statusTypes: { buckets: [{ doc_count: 1, key: 'completed_with_warnings' }] },
+              },
+              lastDay: {
+                doc_count: 1,
+                jobTypes: { buckets: [{ doc_count: 1, key: 'PNG' }] },
+                layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
+                objectTypes: { doc_count: 0, pdf: { buckets: [] } },
+                statusByApp: { buckets: [ { doc_count: 1, jobTypes: { buckets: [ { appNames: { buckets: [{ doc_count: 1, key: 'dashboard' }] }, doc_count: 1, key: 'PNG', }, ], }, key: 'completed_with_warnings', }, ], },
+                statusTypes: { buckets: [{ doc_count: 1, key: 'completed_with_warnings' }] },
               },
             },
           },
-        } as SearchResponse) // prettier-ignore
-      )
+        },
+      } as SearchResponse) // prettier-ignore
     );
-
-    const usageStats = await fetch(callClusterMock as any);
+    const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
   });
 
   test('with sparse data', async () => {
     const plugins = getPluginsMock();
-    const { fetch } = getReportingUsageCollector(
+    const collector = getReportingUsageCollector(
       mockCore,
       plugins.usageCollection,
       getLicenseMock(),
@@ -251,50 +252,48 @@ describe('data modeling', () => {
         return Promise.resolve(true);
       }
     );
-    const callClusterMock = jest.fn(() =>
-      Promise.resolve(
-        getResponseMock({
-          aggregations: {
-            ranges: {
-              buckets: {
-                all: {
-                  doc_count: 4,
-                  layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
-                  statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
-                  objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
-                  statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
-                  jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
-                },
-                last7Days: {
-                  doc_count: 4,
-                  layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
-                  statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
-                  objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
-                  statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
-                  jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
-                },
-                lastDay: {
-                  doc_count: 4,
-                  layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
-                  statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
-                  objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
-                  statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
-                  jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
-                },
+    collectorFetchContext = getMockFetchClients(
+      getResponseMock(
+      {
+        aggregations: {
+          ranges: {
+            buckets: {
+              all: {
+                doc_count: 4,
+                layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
+                statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
+                objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
+                statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
+                jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
+              },
+              last7Days: {
+                doc_count: 4,
+                layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
+                statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
+                objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
+                statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
+                jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
+              },
+              lastDay: {
+                doc_count: 4,
+                layoutTypes: { doc_count: 2, pdf: { buckets: [{ key: 'preserve_layout', doc_count: 2 }] }, },
+                statusByApp: { buckets: [ { key: 'completed', doc_count: 4, jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2, appNames: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, }, { key: 'PNG', doc_count: 1, appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] }, }, { key: 'csv', doc_count: 1, appNames: { buckets: [] } }, ], }, }, ], },
+                objectTypes: { doc_count: 2, pdf: { buckets: [ { key: 'canvas workpad', doc_count: 1 }, { key: 'dashboard', doc_count: 1 }, ], }, },
+                statusTypes: { buckets: [{ key: 'completed', doc_count: 4 }] },
+                jobTypes: { buckets: [ { key: 'printable_pdf', doc_count: 2 }, { key: 'PNG', doc_count: 1 }, { key: 'csv', doc_count: 1 }, ], },
               },
             },
           },
-        } as SearchResponse) // prettier-ignore
-      )
+        },
+      } as SearchResponse) // prettier-ignore
     );
-
-    const usageStats = await fetch(callClusterMock as any);
+    const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
   });
 
   test('with empty data', async () => {
     const plugins = getPluginsMock();
-    const { fetch } = getReportingUsageCollector(
+    const collector = getReportingUsageCollector(
       mockCore,
       plugins.usageCollection,
       getLicenseMock(),
@@ -303,43 +302,42 @@ describe('data modeling', () => {
         return Promise.resolve(true);
       }
     );
-    const callClusterMock = jest.fn(() =>
-      Promise.resolve(
-        getResponseMock({
-          aggregations: {
-            ranges: {
-              buckets: {
-                all: {
-                  doc_count: 0,
-                  jobTypes: { buckets: [] },
-                  layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
-                  objectTypes: { doc_count: 0, pdf: { buckets: [] } },
-                  statusByApp: { buckets: [] },
-                  statusTypes: { buckets: [] },
-                },
-                last7Days: {
-                  doc_count: 0,
-                  jobTypes: { buckets: [] },
-                  layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
-                  objectTypes: { doc_count: 0, pdf: { buckets: [] } },
-                  statusByApp: { buckets: [] },
-                  statusTypes: { buckets: [] },
-                },
-                lastDay: {
-                  doc_count: 0,
-                  jobTypes: { buckets: [] },
-                  layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
-                  objectTypes: { doc_count: 0, pdf: { buckets: [] } },
-                  statusByApp: { buckets: [] },
-                  statusTypes: { buckets: [] },
-                },
-              },
+
+    collectorFetchContext = getMockFetchClients(
+      getResponseMock({
+      aggregations: {
+        ranges: {
+          buckets: {
+            all: {
+              doc_count: 0,
+              jobTypes: { buckets: [] },
+              layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
+              objectTypes: { doc_count: 0, pdf: { buckets: [] } },
+              statusByApp: { buckets: [] },
+              statusTypes: { buckets: [] },
+            },
+            last7Days: {
+              doc_count: 0,
+              jobTypes: { buckets: [] },
+              layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
+              objectTypes: { doc_count: 0, pdf: { buckets: [] } },
+              statusByApp: { buckets: [] },
+              statusTypes: { buckets: [] },
+            },
+            lastDay: {
+              doc_count: 0,
+              jobTypes: { buckets: [] },
+              layoutTypes: { doc_count: 0, pdf: { buckets: [] } },
+              objectTypes: { doc_count: 0, pdf: { buckets: [] } },
+              statusByApp: { buckets: [] },
+              statusTypes: { buckets: [] },
             },
           },
-        } as SearchResponse)
-      )
+        },
+      },
+    } as SearchResponse) // prettier-ignore
     );
-    const usageStats = await fetch(callClusterMock as any);
+    const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
   });
 

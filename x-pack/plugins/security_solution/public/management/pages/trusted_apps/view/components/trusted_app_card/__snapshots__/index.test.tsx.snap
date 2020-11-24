@@ -4,11 +4,22 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
 <ItemDetailsCard>
   <ItemPropertySummary
     name="Name"
-    value="trusted app 4"
+    value={
+      <TextFieldValue
+        fieldName="Name"
+        maxLength={100}
+        value="trusted app 4"
+      />
+    }
   />
   <ItemPropertySummary
     name="OS"
-    value="Mac OS"
+    value={
+      <TextFieldValue
+        fieldName="OS"
+        value="Mac"
+      />
+    }
   />
   <ItemPropertySummary
     name="Date Created"
@@ -22,12 +33,22 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
   />
   <ItemPropertySummary
     name="Created By"
-    value="someone"
+    value={
+      <TextFieldValue
+        fieldName="Created By"
+        value="someone"
+      />
+    }
   />
   <ItemPropertySummary
     name="Description"
-    title="Trusted App 4"
-    value="Trusted App 4"
+    value={
+      <TextFieldValue
+        fieldName="Description"
+        maxLength={100}
+        value="Trusted App 4"
+      />
+    }
   />
   <ConditionsTable
     badge="and"
@@ -36,6 +57,7 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
         Object {
           "field": "field",
           "name": "Field",
+          "render": [Function],
           "sortable": false,
           "textOnly": true,
           "truncateText": true,
@@ -44,15 +66,17 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
         Object {
           "field": "operator",
           "name": "Operator",
+          "render": [Function],
           "sortable": false,
           "truncateText": true,
           "width": "20%",
         },
         Object {
+          "data-test-subj": "conditionValue",
           "field": "value",
           "name": "Value",
+          "render": [Function],
           "sortable": false,
-          "truncateText": true,
           "width": "60%",
         },
       ]
@@ -62,6 +86,7 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
   />
   <ItemDetailsAction
     color="danger"
+    data-test-subj="trustedAppDeleteButton"
     onClick={[Function]}
     size="s"
   >
@@ -70,15 +95,26 @@ exports[`trusted_app_card TrustedAppCard should render correctly 1`] = `
 </ItemDetailsCard>
 `;
 
-exports[`trusted_app_card TrustedAppCard should trim long descriptions 1`] = `
+exports[`trusted_app_card TrustedAppCard should trim long texts 1`] = `
 <ItemDetailsCard>
   <ItemPropertySummary
     name="Name"
-    value="trusted app 4"
+    value={
+      <TextFieldValue
+        fieldName="Name"
+        maxLength={100}
+        value="trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4 trusted app 4"
+      />
+    }
   />
   <ItemPropertySummary
     name="OS"
-    value="Mac OS"
+    value={
+      <TextFieldValue
+        fieldName="OS"
+        value="Mac"
+      />
+    }
   />
   <ItemPropertySummary
     name="Date Created"
@@ -92,12 +128,22 @@ exports[`trusted_app_card TrustedAppCard should trim long descriptions 1`] = `
   />
   <ItemPropertySummary
     name="Created By"
-    value="someone"
+    value={
+      <TextFieldValue
+        fieldName="Created By"
+        value="someone"
+      />
+    }
   />
   <ItemPropertySummary
     name="Description"
-    title="item0 item1 item2 item3 item4 item5 item6 item7 item8 item9 item10 item11 item12 item13 item14 item15 item16 item17 item18 item19 item20 item21 item22 item23 item24 item25 item26 item27 item28 item29 item30 item31 item32 item33 item34 item35 item36 item37 item38 item39"
-    value="item0 item1 item2 item3 item4 item5 item6 item7 item8 item9 item10 item11 item12 item13 item14 item1..."
+    value={
+      <TextFieldValue
+        fieldName="Description"
+        maxLength={100}
+        value="Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4 Trusted App 4"
+      />
+    }
   />
   <ConditionsTable
     badge="and"
@@ -106,6 +152,7 @@ exports[`trusted_app_card TrustedAppCard should trim long descriptions 1`] = `
         Object {
           "field": "field",
           "name": "Field",
+          "render": [Function],
           "sortable": false,
           "textOnly": true,
           "truncateText": true,
@@ -114,15 +161,17 @@ exports[`trusted_app_card TrustedAppCard should trim long descriptions 1`] = `
         Object {
           "field": "operator",
           "name": "Operator",
+          "render": [Function],
           "sortable": false,
           "truncateText": true,
           "width": "20%",
         },
         Object {
+          "data-test-subj": "conditionValue",
           "field": "value",
           "name": "Value",
+          "render": [Function],
           "sortable": false,
-          "truncateText": true,
           "width": "60%",
         },
       ]
@@ -132,6 +181,7 @@ exports[`trusted_app_card TrustedAppCard should trim long descriptions 1`] = `
   />
   <ItemDetailsAction
     color="danger"
+    data-test-subj="trustedAppDeleteButton"
     onClick={[Function]}
     size="s"
   >

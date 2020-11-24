@@ -7,7 +7,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getOr } from 'lodash/fp';
-import React, { Fragment, useState } from 'react';
+import React, { useCallback, Fragment, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { HostEcs } from '../../../../common/ecs/host';
@@ -260,25 +260,31 @@ MoreContainer.displayName = 'MoreContainer';
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
   ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
+    const button = useMemo(
+      () => (
+        <>
+          {' ,'}
+          <EuiButtonEmpty size="xs" onClick={togglePopover}>
+            {`+${rowItems.length - overflowIndexStart} `}
+            <FormattedMessage
+              id="xpack.securitySolution.fieldRenderers.moreLabel"
+              defaultMessage="More"
+            />
+          </EuiButtonEmpty>
+        </>
+      ),
+      [togglePopover, overflowIndexStart, rowItems.length]
+    );
+
     return (
       <EuiFlexItem grow={false}>
         {rowItems.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
-            button={
-              <>
-                {' ,'}
-                <EuiButtonEmpty size="xs" onClick={() => setIsOpen(!isOpen)}>
-                  {`+${rowItems.length - overflowIndexStart} `}
-                  <FormattedMessage
-                    id="xpack.securitySolution.fieldRenderers.moreLabel"
-                    defaultMessage="More"
-                  />
-                </EuiButtonEmpty>
-              </>
-            }
+            button={button}
             isOpen={isOpen}
-            closePopover={() => setIsOpen(!isOpen)}
+            closePopover={togglePopover}
             repositionOnScroll
           >
             <MoreContainer

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../plugins/case/common/constants';
-import { postCaseReq, postCommentReq, findCasesResp } from '../../../common/lib/mock';
+import { postCaseReq, postCommentUserReq, findCasesResp } from '../../../common/lib/mock';
 import { deleteCases, deleteComments, deleteCasesUserActions } from '../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -21,6 +21,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteComments(es);
       await deleteCasesUserActions(es);
     });
+
     it('should return empty response', async () => {
       const { body } = await supertest
         .get(`${CASES_URL}/_find`)
@@ -32,9 +33,24 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return cases', async () => {
-      const { body: a } = await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
-      const { body: b } = await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
-      const { body: c } = await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq);
+      const { body: a } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      const { body: b } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      const { body: c } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
       const { body } = await supertest
         .get(`${CASES_URL}/_find?sortOrder=asc`)
         .set('kbn-xsrf', 'true')
@@ -54,7 +70,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send({ ...postCaseReq, tags: ['unique'] });
+        .send({ ...postCaseReq, tags: ['unique'] })
+        .expect(200);
+
       const { body } = await supertest
         .get(`${CASES_URL}/_find?sortOrder=asc&tags=unique`)
         .set('kbn-xsrf', 'true')
@@ -73,17 +91,22 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
 
       // post 2 comments
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentUserReq)
+        .expect(200);
+
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentUserReq)
+        .expect(200);
+
       const { body } = await supertest
         .get(`${CASES_URL}/_find?sortOrder=asc`)
         .set('kbn-xsrf', 'true')
@@ -109,7 +132,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -123,6 +148,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         })
         .expect(200);
+
       const { body } = await supertest
         .get(`${CASES_URL}/_find?sortOrder=asc`)
         .set('kbn-xsrf', 'true')

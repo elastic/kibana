@@ -41,6 +41,11 @@ describe('DashboardState', function () {
     },
   } as TimefilterContract;
 
+  // TS is *very* picky with type guards / predicates. can't just use jest.fn()
+  function mockHasTaggingCapabilities(obj: any): obj is any {
+    return false;
+  }
+
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,
@@ -48,6 +53,7 @@ describe('DashboardState', function () {
       kibanaVersion: '7.0.0',
       kbnUrlStateStorage: createKbnUrlStateStorage(),
       history: createBrowserHistory(),
+      hasTaggingCapabilities: mockHasTaggingCapabilities,
     });
   }
 

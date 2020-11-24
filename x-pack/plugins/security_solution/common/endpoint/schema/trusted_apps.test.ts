@@ -293,11 +293,28 @@ describe('When invoking Trusted Apps Schema', () => {
       });
 
       it('should validate that `entry.field` is used only once', () => {
-        const bodyMsg = {
+        let bodyMsg = {
           ...getCreateTrustedAppItem(),
           entries: [getTrustedAppItemEntryItem(), getTrustedAppItemEntryItem()],
         };
-        expect(() => body.validate(bodyMsg)).toThrow();
+        expect(() => body.validate(bodyMsg)).toThrow('[Path] field can only be used once');
+
+        bodyMsg = {
+          ...getCreateTrustedAppItem(),
+          entries: [
+            {
+              ...getTrustedAppItemEntryItem(),
+              field: 'process.hash.*',
+              value: VALID_HASH_MD5,
+            },
+            {
+              ...getTrustedAppItemEntryItem(),
+              field: 'process.hash.*',
+              value: VALID_HASH_MD5,
+            },
+          ],
+        };
+        expect(() => body.validate(bodyMsg)).toThrow('[Hash] field can only be used once');
       });
 
       it('should validate Hash field valid value', () => {

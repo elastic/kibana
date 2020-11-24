@@ -549,8 +549,7 @@ export function reducer(state: State, action: Action): State {
     }
 
     case ACTION.SWITCH_TO_ADVANCED_EDITOR:
-      let { jobConfig } = state;
-      jobConfig = getJobConfigFromFormState(state.form);
+      const jobConfig = getJobConfigFromFormState(state.form);
       const shouldDisableSwitchToForm = isAdvancedConfig(jobConfig);
 
       return validateAdvancedEditor({

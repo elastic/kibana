@@ -25,6 +25,7 @@ export {
   ConfigDeprecationLogger,
   ConfigDeprecationProvider,
   ConfigDeprecationWithContext,
+  copyFromRoot,
 } from './deprecation';
 
 export { RawConfigurationProvider, RawConfigService, getConfigFromFiles } from './raw';
@@ -35,3 +36,4 @@ export { ObjectToConfigAdapter } from './object_to_config_adapter';
 export { CliArgs, Env, RawPackageInfo } from './env';
 export { EnvironmentMode, PackageInfo } from './types';
 export { LegacyObjectToConfigAdapter, LegacyLoggingConfig } from './legacy';
+export { getPluginSearchPaths } from './plugins';

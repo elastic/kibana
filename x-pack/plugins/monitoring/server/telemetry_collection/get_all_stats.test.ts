@@ -9,13 +9,10 @@ import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
 import { ClustersHighLevelStats } from './get_high_level_stats';
-import { coreMock } from 'src/core/server/mocks';
 
 describe('get_all_stats', () => {
-  const start = 0;
-  const end = 1;
+  const timestamp = Date.now();
   const callCluster = sinon.stub();
-  const esClient = sinon.stub();
 
   const esClusters = [
     { cluster_uuid: 'a' },
@@ -172,23 +169,7 @@ describe('get_all_stats', () => {
         .onCall(4)
         .returns(Promise.resolve({})); // Beats state
 
-      expect(
-        await getAllStats(
-          [{ clusterUuid: 'a' }],
-          {
-            callCluster: callCluster as any,
-            esClient: esClient as any,
-            usageCollection: {} as any,
-            start,
-            end,
-          },
-          {
-            logger: coreMock.createPluginInitializerContext().logger.get('test'),
-            version: 'version',
-            maxBucketSize: 1,
-          }
-        )
-      ).toStrictEqual(allClusters);
+      expect(await getAllStats(['a'], callCluster, timestamp, 1)).toStrictEqual(allClusters);
     });
 
     it('returns empty clusters', async () => {
@@ -198,23 +179,7 @@ describe('get_all_stats', () => {
 
       callCluster.withArgs('search').returns(Promise.resolve(clusterUuidsResponse));
 
-      expect(
-        await getAllStats(
-          [],
-          {
-            callCluster: callCluster as any,
-            esClient: esClient as any,
-            usageCollection: {} as any,
-            start,
-            end,
-          },
-          {
-            logger: coreMock.createPluginInitializerContext().logger.get('test'),
-            version: 'version',
-            maxBucketSize: 1,
-          }
-        )
-      ).toStrictEqual([]);
+      expect(await getAllStats([], callCluster, timestamp, 1)).toStrictEqual([]);
     });
   });
 

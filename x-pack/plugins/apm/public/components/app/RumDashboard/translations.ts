@@ -7,6 +7,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const I18LABELS = {
+  dataMissing: i18n.translate('xpack.apm.rum.dashboard.dataMissing', {
+    defaultMessage: 'N/A',
+  }),
+  totalPageLoad: i18n.translate('xpack.apm.rum.dashboard.totalPageLoad', {
+    defaultMessage: 'Total',
+  }),
   backEnd: i18n.translate('xpack.apm.rum.dashboard.backend', {
     defaultMessage: 'Backend',
   }),
@@ -14,7 +20,7 @@ export const I18LABELS = {
     defaultMessage: 'Frontend',
   }),
   pageViews: i18n.translate('xpack.apm.rum.dashboard.pageViews', {
-    defaultMessage: 'Page views',
+    defaultMessage: 'Total page views',
   }),
   percPageLoaded: i18n.translate('xpack.apm.rum.dashboard.pagesLoaded.label', {
     defaultMessage: 'Pages loaded',
@@ -31,6 +37,9 @@ export const I18LABELS = {
       defaultMessage: 'Page load duration',
     }
   ),
+  pageLoad: i18n.translate('xpack.apm.rum.dashboard.pageLoad.label', {
+    defaultMessage: 'Page load',
+  }),
   pageLoadDistribution: i18n.translate(
     'xpack.apm.rum.dashboard.pageLoadDistribution.label',
     {
@@ -76,8 +85,11 @@ export const I18LABELS = {
       defaultMessage: 'Operating system',
     }
   ),
-  userExperienceMetrics: i18n.translate('xpack.apm.rum.userExperienceMetrics', {
-    defaultMessage: 'User experience metrics',
+  metrics: i18n.translate('xpack.apm.ux.metrics', {
+    defaultMessage: 'Metrics',
+  }),
+  median: i18n.translate('xpack.apm.ux.median', {
+    defaultMessage: 'median',
   }),
   avgPageLoadDuration: i18n.translate(
     'xpack.apm.rum.visitorBreakdownMap.avgPageLoadDuration',
@@ -92,7 +104,7 @@ export const I18LABELS = {
     }
   ),
   searchByUrl: i18n.translate('xpack.apm.rum.filters.searchByUrl', {
-    defaultMessage: 'Search by url',
+    defaultMessage: 'Search by URL',
   }),
   getSearchResultsLabel: (total: number) =>
     i18n.translate('xpack.apm.rum.filters.searchResults', {
@@ -107,9 +119,6 @@ export const I18LABELS = {
   }),
   url: i18n.translate('xpack.apm.rum.filters.url', {
     defaultMessage: 'Url',
-  }),
-  matchThisQuery: i18n.translate('xpack.apm.rum.filters.url.matchThisQuery', {
-    defaultMessage: 'Match this query',
   }),
   loadingResults: i18n.translate('xpack.apm.rum.filters.url.loadingResults', {
     defaultMessage: 'Loading results',
@@ -152,6 +161,21 @@ export const I18LABELS = {
   }),
   noData: i18n.translate('xpack.apm.ux.visitorBreakdown.noData', {
     defaultMessage: 'No data.',
+  }),
+  // Helper tooltips
+  totalPageLoadTooltip: i18n.translate(
+    'xpack.apm.rum.dashboard.tooltips.totalPageLoad',
+    {
+      defaultMessage: 'Total represents the full page load duration',
+    }
+  ),
+  frontEndTooltip: i18n.translate('xpack.apm.rum.dashboard.tooltips.frontEnd', {
+    defaultMessage:
+      'Frontend time represents the total page load duration minus the backend time',
+  }),
+  backEndTooltip: i18n.translate('xpack.apm.rum.dashboard.tooltips.backEnd', {
+    defaultMessage:
+      'Backend time represents time to first byte (TTFB), which is when the first response packet is received after the request has been made',
   }),
 };
 

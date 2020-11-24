@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
   EuiSpacer,
@@ -21,9 +21,8 @@ import {
   EuiButtonEmptyProps,
   EuiLinkProps,
 } from '@elastic/eui';
-import sharedSourcesIcon from '../../components/shared/assets/share_circle.svg';
-import { sendTelemetry } from '../../../shared/telemetry';
-import { HttpLogic } from '../../../shared/http';
+import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
+import { TelemetryLogic } from '../../../shared/telemetry';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
@@ -136,12 +135,10 @@ export const OnboardingSteps: React.FC = () => {
 };
 
 export const OrgNameOnboarding: React.FC = () => {
-  const { http } = useValues(HttpLogic);
+  const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>
-    sendTelemetry({
-      http,
-      product: 'workplace_search',
+    sendWorkplaceSearchTelemetry({
       action: 'clicked',
       metric: 'org_name_change_button',
     });

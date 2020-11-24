@@ -8,7 +8,9 @@ import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
 import {
+  AppMountParameters,
   CoreSetup,
   CoreStart,
   Plugin,
@@ -18,6 +20,7 @@ import {
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
 import {
+  setEMSSettings,
   setKibanaCommonConfig,
   setKibanaVersion,
   setMapAppConfig,
@@ -27,8 +30,12 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../src/plugins/visualizations/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { PLUGIN_ID_OSS } from '../../../../src/plugins/maps_oss/common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   createMapsUrlGenerator,
@@ -49,7 +56,14 @@ import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
-import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
+import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
+import {
+  getIsEnterprisePlus,
+  registerLicensedFeatures,
+  setLicensingPluginStart,
+} from './licensed_features';
+import { EMSSettings } from '../common/ems_settings';
+import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -70,6 +84,10 @@ export interface MapsPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
+  visualizations: VisualizationsStart;
+  savedObjects: SavedObjectsStart;
+  dashboard: DashboardStart;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }
 
 /**
@@ -103,6 +121,9 @@ export class MapsPlugin
     setMapAppConfig(config);
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
 
+    const emsSettings = new EMSSettings(plugins.mapsLegacy.config, getIsEnterprisePlus);
+    setEMSSettings(emsSettings);
+
     // register url generators
     const getStartServices = async () => {
       const [coreStart] = await core.getStartServices();
@@ -131,9 +152,9 @@ export class MapsPlugin
       icon: `plugins/${APP_ID}/icon.svg`,
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      async mount(context, params) {
+      async mount(params: AppMountParameters) {
         const { renderApp } = await lazyLoadMapModules();
-        return renderApp(context, params);
+        return renderApp(params);
       },
     });
   }
@@ -142,6 +163,8 @@ export class MapsPlugin
     setLicensingPluginStart(plugins.licensing);
     plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     setStartServices(core, plugins);
+    // unregisters the OSS alias
+    plugins.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
 
     return {
       createSecurityLayerDescriptors,

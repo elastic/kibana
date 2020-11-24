@@ -90,10 +90,9 @@ exports[`EnabledFeatures renders as expected 1`] = `
               "category": Object {
                 "euiIconType": "logoKibana",
                 "id": "kibana",
-                "label": "Kibana",
+                "label": "Analytics",
                 "order": 1000,
               },
-              "icon": "spacesApp",
               "id": "feature-1",
               "name": "Feature 1",
               "privileges": null,
@@ -103,10 +102,9 @@ exports[`EnabledFeatures renders as expected 1`] = `
               "category": Object {
                 "euiIconType": "logoKibana",
                 "id": "kibana",
-                "label": "Kibana",
+                "label": "Analytics",
                 "order": 1000,
               },
-              "icon": "spacesApp",
               "id": "feature-2",
               "name": "Feature 2",
               "privileges": null,

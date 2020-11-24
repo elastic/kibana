@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import React from 'react';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
-
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
+import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { createConnectedBackgroundSessionIndicator } from './search';
+import { ConfigSchema } from '../config';
 
 export interface DataEnhancedSetupDependencies {
   data: DataPublicPluginSetup;
@@ -24,6 +28,8 @@ export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 export class DataEnhancedPlugin
   implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
   private enhancedSearchInterceptor!: EnhancedSearchInterceptor;
+
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
@@ -40,6 +46,7 @@ export class DataEnhancedPlugin
       uiSettings: core.uiSettings,
       startServices: core.getStartServices(),
       usageCollector: data.search.usageCollector,
+      session: data.search.session,
     });
 
     data.__enhance({
@@ -51,6 +58,18 @@ export class DataEnhancedPlugin
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
+
+    if (this.initializerContext.config.get().search.sendToBackground.enabled) {
+      core.chrome.setBreadcrumbsAppendExtension({
+        content: toMountPoint(
+          React.createElement(
+            createConnectedBackgroundSessionIndicator({
+              sessionService: plugins.data.search.session,
+            })
+          )
+        ),
+      });
+    }
   }
 
   public stop() {

@@ -5,9 +5,10 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
-import { NewPackagePolicy, PackagePolicy } from '../../../../ingest_manager/common';
+import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
+export * from './os';
 export * from './trusted_apps';
 
 /**
@@ -197,7 +198,6 @@ export interface SafeResolverTree {
    */
   entityID: string;
   children: SafeResolverChildren;
-  relatedEvents: Omit<SafeResolverRelatedEvents, 'entityID'>;
   relatedAlerts: Omit<ResolverRelatedAlerts, 'entityID'>;
   ancestry: SafeResolverAncestry;
   lifecycle: SafeResolverEvent[];
@@ -268,15 +268,6 @@ export interface ResolverRelatedEvents {
 }
 
 /**
- * Safe version of `ResolverRelatedEvents`
- */
-export interface SafeResolverRelatedEvents {
-  entityID: string;
-  events: SafeResolverEvent[];
-  nextEvent: string | null;
-}
-
-/**
  * Response structure for the events route.
  * `nextEvent` will be set to null when at the time of querying there were no more results to retrieve from ES.
  */
@@ -308,6 +299,17 @@ export interface HostResultList {
   request_page_index: number;
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
+  /* policy IDs and versions */
+  policy_info?: HostInfo['policy_info'];
+}
+
+/**
+ * The data_stream fields in an elasticsearch document.
+ */
+export interface DataStream {
+  dataset: string;
+  namespace: string;
+  type: string;
 }
 
 /**
@@ -520,9 +522,30 @@ export enum MetadataQueryStrategyVersions {
   VERSION_2 = 'v2',
 }
 
+export type PolicyInfo = Immutable<{
+  revision: number;
+  id: string;
+}>;
+
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
   host_status: HostStatus;
+  policy_info?: {
+    agent: {
+      /**
+       * As set in Kibana
+       */
+      configured: PolicyInfo;
+      /**
+       * Last reported running in agent (may lag behind configured)
+       */
+      applied: PolicyInfo;
+    };
+    /**
+     * Current intended 'endpoint' package policy
+     */
+    endpoint: PolicyInfo;
+  };
   /* the version of the query strategy */
   query_strategy_version: MetadataQueryStrategyVersions;
 }>;
@@ -558,6 +581,8 @@ export type HostMetadata = Immutable<{
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        endpoint_policy_version: number;
+        version: number;
       };
     };
   };
@@ -566,6 +591,7 @@ export type HostMetadata = Immutable<{
     version: string;
   };
   host: Host;
+  data_stream: DataStream;
 }>;
 
 export interface LegacyEndpointEvent {
@@ -684,6 +710,11 @@ export type SafeEndpointEvent = Partial<{
     id: ECSField<string>;
     version: ECSField<string>;
     type: ECSField<string>;
+  }>;
+  data_stream: Partial<{
+    type: ECSField<string>;
+    dataset: ECSField<string>;
+    namespace: ECSField<string>;
   }>;
   ecs: Partial<{
     version: ECSField<string>;
@@ -810,9 +841,7 @@ export type ResolverEntityIndex = Array<{ entity_id: string }>;
  * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
 export type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
-  ? KbnConfigSchemaInputObjectTypeOf<
-      T
-    > /** `schema.number()` accepts strings, so this type should accept them as well. */
+  ? KbnConfigSchemaInputObjectTypeOf<T> /** `schema.number()` accepts strings, so this type should accept them as well. */
   : number extends T
   ? T | string
   : T;
@@ -855,6 +884,7 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
+    advanced?: {};
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;
@@ -868,19 +898,36 @@ export interface PolicyConfig {
     logging: {
       file: string;
     };
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
+    antivirus_registration: {
+      enabled: boolean;
+    };
   };
   mac: {
+    advanced?: {};
     events: {
       file: boolean;
       process: boolean;
       network: boolean;
     };
     malware: MalwareFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
     logging: {
       file: string;
     };
   };
   linux: {
+    advanced?: {};
     events: {
       file: boolean;
       process: boolean;
@@ -899,15 +946,18 @@ export interface UIPolicyConfig {
   /**
    * Windows-specific policy configuration that is supported via the UI
    */
-  windows: Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+  windows: Pick<
+    PolicyConfig['windows'],
+    'events' | 'malware' | 'popup' | 'antivirus_registration' | 'advanced'
+  >;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events'>;
+  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
 }
 
 /** Policy: Malware protection fields */
@@ -1012,6 +1062,7 @@ interface HostPolicyResponseAppliedArtifact {
  */
 export interface HostPolicyResponse {
   '@timestamp': number;
+  data_stream: DataStream;
   elastic: {
     agent: {
       id: string;
@@ -1040,7 +1091,8 @@ export interface HostPolicyResponse {
   Endpoint: {
     policy: {
       applied: {
-        version: string;
+        version: number;
+        endpoint_policy_version: number;
         id: string;
         name: string;
         status: HostPolicyResponseActionStatus;
@@ -1073,4 +1125,15 @@ export interface HostPolicyResponse {
  */
 export interface GetHostPolicyResponse {
   policy_response: HostPolicyResponse;
+}
+
+/**
+ * REST API response for retrieving agent summary
+ */
+export interface GetAgentSummaryResponse {
+  summary_response: {
+    package: string;
+    policy_id?: string;
+    versions_count: { [key: string]: number };
+  };
 }

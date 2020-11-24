@@ -56,7 +56,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    *
    * Note: this can only be used for multi-namespace object types.
    */
-  namespaces?: string[];
+  initialNamespaces?: string[];
 }
 
 /**
@@ -79,7 +79,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    *
    * Note: this can only be used for multi-namespace object types.
    */
-  namespaces?: string[];
+  initialNamespaces?: string[];
 }
 
 /**
@@ -207,6 +207,24 @@ export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBas
 export interface SavedObjectsDeleteFromNamespacesResponse {
   /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
   namespaces: string[];
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation. Defaults to `true` */
+  refresh?: boolean;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBaseOptions {
+  /** The number of objects that have been updated by this operation */
+  updated: number;
 }
 
 /**
@@ -432,5 +450,16 @@ export class SavedObjectsClient {
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     return await this._repository.bulkUpdate(objects, options);
+  }
+
+  /**
+   * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
+   */
+  async removeReferencesTo(
+    type: string,
+    id: string,
+    options?: SavedObjectsRemoveReferencesToOptions
+  ) {
+    return await this._repository.removeReferencesTo(type, id, options);
   }
 }

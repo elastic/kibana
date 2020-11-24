@@ -96,10 +96,10 @@ export default ({ getService }: FtrProviderContext) => {
         .get(`/api/ml/results/${jobId}/categorizer_stats`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .expect(404);
+        .expect(403);
 
-      expect(body.error).to.be('Not Found');
-      expect(body.message).to.be('Not Found');
+      expect(body.error).to.be('Forbidden');
+      expect(body.message).to.be('Forbidden');
     });
 
     it('should fetch all the categorizer stats with per-partition value for job id', async () => {
@@ -139,10 +139,10 @@ export default ({ getService }: FtrProviderContext) => {
         .query({ partitionByValue: 'sample_web_logs' })
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .expect(404);
+        .expect(403);
 
-      expect(body.error).to.be('Not Found');
-      expect(body.message).to.be('Not Found');
+      expect(body.error).to.be('Forbidden');
+      expect(body.message).to.be('Forbidden');
     });
   });
 };

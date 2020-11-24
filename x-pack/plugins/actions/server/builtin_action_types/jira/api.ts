@@ -17,6 +17,7 @@ import {
   PushToServiceApiParams,
   PushToServiceResponse,
   GetIssueHandlerArgs,
+  GetCommonFieldsHandlerArgs,
 } from './types';
 
 // TODO: to remove, need to support Case
@@ -36,6 +37,11 @@ const getIncidentHandler = async ({
 
 const getIssueTypesHandler = async ({ externalService }: GetIssueTypesHandlerArgs) => {
   const res = await externalService.getIssueTypes();
+  return res;
+};
+
+const getFieldsHandler = async ({ externalService }: GetCommonFieldsHandlerArgs) => {
+  const res = await externalService.getFields();
   return res;
 };
 
@@ -91,11 +97,25 @@ const pushToServiceHandler = async ({
       defaultPipes,
     });
 
-    incident = transformFields<PushToServiceApiParams, ExternalServiceParams, Incident>({
+    const transformedFields = transformFields<
+      PushToServiceApiParams,
+      ExternalServiceParams,
+      Incident
+    >({
       params,
       fields,
       currentIncident,
     });
+
+    const { priority, labels, issueType, parent } = params;
+    incident = {
+      summary: transformedFields.summary,
+      description: transformedFields.description,
+      priority,
+      labels,
+      issueType,
+      parent,
+    };
   } else {
     const { title, description, priority, labels, issueType, parent } = params;
     incident = { summary: title, description, priority, labels, issueType, parent };
@@ -143,6 +163,7 @@ const pushToServiceHandler = async ({
 };
 
 export const api: ExternalServiceApi = {
+  getFields: getFieldsHandler,
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,
   getIncident: getIncidentHandler,

@@ -44,7 +44,7 @@ export const registerBulkCreateRoute = (router: IRouter) => {
                 })
               )
             ),
-            namespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           })
         ),
       },

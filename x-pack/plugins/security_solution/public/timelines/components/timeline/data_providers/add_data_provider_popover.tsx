@@ -196,9 +196,9 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       isOpen={isAddFilterPopoverOpen}
       closePopover={handleClosePopover}
       anchorPosition="downLeft"
-      withTitle
       panelPaddingSize="none"
       ownFocus={true}
+      repositionOnScroll
     >
       {content}
     </EuiPopover>

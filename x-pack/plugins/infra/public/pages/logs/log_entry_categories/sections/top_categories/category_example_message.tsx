@@ -86,7 +86,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
         <LogEntryMessageColumn
           columnValue={{
             columnId: messageColumnId,
-            message: [{ field: 'message', value: message, highlights: [] }],
+            message: [{ field: 'message', value: [message], highlights: [] }],
           }}
           highlights={noHighlights}
           isActiveHighlight={false}
@@ -98,7 +98,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
           columnValue={{
             columnId: datasetColumnId,
             field: 'event.dataset',
-            value: humanFriendlyDataset,
+            value: [humanFriendlyDataset],
             highlights: [],
           }}
           highlights={noHighlights}

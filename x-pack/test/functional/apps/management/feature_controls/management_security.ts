@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should not show the Stack Management nav link', async () => {
         const links = await appsMenu.readLinks();
-        expect(links.map((link) => link.text)).to.eql(['Dashboard']);
+        expect(links.map((link) => link.text)).to.eql(['Overview', 'Dashboard']);
       });
 
       it('should render the "application not found" view when navigating to management directly', async () => {
@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         expect(sections[1]).to.eql({
           sectionId: 'kibana',
-          sectionLinks: ['indexPatterns', 'objects', 'spaces', 'settings'],
+          sectionLinks: ['indexPatterns', 'objects', 'tags', 'spaces', 'settings'],
         });
       });
     });

@@ -24,7 +24,7 @@ import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../test_utils/public';
+} from '@kbn/test/jest';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
 import { pieChartMockData } from './pie_chart_mock_data';
@@ -40,7 +40,7 @@ let mockedSVGElementGetBBox;
 let mockedSVGElementGetComputedTextLength;
 
 describe('No global chart settings', function () {
-  const visLibParams1 = {
+  const vislibParams1 = {
     el: '<div class=chart1></div>',
     type: 'pie',
     addLegend: true,
@@ -58,7 +58,7 @@ describe('No global chart settings', function () {
   });
 
   beforeEach(() => {
-    chart1 = getVis(visLibParams1);
+    chart1 = getVis(vislibParams1);
     mockUiState = getMockUiState();
   });
 
@@ -153,7 +153,7 @@ describe('Vislib PieChart Class Test Suite', function () {
     describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
       const mockPieData = pieChartMockData[aggItem];
 
-      const visLibParams = {
+      const vislibParams = {
         type: 'pie',
         addLegend: true,
         addTooltip: true,
@@ -161,7 +161,7 @@ describe('Vislib PieChart Class Test Suite', function () {
       let vis;
 
       beforeEach(async () => {
-        vis = getVis(visLibParams);
+        vis = getVis(vislibParams);
         const mockUiState = getMockUiState();
         vis.render(mockPieData, mockUiState);
       });

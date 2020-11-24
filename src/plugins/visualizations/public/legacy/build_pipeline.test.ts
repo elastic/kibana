@@ -21,14 +21,12 @@ import {
   prepareJson,
   prepareString,
   buildPipelineVisFunction,
-  buildVislibDimensions,
   buildPipeline,
   SchemaConfig,
   Schemas,
 } from './build_pipeline';
 import { Vis } from '..';
 import { dataPluginMock } from '../../../../plugins/data/public/mocks';
-import { IndexPattern, IAggConfigs } from '../../../../plugins/data/public';
 import { parseExpression } from '../../../expressions/common';
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
@@ -94,14 +92,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       uiState = {};
     });
 
-    it('handles vega function', () => {
-      const vis = {
-        params: { spec: 'this is a test' },
-      };
-      const actual = buildPipelineVisFunction.vega(vis.params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
     it('handles input_control_vis function', () => {
       const params = {
         some: 'nested',
@@ -109,90 +99,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       };
       const actual = buildPipelineVisFunction.input_control_vis(params, schemasDef, uiState);
       expect(actual).toMatchSnapshot();
-    });
-
-    it('handles metrics/tsvb function', () => {
-      const params = { foo: 'bar' };
-      const actual = buildPipelineVisFunction.metrics(params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
-    describe('handles table function', () => {
-      it('without splits or buckets', () => {
-        const params = { foo: 'bar' };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 0 },
-            { ...schemaConfig, accessor: 1 },
-          ],
-        };
-        const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with splits', () => {
-        const params = { foo: 'bar' };
-        const schemas = {
-          ...schemasDef,
-          split_row: [1, 2],
-        };
-        const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with splits and buckets', () => {
-        const params = { foo: 'bar' };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 0 },
-            { ...schemaConfig, accessor: 1 },
-          ],
-          split_row: [2, 4],
-          bucket: [3],
-        };
-        const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with showPartialRows=true and showMetricsAtAllLevels=true', () => {
-        const params = {
-          showMetricsAtAllLevels: true,
-          showPartialRows: true,
-        };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 1 },
-            { ...schemaConfig, accessor: 2 },
-            { ...schemaConfig, accessor: 4 },
-            { ...schemaConfig, accessor: 5 },
-          ],
-          bucket: [0, 3],
-        };
-        const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
-
-      it('with showPartialRows=true and showMetricsAtAllLevels=false', () => {
-        const params = {
-          showMetricsAtAllLevels: false,
-          showPartialRows: true,
-        };
-        const schemas = {
-          ...schemasDef,
-          metric: [
-            { ...schemaConfig, accessor: 1 },
-            { ...schemaConfig, accessor: 2 },
-            { ...schemaConfig, accessor: 4 },
-            { ...schemaConfig, accessor: 5 },
-          ],
-          bucket: [0, 3],
-        };
-        const actual = buildPipelineVisFunction.table(params, schemas, uiState);
-        expect(actual).toMatchSnapshot();
-      });
     });
 
     describe('handles region_map function', () => {
@@ -222,15 +128,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       const actual = buildPipelineVisFunction.tile_map(params, schemas, uiState);
       expect(actual).toMatchSnapshot();
     });
-
-    it('handles pie function', () => {
-      const schemas = {
-        ...schemasDef,
-        segment: [1, 2],
-      };
-      const actual = buildPipelineVisFunction.pie({}, schemas, uiState);
-      expect(actual).toMatchSnapshot();
-    });
   });
 
   describe('buildPipeline', () => {
@@ -258,159 +155,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         timefilter: dataStart.query.timefilter.timefilter,
       });
       expect(expression).toMatchSnapshot();
-    });
-  });
-
-  describe('buildVislibDimensions', () => {
-    const dataStart = dataPluginMock.createStartContract();
-
-    let aggs: IAggConfigs;
-    let vis: Vis;
-    let params: any;
-
-    beforeEach(() => {
-      aggs = dataStart.search.aggs.createAggConfigs({} as IndexPattern, [
-        {
-          id: '0',
-          enabled: true,
-          type: 'count',
-          schema: 'metric',
-          params: {},
-        },
-      ]);
-
-      params = {
-        searchSource: null,
-        timefilter: dataStart.query.timefilter.timefilter,
-        timeRange: null,
-      };
-    });
-
-    describe('test y dimension format for histogram chart', () => {
-      beforeEach(() => {
-        vis = {
-          // @ts-ignore
-          type: {
-            name: 'histogram',
-          },
-          params: {
-            seriesParams: [
-              {
-                data: { id: '0' },
-                valueAxis: 'axis-y',
-              },
-            ],
-            valueAxes: [
-              {
-                id: 'axis-y',
-                scale: {
-                  mode: 'normal',
-                },
-              },
-            ],
-          },
-          data: {
-            aggs,
-            searchSource: {} as any,
-          },
-          isHierarchical: () => {
-            return false;
-          },
-        };
-      });
-
-      it('with one numeric metric in regular moder', async () => {
-        const dimensions = await buildVislibDimensions(vis, params);
-        const expected = { id: 'number' };
-        const actual = dimensions.y[0].format;
-        expect(actual).toEqual(expected);
-      });
-
-      it('with one numeric metric in percentage mode', async () => {
-        vis.params.valueAxes[0].scale.mode = 'percentage';
-        const dimensions = await buildVislibDimensions(vis, params);
-        const expected = { id: 'percent' };
-        const actual = dimensions.y[0].format;
-        expect(actual).toEqual(expected);
-      });
-
-      it('with two numeric metrics, mixed normal and percent mode should have corresponding formatters', async () => {
-        aggs.createAggConfig({
-          id: '5',
-          enabled: true,
-          type: 'count',
-          schema: 'metric',
-          params: {},
-        });
-
-        vis.params = {
-          seriesParams: [
-            {
-              data: { id: '0' },
-              valueAxis: 'axis-y-1',
-            },
-            {
-              data: { id: '5' },
-              valueAxis: 'axis-y-2',
-            },
-          ],
-          valueAxes: [
-            {
-              id: 'axis-y-1',
-              scale: {
-                mode: 'normal',
-              },
-            },
-            {
-              id: 'axis-y-2',
-              scale: {
-                mode: 'percentage',
-              },
-            },
-          ],
-        };
-
-        const dimensions = await buildVislibDimensions(vis, params);
-        const expectedY1 = { id: 'number' };
-        const expectedY2 = { id: 'percent' };
-        expect(dimensions.y[0].format).toEqual(expectedY1);
-        expect(dimensions.y[1].format).toEqual(expectedY2);
-      });
-    });
-
-    describe('test y dimension format for gauge chart', () => {
-      beforeEach(() => {
-        vis = {
-          // @ts-ignore
-          type: {
-            name: 'gauge',
-          },
-          params: { gauge: {} },
-          data: {
-            aggs,
-            searchSource: {} as any,
-          },
-          isHierarchical: () => {
-            return false;
-          },
-        };
-      });
-
-      it('with percentageMode = false', async () => {
-        vis.params.gauge.percentageMode = false;
-        const dimensions = await buildVislibDimensions(vis, params);
-        const expected = { id: 'number' };
-        const actual = dimensions.y[0].format;
-        expect(actual).toEqual(expected);
-      });
-
-      it('with percentageMode = true', async () => {
-        vis.params.gauge.percentageMode = true;
-        const dimensions = await buildVislibDimensions(vis, params);
-        const expected = { id: 'percent' };
-        const actual = dimensions.y[0].format;
-        expect(actual).toEqual(expected);
-      });
     });
   });
 });

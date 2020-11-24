@@ -7,7 +7,8 @@
 jest.mock('./api_keys');
 jest.mock('./authenticator');
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   loggingSystemMock,
@@ -18,7 +19,7 @@ import {
 } from '../../../../../src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { securityAuditLoggerMock } from '../audit/index.mock';
+import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { sessionMock } from '../session_management/session.mock';
 
@@ -42,13 +43,14 @@ import {
   InvalidateAPIKeyParams,
 } from './api_keys';
 import { SecurityLicense } from '../../common/licensing';
-import { SecurityAuditLogger } from '../audit';
+import { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { Session } from '../session_management';
 
 describe('setupAuthentication()', () => {
   let mockSetupAuthenticationParams: {
-    auditLogger: jest.Mocked<SecurityAuditLogger>;
+    legacyAuditLogger: jest.Mocked<SecurityAuditLogger>;
+    audit: jest.Mocked<AuditServiceSetup>;
     config: ConfigType;
     loggers: LoggerFactory;
     http: jest.Mocked<HttpServiceSetup>;
@@ -60,7 +62,8 @@ describe('setupAuthentication()', () => {
   let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<LegacyScopedClusterClient>>;
   beforeEach(() => {
     mockSetupAuthenticationParams = {
-      auditLogger: securityAuditLoggerMock.create(),
+      legacyAuditLogger: securityAuditLoggerMock.create(),
+      audit: auditServiceMock.create(),
       http: coreMock.createSetup().http,
       config: createConfig(
         ConfigSchema.validate({

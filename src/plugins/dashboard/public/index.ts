@@ -45,7 +45,6 @@ export {
 export { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 export { SavedObjectDashboard } from './saved_dashboards';
 export { SavedDashboardPanel } from './types';
-export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './attribute_service';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

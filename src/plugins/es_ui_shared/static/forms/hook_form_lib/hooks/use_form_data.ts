@@ -19,6 +19,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 import { FormData, FormHook } from '../types';
+import { unflattenObject } from '../lib';
 import { useFormDataContext, Context } from '../form_data_context';
 
 interface Options {
@@ -26,14 +27,16 @@ interface Options {
   form?: FormHook<any>;
 }
 
-export type HookReturn<T extends object = FormData> = [FormData, () => T, boolean];
+export type HookReturn<I extends object = FormData, T extends object = I> = [I, () => T, boolean];
 
-export const useFormData = <T extends object = FormData>(options: Options = {}): HookReturn<T> => {
+export const useFormData = <I extends object = FormData, T extends object = I>(
+  options: Options = {}
+): HookReturn<I, T> => {
   const { watch, form } = options;
-  const ctx = useFormDataContext<T>();
+  const ctx = useFormDataContext<T, I>();
 
-  let getFormData: Context<T>['getFormData'];
-  let getFormData$: Context<T>['getFormData$'];
+  let getFormData: Context<T, I>['getFormData'];
+  let getFormData$: Context<T, I>['getFormData$'];
 
   if (form !== undefined) {
     getFormData = form.getFormData;
@@ -50,30 +53,33 @@ export const useFormData = <T extends object = FormData>(options: Options = {}):
 
   const previousRawData = useRef<FormData>(initialValue);
   const isMounted = useRef(false);
-  const [formData, setFormData] = useState<FormData>(previousRawData.current);
+  const [formData, setFormData] = useState<I>(() => unflattenObject<I>(previousRawData.current));
 
-  const formatFormData = useCallback(() => {
-    return getFormData({ unflatten: true });
-  }, [getFormData]);
+  /**
+   * We do want to offer to the consumer a handler to serialize the form data that changes each time
+   * the formData **state** changes. This is why we added the "formData" dep to the array and added the eslint override.
+   */
+  const serializer = useCallback(() => {
+    return getFormData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getFormData, formData]);
 
   useEffect(() => {
     const subscription = getFormData$().subscribe((raw) => {
-      if (watch) {
-        const valuesToWatchArray = Array.isArray(watch)
-          ? (watch as string[])
-          : ([watch] as string[]);
+      if (!isMounted.current && Object.keys(raw).length === 0) {
+        return;
+      }
 
-        if (
-          valuesToWatchArray.some(
-            (value) => previousRawData.current[value] !== raw[value as keyof T]
-          )
-        ) {
+      if (watch) {
+        const pathsToWatchArray: string[] = Array.isArray(watch) ? watch : [watch];
+
+        if (pathsToWatchArray.some((path) => previousRawData.current[path] !== raw[path])) {
           previousRawData.current = raw;
           // Only update the state if one of the field we watch has changed.
-          setFormData(raw);
+          setFormData(unflattenObject<I>(raw));
         }
       } else {
-        setFormData(raw);
+        setFormData(unflattenObject<I>(raw));
       }
     });
     return subscription.unsubscribe;
@@ -88,8 +94,8 @@ export const useFormData = <T extends object = FormData>(options: Options = {}):
 
   if (!isMounted.current && Object.keys(formData).length === 0) {
     // No field has mounted yet
-    return [formData, formatFormData, false];
+    return [formData, serializer, false];
   }
 
-  return [formData, formatFormData, true];
+  return [formData, serializer, true];
 };

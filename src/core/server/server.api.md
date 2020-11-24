@@ -5,7 +5,7 @@
 ```ts
 
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
@@ -129,16 +129,16 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
-import { Request } from 'hapi';
-import { ResponseObject } from 'hapi';
-import { ResponseToolkit } from 'hapi';
+import { Request } from '@hapi/hapi';
+import { ResponseObject } from '@hapi/hapi';
+import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
 import { SearchTemplateParams } from 'elasticsearch';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { ShallowPromise } from '@kbn/utility-types';
 import { SnapshotCreateParams } from 'elasticsearch';
 import { SnapshotCreateRepositoryParams } from 'elasticsearch';
@@ -160,9 +160,10 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
-import { Url } from 'url';
+import { URL } from 'url';
 
 // @public
 export interface AppCategory {
@@ -197,38 +198,6 @@ export interface AssistantAPIClientParams extends GenericParams {
     // (undocumented)
     path: '/_migration/assistance';
 }
-
-// @public
-export interface AuditableEvent {
-    // (undocumented)
-    message: string;
-    // (undocumented)
-    type: string;
-}
-
-// @public
-export interface Auditor {
-    add(event: AuditableEvent): void;
-    withAuditScope(name: string): void;
-}
-
-// @public
-export interface AuditorFactory {
-    // (undocumented)
-    asScoped(request: KibanaRequest): Auditor;
-}
-
-// Warning: (ae-missing-release-tag) "AuditTrailSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface AuditTrailSetup {
-    register(auditor: AuditorFactory): void;
-}
-
-// Warning: (ae-missing-release-tag) "AuditTrailStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export type AuditTrailStart = AuditorFactory;
 
 // @public (undocumented)
 export interface Authenticated extends AuthResultParams {
@@ -500,8 +469,6 @@ export interface CoreServicesUsageData {
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
-    auditTrail: AuditTrailSetup;
-    // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
@@ -513,6 +480,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     http: HttpServiceSetup & {
         resources: HttpResources;
     };
+    // (undocumented)
+    i18n: I18nServiceSetup;
     // (undocumented)
     logging: LoggingServiceSetup;
     // (undocumented)
@@ -527,8 +496,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
-    // (undocumented)
-    auditTrail: AuditTrailStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
@@ -764,7 +731,7 @@ export interface Explanation {
 }
 
 // @public
-export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
+export function exportSavedObjectsToStream({ types, hasReference, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
 
 // @public
 export interface FakeRequest {
@@ -887,6 +854,12 @@ export interface HttpServiceStart {
     auth: HttpAuth;
     basePath: IBasePath;
     getServerInfo: () => HttpServerInfo;
+}
+
+// @public (undocumented)
+export interface I18nServiceSetup {
+    getLocale(): string;
+    getTranslationFiles(): string[];
 }
 
 // @public
@@ -1043,10 +1016,11 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     readonly params: Params;
     // (undocumented)
     readonly query: Query;
+    readonly rewrittenUrl?: URL;
     readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
     // (undocumented)
     readonly socket: IKibanaSocket;
-    readonly url: Url;
+    readonly url: URL;
     readonly uuid: string;
     }
 
@@ -1348,7 +1322,7 @@ export interface LegacyCallAPIOptions {
 
 // @public @deprecated
 export class LegacyClusterClient implements ILegacyClusterClient {
-    constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuditorFactory: () => AuditorFactory, getAuthHeaders?: GetAuthHeaders);
+    constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient;
     callAsInternalUser: LegacyAPICaller;
     close(): void;
@@ -1396,7 +1370,7 @@ export interface LegacyRequest extends Request {
 
 // @public @deprecated
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
-    constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined, auditor?: Auditor | undefined);
+    constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined);
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     }
@@ -1531,8 +1505,15 @@ export interface OnPreResponseInfo {
 }
 
 // @public
+export interface OnPreResponseRender {
+    body: string;
+    headers?: ResponseHeaders;
+}
+
+// @public
 export interface OnPreResponseToolkit {
     next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
+    render: (responseRender: OnPreResponseRender) => OnPreResponseResult;
 }
 
 // Warning: (ae-forgotten-export) The symbol "OnPreRoutingResult" needs to be exported by the entry point index.d.ts
@@ -1731,7 +1712,6 @@ export interface RequestHandlerContext {
         uiSettings: {
             client: IUiSettingsClient;
         };
-        auditor: Auditor;
     };
 }
 
@@ -1929,8 +1909,8 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     attributes: T;
     // (undocumented)
     id?: string;
+    initialNamespaces?: string[];
     migrationVersion?: SavedObjectsMigrationVersion;
-    namespaces?: string[];
     originId?: string;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -2016,6 +1996,7 @@ export class SavedObjectsClient {
     errors: typeof SavedObjectsErrorHelpers;
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
+    removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -2087,8 +2068,8 @@ export interface SavedObjectsCoreFieldMapping {
 // @public (undocumented)
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
+    initialNamespaces?: string[];
     migrationVersion?: SavedObjectsMigrationVersion;
-    namespaces?: string[];
     originId?: string;
     overwrite?: boolean;
     // (undocumented)
@@ -2123,7 +2104,7 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createBadRequestError(reason?: string): DecoratedError;
     // (undocumented)
-    static createConflictError(type: string, id: string): DecoratedError;
+    static createConflictError(type: string, id: string, reason?: string): DecoratedError;
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
@@ -2180,6 +2161,7 @@ export class SavedObjectsErrorHelpers {
 export interface SavedObjectsExportOptions {
     excludeExportDetails?: boolean;
     exportSizeLimit: number;
+    hasReference?: SavedObjectsFindOptionsReference[];
     includeReferencesDeep?: boolean;
     namespace?: string;
     objects?: Array<{
@@ -2206,18 +2188,14 @@ export type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjec
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
-    // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     filter?: string | KueryNode;
-    // (undocumented)
-    hasReference?: {
-        type: string;
-        id: string;
-    };
+    hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+    hasReferenceOperator?: 'AND' | 'OR';
     // (undocumented)
     namespaces?: string[];
     // (undocumented)
@@ -2235,6 +2213,14 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindOptionsReference {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
 }
 
 // @public
@@ -2431,6 +2417,16 @@ export interface SavedObjectsRawDoc {
 }
 
 // @public (undocumented)
+export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
+    refresh?: boolean;
+}
+
+// @public (undocumented)
+export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBaseOptions {
+    updated: number;
+}
+
+// @public (undocumented)
 export class SavedObjectsRepository {
     addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<SavedObjectsAddToNamespacesResponse>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
@@ -2449,6 +2445,7 @@ export class SavedObjectsRepository {
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
+    removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -2750,6 +2747,11 @@ export interface UiSettingsParams<T = unknown> {
     category?: string[];
     deprecation?: DeprecationSettings;
     description?: string;
+    // @deprecated
+    metric?: {
+        type: UiStatsMetricType;
+        name: string;
+    };
     name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];

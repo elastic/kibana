@@ -22,14 +22,16 @@ import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
  */
 export const getFormattedEntry = (
   indexPattern: IndexPattern,
+  threatIndexPatterns: IndexPattern,
   item: Entry,
   itemIndex: number
 ): FormattedEntry => {
   const { fields } = indexPattern;
+  const { fields: threatFields } = threatIndexPatterns;
   const field = item.field;
   const threatField = item.value;
   const [foundField] = fields.filter(({ name }) => field != null && field === name);
-  const [threatFoundField] = fields.filter(
+  const [threatFoundField] = threatFields.filter(
     ({ name }) => threatField != null && threatField === name
   );
   return {
@@ -48,10 +50,11 @@ export const getFormattedEntry = (
  */
 export const getFormattedEntries = (
   indexPattern: IndexPattern,
+  threatIndexPatterns: IndexPattern,
   entries: Entry[]
 ): FormattedEntry[] => {
   return entries.reduce<FormattedEntry[]>((acc, item, index) => {
-    const newItemEntry = getFormattedEntry(indexPattern, item, index);
+    const newItemEntry = getFormattedEntry(indexPattern, threatIndexPatterns, item, index);
     return [...acc, newItemEntry];
   }, []);
 };

@@ -16,13 +16,13 @@
     "search": {
       "properties": {
         "successCount": {
-          "type": "number"
+          "type": "long"
         },
         "errorCount": {
-          "type": "number"
+          "type": "long"
         },
         "averageDuration": {
-          "type": "long"
+          "type": "float"
         }
       }
     },
@@ -1290,6 +1290,235 @@
         }
       }
     },
+    "core": {
+      "properties": {
+        "config": {
+          "properties": {
+            "elasticsearch": {
+              "properties": {
+                "sniffOnStart": {
+                  "type": "boolean"
+                },
+                "sniffIntervalMs": {
+                  "type": "long"
+                },
+                "sniffOnConnectionFault": {
+                  "type": "boolean"
+                },
+                "numberOfHostsConfigured": {
+                  "type": "long"
+                },
+                "requestHeadersWhitelistConfigured": {
+                  "type": "boolean"
+                },
+                "customHeadersConfigured": {
+                  "type": "boolean"
+                },
+                "shardTimeoutMs": {
+                  "type": "long"
+                },
+                "requestTimeoutMs": {
+                  "type": "long"
+                },
+                "pingTimeoutMs": {
+                  "type": "long"
+                },
+                "logQueries": {
+                  "type": "boolean"
+                },
+                "ssl": {
+                  "properties": {
+                    "verificationMode": {
+                      "type": "keyword"
+                    },
+                    "certificateAuthoritiesConfigured": {
+                      "type": "boolean"
+                    },
+                    "certificateConfigured": {
+                      "type": "boolean"
+                    },
+                    "keyConfigured": {
+                      "type": "boolean"
+                    },
+                    "keystoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "truststoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "alwaysPresentCertificate": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "apiVersion": {
+                  "type": "keyword"
+                },
+                "healthCheckDelayMs": {
+                  "type": "long"
+                }
+              }
+            },
+            "http": {
+              "properties": {
+                "basePathConfigured": {
+                  "type": "boolean"
+                },
+                "maxPayloadInBytes": {
+                  "type": "long"
+                },
+                "rewriteBasePath": {
+                  "type": "boolean"
+                },
+                "keepaliveTimeout": {
+                  "type": "long"
+                },
+                "socketTimeout": {
+                  "type": "long"
+                },
+                "compression": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "referrerWhitelistConfigured": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "xsrf": {
+                  "properties": {
+                    "disableProtection": {
+                      "type": "boolean"
+                    },
+                    "whitelistConfigured": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "requestId": {
+                  "properties": {
+                    "allowFromAnyIp": {
+                      "type": "boolean"
+                    },
+                    "ipAllowlistConfigured": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "ssl": {
+                  "properties": {
+                    "certificateAuthoritiesConfigured": {
+                      "type": "boolean"
+                    },
+                    "certificateConfigured": {
+                      "type": "boolean"
+                    },
+                    "cipherSuites": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "keyConfigured": {
+                      "type": "boolean"
+                    },
+                    "keystoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "truststoreConfigured": {
+                      "type": "boolean"
+                    },
+                    "redirectHttpFromPortConfigured": {
+                      "type": "boolean"
+                    },
+                    "supportedProtocols": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "clientAuthentication": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "logging": {
+              "properties": {
+                "appendersTypesUsed": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                },
+                "loggersConfiguredCount": {
+                  "type": "long"
+                }
+              }
+            },
+            "savedObjects": {
+              "properties": {
+                "maxImportPayloadBytes": {
+                  "type": "long"
+                },
+                "maxImportExportSizeBytes": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "environment": {
+          "properties": {
+            "memory": {
+              "properties": {
+                "heapSizeLimit": {
+                  "type": "long"
+                },
+                "heapTotalBytes": {
+                  "type": "long"
+                },
+                "heapUsedBytes": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "services": {
+          "properties": {
+            "savedObjects": {
+              "properties": {
+                "indices": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "docsCount": {
+                        "type": "long"
+                      },
+                      "docsDeleted": {
+                        "type": "long"
+                      },
+                      "alias": {
+                        "type": "text"
+                      },
+                      "primaryStoreSizeBytes": {
+                        "type": "long"
+                      },
+                      "storeSizeBytes": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "csp": {
       "properties": {
         "strict": {
@@ -1349,6 +1578,23 @@
               "type": "long"
             }
           }
+        }
+      }
+    },
+    "localization": {
+      "properties": {
+        "locale": {
+          "type": "keyword"
+        },
+        "integrities": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "text"
+            }
+          }
+        },
+        "labelsCount": {
+          "type": "long"
         }
       }
     },
@@ -2500,6 +2746,48 @@
       "properties": {
         "failed_validations": {
           "type": "long"
+        }
+      }
+    },
+    "vis_type_vega": {
+      "properties": {
+        "vega_lib_specs_total": {
+          "type": "long"
+        },
+        "vega_lite_lib_specs_total": {
+          "type": "long"
+        },
+        "vega_use_map_total": {
+          "type": "long"
+        }
+      }
+    },
+    "visualization_types": {
+      "properties": {
+        "DYNAMIC_KEY": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "spaces_min": {
+              "type": "long"
+            },
+            "spaces_max": {
+              "type": "long"
+            },
+            "spaces_avg": {
+              "type": "long"
+            },
+            "saved_7_days_total": {
+              "type": "long"
+            },
+            "saved_30_days_total": {
+              "type": "long"
+            },
+            "saved_90_days_total": {
+              "type": "long"
+            }
+          }
         }
       }
     }

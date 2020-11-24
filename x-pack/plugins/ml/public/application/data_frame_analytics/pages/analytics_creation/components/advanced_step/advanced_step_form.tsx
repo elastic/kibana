@@ -5,15 +5,20 @@
  */
 
 import React, { FC, Fragment, useMemo, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGrid,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,11 +30,92 @@ import {
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
   ANALYSIS_ADVANCED_FIELDS,
 } from '../../../../common/analytics';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
 import { fetchExplainData } from '../shared';
 import { ContinueButton } from '../continue_button';
 import { OutlierHyperParameters } from './outlier_hyper_parameters';
+
+const defaultNumTopClassesOption: EuiComboBoxOptionOption = {
+  label: i18n.translate('xpack.ml.dataframe.analytics.create.allClassesLabel', {
+    defaultMessage: 'All classes',
+  }),
+  value: -1,
+};
+const numClassesTypeMessage = (
+  <FormattedMessage
+    id="xpack.ml.dataframe.analytics.create.numTopClassTypeWarning"
+    defaultMessage="Value must be an integer of -1 or greater, where -1 indicates all classes."
+  />
+);
+
+function getZeroClassesMessage(elasaticUrl: string, version: string) {
+  return (
+    <FormattedMessage
+      id="xpack.ml.dataframe.analytics.create.zeroClassesMessage"
+      defaultMessage="To evaluate the {wikiLink}, select all classes or a value greater than the total number of categories."
+      values={{
+        wikiLink: (
+          <EuiLink
+            href={`${elasaticUrl}guide/en/machine-learning/${version}/ml-dfanalytics-evaluate.html#ml-dfanalytics-roc`}
+            target="_blank"
+            external
+          >
+            {i18n.translate('xpack.ml.dataframe.analytics.create.aucRocLabel', {
+              defaultMessage: 'AUC ROC',
+            })}
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+}
+
+function getTopClassesHelpText(currentNumTopClasses?: number) {
+  if (currentNumTopClasses === -1) {
+    return (
+      <>
+        <FormattedMessage
+          id="xpack.ml.dataframe.analytics.create.numTopClassesHelpText"
+          defaultMessage="The number of categories for which the predicted probabilities are reported."
+        />{' '}
+        <FormattedMessage
+          id="xpack.ml.dataframe.analytics.create.allClassesMessage"
+          defaultMessage="If you have a large number of classes there could be a significant effect on the size of your destination index."
+        />
+      </>
+    );
+  }
+  return (
+    <FormattedMessage
+      id="xpack.ml.dataframe.analytics.create.numTopClassesHelpText"
+      defaultMessage="The number of categories for which the predicted probabilities are reported."
+    />
+  );
+}
+
+function getSelectedNumTomClassesOption(currentNumTopClasses?: number) {
+  const option: EuiComboBoxOptionOption[] = [];
+  if (currentNumTopClasses === -1) {
+    option.push(defaultNumTopClassesOption);
+  } else if (currentNumTopClasses !== undefined) {
+    option.push({
+      label: `${currentNumTopClasses}`,
+    });
+  }
+  return option;
+}
+
+function isInvalidNumTopClasses(currentNumTopClasses?: number) {
+  // Only valid if undefined or a whole integer >= -1
+  return (
+    currentNumTopClasses !== undefined &&
+    (isNaN(currentNumTopClasses) ||
+      currentNumTopClasses < -1 ||
+      currentNumTopClasses - Math.floor(currentNumTopClasses) !== 0)
+  );
+}
 
 export function getNumberValue(value?: number) {
   return value === undefined ? '' : +value;
@@ -47,8 +133,13 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const [advancedParamErrors, setAdvancedParamErrors] = useState<AdvancedParamErrors>({});
   const [fetchingAdvancedParamErrors, setFetchingAdvancedParamErrors] = useState<boolean>(false);
 
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
-  const { form, isJobCreated } = state;
+  const { form, isJobCreated, estimatedModelMemoryLimit } = state;
   const {
     computeFeatureInfluence,
     eta,
@@ -69,7 +160,23 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     outlierFraction,
     predictionFieldName,
     randomizeSeed,
+    useEstimatedMml,
   } = form;
+
+  const [numTopClassesOptions, setNumTopClassesOptions] = useState<EuiComboBoxOptionOption[]>([
+    defaultNumTopClassesOption,
+  ]);
+  const [numTopClassesSelectedOptions, setNumTopClassesSelectedOptions] = useState<
+    EuiComboBoxOptionOption[]
+  >(getSelectedNumTomClassesOption(numTopClasses));
+
+  const selectedNumTopClasses =
+    numTopClassesSelectedOptions[0] &&
+    ((numTopClassesSelectedOptions[0].value ?? Number(numTopClassesSelectedOptions[0].label)) as
+      | number
+      | undefined);
+
+  const selectedNumTopClassesIsInvalid = isInvalidNumTopClasses(selectedNumTopClasses);
 
   const mmlErrors = useMemo(() => getModelMemoryLimitErrors(modelMemoryLimitValidationResult), [
     modelMemoryLimitValidationResult,
@@ -84,6 +191,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       modelMemoryLimitValidationResult.required === true);
 
   const isStepInvalid =
+    selectedNumTopClassesIsInvalid ||
     mmlInvalid ||
     Object.keys(advancedParamErrors).length > 0 ||
     fetchingAdvancedParamErrors === true ||
@@ -98,7 +206,9 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       if (success) {
         if (modelMemoryLimit !== expectedMemory) {
           setEstimatedModelMemoryLimit(expectedMemory);
-          setFormState({ modelMemoryLimit: expectedMemory });
+          if (useEstimatedMml === true) {
+            setFormState({ modelMemoryLimit: expectedMemory });
+          }
         }
       } else {
         // Check which field is invalid
@@ -309,15 +419,16 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               label={i18n.translate('xpack.ml.dataframe.analytics.create.numTopClassesLabel', {
                 defaultMessage: 'Top classes',
               })}
-              helpText={i18n.translate(
-                'xpack.ml.dataframe.analytics.create.numTopClassesHelpText',
-                {
-                  defaultMessage:
-                    'The number of categories for which the predicted probabilities are reported.',
-                }
-              )}
+              helpText={getTopClassesHelpText(selectedNumTopClasses)}
+              isInvalid={selectedNumTopClasses === 0 || selectedNumTopClassesIsInvalid}
+              error={[
+                ...(selectedNumTopClasses === 0
+                  ? [getZeroClassesMessage(ELASTIC_WEBSITE_URL, DOC_LINK_VERSION)]
+                  : []),
+                ...(selectedNumTopClassesIsInvalid ? [numClassesTypeMessage] : []),
+              ]}
             >
-              <EuiFieldNumber
+              <EuiComboBox
                 aria-label={i18n.translate(
                   'xpack.ml.dataframe.analytics.create.numTopClassesInputAriaLabel',
                   {
@@ -325,15 +436,36 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                       'The number of categories for which the predicted probabilities are reported',
                   }
                 )}
+                singleSelection={true}
+                options={numTopClassesOptions}
+                selectedOptions={numTopClassesSelectedOptions}
+                onCreateOption={(input: string, flattenedOptions = []) => {
+                  const normalizedInput = input.trim().toLowerCase();
+
+                  if (normalizedInput === '') {
+                    return;
+                  }
+
+                  const newOption = {
+                    label: input,
+                  };
+
+                  if (
+                    flattenedOptions.findIndex(
+                      (option) => option.label.trim().toLowerCase() === normalizedInput
+                    ) === -1
+                  ) {
+                    setNumTopClassesOptions([...numTopClassesOptions, newOption]);
+                  }
+
+                  setNumTopClassesSelectedOptions([newOption]);
+                }}
+                onChange={(selectedOptions) => {
+                  setNumTopClassesSelectedOptions(selectedOptions);
+                }}
+                isClearable={true}
+                isInvalid={selectedNumTopClasses !== undefined && selectedNumTopClasses < -1}
                 data-test-subj="mlAnalyticsCreateJobWizardnumTopClassesInput"
-                min={0}
-                onChange={(e) =>
-                  setFormState({
-                    numTopClasses: e.target.value === '' ? undefined : +e.target.value,
-                  })
-                }
-                step={1}
-                value={getNumberValue(numTopClasses)}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -353,18 +485,35 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               }
             )}
           >
-            <EuiFieldText
-              placeholder={
-                jobType !== undefined
-                  ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
-                  : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection
-              }
-              disabled={isJobCreated}
-              value={modelMemoryLimit || ''}
-              onChange={(e) => setFormState({ modelMemoryLimit: e.target.value })}
-              isInvalid={modelMemoryLimitValidationResult !== null}
-              data-test-subj="mlAnalyticsCreateJobWizardModelMemoryInput"
-            />
+            <>
+              <EuiFieldText
+                placeholder={
+                  jobType !== undefined
+                    ? DEFAULT_MODEL_MEMORY_LIMIT[jobType]
+                    : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection
+                }
+                disabled={isJobCreated || useEstimatedMml}
+                value={useEstimatedMml ? estimatedModelMemoryLimit : modelMemoryLimit || ''}
+                onChange={(e) => setFormState({ modelMemoryLimit: e.target.value })}
+                isInvalid={modelMemoryLimitValidationResult !== null}
+                data-test-subj="mlAnalyticsCreateJobWizardModelMemoryInput"
+              />
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                disabled={isJobCreated}
+                name="mlDataFrameAnalyticsUseEstimatedMml"
+                label={i18n.translate('xpack.ml.dataframe.analytics.create.useEstimatedMmlLabel', {
+                  defaultMessage: 'Use estimated model memory limit',
+                })}
+                checked={useEstimatedMml === true}
+                onChange={() =>
+                  setFormState({
+                    useEstimatedMml: !useEstimatedMml,
+                  })
+                }
+                data-test-subj="mlAnalyticsCreateJobWizardUseEstimatedMml"
+              />
+            </>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -440,6 +589,10 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       <ContinueButton
         isDisabled={isStepInvalid}
         onClick={() => {
+          setFormState({
+            numTopClasses:
+              selectedNumTopClassesIsInvalid === false ? selectedNumTopClasses : undefined,
+          });
           setCurrentStep(ANALYTICS_STEPS.DETAILS);
         }}
       />

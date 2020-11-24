@@ -1006,930 +1006,6 @@
                   }
                 }
               }
-            },
-            "otlp": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "opentelemetry/cpp": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "opentelemetry/dotnet": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "opentelemetry/erlang": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "opentelemetry/go": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "opentelemetry/java": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "opentelemetry/nodejs": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "opentelemetry/php": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "opentelemetry/python": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "opentelemetry/ruby": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "opentelemetry/webjs": {
-              "properties": {
-                "agent": {
-                  "properties": {
-                    "version": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                },
-                "service": {
-                  "properties": {
-                    "framework": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "language": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    },
-                    "runtime": {
-                      "properties": {
-                        "name": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "version": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        },
-                        "composite": {
-                          "type": "array",
-                          "items": {
-                            "type": "keyword"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
             }
           }
         },
@@ -2630,6 +1706,16 @@
           "properties": {
             "overview": {
               "type": "long"
+            },
+            "setup_guide": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
             }
           }
         },
@@ -2692,33 +1778,9 @@
         }
       }
     },
-    "infraops": {
+    "fleet": {
       "properties": {
-        "last_24_hours": {
-          "properties": {
-            "hits": {
-              "properties": {
-                "infraops_hosts": {
-                  "type": "long"
-                },
-                "infraops_docker": {
-                  "type": "long"
-                },
-                "infraops_kubernetes": {
-                  "type": "long"
-                },
-                "logs": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "ingest_manager": {
-      "properties": {
-        "fleet_enabled": {
+        "agents_enabled": {
           "type": "boolean"
         },
         "agents": {
@@ -2749,6 +1811,30 @@
               },
               "enabled": {
                 "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "infraops": {
+      "properties": {
+        "last_24_hours": {
+          "properties": {
+            "hits": {
+              "properties": {
+                "infraops_hosts": {
+                  "type": "long"
+                },
+                "infraops_docker": {
+                  "type": "long"
+                },
+                "infraops_kubernetes": {
+                  "type": "long"
+                },
+                "logs": {
+                  "type": "long"
+                }
               }
             }
           }
@@ -4050,6 +3136,50 @@
         }
       }
     },
+    "saved_objects_tagging": {
+      "properties": {
+        "usedTags": {
+          "type": "integer"
+        },
+        "taggedObjects": {
+          "type": "integer"
+        },
+        "types": {
+          "properties": {
+            "dashboard": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "visualization": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "map": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "security_solution": {
       "properties": {
         "detections": {
@@ -4164,7 +3294,7 @@
           "type": "boolean"
         },
         "authProviderCount": {
-          "type": "number"
+          "type": "long"
         },
         "enabledAuthProviders": {
           "type": "array",

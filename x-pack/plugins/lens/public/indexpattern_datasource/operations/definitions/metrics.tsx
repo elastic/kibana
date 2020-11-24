@@ -43,7 +43,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       }
     },
     isTransferable: (column, newIndexPattern) => {
-      const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+      const newField = newIndexPattern.getFieldByName(column.sourceField);
 
       return Boolean(
         newField &&
@@ -52,18 +52,19 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    buildColumn: ({ suggestedPriority, field, previousColumn }) => ({
+    getDefaultLabel: (column, indexPattern, columns) =>
+      ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
+    buildColumn: ({ field, previousColumn }) => ({
       label: ofName(field.displayName),
       dataType: 'number',
       operationType: type,
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
       params:
         previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
     }),
-    onFieldChange: (oldColumn, indexPattern, field) => {
+    onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,
         label: ofName(field.displayName),
@@ -87,6 +88,7 @@ export type SumIndexPatternColumn = MetricColumn<'sum'>;
 export type AvgIndexPatternColumn = MetricColumn<'avg'>;
 export type MinIndexPatternColumn = MetricColumn<'min'>;
 export type MaxIndexPatternColumn = MetricColumn<'max'>;
+export type MedianIndexPatternColumn = MetricColumn<'median'>;
 
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
   type: 'min',
@@ -134,6 +136,18 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
   ofName: (name) =>
     i18n.translate('xpack.lens.indexPattern.sumOf', {
       defaultMessage: 'Sum of {name}',
+      values: { name },
+    }),
+});
+
+export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
+  type: 'median',
+  displayName: i18n.translate('xpack.lens.indexPattern.median', {
+    defaultMessage: 'Median',
+  }),
+  ofName: (name) =>
+    i18n.translate('xpack.lens.indexPattern.medianOf', {
+      defaultMessage: 'Median of {name}',
       values: { name },
     }),
 });

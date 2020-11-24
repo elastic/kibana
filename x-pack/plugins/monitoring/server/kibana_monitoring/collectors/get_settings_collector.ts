@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Collector } from '../../../../../../src/plugins/usage_collection/server';
+import { Logger } from 'src/core/server';
+import { Collector, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
@@ -44,42 +45,66 @@ interface EmailSettingData {
   xpack: { default_admin_email: string | null };
 }
 
-export interface KibanaSettingsCollector extends Collector<EmailSettingData | undefined> {
+export interface KibanaSettingsCollectorExtraOptions {
   getEmailValueStructure(email: string | null): EmailSettingData;
 }
 
-export function getSettingsCollector(usageCollection: any, config: MonitoringConfig) {
-  return usageCollection.makeStatsCollector({
+export type KibanaSettingsCollector = Collector<EmailSettingData | undefined> &
+  KibanaSettingsCollectorExtraOptions;
+
+export function getEmailValueStructure(email: string | null) {
+  return {
+    xpack: {
+      default_admin_email: email,
+    },
+  };
+}
+
+export async function getKibanaSettings(logger: Logger, config: MonitoringConfig) {
+  let kibanaSettingsData;
+  const defaultAdminEmail = await checkForEmailValue(config);
+
+  // skip everything if defaultAdminEmail === undefined
+  if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
+    kibanaSettingsData = getEmailValueStructure(defaultAdminEmail);
+    logger.debug(
+      `[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`
+    );
+  } else {
+    logger.debug(
+      `not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`
+    );
+  }
+
+  // remember the current email so that we can mark it as successful if the bulk does not error out
+  shouldUseNull = !!defaultAdminEmail;
+
+  // returns undefined if there was no result
+  return kibanaSettingsData;
+}
+
+export function getSettingsCollector(
+  usageCollection: UsageCollectionSetup,
+  config: MonitoringConfig
+) {
+  return usageCollection.makeStatsCollector<
+    EmailSettingData | undefined,
+    unknown,
+    false,
+    KibanaSettingsCollectorExtraOptions
+  >({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,
-    async fetch(this: KibanaSettingsCollector) {
-      let kibanaSettingsData;
-      const defaultAdminEmail = await checkForEmailValue(config);
-
-      // skip everything if defaultAdminEmail === undefined
-      if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
-        kibanaSettingsData = this.getEmailValueStructure(defaultAdminEmail);
-        this.log.debug(
-          `[${defaultAdminEmail}] default admin email setting found, sending [${KIBANA_SETTINGS_TYPE}] monitoring document.`
-        );
-      } else {
-        this.log.debug(
-          `not sending [${KIBANA_SETTINGS_TYPE}] monitoring document because [${defaultAdminEmail}] is null or invalid.`
-        );
-      }
-
-      // remember the current email so that we can mark it as successful if the bulk does not error out
-      shouldUseNull = !!defaultAdminEmail;
-
-      // returns undefined if there was no result
-      return kibanaSettingsData;
+    schema: {
+      xpack: {
+        default_admin_email: { type: 'text' },
+      },
+    },
+    async fetch() {
+      return getKibanaSettings(this.log, config);
     },
     getEmailValueStructure(email: string | null) {
-      return {
-        xpack: {
-          default_admin_email: email,
-        },
-      };
+      return getEmailValueStructure(email);
     },
   });
 }

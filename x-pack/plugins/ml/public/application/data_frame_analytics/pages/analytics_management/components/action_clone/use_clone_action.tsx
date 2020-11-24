@@ -24,9 +24,7 @@ export const useCloneAction = (canCreateDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: (item: DataFrameAnalyticsListRow) => (
-        <CloneActionName isDisabled={!canCreateDataFrameAnalytics} />
-      ),
+      name: () => <CloneActionName isDisabled={!canCreateDataFrameAnalytics} />,
       enabled: () => canCreateDataFrameAnalytics,
       description: cloneActionNameText,
       icon: 'copy',

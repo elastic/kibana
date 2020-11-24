@@ -38,7 +38,6 @@ export function useTimeSeriesExplorerHref({
         refreshPaused !== undefined && refreshInterval !== undefined
           ? { pause: refreshPaused, value: refreshInterval }
           : undefined,
-      zoom: timeRange,
       ...(serviceName && transactionType
         ? {
             entities: {

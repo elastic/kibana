@@ -44,7 +44,7 @@ export function getKibanaUsageCollector(
       graph_workspace: { total: { type: 'long' } },
       timelion_sheet: { total: { type: 'long' } },
     },
-    async fetch(callCluster) {
+    async fetch({ callCluster }) {
       const {
         kibana: { index },
       } = await legacyConfig$.pipe(take(1)).toPromise();

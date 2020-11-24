@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from 'src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
@@ -15,7 +15,7 @@ import {
   ProxySettings,
 } from '../types';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { SpacesServiceSetup } from '../../../spaces/server';
+import { SpacesServiceStart } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { ActionsClient } from '../actions_client';
@@ -23,7 +23,7 @@ import { ActionExecutionSource } from './action_execution_source';
 
 export interface ActionExecutorContext {
   logger: Logger;
-  spaces?: SpacesServiceSetup;
+  spaces?: SpacesServiceStart;
   getServices: GetServicesFunction;
   getActionsClientWithRequest: (
     request: KibanaRequest,
@@ -74,11 +74,12 @@ export class ActionExecutor {
 
     if (this.isESOUsingEphemeralEncryptionKey === true) {
       throw new Error(
-        `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+        `Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );
     }
 
     const {
+      logger,
       spaces,
       getServices,
       encryptedSavedObjectsClient,
@@ -101,7 +102,7 @@ export class ActionExecutor {
       namespace.namespace
     );
 
-    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId)) {
+    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
     const actionType = actionTypeRegistry.get(actionTypeId);
@@ -171,11 +172,15 @@ export class ActionExecutor {
       event.message = `action execution failure: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = actionErrorToMessage(result);
+      logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
     } else {
       event.event.outcome = 'failure';
-      event.message = `action execution returned unexpected result: ${actionLabel}`;
+      event.message = `action execution returned unexpected result: ${actionLabel}: "${result.status}"`;
       event.error = event.error || {};
       event.error.message = 'action execution returned unexpected result';
+      logger.warn(
+        `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
+      );
     }
 
     eventLogger.logEvent(event);

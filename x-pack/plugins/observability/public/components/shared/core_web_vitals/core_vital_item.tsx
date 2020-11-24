@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, euiPaletteForStatus, EuiSpacer, EuiStat } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiIconTip,
+  euiPaletteForStatus,
+  EuiSpacer,
+  EuiStat,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PaletteLegends } from './palette_legends';
@@ -14,7 +21,10 @@ import {
   CV_GOOD_LABEL,
   LESS_LABEL,
   MORE_LABEL,
+  NO_DATA,
   CV_POOR_LABEL,
+  IS_LABEL,
+  TAKES_LABEL,
 } from './translations';
 
 export interface Thresholds {
@@ -24,17 +34,20 @@ export interface Thresholds {
 
 interface Props {
   title: string;
-  value: string;
+  value?: string | null;
   ranks?: number[];
   loading: boolean;
   thresholds: Thresholds;
+  isCls?: boolean;
+  helpLabel: string;
 }
 
 export function getCoreVitalTooltipMessage(
   thresholds: Thresholds,
   position: number,
   title: string,
-  percentage: number
+  percentage: number,
+  isCls?: boolean
 ) {
   const good = position === 0;
   const bad = position === 2;
@@ -42,9 +55,10 @@ export function getCoreVitalTooltipMessage(
 
   return i18n.translate('xpack.observability.ux.dashboard.webVitals.palette.tooltip', {
     defaultMessage:
-      '{percentage} % of users have {exp} experience because the {title} takes {moreOrLess} than {value}{averageMessage}.',
+      '{percentage} % of users have {exp} experience because the {title} {isOrTakes} {moreOrLess} than {value}{averageMessage}.',
     values: {
       percentage,
+      isOrTakes: isCls ? IS_LABEL : TAKES_LABEL,
       title: title?.toLowerCase(),
       exp: good ? CV_GOOD_LABEL : bad ? CV_POOR_LABEL : CV_AVERAGE_LABEL,
       moreOrLess: bad || average ? MORE_LABEL : LESS_LABEL,
@@ -59,19 +73,35 @@ export function getCoreVitalTooltipMessage(
   });
 }
 
-export function CoreVitalItem({ loading, title, value, thresholds, ranks = [100, 0, 0] }: Props) {
+export function CoreVitalItem({
+  loading,
+  title,
+  value,
+  thresholds,
+  ranks = [100, 0, 0],
+  isCls,
+  helpLabel,
+}: Props) {
   const palette = euiPaletteForStatus(3);
 
   const [inFocusInd, setInFocusInd] = useState<number | null>(null);
 
   const biggestValIndex = ranks.indexOf(Math.max(...ranks));
 
+  if ((value === null || value !== undefined) && ranks[0] === 100 && !loading) {
+    return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
+  }
   return (
     <>
       <EuiStat
         titleSize="s"
-        title={value}
-        description={title}
+        title={value ?? ''}
+        description={
+          <>
+            {title}
+            <EuiIconTip content={helpLabel} type="questionInCircle" />
+          </>
+        }
         titleColor={palette[biggestValIndex]}
         isLoading={loading}
       />
@@ -89,7 +119,7 @@ export function CoreVitalItem({ loading, title, value, thresholds, ranks = [100,
             position={ind}
             inFocus={inFocusInd !== ind && inFocusInd !== null}
             percentage={ranks[ind]}
-            tooltip={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind])}
+            tooltip={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind], isCls)}
           />
         ))}
       </EuiFlexGroup>
@@ -101,6 +131,7 @@ export function CoreVitalItem({ loading, title, value, thresholds, ranks = [100,
         onItemHover={(ind) => {
           setInFocusInd(ind);
         }}
+        isCls={isCls}
       />
     </>
   );

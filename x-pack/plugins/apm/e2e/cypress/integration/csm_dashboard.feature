@@ -9,6 +9,10 @@ Feature: CSM Dashboard
     When a user browses the APM UI application for RUM Data
     Then should have correct client metrics
 
+  Scenario: JS Errors
+    When a user browses the APM UI application for RUM Data
+    Then it displays list of relevant js errors
+
   Scenario: Percentile select
     When the user changes the selected percentile
     Then it displays client metric related to that percentile

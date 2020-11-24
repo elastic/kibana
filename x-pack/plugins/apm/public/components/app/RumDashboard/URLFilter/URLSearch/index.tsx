@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import React, { useEffect, useState, FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../../hooks/useFetcher';
 import { I18LABELS } from '../../translations';
@@ -16,6 +16,7 @@ import { formatToSec } from '../../UXMetrics/KeyUXMetrics';
 import { SelectableUrlList } from './SelectableUrlList';
 import { UrlOption } from './RenderOption';
 import { useUxQuery } from '../../hooks/useUxQuery';
+import { getPercentileLabel } from '../../UXMetrics/translations';
 
 interface Props {
   onChange: (value: string[]) => void;
@@ -24,13 +25,15 @@ interface Props {
 export function URLSearch({ onChange: onFilterChange }: Props) {
   const history = useHistory();
 
-  const { uiFilters } = useUrlParams();
+  const { uiFilters, urlParams } = useUrlParams();
+
+  const { searchTerm, percentile } = urlParams;
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
 
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState(searchTerm ?? '');
 
-  const [debouncedValue, setDebouncedValue] = useState('');
+  const [debouncedValue, setDebouncedValue] = useState(searchTerm ?? '');
 
   useDebounce(
     () => {
@@ -42,12 +45,16 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   const updateSearchTerm = useCallback(
     (searchTermN: string) => {
+      const newQuery = {
+        ...toQuery(history.location.search),
+        searchTerm: searchTermN || undefined,
+      };
+      if (!searchTermN) {
+        delete newQuery.searchTerm;
+      }
       const newLocation = {
         ...history.location,
-        search: fromQuery({
-          ...toQuery(history.location.search),
-          searchTerm: searchTermN,
-        }),
+        search: fromQuery(newQuery),
       };
       history.push(newLocation);
     },
@@ -64,7 +71,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
         const { transactionUrl, ...restFilters } = uiFilters;
 
         return callApmApi({
-          pathname: '/api/apm/rum-client/url-search',
+          endpoint: 'GET /api/apm/rum-client/url-search',
           params: {
             query: {
               ...uxQuery,
@@ -84,6 +91,12 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     setCheckedUrls(uiFilters.transactionUrl || []);
   }, [uiFilters]);
 
+  useEffect(() => {
+    if (searchTerm && searchValue === '') {
+      updateSearchTerm('');
+    }
+  }, [searchValue, updateSearchTerm, searchTerm]);
+
   const onChange = (updatedOptions: UrlOption[]) => {
     const clickedItems = updatedOptions.filter(
       (option) => option.checked === 'on'
@@ -92,12 +105,17 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     setCheckedUrls(clickedItems.map((item) => item.url));
   };
 
+  const percTitle = getPercentileLabel(percentile!);
+
   const items: UrlOption[] = (data?.items ?? []).map((item) => ({
     label: item.url,
     key: item.url,
     meta: [
       I18LABELS.pageViews + ': ' + item.count,
-      I18LABELS.pageLoadDuration + ': ' + formatToSec(item.pld),
+      I18LABELS.pageLoadDuration +
+        ': ' +
+        formatToSec(item.pld) +
+        ` (${percTitle})`,
     ],
     url: item.url,
     checked: checkedUrls?.includes(item.url) ? 'on' : undefined,
@@ -121,10 +139,11 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   return (
     <>
-      <EuiTitle size="xxs" textTransform="uppercase">
+      <EuiTitle size="xxxs" textTransform="uppercase">
         <h4>{I18LABELS.url}</h4>
       </EuiTitle>
       <SelectableUrlList
+        initialValue={searchTerm}
         loading={isLoading}
         onInputChange={onInputChange}
         onTermChange={onTermChange}

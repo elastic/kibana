@@ -49,11 +49,11 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions, expectForbidden } = bulkCreateTestSuiteFactory(
-    es,
-    esArchiver,
-    supertest
-  );
+  const {
+    addTests,
+    createTestDefinitions,
+    expectSavedObjectForbidden,
+  } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
   const createTests = (overwrite: boolean, user: TestUser) => {
     const { normalTypes, hiddenType, allTypes } = createTestCases(overwrite);
     // use singleRequest to reduce execution time and/or test combined cases
@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         createTestDefinitions(allTypes, true, overwrite, {
           user,
           singleRequest: true,
-          responseBodyOverride: expectForbidden(['hiddentype']),
+          responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
         }),
       ].flat(),
       superuser: createTestDefinitions(allTypes, false, overwrite, { user, singleRequest: true }),

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollector } from '../../types';
 
 import { workpadCollector, workpadSchema, WorkpadTelemetry } from './workpad_collector';
@@ -37,7 +37,7 @@ export function registerCanvasUsageCollector(
   const canvasCollector = usageCollection.makeUsageCollector<CanvasUsage>({
     type: 'canvas',
     isReady: () => true,
-    fetch: async (callCluster) => {
+    fetch: async ({ callCluster }: CollectorFetchContext) => {
       const collectorResults = await Promise.all(
         collectors.map((collector) => collector(kibanaIndex, callCluster))
       );

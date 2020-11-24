@@ -6,6 +6,7 @@
 
 import { ServerApiError } from '../../../../common/types';
 import { Immutable, NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 
 import {
   AsyncResourceState,
@@ -16,6 +17,7 @@ import {
   isLoadingResourceState,
   isOutdatedResourceState,
   LoadedResourceState,
+  Pagination,
   TrustedAppCreateFailure,
   TrustedAppsListData,
   TrustedAppsListPageLocation,
@@ -33,11 +35,11 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState
   const location = state.location;
 
   return (
-    state.active &&
+    Boolean(state.active) &&
     isOutdatedResourceState(currentPage, (data) => {
       return (
-        data.paginationInfo.index === location.page_index &&
-        data.paginationInfo.size === location.page_size &&
+        data.pageIndex === location.page_index &&
+        data.pageSize === location.page_size &&
         data.timestamp >= freshDataTimestamp
       );
     })
@@ -72,6 +74,17 @@ export const getCurrentLocationPageSize = (state: Immutable<TrustedAppsListPageS
 
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
   return getLastLoadedResourceState(state.listView.listResourceState)?.data.totalItemsCount || 0;
+};
+
+export const getListPagination = (state: Immutable<TrustedAppsListPageState>): Pagination => {
+  const lastLoadedResourceState = getLastLoadedResourceState(state.listView.listResourceState);
+
+  return {
+    pageIndex: state.location.page_index,
+    pageSize: state.location.page_size,
+    totalItemCount: lastLoadedResourceState?.data.totalItemsCount || 0,
+    pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
+  };
 };
 
 export const getCurrentLocation = (

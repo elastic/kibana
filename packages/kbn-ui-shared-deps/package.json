@@ -9,40 +9,11 @@
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
-    "@elastic/charts": "23.1.1",
-    "@elastic/eui": "29.3.0",
-    "@elastic/numeral": "^2.5.0",
-    "@kbn/i18n": "1.0.0",
-    "@kbn/monaco": "1.0.0",
-    "abortcontroller-polyfill": "^1.4.0",
-    "angular": "^1.8.0",
-    "compression-webpack-plugin": "^4.0.0",
-    "core-js": "^3.6.5",
-    "custom-event-polyfill": "^0.3.0",
-    "jquery": "^3.5.0",
-    "lodash": "^4.17.20",
-    "mini-css-extract-plugin": "0.8.0",
-    "moment": "^2.24.0",
-    "moment-timezone": "^0.5.27",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "react-is": "^16.8.0",
-    "react-router": "^5.2.0",
-    "react-router-dom": "^5.2.0",
-    "regenerator-runtime": "^0.13.3",
-    "rxjs": "^6.5.5",
-    "styled-components": "^5.1.0",
-    "symbol-observable": "^1.2.0",
-    "whatwg-fetch": "^3.0.0"
+    "@kbn/i18n": "link:../kbn-i18n",
+    "@kbn/monaco": "link:../kbn-monaco"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
-    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
-    "css-loader": "^3.4.2",
-    "del": "^5.1.0",
-    "loader-utils": "^1.2.3",
-    "val-loader": "^1.1.1",
-    "webpack": "^4.41.5"
+    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }

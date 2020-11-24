@@ -97,7 +97,12 @@ export class SearchTimeoutError extends KbnError {
           <>
             <EuiSpacer size="s" />
             <EuiText textAlign="right">
-              <EuiButton color="danger" onClick={() => this.onClick(application)} size="s">
+              <EuiButton
+                color="danger"
+                onClick={() => this.onClick(application)}
+                size="s"
+                data-test-subj="searchTimeoutError"
+              >
                 {actionText}
               </EuiButton>
             </EuiText>

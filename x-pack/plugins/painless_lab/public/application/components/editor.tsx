@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { PainlessLang } from '@kbn/monaco';
 import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
 export function Editor({ code, onChange }: Props) {
   return (
     <CodeEditor
-      languageId="painless"
+      languageId={PainlessLang.ID}
       // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
       width="99%"
       height="100%"

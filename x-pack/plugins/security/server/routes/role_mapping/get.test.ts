@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { defineRoleMappingGetRoutes } from './get';

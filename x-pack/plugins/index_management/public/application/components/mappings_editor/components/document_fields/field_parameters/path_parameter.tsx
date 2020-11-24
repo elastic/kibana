@@ -93,17 +93,17 @@ export const PathParameter = ({ field, allFields }: Props) => {
             <>
               {!Boolean(suggestedFields.length) && (
                 <>
-                  <EuiCallOut color="warning">
-                    <p>
-                      {i18n.translate(
-                        'xpack.idxMgmt.mappingsEditor.aliasType.noFieldsAddedWarningMessage',
-                        {
-                          defaultMessage:
-                            'You need to add at least one field before creating an alias.',
-                        }
-                      )}
-                    </p>
-                  </EuiCallOut>
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    title={i18n.translate(
+                      'xpack.idxMgmt.mappingsEditor.aliasType.noFieldsAddedWarningMessage',
+                      {
+                        defaultMessage:
+                          'You need to add at least one field before creating an alias.',
+                      }
+                    )}
+                  />
                   <EuiSpacer />
                 </>
               )}

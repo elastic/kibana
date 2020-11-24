@@ -63,7 +63,7 @@ class Main extends React.Component<{}, State> {
       return getExpressions()
         .execute(expression, context || { type: 'null' }, {
           inspectorAdapters: adapters,
-          search: initialContext as any,
+          searchContext: initialContext as any,
         })
         .getData();
     };

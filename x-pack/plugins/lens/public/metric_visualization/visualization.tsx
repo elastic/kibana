@@ -96,7 +96,7 @@ export const metricVisualization: Visualization<State> = {
           groupId: 'metric',
           groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
           layerId: props.state.layerId,
-          accessors: props.state.accessor ? [props.state.accessor] : [],
+          accessors: props.state.accessor ? [{ columnId: props.state.accessor }] : [],
           supportsMoreColumns: !props.state.accessor,
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
         },
@@ -114,5 +114,10 @@ export const metricVisualization: Visualization<State> = {
 
   removeDimension({ prevState }) {
     return { ...prevState, accessor: undefined };
+  },
+
+  getErrorMessages(state, frame) {
+    // Is it possible to break it?
+    return undefined;
   },
 };

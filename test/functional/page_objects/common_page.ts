@@ -19,7 +19,6 @@
 
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
-import { get } from 'lodash';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -48,20 +47,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   }
 
   class CommonPage {
-    /**
-     * Returns Kibana host URL
-     */
-    public getHostPort() {
-      return getUrl.baseUrl(config.get('servers.kibana'));
-    }
-
-    /**
-     * Returns ES host URL
-     */
-    public getEsHostPort() {
-      return getUrl.baseUrl(config.get('servers.elasticsearch'));
-    }
-
     /**
      * Logins to Kibana as default user and navigates to provided app
      * @param appUrl Kibana URL
@@ -117,10 +102,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         } else {
           log.debug(`navigateToUrl ${appUrl}`);
           await browser.get(appUrl, insertTimestamp);
-          // accept alert if it pops up
-          const alert = await browser.getAlert();
-          await alert?.accept();
         }
+
+        // accept alert if it pops up
+        const alert = await browser.getAlert();
+        await alert?.accept();
 
         const currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp)
@@ -434,7 +420,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       }
     }
 
-    async getBodyText() {
+    async getJsonBodyText() {
       if (await find.existsByCssSelector('a[id=rawdata-tab]', defaultFindTimeout)) {
         // Firefox has 3 tabs and requires navigation to see Raw output
         await find.clickByCssSelector('a[id=rawdata-tab]');
@@ -449,37 +435,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       }
     }
 
-    /**
-     * Helper to detect an OSS licensed Kibana
-     * Useful for functional testing in cloud environment
-     */
-    async isOss() {
-      const baseUrl = this.getEsHostPort();
-      const username = config.get('servers.elasticsearch.username');
-      const password = config.get('servers.elasticsearch.password');
-      const response = await fetch(baseUrl + '/_xpack', {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-        },
-      });
-      return response.status !== 200;
-    }
-
-    async isCloud(): Promise<boolean> {
-      const baseUrl = this.getHostPort();
-      const username = config.get('servers.kibana.username');
-      const password = config.get('servers.kibana.password');
-      const response = await fetch(baseUrl + '/api/stats?extended', {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-        },
-      });
-      const data = await response.json();
-      return get(data, 'usage.cloud.is_cloud_enabled', false);
+    async getBodyText() {
+      const body = await find.byCssSelector('body');
+      return await body.getVisibleText();
     }
 
     async waitForSaveModalToClose() {
@@ -499,6 +457,16 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async scrollKibanaBodyTop() {
       await browser.setScrollToById('kibana-body', 0, 0);
+    }
+
+    /**
+     * Dismiss Banner if available.
+     */
+    async dismissBanner() {
+      if (await testSubjects.exists('global-banner-item')) {
+        const button = await find.byButtonText('Dismiss');
+        await button.click();
+      }
     }
   }
 

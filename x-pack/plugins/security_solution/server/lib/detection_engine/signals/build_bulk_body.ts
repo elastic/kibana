@@ -16,10 +16,9 @@ import {
 import { buildRule, buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { EqlSequence, RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
-import { EqlSequence } from '../../types';
 
 interface BuildBulkBodyParams {
   doc: SignalSourceHit;
@@ -104,6 +103,14 @@ export const buildSignalGroupFromSequence = (
     outputIndex
   );
 
+  if (
+    wrappedBuildingBlocks.some((block) =>
+      block._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleSO.id)
+    )
+  ) {
+    return [];
+  }
+
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together
   // and also insert the group id (which is also the "shell" signal _id) in each building block
@@ -155,7 +162,7 @@ export const buildSignalFromEvent = (
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, event._source)
     : buildRuleWithoutOverrides(ruleSO);
-  const signal = {
+  const signal: Signal = {
     ...buildSignal([event], rule),
     ...additionalSignalFields(event),
   };

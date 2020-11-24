@@ -22,12 +22,12 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
-import { EditorRenderProps } from 'src/plugins/visualize/public';
+import { EditorRenderProps, IEditorController } from 'src/plugins/visualize/public';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
 
 const DefaultEditor = lazy(() => import('./default_editor'));
 
-class DefaultEditorController {
+class DefaultEditorController implements IEditorController {
   constructor(
     private el: HTMLElement,
     private vis: Vis,

@@ -13,10 +13,11 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
-import { SideNav, SideNavLink } from '../shared/layout';
+import { Layout, SideNav, SideNavLink } from '../shared/layout';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
-import { EngineOverview } from './components/engine_overview';
+import { EnginesOverview } from './components/engines';
+import { EngineRouter } from './components/engine';
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {
@@ -51,10 +52,13 @@ describe('AppSearchConfigured', () => {
     setMockActions({ initializeAppData: () => {} });
   });
 
-  it('renders', () => {
+  it('renders with layout', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
-    expect(wrapper.find(EngineOverview)).toHaveLength(1);
+    expect(wrapper.find(Layout)).toHaveLength(2);
+    expect(wrapper.find(Layout).last().prop('readOnlyMode')).toBeFalsy();
+    expect(wrapper.find(EnginesOverview)).toHaveLength(1);
+    expect(wrapper.find(EngineRouter)).toHaveLength(1);
   });
 
   it('initializes app data with passed props', () => {
@@ -84,6 +88,14 @@ describe('AppSearchConfigured', () => {
     expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
   });
 
+  it('passes readOnlyMode state', () => {
+    setMockValues({ myRole: {}, readOnlyMode: true });
+
+    const wrapper = shallow(<AppSearchConfigured />);
+
+    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
+  });
+
   describe('ability checks', () => {
     // TODO: Use this section for routes wrapped in canViewX conditionals
     // e.g., it('renders settings if a user can view settings')
@@ -98,22 +110,25 @@ describe('AppSearchNav', () => {
     expect(wrapper.find(SideNavLink).prop('to')).toEqual('/engines');
   });
 
+  it('renders an Engine subnav if passed', () => {
+    const wrapper = shallow(<AppSearchNav subNav={<div data-test-subj="subnav">Testing</div>} />);
+    const link = wrapper.find(SideNavLink).dive();
+
+    expect(link.find('[data-test-subj="subnav"]')).toHaveLength(1);
+  });
+
   it('renders the Settings link', () => {
     setMockValues({ myRole: { canViewSettings: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as/settings/account'
-    );
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/settings/account');
   });
 
   it('renders the Credentials link', () => {
     setMockValues({ myRole: { canViewAccountCredentials: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as/credentials'
-    );
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/credentials');
   });
 
   it('renders the Role Mappings link', () => {

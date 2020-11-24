@@ -21,7 +21,7 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+        className="euiPopover euiPopover--anchorUpRight"
         id="settings"
         onKeyDown={[Function]}
         onMouseDown={[Function]}
@@ -38,7 +38,7 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
             onClick={[Function]}
             type="button"
           >
-            <div
+            <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
               data-euiicon-type="gear"
@@ -73,7 +73,7 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+        className="euiPopover euiPopover--anchorUpRight"
         id="settings"
         onKeyDown={[Function]}
         onMouseDown={[Function]}
@@ -90,7 +90,7 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
             onClick={[Function]}
             type="button"
           >
-            <div
+            <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
               data-euiicon-type="gear"

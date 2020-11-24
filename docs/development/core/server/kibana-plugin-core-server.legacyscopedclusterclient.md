@@ -21,7 +21,7 @@ export declare class LegacyScopedClusterClient implements ILegacyScopedClusterCl
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(internalAPICaller, scopedAPICaller, headers, auditor)](./kibana-plugin-core-server.legacyscopedclusterclient._constructor_.md) |  | Constructs a new instance of the <code>LegacyScopedClusterClient</code> class |
+|  [(constructor)(internalAPICaller, scopedAPICaller, headers)](./kibana-plugin-core-server.legacyscopedclusterclient._constructor_.md) |  | Constructs a new instance of the <code>LegacyScopedClusterClient</code> class |
 
 ## Methods
 

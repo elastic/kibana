@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions, expectForbidden } = bulkGetTestSuiteFactory(
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } = bulkGetTestSuiteFactory(
     esArchiver,
     supertest
   );
@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         createTestDefinitions(hiddenType, true),
         createTestDefinitions(allTypes, true, {
           singleRequest: true,
-          responseBodyOverride: expectForbidden(['hiddentype']),
+          responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
         }),
       ].flat(),
       superuser: createTestDefinitions(allTypes, false, { singleRequest: true }),

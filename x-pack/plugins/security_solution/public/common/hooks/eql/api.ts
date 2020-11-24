@@ -4,28 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from '../../../../../../../src/core/public';
-import { DETECTION_ENGINE_EQL_VALIDATION_URL } from '../../../../common/constants';
-import { EqlValidationSchema as EqlValidationRequest } from '../../../../common/detection_engine/schemas/request/eql_validation_schema';
-import { EqlValidationSchema as EqlValidationResponse } from '../../../../common/detection_engine/schemas/response/eql_validation_schema';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import {
+  EqlSearchStrategyRequest,
+  EqlSearchStrategyResponse,
+} from '../../../../../data_enhanced/common';
+import { EQL_SEARCH_STRATEGY } from '../../../../../data_enhanced/public';
+import {
+  getValidationErrors,
+  isErrorResponse,
+  isValidationErrorResponse,
+} from '../../../../common/search_strategy/eql';
 
-interface ApiParams {
-  http: HttpStart;
+interface Params {
+  index: string[];
+  query: string;
+  data: DataPublicPluginStart;
   signal: AbortSignal;
 }
 
 export const validateEql = async ({
-  http,
-  query,
+  data,
   index,
+  query,
   signal,
-}: ApiParams & EqlValidationRequest) => {
-  return http.fetch<EqlValidationResponse>(DETECTION_ENGINE_EQL_VALIDATION_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      query,
-      index,
-    }),
-    signal,
-  });
+}: Params): Promise<{ valid: boolean; errors: string[] }> => {
+  const { rawResponse: response } = await data.search
+    .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
+      {
+        params: { index: index.join(), body: { query, size: 0 } },
+        options: { ignore: [400] },
+      },
+      {
+        strategy: EQL_SEARCH_STRATEGY,
+        abortSignal: signal,
+      }
+    )
+    .toPromise();
+
+  if (isValidationErrorResponse(response.body)) {
+    return { valid: false, errors: getValidationErrors(response.body) };
+  } else if (isErrorResponse(response.body)) {
+    throw new Error(JSON.stringify(response.body));
+  } else {
+    return { valid: true, errors: [] };
+  }
 };

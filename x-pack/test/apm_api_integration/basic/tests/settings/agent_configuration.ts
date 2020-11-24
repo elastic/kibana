@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { AgentConfigurationIntake } from '../../../../../plugins/apm/common/agent_configuration/configuration_types';
 import { AgentConfigSearchParams } from '../../../../../plugins/apm/server/routes/settings/agent_configuration';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -186,7 +185,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
           // ensure that `createConfiguration` throws
           expect(true).to.be(false);
         } catch (e) {
-          expect(e.res.statusCode).to.be(404);
+          expect(e.res.statusCode).to.be(403);
         }
       });
 
@@ -201,7 +200,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
             // ensure that `updateConfiguration` throws
             expect(true).to.be(false);
           } catch (e) {
-            expect(e.res.statusCode).to.be(404);
+            expect(e.res.statusCode).to.be(403);
           }
         });
 
@@ -212,7 +211,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
             // ensure that `deleteConfiguration` throws
             expect(true).to.be(false);
           } catch (e) {
-            expect(e.res.statusCode).to.be(404);
+            expect(e.res.statusCode).to.be(403);
           }
         });
       });

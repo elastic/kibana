@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import {
   ILegacyScopedClusterClient,
   SavedObjectsClientContract,
@@ -155,9 +155,11 @@ export class ActionsClient {
         'update'
       );
     }
-    const { attributes, references, version } = await this.unsecuredSavedObjectsClient.get<
-      RawAction
-    >('action', id);
+    const {
+      attributes,
+      references,
+      version,
+    } = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
@@ -342,6 +344,13 @@ export class ActionsClient {
 
   public async listTypes(): Promise<ActionType[]> {
     return this.actionTypeRegistry.list();
+  }
+
+  public isActionTypeEnabled(
+    actionTypeId: string,
+    options: { notifyUsage: boolean } = { notifyUsage: false }
+  ) {
+    return this.actionTypeRegistry.isActionTypeEnabled(actionTypeId, options);
   }
 }
 

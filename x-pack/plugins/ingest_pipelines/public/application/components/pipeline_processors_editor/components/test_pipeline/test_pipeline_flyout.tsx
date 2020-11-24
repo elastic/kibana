@@ -21,6 +21,7 @@ import { Document } from '../../types';
 
 import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_tabs';
 import { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
+
 export interface Props {
   onClose: () => void;
   handleTestPipeline: (

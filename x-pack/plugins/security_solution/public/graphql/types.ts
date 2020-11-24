@@ -490,6 +490,8 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
+  agent?: Maybe<AgentFields>;
+
   cloud?: Maybe<CloudFields>;
 
   endpoint?: Maybe<EndpointFields>;
@@ -499,6 +501,10 @@ export interface HostItem {
   inspect?: Maybe<Inspect>;
 
   lastSeen?: Maybe<string>;
+}
+
+export interface AgentFields {
+  id?: Maybe<string>;
 }
 
 export interface CloudFields {
@@ -1728,6 +1734,8 @@ export namespace GetHostOverviewQuery {
 
     _id: Maybe<string>;
 
+    agent: Maybe<Agent>;
+
     host: Maybe<Host>;
 
     cloud: Maybe<Cloud>;
@@ -1736,6 +1744,12 @@ export namespace GetHostOverviewQuery {
 
     endpoint: Maybe<Endpoint>;
   };
+
+  export type Agent = {
+    __typename?: 'AgentFields';
+
+    id: Maybe<string>;
+  }
 
   export type Host = {
     __typename?: 'HostEcsFields';

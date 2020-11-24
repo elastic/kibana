@@ -29,12 +29,15 @@ import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../..
 import {
   getPredictionFieldName,
   getDefaultPredictionFieldName,
+  isClassificationAnalysis,
 } from '../../../../../../../common/util/analytics_utils';
 import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
 import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 import { isRegressionAnalysis } from '../../../../common/analytics';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
+import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
 
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
@@ -43,7 +46,9 @@ export const useExplorationResults = (
   toastNotifications: CoreSetup['notifications']['toasts'],
   mlApiServices: MlApiServices
 ): UseIndexDataReturnType => {
-  const [baseline, setBaseLine] = useState();
+  const [baseline, setBaseLine] = useState<FeatureImportanceBaseline | undefined>();
+
+  const trainedModelsApiService = useTrainedModelsApiService();
 
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
@@ -73,8 +78,15 @@ export const useExplorationResults = (
     dataGrid.resetPagination();
   }, [JSON.stringify(searchQuery)]);
 
+  // The pattern using `didCancel` allows us to abort out of date remote request.
+  // We wrap `didCancel` in a object so we can mutate the value as it's being
+  // passed on to `getIndexData`.
   useEffect(() => {
-    getIndexData(jobConfig, dataGrid, searchQuery);
+    const options = { didCancel: false };
+    getIndexData(jobConfig, dataGrid, searchQuery, options);
+    return () => {
+      options.didCancel = true;
+    };
     // custom comparison
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
@@ -128,11 +140,18 @@ export const useExplorationResults = (
       if (
         jobConfig !== undefined &&
         jobConfig.analysis !== undefined &&
-        isRegressionAnalysis(jobConfig.analysis)
+        (isRegressionAnalysis(jobConfig.analysis) || isClassificationAnalysis(jobConfig.analysis))
       ) {
-        const result = await mlApiServices.dataFrameAnalytics.getAnalyticsBaseline(jobConfig.id);
-        if (result?.baseline) {
-          setBaseLine(result.baseline);
+        const jobId = jobConfig.id;
+        const inferenceModels = await trainedModelsApiService.getTrainedModels(`${jobId}*`, {
+          include: 'feature_importance_baseline',
+        });
+        const inferenceModel = inferenceModels.find(
+          (model) => model.metadata?.analytics_config?.id === jobId
+        );
+
+        if (inferenceModel?.metadata?.feature_importance_baseline !== undefined) {
+          setBaseLine(inferenceModel?.metadata?.feature_importance_baseline);
         }
       }
     } catch (e) {

@@ -18,17 +18,12 @@
  */
 
 import React from 'react';
-import { EuiLoadingContent, EuiDelayRender } from '@elastic/eui';
 import { IIndexPattern, Filter } from '../..';
 
 type CancelFnType = () => void;
 type SubmitFnType = (filters: Filter[]) => void;
 
-const Fallback = () => (
-  <EuiDelayRender>
-    <EuiLoadingContent lines={1} />
-  </EuiDelayRender>
-);
+const Fallback = () => <div />;
 
 const LazyApplyFiltersPopoverContent = React.lazy(() => import('./apply_filter_popover_content'));
 

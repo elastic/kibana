@@ -36,7 +36,8 @@ import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useFullScreen } from '../../containers/use_full_screen';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../common/types/timeline';
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -76,6 +77,16 @@ const EventsContainerLoading = styled.div`
   flex-direction: column;
 `;
 
+const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
+  width: 100%;
+  overflow: hidden;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+`;
+
+const ScrollableFlexItem = styled(EuiFlexItem)`
+  overflow: auto;
+`;
+
 /**
  * Hides stateful headerFilterGroup implementations, but prevents the component
  * from being unmounted, to preserve the state of the component
@@ -104,6 +115,7 @@ interface Props {
   kqlMode: KqlMode;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   query: Query;
+  onRuleChange?: () => void;
   start: string;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
@@ -131,6 +143,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   onChangeItemsPerPage,
   query,
+  onRuleChange,
   start,
   sort,
   toggleColumn,
@@ -175,8 +188,6 @@ const EventsViewerComponent: React.FC<Props> = ({
     filters,
     kqlQuery: query,
     kqlMode,
-    start,
-    end,
     isEventViewer: true,
   });
 
@@ -280,20 +291,27 @@ const EventsViewerComponent: React.FC<Props> = ({
                 refetch={refetch}
               />
 
-              <StatefulBody
-                browserFields={browserFields}
-                data={nonDeletedEvents}
-                docValueFields={docValueFields}
-                id={id}
-                isEventViewer={true}
-                refetch={refetch}
-                sort={sort}
-                toggleColumn={toggleColumn}
-              />
-
-              {
-                /** Hide the footer if Resolver is showing. */
-                !graphEventId && (
+              {graphEventId && (
+                <GraphOverlay
+                  graphEventId={graphEventId}
+                  isEventViewer={true}
+                  timelineId={id}
+                  timelineType={TimelineType.default}
+                />
+              )}
+              <FullWidthFlexGroup $visible={!graphEventId}>
+                <ScrollableFlexItem grow={1}>
+                  <StatefulBody
+                    browserFields={browserFields}
+                    data={nonDeletedEvents}
+                    docValueFields={docValueFields}
+                    id={id}
+                    isEventViewer={true}
+                    onRuleChange={onRuleChange}
+                    refetch={refetch}
+                    sort={sort}
+                    toggleColumn={toggleColumn}
+                  />
                   <Footer
                     activePage={pageInfo.activePage}
                     data-test-subj="events-viewer-footer"
@@ -309,8 +327,8 @@ const EventsViewerComponent: React.FC<Props> = ({
                     onChangePage={loadPage}
                     totalCount={totalCountMinusDeleted}
                   />
-                )
-              }
+                </ScrollableFlexItem>
+              </FullWidthFlexGroup>
             </EventsContainerLoading>
           </>
         </EventDetailsWidthProvider>

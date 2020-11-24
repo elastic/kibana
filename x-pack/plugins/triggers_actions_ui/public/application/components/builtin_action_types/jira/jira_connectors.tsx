@@ -6,12 +6,15 @@
 import React, { useCallback } from 'react';
 
 import {
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiFieldPassword,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash';
@@ -29,7 +32,6 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
   errors,
   consumer,
   readOnly,
-  docLinks,
 }) => {
   // TODO: remove incidentConfiguration later, when Case Jira will move their fields to the level of action execution
   const { apiUrl, projectKey, incidentConfiguration, isCaseOwned } = action.config;
@@ -95,7 +97,6 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
               readOnly={readOnly}
               value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="apiUrlFromInput"
-              placeholder="https://<site-url>"
               onChange={(evt) => handleOnChangeActionConfig('apiUrl', evt.target.value)}
               onBlur={() => {
                 if (!apiUrl) {
@@ -130,6 +131,20 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
               }}
             />
           </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h4>{i18n.JIRA_AUTHENTICATION_LABEL}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -204,6 +219,24 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
     </>
   );
 };
+
+function getEncryptedFieldNotifyLabel(isCreate: boolean) {
+  if (isCreate) {
+    return (
+      <EuiText size="s" data-test-subj="rememberValuesMessage">
+        {i18n.JIRA_REMEMBER_VALUES_LABEL}
+      </EuiText>
+    );
+  }
+  return (
+    <EuiCallOut
+      size="s"
+      iconType="iInCircle"
+      title={i18n.JIRA_REENTER_VALUES_LABEL}
+      data-test-subj="reenterValuesMessage"
+    />
+  );
+}
 
 // eslint-disable-next-line import/no-default-export
 export { JiraConnectorFields as default };

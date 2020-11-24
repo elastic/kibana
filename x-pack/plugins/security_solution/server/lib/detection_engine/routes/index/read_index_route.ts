@@ -8,6 +8,8 @@ import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
+import { SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
+import { getIndexVersion } from './get_index_version';
 
 export const readIndexRoute = (router: IRouter) => {
   router.get(
@@ -33,7 +35,22 @@ export const readIndexRoute = (router: IRouter) => {
         const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, index);
 
         if (indexExists) {
-          return response.ok({ body: { name: index } });
+          let mappingOutdated: boolean | null = null;
+          try {
+            const indexVersion = await getIndexVersion(clusterClient.callAsCurrentUser, index);
+            mappingOutdated = indexVersion !== SIGNALS_TEMPLATE_VERSION;
+          } catch (err) {
+            const error = transformError(err);
+            // Some users may not have the view_index_metadata permission necessary to check the index mapping version
+            // so just continue and return null for index_mapping_outdated if the error is a 403
+            if (error.statusCode !== 403) {
+              return siemResponse.error({
+                body: error.message,
+                statusCode: error.statusCode,
+              });
+            }
+          }
+          return response.ok({ body: { name: index, index_mapping_outdated: mappingOutdated } });
         } else {
           return siemResponse.error({
             statusCode: 404,

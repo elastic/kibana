@@ -9,8 +9,12 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 import { Route, Switch, useParams } from 'react-router-dom';
 
-import { FlashMessages, FlashMessagesLogic } from '../../../shared/flash_messages';
+import { FlashMessages } from '../../../shared/flash_messages';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+
 import { GROUP_SOURCE_PRIORITIZATION_PATH, GROUP_PATH } from '../../routes';
+import { NAV } from '../../constants';
 import { GroupLogic } from './group_logic';
 
 import { ManageUsersModal } from './components/manage_users_modal';
@@ -22,11 +26,12 @@ import { GroupSourcePrioritization } from './components/group_source_prioritizat
 export const GroupRouter: React.FC = () => {
   const { groupId } = useParams() as { groupId: string };
 
-  const { messages } = useValues(FlashMessagesLogic);
   const { initializeGroup, resetGroup } = useActions(GroupLogic);
-  const { sharedSourcesModalModalVisible, manageUsersModalVisible } = useValues(GroupLogic);
-
-  const hasMessages = messages.length > 0;
+  const {
+    sharedSourcesModalVisible,
+    manageUsersModalVisible,
+    group: { name },
+  } = useValues(GroupLogic);
 
   useEffect(() => {
     initializeGroup(groupId);
@@ -35,12 +40,19 @@ export const GroupRouter: React.FC = () => {
 
   return (
     <>
-      {hasMessages && <FlashMessages />}
+      <FlashMessages />
       <Switch>
-        <Route path={GROUP_SOURCE_PRIORITIZATION_PATH} component={GroupSourcePrioritization} />
-        <Route path={GROUP_PATH} component={GroupOverview} />
+        <Route path={GROUP_SOURCE_PRIORITIZATION_PATH}>
+          <SetPageChrome trail={[NAV.GROUPS, name || '...', NAV.SOURCE_PRIORITIZATION]} />
+          <GroupSourcePrioritization />
+        </Route>
+        <Route path={GROUP_PATH}>
+          <SetPageChrome trail={[NAV.GROUPS, name || '...']} />
+          <SendTelemetry action="viewed" metric="group_overview" />
+          <GroupOverview />
+        </Route>
       </Switch>
-      {sharedSourcesModalModalVisible && <SharedSourcesModal />}
+      {sharedSourcesModalVisible && <SharedSourcesModal />}
       {manageUsersModalVisible && <ManageUsersModal />}
     </>
   );

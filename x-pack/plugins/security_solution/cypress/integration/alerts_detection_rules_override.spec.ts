@@ -34,6 +34,7 @@ import {
   DETAILS_TITLE,
   FALSE_POSITIVES_DETAILS,
   getDetails,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
@@ -41,7 +42,6 @@ import {
   REFERENCE_URLS_DETAILS,
   RISK_SCORE_DETAILS,
   RISK_SCORE_OVERRIDE_DETAILS,
-  RULE_ABOUT_DETAILS_HEADER_TOGGLE,
   RULE_NAME_HEADER,
   RULE_NAME_OVERRIDE_DETAILS,
   RULE_TYPE_DETAILS,
@@ -72,11 +72,11 @@ import {
   fillAboutRuleWithOverrideAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
   fillScheduleRuleAndContinue,
+  waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
@@ -132,7 +132,7 @@ describe('Detection rules, override', () => {
 
     goToRuleDetails();
 
-    cy.get(RULE_NAME_HEADER).should('have.text', `${newOverrideRule.name} Beta`);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${newOverrideRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newOverrideRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', newOverrideRule.severity);
@@ -142,9 +142,13 @@ describe('Detection rules, override', () => {
         `${newOverrideRule.riskOverride}signal.rule.risk_score`
       );
       getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', newOverrideRule.nameOverride);
-      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
       getDetails(TIMESTAMP_OVERRIDE_DETAILS).should('have.text', newOverrideRule.timestampOverride);
       cy.contains(DETAILS_TITLE, 'Severity override')
@@ -160,11 +164,11 @@ describe('Detection rules, override', () => {
           });
         });
     });
-    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+    cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', `${newOverrideRule.customQuery} `);
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', newOverrideRule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
     });
@@ -179,14 +183,10 @@ describe('Detection rules, override', () => {
       );
     });
 
-    refreshPage();
     waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((numberOfAlertsText) => {
-        cy.wrap(parseInt(numberOfAlertsText, 10)).should('be.above', 0);
-      });
+    cy.get(NUMBER_OF_ALERTS).invoke('text').then(parseFloat).should('be.above', 0);
     cy.get(ALERT_RULE_NAME).first().should('have.text', 'auditbeat');
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'query');

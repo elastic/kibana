@@ -31,7 +31,7 @@ import {
   mockMetricsService,
   mockStatusService,
   mockLoggingService,
-  mockAuditTrailService,
+  mockI18nService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -50,6 +50,7 @@ beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
   mockPluginsService.discover.mockResolvedValue({
     pluginTree: { asOpaqueIds: new Map(), asNames: new Map() },
+    pluginPaths: [],
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 });
@@ -71,7 +72,7 @@ test('sets up services on "setup"', async () => {
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
-  expect(mockAuditTrailService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -85,7 +86,7 @@ test('sets up services on "setup"', async () => {
   expect(mockMetricsService.setup).toHaveBeenCalledTimes(1);
   expect(mockStatusService.setup).toHaveBeenCalledTimes(1);
   expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
-  expect(mockAuditTrailService.setup).toHaveBeenCalledTimes(1);
+  expect(mockI18nService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -99,6 +100,7 @@ test('injects legacy dependency to context#setup()', async () => {
   ]);
   mockPluginsService.discover.mockResolvedValue({
     pluginTree: { asOpaqueIds: pluginDependencies, asNames: new Map() },
+    pluginPaths: [],
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 
@@ -126,7 +128,6 @@ test('runs services on "start"', async () => {
   expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
   expect(mockUiSettingsService.start).not.toHaveBeenCalled();
   expect(mockMetricsService.start).not.toHaveBeenCalled();
-  expect(mockAuditTrailService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -135,7 +136,6 @@ test('runs services on "start"', async () => {
   expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.start).toHaveBeenCalledTimes(1);
-  expect(mockAuditTrailService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -160,7 +160,6 @@ test('stops services on "stop"', async () => {
   expect(mockMetricsService.stop).not.toHaveBeenCalled();
   expect(mockStatusService.stop).not.toHaveBeenCalled();
   expect(mockLoggingService.stop).not.toHaveBeenCalled();
-  expect(mockAuditTrailService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
@@ -173,7 +172,6 @@ test('stops services on "stop"', async () => {
   expect(mockMetricsService.stop).toHaveBeenCalledTimes(1);
   expect(mockStatusService.stop).toHaveBeenCalledTimes(1);
   expect(mockLoggingService.stop).toHaveBeenCalledTimes(1);
-  expect(mockAuditTrailService.stop).toHaveBeenCalledTimes(1);
 });
 
 test(`doesn't setup core services if config validation fails`, async () => {
@@ -192,6 +190,7 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 });
 
 test(`doesn't setup core services if legacy config validation fails`, async () => {
@@ -214,6 +213,7 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 });
 
 test(`doesn't validate config if env.isDevClusterMaster is true`, async () => {
@@ -227,7 +227,6 @@ test(`doesn't validate config if env.isDevClusterMaster is true`, async () => {
 
   expect(mockEnsureValidConfiguration).not.toHaveBeenCalled();
   expect(mockContextService.setup).toHaveBeenCalled();
-  expect(mockAuditTrailService.setup).toHaveBeenCalled();
   expect(mockHttpService.setup).toHaveBeenCalled();
   expect(mockElasticsearchService.setup).toHaveBeenCalled();
   expect(mockSavedObjectsService.setup).toHaveBeenCalled();

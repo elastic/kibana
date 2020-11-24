@@ -14,15 +14,15 @@ import {
   AlertMessageLinkToken,
   AlertInstanceState,
   LegacyAlert,
-} from './types';
+  CommonAlertParams,
+} from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { INDEX_ALERTS, ALERT_CLUSTER_HEALTH } from '../../common/constants';
+import { INDEX_ALERTS, ALERT_CLUSTER_HEALTH, LEGACY_ALERT_DETAILS } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertClusterHealthType } from '../../common/enums';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
-import { CommonAlertParams } from '../../common/types';
-import { AlertingDefaults } from './alerts_common';
+import { AlertingDefaults } from './alert_helpers';
 
 const RED_STATUS_MESSAGE = i18n.translate('xpack.monitoring.alerts.clusterHealth.redMessage', {
   defaultMessage: 'Allocate missing primary and replica shards',
@@ -39,9 +39,8 @@ const WATCH_NAME = 'elasticsearch_cluster_status';
 
 export class ClusterHealthAlert extends BaseAlert {
   public type = ALERT_CLUSTER_HEALTH;
-  public label = i18n.translate('xpack.monitoring.alerts.clusterHealth.label', {
-    defaultMessage: 'Cluster health',
-  });
+  public label = LEGACY_ALERT_DETAILS[ALERT_CLUSTER_HEALTH].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_CLUSTER_HEALTH].description;
   public isLegacy = true;
 
   protected actionVariables = [

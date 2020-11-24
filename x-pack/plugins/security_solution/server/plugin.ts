@@ -18,18 +18,23 @@ import {
   SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../src/plugins/data/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
+import {
+  PluginSetupContract as AlertingSetup,
+  PluginStartContract as AlertPluginStartContract,
+} from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { IngestManagerStartContract, ExternalCallback } from '../../ingest_manager/server';
+import { ILicense, LicensingPluginStart } from '../../licensing/server';
+import { FleetStartContract, ExternalCallback } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -69,13 +74,13 @@ import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
 } from '../../../../src/plugins/telemetry/server';
+import { licenseService } from './lib/license/license';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
-  licensing: LicensingPluginSetup;
   lists?: ListPluginSetup;
   ml?: MlSetup;
   security?: SecuritySetup;
@@ -86,8 +91,10 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
+  alerts: AlertPluginStartContract;
   data: DataPluginStart;
-  ingestManager?: IngestManagerStartContract;
+  fleet?: FleetStartContract;
+  licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
 }
@@ -111,12 +118,15 @@ const securitySubPlugins = [
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config$: Observable<ConfigType>;
+  private config?: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
+  private setupPlugins?: SetupPlugins;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
+  private licensing$!: Observable<ILicense>;
 
   private manifestTask: ManifestTask | undefined;
   private exceptionsCache: LRU<string, Buffer>;
@@ -135,8 +145,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
+    this.setupPlugins = plugins;
 
     const config = await this.config$.pipe(first()).toPromise();
+    this.config = config;
     const globalConfig = await this.context.config.legacy.globalConfig$.pipe(first()).toPromise();
 
     initSavedObjects(core.savedObjects);
@@ -188,9 +200,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         defaultMessage: 'Security',
       }),
       order: 1100,
-      icon: 'logoSecurity',
       category: DEFAULT_APP_CATEGORIES.security,
-      navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
       management: {
@@ -226,7 +236,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {
-            all: ['alert'],
+            all: [],
             read: [
               'config',
               'cases',
@@ -237,7 +247,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
           },
           alerting: {
-            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+            read: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
@@ -316,27 +326,33 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     let registerIngestCallback: ((...args: ExternalCallback) => void) | undefined;
 
     const exceptionListsStartEnabled = () => {
-      return this.lists && plugins.taskManager && plugins.ingestManager;
+      return this.lists && plugins.taskManager && plugins.fleet;
     };
 
     if (exceptionListsStartEnabled()) {
       const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = new ArtifactClient(savedObjectsClient);
 
-      registerIngestCallback = plugins.ingestManager!.registerExternalCallback;
+      registerIngestCallback = plugins.fleet!.registerExternalCallback;
       manifestManager = new ManifestManager({
         savedObjectsClient,
         artifactClient,
         exceptionListClient,
-        packagePolicyService: plugins.ingestManager!.packagePolicyService,
+        packagePolicyService: plugins.fleet!.packagePolicyService,
         logger: this.logger,
         cache: this.exceptionsCache,
       });
     }
 
     this.endpointAppContextService.start({
-      agentService: plugins.ingestManager?.agentService,
-      packageService: plugins.ingestManager?.packageService,
+      agentService: plugins.fleet?.agentService,
+      packageService: plugins.fleet?.packageService,
+      packagePolicyService: plugins.fleet?.packagePolicyService,
+      agentPolicyService: plugins.fleet?.agentPolicyService,
+      appClientFactory: this.appClientFactory,
+      security: this.setupPlugins!.security!,
+      alerts: plugins.alerts,
+      config: this.config!,
       logger: this.logger,
       manifestManager,
       registerIngestCallback,
@@ -352,6 +368,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     this.telemetryEventsSender.start(core, plugins.telemetry);
+    this.licensing$ = plugins.licensing.license$;
+    licenseService.start(this.licensing$);
 
     return {};
   }
@@ -360,5 +378,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('Stopping plugin');
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
+    licenseService.stop();
   }
 }

@@ -10,12 +10,12 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 import { AxiosResponse } from 'axios';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
-import { ANCESTRY_LIMIT } from '../../common/endpoint/generate_data';
-import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../ingest_manager/common/constants';
+import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
+import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../fleet/common/constants';
 import {
   CreateFleetSetupResponse,
   PostIngestSetupResponse,
-} from '../../../ingest_manager/common/types/rest_spec';
+} from '../../../fleet/common/types/rest_spec';
 import { KbnClientWithApiKeySupport } from './kbn_client_with_api_key_support';
 
 main();
@@ -203,7 +203,14 @@ async function main() {
       default: false,
     },
   }).argv;
-  const kbnClient = new KbnClientWithApiKeySupport(new ToolingLog(), { url: argv.kibana });
+
+  const kbnClient = new KbnClientWithApiKeySupport({
+    log: new ToolingLog({
+      level: 'info',
+      writeTo: process.stdout,
+    }),
+    url: argv.kibana,
+  });
 
   try {
     await doIngestSetup(kbnClient);
@@ -250,6 +257,8 @@ async function main() {
       percentTerminated: argv.percentTerminated,
       alwaysGenMaxChildrenPerNode: argv.maxChildrenPerNode,
       ancestryArraySize: argv.ancestryArraySize,
+      eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.eventIndex),
+      alertsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.alertIndex),
     }
   );
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);

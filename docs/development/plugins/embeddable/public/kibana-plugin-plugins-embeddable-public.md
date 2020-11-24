@@ -9,6 +9,7 @@
 |  Class | Description |
 |  --- | --- |
 |  [AddPanelAction](./kibana-plugin-plugins-embeddable-public.addpanelaction.md) |  |
+|  [AttributeService](./kibana-plugin-plugins-embeddable-public.attributeservice.md) |  |
 |  [Container](./kibana-plugin-plugins-embeddable-public.container.md) |  |
 |  [EditPanelAction](./kibana-plugin-plugins-embeddable-public.editpanelaction.md) |  |
 |  [Embeddable](./kibana-plugin-plugins-embeddable-public.embeddable.md) |  |
@@ -71,10 +72,12 @@
 |  --- | --- |
 |  [ACTION\_ADD\_PANEL](./kibana-plugin-plugins-embeddable-public.action_add_panel.md) |  |
 |  [ACTION\_EDIT\_PANEL](./kibana-plugin-plugins-embeddable-public.action_edit_panel.md) |  |
+|  [ATTRIBUTE\_SERVICE\_KEY](./kibana-plugin-plugins-embeddable-public.attribute_service_key.md) | The attribute service is a shared, generic service that embeddables can use to provide the functionality required to fulfill the requirements of the ReferenceOrValueEmbeddable interface. The attribute\_service can also be used as a higher level wrapper to transform an embeddable input shape that references a saved object into an embeddable input shape that contains that saved object's attributes by value. |
 |  [CONTEXT\_MENU\_TRIGGER](./kibana-plugin-plugins-embeddable-public.context_menu_trigger.md) |  |
 |  [contextMenuTrigger](./kibana-plugin-plugins-embeddable-public.contextmenutrigger.md) |  |
 |  [defaultEmbeddableFactoryProvider](./kibana-plugin-plugins-embeddable-public.defaultembeddablefactoryprovider.md) |  |
 |  [EmbeddableRenderer](./kibana-plugin-plugins-embeddable-public.embeddablerenderer.md) | Helper react component to render an embeddable Can be used if you have an embeddable object or an embeddable factory Supports updating input by passing <code>input</code> prop |
+|  [isContextMenuTriggerContext](./kibana-plugin-plugins-embeddable-public.iscontextmenutriggercontext.md) |  |
 |  [isRangeSelectTriggerContext](./kibana-plugin-plugins-embeddable-public.israngeselecttriggercontext.md) |  |
 |  [isValueClickTriggerContext](./kibana-plugin-plugins-embeddable-public.isvalueclicktriggercontext.md) |  |
 |  [PANEL\_BADGE\_TRIGGER](./kibana-plugin-plugins-embeddable-public.panel_badge_trigger.md) |  |

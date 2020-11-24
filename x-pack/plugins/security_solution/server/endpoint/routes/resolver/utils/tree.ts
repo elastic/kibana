@@ -8,7 +8,6 @@ import _ from 'lodash';
 import {
   SafeResolverEvent,
   ResolverNodeStats,
-  SafeResolverRelatedEvents,
   SafeResolverAncestry,
   SafeResolverTree,
   SafeResolverChildren,
@@ -23,7 +22,6 @@ interface Node {
 }
 
 export interface Options {
-  relatedEvents?: SafeResolverRelatedEvents;
   ancestry?: SafeResolverAncestry;
   children?: SafeResolverChildren;
   relatedAlerts?: ResolverRelatedAlerts;
@@ -44,7 +42,6 @@ export class Tree {
     this.tree = tree;
     this.cache.set(id, tree);
 
-    this.addRelatedEvents(options.relatedEvents);
     this.addAncestors(options.ancestry);
     this.addChildren(options.children);
     this.addRelatedAlerts(options.relatedAlerts);
@@ -66,20 +63,6 @@ export class Tree {
    */
   public ids(): string[] {
     return [...this.cache.keys()];
-  }
-
-  /**
-   * Add related events for the tree's origin node. Related events cannot be added for other nodes.
-   *
-   * @param relatedEventsInfo is the related events and pagination information to add to the tree.
-   */
-  private addRelatedEvents(relatedEventsInfo: SafeResolverRelatedEvents | undefined) {
-    if (!relatedEventsInfo) {
-      return;
-    }
-
-    this.tree.relatedEvents.events = relatedEventsInfo.events;
-    this.tree.relatedEvents.nextEvent = relatedEventsInfo.nextEvent;
   }
 
   /**

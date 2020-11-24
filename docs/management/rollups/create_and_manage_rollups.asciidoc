@@ -8,11 +8,7 @@ by an index pattern, and then rolls it into a new index. Rollup indices are a go
 compactly store months or years of historical
 data for use in visualizations and reports.
 
-To get started, open the menu, then go to *Stack Management > Data > Rollup Jobs*. With this UI,
-you can:
-
-* <<create-and-manage-rollup-job, Create a rollup job>>
-* <<manage-rollup-job, Start&comma; stop&comma; and delete rollup jobs>>
+To get started, open the main menu, then click *Stack Management > Rollup Jobs*.
 
 [role="screenshot"]
 image::images/management_rollup_list.png[][List of currently active rollup jobs]
@@ -25,7 +21,7 @@ Before using this feature, you should be familiar with how rollups work.
 
 The `manage_rollup` cluster privilege is required to access *Rollup jobs*.
 
-You can add this privilege in *Stack Management > Security > Roles*.
+To add the privilege, open the main menu, then click *Stack Management > Roles*.
 
 [float]
 [[create-and-manage-rollup-job]]
@@ -67,7 +63,7 @@ You can read more at {ref}/rollup-job-config.html[rollup job configuration].
 === Try it: Create and visualize rolled up data
 
 This example creates a rollup job to capture log data from sample web logs.
-To follow along, add the <<gs-get-data-into-kibana, sample web logs data set>>.
+To follow along, add the sample web logs data set.
 
 In this example, you want data that is older than 7 days in the target index pattern `kibana_sample_data_logs`
 to roll up once a day into the index `rollup_logstash`. You’ll bucket the
@@ -137,7 +133,7 @@ Your next step is to visualize your rolled up data in a vertical bar chart.
 Most visualizations support rolled up data, with the exception of Timelion and Vega visualizations.
 
 
-. Go to *Stack Management > {kib} > Index Patterns*.
+. Open the main menu, then click *Stack Management > Index Patterns*.
 
 . Click *Create index pattern*, and select *Rollup index pattern* from the dropdown.
 +
@@ -152,7 +148,7 @@ is `rollup_logstash,kibana_sample_data_logs`. In this index pattern, `rollup_log
 matches the rolled up index pattern and `kibana_sample_data_logs` matches the index
 pattern for raw data.
 
-. Go to *Dashboard* and create a vertical bar chart.
+. Open the main menu, click *Dashboard*, then create and add a vertical bar chart.
  
 . Choose `rollup_logstash,kibana_sample_data_logs`
 as your source to see both the raw and rolled up data.

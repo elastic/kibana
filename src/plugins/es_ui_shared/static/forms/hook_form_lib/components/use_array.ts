@@ -107,7 +107,7 @@ export const UseArray = ({
     getNewItemAtIndex,
   ]);
 
-  // Create a new hook field with the "hasValue" set to false so we don't use its value to build the final form data.
+  // Create a new hook field with the "isIncludedInOutput" set to false so we don't use its value to build the final form data.
   // Apart from that the field behaves like a normal field and is hooked into the form validation lifecycle.
   const fieldConfigBase: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
     defaultValue: fieldDefaultValue,

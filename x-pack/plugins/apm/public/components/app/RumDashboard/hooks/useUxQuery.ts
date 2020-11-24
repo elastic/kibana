@@ -15,7 +15,7 @@ export function useUxQuery() {
   const queryParams = useMemo(() => {
     const { serviceName } = uiFilters;
 
-    if (start && end && serviceName) {
+    if (start && end && serviceName && percentile) {
       return {
         start,
         end,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import { IndexPatternsFetcher, ISearchStrategy } from '../../../../../../src/plugins/data/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -25,60 +26,60 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
 
   return {
-    search: async (context, request) => {
-      const { elasticsearch } = context.core;
-      const indexPatternsFetcher = new IndexPatternsFetcher(
-        elasticsearch.legacy.client.callAsCurrentUser
-      );
-      const dedupeIndices = dedupeIndexName(request.indices);
+    search: (request, options, { esClient }) =>
+      from(
+        new Promise<IndexFieldsStrategyResponse>(async (resolve) => {
+          const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
+          const dedupeIndices = dedupeIndexName(request.indices);
 
-      const responsesIndexFields = await Promise.all(
-        dedupeIndices
-          .map((index) =>
-            indexPatternsFetcher.getFieldsForWildcard({
-              pattern: index,
-            })
-          )
-          .map((p) => p.catch((e) => false))
-      );
-      let indexFields: IndexField[] = [];
+          const responsesIndexFields = await Promise.all(
+            dedupeIndices
+              .map((index) =>
+                indexPatternsFetcher.getFieldsForWildcard({
+                  pattern: index,
+                })
+              )
+              .map((p) => p.catch((e) => false))
+          );
+          let indexFields: IndexField[] = [];
 
-      if (!request.onlyCheckIfIndicesExist) {
-        indexFields = await formatIndexFields(
-          beatFields,
-          responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
-          dedupeIndices
-        );
-      }
+          if (!request.onlyCheckIfIndicesExist) {
+            indexFields = await formatIndexFields(
+              beatFields,
+              responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
+              dedupeIndices
+            );
+          }
 
-      return Promise.resolve({
-        indexFields,
-        indicesExist: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
-        rawResponse: {
-          timed_out: false,
-          took: -1,
-          _shards: {
-            total: -1,
-            successful: -1,
-            failed: -1,
-            skipped: -1,
-          },
-          hits: {
-            total: -1,
-            max_score: -1,
-            hits: [
-              {
-                _index: '',
-                _type: '',
-                _id: '',
-                _score: -1,
-                _source: null,
+          return resolve({
+            indexFields,
+            indicesExist: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
+            rawResponse: {
+              timed_out: false,
+              took: -1,
+              _shards: {
+                total: -1,
+                successful: -1,
+                failed: -1,
+                skipped: -1,
               },
-            ],
-          },
-        },
-      });
-    },
+              hits: {
+                total: -1,
+                max_score: -1,
+                hits: [
+                  {
+                    _index: '',
+                    _type: '',
+                    _id: '',
+                    _score: -1,
+                    _source: null,
+                  },
+                ],
+              },
+            },
+          });
+        })
+      ),
   };
 };
 

@@ -4,24 +4,8 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipeline calls t
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles input_control_vis function 1`] = `"input_control_vis visConfig='{\\"some\\":\\"nested\\",\\"data\\":{\\"here\\":true}}' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles metrics/tsvb function 1`] = `"tsvb params='{\\"foo\\":\\"bar\\"}'  uiState='{}' "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles pie function 1`] = `"kibana_pie visConfig='{\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"buckets\\":[1,2]}}' "`;
-
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function with buckets 1`] = `"regionmap visConfig='{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"bucket\\":1}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function without buckets 1`] = `"regionmap visConfig='{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}}' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with showPartialRows=true and showMetricsAtAllLevels=false 1`] = `"kibana_table visConfig='{\\"showMetricsAtAllLevels\\":false,\\"showPartialRows\\":true,\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":4,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":5,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}],\\"buckets\\":[0,3]}}' "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with showPartialRows=true and showMetricsAtAllLevels=true 1`] = `"kibana_table visConfig='{\\"showMetricsAtAllLevels\\":true,\\"showPartialRows\\":true,\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":1,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":2,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":4,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":5,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}],\\"buckets\\":[0,3]}}' "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}],\\"buckets\\":[],\\"splitRow\\":[1,2]}}' "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits and buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":1,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}],\\"buckets\\":[3],\\"splitRow\\":[2,4]}}' "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function without splits or buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},{\\"accessor\\":1,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"}],\\"buckets\\":[]}}' "`;
-
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles tile_map function 1`] = `"tilemap visConfig='{\\"metric\\":{},\\"dimensions\\":{\\"metric\\":{\\"accessor\\":0,\\"label\\":\\"\\",\\"format\\":{},\\"params\\":{},\\"aggType\\":\\"\\"},\\"geohash\\":1,\\"geocentroid\\":3}}' "`;
-
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles vega function 1`] = `"vega spec='this is a test' "`;

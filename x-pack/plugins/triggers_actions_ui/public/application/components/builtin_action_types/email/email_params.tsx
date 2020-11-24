@@ -11,6 +11,7 @@ import { ActionParamsProps } from '../../../../types';
 import { EmailActionParams } from '../types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
+import { resolvedActionGroupMessage } from '../../../constants';
 
 export const EmailParamsFields = ({
   actionParams,
@@ -28,11 +29,18 @@ export const EmailParamsFields = ({
   const [addBCC, setAddBCC] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!message && defaultMessage && defaultMessage.length > 0) {
+    if (defaultMessage === resolvedActionGroupMessage) {
+      editAction('message', defaultMessage, index);
+    } else if (
+      (!message || message === resolvedActionGroupMessage) &&
+      defaultMessage &&
+      defaultMessage.length > 0
+    ) {
       editAction('message', defaultMessage, index);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [defaultMessage]);
 
   return (
     <Fragment>
@@ -52,7 +60,7 @@ export const EmailParamsFields = ({
               {!addCC ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
                   <FormattedMessage
-                    defaultMessage="Add Cc"
+                    defaultMessage="Cc"
                     id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton"
                   />
                 </EuiButtonEmpty>
@@ -60,9 +68,8 @@ export const EmailParamsFields = ({
               {!addBCC ? (
                 <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
                   <FormattedMessage
-                    defaultMessage="{titleBcc}"
+                    defaultMessage="Bcc"
                     id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addBccButton"
-                    values={{ titleBcc: !addCC ? '/ Bcc' : 'Add Bcc' }}
                   />
                 </EuiButtonEmpty>
               ) : null}

@@ -93,6 +93,17 @@ describe('EnterpriseSearchRequestHandler', () => {
         });
       });
 
+      it('passes request params', async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/example',
+        });
+        await makeAPICall(requestHandler, { query: { someQuery: false } });
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+          'http://localhost:3002/api/example?someQuery=false'
+        );
+      });
+
       it('passes custom params set by the handler, which override request params', async () => {
         const requestHandler = enterpriseSearchRequestHandler.createRequest({
           path: '/api/example',
@@ -102,6 +113,17 @@ describe('EnterpriseSearchRequestHandler', () => {
 
         EnterpriseSearchAPI.shouldHaveBeenCalledWith(
           'http://localhost:3002/api/example?someQuery=true'
+        );
+      });
+
+      it('correctly encodes paths and query string parameters', async () => {
+        const requestHandler = enterpriseSearchRequestHandler.createRequest({
+          path: '/api/some example',
+        });
+        await makeAPICall(requestHandler, { query: { 'page[current]': 1 } });
+
+        EnterpriseSearchAPI.shouldHaveBeenCalledWith(
+          'http://localhost:3002/api/some%20example?page%5Bcurrent%5D=1'
         );
       });
     });
@@ -301,6 +323,10 @@ describe('EnterpriseSearchRequestHandler', () => {
           headers: mockExpectedResponseHeaders,
         });
         expect(mockLogger.error).toHaveBeenCalled();
+      });
+
+      it('errors when receiving a 401 response', async () => {
+        EnterpriseSearchAPI.mockReturn({}, { status: 401 });
       });
 
       it('errors when redirected to /login', async () => {

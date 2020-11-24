@@ -82,17 +82,6 @@ export function supportsGeoTileAgg(field?: IFieldType): boolean {
   );
 }
 
-export function supportsMvt(indexPattern: IndexPattern, geoFieldName: string): boolean {
-  const field = indexPattern.fields.getByName(geoFieldName);
-  return !!field && field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
-}
-
-export function getMvtDisabledReason() {
-  return i18n.translate('xpack.maps.mbt.disabled', {
-    defaultMessage: 'Display as vector tiles is only supported for geo_shape field-types.',
-  });
-}
-// Returns filtered fields list containing only fields that exist in _source.
 export function getSourceFields(fields: IFieldType[]): IFieldType[] {
   return fields.filter((field) => {
     // Multi fields are not stored in _source and only exist in index.

@@ -43,12 +43,12 @@ jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_asy
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
-  let defaultEndpointItems: jest.SpyInstance<ReturnType<
-    typeof helpers.defaultEndpointExceptionItems
-  >>;
-  let ExceptionBuilderComponent: jest.SpyInstance<ReturnType<
-    typeof builder.ExceptionBuilderComponent
-  >>;
+  let defaultEndpointItems: jest.SpyInstance<
+    ReturnType<typeof helpers.defaultEndpointExceptionItems>
+  >;
+  let ExceptionBuilderComponent: jest.SpyInstance<
+    ReturnType<typeof builder.ExceptionBuilderComponent>
+  >;
   beforeEach(() => {
     defaultEndpointItems = jest.spyOn(helpers, 'defaultEndpointExceptionItems');
     ExceptionBuilderComponent = jest
@@ -406,5 +406,25 @@ describe('When the add exception modal is opened', () => {
         ).toBeDisabled();
       });
     });
+  });
+
+  test('when there are exception builder errors submit button is disabled', async () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <AddExceptionModal
+          ruleId={'123'}
+          ruleIndices={['filebeat-*']}
+          ruleName={ruleName}
+          exceptionListType={'endpoint'}
+          onCancel={jest.fn()}
+          onConfirm={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+    const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+    await waitFor(() => callProps.onChange({ exceptionItems: [], errorExists: true }));
+    expect(
+      wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
+    ).toBeDisabled();
   });
 });

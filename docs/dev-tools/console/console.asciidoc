@@ -7,7 +7,7 @@ Console enables you to interact with the REST API of {es}. You can:
 * View API documentation
 * Get your request history
 
-To get started, open the menu, go to *Dev Tools*, then click *Console*.
+To get started, open the main menu, click *Dev Tools*, then click *Console*.
 
 [role="screenshot"]
 image::dev-tools/console/images/console.png["Console"]

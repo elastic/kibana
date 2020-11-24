@@ -14,6 +14,6 @@ export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [data](./kibana-plugin-plugins-embeddable-public.rangeselectcontext.data.md) | <code>{</code><br/><code>        table: KibanaDatatable;</code><br/><code>        column: number;</code><br/><code>        range: number[];</code><br/><code>        timeFieldName?: string;</code><br/><code>    }</code> |  |
+|  [data](./kibana-plugin-plugins-embeddable-public.rangeselectcontext.data.md) | <code>{</code><br/><code>        table: Datatable;</code><br/><code>        column: number;</code><br/><code>        range: number[];</code><br/><code>        timeFieldName?: string;</code><br/><code>    }</code> |  |
 |  [embeddable](./kibana-plugin-plugins-embeddable-public.rangeselectcontext.embeddable.md) | <code>T</code> |  |
 

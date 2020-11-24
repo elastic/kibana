@@ -5,18 +5,23 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import isEmpty from 'lodash/isEmpty';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { flattenCaseSavedObject, wrapError, escapeHatch } from '../utils';
+import {
+  flattenCaseSavedObject,
+  wrapError,
+  escapeHatch,
+  getCommentContextFromAttributes,
+} from '../utils';
 
 import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
-import { getConnectorId } from './helpers';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -94,14 +99,13 @@ export function initPushCaseUserActionApi({
           ...query,
         };
 
-        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
+        const updateConnector = myCase.attributes.connector;
 
-        // old case may not have new attribute connector_id, so we default to the configured system
-        const updateConnectorId = {
-          connector_id: myCase.attributes.connector_id ?? caseConfigureConnectorId,
-        };
-
-        if (!connectors.some((connector) => connector.id === updateConnectorId.connector_id)) {
+        if (
+          isEmpty(updateConnector) ||
+          (updateConnector != null && updateConnector.id === 'none') ||
+          !connectors.some((connector) => connector.id === updateConnector.id)
+        ) {
           throw Boom.notFound('Connector not found or set to none');
         }
 
@@ -121,7 +125,6 @@ export function initPushCaseUserActionApi({
               external_service: externalService,
               updated_at: pushedDate,
               updated_by: { username, full_name, email },
-              ...updateConnectorId,
             },
             version: myCase.version,
           }),
@@ -166,6 +169,7 @@ export function initPushCaseUserActionApi({
             ],
           }),
         ]);
+
         return response.ok({
           body: CaseResponseRt.encode(
             flattenCaseSavedObject({
@@ -185,6 +189,7 @@ export function initPushCaseUserActionApi({
                   attributes: {
                     ...origComment.attributes,
                     ...updatedComment?.attributes,
+                    ...getCommentContextFromAttributes(origComment.attributes),
                   },
                   version: updatedComment?.version ?? origComment.version,
                   references: origComment?.references ?? [],

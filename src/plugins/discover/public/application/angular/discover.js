@@ -65,7 +65,7 @@ const {
   timefilter,
   toastNotifications,
   uiSettings: config,
-  visualizations,
+  trackUiMetric,
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
@@ -82,12 +82,19 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
+import { removeQueryParam, getQueryParams } from '../../../../kibana_utils/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
   LOADING: 'loading',
   COMPLETE: 'complete',
+  ERROR: 'error',
 };
+
+const getSearchSessionIdFromURL = (history) =>
+  getQueryParams(history.location)[SEARCH_SESSION_ID_QUERY_PARAM];
 
 const app = getAngularModule();
 
@@ -193,7 +200,7 @@ app.directive('discoverApp', function () {
 function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
-  const $fetchObservable = new Subject();
+  const refetch$ = new Subject();
   let inspectorRequest;
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
@@ -206,6 +213,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   };
 
   const history = getHistory();
+  // used for restoring background session
+  let isInitialSearch = true;
 
   const {
     appStateContainer,
@@ -267,7 +276,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         );
 
         if (changes.length) {
-          $fetchObservable.next();
+          refetch$.next();
         }
       });
     }
@@ -332,6 +341,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
+    data.search.session.clear();
     appStateUnsubscribe();
     stopStateSync();
     stopSyncingGlobalStateWithUrl();
@@ -619,6 +629,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     config: config,
     fixedScroll: createFixedScroll($scope, $timeout),
     setHeaderActionMenu: getHeaderActionMenuMounter(),
+    data,
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -633,12 +644,18 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   const init = _.once(() => {
     $scope.updateDataSource().then(async () => {
-      const searchBarChanges = merge(data.query.state$, $fetchObservable).pipe(debounceTime(100));
+      const fetch$ = merge(
+        refetch$,
+        filterManager.getFetches$(),
+        timefilter.getFetch$(),
+        timefilter.getAutoRefreshFetch$(),
+        data.query.queryString.getUpdates$()
+      ).pipe(debounceTime(100));
 
       subscriptions.add(
         subscribeWithScope(
           $scope,
-          searchBarChanges,
+          fetch$,
           {
             next: $scope.fetch,
           },
@@ -678,7 +695,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
           function pick(rows, oldRows, fetchStatus) {
             // initial state, pretend we're already loading if we're about to execute a search so
             // that the uninitilized message doesn't flash on screen
-            if (rows == null && oldRows == null && shouldSearchOnPageLoad()) {
+            if (!$scope.fetchError && rows == null && oldRows == null && shouldSearchOnPageLoad()) {
               return status.LOADING;
             }
 
@@ -717,7 +734,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
       init.complete = true;
       if (shouldSearchOnPageLoad()) {
-        $fetchObservable.next();
+        refetch$.next();
       }
     });
   });
@@ -788,14 +805,30 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (abortController) abortController.abort();
     abortController = new AbortController();
 
+    const searchSessionId = (() => {
+      const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+      if (searchSessionIdFromURL) {
+        if (isInitialSearch) {
+          data.search.session.restore(searchSessionIdFromURL);
+          isInitialSearch = false;
+          return searchSessionIdFromURL;
+        } else {
+          // navigating away from background search
+          removeQueryParam(history, SEARCH_SESSION_ID_QUERY_PARAM);
+        }
+      }
+      return data.search.session.start();
+    })();
+
     $scope
       .updateDataSource()
       .then(setupVisualization)
       .then(function () {
         $scope.fetchStatus = fetchStatuses.LOADING;
-        logInspectorRequest();
+        logInspectorRequest({ searchSessionId });
         return $scope.searchSource.fetch({
           abortSignal: abortController.signal,
+          sessionId: searchSessionId,
         });
       })
       .then(onResults)
@@ -804,7 +837,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         if (error instanceof Error && error.name === 'AbortError') return;
 
         $scope.fetchStatus = fetchStatuses.NO_RESULTS;
-        $scope.rows = [];
+        $scope.fetchError = error;
 
         data.search.showError(error);
       });
@@ -812,7 +845,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   $scope.handleRefresh = function (_payload, isUpdate) {
     if (isUpdate === false) {
-      $fetchObservable.next();
+      refetch$.next();
     }
   };
 
@@ -862,11 +895,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
     if (getTimeField()) {
-      const tabifiedData = tabifyAggResponse($scope.vis.data.aggs, resp);
+      const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
       $scope.searchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
         tabifiedData,
-        getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
+        getDimensions($scope.opts.chartAggConfigs.aggs, $scope.timeRange)
       );
       $scope.updateTime();
     }
@@ -887,7 +920,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
 
-  function logInspectorRequest() {
+  function logInspectorRequest({ searchSessionId = null } = { searchSessionId: null }) {
     inspectorAdapters.requests.reset();
     const title = i18n.translate('discover.inspectorRequestDataTitle', {
       defaultMessage: 'data',
@@ -895,7 +928,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     const description = i18n.translate('discover.inspectorRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
-    inspectorRequest = inspectorAdapters.requests.start(title, { description });
+    inspectorRequest = inspectorAdapters.requests.start(title, { description, searchSessionId });
     inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
     $scope.searchSource.getSearchRequestBody().then((body) => {
       inspectorRequest.json(body);
@@ -979,6 +1012,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       operation,
       $scope.indexPattern.id
     );
+    if (trackUiMetric) {
+      trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
+    }
     return filterManager.addFilters(newFilters);
   };
 
@@ -1033,27 +1069,19 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         },
       },
     ];
-
-    $scope.vis = await visualizations.createVis('histogram', {
-      title: savedSearch.title,
-      params: {
-        addLegend: false,
-        addTimeMarker: true,
-      },
-      data: {
-        aggs: visStateAggs,
-        searchSource: $scope.searchSource.getSerializedFields(),
-      },
-    });
+    $scope.opts.chartAggConfigs = data.search.aggs.createAggConfigs(
+      $scope.indexPattern,
+      visStateAggs
+    );
 
     $scope.searchSource.onRequestStart((searchSource, options) => {
-      if (!$scope.vis) return;
-      return $scope.vis.data.aggs.onSearchRequestStart(searchSource, options);
+      if (!$scope.opts.chartAggConfigs) return;
+      return $scope.opts.chartAggConfigs.onSearchRequestStart(searchSource, options);
     });
 
     $scope.searchSource.setField('aggs', function () {
-      if (!$scope.vis) return;
-      return $scope.vis.data.aggs.toDsl();
+      if (!$scope.opts.chartAggConfigs) return;
+      return $scope.opts.chartAggConfigs.toDsl();
     });
   }
 

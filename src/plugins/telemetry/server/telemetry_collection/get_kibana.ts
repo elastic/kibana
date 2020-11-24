@@ -19,7 +19,12 @@
 
 import { omit } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { LegacyAPICaller } from 'kibana/server';
+import {
+  ISavedObjectsRepository,
+  KibanaRequest,
+  LegacyAPICaller,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { StatsCollectionContext } from 'src/plugins/telemetry_collection_manager/server';
 import { ElasticsearchClient } from 'src/core/server';
 
@@ -84,8 +89,15 @@ export function handleKibanaStats(
 export async function getKibana(
   usageCollection: UsageCollectionSetup,
   callWithInternalUser: LegacyAPICaller,
-  asInternalUser: ElasticsearchClient
+  asInternalUser: ElasticsearchClient,
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository,
+  kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
 ): Promise<KibanaUsageStats> {
-  const usage = await usageCollection.bulkFetch(callWithInternalUser, asInternalUser);
+  const usage = await usageCollection.bulkFetch(
+    callWithInternalUser,
+    asInternalUser,
+    soClient,
+    kibanaRequest
+  );
   return usageCollection.toObject(usage);
 }

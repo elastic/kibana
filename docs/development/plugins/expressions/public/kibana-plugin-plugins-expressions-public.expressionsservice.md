@@ -15,7 +15,7 @@ so that JSDoc appears in developers IDE when they use those `plugins.expressions
 <b>Signature:</b>
 
 ```typescript
-export declare class ExpressionsService 
+export declare class ExpressionsService implements PersistableStateService<ExpressionAstExpression> 
 ```
 
 ## Constructors
@@ -30,6 +30,7 @@ export declare class ExpressionsService
 |  --- | --- | --- | --- |
 |  [execute](./kibana-plugin-plugins-expressions-public.expressionsservice.execute.md) |  | <code>ExpressionsServiceStart['execute']</code> |  |
 |  [executor](./kibana-plugin-plugins-expressions-public.expressionsservice.executor.md) |  | <code>Executor</code> |  |
+|  [extract](./kibana-plugin-plugins-expressions-public.expressionsservice.extract.md) |  | <code>(state: ExpressionAstExpression) =&gt; {</code><br/><code>        state: ExpressionAstExpression;</code><br/><code>        references: SavedObjectReference[];</code><br/><code>    }</code> | Extracts saved object references from expression AST |
 |  [fork](./kibana-plugin-plugins-expressions-public.expressionsservice.fork.md) |  | <code>() =&gt; ExpressionsService</code> |  |
 |  [getFunction](./kibana-plugin-plugins-expressions-public.expressionsservice.getfunction.md) |  | <code>ExpressionsServiceStart['getFunction']</code> |  |
 |  [getFunctions](./kibana-plugin-plugins-expressions-public.expressionsservice.getfunctions.md) |  | <code>() =&gt; ReturnType&lt;Executor['getFunctions']&gt;</code> | Returns POJO map of all registered expression functions, where keys are names of the functions and values are <code>ExpressionFunction</code> instances. |
@@ -37,6 +38,8 @@ export declare class ExpressionsService
 |  [getRenderers](./kibana-plugin-plugins-expressions-public.expressionsservice.getrenderers.md) |  | <code>() =&gt; ReturnType&lt;ExpressionRendererRegistry['toJS']&gt;</code> | Returns POJO map of all registered expression renderers, where keys are names of the renderers and values are <code>ExpressionRenderer</code> instances. |
 |  [getType](./kibana-plugin-plugins-expressions-public.expressionsservice.gettype.md) |  | <code>ExpressionsServiceStart['getType']</code> |  |
 |  [getTypes](./kibana-plugin-plugins-expressions-public.expressionsservice.gettypes.md) |  | <code>() =&gt; ReturnType&lt;Executor['getTypes']&gt;</code> | Returns POJO map of all registered expression types, where keys are names of the types and values are <code>ExpressionType</code> instances. |
+|  [inject](./kibana-plugin-plugins-expressions-public.expressionsservice.inject.md) |  | <code>(state: ExpressionAstExpression, references: SavedObjectReference[]) =&gt; ExpressionAstExpression</code> | Injects saved object references into expression AST |
+|  [migrate](./kibana-plugin-plugins-expressions-public.expressionsservice.migrate.md) |  | <code>(state: SerializableState, version: string) =&gt; ExpressionAstExpression</code> | Runs the migration (if it exists) for specified version. This will run a single migration step (ie from 7.10.0 to 7.10.1) |
 |  [registerFunction](./kibana-plugin-plugins-expressions-public.expressionsservice.registerfunction.md) |  | <code>(functionDefinition: AnyExpressionFunctionDefinition &#124; (() =&gt; AnyExpressionFunctionDefinition)) =&gt; void</code> | Register an expression function, which will be possible to execute as part of the expression pipeline.<!-- -->Below we register a function which simply sleeps for given number of milliseconds to delay the execution and outputs its input as-is.
 ```ts
 expressions.registerFunction({
@@ -61,6 +64,7 @@ The actual function is defined in the <code>fn</code> key. The function can be \
 |  [registerType](./kibana-plugin-plugins-expressions-public.expressionsservice.registertype.md) |  | <code>(typeDefinition: AnyExpressionTypeDefinition &#124; (() =&gt; AnyExpressionTypeDefinition)) =&gt; void</code> |  |
 |  [renderers](./kibana-plugin-plugins-expressions-public.expressionsservice.renderers.md) |  | <code>ExpressionRendererRegistry</code> |  |
 |  [run](./kibana-plugin-plugins-expressions-public.expressionsservice.run.md) |  | <code>ExpressionsServiceStart['run']</code> |  |
+|  [telemetry](./kibana-plugin-plugins-expressions-public.expressionsservice.telemetry.md) |  | <code>(state: ExpressionAstExpression, telemetryData?: Record&lt;string, any&gt;) =&gt; Record&lt;string, any&gt;</code> | Extracts telemetry from expression AST |
 
 ## Methods
 

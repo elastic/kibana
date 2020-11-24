@@ -23,11 +23,8 @@ import {
   NetworkHttpStrategyResponse,
   SortField,
 } from '../../../../common/search_strategy';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { InspectResponse } from '../../../types';
 import { getInspectResponse } from '../../../helpers';
@@ -82,7 +79,6 @@ export const useNetworkHttp = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkQueries.http,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           ip,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort: sort as SortField,
@@ -197,7 +193,7 @@ export const useNetworkHttp = ({
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.http,
         filterQuery: createFilter(filterQuery),
-        id: ID,
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort: sort as SortField,
         timerange: {
@@ -211,7 +207,7 @@ export const useNetworkHttp = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, skip]);
 
   useEffect(() => {
     networkHttpSearch(networkHttpRequest);

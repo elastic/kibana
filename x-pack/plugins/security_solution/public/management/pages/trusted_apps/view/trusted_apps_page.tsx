@@ -3,48 +3,49 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { useHistory, useLocation } from 'react-router-dom';
+import React, { memo, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
+
+import { ViewType } from '../state';
+import { getCurrentLocation, getListTotalItemsCount } from '../store/selectors';
+import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from './hooks';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { TrustedAppsList } from './trusted_apps_list';
+import { CreateTrustedAppFlyout } from './components/create_trusted_app_flyout';
+import { ControlPanel } from './components/control_panel';
+import { TrustedAppsGrid } from './components/trusted_apps_grid';
+import { TrustedAppsList } from './components/trusted_apps_list';
 import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
 import { TrustedAppsNotifications } from './trusted_apps_notifications';
-import { CreateTrustedAppFlyout } from './components/create_trusted_app_flyout';
-import { getTrustedAppsListPath } from '../../../common/routing';
-import { useTrustedAppsSelector } from './hooks';
-import { getCurrentLocation } from '../store/selectors';
 import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { ABOUT_TRUSTED_APPS } from './translations';
 
 export const TrustedAppsPage = memo(() => {
-  const history = useHistory();
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
   const location = useTrustedAppsSelector(getCurrentLocation);
-  const handleAddButtonClick = useCallback(() => {
-    history.push(
-      getTrustedAppsListPath({
-        ...location,
-        show: 'create',
-      })
-    );
-  }, [history, location]);
-  const handleAddFlyoutClose = useCallback(() => {
-    const { show, ...paginationParamsOnly } = location;
-    history.push(getTrustedAppsListPath(paginationParamsOnly));
-  }, [history, location]);
+  const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
+  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({ show: 'create' }));
+  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({ show: undefined }));
+  const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
+    view_type: viewType,
+  }));
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {
       return <BackToExternalAppButton {...routeState} />;
     }
     return null;
-    // FIXME: Route state is being deleted by some parent component
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [routeState]);
 
   const addButton = (
     <EuiButton
@@ -64,7 +65,7 @@ export const TrustedAppsPage = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="trustedAppsListPage"
-      beta={true}
+      beta={false}
       title={
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.list.pageTitle"
@@ -84,7 +85,23 @@ export const TrustedAppsPage = memo(() => {
           data-test-subj="addTrustedAppFlyout"
         />
       )}
-      <TrustedAppsList />
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <ControlPanel
+            totalItemCount={totalItemsCount}
+            currentViewType={location.view_type}
+            onViewTypeChange={handleViewTypeChange}
+          />
+
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
+
+          {location.view_type === 'grid' && <TrustedAppsGrid />}
+          {location.view_type === 'list' && <TrustedAppsList />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AdministrationListPage>
   );
 });

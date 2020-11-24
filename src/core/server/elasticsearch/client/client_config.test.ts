@@ -216,49 +216,19 @@ describe('parseClientOptions', () => {
         );
       });
 
-      it('adds auth to the nodes if both `username` and `password` are set', () => {
-        let options = parseClientOptions(
-          createConfig({
-            username: 'user',
-            hosts: ['http://node-A:9200'],
-          }),
-          false
-        );
-        expect(options.nodes).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "url": "http://node-a:9200/",
-                    },
-                  ]
-              `);
-
-        options = parseClientOptions(
-          createConfig({
-            password: 'pass',
-            hosts: ['http://node-A:9200'],
-          }),
-          false
-        );
-        expect(options.nodes).toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "url": "http://node-a:9200/",
-                    },
-                  ]
-              `);
-
-        options = parseClientOptions(
+      it('does not add auth to the nodes', () => {
+        const options = parseClientOptions(
           createConfig({
             username: 'user',
             password: 'pass',
             hosts: ['http://node-A:9200'],
           }),
-          false
+          true
         );
         expect(options.nodes).toMatchInlineSnapshot(`
                   Array [
                     Object {
-                      "url": "http://user:pass@node-a:9200/",
+                      "url": "http://node-a:9200/",
                     },
                   ]
               `);

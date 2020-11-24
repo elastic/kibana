@@ -45,6 +45,7 @@ const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 interface Props {
   telemetryService: TelemetryService;
   onQueryMatchChange: (searchTermMatches: boolean) => void;
+  isSecurityExampleEnabled: () => boolean;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
   query?: any;
@@ -89,8 +90,9 @@ export class TelemetryManagementSection extends Component<Props, State> {
   }
 
   render() {
-    const { telemetryService } = this.props;
+    const { telemetryService, isSecurityExampleEnabled } = this.props;
     const { showExample, showSecurityExample, queryMatches, enabled, processing } = this.state;
+    const securityExampleEnabled = isSecurityExampleEnabled();
 
     if (!telemetryService.getCanChangeOptInStatus()) {
       return null;
@@ -108,7 +110,9 @@ export class TelemetryManagementSection extends Component<Props, State> {
             onClose={this.toggleExample}
           />
         )}
-        {showSecurityExample && <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />}
+        {showSecurityExample && securityExampleEnabled && (
+          <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
+        )}
         <EuiPanel paddingSize="l">
           <EuiForm>
             <EuiText>
@@ -181,48 +185,63 @@ export class TelemetryManagementSection extends Component<Props, State> {
     );
   };
 
-  renderDescription = () => (
-    <Fragment>
-      <p>
-        <FormattedMessage
-          id="telemetry.telemetryConfigAndLinkDescription"
-          defaultMessage="Enabling data usage collection helps us manage and improve our products and services.
-          See our {privacyStatementLink} for more details."
-          values={{
-            privacyStatementLink: (
-              <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
-                <FormattedMessage
-                  id="telemetry.readOurUsageDataPrivacyStatementLinkText"
-                  defaultMessage="Privacy Statement"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
-      <p>
-        <FormattedMessage
-          id="telemetry.seeExamplesOfWhatWeCollect"
-          defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
-          values={{
-            clusterData: (
-              <EuiLink onClick={this.toggleExample}>
-                <FormattedMessage id="telemetry.clusterData" defaultMessage="cluster data" />
-              </EuiLink>
-            ),
-            endpointSecurityData: (
-              <EuiLink onClick={this.toggleSecurityExample}>
-                <FormattedMessage
-                  id="telemetry.securityData"
-                  defaultMessage="endpoint security data"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
-    </Fragment>
-  );
+  renderDescription = () => {
+    const { isSecurityExampleEnabled } = this.props;
+    const securityExampleEnabled = isSecurityExampleEnabled();
+    const clusterDataLink = (
+      <EuiLink onClick={this.toggleExample} data-test-id="cluster_data_example">
+        <FormattedMessage id="telemetry.clusterData" defaultMessage="cluster data" />
+      </EuiLink>
+    );
+
+    const endpointSecurityDataLink = (
+      <EuiLink onClick={this.toggleSecurityExample} data-test-id="endpoint_security_example">
+        <FormattedMessage id="telemetry.securityData" defaultMessage="endpoint security data" />
+      </EuiLink>
+    );
+
+    return (
+      <Fragment>
+        <p>
+          <FormattedMessage
+            id="telemetry.telemetryConfigAndLinkDescription"
+            defaultMessage="Enabling data usage collection helps us manage and improve our products and services.
+            See our {privacyStatementLink} for more details."
+            values={{
+              privacyStatementLink: (
+                <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+                  <FormattedMessage
+                    id="telemetry.readOurUsageDataPrivacyStatementLinkText"
+                    defaultMessage="Privacy Statement"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+        <p>
+          {securityExampleEnabled ? (
+            <FormattedMessage
+              id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
+              defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
+              values={{
+                clusterData: clusterDataLink,
+                endpointSecurityData: endpointSecurityDataLink,
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="telemetry.seeExampleOfClusterData"
+              defaultMessage="See an example of the {clusterData} that we collect."
+              values={{
+                clusterData: clusterDataLink,
+              }}
+            />
+          )}
+        </p>
+      </Fragment>
+    );
+  };
 
   toggleOptIn = async (): Promise<boolean> => {
     const { telemetryService, toasts } = this.props;
@@ -264,6 +283,9 @@ export class TelemetryManagementSection extends Component<Props, State> {
   };
 
   toggleSecurityExample = () => {
+    const { isSecurityExampleEnabled } = this.props;
+    const securityExampleEnabled = isSecurityExampleEnabled();
+    if (!securityExampleEnabled) return;
     this.setState({
       showSecurityExample: !this.state.showSecurityExample,
     });

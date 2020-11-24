@@ -19,6 +19,8 @@
 
 import { fetchProvider } from './fetch';
 import { LegacyAPICaller } from 'kibana/server';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 jest.mock('../../../common', () => ({
   DEFAULT_QUERY_LANGUAGE: 'lucene',
@@ -29,6 +31,8 @@ jest.mock('../../../common', () => ({
 
 let fetch: ReturnType<typeof fetchProvider>;
 let callCluster: LegacyAPICaller;
+let collectorFetchContext: CollectorFetchContext;
+const collectorFetchContextMock = createCollectorFetchContextMock();
 
 function setupMockCallCluster(
   optCount: { optInCount?: number; optOutCount?: number } | null,
@@ -89,40 +93,64 @@ describe('makeKQLUsageCollector', () => {
 
     it('should return opt in data from the .kibana/kql-telemetry doc', async () => {
       setupMockCallCluster({ optInCount: 1 }, 'kuery');
-      const fetchResponse = await fetch(callCluster);
+      collectorFetchContext = {
+        ...collectorFetchContextMock,
+        callCluster,
+      };
+      const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.optInCount).toBe(1);
       expect(fetchResponse.optOutCount).toBe(0);
     });
 
     it('should return the default query language set in advanced settings', async () => {
       setupMockCallCluster({ optInCount: 1 }, 'kuery');
-      const fetchResponse = await fetch(callCluster);
+      collectorFetchContext = {
+        ...collectorFetchContextMock,
+        callCluster,
+      };
+      const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.defaultQueryLanguage).toBe('kuery');
     });
 
     // Indicates the user has modified the setting at some point but the value is currently the default
     it('should return the kibana default query language if the config value is null', async () => {
       setupMockCallCluster({ optInCount: 1 }, null);
-      const fetchResponse = await fetch(callCluster);
+      collectorFetchContext = {
+        ...collectorFetchContextMock,
+        callCluster,
+      };
+      const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.defaultQueryLanguage).toBe('lucene');
     });
 
     it('should indicate when the default language has never been modified by the user', async () => {
       setupMockCallCluster({ optInCount: 1 }, undefined);
-      const fetchResponse = await fetch(callCluster);
+      collectorFetchContext = {
+        ...collectorFetchContextMock,
+        callCluster,
+      };
+      const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.defaultQueryLanguage).toBe('default-lucene');
     });
 
     it('should default to 0 opt in counts if the .kibana/kql-telemetry doc does not exist', async () => {
       setupMockCallCluster(null, 'kuery');
-      const fetchResponse = await fetch(callCluster);
+      collectorFetchContext = {
+        ...collectorFetchContextMock,
+        callCluster,
+      };
+      const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.optInCount).toBe(0);
       expect(fetchResponse.optOutCount).toBe(0);
     });
 
     it('should default to the kibana default language if the config document does not exist', async () => {
       setupMockCallCluster(null, 'missingConfigDoc');
-      const fetchResponse = await fetch(callCluster);
+      collectorFetchContext = {
+        ...collectorFetchContextMock,
+        callCluster,
+      };
+      const fetchResponse = await fetch(collectorFetchContext);
       expect(fetchResponse.defaultQueryLanguage).toBe('default-lucene');
     });
   });

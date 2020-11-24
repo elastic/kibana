@@ -21,7 +21,6 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import {
   CoreSetup,
-  CoreStart,
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
@@ -31,25 +30,33 @@ import {
   AppNavLinkStatus,
 } from '../../../core/public';
 import { Panel } from './panels/panel';
-import { initAngularBootstrap, KibanaLegacyStart } from '../../kibana_legacy/public';
+import { initAngularBootstrap } from '../../kibana_legacy/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DataPublicPluginStart, esFilters, DataPublicPluginSetup } from '../../data/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { VisualizationsStart } from '../../visualizations/public';
+import { SavedObjectsStart } from '../../saved_objects/public';
 import {
   VisTypeTimelionPluginStart,
   VisTypeTimelionPluginSetup,
 } from '../../vis_type_timelion/public';
 
-export interface TimelionPluginDependencies {
+export interface TimelionPluginSetupDependencies {
+  data: DataPublicPluginSetup;
+  visTypeTimelion: VisTypeTimelionPluginSetup;
+}
+
+export interface TimelionPluginStartDependencies {
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   visualizations: VisualizationsStart;
   visTypeTimelion: VisTypeTimelionPluginStart;
+  savedObjects: SavedObjectsStart;
 }
 
 /** @internal */
-export class TimelionPlugin implements Plugin<void, void> {
+export class TimelionPlugin
+  implements Plugin<void, void, TimelionPluginSetupDependencies, TimelionPluginStartDependencies> {
   initializerContext: PluginInitializerContext;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
@@ -60,7 +67,7 @@ export class TimelionPlugin implements Plugin<void, void> {
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<TimelionPluginStartDependencies>,
     {
       data,
       visTypeTimelion,
@@ -122,7 +129,7 @@ export class TimelionPlugin implements Plugin<void, void> {
           pluginInitializerContext: this.initializerContext,
           timelionPanels,
           core: coreStart,
-          plugins: pluginsStart as TimelionPluginDependencies,
+          plugins: pluginsStart,
         });
         return () => {
           unlistenParentHistory();
@@ -133,9 +140,7 @@ export class TimelionPlugin implements Plugin<void, void> {
     });
   }
 
-  public start(core: CoreStart, { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }) {
-    kibanaLegacy.loadFontAwesome();
-  }
+  public start() {}
 
   public stop(): void {
     if (this.stopUrlTracking) {

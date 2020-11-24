@@ -37,22 +37,20 @@ import {
   getConfigCollections,
 } from './utils/collections';
 import { getAreaOptionTabs, countLabel } from './utils/common_config';
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
 import { Rotates } from '../../charts/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { toExpressionAst } from './to_ast';
+import { BasicVislibParams } from './types';
 
-export const createAreaVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const areaVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'area',
   title: i18n.translate('visTypeVislib.area.areaTitle', { defaultMessage: 'Area' }),
   icon: 'visArea',
   description: i18n.translate('visTypeVislib.area.areaDescription', {
-    defaultMessage: 'Emphasize the quantity beneath a line chart',
+    defaultMessage: 'Emphasize the data between an axis and a line.',
   }),
-  visualization: createVislibVisController(deps),
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
-  },
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  toExpressionAst,
   visConfig: {
     defaults: {
       type: 'area',
@@ -131,9 +129,6 @@ export const createAreaVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
       labels: {},
     },
   },
-  events: {
-    brush: { disabled: false },
-  },
   editorConfig: {
     collections: getConfigCollections(),
     optionTabs: getAreaOptionTabs(),
@@ -190,4 +185,4 @@ export const createAreaVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
       },
     ]),
   },
-});
+};

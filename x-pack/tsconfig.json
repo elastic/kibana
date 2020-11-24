@@ -1,19 +1,14 @@
 {
   "extends": "../tsconfig.base.json",
-  "include": [
-    "mocks.ts",
-    "typings/**/*",
-    "plugins/**/*",
-    "test_utils/**/*",
-    "tasks/**/*"
-  ],
+  "include": ["mocks.ts", "typings/**/*", "plugins/**/*", "test_utils/**/*", "tasks/**/*"],
   "exclude": [
-    "test/**/*",
-    "plugins/security_solution/cypress/**/*",
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/scripts/**/*",
-    "plugins/licensing/**/*",
     "plugins/global_search/**/*",
+    "plugins/licensing/**/*",
+    "plugins/security_solution/cypress/**/*",
+    "plugins/telemetry_collection_xpack/**/*",
+    "test/**/*"
   ],
   "compilerOptions": {
     "paths": {
@@ -27,9 +22,23 @@
   },
   "references": [
     { "path": "../src/core/tsconfig.json" },
-    { "path": "../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../src/plugins/dev_tools/tsconfig.json" },
+    { "path": "../src/plugins/inspector/tsconfig.json" },
+    { "path": "../src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "./plugins/licensing/tsconfig.json" },
+    { "path": "../src/plugins/kibana_usage_collection/tsconfig.json" },
+    { "path": "../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../src/plugins/newsfeed/tsconfig.json" },
+    { "path": "../src/plugins/security_oss/tsconfig.json" },
+    { "path": "../src/plugins/share/tsconfig.json" },
+    { "path": "../src/plugins/telemetry/tsconfig.json" },
+    { "path": "../src/plugins/telemetry_collection_manager/tsconfig.json" },
+    { "path": "../src/plugins/url_forwarding/tsconfig.json" },
+    { "path": "../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../src/test_utils/tsconfig.json" },
+
     { "path": "./plugins/global_search/tsconfig.json" },
+    { "path": "./plugins/licensing/tsconfig.json" },
+    { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" }
   ]
 }

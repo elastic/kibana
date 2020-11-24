@@ -56,18 +56,16 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
     () => ({
       onClick: setEql,
       isSelected: isEqlRule(ruleType),
-      isVisible: !isUpdateView || isEqlRule(ruleType),
     }),
-    [ruleType, setEql, isUpdateView]
+    [ruleType, setEql]
   );
 
   const querySelectableConfig = useMemo(
     () => ({
       onClick: setQuery,
       isSelected: isQueryRule(ruleType),
-      isVisible: !isUpdateView || isQueryRule(ruleType),
     }),
-    [ruleType, setQuery, isUpdateView]
+    [ruleType, setQuery]
   );
 
   const mlSelectableConfig = useMemo(
@@ -75,27 +73,24 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       isDisabled: !hasValidLicense || !isMlAdmin,
       onClick: setMl,
       isSelected: isMlRule(ruleType),
-      isVisible: !isUpdateView || isMlRule(ruleType),
     }),
-    [ruleType, setMl, isUpdateView, hasValidLicense, isMlAdmin]
+    [ruleType, setMl, hasValidLicense, isMlAdmin]
   );
 
   const thresholdSelectableConfig = useMemo(
     () => ({
       onClick: setThreshold,
       isSelected: isThresholdRule(ruleType),
-      isVisible: !isUpdateView || isThresholdRule(ruleType),
     }),
-    [ruleType, setThreshold, isUpdateView]
+    [ruleType, setThreshold]
   );
 
   const threatMatchSelectableConfig = useMemo(
     () => ({
       onClick: setThreatMatch,
       isSelected: isThreatMatchRule(ruleType),
-      isVisible: !isUpdateView || isThreatMatchRule(ruleType),
     }),
-    [ruleType, setThreatMatch, isUpdateView]
+    [ruleType, setThreatMatch]
   );
 
   return (
@@ -106,7 +101,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       label={field.label}
     >
       <EuiFlexGrid columns={3}>
-        {querySelectableConfig.isVisible && (
+        {(!isUpdateView || querySelectableConfig.isSelected) && (
           <EuiFlexItem>
             <EuiCard
               data-test-subj="customRuleType"
@@ -120,7 +115,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             />
           </EuiFlexItem>
         )}
-        {mlSelectableConfig.isVisible && (
+        {(!isUpdateView || mlSelectableConfig.isSelected) && (
           <EuiFlexItem>
             <EuiCard
               data-test-subj="machineLearningRuleType"
@@ -140,7 +135,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             />
           </EuiFlexItem>
         )}
-        {thresholdSelectableConfig.isVisible && (
+        {(!isUpdateView || thresholdSelectableConfig.isSelected) && (
           <EuiFlexItem>
             <EuiCard
               data-test-subj="thresholdRuleType"
@@ -154,7 +149,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             />
           </EuiFlexItem>
         )}
-        {eqlSelectableConfig.isVisible && (
+        {(!isUpdateView || eqlSelectableConfig.isSelected) && (
           <EuiFlexItem>
             <EuiCard
               data-test-subj="eqlRuleType"
@@ -168,7 +163,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
             />
           </EuiFlexItem>
         )}
-        {threatMatchSelectableConfig.isVisible && (
+        {(!isUpdateView || threatMatchSelectableConfig.isSelected) && (
           <EuiFlexItem>
             <EuiCard
               data-test-subj="threatMatchRuleType"

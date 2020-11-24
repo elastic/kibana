@@ -31,7 +31,11 @@ export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
-export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
+export const CUSTOM_QUERY_INPUT =
+  '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="queryInput"]';
+
+export const THREAT_MATCH_QUERY_INPUT =
+  '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
 
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
@@ -45,6 +49,10 @@ export const DEFINE_INDEX_INPUT =
 export const EQL_TYPE = '[data-test-subj="eqlRuleType"]';
 
 export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
+
+export const EQL_QUERY_PREVIEW_HISTOGRAM = '[data-test-subj="queryPreviewEqlHistogram"]';
+
+export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loading"]';
 
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
@@ -75,6 +83,8 @@ export const MITRE_TACTIC_DROPDOWN = '[data-test-subj="mitreTactic"]';
 
 export const MITRE_TECHNIQUES_INPUT =
   '[data-test-subj="mitreTechniques"] [data-test-subj="comboBoxSearchInput"]';
+
+export const QUERY_PREVIEW_BUTTON = '[data-test-subj="queryPreviewButton"]';
 
 export const REFERENCE_URLS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] input';

@@ -17,7 +17,14 @@ import {
   doesNotExistOperator,
 } from './operators';
 import { GetGenericComboBoxPropsReturn, OperatorOption } from './types';
+import * as i18n from './translations';
 
+/**
+ * Returns the appropriate operators given a field type
+ *
+ * @param field IFieldType selected field
+ *
+ */
 export const getOperators = (field: IFieldType | undefined): OperatorOption[] => {
   if (field == null) {
     return [isOperator];
@@ -30,33 +37,81 @@ export const getOperators = (field: IFieldType | undefined): OperatorOption[] =>
   }
 };
 
-export const paramIsValid = (
-  params: string | undefined,
+/**
+ * Determines if empty value is ok
+ *
+ * @param param the value being checked
+ * @param field the selected field
+ * @param isRequired whether or not an empty value is allowed
+ * @param touched has field been touched by user
+ * @returns undefined if valid, string with error message if invalid,
+ * null if no checks matched
+ */
+export const checkEmptyValue = (
+  param: string | undefined,
   field: IFieldType | undefined,
   isRequired: boolean,
   touched: boolean
-): boolean => {
-  if (isRequired && touched && (params == null || params === '')) {
-    return false;
+): string | undefined | null => {
+  if (isRequired && touched && (param == null || param.trim() === '')) {
+    return i18n.FIELD_REQUIRED_ERR;
   }
 
-  if ((isRequired && !touched) || (!isRequired && (params == null || params === ''))) {
-    return true;
+  if (
+    field == null ||
+    (isRequired && !touched) ||
+    (!isRequired && (param == null || param === ''))
+  ) {
+    return undefined;
   }
 
-  const types = field != null && field.esTypes != null ? field.esTypes : [];
-
-  return types.reduce<boolean>((acc, type) => {
-    switch (type) {
-      case 'date':
-        const moment = dateMath.parse(params ?? '');
-        return Boolean(moment && moment.isValid());
-      default:
-        return acc;
-    }
-  }, true);
+  return null;
 };
 
+/**
+ * Very basic validation for values
+ *
+ * @param param the value being checked
+ * @param field the selected field
+ * @param isRequired whether or not an empty value is allowed
+ * @param touched has field been touched by user
+ * @returns undefined if valid, string with error message if invalid
+ */
+export const paramIsValid = (
+  param: string | undefined,
+  field: IFieldType | undefined,
+  isRequired: boolean,
+  touched: boolean
+): string | undefined => {
+  if (field == null) {
+    return undefined;
+  }
+
+  const emptyValueError = checkEmptyValue(param, field, isRequired, touched);
+  if (emptyValueError !== null) {
+    return emptyValueError;
+  }
+
+  switch (field.type) {
+    case 'date':
+      const moment = dateMath.parse(param ?? '');
+      const isDate = Boolean(moment && moment.isValid());
+      return isDate ? undefined : i18n.DATE_ERR;
+    case 'number':
+      const isNum = param != null && param.trim() !== '' && !isNaN(+param);
+      return isNum ? undefined : i18n.NUMBER_ERR;
+    default:
+      return undefined;
+  }
+};
+
+/**
+ * Determines the options, selected values and option labels for EUI combo box
+ *
+ * @param options options user can select from
+ * @param selectedOptions user selection if any
+ * @param getLabel helper function to know which property to use for labels
+ */
 export function getGenericComboBoxProps<T>({
   options,
   selectedOptions,

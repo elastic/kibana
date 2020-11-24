@@ -31,7 +31,7 @@ export const TEST_CASES: Record<string, BulkGetTestCase> = Object.freeze({
 });
 
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbiddenTypes('bulk_get');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody = (
     testCases: BulkGetTestCase | BulkGetTestCase[],
     statusCode: 200 | 403
@@ -39,7 +39,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
       const types = testCaseArray.map((x) => x.type);
-      await expectForbidden(types)(response);
+      await expectSavedObjectForbidden(types)(response);
     } else {
       // permitted
       const savedObjects = response.body.saved_objects;
@@ -113,6 +113,6 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
   return {
     addTests,
     createTestDefinitions,
-    expectForbidden,
+    expectSavedObjectForbidden,
   };
 }

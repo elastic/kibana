@@ -7,6 +7,7 @@ import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import {
   AlertEvent,
+  DataStream,
   EndpointStatus,
   Host,
   HostMetadata,
@@ -26,13 +27,9 @@ import {
 import {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
-} from '../../../ingest_manager/common/types/rest_spec';
-import {
-  AgentPolicyStatus,
-  EsAssetReference,
-  InstallationStatus,
-  KibanaAssetReference,
-} from '../../../ingest_manager/common/types/models';
+} from '../../../fleet/common/types/rest_spec';
+import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/types/models';
+import { agentPolicyStatuses } from '../../../fleet/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 
 export type Event = AlertEvent | SafeEndpointEvent;
@@ -59,6 +56,7 @@ interface EventOptions {
   pid?: number;
   parentPid?: number;
   extensions?: object;
+  eventsDataStream?: DataStream;
 }
 
 const Windows: OSFields[] = [
@@ -120,21 +118,29 @@ const APPLIED_POLICIES: Array<{
   name: string;
   id: string;
   status: HostPolicyResponseActionStatus;
+  endpoint_policy_version: number;
+  version: number;
 }> = [
   {
     name: 'Default',
     id: '00000000-0000-0000-0000-000000000000',
     status: HostPolicyResponseActionStatus.success,
+    endpoint_policy_version: 1,
+    version: 3,
   },
   {
     name: 'With Eventing',
     id: 'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
     status: HostPolicyResponseActionStatus.success,
+    endpoint_policy_version: 3,
+    version: 5,
   },
   {
     name: 'Detect Malware Only',
     id: '47d7965d-6869-478b-bd9c-fb0d2bb3959f',
     status: HostPolicyResponseActionStatus.success,
+    endpoint_policy_version: 4,
+    version: 9,
   },
 ];
 
@@ -253,6 +259,8 @@ interface HostInfo {
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        endpoint_policy_version: number;
+        version: number;
       };
     };
   };
@@ -330,6 +338,8 @@ export interface TreeOptions {
   percentTerminated?: number;
   alwaysGenMaxChildrenPerNode?: boolean;
   ancestryArraySize?: number;
+  eventsDataStream?: DataStream;
+  alertsDataStream?: DataStream;
 }
 
 type TreeOptionDefaults = Required<TreeOptions>;
@@ -351,19 +361,51 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
     percentTerminated: options?.percentTerminated ?? 100,
     alwaysGenMaxChildrenPerNode: options?.alwaysGenMaxChildrenPerNode ?? false,
     ancestryArraySize: options?.ancestryArraySize ?? ANCESTRY_LIMIT,
+    eventsDataStream: options?.eventsDataStream ?? eventsDefaultDataStream,
+    alertsDataStream: options?.alertsDataStream ?? alertsDefaultDataStream,
   };
 }
+
+const metadataDefaultDataStream = {
+  type: 'metrics',
+  dataset: 'endpoint.metadata',
+  namespace: 'default',
+};
+
+const policyDefaultDataStream = {
+  type: 'metrics',
+  dataset: 'endpoint.policy',
+  namespace: 'default',
+};
+
+const eventsDefaultDataStream = {
+  type: 'logs',
+  dataset: 'endpoint.events.process',
+  namespace: 'default',
+};
+
+const alertsDefaultDataStream = {
+  type: 'logs',
+  dataset: 'endpoint.alerts',
+  namespace: 'default',
+};
 
 export class EndpointDocGenerator {
   commonInfo: HostInfo;
   random: seedrandom.prng;
   sequence: number = 0;
+  /**
+   * The EndpointDocGenerator parameters
+   *
+   * @param seed either a string to seed the random number generator or a random number generator function
+   */
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
     if (typeof seed === 'string') {
       this.random = seedrandom(seed);
     } else {
       this.random = seed;
     }
+
     this.commonInfo = this.createHostData();
   }
 
@@ -381,6 +423,21 @@ export class EndpointDocGenerator {
   public updateHostPolicyData() {
     this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
     this.commonInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
+  }
+
+  /**
+   * Parses an index and returns the data stream fields extracted from the index.
+   *
+   * @param index the index name to parse into the data stream parts
+   */
+  public static createDataStreamFromIndex(index: string): DataStream {
+    // e.g. logs-endpoint.events.network-default
+    const parts = index.split('-');
+    return {
+      type: parts[0], // logs
+      dataset: parts[1], // endpoint.events.network
+      namespace: parts[2], // default
+    };
   }
 
   private createHostData(): HostInfo {
@@ -417,8 +474,12 @@ export class EndpointDocGenerator {
   /**
    * Creates a host metadata document
    * @param ts - Timestamp to put in the event
+   * @param metadataDataStream the values to populate the data_stream fields when generating metadata documents
    */
-  public generateHostMetadata(ts = new Date().getTime()): HostMetadata {
+  public generateHostMetadata(
+    ts = new Date().getTime(),
+    metadataDataStream = metadataDefaultDataStream
+  ): HostMetadata {
     return {
       '@timestamp': ts,
       event: {
@@ -432,6 +493,7 @@ export class EndpointDocGenerator {
         dataset: 'endpoint.metadata',
       },
       ...this.commonInfo,
+      data_stream: metadataDataStream,
     };
   }
 
@@ -441,15 +503,24 @@ export class EndpointDocGenerator {
    * @param entityID - entityID of the originating process
    * @param parentEntityID - optional entityID of the parent process, if it exists
    * @param ancestry - an array of ancestors for the generated alert
+   * @param alertsDataStream the values to populate the data_stream fields when generating alert documents
    */
-  public generateAlert(
+  public generateAlert({
     ts = new Date().getTime(),
     entityID = this.randomString(10),
-    parentEntityID?: string,
-    ancestry: string[] = []
-  ): AlertEvent {
+    parentEntityID,
+    ancestry = [],
+    alertsDataStream = alertsDefaultDataStream,
+  }: {
+    ts?: number;
+    entityID?: string;
+    parentEntityID?: string;
+    ancestry?: string[];
+    alertsDataStream?: DataStream;
+  } = {}): AlertEvent {
     return {
       ...this.commonInfo,
+      data_stream: alertsDataStream,
       '@timestamp': ts,
       ecs: {
         version: '1.4.0',
@@ -598,6 +669,7 @@ export class EndpointDocGenerator {
         return {};
       })(options.eventCategory);
     return {
+      data_stream: options?.eventsDataStream ?? eventsDefaultDataStream,
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
       agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
@@ -813,6 +885,7 @@ export class EndpointDocGenerator {
     const startDate = new Date().getTime();
     const root = this.generateEvent({
       timestamp: startDate + 1000,
+      eventsDataStream: opts.eventsDataStream,
     });
     events.push(root);
     let ancestor = root;
@@ -824,18 +897,24 @@ export class EndpointDocGenerator {
       secBeforeAlert: number,
       eventList: Event[]
     ) => {
-      for (const relatedAlert of this.relatedAlertsGenerator(node, alertsPerNode, secBeforeAlert)) {
+      for (const relatedAlert of this.relatedAlertsGenerator({
+        node,
+        relatedAlerts: alertsPerNode,
+        alertCreationTime: secBeforeAlert,
+        alertsDataStream: opts.alertsDataStream,
+      })) {
         eventList.push(relatedAlert);
       }
     };
 
     const addRelatedEvents = (node: Event, secBeforeEvent: number, eventList: Event[]) => {
-      for (const relatedEvent of this.relatedEventsGenerator(
+      for (const relatedEvent of this.relatedEventsGenerator({
         node,
-        opts.relatedEvents,
-        secBeforeEvent,
-        opts.relatedEventsOrdered
-      )) {
+        relatedEvents: opts.relatedEvents,
+        processDuration: secBeforeEvent,
+        ordered: opts.relatedEventsOrdered,
+        eventsDataStream: opts.eventsDataStream,
+      })) {
         eventList.push(relatedEvent);
       }
     };
@@ -857,6 +936,7 @@ export class EndpointDocGenerator {
           parentEntityID: parentEntityIDSafeVersion(root),
           eventCategory: ['process'],
           eventType: ['end'],
+          eventsDataStream: opts.eventsDataStream,
         })
       );
     }
@@ -877,6 +957,7 @@ export class EndpointDocGenerator {
         ancestryArrayLimit: opts.ancestryArraySize,
         parentPid: firstNonNullValue(ancestor.process?.pid),
         pid: this.randomN(5000),
+        eventsDataStream: opts.eventsDataStream,
       });
       events.push(ancestor);
       timestamp = timestamp + 1000;
@@ -892,6 +973,7 @@ export class EndpointDocGenerator {
             eventType: ['end'],
             ancestry: ancestryArray(ancestor),
             ancestryArrayLimit: opts.ancestryArraySize,
+            eventsDataStream: opts.eventsDataStream,
           })
         );
       }
@@ -912,12 +994,13 @@ export class EndpointDocGenerator {
     timestamp = timestamp + 1000;
 
     events.push(
-      this.generateAlert(
-        timestamp,
-        entityIDSafeVersion(ancestor),
-        parentEntityIDSafeVersion(ancestor),
-        ancestryArray(ancestor)
-      )
+      this.generateAlert({
+        ts: timestamp,
+        entityID: entityIDSafeVersion(ancestor),
+        parentEntityID: parentEntityIDSafeVersion(ancestor),
+        ancestry: ancestryArray(ancestor),
+        alertsDataStream: opts.alertsDataStream,
+      })
     );
     return events;
   }
@@ -973,6 +1056,7 @@ export class EndpointDocGenerator {
         parentEntityID: currentStateEntityID,
         ancestry,
         ancestryArrayLimit: opts.ancestryArraySize,
+        eventsDataStream: opts.eventsDataStream,
       });
 
       maxChildren = this.randomN(opts.children + 1);
@@ -996,16 +1080,23 @@ export class EndpointDocGenerator {
           eventType: ['end'],
           ancestry,
           ancestryArrayLimit: opts.ancestryArraySize,
+          eventsDataStream: opts.eventsDataStream,
         });
       }
       if (this.randomN(100) < opts.percentWithRelated) {
-        yield* this.relatedEventsGenerator(
-          child,
-          opts.relatedEvents,
+        yield* this.relatedEventsGenerator({
+          node: child,
+          relatedEvents: opts.relatedEvents,
           processDuration,
-          opts.relatedEventsOrdered
-        );
-        yield* this.relatedAlertsGenerator(child, opts.relatedAlerts, processDuration);
+          ordered: opts.relatedEventsOrdered,
+          eventsDataStream: opts.eventsDataStream,
+        });
+        yield* this.relatedAlertsGenerator({
+          node: child,
+          relatedAlerts: opts.relatedAlerts,
+          alertCreationTime: processDuration,
+          alertsDataStream: opts.alertsDataStream,
+        });
       }
     }
   }
@@ -1019,12 +1110,19 @@ export class EndpointDocGenerator {
    * @param ordered - if true the events will have an increasing timestamp, otherwise their timestamp will be random but
    *  guaranteed to be greater than or equal to the originating event
    */
-  public *relatedEventsGenerator(
-    node: Event,
-    relatedEvents: RelatedEventInfo[] | number = 10,
-    processDuration: number = 6 * 3600,
-    ordered: boolean = false
-  ) {
+  public *relatedEventsGenerator({
+    node,
+    relatedEvents = 10,
+    processDuration = 6 * 3600,
+    ordered = false,
+    eventsDataStream = eventsDefaultDataStream,
+  }: {
+    node: Event;
+    relatedEvents?: RelatedEventInfo[] | number;
+    processDuration?: number;
+    ordered?: boolean;
+    eventsDataStream?: DataStream;
+  }) {
     let relatedEventsInfo: RelatedEventInfo[];
     const nodeTimestamp = timestampSafeVersion(node) ?? 0;
     let ts = nodeTimestamp + 1;
@@ -1056,6 +1154,7 @@ export class EndpointDocGenerator {
           eventCategory: eventInfo.category,
           eventType: eventInfo.creationType,
           ancestry: ancestryArray(node),
+          eventsDataStream,
         });
       }
     }
@@ -1067,19 +1166,26 @@ export class EndpointDocGenerator {
    * @param relatedAlerts - number which defines the number of related alerts to create
    * @param alertCreationTime - maximum number of seconds after process event that related alert timestamp can be
    */
-  public *relatedAlertsGenerator(
-    node: Event,
-    relatedAlerts: number = 3,
-    alertCreationTime: number = 6 * 3600
-  ) {
+  public *relatedAlertsGenerator({
+    node,
+    relatedAlerts = 3,
+    alertCreationTime = 6 * 3600,
+    alertsDataStream = alertsDefaultDataStream,
+  }: {
+    node: Event;
+    relatedAlerts: number;
+    alertCreationTime: number;
+    alertsDataStream: DataStream;
+  }) {
     for (let i = 0; i < relatedAlerts; i++) {
       const ts = (timestampSafeVersion(node) ?? 0) + this.randomN(alertCreationTime) * 1000;
-      yield this.generateAlert(
+      yield this.generateAlert({
         ts,
-        entityIDSafeVersion(node),
-        parentEntityIDSafeVersion(node),
-        ancestryArray(node)
-      );
+        entityID: entityIDSafeVersion(node),
+        parentEntityID: parentEntityIDSafeVersion(node),
+        ancestry: ancestryArray(node),
+        alertsDataStream,
+      });
     }
   }
 
@@ -1135,7 +1241,7 @@ export class EndpointDocGenerator {
     return {
       id: this.seededUUIDv4(),
       name: 'Agent Policy',
-      status: AgentPolicyStatus.Active,
+      status: agentPolicyStatuses.Active,
       description: 'Some description',
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
@@ -1167,7 +1273,7 @@ export class EndpointDocGenerator {
           type: 'image/svg+xml',
         },
       ],
-      status: 'installed' as InstallationStatus,
+      status: 'installed',
       savedObject: {
         type: 'epm-packages',
         id: 'endpoint',
@@ -1227,15 +1333,21 @@ export class EndpointDocGenerator {
   /**
    * Generates a Host Policy response message
    */
-  public generatePolicyResponse(
+  public generatePolicyResponse({
     ts = new Date().getTime(),
-    allStatus?: HostPolicyResponseActionStatus
-  ): HostPolicyResponse {
-    const policyVersion = this.seededUUIDv4();
+    allStatus,
+    policyDataStream = policyDefaultDataStream,
+  }: {
+    ts?: number;
+    allStatus?: HostPolicyResponseActionStatus;
+    policyDataStream?: DataStream;
+  } = {}): HostPolicyResponse {
+    const policyVersion = this.randomN(10);
     const status = () => {
       return allStatus || this.randomHostPolicyResponseActionStatus();
     };
     return {
+      data_stream: policyDataStream,
       '@timestamp': ts,
       agent: {
         id: this.commonInfo.agent.id,
@@ -1399,6 +1511,8 @@ export class EndpointDocGenerator {
             status: this.commonInfo.Endpoint.policy.applied.status,
             version: policyVersion,
             name: this.commonInfo.Endpoint.policy.applied.name,
+            endpoint_policy_version: this.commonInfo.Endpoint.policy.applied
+              .endpoint_policy_version,
           },
         },
       },

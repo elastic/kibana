@@ -12,16 +12,6 @@ import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 jest.mock('../../../../common/lib/kibana');
 
 describe('SelectRuleType', () => {
-  // I do this to avoid the messy warning from happening
-  // Warning: React does not recognize the `isVisible` prop on a DOM element.
-  beforeEach(() => {
-    jest.spyOn(console, 'error').mockImplementation(jest.fn());
-  });
-
-  afterEach(() => {
-    jest.spyOn(console, 'error').mockRestore();
-  });
-
   it('renders correctly', () => {
     const Component = () => {
       const field = useFormFieldMock();

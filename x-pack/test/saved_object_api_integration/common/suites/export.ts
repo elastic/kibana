@@ -115,7 +115,7 @@ const getTestTitle = ({ failure, title }: ExportTestCase) =>
 const EMPTY_RESULT = { exportedCount: 0, missingRefCount: 0, missingReferences: [] };
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
+  const expectSavedObjectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody = (testCase: ExportTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
@@ -124,7 +124,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       // In export only, the API uses "bulkGet" or "find" depending on the parameters it receives.
       if (failure.statusCode === 403) {
         // "bulkGet" was unauthorized, which returns a forbidden error
-        await expectForbiddenBulkGet(type)(response);
+        await expectSavedObjectForbiddenBulkGet(type)(response);
       } else if (failure.statusCode === 200) {
         // "find" was unauthorized, which returns an empty result
         expect(response.body).not.to.have.property('error');

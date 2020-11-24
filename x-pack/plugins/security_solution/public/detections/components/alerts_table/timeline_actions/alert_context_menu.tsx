@@ -29,7 +29,7 @@ import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from '../alerts_filter
 import { updateAlertStatusAction } from '../actions';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 import { Ecs } from '../../../../../common/ecs';
-import { AddExceptionModal as AddExceptionModalComponent } from '../../../../common/components/exceptions/add_exception_modal';
+import { AddExceptionModal } from '../../../../common/components/exceptions/add_exception_modal';
 import * as i18nCommon from '../../../../common/translations';
 import * as i18n from '../translations';
 import {
@@ -45,6 +45,7 @@ interface AlertContextMenuProps {
   disabled: boolean;
   ecsRowData: Ecs;
   refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
   timelineId: string;
 }
 
@@ -52,6 +53,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   disabled,
   ecsRowData,
   refetch,
+  onRuleChange,
   timelineId,
 }) => {
   const dispatch = useDispatch();
@@ -201,6 +203,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const openAlertActionComponent = (
     <EuiContextMenuItem
       key="open-alert"
@@ -233,6 +236,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const closeAlertActionComponent = (
     <EuiContextMenuItem
       key="close-alert"
@@ -265,6 +269,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setEventsLoading,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const inProgressAlertActionComponent = (
     <EuiContextMenuItem
       key="in-progress-alert"
@@ -294,6 +299,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal('endpoint');
   }, [closePopover]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const addEndpointExceptionComponent = (
     <EuiContextMenuItem
       key="add-endpoint-exception-menu-item"
@@ -318,6 +324,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     return !isMlRule(ruleType) && !isThresholdRule(ruleType);
   }, [ecsRowData]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const addExceptionComponent = (
     <EuiContextMenuItem
       key="add-exception-menu-item"
@@ -376,7 +383,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         </EventsTdContent>
       </EventsTd>
       {exceptionModalType != null && ruleId != null && ecsRowData != null && (
-        <AddExceptionModalComponent
+        <AddExceptionModal
           ruleName={ruleName}
           ruleId={ruleId}
           ruleIndices={ruleIndices}
@@ -385,6 +392,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
           alertStatus={alertStatus}
+          onRuleChange={onRuleChange}
         />
       )}
     </>

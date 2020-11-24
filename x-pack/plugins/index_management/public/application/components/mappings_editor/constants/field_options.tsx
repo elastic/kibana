@@ -18,6 +18,7 @@ export const TYPE_NOT_ALLOWED_MULTIFIELD: DataType[] = [
   'object',
   'nested',
   'alias',
+  'runtime',
 ];
 
 export const FIELD_TYPES_OPTIONS = Object.entries(MAIN_DATA_TYPE_DEFINITION).map(

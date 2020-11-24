@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
@@ -88,7 +88,7 @@ export class InfraServerPlugin {
   }
 
   async setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       this.config$.subscribe((configValue) => {
         this.config = configValue;
         resolve();
@@ -149,8 +149,11 @@ export class InfraServerPlugin {
     core.http.registerRouteHandlerContext(
       'infra',
       (context, request): InfraRequestHandlerContext => {
-        const mlSystem = plugins.ml?.mlSystemProvider(request);
-        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request);
+        const mlSystem = plugins.ml?.mlSystemProvider(request, context.core.savedObjects.client);
+        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
+          request,
+          context.core.savedObjects.client
+        );
         const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
 
         return {

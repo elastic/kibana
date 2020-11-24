@@ -85,11 +85,8 @@ export class TagCloudVisualization {
   }
 
   async render(data, visParams) {
-    if (data && visParams) {
-      this._updateParams(visParams);
-      this._updateData(data);
-    }
-
+    this._updateParams(visParams);
+    this._updateData(data);
     this._resize();
 
     await this._renderComplete$.pipe(take(1)).toPromise();

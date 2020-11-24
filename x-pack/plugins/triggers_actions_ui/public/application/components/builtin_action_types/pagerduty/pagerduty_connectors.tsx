@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { PagerDutyActionConnector } from '.././types';
+import { useKibana } from '../../../../common/lib/kibana';
 
-const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  PagerDutyActionConnector
->> = ({ errors, action, editActionConfig, editActionSecrets, docLinks, readOnly }) => {
+const PagerDutyActionConnectorFields: React.FunctionComponent<
+  ActionConnectorFieldsProps<PagerDutyActionConnector>
+> = ({ errors, action, editActionConfig, editActionSecrets, readOnly }) => {
+  const { docLinks } = useKibana().services;
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
   return (
@@ -53,7 +55,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
-              defaultMessage="Configure a PagerDuty account."
+              defaultMessage="Configure a PagerDuty account"
             />
           </EuiLink>
         }
@@ -66,26 +68,61 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
           }
         )}
       >
-        <EuiFieldText
-          fullWidth
-          isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
-          name="routingKey"
-          readOnly={readOnly}
-          value={routingKey || ''}
-          data-test-subj="pagerdutyRoutingKeyInput"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editActionSecrets('routingKey', e.target.value);
-          }}
-          onBlur={() => {
-            if (!routingKey) {
-              editActionSecrets('routingKey', '');
-            }
-          }}
-        />
+        <Fragment>
+          {getEncryptedFieldNotifyLabel(!action.id)}
+          <EuiFieldText
+            fullWidth
+            isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
+            name="routingKey"
+            readOnly={readOnly}
+            value={routingKey || ''}
+            data-test-subj="pagerdutyRoutingKeyInput"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              editActionSecrets('routingKey', e.target.value);
+            }}
+            onBlur={() => {
+              if (!routingKey) {
+                editActionSecrets('routingKey', '');
+              }
+            }}
+          />
+        </Fragment>
       </EuiFormRow>
     </Fragment>
   );
 };
+
+function getEncryptedFieldNotifyLabel(isCreate: boolean) {
+  if (isCreate) {
+    return (
+      <Fragment>
+        <EuiSpacer size="s" />
+        <EuiText size="s" data-test-subj="rememberValuesMessage">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.rememberValueLabel"
+            defaultMessage="Remember this value. You must reenter it each time you edit the connector."
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+  }
+  return (
+    <Fragment>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        size="s"
+        iconType="iInCircle"
+        data-test-subj="reenterValuesMessage"
+        title={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.reenterValueLabel',
+          { defaultMessage: 'This key is encrypted. Please reenter a value for this field.' }
+        )}
+      />
+      <EuiSpacer size="m" />
+    </Fragment>
+  );
+}
 
 // eslint-disable-next-line import/no-default-export
 export { PagerDutyActionConnectorFields as default };

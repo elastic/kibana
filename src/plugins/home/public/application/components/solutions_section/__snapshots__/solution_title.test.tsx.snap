@@ -16,7 +16,7 @@ exports[`SolutionTitle renders the title section of the solution panel 1`] = `
       size="l"
     />
     <EuiTitle
-      className="eui-textInheritColor"
+      className="homSolutionPanel__title eui-textInheritColor"
       size="s"
     >
       <h3>

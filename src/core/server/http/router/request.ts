@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Url } from 'url';
+import { URL } from 'url';
 import uuid from 'uuid';
-import { Request, RouteOptionsApp, ApplicationState } from 'hapi';
+import { Request, RouteOptionsApp, RequestApplicationState, RouteOptions } from '@hapi/hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -42,9 +42,10 @@ export interface KibanaRouteOptions extends RouteOptionsApp {
 /**
  * @internal
  */
-export interface KibanaRequestState extends ApplicationState {
+export interface KibanaRequestState extends RequestApplicationState {
   requestId: string;
   requestUuid: string;
+  rewrittenUrl?: URL;
 }
 
 /**
@@ -162,7 +163,7 @@ export class KibanaRequest<
    */
   public readonly uuid: string;
   /** a WHATWG URL standard object. */
-  public readonly url: Url;
+  public readonly url: URL;
   /** matched route details */
   public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
   /**
@@ -186,6 +187,11 @@ export class KibanaRequest<
     isAuthenticated: boolean;
   };
 
+  /**
+   * URL rewritten in onPreRouting request interceptor.
+   */
+  public readonly rewrittenUrl?: URL;
+
   /** @internal */
   protected readonly [requestSymbol]: Request;
 
@@ -199,10 +205,12 @@ export class KibanaRequest<
     private readonly withoutSecretHeaders: boolean
   ) {
     // The `requestId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
-    // KibanaRequest in conjunction with scoped Elaticcsearch and SavedObjectsClient in order to pass credentials.
+    // KibanaRequest in conjunction with scoped Elasticsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
-    this.id = (request.app as KibanaRequestState | undefined)?.requestId ?? uuid.v4();
-    this.uuid = (request.app as KibanaRequestState | undefined)?.requestUuid ?? uuid.v4();
+    const appState = request.app as KibanaRequestState | undefined;
+    this.id = appState?.requestId ?? uuid.v4();
+    this.uuid = appState?.requestUuid ?? uuid.v4();
+    this.rewrittenUrl = appState?.rewrittenUrl;
 
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
@@ -252,8 +260,16 @@ export class KibanaRequest<
     const socketTimeout = (request.raw.req.socket as any)?.timeout;
     const options = ({
       authRequired: this.getAuthRequired(request),
-      // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
-      xsrfRequired: (request.route.settings.app as KibanaRouteOptions)?.xsrfRequired ?? true,
+      // TypeScript note: Casting to `RouterOptions` to fix the following error:
+      //
+      //     Property 'app' does not exist on type 'RouteSettings'
+      //
+      // In @types/hapi__hapi v18, `request.route.settings` is of type
+      // `RouteSettings`, which doesn't have an `app` property. I think this is
+      // a mistake. In v19, the `RouteSettings` interface does have an `app`
+      // property.
+      xsrfRequired:
+        ((request.route.settings as RouteOptions).app as KibanaRouteOptions)?.xsrfRequired ?? true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       tags: request.route.settings.tags || [],
       timeout: {
         payload: payloadTimeout,
@@ -293,11 +309,12 @@ export class KibanaRequest<
       return true;
     }
 
+    // @ts-expect-error According to @types/hapi__hapi, `route.settings` should be of type `RouteSettings`, but it seems that it's actually `RouteOptions` (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
     if (authOptions === false) return false;
     throw new Error(
       `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
-        this.url.href
-      }`
+        this.url.pathname
+      }${this.url.search}`
     );
   }
 }

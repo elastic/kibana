@@ -34,34 +34,6 @@ class MockFieldFormatter {}
 
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
-jest.mock('../../field_mapping', () => {
-  const originalModule = jest.requireActual('../../field_mapping');
-
-  return {
-    ...originalModule,
-    expandShorthand: jest.fn(() => ({
-      id: true,
-      title: true,
-      fieldFormatMap: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => []),
-      },
-      fields: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation((fields) => fields),
-      },
-      sourceFilters: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => undefined),
-      },
-      typeMeta: {
-        _serialize: jest.fn().mockImplementation(() => {}),
-        _deserialize: jest.fn().mockImplementation(() => undefined),
-      },
-    })),
-  };
-});
-
 // helper function to create index patterns
 function create(id: string) {
   const {
@@ -72,7 +44,6 @@ function create(id: string) {
 
   return new IndexPattern({
     spec: { id, type, version, timeFieldName, fields, title },
-    savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
     metaFields: [],
@@ -211,6 +182,38 @@ describe('IndexPattern', () => {
     });
   });
 
+  describe('setFieldFormat and deleteFieldFormaat', () => {
+    test('should persist changes', () => {
+      const formatter = {
+        toJSON: () => ({ id: 'bytes' }),
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+      indexPattern.setFieldFormat('bytes', { id: 'bytes' });
+      expect(indexPattern.toSpec().fieldFormats).toEqual({ bytes: { id: 'bytes' } });
+
+      indexPattern.deleteFieldFormat('bytes');
+      expect(indexPattern.toSpec().fieldFormats).toEqual({});
+    });
+  });
+
+  describe('getFormatterForField', () => {
+    test('should return the default one for empty objects', () => {
+      indexPattern.setFieldFormat('scriptedFieldWithEmptyFormatter', {});
+      expect(
+        indexPattern.getFormatterForField({
+          name: 'scriptedFieldWithEmptyFormatter',
+          type: 'number',
+          esTypes: ['long'],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          convert: expect.any(Function),
+          getConverterFor: expect.any(Function),
+        })
+      );
+    });
+  });
+
   describe('toSpec', () => {
     test('should match snapshot', () => {
       const formatter = {
@@ -228,7 +231,6 @@ describe('IndexPattern', () => {
       const spec = indexPattern.toSpec();
       const restoredPattern = new IndexPattern({
         spec,
-        savedObjectsClient: {} as any,
         fieldFormats: fieldFormatsMock,
         shortDotsEnable: false,
         metaFields: [],
@@ -237,7 +239,6 @@ describe('IndexPattern', () => {
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
-      expect(restoredPattern.fieldFormatMap.bytes instanceof MockFieldFormatter).toEqual(true);
     });
   });
 });

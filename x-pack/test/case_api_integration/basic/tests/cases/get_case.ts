@@ -41,6 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const data = removeServerGeneratedPropertiesFromCase(body);
       expect(data).to.eql(postCaseResp(postedCase.id));
     });
+
     it('unhappy path - 404s when case is not there', async () => {
       await supertest.get(`${CASES_URL}/fake-id`).set('kbn-xsrf', 'true').send().expect(404);
     });

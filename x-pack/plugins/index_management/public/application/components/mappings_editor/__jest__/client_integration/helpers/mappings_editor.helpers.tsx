@@ -7,8 +7,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
+import { registerTestBed, TestBed } from '@kbn/test/jest';
 import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
-import { registerTestBed, TestBed } from '../../../../../../../../../test_utils';
 import { getChildFieldsName } from '../../../lib';
 import { MappingsEditor } from '../../../mappings_editor';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
@@ -358,9 +358,11 @@ export type TestSubjects =
   | 'toggleExpandButton'
   | 'createFieldForm'
   | 'createFieldForm.fieldType'
+  | 'createFieldForm.fieldSubType'
   | 'createFieldForm.addButton'
   | 'mappingsEditorFieldEdit'
   | 'mappingsEditorFieldEdit.fieldType'
+  | 'mappingsEditorFieldEdit.fieldSubType'
   | 'mappingsEditorFieldEdit.editFieldUpdateButton'
   | 'mappingsEditorFieldEdit.flyoutTitle'
   | 'mappingsEditorFieldEdit.documentationLink'
@@ -383,4 +385,7 @@ export type TestSubjects =
   | 'searchQuoteAnalyzer-custom.input'
   | 'useSameAnalyzerForSearchCheckBox.input'
   | 'metaParameterEditor'
+  | 'scalingFactor.input'
+  | 'formatParameter'
+  | 'formatParameter.formatInput'
   | string;

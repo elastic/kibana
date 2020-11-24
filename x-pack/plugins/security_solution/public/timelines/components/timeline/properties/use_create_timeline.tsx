@@ -93,15 +93,28 @@ export const useCreateTimelineButton = ({
   }, [createTimeline, timelineId, timelineType, closeGearMenu]);
 
   const getButton = useCallback(
-    ({ outline, title }: { outline?: boolean; title?: string }) => {
+    ({
+      outline,
+      title,
+      iconType = 'plusInCircle',
+      fill = true,
+      isDisabled = false,
+    }: {
+      outline?: boolean;
+      title?: string;
+      iconType?: string;
+      fill?: boolean;
+      isDisabled?: boolean;
+    }) => {
       const buttonProps = {
-        iconType: 'plusInCircle',
+        iconType,
         onClick: handleButtonClick,
+        fill,
       };
       const dataTestSubjPrefix =
         timelineType === TimelineType.template ? `template-timeline-new` : `timeline-new`;
       return outline ? (
-        <EuiButton data-test-subj={`${dataTestSubjPrefix}-with-border`} {...buttonProps} fill>
+        <EuiButton data-test-subj={`${dataTestSubjPrefix}-with-border`} {...buttonProps}>
           {title}
         </EuiButton>
       ) : (

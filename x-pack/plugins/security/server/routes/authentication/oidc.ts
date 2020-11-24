@@ -135,7 +135,7 @@ export function defineOIDCRoutes({
           loginAttempt = {
             type: OIDCLogin.LoginWithAuthorizationCodeFlow,
             //  We pass the path only as we can't be sure of the full URL and Elasticsearch doesn't need it anyway.
-            authenticationResponseURI: request.url.path!,
+            authenticationResponseURI: request.url.pathname + request.url.search,
           };
         } else if (request.query.iss) {
           logger.warn(

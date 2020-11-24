@@ -22,21 +22,18 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
-import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../../shared/telemetry';
-
 import { AppLogic } from '../../../app_logic';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { ContentSection } from '../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { Loading } from '../../../components/shared/loading';
+import { Loading } from '../../../../shared/loading';
 import { SourcesTable } from '../../../components/shared/sources_table';
 
 import { GroupUsersTable } from './group_users_table';
 
 import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
-const EMPTY_SOURCES_DESCRIPTION = i18n.translate(
+export const EMPTY_SOURCES_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.emptySourcesDescription',
   {
     defaultMessage: 'No content sources are shared with this group.',
@@ -48,7 +45,7 @@ const GROUP_USERS_DESCRIPTION = i18n.translate(
     defaultMessage: 'Members will be able to search over the group’s sources.',
   }
 );
-const EMPTY_USERS_DESCRIPTION = i18n.translate(
+export const EMPTY_USERS_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.emptyUsersDescription',
   {
     defaultMessage: 'There are no users in this group.',
@@ -183,6 +180,7 @@ export const GroupOverview: React.FC = () => {
       title="Group content sources"
       description={hasContentSources ? GROUP_SOURCES_DESCRIPTION : EMPTY_SOURCES_DESCRIPTION}
       action={manageSourcesButton}
+      data-test-subj="GroupContentSourcesSection"
     >
       {hasContentSources && sourcesTable}
     </ContentSection>
@@ -193,6 +191,7 @@ export const GroupOverview: React.FC = () => {
       title="Group users"
       description={hasUsers ? GROUP_USERS_DESCRIPTION : EMPTY_USERS_DESCRIPTION}
       action={manageUsersButton}
+      data-test-subj="GroupUsersSection"
     >
       {hasUsers && <GroupUsersTable />}
     </ContentSection>
@@ -260,9 +259,6 @@ export const GroupOverview: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome trail={['Group Overview']} />
-      <SendTelemetry action="viewed" metric="group_overview" />
-
       <ViewContentHeader title={truncatedName} />
       <EuiSpacer />
       {sourcesSection}

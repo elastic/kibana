@@ -58,6 +58,10 @@ export type TypeAliasWithRecord = Usage & Record<string, number>;
 
 export type MappedTypeProps = 'prop1' | 'prop2';
 
+export type MappedTypeExtraProps = 'prop3' | 'prop4';
+
+export type MappedTypeAllProps = MappedTypeProps | MappedTypeExtraProps;
+
 export interface MappedTypes {
   mappedTypeWithExternallyDefinedProps: {
     [key in MappedTypeProps]: number;
@@ -68,5 +72,6 @@ export interface MappedTypes {
 }
 
 export type RecordWithKnownProps = Record<MappedTypeProps, number>;
+export type RecordWithKnownAllProps = Record<MappedTypeAllProps, number>;
 
 export type IndexedAccessType = Pick<WithUnion, 'prop1' | 'prop2'>;

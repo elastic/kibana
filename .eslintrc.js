@@ -447,6 +447,7 @@ module.exports = {
           {
             devDependencies: false,
             peerDependencies: true,
+            packageDir: '.',
           },
         ],
       },
@@ -478,6 +479,7 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
+            packageDir: '.',
           },
         ],
       },
@@ -638,6 +640,10 @@ module.exports = {
                 name: 'lodash/fp/assocPath',
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
+              {
+                name: 'react-use',
+                message: 'Please use react-use/lib/{method} instead.',
+              },
             ],
           },
         ],
@@ -729,22 +735,6 @@ module.exports = {
         ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
-      },
-    },
-
-    /**
-     * ML overrides
-     */
-    {
-      files: ['x-pack/plugins/ml/**/*.js'],
-      rules: {
-        'no-shadow': 'error',
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: './x-pack',
-          },
-        ],
       },
     },
 
@@ -873,7 +863,8 @@ module.exports = {
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
         'no-this-before-super': 'error',
-        'no-undef': 'error',
+        // rely on typescript
+        'no-undef': 'off',
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
         'no-useless-call': 'error',
@@ -1008,7 +999,8 @@ module.exports = {
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
         'no-this-before-super': 'error',
-        'no-undef': 'error',
+        // rely on typescript
+        'no-undef': 'off',
         'no-unreachable': 'error',
         'no-unsafe-finally': 'error',
         'no-useless-call': 'error',
@@ -1045,10 +1037,15 @@ module.exports = {
      * Alerting Services overrides
      */
     {
-      // typescript only for front and back end
-      files: [
-        'x-pack/plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
-      ],
+      // typescript for front and back end
+      files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
+      },
+    },
+    {
+      // typescript only for back end
+      files: ['x-pack/plugins/triggers_actions_ui/server/**/*.ts'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1151,14 +1148,9 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
+            packageDir: '.',
           },
         ],
-      },
-    },
-    {
-      files: ['x-pack/plugins/canvas/storybook/**'],
-      rules: {
-        'import/no-extraneous-dependencies': 0,
       },
     },
     {
@@ -1180,13 +1172,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
-      env: {
-        jquery: true,
-      },
-    },
-    {
-      files: ['x-pack/plugins/monitoring/public/lib/jquery_flot/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1241,6 +1227,22 @@ module.exports = {
           'error',
           {
             patterns: ['lodash/*', '!lodash/fp'],
+          },
+        ],
+      },
+    },
+
+    /**
+     * Single package.json rules, it tells eslint to ignore the child package.json files
+     * and look for dependencies declarations in the single and root level package.json
+     */
+    {
+      files: ['**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: '.',
           },
         ],
       },

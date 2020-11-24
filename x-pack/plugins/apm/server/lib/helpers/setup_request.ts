@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { Logger } from 'kibana/server';
-import { isActivePlatinumLicense } from '../../../common/service_map';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { KibanaRequest } from '../../../../../../src/core/server';
+import moment from 'moment';
 import { APMConfig } from '../..';
-import {
-  getApmIndices,
-  ApmIndicesConfig,
-} from '../settings/apm_indices/get_apm_indices';
-import { ESFilter } from '../../../typings/elasticsearch';
-import { getEsFilter } from './convert_ui_filters/get_es_filter';
+import { KibanaRequest } from '../../../../../../src/core/server';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { ESFilter } from '../../../../../typings/elasticsearch';
+import { isActivePlatinumLicense } from '../../../common/service_map';
+import { UIFilters } from '../../../typings/ui_filters';
 import { APMRequestHandlerContext } from '../../routes/typings';
-import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  ApmIndicesConfig,
+  getApmIndices,
+} from '../settings/apm_indices/get_apm_indices';
+import { getEsFilter } from './convert_ui_filters/get_es_filter';
 import {
   APMEventClient,
   createApmEventClient,
@@ -26,7 +26,6 @@ import {
   APMInternalClient,
   createInternalESClient,
 } from './create_es_client/create_internal_es_client';
-import { UIFilters } from '../../../typings/ui_filters';
 
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
@@ -49,10 +48,17 @@ export interface SetupTimeRange {
 interface SetupRequestParams {
   query?: {
     _debug?: boolean;
+
+    /**
+     * Timestamp in ms since epoch
+     */
     start?: string;
+
+    /**
+     * Timestamp in ms since epoch
+     */
     end?: string;
     uiFilters?: string;
-    processorEvent?: ProcessorEvent;
   };
 }
 
@@ -80,7 +86,8 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   const coreSetupRequest = {
     indices,
     apmEventClient: createApmEventClient({
-      context,
+      esClient: context.core.elasticsearch.legacy.client,
+      debug: context.params.query._debug,
       request,
       indices,
       options: { includeFrozen },
@@ -115,8 +122,8 @@ function getMlSetup(
   request: KibanaRequest
 ) {
   return {
-    mlSystem: ml.mlSystemProvider(request),
-    anomalyDetectors: ml.anomalyDetectorsProvider(request),
+    mlSystem: ml.mlSystemProvider(request, savedObjectsClient),
+    anomalyDetectors: ml.anomalyDetectorsProvider(request, savedObjectsClient),
     modules: ml.modulesProvider(request, savedObjectsClient),
   };
 }

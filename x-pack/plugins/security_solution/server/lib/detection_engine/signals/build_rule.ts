@@ -102,7 +102,7 @@ export const buildRule = ({
     created_by: createdBy,
     updated_by: updatedBy,
     threat: ruleParams.threat ?? [],
-    timestamp_override: ruleParams.timestampOverride, // TODO: Timestamp Override via timestamp_override
+    timestamp_override: ruleParams.timestampOverride,
     throttle,
     version: ruleParams.version,
     created_at: createdAt,
@@ -155,7 +155,7 @@ export const buildRuleWithoutOverrides = (
     created_by: ruleSO.attributes.createdBy,
     updated_by: ruleSO.attributes.updatedBy,
     threat: ruleParams.threat ?? [],
-    timestamp_override: ruleParams.timestampOverride, // TODO: Timestamp Override via timestamp_override
+    timestamp_override: ruleParams.timestampOverride,
     throttle: ruleSO.attributes.throttle,
     version: ruleParams.version,
     created_at: ruleSO.attributes.createdAt,

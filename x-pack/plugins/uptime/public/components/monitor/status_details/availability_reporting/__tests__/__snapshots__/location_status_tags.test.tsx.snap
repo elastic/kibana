@@ -1034,7 +1034,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               disabled=""
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowLeft"
@@ -1097,7 +1097,7 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
               href="#generated-id"
               rel="noreferrer"
             >
-              <div
+              <span
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowRight"

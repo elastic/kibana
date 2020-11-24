@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class Executor<Context extends Record<string, unknown> = Record<string, unknown>> 
+export declare class Executor<Context extends Record<string, unknown> = Record<string, unknown>> implements PersistableStateService<ExpressionAstExpression> 
 ```
 
 ## Constructors
@@ -29,15 +29,19 @@ export declare class Executor<Context extends Record<string, unknown> = Record<s
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [createExecution(ast, context, { debug })](./kibana-plugin-plugins-expressions-server.executor.createexecution.md) |  |  |
+|  [createExecution(ast, params)](./kibana-plugin-plugins-expressions-server.executor.createexecution.md) |  |  |
 |  [createWithDefaults(state)](./kibana-plugin-plugins-expressions-server.executor.createwithdefaults.md) | <code>static</code> |  |
 |  [extendContext(extraContext)](./kibana-plugin-plugins-expressions-server.executor.extendcontext.md) |  |  |
+|  [extract(ast)](./kibana-plugin-plugins-expressions-server.executor.extract.md) |  |  |
 |  [fork()](./kibana-plugin-plugins-expressions-server.executor.fork.md) |  |  |
 |  [getFunction(name)](./kibana-plugin-plugins-expressions-server.executor.getfunction.md) |  |  |
 |  [getFunctions()](./kibana-plugin-plugins-expressions-server.executor.getfunctions.md) |  |  |
 |  [getType(name)](./kibana-plugin-plugins-expressions-server.executor.gettype.md) |  |  |
 |  [getTypes()](./kibana-plugin-plugins-expressions-server.executor.gettypes.md) |  |  |
+|  [inject(ast, references)](./kibana-plugin-plugins-expressions-server.executor.inject.md) |  |  |
+|  [migrate(ast, version)](./kibana-plugin-plugins-expressions-server.executor.migrate.md) |  |  |
 |  [registerFunction(functionDefinition)](./kibana-plugin-plugins-expressions-server.executor.registerfunction.md) |  |  |
 |  [registerType(typeDefinition)](./kibana-plugin-plugins-expressions-server.executor.registertype.md) |  |  |
-|  [run(ast, input, context)](./kibana-plugin-plugins-expressions-server.executor.run.md) |  | Execute expression and return result. |
+|  [run(ast, input, params)](./kibana-plugin-plugins-expressions-server.executor.run.md) |  | Execute expression and return result. |
+|  [telemetry(ast, telemetryData)](./kibana-plugin-plugins-expressions-server.executor.telemetry.md) |  |  |
 

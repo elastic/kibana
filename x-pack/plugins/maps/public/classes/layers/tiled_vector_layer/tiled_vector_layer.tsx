@@ -182,7 +182,10 @@ export class TiledVectorLayer extends VectorLayer {
     const layerIds = this.getMbLayerIds();
     for (let i = 0; i < layerIds.length; i++) {
       const mbLayer = mbMap.getLayer(layerIds[i]);
-      if (mbLayer && mbLayer['source-layer'] !== tiledSourceMeta.layerName) {
+      // The mapbox type in the spec is specified with `source-layer`
+      // but the programmable JS-object uses camelcase `sourceLayer`
+      // @ts-expect-error
+      if (mbLayer && mbLayer.sourceLayer !== tiledSourceMeta.layerName) {
         // If the source-pointer of one of the layers is stale, they will all be stale.
         // In this case, all the mb-layers need to be removed and re-added.
         return true;

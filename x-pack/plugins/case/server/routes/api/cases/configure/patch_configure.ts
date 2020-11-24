@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -17,6 +17,10 @@ import {
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import {
+  transformCaseConnectorToEsConnector,
+  transformESConnectorToCaseConnector,
+} from '../helpers';
 
 export function initPatchCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.patch(
@@ -35,8 +39,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
         );
 
         const myCaseConfigure = await caseConfigureService.find({ client });
-        const { version, ...queryWithoutVersion } = query;
-
+        const { version, connector, ...queryWithoutVersion } = query;
         if (myCaseConfigure.saved_objects.length === 0) {
           throw Boom.conflict(
             'You can not patch this configuration since you did not created first with a post.'
@@ -58,6 +61,9 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           caseConfigureId: myCaseConfigure.saved_objects[0].id,
           updatedAttributes: {
             ...queryWithoutVersion,
+            ...(connector != null
+              ? { connector: transformCaseConnectorToEsConnector(connector) }
+              : {}),
             updated_at: updateDate,
             updated_by: { email, full_name, username },
           },
@@ -67,6 +73,9 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           body: CaseConfigureResponseRt.encode({
             ...myCaseConfigure.saved_objects[0].attributes,
             ...patch.attributes,
+            connector: transformESConnectorToCaseConnector(
+              patch.attributes.connector ?? myCaseConfigure.saved_objects[0].attributes.connector
+            ),
             version: patch.version ?? '',
           }),
         });

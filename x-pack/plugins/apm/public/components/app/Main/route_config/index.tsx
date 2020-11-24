@@ -13,8 +13,8 @@ import { APMRouteDefinition } from '../../../../application/routes';
 import { toQuery } from '../../../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../../ErrorGroupDetails';
 import { Home } from '../../Home';
-import { ServiceDetails } from '../../ServiceDetails';
-import { ServiceNodeMetrics } from '../../ServiceNodeMetrics';
+import { ServiceDetails } from '../../service_details';
+import { ServiceNodeMetrics } from '../../service_node_metrics';
 import { Settings } from '../../Settings';
 import { AgentConfigurations } from '../../Settings/AgentConfigurations';
 import { AnomalyDetection } from '../../Settings/anomaly_detection';
@@ -90,6 +90,12 @@ function ServiceDetailsNodes(
   props: RouteComponentProps<{ serviceName: string }>
 ) {
   return <ServiceDetails {...props} tab="nodes" />;
+}
+
+function ServiceDetailsOverview(
+  props: RouteComponentProps<{ serviceName: string }>
+) {
+  return <ServiceDetails {...props} tab="overview" />;
 }
 
 function ServiceDetailsServiceMap(
@@ -214,6 +220,14 @@ export const routes: APMRouteDefinition[] = [
       renderAsRedirectTo(
         `/services/${props.match.params.serviceName}/transactions`
       )(props),
+  } as APMRouteDefinition<{ serviceName: string }>,
+  {
+    exact: true,
+    path: '/services/:serviceName/overview',
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.overviewTitle', {
+      defaultMessage: 'Overview',
+    }),
+    component: ServiceDetailsOverview,
   } as APMRouteDefinition<{ serviceName: string }>,
   // errors
   {

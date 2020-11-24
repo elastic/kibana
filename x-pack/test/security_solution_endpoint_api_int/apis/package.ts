@@ -74,7 +74,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('handles events without the `network.protocol` field being defined', async () => {
-        const eventWithoutNetworkObject = generator.generateEvent();
+        const eventWithoutNetworkObject = generator.generateEvent({
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(networkIndex),
+        });
         // ensure that `network.protocol` does not exist in the event to test that the pipeline handles those type of events
         delete eventWithoutNetworkObject.network;
 
@@ -137,8 +139,10 @@ export default function ({ getService }: FtrProviderContext) {
       let genData: InsertedEvents;
 
       before(async () => {
-        event = generator.generateEvent();
-        genData = await resolver.insertEvents([event]);
+        event = generator.generateEvent({
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
+        genData = await resolver.insertEvents([event], processEventsIndex);
       });
 
       after(async () => {
@@ -158,20 +162,29 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // 46.239.193.5 should be in Iceland
         // 8.8.8.8 should be in the US
-        const eventWithBothIPs = generator.generateEvent({
+        const eventWithBothIPsNetwork = generator.generateEvent({
           extensions: { source: { ip: '8.8.8.8' }, destination: { ip: '46.239.193.5' } },
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(networkIndex),
         });
 
-        const eventWithSourceOnly = generator.generateEvent({
+        const eventWithSourceOnlyNetwork = generator.generateEvent({
           extensions: { source: { ip: '8.8.8.8' } },
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(networkIndex),
         });
 
         networkIndexData = await resolver.insertEvents(
-          [eventWithBothIPs, eventWithSourceOnly],
+          [eventWithBothIPsNetwork, eventWithSourceOnlyNetwork],
           networkIndex
         );
 
-        processIndexData = await resolver.insertEvents([eventWithBothIPs], processEventsIndex);
+        const eventWithBothIPsProcess = generator.generateEvent({
+          extensions: { source: { ip: '8.8.8.8' }, destination: { ip: '46.239.193.5' } },
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
+        processIndexData = await resolver.insertEvents(
+          [eventWithBothIPsProcess],
+          processEventsIndex
+        );
       });
 
       after(async () => {

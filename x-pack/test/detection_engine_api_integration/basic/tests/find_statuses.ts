@@ -14,7 +14,8 @@ import {
   deleteSignalsIndex,
   deleteAllRulesStatuses,
   getSimpleRule,
-  waitFor,
+  createRule,
+  waitForRuleSuccess,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -29,7 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
-      await deleteAllAlerts(es);
+      await deleteAllAlerts(supertest);
       await deleteAllRulesStatuses(es);
     });
 
@@ -44,25 +45,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a single rule status when a single rule is loaded from a find status with defaults added', async () => {
-      // add a single rule
-      const { body: resBody } = await supertest
-        .post(DETECTION_ENGINE_RULES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getSimpleRule())
-        .expect(200);
+      const resBody = await createRule(supertest, getSimpleRule('rule-1', true));
 
-      // wait for Task Manager to execute the rule and update status
-      await waitFor(async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [resBody.id] })
-          .expect(200);
-        return (
-          body[resBody.id].current_status?.status === 'succeeded' ||
-          body[resBody.id].current_status?.status === 'going to run'
-        );
-      });
+      await waitForRuleSuccess(supertest, resBody.id);
 
       // query the single rule from _find
       const { body } = await supertest

@@ -49,6 +49,7 @@ import {
   setOverlays,
   setSavedSearchLoader,
   setEmbeddable,
+  setDocLinks,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -78,6 +79,7 @@ import {
 } from './saved_visualizations/_saved_vis';
 import { createSavedSearchesLoader } from '../../discover/public';
 import { DashboardStart } from '../../dashboard/public';
+import { SavedObjectsStart } from '../../saved_objects/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -112,7 +114,8 @@ export interface VisualizationsStartDeps {
   uiActions: UiActionsStart;
   application: ApplicationStart;
   dashboard: DashboardStart;
-  getAttributeService: DashboardStart['getAttributeService'];
+  getAttributeService: EmbeddableStart['getAttributeService'];
+  savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
 }
 
@@ -160,7 +163,7 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable, dashboard }: VisualizationsStartDeps
+    { data, expressions, uiActions, embeddable, dashboard, savedObjects }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
@@ -170,6 +173,7 @@ export class VisualizationsPlugin
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
     setSavedObjects(core.savedObjects);
+    setDocLinks(core.docLinks);
     setIndexPatterns(data.indexPatterns);
     setSearch(data.search);
     setFilterManager(data.query.filterManager);
@@ -182,18 +186,13 @@ export class VisualizationsPlugin
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome: core.chrome,
-      overlays: core.overlays,
+      savedObjects,
       visualizationTypes: types,
     });
     setSavedVisualizationsLoader(savedVisualizationsLoader);
     const savedSearchLoader = createSavedSearchesLoader({
       savedObjectsClient: core.savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome: core.chrome,
-      overlays: core.overlays,
+      savedObjects,
     });
     setSavedSearchLoader(savedSearchLoader);
     return {

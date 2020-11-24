@@ -1,0 +1,15 @@
+title: PackagePolicy
+allOf:
+  - type: object
+    properties:
+      id:
+        type: string
+      revision:
+        type: number
+      inputs:
+        type: array
+        items: {}
+    required:
+      - id
+      - revision
+  - $ref: ./new_package_policy.yaml

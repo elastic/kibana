@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type AlertStatusValues = 'OK' | 'Active' | 'Error';
-type AlertInstanceStatusValues = 'OK' | 'Active';
+export type AlertStatusValues = 'OK' | 'Active' | 'Error';
+export type AlertInstanceStatusValues = 'OK' | 'Active';
 
 export interface AlertInstanceSummary {
   id: string;
@@ -27,5 +27,6 @@ export interface AlertInstanceSummary {
 export interface AlertInstanceStatus {
   status: AlertInstanceStatusValues;
   muted: boolean;
+  actionGroupId?: string;
   activeStartDate?: string;
 }

@@ -7,52 +7,17 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
-import { Alert, ActionType, ValidationResult } from '../../../../types';
-import {
-  EuiTitle,
-  EuiBadge,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiBetaBadge,
-  EuiButtonEmpty,
-  EuiText,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { Alert, ActionType, AlertTypeModel } from '../../../../types';
+import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { ViewInApp } from './view_in_app';
-import { PLUGIN } from '../../../constants/plugin';
-import { coreMock } from 'src/core/public/mocks';
-import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import {
+  AlertExecutionStatusErrorReasons,
+  ALERTS_FEATURE_ID,
+} from '../../../../../../alerts/common';
+import { useKibana } from '../../../../common/lib/kibana';
+import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
 
-const mockes = coreMock.createSetup();
-
-jest.mock('../../../app_context', () => ({
-  useAppDependencies: jest.fn(() => ({
-    http: jest.fn(),
-    capabilities: {
-      get: jest.fn(() => ({})),
-    },
-    actionTypeRegistry: jest.fn(),
-    alertTypeRegistry: {
-      has: jest.fn().mockReturnValue(true),
-      register: jest.fn(),
-      get: jest.fn().mockReturnValue({
-        id: 'my-alert-type',
-        iconClass: 'test',
-        name: 'test-alert',
-        validate: (): ValidationResult => {
-          return { errors: {} };
-        },
-        requiresAppContext: false,
-      }),
-      list: jest.fn(),
-    },
-    toastNotifications: mockes.notifications.toasts,
-    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
-    uiSettings: mockes.uiSettings,
-    dataPlugin: jest.fn(),
-    charts: jest.fn(),
-  })),
-}));
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -68,6 +33,8 @@ jest.mock('../../../lib/capabilities', () => ({
   hasSaveAlertsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
 }));
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const alertTypeRegistry = alertTypeRegistryMock.create();
 
 const mockAlertApis = {
   muteAlert: jest.fn(),
@@ -104,20 +71,6 @@ describe('alert_details', () => {
         <EuiTitle size="m">
           <h1>
             <span>{alert.name}</span>
-            &emsp;
-            <EuiBetaBadge
-              label="Beta"
-              tooltipContent={i18n.translate(
-                'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
-                {
-                  defaultMessage:
-                    '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                  values: {
-                    pluginName: PLUGIN.getI18nName(i18n),
-                  },
-                }
-              )}
-            />
           </h1>
         </EuiTitle>
       )
@@ -149,7 +102,7 @@ describe('alert_details', () => {
         status: 'error',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: 'unknown',
+          reason: AlertExecutionStatusErrorReasons.Unknown,
           message: 'test',
         },
       },
@@ -652,6 +605,21 @@ describe('edit button', () => {
       minimumLicenseRequired: 'basic',
     },
   ];
+  alertTypeRegistry.has.mockReturnValue(true);
+  const alertTypeR = ({
+    id: 'my-alert-type',
+    iconClass: 'test',
+    name: 'test-alert',
+    description: 'Alert when testing',
+    documentationUrl: 'https://localhost.local/docs',
+    validate: () => {
+      return { errors: {} };
+    },
+    alertParamsExpression: () => {},
+    requiresAppContext: false,
+  } as unknown) as AlertTypeModel;
+  alertTypeRegistry.get.mockReturnValue(alertTypeR);
+  useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
   it('should render an edit button when alert and actions are editable', () => {
     const alert = mockAlert({
@@ -735,7 +703,7 @@ describe('edit button', () => {
     ).toBeFalsy();
   });
 
-  it('should render an edit button when alert editable but actions arent when there are no actions on the alert', () => {
+  it('should render an edit button when alert editable but actions arent when there are no actions on the alert', async () => {
     const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
     hasExecuteActionsCapability.mockReturnValue(false);
     const alert = mockAlert({

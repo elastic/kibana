@@ -5,7 +5,7 @@
  */
 
 import './expression.scss';
-
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
@@ -17,6 +17,8 @@ import { MetricConfig } from './types';
 import { FormatFactory, LensMultiTable } from '../types';
 import { AutoScale } from './auto_scale';
 import { VisualizationContainer } from '../visualization_container';
+import { EmptyPlaceholder } from '../shared_components';
+import { LensIconChartMetric } from '../assets/chart_metric';
 
 export interface MetricChartProps {
   data: LensMultiTable;
@@ -91,7 +93,9 @@ export const getMetricChartRenderer = (
   ) => {
     const resolvedFormatFactory = await formatFactory;
     ReactDOM.render(
-      <MetricChart {...config} formatFactory={resolvedFormatFactory} />,
+      <I18nProvider>
+        <MetricChart {...config} formatFactory={resolvedFormatFactory} />
+      </I18nProvider>,
       domNode,
       () => {
         handlers.done();
@@ -107,7 +111,6 @@ export function MetricChart({
   formatFactory,
 }: MetricChartProps & { formatFactory: FormatFactory }) {
   const { metricTitle, title, description, accessor, mode } = args;
-  let value = '-';
   const firstTable = Object.values(data.tables)[0];
   if (!accessor) {
     return (
@@ -119,16 +122,25 @@ export function MetricChart({
     );
   }
 
-  if (firstTable) {
-    const column = firstTable.columns[0];
-    const row = firstTable.rows[0];
-    if (row[accessor]) {
-      value =
-        column && column.formatHint
-          ? formatFactory(column.formatHint).convert(row[accessor])
-          : Number(Number(row[accessor]).toFixed(3)).toString();
-    }
+  if (!firstTable) {
+    return <EmptyPlaceholder icon={LensIconChartMetric} />;
   }
+
+  const column = firstTable.columns[0];
+  const row = firstTable.rows[0];
+
+  // NOTE: Cardinality and Sum never receives "null" as value, but always 0, even for empty dataset.
+  // Mind falsy values here as 0!
+  const shouldShowResults = row[accessor] != null;
+
+  if (!shouldShowResults) {
+    return <EmptyPlaceholder icon={LensIconChartMetric} />;
+  }
+
+  const value =
+    column && column.meta?.params
+      ? formatFactory(column.meta?.params).convert(row[accessor])
+      : Number(Number(row[accessor]).toFixed(3)).toString();
 
   return (
     <VisualizationContainer

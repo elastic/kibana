@@ -57,6 +57,8 @@ import {
   SavedObjectsAddToNamespacesResponse,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsDeleteFromNamespacesResponse,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsRemoveReferencesToResponse,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -230,19 +232,19 @@ export class SavedObjectsRepository {
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
       originId,
-      namespaces,
+      initialNamespaces,
       version,
     } = options;
     const namespace = normalizeNamespace(options.namespace);
 
-    if (namespaces) {
+    if (initialNamespaces) {
       if (!this._registry.isMultiNamespace(type)) {
         throw SavedObjectsErrorHelpers.createBadRequestError(
-          '"options.namespaces" can only be used on multi-namespace types'
+          '"options.initialNamespaces" can only be used on multi-namespace types'
         );
-      } else if (!namespaces.length) {
+      } else if (!initialNamespaces.length) {
         throw SavedObjectsErrorHelpers.createBadRequestError(
-          '"options.namespaces" must be a non-empty array of strings'
+          '"options.initialNamespaces" must be a non-empty array of strings'
         );
       }
     }
@@ -262,9 +264,9 @@ export class SavedObjectsRepository {
         // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
         // note: this check throws an error if the object is found but does not exist in this namespace
         const existingNamespaces = await this.preflightGetNamespaces(type, id, namespace);
-        savedObjectNamespaces = namespaces || existingNamespaces;
+        savedObjectNamespaces = initialNamespaces || existingNamespaces;
       } else {
-        savedObjectNamespaces = namespaces || getSavedObjectNamespaces(namespace);
+        savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
       }
     }
 
@@ -323,14 +325,14 @@ export class SavedObjectsRepository {
       let error: DecoratedError | undefined;
       if (!this._allowedTypes.includes(object.type)) {
         error = SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type);
-      } else if (object.namespaces) {
+      } else if (object.initialNamespaces) {
         if (!this._registry.isMultiNamespace(object.type)) {
           error = SavedObjectsErrorHelpers.createBadRequestError(
-            '"namespaces" can only be used on multi-namespace types'
+            '"initialNamespaces" can only be used on multi-namespace types'
           );
-        } else if (!object.namespaces.length) {
+        } else if (!object.initialNamespaces.length) {
           error = SavedObjectsErrorHelpers.createBadRequestError(
-            '"namespaces" must be a non-empty array of strings'
+            '"initialNamespaces" must be a non-empty array of strings'
           );
         }
       }
@@ -388,7 +390,7 @@ export class SavedObjectsRepository {
       let versionProperties;
       const {
         esRequestIndex,
-        object: { namespaces, version, ...object },
+        object: { initialNamespaces, version, ...object },
         method,
       } = expectedBulkGetResult.value;
       if (esRequestIndex !== undefined) {
@@ -410,13 +412,13 @@ export class SavedObjectsRepository {
           };
         }
         savedObjectNamespaces =
-          namespaces || getSavedObjectNamespaces(namespace, docFound && actualResult);
+          initialNamespaces || getSavedObjectNamespaces(namespace, docFound && actualResult);
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = namespace;
         } else if (this._registry.isMultiNamespace(object.type)) {
-          savedObjectNamespaces = namespaces || getSavedObjectNamespaces(namespace);
+          savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
         }
         versionProperties = getExpectedVersionProperties(version);
       }
@@ -708,6 +710,7 @@ export class SavedObjectsRepository {
       searchFields,
       rootSearchFields,
       hasReference,
+      hasReferenceOperator,
       page = FIND_DEFAULT_PAGE,
       perPage = FIND_DEFAULT_PER_PAGE,
       sortField,
@@ -790,6 +793,7 @@ export class SavedObjectsRepository {
           namespaces,
           typeToNamespacesMap,
           hasReference,
+          hasReferenceOperator,
           kueryNode,
         }),
       },
@@ -1442,6 +1446,71 @@ export class SavedObjectsRepository {
           references,
         };
       }),
+    };
+  }
+
+  /**
+   * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
+   *
+   * @remarks Will throw a conflict error if the `update_by_query` operation returns any failure. In that case
+   *          some references might have been removed, and some were not. It is the caller's responsibility
+   *          to handle and fix this situation if it was to happen.
+   */
+  async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ): Promise<SavedObjectsRemoveReferencesToResponse> {
+    const { namespace, refresh = true } = options;
+    const allTypes = this._registry.getAllTypes().map((t) => t.name);
+
+    // we need to target all SO indices as all types of objects may have references to the given SO.
+    const targetIndices = this.getIndicesForTypes(allTypes);
+
+    const { body } = await this.client.updateByQuery(
+      {
+        index: targetIndices,
+        refresh,
+        body: {
+          script: {
+            source: `
+              if (ctx._source.containsKey('references')) {
+                def items_to_remove = [];
+                for (item in ctx._source.references) {
+                  if ( (item['type'] == params['type']) && (item['id'] == params['id']) ) {
+                    items_to_remove.add(item);
+                  }
+                }
+                ctx._source.references.removeAll(items_to_remove);
+              }
+            `,
+            params: {
+              type,
+              id,
+            },
+            lang: 'painless',
+          },
+          conflicts: 'proceed',
+          ...getSearchDsl(this._mappings, this._registry, {
+            namespaces: namespace ? [namespace] : undefined,
+            type: allTypes,
+            hasReference: { type, id },
+          }),
+        },
+      },
+      { ignore: [404] }
+    );
+
+    if (body.failures?.length) {
+      throw SavedObjectsErrorHelpers.createConflictError(
+        type,
+        id,
+        `${body.failures.length} references could not be removed`
+      );
+    }
+
+    return {
+      updated: body.updated,
     };
   }
 

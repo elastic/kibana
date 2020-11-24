@@ -27,6 +27,42 @@
 
 saved-object-finder {
 
+  .timSearchBar {
+    display: flex;
+    align-items: center;
+  }
+
+  .timSearchBar__section {
+    position: relative;
+    margin-right: $euiSize;
+    flex: 1;
+  }
+
+  .timSearchBar__icon {
+    position: absolute;
+    top: $euiSizeS;
+    left: $euiSizeS;
+    font-size: $euiSize;
+    color: $euiColorDarkShade;
+  }
+
+  .timSearchBar__input {
+    padding: $euiSizeS $euiSizeM;
+    color: $euiColorDarkestShade;
+    background-color: $euiColorEmptyShade;
+    border: 1px solid $euiColorLightShade;
+    border-radius: $euiSizeXS;
+    transition: border-color .1s linear;
+    padding-left: $euiSizeXL;
+    width: 100%;
+    font-size: $euiSize;
+  }
+
+  .timSearchBar__pagecount {
+    font-size: $euiSize;
+    color: $euiColorDarkShade;
+  }
+
   .list-sort-button {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
@@ -34,6 +70,7 @@ saved-object-finder {
     padding: $euiSizeS $euiSize;
     font-weight: $euiFontWeightRegular;
     background-color: $euiColorLightestShade;
+    margin-top: $euiSize;
   }
 
   .li-striped {

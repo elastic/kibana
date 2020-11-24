@@ -14,24 +14,24 @@ if (timefield) {
     <% if (filterable) { %>
       <button
         ng-click="inlineFilter($event, '+')"
-        class="fa fa-search-plus kbnDocTableRowFilterButton"
+        class="kbnDocTableRowFilterButton"
         data-column="<%- column %>"
         tooltip-append-to-body="1"
         data-test-subj="docTableCellFilter"
         tooltip="{{ ::'discover.docTable.tableRow.filterForValueButtonTooltip' | i18n: {defaultMessage: 'Filter for value'} }}"
         tooltip-placement="bottom"
         aria-label="{{ ::'discover.docTable.tableRow.filterForValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter for value'} }}"
-      ></button>
+      ><icon type="'plusInCircle'" size="'s'" color="'primary'"></icon></button>
       <button
         ng-click="inlineFilter($event, '-')"
-        class="fa fa-search-minus kbnDocTableRowFilterButton"
+        class="kbnDocTableRowFilterButton"
         data-column="<%- column %>"
         data-test-subj="docTableCellFilterNegate"
         tooltip="{{ ::'discover.docTable.tableRow.filterOutValueButtonTooltip' | i18n: {defaultMessage: 'Filter out value'} }}"
         aria-label="{{ ::'discover.docTable.tableRow.filterOutValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter out value'} }}"
         tooltip-append-to-body="1"
         tooltip-placement="bottom"
-      ></button>
+      ><icon type="'minusInCircle'" size="'s'" color="'primary'"></icon></button>
     <% } %>
   </span>
 </td>

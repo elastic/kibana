@@ -17,58 +17,69 @@
  * under the License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 // @ts-expect-error untyped service
 import { FeatureCatalogueEntry } from '../../services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 // @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
+import { getServices } from '../../kibana_services';
 
 interface Props {
   addBasePath: (path: string) => string;
   features: FeatureCatalogueEntry[];
 }
 
-export const ManageData: FC<Props> = ({ addBasePath, features }) => (
-  <>
-    {features.length > 1 && <EuiHorizontalRule margin="xl" aria-hidden="true" />}
+export const ManageData: FC<Props> = ({ addBasePath, features }) => {
+  const { trackUiMetric } = getServices();
+  return (
+    <>
+      {features.length > 1 && <EuiHorizontalRule margin="xl" aria-hidden="true" />}
 
-    {features.length > 0 && (
-      <section
-        className="homDataManage"
-        aria-labelledby="homDataManage__title"
-        data-test-subj="homDataManage"
-      >
-        <EuiTitle size="s">
-          <h2 id="homDataManage__title">
-            <FormattedMessage id="home.manageData.sectionTitle" defaultMessage="Manage your data" />
-          </h2>
-        </EuiTitle>
-
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup className="homDataManage__content">
-          {features.map((feature) => (
-            <EuiFlexItem key={feature.id}>
-              <Synopsis
-                id={feature.id}
-                onClick={createAppNavigationHandler(feature.path)}
-                description={feature.description}
-                iconType={feature.icon}
-                title={feature.title}
-                url={addBasePath(feature.path)}
-                wrapInPanel
+      {features.length > 0 && (
+        <section
+          className="homDataManage"
+          aria-labelledby="homDataManage__title"
+          data-test-subj="homDataManage"
+        >
+          <EuiTitle size="s">
+            <h2 id="homDataManage__title">
+              <FormattedMessage
+                id="home.manageData.sectionTitle"
+                defaultMessage="Manage your data"
               />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </section>
-    )}
-  </>
-);
+            </h2>
+          </EuiTitle>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup className="homDataManage__content">
+            {features.map((feature) => (
+              <EuiFlexItem key={feature.id}>
+                <Synopsis
+                  id={feature.id}
+                  onClick={(event: MouseEvent) => {
+                    trackUiMetric(METRIC_TYPE.CLICK, `manage_data_card_${feature.id}`);
+                    createAppNavigationHandler(feature.path)(event);
+                  }}
+                  description={feature.description}
+                  iconType={feature.icon}
+                  title={feature.title}
+                  url={addBasePath(feature.path)}
+                  wrapInPanel
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </section>
+      )}
+    </>
+  );
+};
 
 ManageData.propTypes = {
   addBasePath: PropTypes.func.isRequired,

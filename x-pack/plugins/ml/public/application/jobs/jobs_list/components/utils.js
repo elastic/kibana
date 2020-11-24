@@ -6,7 +6,6 @@
 
 import { each } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import rison from 'rison-node';
 
 import { mlJobService } from '../../../services/job_service';
 import {
@@ -38,7 +37,9 @@ export function loadFullJob(jobId) {
 }
 
 export function isStartable(jobs) {
-  return jobs.some((j) => j.datafeedState === DATAFEED_STATE.STOPPED);
+  return jobs.some(
+    (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSING
+  );
 }
 
 export function isStoppable(jobs) {
@@ -49,7 +50,10 @@ export function isStoppable(jobs) {
 
 export function isClosable(jobs) {
   return jobs.some(
-    (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSED
+    (j) =>
+      j.datafeedState === DATAFEED_STATE.STOPPED &&
+      j.jobState !== JOB_STATE.CLOSED &&
+      j.jobState !== JOB_STATE.CLOSING
   );
 }
 
@@ -361,51 +365,4 @@ function jobProperty(job, prop) {
     id: 'id',
   };
   return job[propMap[prop]];
-}
-
-function getUrlVars(url) {
-  const vars = {};
-  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (_, key, value) {
-    vars[key] = value;
-  });
-  return vars;
-}
-
-export function getSelectedIdFromUrl(url) {
-  const result = {};
-  if (typeof url === 'string') {
-    const isGroup = url.includes('groupIds');
-    url = decodeURIComponent(url);
-
-    if (url.includes('mlManagement')) {
-      const urlParams = getUrlVars(url);
-      const decodedJson = rison.decode(urlParams.mlManagement);
-
-      if (isGroup) {
-        result.groupIds = decodedJson.groupIds;
-      } else {
-        result.jobId = decodedJson.jobId;
-      }
-    }
-  }
-  return result;
-}
-
-export function getGroupQueryText(groupIds) {
-  return `groups:(${groupIds.join(' or ')})`;
-}
-
-export function getJobQueryText(jobIds) {
-  return Array.isArray(jobIds) ? `id:(${jobIds.join(' OR ')})` : jobIds;
-}
-
-export function clearSelectedJobIdFromUrl(url) {
-  if (typeof url === 'string') {
-    url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && (url.includes('jobId') || url.includes('groupIds'))) {
-      const urlParams = getUrlVars(url);
-      const clearedParams = `jobs?_g=${urlParams._g}`;
-      window.history.replaceState({}, document.title, clearedParams);
-    }
-  }
 }

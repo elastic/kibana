@@ -12,50 +12,50 @@ interface GetJourneyStepsParams {
 }
 
 export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping> = async ({
-  callES,
-  dynamicSettings,
+  uptimeEsClient,
   checkGroup,
 }) => {
-  const params: any = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                'synthetics.type': ['step/end', 'stderr', 'cmd/status', 'step/screenshot'],
-              },
+  const params = {
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              'synthetics.type': ['step/end', 'stderr', 'cmd/status', 'step/screenshot'],
             },
-            {
-              term: {
-                'monitor.check_group': checkGroup,
-              },
+          },
+          {
+            term: {
+              'monitor.check_group': checkGroup,
             },
-          ],
-        },
+          },
+        ],
       },
-      _source: {
-        excludes: ['synthetics.blob'],
-      },
+    },
+    sort: [{ 'synthetics.step.index': { order: 'asc' } }, { '@timestamp': { order: 'asc' } }],
+    _source: {
+      excludes: ['synthetics.blob'],
     },
     size: 500,
   };
-  const result = await callES('search', params);
+  const { body: result } = await uptimeEsClient.search({ body: params });
+
   const screenshotIndexes: number[] = result.hits.hits
-    .filter((h: any) => h?._source?.synthetics?.type === 'step/screenshot')
-    .map((h: any) => h?._source?.synthetics?.step?.index);
-  return result.hits.hits
-    .filter((h: any) => h?._source?.synthetics?.type !== 'step/screenshot')
-    .map(
-      ({ _id, _source, _source: { synthetics } }: any): Ping => ({
-        ..._source,
-        timestamp: _source['@timestamp'],
-        docId: _id,
+    .filter((h) => (h?._source as Ping).synthetics?.type === 'step/screenshot')
+    .map((h) => (h?._source as Ping).synthetics?.step?.index as number);
+
+  return (result.hits.hits
+    .filter((h) => (h?._source as Ping).synthetics?.type !== 'step/screenshot')
+    .map((h) => {
+      const source = h._source as Ping & { '@timestamp': string };
+      return {
+        ...source,
+        timestamp: source['@timestamp'],
+        docId: h._id,
         synthetics: {
-          ...synthetics,
-          screenshotExists: screenshotIndexes.some((i) => i === synthetics?.step?.index),
+          ...source.synthetics,
+          screenshotExists: screenshotIndexes.some((i) => i === source.synthetics?.step?.index),
         },
-      })
-    );
+      };
+    }) as unknown) as Ping;
 };

@@ -95,7 +95,10 @@ export const searchAfterAndBulkCreate = async ({
         });
         toReturn = mergeReturns([
           toReturn,
-          createSearchAfterReturnTypeFromResponse({ searchResult }),
+          createSearchAfterReturnTypeFromResponse({
+            searchResult,
+            timestampOverride: ruleParams.timestampOverride,
+          }),
           createSearchAfterReturnType({
             searchAfterTimes: [searchDuration],
             errors: searchErrors,

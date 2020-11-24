@@ -14,7 +14,7 @@ exports[`ReportInfoButton handles button click flyout on click 1`] = `
     size="m"
     type="iInCircle"
   >
-    <div
+    <span
       aria-hidden="true"
       className="euiButtonIcon__icon"
       data-euiicon-type="iInCircle"
@@ -87,7 +87,7 @@ Array [
                   size="m"
                   type="cross"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     className="euiButtonIcon__icon"
                     data-euiicon-type="cross"
@@ -172,7 +172,7 @@ Array [
             size="m"
             type="cross"
           >
-            <div
+            <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
               data-euiicon-type="cross"
@@ -288,7 +288,7 @@ Array [
                   size="m"
                   type="cross"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
                     className="euiButtonIcon__icon"
                     data-euiicon-type="cross"
@@ -371,7 +371,7 @@ Array [
             size="m"
             type="cross"
           >
-            <div
+            <span
               aria-hidden="true"
               className="euiButtonIcon__icon"
               data-euiicon-type="cross"

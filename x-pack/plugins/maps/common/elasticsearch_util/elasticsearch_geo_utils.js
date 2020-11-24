@@ -175,6 +175,16 @@ export function convertESShapeToGeojsonGeometry(value) {
       geoJson.type = GEO_JSON_TYPE.GEOMETRY_COLLECTION;
       break;
     case 'envelope':
+      // format defined here https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-shape.html#_envelope
+      const polygon = formatEnvelopeAsPolygon({
+        minLon: geoJson.coordinates[0][0],
+        maxLon: geoJson.coordinates[1][0],
+        minLat: geoJson.coordinates[1][1],
+        maxLat: geoJson.coordinates[0][1],
+      });
+      geoJson.type = polygon.type;
+      geoJson.coordinates = polygon.coordinates;
+      break;
     case 'circle':
       const errorMessage = i18n.translate(
         'xpack.maps.es_geo_utils.convert.unsupportedGeometryTypeErrorMessage',

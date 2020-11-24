@@ -21,6 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
+import { AppMountParameters } from 'kibana/public';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -51,6 +52,7 @@ interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
+  onAppLeave: AppMountParameters['onAppLeave'];
 }
 
 export const getTopNavConfig = (
@@ -66,6 +68,7 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
+    onAppLeave,
   }: TopNavConfigParams,
   {
     application,
@@ -77,6 +80,7 @@ export const getTopNavConfig = (
     visualizeCapabilities,
     i18n: { Context: I18nContext },
     dashboard,
+    savedObjectsTagging,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -174,6 +178,12 @@ export const getTopNavConfig = (
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
   };
 
+  const navigateToOriginatingApp = () => {
+    if (originatingApp) {
+      application.navigateToApp(originatingApp);
+    }
+  };
+
   const topNavMenu: TopNavMenuData[] = [
     {
       id: 'inspector',
@@ -225,6 +235,31 @@ export const getTopNavConfig = (
       // disable the Share button if no action specified
       disableButton: !share || !!embeddableId,
     },
+    ...(originatingApp === 'dashboards' || originatingApp === 'canvas'
+      ? [
+          {
+            id: 'cancel',
+            label: i18n.translate('visualize.topNavMenu.cancelButtonLabel', {
+              defaultMessage: 'Cancel',
+            }),
+            emphasize: false,
+            description: i18n.translate('visualize.topNavMenu.cancelButtonAriaLabel', {
+              defaultMessage: 'Return to the last app without saving changes',
+            }),
+            testId: 'visualizeCancelAndReturnButton',
+            tooltip() {
+              if (hasUnappliedChanges || hasUnsavedChanges) {
+                return i18n.translate('visualize.topNavMenu.cancelAndReturnButtonTooltip', {
+                  defaultMessage: 'Discard your changes before finishing',
+                });
+              }
+            },
+            run: async () => {
+              return navigateToOriginatingApp();
+            },
+          },
+        ]
+      : []),
     ...(visualizeCapabilities.save && !embeddableId
       ? [
           {
@@ -272,6 +307,11 @@ export const getTopNavConfig = (
                 embeddableHandler.updateInput({ title: newTitle });
                 savedVis.copyOnSave = newCopyOnSave;
                 savedVis.description = newDescription;
+
+                if (savedObjectsTagging && savedObjectsTagging.ui.hasTagDecoration(savedVis)) {
+                  savedVis.setTags(selectedTags);
+                }
+
                 const saveOptions = {
                   confirmOverwrite: false,
                   isTitleDuplicateConfirmed,
@@ -286,10 +326,30 @@ export const getTopNavConfig = (
                 return response;
               };
 
+              let selectedTags: string[] = [];
+              let options: React.ReactNode | undefined;
+
+              if (
+                savedVis &&
+                savedObjectsTagging &&
+                savedObjectsTagging.ui.hasTagDecoration(savedVis)
+              ) {
+                selectedTags = savedVis.getTags();
+                options = (
+                  <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+                    initialSelection={selectedTags}
+                    onTagsSelected={(newSelection) => {
+                      selectedTags = newSelection;
+                    }}
+                  />
+                );
+              }
+
               const saveModal = (
                 <SavedObjectSaveModalOrigin
                   documentInfo={savedVis || { title: '' }}
                   onSave={onSave}
+                  options={options}
                   getAppNameFromId={stateTransfer.getAppNameFromId}
                   objectType={'visualization'}
                   onClose={() => {}}
@@ -297,6 +357,9 @@ export const getTopNavConfig = (
                 />
               );
               const isSaveAsButton = anchorElement.classList.contains('saveAsButton');
+              onAppLeave((actions) => {
+                return actions.default();
+              });
               if (
                 originatingApp === 'dashboards' &&
                 dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
@@ -342,6 +405,9 @@ export const getTopNavConfig = (
                 confirmOverwrite: false,
                 returnToOrigin: true,
               };
+              onAppLeave((actions) => {
+                return actions.default();
+              });
               if (
                 originatingApp === 'dashboards' &&
                 dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&

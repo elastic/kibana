@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, log, spacesService } = deps;
+  const { externalRouter, log, getSpacesService } = deps;
 
   externalRouter.delete(
     {
@@ -25,7 +24,7 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const spacesClient: SpacesClient = await spacesService.scopedClient(request);
+      const spacesClient = getSpacesService().createSpacesClient(request);
 
       const id = request.params.id;
 

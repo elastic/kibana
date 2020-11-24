@@ -47,6 +47,10 @@ kibana_vars=(
     elasticsearch.ssl.truststore.password
     elasticsearch.ssl.verificationMode
     elasticsearch.username
+    enterpriseSearch.accessCheckTimeout
+    enterpriseSearch.accessCheckTimeoutWarning
+    enterpriseSearch.enabled
+    enterpriseSearch.host
     i18n.locale
     interpreter.enableInVisualize
     kibana.autocompleteTerminateAfter
@@ -134,6 +138,7 @@ kibana_vars=(
     tilemap.url
     timelion.enabled
     vega.enableExternalUrls
+    xpack.actions.proxyUrl
     xpack.apm.enabled
     xpack.apm.serviceMapEnabled
     xpack.apm.ui.enabled
@@ -232,6 +237,7 @@ kibana_vars=(
     xpack.security.authc.oidc.realm
     xpack.security.authc.saml.realm
     xpack.security.authc.saml.maxRedirectURLSize
+    xpack.security.authc.selector.enabled
     xpack.security.cookieName
     xpack.security.enabled
     xpack.security.encryptionKey

@@ -1,6 +1,6 @@
 {
   "name": "ml_kibana_api",
-  "version": "7.8.0",
+  "version": "7.11.0",
   "description": "This is the documentation of the REST API provided by the Machine Learning Kibana plugin. Each API is experimental and can include breaking changes in any version.",
   "title": "ML Kibana API",
   "order": [
@@ -16,6 +16,8 @@
     "GetDataFrameAnalyticsMessages",
     "UpdateDataFrameAnalytics",
     "DeleteDataFrameAnalytics",
+    "JobsExist",
+    "GetDataFrameAnalyticsIdMap",
 
     "DataVisualizer",
     "GetOverallStats",
@@ -84,6 +86,7 @@
     "UpdateGroups",
     "DeletingJobTasks",
     "DeleteJobs",
+    "RevertModelSnapshot",
 
     "Calendars",
     "PutCalendars",
@@ -138,6 +141,20 @@
 
     "FieldsService",
     "GetCardinalityOfFields",
-    "GetTimeFieldRange"
+    "GetTimeFieldRange",
+
+    "JobSavedObjects",
+    "SavedObjectsStatus",
+    "RepairJobSavedObjects",
+    "InitializeJobSavedObjects",
+    "AssignJobsToSpaces",
+    "RemoveJobsFromSpaces",
+    "JobsSpaces",
+
+    "TrainedModels",
+    "GetTrainedModel",
+    "GetTrainedModelStats",
+    "GetTrainedModelPipelines",
+    "DeleteTrainedModel"
   ]
 }

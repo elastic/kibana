@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { useValues } from 'kea';
-import { i18n } from '@kbn/i18n';
 
 import { GroupLogic } from '../group_logic';
+import { NAV } from '../../../constants';
 
 import { SideNavLink } from '../../../../shared/layout';
 
@@ -23,15 +23,9 @@ export const GroupSubNav: React.FC = () => {
 
   return (
     <>
-      <SideNavLink to={getGroupPath(id)}>
-        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.groups.groupOverview', {
-          defaultMessage: 'Overview',
-        })}
-      </SideNavLink>
+      <SideNavLink to={getGroupPath(id)}>{NAV.GROUP_OVERVIEW}</SideNavLink>
       <SideNavLink to={getGroupSourcePrioritizationPath(id)}>
-        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.groups.sourcePrioritization', {
-          defaultMessage: 'Source Prioritization',
-        })}
+        {NAV.SOURCE_PRIORITIZATION}
       </SideNavLink>
     </>
   );

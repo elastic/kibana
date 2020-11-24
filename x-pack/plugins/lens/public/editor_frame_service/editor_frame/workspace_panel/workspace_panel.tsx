@@ -7,12 +7,27 @@
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTextColor,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiTitle,
+} from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import {
+  DataPublicPluginStart,
+  ExecutionContextSearch,
+  TimefilterContract,
+} from 'src/plugins/data/public';
 import {
   ExpressionRendererEvent,
+  ExpressionRenderError,
   ReactExpressionRendererType,
 } from '../../../../../../../src/plugins/expressions/public';
 import { Action } from '../state_management';
@@ -33,9 +48,11 @@ import {
   VisualizeFieldContext,
 } from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
+import { LensInspectorAdapters } from '../../types';
+import { getOriginalRequestErrorMessage } from '../../error_helper';
+import { validateDatasourceAndVisualization } from '../state_helpers';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -59,10 +76,13 @@ export interface WorkspacePanelProps {
   visualizeTriggerFieldContext?: VisualizeFieldContext;
 }
 
-export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
+interface WorkspaceState {
+  expressionBuildError?: Array<{ shortMessage: string; longMessage: string }>;
+  expandError: boolean;
+}
 
 // Exported for testing purposes only.
-export function InnerWorkspacePanel({
+export function WorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
   visualizationMap,
@@ -89,6 +109,12 @@ export function InnerWorkspacePanel({
         (datasource) => datasource.getTableSpec().length > 0
       );
 
+      const mainPalette =
+        activeVisualizationId &&
+        visualizationMap[activeVisualizationId] &&
+        visualizationMap[activeVisualizationId].getMainPalette
+          ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
+          : undefined;
       const suggestions = getSuggestions({
         datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
         datasourceStates,
@@ -99,6 +125,7 @@ export function InnerWorkspacePanel({
         activeVisualizationId,
         visualizationState,
         field: dragDropContext.dragging,
+        mainPalette,
       });
 
       return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
@@ -107,27 +134,59 @@ export function InnerWorkspacePanel({
     [dragDropContext.dragging]
   );
 
-  const [localState, setLocalState] = useState({
-    expressionBuildError: undefined as string | undefined,
+  const [localState, setLocalState] = useState<WorkspaceState>({
+    expressionBuildError: undefined,
     expandError: false,
   });
 
   const activeVisualization = activeVisualizationId
     ? visualizationMap[activeVisualizationId]
     : null;
+
+  // Note: mind to all these eslint disable lines: the frameAPI will change too frequently
+  // and to prevent race conditions it is ok to leave them there.
+
+  const configurationValidationError = useMemo(
+    () =>
+      validateDatasourceAndVisualization(
+        activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+        activeDatasourceId && datasourceStates[activeDatasourceId]?.state,
+        activeVisualization,
+        visualizationState,
+        framePublicAPI
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeVisualization, visualizationState, activeDatasourceId, datasourceMap, datasourceStates]
+  );
+
   const expression = useMemo(
     () => {
-      try {
-        return buildExpression({
-          visualization: activeVisualization,
-          visualizationState,
-          datasourceMap,
-          datasourceStates,
-          datasourceLayers: framePublicAPI.datasourceLayers,
-        });
-      } catch (e) {
-        // Most likely an error in the expression provided by a datasource or visualization
-        setLocalState((s) => ({ ...s, expressionBuildError: e.toString() }));
+      if (!configurationValidationError) {
+        try {
+          return buildExpression({
+            visualization: activeVisualization,
+            visualizationState,
+            datasourceMap,
+            datasourceStates,
+            datasourceLayers: framePublicAPI.datasourceLayers,
+          });
+        } catch (e) {
+          const buildMessages = activeVisualization?.getErrorMessages(
+            visualizationState,
+            framePublicAPI
+          );
+          const defaultMessage = {
+            shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
+              defaultMessage: 'An unexpected error occurred while preparing the chart',
+            }),
+            longMessage: e.toString(),
+          };
+          // Most likely an error in the expression provided by a datasource or visualization
+          setLocalState((s) => ({
+            ...s,
+            expressionBuildError: buildMessages ?? [defaultMessage],
+          }));
+        }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,28 +219,6 @@ export function InnerWorkspacePanel({
       }
     },
     [plugins.uiActions]
-  );
-
-  const autoRefreshFetch$ = useMemo(
-    () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
-    [plugins.data.query.timefilter.timefilter]
-  );
-
-  const context: ExecutionContextSearch = useMemo(
-    () => ({
-      query: framePublicAPI.query,
-      timeRange: {
-        from: framePublicAPI.dateRange.fromDate,
-        to: framePublicAPI.dateRange.toDate,
-      },
-      filters: framePublicAPI.filters,
-    }),
-    [
-      framePublicAPI.query,
-      framePublicAPI.dateRange.fromDate,
-      framePublicAPI.dateRange.toDate,
-      framePublicAPI.filters,
-    ]
   );
 
   useEffect(() => {
@@ -255,68 +292,17 @@ export function InnerWorkspacePanel({
     if (expression === null && !visualizeTriggerFieldContext) {
       return renderEmptyWorkspace();
     }
-
-    if (localState.expressionBuildError) {
-      return (
-        <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
-          <EuiFlexItem>
-            <EuiIcon type="alert" size="xl" color="danger" />
-          </EuiFlexItem>
-          <EuiFlexItem data-test-subj="expression-failure">
-            <FormattedMessage
-              id="xpack.lens.editorFrame.expressionFailure"
-              defaultMessage="An error occurred in the expression"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{localState.expressionBuildError}</EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
     return (
-      <div className="lnsExpressionRenderer">
-        <ExpressionRendererComponent
-          className="lnsExpressionRenderer__component"
-          padding="m"
-          expression={expression!}
-          searchContext={context}
-          reload$={autoRefreshFetch$}
-          onEvent={onEvent}
-          renderError={(errorMessage?: string | null) => {
-            return (
-              <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
-                <EuiFlexItem>
-                  <EuiIcon type="alert" size="xl" color="danger" />
-                </EuiFlexItem>
-                <EuiFlexItem data-test-subj="expression-failure">
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.dataFailure"
-                    defaultMessage="An error occurred when loading data."
-                  />
-                </EuiFlexItem>
-                {errorMessage ? (
-                  <EuiFlexItem className="eui-textBreakAll" grow={false}>
-                    <EuiButtonEmpty
-                      onClick={() => {
-                        setLocalState((prevState) => ({
-                          ...prevState,
-                          expandError: !prevState.expandError,
-                        }));
-                      }}
-                    >
-                      {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
-                        defaultMessage: 'Show details of error',
-                      })}
-                    </EuiButtonEmpty>
-
-                    {localState.expandError ? errorMessage : null}
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            );
-          }}
-        />
-      </div>
+      <VisualizationWrapper
+        expression={expression}
+        framePublicAPI={framePublicAPI}
+        timefilter={plugins.data.query.timefilter.timefilter}
+        dispatch={dispatch}
+        onEvent={onEvent}
+        setLocalState={setLocalState}
+        localState={{ ...localState, configurationValidationError }}
+        ExpressionRendererComponent={ExpressionRendererComponent}
+      />
     );
   }
 
@@ -325,7 +311,6 @@ export function InnerWorkspacePanel({
       title={title}
       framePublicAPI={framePublicAPI}
       dispatch={dispatch}
-      emptyExpression={expression === null}
       visualizationState={visualizationState}
       visualizationId={activeVisualizationId}
       datasourceStates={datasourceStates}
@@ -347,3 +332,184 @@ export function InnerWorkspacePanel({
     </WorkspacePanelWrapper>
   );
 }
+
+export const InnerVisualizationWrapper = ({
+  expression,
+  framePublicAPI,
+  timefilter,
+  onEvent,
+  setLocalState,
+  localState,
+  ExpressionRendererComponent,
+  dispatch,
+}: {
+  expression: Ast | null | undefined;
+  framePublicAPI: FramePublicAPI;
+  timefilter: TimefilterContract;
+  onEvent: (event: ExpressionRendererEvent) => void;
+  dispatch: (action: Action) => void;
+  setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
+  localState: WorkspaceState & {
+    configurationValidationError?: Array<{ shortMessage: string; longMessage: string }>;
+  };
+  ExpressionRendererComponent: ReactExpressionRendererType;
+}) => {
+  const autoRefreshFetch$ = useMemo(() => timefilter.getAutoRefreshFetch$(), [timefilter]);
+
+  const context: ExecutionContextSearch = useMemo(
+    () => ({
+      query: framePublicAPI.query,
+      timeRange: {
+        from: framePublicAPI.dateRange.fromDate,
+        to: framePublicAPI.dateRange.toDate,
+      },
+      filters: framePublicAPI.filters,
+    }),
+    [
+      framePublicAPI.query,
+      framePublicAPI.dateRange.fromDate,
+      framePublicAPI.dateRange.toDate,
+      framePublicAPI.filters,
+    ]
+  );
+
+  const onData$ = useCallback(
+    (data: unknown, inspectorAdapters?: LensInspectorAdapters) => {
+      if (inspectorAdapters && inspectorAdapters.tables) {
+        dispatch({
+          type: 'UPDATE_ACTIVE_DATA',
+          tables: inspectorAdapters.tables,
+        });
+      }
+    },
+    [dispatch]
+  );
+
+  if (localState.configurationValidationError?.length) {
+    let showExtraErrors = null;
+    if (localState.configurationValidationError.length > 1) {
+      if (localState.expandError) {
+        showExtraErrors = localState.configurationValidationError
+          .slice(1)
+          .map(({ longMessage }) => (
+            <EuiFlexItem key={longMessage} className="eui-textBreakAll">
+              {longMessage}
+            </EuiFlexItem>
+          ));
+      } else {
+        showExtraErrors = (
+          <EuiFlexItem data-test-subj="configuration-failure-more-errors">
+            <EuiButtonEmpty
+              onClick={() => {
+                setLocalState((prevState: WorkspaceState) => ({
+                  ...prevState,
+                  expandError: !prevState.expandError,
+                }));
+              }}
+            >
+              {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
+                defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
+                values: { errors: localState.configurationValidationError.length - 1 },
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        );
+      }
+    }
+
+    return (
+      <EuiFlexGroup
+        style={{ maxWidth: '100%' }}
+        direction="column"
+        alignItems="center"
+        data-test-subj="configuration-failure"
+      >
+        <EuiFlexItem>
+          <EuiIcon type="alert" size="xl" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <EuiTextColor color="danger">
+              <FormattedMessage
+                id="xpack.lens.editorFrame.configurationFailure"
+                defaultMessage="Invalid configuration"
+              />
+            </EuiTextColor>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem className="eui-textBreakAll">
+          {localState.configurationValidationError[0].longMessage}
+        </EuiFlexItem>
+        {showExtraErrors}
+      </EuiFlexGroup>
+    );
+  }
+
+  if (localState.expressionBuildError?.length) {
+    return (
+      <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+        <EuiFlexItem>
+          <EuiIcon type="alert" size="xl" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj="expression-failure">
+          <FormattedMessage
+            id="xpack.lens.editorFrame.expressionFailure"
+            defaultMessage="An error occurred in the expression"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{localState.expressionBuildError[0].longMessage}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  return (
+    <div className="lnsExpressionRenderer">
+      <ExpressionRendererComponent
+        className="lnsExpressionRenderer__component"
+        padding="m"
+        expression={expression!}
+        searchContext={context}
+        reload$={autoRefreshFetch$}
+        onEvent={onEvent}
+        onData$={onData$}
+        renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
+          const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
+
+          return (
+            <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+              <EuiFlexItem>
+                <EuiIcon type="alert" size="xl" color="danger" />
+              </EuiFlexItem>
+              <EuiFlexItem data-test-subj="expression-failure">
+                <FormattedMessage
+                  id="xpack.lens.editorFrame.dataFailure"
+                  defaultMessage="An error occurred when loading data."
+                />
+              </EuiFlexItem>
+              {visibleErrorMessage ? (
+                <EuiFlexItem className="eui-textBreakAll" grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      setLocalState((prevState: WorkspaceState) => ({
+                        ...prevState,
+                        expandError: !prevState.expandError,
+                      }));
+                    }}
+                  >
+                    {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
+                      defaultMessage: 'Show details of error',
+                    })}
+                  </EuiButtonEmpty>
+
+                  {localState.expandError ? visibleErrorMessage : null}
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          );
+        }}
+      />
+    </div>
+  );
+};
+
+export const VisualizationWrapper = debouncedComponent(InnerVisualizationWrapper);

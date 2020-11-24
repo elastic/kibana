@@ -7,14 +7,8 @@
 
 import { FeatureCollection } from 'geojson';
 import { Query } from 'src/plugins/data/public';
-import {
-  AGG_TYPE,
-  GRID_RESOLUTION,
-  RENDER_AS,
-  SORT_ORDER,
-  SCALING_TYPES,
-  MVT_FIELD_TYPE,
-} from '../constants';
+import { SortDirection } from 'src/plugins/data/common/search';
+import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SCALING_TYPES, MVT_FIELD_TYPE } from '../constants';
 
 export type AttributionDescriptor = {
   attributionText?: string;
@@ -24,7 +18,6 @@ export type AttributionDescriptor = {
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
-  applyGlobalQuery?: boolean;
 };
 
 export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
@@ -40,33 +33,54 @@ export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
 
 export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   // id: UUID
+  id: string;
   indexPatternId: string;
   geoField?: string;
+  applyGlobalQuery: boolean;
+  applyGlobalTime: boolean;
 };
 
-export type AggDescriptor = {
-  field?: string; // count aggregation does not require field. All other aggregation types do
-  label?: string;
+type AbstractAggDescriptor = {
   type: AGG_TYPE;
+  label?: string;
 };
+
+export type CountAggDescriptor = AbstractAggDescriptor & {
+  type: AGG_TYPE.COUNT;
+};
+
+export type FieldedAggDescriptor = AbstractAggDescriptor & {
+  type:
+    | AGG_TYPE.UNIQUE_COUNT
+    | AGG_TYPE.MAX
+    | AGG_TYPE.MIN
+    | AGG_TYPE.SUM
+    | AGG_TYPE.AVG
+    | AGG_TYPE.TERMS;
+  field?: string;
+};
+
+export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor;
 
 export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
 };
 
 export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
-  requestType?: RENDER_AS;
-  resolution?: GRID_RESOLUTION;
+  geoField: string;
+  requestType: RENDER_AS;
+  resolution: GRID_RESOLUTION;
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
+  geoField: string;
   filterByMapBounds?: boolean;
   tooltipProperties?: string[];
-  sortField?: string;
-  sortOrder?: SORT_ORDER;
+  sortField: string;
+  sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
-  topHitsSplitField?: string;
-  topHitsSize?: number;
+  topHitsSplitField: string;
+  topHitsSize: number;
 };
 
 export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
@@ -76,7 +90,7 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
 
 export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   indexPatternTitle?: string;
-  term?: string; // term field name
+  term: string; // term field name
   whereQuery?: Query;
 };
 

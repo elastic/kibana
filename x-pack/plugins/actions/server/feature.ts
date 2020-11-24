@@ -11,10 +11,8 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 export const ACTIONS_FEATURE = {
   id: 'actions',
   name: i18n.translate('xpack.actions.featureRegistry.actionsFeatureName', {
-    defaultMessage: 'Actions',
+    defaultMessage: 'Actions and Connectors',
   }),
-  icon: 'bell',
-  navLinkId: 'actions',
   category: DEFAULT_APP_CATEGORIES.management,
   app: [],
   management: {

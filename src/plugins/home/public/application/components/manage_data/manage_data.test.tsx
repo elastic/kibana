@@ -19,13 +19,19 @@
 
 import React from 'react';
 import { ManageData } from './manage_data';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 
 jest.mock('../app_navigation_handler', () => {
   return {
     createAppNavigationHandler: jest.fn(() => () => {}),
   };
 });
+
+jest.mock('../../kibana_services', () => ({
+  getServices: () => ({
+    trackUiMetric: jest.fn(),
+  }),
+}));
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -37,7 +43,6 @@ const mockFeatures = [
   {
     category: 'admin',
     description: 'Control who has access and what tasks they can perform.',
-    homePageSection: 'manage_data',
     icon: 'securityApp',
     id: 'security',
     order: 600,
@@ -48,7 +53,6 @@ const mockFeatures = [
   {
     category: 'admin',
     description: 'Track the real-time health and performance of your deployment.',
-    homePageSection: 'manage_data',
     icon: 'monitoringApp',
     id: 'monitoring',
     order: 610,
@@ -60,7 +64,6 @@ const mockFeatures = [
     category: 'admin',
     description:
       'Save snapshots to a backup repository, and restore to recover index and cluster state.',
-    homePageSection: 'manage_data',
     icon: 'storage',
     id: 'snapshot_restore',
     order: 630,
@@ -71,7 +74,6 @@ const mockFeatures = [
   {
     category: 'admin',
     description: 'Define lifecycle policies to automatically perform operations as an index ages.',
-    homePageSection: 'manage_data',
     icon: 'indexSettings',
     id: 'index_lifecycle_management',
     order: 640,

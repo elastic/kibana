@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { Storage } from './storage';
 import { IStorage, IStorageWrapper } from './types';
 

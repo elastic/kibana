@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Logger, RequestHandlerContext } from 'src/core/server';
+import type { Logger } from 'kibana/server';
 import { EqlSearchStrategyRequest } from '../../common/search/types';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
+import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server';
 
 const getMockEqlResponse = () => ({
   body: {
@@ -22,6 +22,8 @@ const getMockEqlResponse = () => ({
       sequences: [],
     },
   },
+  meta: {},
+  statusCode: 200,
 });
 
 describe('EQL search strategy', () => {
@@ -46,32 +48,26 @@ describe('EQL search strategy', () => {
   describe('search()', () => {
     let mockEqlSearch: jest.Mock;
     let mockEqlGet: jest.Mock;
-    let mockContext: RequestHandlerContext;
+    let mockDeps: SearchStrategyDependencies;
     let params: Required<EqlSearchStrategyRequest>['params'];
     let options: Required<EqlSearchStrategyRequest>['options'];
 
     beforeEach(() => {
       mockEqlSearch = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
       mockEqlGet = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
-      mockContext = ({
-        core: {
-          uiSettings: {
-            client: {
-              get: jest.fn(),
-            },
-          },
-          elasticsearch: {
-            client: {
-              asCurrentUser: {
-                eql: {
-                  get: mockEqlGet,
-                  search: mockEqlSearch,
-                },
-              },
+      mockDeps = ({
+        uiSettingsClient: {
+          get: jest.fn(),
+        },
+        esClient: {
+          asCurrentUser: {
+            eql: {
+              get: mockEqlGet,
+              search: mockEqlSearch,
             },
           },
         },
-      } as unknown) as RequestHandlerContext;
+      } as unknown) as SearchStrategyDependencies;
       params = {
         index: 'logstash-*',
         body: { query: 'process where 1 == 1' },
@@ -82,7 +78,7 @@ describe('EQL search strategy', () => {
     describe('async functionality', () => {
       it('performs an eql client search with params when no ID is provided', async () => {
         const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
-        await eqlSearch.search(mockContext, { options, params });
+        await eqlSearch.search({ options, params }, {}, mockDeps).toPromise();
         const [[request, requestOptions]] = mockEqlSearch.mock.calls;
 
         expect(request.index).toEqual('logstash-*');
@@ -92,18 +88,30 @@ describe('EQL search strategy', () => {
 
       it('retrieves the current request if an id is provided', async () => {
         const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
-        await eqlSearch.search(mockContext, { id: 'my-search-id' });
+        await eqlSearch.search({ id: 'my-search-id' }, {}, mockDeps).toPromise();
         const [[requestParams]] = mockEqlGet.mock.calls;
 
         expect(mockEqlSearch).not.toHaveBeenCalled();
         expect(requestParams).toEqual(expect.objectContaining({ id: 'my-search-id' }));
+      });
+
+      it('emits an error if the client throws', async () => {
+        expect.assertions(1);
+        mockEqlSearch.mockReset().mockRejectedValueOnce(new Error('client error'));
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        eqlSearch.search({ options, params }, {}, mockDeps).subscribe(
+          () => {},
+          (err) => {
+            expect(err).toEqual(new Error('client error'));
+          }
+        );
       });
     });
 
     describe('arguments', () => {
       it('sends along async search options', async () => {
         const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
-        await eqlSearch.search(mockContext, { options, params });
+        await eqlSearch.search({ options, params }, {}, mockDeps).toPromise();
         const [[request]] = mockEqlSearch.mock.calls;
 
         expect(request).toEqual(
@@ -116,7 +124,7 @@ describe('EQL search strategy', () => {
 
       it('sends along default search parameters', async () => {
         const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
-        await eqlSearch.search(mockContext, { options, params });
+        await eqlSearch.search({ options, params }, {}, mockDeps).toPromise();
         const [[request]] = mockEqlSearch.mock.calls;
 
         expect(request).toEqual(
@@ -129,14 +137,20 @@ describe('EQL search strategy', () => {
 
       it('allows search parameters to be overridden', async () => {
         const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
-        await eqlSearch.search(mockContext, {
-          options,
-          params: {
-            ...params,
-            wait_for_completion_timeout: '5ms',
-            keep_on_completion: false,
-          },
-        });
+        await eqlSearch
+          .search(
+            {
+              options,
+              params: {
+                ...params,
+                wait_for_completion_timeout: '5ms',
+                keep_on_completion: false,
+              },
+            },
+            {},
+            mockDeps
+          )
+          .toPromise();
         const [[request]] = mockEqlSearch.mock.calls;
 
         expect(request).toEqual(
@@ -150,16 +164,48 @@ describe('EQL search strategy', () => {
 
       it('allows search options to be overridden', async () => {
         const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
-        await eqlSearch.search(mockContext, {
-          options: { ...options, maxRetries: 2, ignore: [300] },
-          params,
-        });
+        await eqlSearch
+          .search(
+            {
+              options: { ...options, maxRetries: 2, ignore: [300] },
+              params,
+            },
+            {},
+            mockDeps
+          )
+          .toPromise();
         const [[, requestOptions]] = mockEqlSearch.mock.calls;
 
         expect(requestOptions).toEqual(
           expect.objectContaining({
             max_retries: 2,
             ignore: [300],
+          })
+        );
+      });
+
+      it('passes transport options for an existing request', async () => {
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        await eqlSearch
+          .search({ id: 'my-search-id', options: { ignore: [400] } }, {}, mockDeps)
+          .toPromise();
+        const [[, requestOptions]] = mockEqlGet.mock.calls;
+
+        expect(mockEqlSearch).not.toHaveBeenCalled();
+        expect(requestOptions).toEqual(expect.objectContaining({ ignore: [400] }));
+      });
+    });
+
+    describe('response', () => {
+      it('contains a rawResponse field containing the full search response', async () => {
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        const response = await eqlSearch
+          .search({ id: 'my-search-id', options: { ignore: [400] } }, {}, mockDeps)
+          .toPromise();
+
+        expect(response).toEqual(
+          expect.objectContaining({
+            rawResponse: expect.objectContaining(getMockEqlResponse()),
           })
         );
       });

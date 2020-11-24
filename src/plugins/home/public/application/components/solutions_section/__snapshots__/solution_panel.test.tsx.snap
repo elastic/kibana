@@ -13,6 +13,7 @@ exports[`SolutionPanel renders the solution panel for the given solution 1`] = `
     onClick={[Function]}
   >
     <EuiPanel
+      className="homSolutionPanel__inner"
       paddingSize="none"
     >
       <EuiFlexGroup

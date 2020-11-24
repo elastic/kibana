@@ -41,9 +41,10 @@ experimental[] Create multiple {kib} saved objects.
 `references`::
   (Optional, array) Objects with `name`, `id`, and `type` properties that describe the other saved objects in the referenced object. To refer to the other saved object, use `name` in the attributes. Never use `id` to refer to the other saved object. `id` can be automatically updated during migrations, import, or export.
 
-`namespaces`::
-  (Optional, string array) Identifiers for the <<xpack-spaces,spaces>> in which this object should be created. If this is not provided, the
-  object will be created in the current space.
+`initialNamespaces`::
+  (Optional, string array) Identifiers for the <<xpack-spaces,spaces>> in which this object is created. If this is provided, the
+  object is created only in the explicitly defined spaces. If this is not provided, the object is created in the current space
+  (default behavior).
 
 `version`::
   (Optional, number) Specifies the version.

@@ -16,13 +16,17 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
+import { DocumentationLinksService } from '../documentation_links';
 
 export const insecureClusterAlertTitle = i18n.translate(
   'xpack.security.checkup.insecureClusterTitle',
-  { defaultMessage: 'Please secure your installation' }
+  { defaultMessage: 'Your data is not secure' }
 );
 
-export const insecureClusterAlertText = (onDismiss: (persist: boolean) => void) =>
+export const insecureClusterAlertText = (
+  getDocLinksService: () => DocumentationLinksService,
+  onDismiss: (persist: boolean) => void
+) =>
   ((e) => {
     const AlertText = () => {
       const [persist, setPersist] = useState(false);
@@ -33,7 +37,7 @@ export const insecureClusterAlertText = (onDismiss: (persist: boolean) => void) 
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.security.checkup.insecureClusterMessage"
-                defaultMessage="Our free security features can protect against unauthorized access."
+                defaultMessage="Don’t lose one bit. Enable our free security features."
               />
             </EuiText>
             <EuiSpacer />
@@ -52,8 +56,9 @@ export const insecureClusterAlertText = (onDismiss: (persist: boolean) => void) 
                   size="s"
                   color="primary"
                   fill
-                  href="https://www.elastic.co/what-is/elastic-stack-security"
+                  href={getDocLinksService().getEnableSecurityDocUrl()}
                   target="_blank"
+                  data-test-subj="learnMoreButton"
                 >
                   {i18n.translate('xpack.security.checkup.enableButtonText', {
                     defaultMessage: `Enable security`,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed } from '../shared_imports';
@@ -25,37 +25,59 @@ import { Form, UseField } from '../components';
 import { useForm } from './use_form';
 import { useFormData, HookReturn } from './use_form_data';
 
-interface Props {
-  onChange(data: HookReturn): void;
+interface Props<T extends object> {
+  onChange(data: HookReturn<T>): void;
   watch?: string | string[];
 }
 
+interface Form1 {
+  title: string;
+}
+
+interface Form2 {
+  user: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
+interface Form3 {
+  title: string;
+  subTitle: string;
+}
+
 describe('useFormData() hook', () => {
-  const HookListenerComp = React.memo(({ onChange, watch }: Props) => {
-    const hookValue = useFormData({ watch });
+  const HookListenerComp = function <T extends object>({ onChange, watch }: Props<T>) {
+    const hookValue = useFormData<T>({ watch });
+    const isMounted = useRef(false);
 
     useEffect(() => {
-      onChange(hookValue);
+      if (isMounted.current) {
+        onChange(hookValue);
+      }
+      isMounted.current = true;
     }, [hookValue, onChange]);
 
     return null;
-  });
+  };
+
+  const HookListener = React.memo(HookListenerComp);
 
   describe('form data updates', () => {
     let testBed: TestBed;
     let onChangeSpy: jest.Mock;
 
     const getLastMockValue = () => {
-      return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn;
+      return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn<Form1>;
     };
 
-    const TestComp = (props: Props) => {
-      const { form } = useForm();
+    const TestComp = (props: Props<Form1>) => {
+      const { form } = useForm<Form1>();
 
       return (
         <Form form={form}>
           <UseField path="title" defaultValue="titleInitialValue" data-test-subj="titleField" />
-          <HookListenerComp {...props} />
+          <HookListener {...props} />
         </Form>
       );
     };
@@ -70,9 +92,7 @@ describe('useFormData() hook', () => {
     });
 
     test('should return the form data', () => {
-      // Called twice:
-      // once when the hook is called and once when the fields have mounted and updated the form data
-      expect(onChangeSpy).toBeCalledTimes(2);
+      expect(onChangeSpy).toBeCalledTimes(1);
       const [data] = getLastMockValue();
       expect(data).toEqual({ title: 'titleInitialValue' });
     });
@@ -86,7 +106,7 @@ describe('useFormData() hook', () => {
         setInputValue('titleField', 'titleChanged');
       });
 
-      expect(onChangeSpy).toBeCalledTimes(3);
+      expect(onChangeSpy).toBeCalledTimes(2);
       const [data] = getLastMockValue();
       expect(data).toEqual({ title: 'titleChanged' });
     });
@@ -96,17 +116,17 @@ describe('useFormData() hook', () => {
     let onChangeSpy: jest.Mock;
 
     const getLastMockValue = () => {
-      return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn;
+      return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn<Form2>;
     };
 
-    const TestComp = (props: Props) => {
-      const { form } = useForm();
+    const TestComp = (props: Props<Form2>) => {
+      const { form } = useForm<Form2>();
 
       return (
         <Form form={form}>
           <UseField path="user.firstName" defaultValue="John" />
           <UseField path="user.lastName" defaultValue="Snow" />
-          <HookListenerComp {...props} />
+          <HookListener {...props} />
         </Form>
       );
     };
@@ -121,8 +141,8 @@ describe('useFormData() hook', () => {
     });
 
     test('should expose a handler to build the form data', () => {
-      const { 1: format } = getLastMockValue();
-      expect(format()).toEqual({
+      const [formData] = getLastMockValue();
+      expect(formData).toEqual({
         user: {
           firstName: 'John',
           lastName: 'Snow',
@@ -137,11 +157,11 @@ describe('useFormData() hook', () => {
       let onChangeSpy: jest.Mock;
 
       const getLastMockValue = () => {
-        return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn;
+        return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn<Form3>;
       };
 
-      const TestComp = (props: Props) => {
-        const { form } = useForm();
+      const TestComp = (props: Props<Form3>) => {
+        const { form } = useForm<Form3>();
 
         return (
           <Form form={form}>
@@ -190,9 +210,9 @@ describe('useFormData() hook', () => {
         return onChangeSpy.mock.calls[onChangeSpy.mock.calls.length - 1][0] as HookReturn;
       };
 
-      const TestComp = ({ onChange }: Props) => {
+      const TestComp = ({ onChange }: Props<Form1>) => {
         const { form } = useForm();
-        const hookValue = useFormData({ form });
+        const hookValue = useFormData<Form1>({ form });
 
         useEffect(() => {
           onChange(hookValue);

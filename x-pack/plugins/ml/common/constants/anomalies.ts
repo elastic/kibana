@@ -21,6 +21,15 @@ export enum ANOMALY_THRESHOLD {
   LOW = 0,
 }
 
+export const SEVERITY_COLORS = {
+  CRITICAL: '#fe5050',
+  MAJOR: '#fba740',
+  MINOR: '#fdec25',
+  WARNING: '#8bc8fb',
+  LOW: '#d2e9f7',
+  BLANK: '#ffffff',
+};
+
 export const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
 export const JOB_ID = 'job_id';
 export const PARTITION_FIELD_VALUE = 'partition_field_value';

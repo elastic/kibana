@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mockLogger } from '../test_utils';
+
 import { createBuffer, Entity, OperationError, BulkOperation } from './bulk_operation_buffer';
 import { mapErr, asOk, asErr, Ok, Err } from './result_type';
-import { mockLogger } from '../test_utils';
 
 interface TaskInstance extends Entity {
   attempts: number;
@@ -68,7 +69,7 @@ describe('Bulk Operation Buffer', () => {
       const task3 = createTask();
       const task4 = createTask();
 
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
         Promise.all([bufferedUpdate(task1), bufferedUpdate(task2)]).then((_) => {
           expect(bulkUpdate).toHaveBeenCalledTimes(1);
           expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
@@ -145,7 +146,7 @@ describe('Bulk Operation Buffer', () => {
         expect(bulkUpdate).toHaveBeenCalledTimes(1);
         expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
 
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
           const futureUpdates = Promise.all([bufferedUpdate(task3), bufferedUpdate(task4)]);
 
           setTimeout(() => {

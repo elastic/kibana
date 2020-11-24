@@ -7,7 +7,7 @@ pipelines that perform common transformations and
 enrichments on your data.  For example, you might remove a field,
 rename an existing field, or set a new field.
 
-You’ll find *Ingest Node Pipelines* in *Stack Management > Ingest*. With this feature, you can:
+To begin, open the main menu, then click *Stack Management > Ingest Node Pipelines*. With *Ingest Node Pipelines*, you can:
 
 * View a list of your pipelines and drill down into details.
 * Create a pipeline that defines a series of tasks, known as processors.
@@ -23,7 +23,7 @@ image:management/ingest-pipelines/images/ingest-pipeline-list.png["Ingest node p
 The minimum required permissions to access *Ingest Node Pipelines* are
 the `manage_pipeline` and `cluster:monitor/nodes/info` cluster privileges.
 
-You can add these privileges in *Stack Management > Security > Roles*.
+To add privileges, open the main menu, then click *Stack Management > Roles*.
 
 [role="screenshot"]
 image:management/ingest-pipelines/images/ingest-pipeline-privileges.png["Privileges required for Ingest Node Pipelines"]
@@ -62,11 +62,40 @@ You also want to know where the request is coming from.
 
 . In *Ingest Node Pipelines*, click *Create a pipeline*.
 . Provide a name and description for the pipeline.
-. Define the processors:
+. Add a grok processor to parse the log message:
+
+.. Click *Add a processor* and select the *Grok* processor type.
+.. Set the field input to `message` and enter the following grok pattern:
 +
 [source,js]
 ----------------------------------
-[
+%{IPORHOST:clientip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{DATA:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response:int} (?:-|%{NUMBER:bytes:int}) %{QS:referrer} %{QS:agent}
+----------------------------------
++
+.. Click *Update* to save the processor.
+
+. Add processors to map the date, IP, and user agent fields.
+
+.. Map the appropriate field to each processor type:
++
+--
+* **Date**: `timestamp`
+* **GeoIP**: `clientip`
+* **User agent**: `agent`
+
+For the **Date** processor, you also need to specify the date format you want to use: `dd/MMM/YYYY:HH:mm:ss Z`.
+--
+Your form should look similar to this:
++
+[role="screenshot"]
+image:management/ingest-pipelines/images/ingest-pipeline-processor.png["Processors for Ingest Node Pipelines"]
++
+Alternatively, you can click the **Import processors** link and define the processors as JSON:
++
+[source,js]
+----------------------------------
+{
+  "processors": [
     {
       "grok": {
         "field": "message",
@@ -90,19 +119,16 @@ You also want to know where the request is coming from.
       }
     }
   ]
+}
 ----------------------------------
 +
-This code defines four {ref}/ingest-processors.html[processors] that run sequentially:
+The four {ref}/ingest-processors.html[processors] will run sequentially:
 {ref}/grok-processor.html[grok], {ref}/date-processor.html[date],
-{ref}/geoip-processor.html[geoip], and {ref}/user-agent-processor.html[user_agent].
-Your form should look similar to this:
-+
-[role="screenshot"]
-image:management/ingest-pipelines/images/ingest-pipeline-processor.png["Processors for Ingest Node Pipelines"]
+{ref}/geoip-processor.html[geoip], and {ref}/user-agent-processor.html[user_agent]. You can reorder processors using the arrow icon next to each processor. 
 
-. To verify that the pipeline gives the expected outcome, click *Test pipeline*.
+. To test the pipeline to verify that it produces the expected results, click *Add documents*.
 
-. In the *Document* tab, provide the following sample document for testing:
+. In the *Documents* tab, provide a sample document for testing:
 +
 [source,js]
 ----------------------------------

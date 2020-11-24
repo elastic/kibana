@@ -19,7 +19,7 @@ More details are available in the https://www.typescriptlang.org/docs/handbook/p
 ==== Caveats
 This architecture imposes several limitations to which we must comply:
 
-- Projects cannot have circular dependencies. Even though the Kibana platform doesn't support circular dependencies between Kibana plugins, TypeScript (and ES6 modules) does allow circular imports between files. So in theory, you may face a problem when migrating to the TS project references and you will have to resolve this circular dependency.
+- Projects cannot have circular dependencies. Even though the Kibana platform doesn't support circular dependencies between Kibana plugins, TypeScript (and ES6 modules) does allow circular imports between files. So in theory, you may face a problem when migrating to the TS project references and you will have to resolve this circular dependency. https://github.com/elastic/kibana/issues/78162 is going to provide a tool to find such problem places.
 - A project must emit its type declaration. It's not always possible to generate a type declaration if the compiler cannot infer a type. There are two basic cases:
 
 1. Your plugin exports a type inferring an internal type declared in Kibana codebase. In this case, you'll have to either export an internal type or to declare an exported type explicitly.
@@ -27,11 +27,12 @@ This architecture imposes several limitations to which we must comply:
 
 [discrete]
 ==== Prerequisites
-Since `tsc` doesn't support circular project references, the migration order does matter. You can migrate your plugin only when all the plugin dependencies already have migrated. It creates a situation where commonly used plugins (such as `data` or `kibana_react`) have to migrate first.
+Since project refs rely on generated `d.ts` files, the migration order does matter. You can migrate your plugin only when all the plugin dependencies already have migrated. It creates a situation where commonly used plugins (such as `data` or `kibana_react`) have to migrate first.
+Run `node scripts/find_plugins_without_ts_refs.js --id your_plugin_id` to get a list of plugins that should be switched to TS project refs to unblock your plugin migration.
 
 [discrete]
 ==== Implementation
-- Make sure all the plugins listed as dependencies in `kibana.json` file have migrated to TS project references.
+- Make sure all the plugins listed as dependencies in *requiredPlugins*, *optionalPlugins* & *requiredBundles* properties of `kibana.json` manifest file have migrated to TS project references.
 - Add `tsconfig.json` in the root folder of your plugin.
 [source,json]
 ----

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const ALL_ACTIONS = '[data-test-subj="rules-details-popover-button-icon"]';
+
 export const ABOUT_INVESTIGATION_NOTES = '[data-test-subj="stepAboutDetailsNoteContent"]';
 
 export const ABOUT_RULE_DESCRIPTION = '[data-test-subj=stepAboutRuleDetailsToggleDescriptionText]';
@@ -24,13 +26,15 @@ export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
 
+export const DELETE_RULE = '[data-test-subj=rules-details-delete-rule]';
+
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
 export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
-export const INVESTIGATION_NOTES_TOGGLE = 1;
+export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
 
 export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJobId"]';
 
@@ -71,3 +75,6 @@ export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
 
 export const getDetails = (title: string) =>
   cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
+
+export const removeExternalLinkText = (str: string) =>
+  str.replace(/\(opens in a new tab or window\)/g, '');

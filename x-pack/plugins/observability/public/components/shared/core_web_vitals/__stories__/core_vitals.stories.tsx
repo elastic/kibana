@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { CoreVitalItem } from '../core_vital_item';
-import { LCP_LABEL } from '../translations';
+import { LCP_HELP_LABEL, LCP_LABEL } from '../translations';
 import { EuiThemeProvider } from '../../../../typings';
 
 const KibanaReactContext = createKibanaReactContext(({
@@ -40,6 +40,7 @@ export function Basic() {
       title={LCP_LABEL}
       value={'0.00s'}
       loading={false}
+      helpLabel={LCP_HELP_LABEL}
     />
   );
 }
@@ -52,6 +53,7 @@ export function FiftyPercentGood() {
       value={'0.00s'}
       loading={false}
       ranks={[50, 25, 25]}
+      helpLabel={LCP_HELP_LABEL}
     />
   );
 }
@@ -64,6 +66,7 @@ export function OneHundredPercentBad() {
       value={'0.00s'}
       loading={false}
       ranks={[0, 0, 100]}
+      helpLabel={LCP_HELP_LABEL}
     />
   );
 }
@@ -76,6 +79,7 @@ export function OneHundredPercentAverage() {
       value={'0.00s'}
       loading={false}
       ranks={[0, 100, 0]}
+      helpLabel={LCP_HELP_LABEL}
     />
   );
 }

@@ -17,16 +17,13 @@
  * under the License.
  */
 
+import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../core/server/mocks';
 import {
-  savedObjectsRepositoryMock,
-  loggingSystemMock,
-  elasticsearchServiceMock,
-} from '../../../../../core/server/mocks';
-import {
-  CollectorOptions,
+  Collector,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import {
   ROLL_INDICES_START,
   ROLL_TOTAL_INDICES_INTERVAL,
@@ -43,18 +40,17 @@ describe('telemetry_application_usage', () => {
 
   const logger = loggingSystemMock.createLogger();
 
-  let collector: CollectorOptions;
+  let collector: Collector<unknown, unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
-    collector = config;
+    collector = new Collector(logger, config);
     return createUsageCollectionSetupMock().makeUsageCollector(config);
   });
 
   const getUsageCollector = jest.fn();
   const registerType = jest.fn();
-  const callCluster = jest.fn();
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeAll(() =>
     registerApplicationUsageCollector(logger, usageCollectionMock, registerType, getUsageCollector)
@@ -67,7 +63,7 @@ describe('telemetry_application_usage', () => {
 
   test('if no savedObjectClient initialised, return undefined', async () => {
     expect(collector.isReady()).toBe(false);
-    expect(await collector.fetch(callCluster, esClient)).toBeUndefined();
+    expect(await collector.fetch(mockedFetchContext)).toBeUndefined();
     jest.runTimersToTime(ROLL_INDICES_START);
   });
 
@@ -85,7 +81,7 @@ describe('telemetry_application_usage', () => {
     jest.runTimersToTime(ROLL_TOTAL_INDICES_INTERVAL); // Force rollTotals to run
 
     expect(collector.isReady()).toBe(true);
-    expect(await collector.fetch(callCluster, esClient)).toStrictEqual({});
+    expect(await collector.fetch(mockedFetchContext)).toStrictEqual({});
     expect(savedObjectClient.bulkCreate).not.toHaveBeenCalled();
   });
 
@@ -142,7 +138,7 @@ describe('telemetry_application_usage', () => {
 
     jest.runTimersToTime(ROLL_TOTAL_INDICES_INTERVAL); // Force rollTotals to run
 
-    expect(await collector.fetch(callCluster, esClient)).toStrictEqual({
+    expect(await collector.fetch(mockedFetchContext)).toStrictEqual({
       appId: {
         clicks_total: total + 1 + 10,
         clicks_7_days: total + 1,
@@ -202,7 +198,7 @@ describe('telemetry_application_usage', () => {
 
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
-    expect(await collector.fetch(callCluster, esClient)).toStrictEqual({
+    expect(await collector.fetch(mockedFetchContext)).toStrictEqual({
       appId: {
         clicks_total: 1,
         clicks_7_days: 0,

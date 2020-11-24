@@ -30,7 +30,6 @@ import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
 import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../common/constants/ml_url_generator';
-import { PLUGIN_ID } from '../../../../common/constants/app';
 /*
  * Component for rendering the links menu inside a cell in the anomalies table.
  */
@@ -147,8 +146,6 @@ class LinksMenuUI extends Component {
   viewSeries = async () => {
     const {
       services: {
-        application: { navigateToApp },
-
         share: {
           urlGenerators: { getUrlGenerator },
         },
@@ -185,13 +182,13 @@ class LinksMenuUI extends Component {
     }
 
     const singleMetricViewerLink = await mlUrlGenerator.createUrl({
-      excludeBasePath: true,
+      excludeBasePath: false,
       page: ML_PAGES.SINGLE_METRIC_VIEWER,
       pageState: {
         jobIds: [record.job_id],
         refreshInterval: {
           display: 'Off',
-          pause: false,
+          pause: true,
           value: 0,
         },
         timeRange: {
@@ -211,9 +208,7 @@ class LinksMenuUI extends Component {
         },
       },
     });
-    await navigateToApp(PLUGIN_ID, {
-      path: singleMetricViewerLink,
-    });
+    window.open(singleMetricViewerLink, '_blank');
   };
 
   viewExamples = () => {
@@ -307,7 +302,7 @@ class LinksMenuUI extends Component {
           const _g = rison.encode({
             refreshInterval: {
               display: 'Off',
-              pause: false,
+              pause: true,
               value: 0,
             },
             time: {

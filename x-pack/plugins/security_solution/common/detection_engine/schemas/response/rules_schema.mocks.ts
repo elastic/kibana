@@ -111,6 +111,74 @@ export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): R
   };
 };
 
+/**
+ * Useful for e2e backend tests where it doesn't have date time and other
+ * server side properties attached to it.
+ */
+export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<RulesSchema> => {
+  return {
+    author: [],
+    created_by: 'elastic',
+    description: 'Detecting root and admin users',
+    enabled,
+    false_positives: [],
+    from: 'now-6m',
+    immutable: false,
+    interval: '5m',
+    rule_id: 'rule-1',
+    output_index: '.siem-signals-default',
+    max_signals: 100,
+    risk_score: 55,
+    risk_score_mapping: [],
+    name: 'Query with a rule id',
+    references: [],
+    severity: 'high',
+    severity_mapping: [],
+    updated_by: 'elastic',
+    tags: [],
+    to: 'now',
+    type: 'threat_match',
+    threat: [],
+    version: 1,
+    exceptions_list: [],
+    actions: [],
+    throttle: 'no_actions',
+    query: 'user.name: root or user.name: admin',
+    language: 'kuery',
+    threat_query: '*:*',
+    threat_index: ['list-index'],
+    threat_mapping: [
+      {
+        entries: [
+          {
+            field: 'host.name',
+            value: 'host.name',
+            type: 'mapping',
+          },
+        ],
+      },
+    ],
+    threat_filters: [
+      {
+        bool: {
+          must: [
+            {
+              query_string: {
+                query: 'host.name: linux',
+                analyze_wildcard: true,
+                time_zone: 'Zulu',
+              },
+            },
+          ],
+          filter: [],
+          should: [],
+          must_not: [],
+        },
+      },
+    ],
+  };
+};
+
 export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
   return {
     ...getRulesSchemaMock(anchorDate),

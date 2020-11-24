@@ -2,6 +2,8 @@ include::introduction.asciidoc[]
 
 include::whats-new.asciidoc[]
 
+include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
+
 include::setup.asciidoc[]
 
 include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
@@ -10,8 +12,6 @@ include::monitoring/viewing-metrics.asciidoc[leveloffset=+2]
 include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
 
 include::security/securing-kibana.asciidoc[]
-
-include::getting-started.asciidoc[]
 
 include::discover.asciidoc[]
 
@@ -27,13 +27,7 @@ include::graph/index.asciidoc[]
 
 include::{kib-repo-dir}/observability/index.asciidoc[]
 
-include::{kib-repo-dir}/logs/index.asciidoc[]
-
-include::{kib-repo-dir}/infrastructure/index.asciidoc[]
-
 include::{kib-repo-dir}/apm/index.asciidoc[]
-
-include::{kib-repo-dir}/uptime/index.asciidoc[]
 
 include::{kib-repo-dir}/siem/index.asciidoc[]
 
@@ -43,7 +37,7 @@ include::monitoring/index.asciidoc[]
 
 include::management.asciidoc[]
 
-include::{kib-repo-dir}/ingest_manager/ingest-manager.asciidoc[]
+include::{kib-repo-dir}/fleet/fleet.asciidoc[]
 
 include::reporting/index.asciidoc[]
 

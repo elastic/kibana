@@ -120,7 +120,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       id: 'details',
       name: (
         <FormattedMessage
-          id="xpack.ml.inference.modelsList.expandedRow.detailsTabLabel"
+          id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTabLabel"
           defaultMessage="Details"
         />
       ),
@@ -133,7 +133,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 <EuiTitle size={'xs'}>
                   <h5>
                     <FormattedMessage
-                      id="xpack.ml.inference.modelsList.expandedRow.detailsTitle"
+                      id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTitle"
                       defaultMessage="Details"
                     />
                   </h5>
@@ -156,7 +156,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             id: 'config',
             name: (
               <FormattedMessage
-                id="xpack.ml.inference.modelsList.expandedRow.configTabLabel"
+                id="xpack.ml.trainedModels.modelsList.expandedRow.configTabLabel"
                 defaultMessage="Config"
               />
             ),
@@ -169,7 +169,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                       <EuiTitle size={'xs'}>
                         <h5>
                           <FormattedMessage
-                            id="xpack.ml.inference.modelsList.expandedRow.inferenceConfigTitle"
+                            id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceConfigTitle"
                             defaultMessage="Inference configuration"
                           />
                         </h5>
@@ -190,7 +190,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                         <EuiTitle size={'xs'}>
                           <h5>
                             <FormattedMessage
-                              id="xpack.ml.inference.modelsList.expandedRow.analyticsConfigTitle"
+                              id="xpack.ml.trainedModels.modelsList.expandedRow.analyticsConfigTitle"
                               defaultMessage="Analytics configuration"
                             />
                           </h5>
@@ -214,7 +214,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       id: 'stats',
       name: (
         <FormattedMessage
-          id="xpack.ml.inference.modelsList.expandedRow.statsTabLabel"
+          id="xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel"
           defaultMessage="Stats"
         />
       ),
@@ -228,7 +228,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                   <EuiTitle size={'xs'}>
                     <h5>
                       <FormattedMessage
-                        id="xpack.ml.inference.modelsList.expandedRow.inferenceStatsTitle"
+                        id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceStatsTitle"
                         defaultMessage="Inference stats"
                       />
                     </h5>
@@ -248,7 +248,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                   <EuiTitle size={'xs'}>
                     <h5>
                       <FormattedMessage
-                        id="xpack.ml.inference.modelsList.expandedRow.ingestStatsTitle"
+                        id="xpack.ml.trainedModels.modelsList.expandedRow.ingestStatsTitle"
                         defaultMessage="Ingest stats"
                       />
                     </h5>
@@ -266,7 +266,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                       <EuiTitle size={'xs'}>
                         <h5>
                           <FormattedMessage
-                            id="xpack.ml.inference.modelsList.expandedRow.byPipelineTitle"
+                            id="xpack.ml.trainedModels.modelsList.expandedRow.byPipelineTitle"
                             defaultMessage="By pipeline"
                           />
                         </h5>
@@ -300,7 +300,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                               <EuiTitle size={'xxs'}>
                                 <h6>
                                   <FormattedMessage
-                                    id="xpack.ml.inference.modelsList.expandedRow.byProcessorTitle"
+                                    id="xpack.ml.trainedModels.modelsList.expandedRow.byProcessorTitle"
                                     defaultMessage="By processor"
                                   />
                                 </h6>
@@ -354,7 +354,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             name: (
               <>
                 <FormattedMessage
-                  id="xpack.ml.inference.modelsList.expandedRow.pipelinesTabLabel"
+                  id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
                   defaultMessage="Pipelines"
                 />{' '}
                 <EuiNotificationBadge>{stats.pipeline_count}</EuiNotificationBadge>
@@ -390,7 +390,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                                 }}
                               >
                                 <FormattedMessage
-                                  id="xpack.ml.inference.modelsList.expandedRow.editPipelineLabel"
+                                  id="xpack.ml.trainedModels.modelsList.expandedRow.editPipelineLabel"
                                   defaultMessage="Edit"
                                 />
                               </EuiButtonEmpty>
@@ -402,7 +402,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                           <EuiTitle size={'xxs'}>
                             <h6>
                               <FormattedMessage
-                                id="xpack.ml.inference.modelsList.expandedRow.processorsTitle"
+                                id="xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle"
                                 defaultMessage="Processors"
                               />
                             </h6>

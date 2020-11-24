@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
@@ -34,8 +35,8 @@ import {
   GetFieldsOptions,
   IndexPatternSpec,
   IndexPatternAttributes,
+  FieldAttrs,
   FieldSpec,
-  FieldFormatMap,
   IndexPatternFieldMap,
 } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
@@ -98,11 +99,12 @@ export class IndexPatternsService {
    * Refresh cache of index pattern ids and titles
    */
   private async refreshSavedObjectsCache() {
-    this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+    const so = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
       fields: ['title'],
       perPage: 10000,
     });
+    this.savedObjectsCache = so;
   }
 
   /**
@@ -195,33 +197,17 @@ export class IndexPatternsService {
     }
   };
 
-  private isFieldRefreshRequired(specs?: IndexPatternFieldMap): boolean {
-    if (!specs) {
-      return true;
-    }
-
-    return Object.values(specs).every((spec) => {
-      // See https://github.com/elastic/kibana/pull/8421
-      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
-
-      // See https://github.com/elastic/kibana/pull/11969
-      const hasDocValuesFlag = 'readFromDocValues' in spec;
-
-      return !hasFieldCaps || !hasDocValuesFlag;
-    });
-  }
-
   /**
    * Get field list by providing { pattern }
    * @param options
    */
-  getFieldsForWildcard = async (options: GetFieldsOptions = {}) => {
+  getFieldsForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
-      params: options.params || {},
+      rollupIndex: options.rollupIndex,
     });
   };
 
@@ -231,13 +217,13 @@ export class IndexPatternsService {
    */
   getFieldsForIndexPattern = async (
     indexPattern: IndexPattern | IndexPatternSpec,
-    options: GetFieldsOptions = {}
+    options?: GetFieldsOptions
   ) =>
     this.getFieldsForWildcard({
-      pattern: indexPattern.title as string,
-      ...options,
       type: indexPattern.type,
-      params: indexPattern.typeMeta && indexPattern.typeMeta.params,
+      rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
+      ...options,
+      pattern: indexPattern.title as string,
     });
 
   /**
@@ -248,7 +234,11 @@ export class IndexPatternsService {
     try {
       const fields = await this.getFieldsForIndexPattern(indexPattern);
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
-      indexPattern.fields.replaceAll([...fields, ...scripted]);
+      const fieldAttrs = indexPattern.getFieldAttrs();
+      const fieldsWithSavedAttrs = Object.values(
+        this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
+      );
+      indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -274,12 +264,13 @@ export class IndexPatternsService {
     fields: IndexPatternFieldMap,
     id: string,
     title: string,
-    options: GetFieldsOptions
+    options: GetFieldsOptions,
+    fieldAttrs: FieldAttrs = {}
   ) => {
     const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
-      const newFields = await this.getFieldsForWildcard(options);
-      return this.fieldArrayToMap([...newFields, ...scriptdFields]);
+      const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
+      return this.fieldArrayToMap([...newFields, ...scriptdFields], fieldAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -292,31 +283,21 @@ export class IndexPatternsService {
           values: { id, title },
         }),
       });
+      throw err;
     }
-    return fields;
-  };
-
-  /**
-   * Applies a set of formats to a set of fields
-   * @param fieldSpecs
-   * @param fieldFormatMap
-   */
-  private addFormatsToFields = (fieldSpecs: FieldSpec[], fieldFormatMap: FieldFormatMap) => {
-    Object.entries(fieldFormatMap).forEach(([fieldName, value]) => {
-      const field = fieldSpecs.find((fld: FieldSpec) => fld.name === fieldName);
-      if (field) {
-        field.format = value;
-      }
-    });
   };
 
   /**
    * Converts field array to map
    * @param fields
    */
-  fieldArrayToMap = (fields: FieldSpec[]) =>
+  fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
-      collector[field.name] = field;
+      collector[field.name] = {
+        ...field,
+        customLabel: fieldAttrs?.[field.name]?.customLabel,
+        count: fieldAttrs?.[field.name]?.count,
+      };
       return collector;
     }, {});
 
@@ -338,6 +319,7 @@ export class IndexPatternsService {
         fieldFormatMap,
         typeMeta,
         type,
+        fieldAttrs,
       },
     } = savedObject;
 
@@ -345,8 +327,8 @@ export class IndexPatternsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
 
-    this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
     return {
       id,
       version,
@@ -354,23 +336,15 @@ export class IndexPatternsService {
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
-      fields: this.fieldArrayToMap(parsedFields),
+      fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
       typeMeta: parsedTypeMeta,
       type,
+      fieldFormats: parsedFieldFormatMap,
+      fieldAttrs: parsedFieldAttrs,
     };
   };
 
-  /**
-   * Get an index pattern by id. Cache optimized
-   * @param id
-   */
-
-  get = async (id: string): Promise<IndexPattern> => {
-    const cache = indexPatternCache.get(id);
-    if (cache) {
-      return cache;
-    }
-
+  private getSavedObjectAndInit = async (id: string): Promise<IndexPattern> => {
     const savedObject = await this.savedObjectsClient.get<IndexPatternAttributes>(
       savedObjectType,
       id
@@ -382,23 +356,24 @@ export class IndexPatternsService {
 
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta } = spec;
-    const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
-      ? JSON.parse(savedObject.attributes.fieldFormatMap)
+    spec.fieldAttrs = savedObject.attributes.fieldAttrs
+      ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
 
-    const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
-    let isSaveRequired = isFieldRefreshRequired;
     try {
-      spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
-            pattern: title,
-            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-            type,
-            params: typeMeta && typeMeta.params,
-          })
-        : spec.fields;
+      spec.fields = await this.refreshFieldSpecMap(
+        spec.fields || {},
+        id,
+        spec.title as string,
+        {
+          pattern: title as string,
+          metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+          type,
+          rollupIndex: typeMeta?.params?.rollup_index,
+        },
+        spec.fieldAttrs
+      );
     } catch (err) {
-      isSaveRequired = false;
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({
           title: (err as any).message,
@@ -415,34 +390,30 @@ export class IndexPatternsService {
       }
     }
 
-    Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
-      const field = spec.fields?.[fieldName];
-      if (field) {
-        field.format = value;
-      }
-    });
+    spec.fieldFormats = savedObject.attributes.fieldFormatMap
+      ? JSON.parse(savedObject.attributes.fieldFormatMap)
+      : {};
 
     const indexPattern = await this.create(spec, true);
-    indexPatternCache.set(id, indexPattern);
-    if (isSaveRequired) {
-      try {
-        this.updateSavedObject(indexPattern);
-      } catch (err) {
-        this.onError(err, {
-          title: i18n.translate('data.indexPatterns.fetchFieldSaveErrorTitle', {
-            defaultMessage:
-              'Error saving after fetching fields for index pattern {title} (ID: {id})',
-            values: {
-              id: indexPattern.id,
-              title: indexPattern.title,
-            },
-          }),
-        });
-      }
-    }
-
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
+  };
+
+  /**
+   * Get an index pattern by id. Cache optimized
+   * @param id
+   */
+
+  get = async (id: string): Promise<IndexPattern> => {
+    const indexPatternPromise =
+      indexPatternCache.get(id) || indexPatternCache.set(id, this.getSavedObjectAndInit(id));
+
+    // don't cache failed requests
+    indexPatternPromise.catch(() => {
+      indexPatternCache.clear(id);
+    });
+
+    return indexPatternPromise;
   };
 
   /**
@@ -456,7 +427,6 @@ export class IndexPatternsService {
 
     const indexPattern = new IndexPattern({
       spec,
-      savedObjectsClient: this.savedObjectsClient,
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
       metaFields,
@@ -504,7 +474,7 @@ export class IndexPatternsService {
       id: indexPattern.id,
     });
     indexPattern.id = response.id;
-    indexPatternCache.set(indexPattern.id, indexPattern);
+    indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
     return indexPattern;
   }
 

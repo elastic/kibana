@@ -63,6 +63,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
+      const alertUpdatedAt = response.body.updatedAt;
       dates.push(response.body.executionStatus.lastExecutionDate);
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
@@ -70,6 +71,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       dates.push(executionStatus.lastExecutionDate);
       dates.push(Date.now());
       ensureDatetimesAreOrdered(dates);
+      ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -97,6 +99,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
+      const alertUpdatedAt = response.body.updatedAt;
       dates.push(response.body.executionStatus.lastExecutionDate);
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
@@ -104,6 +107,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       dates.push(executionStatus.lastExecutionDate);
       dates.push(Date.now());
       ensureDatetimesAreOrdered(dates);
+      ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -128,6 +132,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
+      const alertUpdatedAt = response.body.updatedAt;
       dates.push(response.body.executionStatus.lastExecutionDate);
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
@@ -135,6 +140,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       dates.push(executionStatus.lastExecutionDate);
       dates.push(Date.now());
       ensureDatetimesAreOrdered(dates);
+      ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
       // Ensure AAD isn't broken
       await checkAAD({
@@ -162,12 +168,14 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
+      const alertUpdatedAt = response.body.updatedAt;
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       const executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
       expect(executionStatus.error.reason).to.be('execute');
       expect(executionStatus.error.message).to.be('this alert is intended to fail');
+      ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
     });
 
     it('should eventually have error reason "unknown" when appropriate', async () => {
@@ -183,6 +191,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
+      const alertUpdatedAt = response.body.updatedAt;
       objectRemover.add(Spaces.space1.id, alertId, 'alert', 'alerts');
 
       let executionStatus = await waitForStatus(alertId, new Set(['ok']));
@@ -201,6 +210,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
       expect(executionStatus.error.reason).to.be('unknown');
+      ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
       const message = 'params invalid: [param1]: expected value of type [string] but got [number]';
       expect(executionStatus.error.message).to.be(message);
@@ -256,14 +266,16 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${id}`
     );
     expect(response.status).to.eql(200);
-    const { status } = response.body.executionStatus;
+
+    const { executionStatus } = response.body || {};
+    const { status } = executionStatus || {};
 
     const message = `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(
-      response.body.executionStatus
+      executionStatus
     )}`;
 
     if (statuses.has(status)) {
-      return response.body.executionStatus;
+      return executionStatus;
     }
 
     // eslint-disable-next-line no-console
@@ -287,13 +299,14 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/${findUri}`);
 
     expect(response.status).to.eql(200);
-    const { executionStatus } = response.body.data.find((obj: any) => obj.id === id);
+    const { executionStatus } = response.body.data.find((obj: any) => obj.id === id) || {};
+    const { status } = executionStatus || {};
 
     const message = `waitForFindStatus(${Array.from(statuses)}): got ${JSON.stringify(
       executionStatus
     )}`;
 
-    if (statuses.has(executionStatus.status)) {
+    if (statuses.has(status)) {
       return executionStatus;
     }
 
@@ -303,9 +316,22 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     await delay(WaitForStatusIncrement);
     return await waitForStatus(id, statuses, waitMillis - WaitForStatusIncrement);
   }
+
+  async function ensureAlertUpdatedAtHasNotChanged(alertId: string, originalUpdatedAt: string) {
+    const response = await supertest.get(
+      `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${alertId}`
+    );
+    const { updatedAt, executionStatus } = response.body;
+    expect(Date.parse(updatedAt)).to.be.greaterThan(0);
+    expect(Date.parse(updatedAt)).to.eql(Date.parse(originalUpdatedAt));
+    expect(Date.parse(executionStatus.lastExecutionDate)).to.be.greaterThan(
+      Date.parse(originalUpdatedAt)
+    );
+  }
 }
 
 function expectErrorExecutionStatus(executionStatus: Record<string, any>, startDate: number) {
+  expect(executionStatus).to.be.ok();
   expect(executionStatus.status).to.equal('error');
 
   const statusDate = Date.parse(executionStatus.lastExecutionDate);

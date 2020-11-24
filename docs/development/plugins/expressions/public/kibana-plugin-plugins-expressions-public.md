@@ -55,9 +55,7 @@
 |  [ExecutionParams](./kibana-plugin-plugins-expressions-public.executionparams.md) |  |
 |  [ExecutionState](./kibana-plugin-plugins-expressions-public.executionstate.md) |  |
 |  [ExecutorState](./kibana-plugin-plugins-expressions-public.executorstate.md) |  |
-|  [ExpressionAstExpression](./kibana-plugin-plugins-expressions-public.expressionastexpression.md) |  |
 |  [ExpressionAstExpressionBuilder](./kibana-plugin-plugins-expressions-public.expressionastexpressionbuilder.md) |  |
-|  [ExpressionAstFunction](./kibana-plugin-plugins-expressions-public.expressionastfunction.md) |  |
 |  [ExpressionAstFunctionBuilder](./kibana-plugin-plugins-expressions-public.expressionastfunctionbuilder.md) |  |
 |  [ExpressionExecutor](./kibana-plugin-plugins-expressions-public.expressionexecutor.md) |  |
 |  [ExpressionFunctionDefinition](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinition.md) | <code>ExpressionFunctionDefinition</code> is the interface plugins have to implement to register a function in <code>expressions</code> plugin. |
@@ -74,10 +72,6 @@
 |  [IExpressionLoaderParams](./kibana-plugin-plugins-expressions-public.iexpressionloaderparams.md) |  |
 |  [IInterpreterRenderHandlers](./kibana-plugin-plugins-expressions-public.iinterpreterrenderhandlers.md) |  |
 |  [IRegistry](./kibana-plugin-plugins-expressions-public.iregistry.md) |  |
-|  [KibanaDatatable](./kibana-plugin-plugins-expressions-public.kibanadatatable.md) |  |
-|  [KibanaDatatableColumn](./kibana-plugin-plugins-expressions-public.kibanadatatablecolumn.md) |  |
-|  [KibanaDatatableColumnMeta](./kibana-plugin-plugins-expressions-public.kibanadatatablecolumnmeta.md) |  |
-|  [KibanaDatatableRow](./kibana-plugin-plugins-expressions-public.kibanadatatablerow.md) |  |
 |  [PointSeriesColumn](./kibana-plugin-plugins-expressions-public.pointseriescolumn.md) | Column in a PointSeries |
 |  [Range](./kibana-plugin-plugins-expressions-public.range.md) |  |
 |  [ReactExpressionRendererProps](./kibana-plugin-plugins-expressions-public.reactexpressionrendererprops.md) |  |
@@ -97,13 +91,14 @@
 |  [AnyExpressionFunctionDefinition](./kibana-plugin-plugins-expressions-public.anyexpressionfunctiondefinition.md) | Type to capture every possible expression function definition. |
 |  [AnyExpressionTypeDefinition](./kibana-plugin-plugins-expressions-public.anyexpressiontypedefinition.md) |  |
 |  [ArgumentType](./kibana-plugin-plugins-expressions-public.argumenttype.md) | This type represents all of the possible combinations of properties of an Argument in an Expression Function. The presence or absence of certain fields influence the shape and presence of others within each <code>arg</code> in the specification. |
-|  [DatatableColumnType](./kibana-plugin-plugins-expressions-public.datatablecolumntype.md) | This type represents the <code>type</code> of any <code>DatatableColumn</code> in a <code>Datatable</code>. |
+|  [DatatableColumnType](./kibana-plugin-plugins-expressions-public.datatablecolumntype.md) | This type represents the <code>type</code> of any <code>DatatableColumn</code> in a <code>Datatable</code>. its duplicated from KBN\_FIELD\_TYPES |
 |  [DatatableRow](./kibana-plugin-plugins-expressions-public.datatablerow.md) | This type represents a row in a <code>Datatable</code>. |
 |  [ExecutionContainer](./kibana-plugin-plugins-expressions-public.executioncontainer.md) |  |
 |  [ExecutorContainer](./kibana-plugin-plugins-expressions-public.executorcontainer.md) |  |
 |  [ExpressionAstArgument](./kibana-plugin-plugins-expressions-public.expressionastargument.md) |  |
+|  [ExpressionAstExpression](./kibana-plugin-plugins-expressions-public.expressionastexpression.md) |  |
+|  [ExpressionAstFunction](./kibana-plugin-plugins-expressions-public.expressionastfunction.md) |  |
 |  [ExpressionAstNode](./kibana-plugin-plugins-expressions-public.expressionastnode.md) |  |
-|  [ExpressionFunctionKibana](./kibana-plugin-plugins-expressions-public.expressionfunctionkibana.md) |  |
 |  [ExpressionRendererComponent](./kibana-plugin-plugins-expressions-public.expressionrenderercomponent.md) |  |
 |  [ExpressionsServiceSetup](./kibana-plugin-plugins-expressions-public.expressionsservicesetup.md) | The public contract that <code>ExpressionsService</code> provides to other plugins in Kibana Platform in \*setup\* life-cycle. |
 |  [ExpressionsSetup](./kibana-plugin-plugins-expressions-public.expressionssetup.md) | Expressions public setup contract, extends [ExpressionsServiceSetup](./kibana-plugin-plugins-expressions-public.expressionsservicesetup.md) |
@@ -114,13 +109,10 @@
 |  [ExpressionValueFilter](./kibana-plugin-plugins-expressions-public.expressionvaluefilter.md) | Represents an object that is a Filter. |
 |  [ExpressionValueNum](./kibana-plugin-plugins-expressions-public.expressionvaluenum.md) |  |
 |  [ExpressionValueRender](./kibana-plugin-plugins-expressions-public.expressionvaluerender.md) | Represents an object that is intended to be rendered. |
-|  [ExpressionValueSearchContext](./kibana-plugin-plugins-expressions-public.expressionvaluesearchcontext.md) |  |
 |  [ExpressionValueUnboxed](./kibana-plugin-plugins-expressions-public.expressionvalueunboxed.md) |  |
 |  [FontLabel](./kibana-plugin-plugins-expressions-public.fontlabel.md) | This type contains a unions of all supported font labels, or the the name of the font the user would see in a UI. |
 |  [FontValue](./kibana-plugin-plugins-expressions-public.fontvalue.md) | This type contains a union of all supported font values, equivalent to the CSS <code>font-value</code> property. |
 |  [InterpreterErrorType](./kibana-plugin-plugins-expressions-public.interpretererrortype.md) |  |
-|  [KIBANA\_CONTEXT\_NAME](./kibana-plugin-plugins-expressions-public.kibana_context_name.md) |  |
-|  [KibanaContext](./kibana-plugin-plugins-expressions-public.kibanacontext.md) |  |
 |  [KnownTypeToString](./kibana-plugin-plugins-expressions-public.knowntypetostring.md) | Map the type of the generic to a string-based representation of the type.<!-- -->If the provided generic is its own type interface, we use the value of the <code>type</code> key as a string literal type for it. |
 |  [PointSeries](./kibana-plugin-plugins-expressions-public.pointseries.md) | A <code>PointSeries</code> is a unique structure that represents dots on a chart. |
 |  [PointSeriesColumnName](./kibana-plugin-plugins-expressions-public.pointseriescolumnname.md) | Allowed column names in a PointSeries |

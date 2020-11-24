@@ -71,8 +71,7 @@ describe('reducer', () => {
   describe('TrustedAppsListResourceStateChanged', () => {
     it('sets the current list resource state', () => {
       const listResourceState = createListLoadedResourceState(
-        { index: 3, size: 50 },
-        200,
+        { pageIndex: 3, pageSize: 50 },
         initialNow
       );
       const result = trustedAppsPageReducer(

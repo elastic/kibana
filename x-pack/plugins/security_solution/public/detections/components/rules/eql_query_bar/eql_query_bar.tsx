@@ -27,14 +27,29 @@ export interface EqlQueryBarProps {
   dataTestSubj: string;
   field: FieldHook<DefineStepRule['queryBar']>;
   idAria?: string;
+  onValidityChange?: (arg: boolean) => void;
 }
 
-export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria }) => {
+export const EqlQueryBar: FC<EqlQueryBarProps> = ({
+  dataTestSubj,
+  field,
+  idAria,
+  onValidityChange,
+}) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
-  const { setValue } = field;
+  const { isValidating, setValue } = field;
   const { isValid, message, messages, error } = getValidationResults(field);
   const fieldValue = field.value.query.query as string;
+
+  // Bubbles up field validity to parent.
+  // Using something like form `getErrors` does
+  // not guarantee latest validity state
+  useEffect(() => {
+    if (onValidityChange != null) {
+      onValidityChange(isValid);
+    }
+  }, [isValid, onValidityChange]);
 
   useEffect(() => {
     setErrorMessages(messages ?? []);
@@ -81,7 +96,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({ dataTestSubj, field, idAria 
           value={fieldValue}
           onChange={handleChange}
         />
-        <EqlQueryBarFooter errors={errorMessages} />
+        <EqlQueryBarFooter errors={errorMessages} isLoading={isValidating} />
       </>
     </EuiFormRow>
   );

@@ -27,10 +27,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const { header } = getPageObjects(['header']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
-  const config = getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
   const elasticChart = getService('elasticChart');
   const docTable = getService('docTable');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
 
   class DiscoverPage {
     public async getChartTimespan() {
@@ -84,8 +84,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async waitUntilSearchingHasFinished() {
-      const spinner = await testSubjects.find('loadingSpinner');
-      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
+      await testSubjects.missingOrFail('loadingSpinner', { timeout: defaultFindTimeout * 10 });
     }
 
     public async getColumnHeaders() {
@@ -247,9 +246,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getAllFieldNames() {
       const sidebar = await testSubjects.find('discover-sidebar');
       const $ = await sidebar.parseDomContent();
-      return $('.dscSidebar__item[attr-field]')
+      return $('.dscSidebarField__name')
         .toArray()
-        .map((field) => $(field).find('span.eui-textTruncate').text());
+        .map((field) => $(field).text());
     }
 
     public async getSidebarWidth() {
@@ -350,7 +349,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async closeSidebarFieldFilter() {
       await testSubjects.click('toggleFieldFilterButton');
-      await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
+      await testSubjects.missingOrFail('filterSelectionPanel');
     }
 
     public async waitForChartLoadingComplete(renderCount: number) {

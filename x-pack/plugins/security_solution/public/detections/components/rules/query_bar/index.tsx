@@ -46,6 +46,7 @@ interface QueryBarDefineRuleProps {
   onCloseTimelineSearch: () => void;
   openTimelineSearch: boolean;
   resizeParentContainer?: (height: number) => void;
+  onValidityChange?: (arg: boolean) => void;
 }
 
 const StyledEuiFormRow = styled(EuiFormRow)`
@@ -74,6 +75,7 @@ export const QueryBarDefineRule = ({
   onCloseTimelineSearch,
   openTimelineSearch = false,
   resizeParentContainer,
+  onValidityChange,
 }: QueryBarDefineRuleProps) => {
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
@@ -85,6 +87,15 @@ export const QueryBarDefineRule = ({
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
 
   const savedQueryServices = useSavedQueryServices();
+
+  // Bubbles up field validity to parent.
+  // Using something like form `getErrors` does
+  // not guarantee latest validity state
+  useEffect((): void => {
+    if (onValidityChange != null) {
+      onValidityChange(!isInvalid);
+    }
+  }, [isInvalid, onValidityChange]);
 
   useEffect(() => {
     let isSubscribed = true;

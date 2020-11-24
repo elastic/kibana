@@ -59,7 +59,6 @@
 |  [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) | Data plugin prewired UI components |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-public.fieldformatconfig.md) |  |
-|  [FieldMappingSpec](./kibana-plugin-plugins-data-public.fieldmappingspec.md) |  |
 |  [IDataPluginServices](./kibana-plugin-plugins-data-public.idatapluginservices.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-public.ifieldsubtype.md) |  |
@@ -75,6 +74,7 @@
 |  [ISearchSetup](./kibana-plugin-plugins-data-public.isearchsetup.md) | The setup contract exposed by the Search plugin exposes the search strategy extension point. |
 |  [ISearchStart](./kibana-plugin-plugins-data-public.isearchstart.md) | search service |
 |  [ISearchStartSearchSource](./kibana-plugin-plugins-data-public.isearchstartsearchsource.md) | high level search service |
+|  [ISessionService](./kibana-plugin-plugins-data-public.isessionservice.md) |  |
 |  [KueryNode](./kibana-plugin-plugins-data-public.kuerynode.md) |  |
 |  [OptionedValueProp](./kibana-plugin-plugins-data-public.optionedvalueprop.md) |  |
 |  [QueryState](./kibana-plugin-plugins-data-public.querystate.md) | All query state service state |
@@ -108,7 +108,7 @@
 |  [esFilters](./kibana-plugin-plugins-data-public.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-public.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-public.esquery.md) |  |
-|  [expandShorthand](./kibana-plugin-plugins-data-public.expandshorthand.md) |  |
+|  [exporters](./kibana-plugin-plugins-data-public.exporters.md) |  |
 |  [extractSearchSourceReferences](./kibana-plugin-plugins-data-public.extractsearchsourcereferences.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [fieldList](./kibana-plugin-plugins-data-public.fieldlist.md) |  |
@@ -143,7 +143,11 @@
 |  [EsdslExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esdslexpressionfunctiondefinition.md) |  |
 |  [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |  |
 |  [EsRawResponseExpressionTypeDefinition](./kibana-plugin-plugins-data-public.esrawresponseexpressiontypedefinition.md) |  |
+|  [ExecutionContextSearch](./kibana-plugin-plugins-data-public.executioncontextsearch.md) |  |
 |  [ExistsFilter](./kibana-plugin-plugins-data-public.existsfilter.md) |  |
+|  [ExpressionFunctionKibana](./kibana-plugin-plugins-data-public.expressionfunctionkibana.md) |  |
+|  [ExpressionFunctionKibanaContext](./kibana-plugin-plugins-data-public.expressionfunctionkibanacontext.md) |  |
+|  [ExpressionValueSearchContext](./kibana-plugin-plugins-data-public.expressionvaluesearchcontext.md) |  |
 |  [FieldFormatId](./kibana-plugin-plugins-data-public.fieldformatid.md) |  id type is needed for creating custom converters. |
 |  [FieldFormatsContentType](./kibana-plugin-plugins-data-public.fieldformatscontenttype.md) | \* |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-public.fieldformatsgetconfigfn.md) |  |
@@ -160,10 +164,9 @@
 |  [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |  |
 |  [IndexPatternSelectProps](./kibana-plugin-plugins-data-public.indexpatternselectprops.md) |  |
 |  [InputTimeRange](./kibana-plugin-plugins-data-public.inputtimerange.md) |  |
-|  [ISearch](./kibana-plugin-plugins-data-public.isearch.md) |  |
 |  [ISearchGeneric](./kibana-plugin-plugins-data-public.isearchgeneric.md) |  |
 |  [ISearchSource](./kibana-plugin-plugins-data-public.isearchsource.md) | search source interface |
-|  [MappingObject](./kibana-plugin-plugins-data-public.mappingobject.md) |  |
+|  [KibanaContext](./kibana-plugin-plugins-data-public.kibanacontext.md) |  |
 |  [MatchAllFilter](./kibana-plugin-plugins-data-public.matchallfilter.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-public.parsedinterval.md) |  |
 |  [PhraseFilter](./kibana-plugin-plugins-data-public.phrasefilter.md) |  |

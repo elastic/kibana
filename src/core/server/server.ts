@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
 import { mapToObject } from '@kbn/std';
 import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
 import { CoreApp } from './core_app';
-import { AuditTrailService } from './audit_trail';
+import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
@@ -30,10 +31,11 @@ import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
-import { SavedObjectsService } from '../server/saved_objects';
+import { SavedObjectsService } from './saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
+// do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
 
 import { config as cspConfig } from './csp';
@@ -45,6 +47,7 @@ import { config as kibanaConfig } from './kibana_config';
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
+import { config as i18nConfig } from './i18n';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
@@ -72,8 +75,8 @@ export class Server {
   private readonly status: StatusService;
   private readonly logging: LoggingService;
   private readonly coreApp: CoreApp;
-  private readonly auditTrail: AuditTrailService;
   private readonly coreUsageData: CoreUsageDataService;
+  private readonly i18n: I18nService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -103,9 +106,9 @@ export class Server {
     this.status = new StatusService(core);
     this.coreApp = new CoreApp(core);
     this.httpResources = new HttpResourcesService(core);
-    this.auditTrail = new AuditTrailService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
+    this.i18n = new I18nService(core);
   }
 
   public async setup() {
@@ -115,7 +118,7 @@ export class Server {
     const environmentSetup = await this.environment.setup();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const { pluginTree, uiPlugins } = await this.plugins.discover({
+    const { pluginTree, pluginPaths, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
@@ -139,11 +142,12 @@ export class Server {
       ]),
     });
 
-    const auditTrailSetup = this.auditTrail.setup();
-
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
     });
+
+    // setup i18n prior to any other service, to have translations ready
+    const i18nServiceSetup = await this.i18n.setup({ http: httpSetup, pluginPaths });
 
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
@@ -195,12 +199,12 @@ export class Server {
       elasticsearch: elasticsearchServiceSetup,
       environment: environmentSetup,
       http: httpSetup,
+      i18n: i18nServiceSetup,
       savedObjects: savedObjectsSetup,
       status: statusSetup,
       uiSettings: uiSettingsSetup,
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
-      auditTrail: auditTrailSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
     };
@@ -225,11 +229,7 @@ export class Server {
     this.log.debug('starting server');
     const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
 
-    const auditTrailStart = this.auditTrail.start();
-
-    const elasticsearchStart = await this.elasticsearch.start({
-      auditTrail: auditTrailStart,
-    });
+    const elasticsearchStart = await this.elasticsearch.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -252,7 +252,6 @@ export class Server {
       metrics: metricsStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
-      auditTrail: auditTrailStart,
       coreUsageData: coreUsageDataStart,
     };
 
@@ -285,7 +284,6 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
-    await this.auditTrail.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
@@ -314,6 +312,7 @@ export class Server {
       opsConfig,
       statusConfig,
       pidConfig,
+      i18nConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
