@@ -26,9 +26,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { DisplaySettingsLogic } from './DisplaySettingsLogic';
+import { DisplaySettingsLogic } from './display_settings_logic';
 
-import { ExampleResultDetailCard } from './ExampleResultDetailCard';
+import { ExampleResultDetailCard } from './example_result_detail_card';
 
 export const ResultDetail: React.FC = () => {
   const {

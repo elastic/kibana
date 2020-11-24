@@ -11,11 +11,11 @@ import { useValues } from 'kea';
 
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
-import { DisplaySettingsLogic } from './DisplaySettingsLogic';
+import { DisplaySettingsLogic } from './display_settings_logic';
 
-import { CustomSourceIcon } from './CustomSourceIcon';
-import { SubtitleField } from './SubtitleField';
-import { TitleField } from './TitleField';
+import { CustomSourceIcon } from './custom_source_icon';
+import { SubtitleField } from './subtitle_field';
+import { TitleField } from './title_field';
 
 export const ExampleStandoutResult: React.FC = () => {
   const {

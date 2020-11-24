@@ -20,10 +20,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { DisplaySettingsLogic } from './DisplaySettingsLogic';
+import { DisplaySettingsLogic } from './display_settings_logic';
 
-import { ExampleSearchResultGroup } from './ExampleSearchResultGroup';
-import { ExampleStandoutResult } from './ExampleStandoutResult';
+import { ExampleSearchResultGroup } from './example_search_result_group';
+import { ExampleStandoutResult } from './example_standout_result';
 
 export const SearchResults: React.FC = () => {
   const {

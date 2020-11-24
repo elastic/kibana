@@ -9,16 +9,17 @@ import { DropResult } from 'react-beautiful-dnd';
 
 import { kea, MakeLogicType } from 'kea';
 import http from 'shared/http';
+import { IFlashMessagesProps } from 'shared/types';
+
 
 import routes from 'workplace_search/routes';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
+import { AppLogic } from '../../../../app_logic';
+import { SourceLogic } from '../../source_logic';
 
 const SUCCESS_MESSAGE = 'Display Settings have been successfuly updated.';
 
-import { IFlashMessagesProps } from 'shared/types';
-import { IObject, DetailField, SearchResultConfig, OptionValue } from 'workplace_search/types';
+import { IObject, DetailField, SearchResultConfig, OptionValue } from '../../../../types';
 
 export interface DisplaySettingsResponseProps {
   sourceName: string;

@@ -23,7 +23,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { DisplaySettingsLogic } from './DisplaySettingsLogic';
+import { DisplaySettingsLogic } from './display_settings_logic';
 
 const emptyField = { fieldName: '', label: '' };
 

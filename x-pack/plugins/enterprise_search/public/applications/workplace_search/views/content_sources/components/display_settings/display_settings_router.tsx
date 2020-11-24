@@ -9,15 +9,15 @@ import React from 'react';
 import { useValues } from 'kea';
 import { Route, Switch } from 'react-router-dom';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
+import { AppLogic } from '../../../../app_logic';
 
 import {
   DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
   DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
   getSourcesPath,
-} from 'workplace_search/utils/routePaths';
+} from '../../../../routes';
 
-import { DisplaySettings } from './DisplaySettings';
+import { DisplaySettings } from './display_settings';
 
 export const DisplaySettingsRouter: React.FC = () => {
   const { isOrganization } = useValues(AppLogic);

@@ -12,22 +12,23 @@ import { useHistory } from 'react-router-dom';
 
 import { EuiButton, EuiEmptyPrompt, EuiTabbedContent, EuiPanel } from '@elastic/eui';
 
+import FlashMessages from 'shared/components/FlashMessages';
 import {
   DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
   DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
   getContentSourcePath,
-} from 'workplace_search/utils/routePaths';
+} from '../../../../routes';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
+import { AppLogic } from '../../../../app_logic';
 
-import FlashMessages from 'shared/components/FlashMessages';
+import { Loading } from '../../../../../shared/loading';
+import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 
-import { Loading, ViewContentHeader } from 'workplace_search/components';
-import { DisplaySettingsLogic } from './DisplaySettingsLogic';
+import { DisplaySettingsLogic } from './display_settings_logic';
 
-import { FieldEditorModal } from './FieldEditorModal';
-import { ResultDetail } from './ResultDetail';
-import { SearchResults } from './SearchResults';
+import { FieldEditorModal } from './field_editor_modal';
+import { ResultDetail } from './result_detail';
+import { SearchResults } from './search_results';
 
 const UNSAVED_MESSAGE =
   'Your display settings have not been saved. Are you sure you want to leave?';
