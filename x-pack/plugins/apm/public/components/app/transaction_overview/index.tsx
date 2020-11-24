@@ -87,7 +87,9 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     status: transactionListStatus,
   } = useTransactionList(urlParams);
 
-  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
+  const localFiltersConfig: React.ComponentProps<
+    typeof LocalUIFilters
+  > = useMemo(
     () => ({
       filterNames: [
         'transactionResult',

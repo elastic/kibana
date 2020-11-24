@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
@@ -35,6 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kibana: {
       ...xPackAPITestsConfig.get('servers.kibana'),
       protocol: 'https',
+      certificateAuthorities: [readFileSync(CA_CERT_PATH)],
     },
   };
 
@@ -43,9 +45,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers,
     security: { disableTestUser: true },
     services: {
-      randomness: kibanaAPITestsConfig.get('services.randomness'),
-      legacyEs: kibanaAPITestsConfig.get('services.legacyEs'),
-      supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
+      ...kibanaAPITestsConfig.get('services'),
+      ...xPackAPITestsConfig.get('services'),
     },
     junit: {
       reportName: 'X-Pack Security API Integration Tests (Login Selector)',
@@ -125,6 +126,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               realm: 'saml2',
               maxRedirectURLSize: '100b',
               useRelayStateDeepLink: true,
+            },
+          },
+          anonymous: {
+            anonymous1: {
+              order: 6,
+              credentials: { username: 'anonymous_user', password: 'changeme' },
             },
           },
         })}`,

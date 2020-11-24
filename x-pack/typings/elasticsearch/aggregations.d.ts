@@ -172,6 +172,12 @@ export interface AggregationOptionsByType {
     field?: string;
     background_filter?: Record<string, any>;
   } & AggregationSourceOptions;
+  bucket_selector: {
+    buckets_path: {
+      [x: string]: string;
+    };
+    script: string;
+  };
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -204,14 +210,14 @@ type SubAggregationResponseOf<
 
 interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOptionsMap, TDocument> {
   terms: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
     buckets: Array<
       {
         doc_count: number;
         key: string | number;
       } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
+    doc_count_error_upper_bound?: number;
+    sum_other_doc_count?: number;
   };
   histogram: {
     buckets: Array<
@@ -362,6 +368,7 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
     >;
   };
   bucket_sort: undefined;
+  bucket_selector: undefined;
 }
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap
@@ -379,11 +386,9 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
 // Union keys are not included in keyof. The type will fall back to keyof T if
 // UnionToIntersection fails, which happens when there are conflicts between the union
 // types, e.g. { foo: string; bar?: undefined } | { foo?: undefined; bar: string };
-export type ValidAggregationKeysOf<T extends Record<string, any>> = keyof (UnionToIntersection<
-  T
-> extends never
-  ? T
-  : UnionToIntersection<T>);
+export type ValidAggregationKeysOf<
+  T extends Record<string, any>
+> = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
 
 export type AggregationResultOf<
   TAggregationOptionsMap extends AggregationOptionsMap,
