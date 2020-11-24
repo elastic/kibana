@@ -12,7 +12,7 @@ import { TestProviders } from '../../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 import {
-  ActionsConnectorsContextProvider,
+  ActionConnector,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
   TriggersAndActionsUIPublicPluginStart,
@@ -41,6 +41,47 @@ describe('ConfigureCases', () => {
   beforeEach(() => {
     useKibanaMock().services.triggersActionsUi = ({
       actionTypeRegistry: actionTypeRegistryMock.create(),
+      getAddConnectorFlyout: jest.fn().mockImplementation(() => (
+        <ConnectorAddFlyout
+          onClose={() => {}}
+          actionTypeRegistry={actionTypeRegistryMock.create()}
+          actionTypes={[
+            {
+              id: '.servicenow',
+              name: 'servicenow',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'gold',
+            },
+            {
+              id: '.jira',
+              name: 'jira',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'gold',
+            },
+            {
+              id: '.resilient',
+              name: 'resilient',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'gold',
+            },
+          ]}
+        />
+      )),
+      getEditConnectorFlyout: jest
+        .fn()
+        .mockImplementation(() => (
+          <ConnectorEditFlyout
+            onClose={() => {}}
+            actionTypeRegistry={actionTypeRegistryMock.create()}
+            initialConnector={connectors[1] as ActionConnector}
+          />
+        )),
     } as unknown) as TriggersAndActionsUIPublicPluginStart;
   });
 
@@ -60,11 +101,6 @@ describe('ConfigureCases', () => {
 
     test('it renders the ClosureType', () => {
       expect(wrapper.find('[data-test-subj="closure-options-radio-group"]').exists()).toBeTruthy();
-    });
-
-    test('it renders the ActionsConnectorsContextProvider', () => {
-      // Components from triggersActionsUi  do not have a data-test-subj
-      expect(wrapper.find(ActionsConnectorsContextProvider).exists()).toBeTruthy();
     });
 
     test('it does NOT render the ConnectorAddFlyout', () => {

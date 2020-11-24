@@ -23,10 +23,12 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
   ServiceNowActionConnector
->> = ({ action, editActionSecrets, editActionConfig, errors, readOnly, docLinks }) => {
+>> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
+  const { docLinks } = useKibana().services;
   const { apiUrl } = action.config;
 
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;

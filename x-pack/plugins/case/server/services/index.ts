@@ -23,6 +23,7 @@ import {
   CommentAttributes,
   SavedObjectFindOptions,
   User,
+  CommentPatchAttributes,
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../saved_object_types';
 import { readReporters } from './reporters/read_reporters';
@@ -79,17 +80,14 @@ type PatchCaseArgs = PatchCase & ClientArgs;
 interface PatchCasesArgs extends ClientArgs {
   cases: PatchCase[];
 }
-interface UpdateCommentArgs extends ClientArgs {
-  commentId: string;
-  updatedAttributes: Partial<CommentAttributes>;
-  version?: string;
-}
 
 interface PatchComment {
   commentId: string;
-  updatedAttributes: Partial<CommentAttributes>;
+  updatedAttributes: CommentPatchAttributes;
   version?: string;
 }
+
+type UpdateCommentArgs = PatchComment & ClientArgs;
 
 interface PatchComments extends ClientArgs {
   comments: PatchComment[];

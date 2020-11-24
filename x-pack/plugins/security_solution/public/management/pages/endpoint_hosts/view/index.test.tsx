@@ -220,6 +220,7 @@ describe('when on the list page', () => {
         HostInfo['metadata']['Endpoint']['policy']['applied']['status']
       > = [];
       let firstPolicyID: string;
+      let firstPolicyRev: number;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const mockedEndpointData = mockEndpointResultList({ total: 4 });
@@ -227,16 +228,60 @@ describe('when on the list page', () => {
           const queryStrategyVersion = mockedEndpointData.query_strategy_version;
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
+          firstPolicyRev = hostListData[0].metadata.Endpoint.policy.applied.endpoint_policy_version;
 
-          [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE, HostStatus.UNENROLLING].forEach(
-            (status, index) => {
-              hostListData[index] = {
-                metadata: hostListData[index].metadata,
-                host_status: status,
-                query_strategy_version: queryStrategyVersion,
-              };
-            }
-          );
+          // add ability to change (immutable) policy
+          type DeepMutable<T> = { -readonly [P in keyof T]: DeepMutable<T[P]> };
+          type Policy = DeepMutable<NonNullable<HostInfo['policy_info']>>;
+
+          const makePolicy = (
+            applied: HostInfo['metadata']['Endpoint']['policy']['applied'],
+            cb: (policy: Policy) => Policy
+          ): Policy => {
+            return cb({
+              agent: {
+                applied: { id: 'xyz', revision: applied.version },
+                configured: { id: 'xyz', revision: applied.version },
+              },
+              endpoint: { id: applied.id, revision: applied.endpoint_policy_version },
+            });
+          };
+
+          [
+            { status: HostStatus.ERROR, policy: (p: Policy) => p },
+            {
+              status: HostStatus.ONLINE,
+              policy: (p: Policy) => {
+                p.endpoint.id = 'xyz'; // represents change in endpoint policy assignment
+                p.endpoint.revision = 1;
+                return p;
+              },
+            },
+            {
+              status: HostStatus.OFFLINE,
+              policy: (p: Policy) => {
+                p.endpoint.revision += 1; // changes made to endpoint policy
+                return p;
+              },
+            },
+            {
+              status: HostStatus.UNENROLLING,
+              policy: (p: Policy) => {
+                p.agent.configured.revision += 1; // agent policy change, not propagated to agent yet
+                return p;
+              },
+            },
+          ].forEach((setup, index) => {
+            hostListData[index] = {
+              metadata: hostListData[index].metadata,
+              host_status: setup.status,
+              policy_info: makePolicy(
+                hostListData[index].metadata.Endpoint.policy.applied,
+                setup.policy
+              ),
+              query_strategy_version: queryStrategyVersion,
+            };
+          });
           hostListData.forEach((item, index) => {
             generatedPolicyStatuses[index] = item.metadata.Endpoint.policy.applied.status;
           });
@@ -316,6 +361,20 @@ describe('when on the list page', () => {
         });
       });
 
+      it('should display policy out-of-date warning when changes pending', async () => {
+        const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+        const outOfDates = await renderResult.findAllByTestId('rowPolicyOutOfDate');
+        expect(outOfDates).toHaveLength(3);
+
+        outOfDates.forEach((item, index) => {
+          expect(item.textContent).toEqual('Out-of-date');
+          expect(item.querySelector(`[data-euiicon-type][color=warning]`)).not.toBeNull();
+        });
+      });
+
       it('should display policy name as a link', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
@@ -344,6 +403,16 @@ describe('when on the list page', () => {
             expect(flyout).not.toBeNull();
           });
         });
+      });
+
+      it('should show revision number', async () => {
+        const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+        const firstPolicyRevElement = (await renderResult.findAllByTestId('policyListRevNo'))[0];
+        expect(firstPolicyRevElement).not.toBeNull();
+        expect(firstPolicyRevElement.textContent).toEqual(`rev. ${firstPolicyRev}`);
       });
     });
   });
@@ -526,6 +595,15 @@ describe('when on the list page', () => {
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
         `/policy/${hostDetails.metadata.Endpoint.policy.applied.id}`
+      );
+    });
+
+    it('should display policy revision number', async () => {
+      const renderResult = await renderAndWaitForData();
+      const policyDetailsRevElement = await renderResult.findByTestId('policyDetailsRevNo');
+      expect(policyDetailsRevElement).not.toBeNull();
+      expect(policyDetailsRevElement.textContent).toEqual(
+        `rev. ${hostDetails.metadata.Endpoint.policy.applied.endpoint_policy_version}`
       );
     });
 

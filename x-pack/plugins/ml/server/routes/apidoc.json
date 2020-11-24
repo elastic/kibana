@@ -17,6 +17,7 @@
     "UpdateDataFrameAnalytics",
     "DeleteDataFrameAnalytics",
     "JobsExist",
+    "GetDataFrameAnalyticsIdMap",
 
     "DataVisualizer",
     "GetOverallStats",
@@ -149,6 +150,7 @@
     "AssignJobsToSpaces",
     "RemoveJobsFromSpaces",
     "JobsSpaces",
+    "DeleteJobCheck",
 
     "TrainedModels",
     "GetTrainedModel",
