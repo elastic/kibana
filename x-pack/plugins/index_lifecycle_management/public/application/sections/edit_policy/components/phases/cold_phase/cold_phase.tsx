@@ -40,6 +40,7 @@ const coldProperty: keyof Phases = 'cold';
 
 const formFieldPaths = {
   enabled: '_meta.cold.enabled',
+  searchableSnapshot: 'phases.cold.actions.searchable_snapshot.snapshot_repository',
 };
 
 export const ColdPhase: FunctionComponent = () => {
@@ -47,10 +48,11 @@ export const ColdPhase: FunctionComponent = () => {
   const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   const [formData] = useFormData({
-    watch: [formFieldPaths.enabled],
+    watch: [formFieldPaths.enabled, formFieldPaths.searchableSnapshot],
   });
 
   const enabled = get(formData, formFieldPaths.enabled);
+  const showReplicasField = get(formData, formFieldPaths.searchableSnapshot) == null;
 
   return (
     <div id="coldPhaseContent" aria-live="polite" role="region">
@@ -105,44 +107,51 @@ export const ColdPhase: FunctionComponent = () => {
               phase={coldProperty}
             />
 
-            {/* Replicas section */}
-            <DescribedFormField
-              title={
-                <h3>
-                  {i18n.translate('xpack.indexLifecycleMgmt.coldPhase.replicasTitle', {
-                    defaultMessage: 'Replicas',
-                  })}
-                </h3>
-              }
-              description={i18n.translate(
-                'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasDescription',
-                {
-                  defaultMessage:
-                    'Set the number of replicas. Remains the same as the previous phase by default.',
-                }
-              )}
-              switchProps={{
-                'data-test-subj': 'cold-setReplicasSwitch',
-                label: i18n.translate(
-                  'xpack.indexLifecycleMgmt.editPolicy.coldPhase.numberOfReplicas.switchLabel',
-                  { defaultMessage: 'Set replicas' }
-                ),
-                initialValue: Boolean(policy.phases.cold?.actions?.allocate?.number_of_replicas),
-              }}
-              fullWidth
-            >
-              <UseField
-                path="phases.cold.actions.allocate.number_of_replicas"
-                component={NumericField}
-                componentProps={{
-                  fullWidth: false,
-                  euiFieldProps: {
-                    'data-test-subj': `${coldProperty}-selectedReplicaCount`,
-                    min: 0,
-                  },
-                }}
-              />
-            </DescribedFormField>
+            {
+              /* Replicas section */
+              showReplicasField && (
+                <DescribedFormField
+                  title={
+                    <h3>
+                      {i18n.translate('xpack.indexLifecycleMgmt.coldPhase.replicasTitle', {
+                        defaultMessage: 'Replicas',
+                      })}
+                    </h3>
+                  }
+                  description={i18n.translate(
+                    'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasDescription',
+                    {
+                      defaultMessage:
+                        'Set the number of replicas. Remains the same as the previous phase by default.',
+                    }
+                  )}
+                  switchProps={{
+                    'data-test-subj': 'cold-setReplicasSwitch',
+                    label: i18n.translate(
+                      'xpack.indexLifecycleMgmt.editPolicy.coldPhase.numberOfReplicas.switchLabel',
+                      { defaultMessage: 'Set replicas' }
+                    ),
+                    initialValue: Boolean(
+                      policy.phases.cold?.actions?.allocate?.number_of_replicas
+                    ),
+                  }}
+                  fullWidth
+                >
+                  <UseField
+                    path="phases.cold.actions.allocate.number_of_replicas"
+                    component={NumericField}
+                    componentProps={{
+                      fullWidth: false,
+                      euiFieldProps: {
+                        'data-test-subj': `${coldProperty}-selectedReplicaCount`,
+                        min: 0,
+                      },
+                    }}
+                  />
+                </DescribedFormField>
+              )
+            }
+
             {/* Freeze section */}
             {!isUsingSearchableSnapshotInHotPhase && (
               <EuiDescribedFormGroup
