@@ -211,7 +211,6 @@ export function DiscoverLegacy({
             {resultState === 'loading' && <LoadingSpinner />}
             {resultState === 'ready' && (
               <>
-                <SkipBottomButton onClick={onSkipBottomButtonClick} />
                 <div className="dscResultCount">
                   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                     <EuiFlexItem
@@ -246,7 +245,7 @@ export function DiscoverLegacy({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </div>
-
+                <SkipBottomButton onClick={onSkipBottomButtonClick} />
                 {toggleOn && opts.timefield && (
                   <section
                     aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
