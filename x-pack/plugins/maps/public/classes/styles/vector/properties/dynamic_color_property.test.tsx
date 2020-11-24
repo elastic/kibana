@@ -578,7 +578,7 @@ test('Should read out ordinal type correctly', async () => {
   expect(ordinalColorStyle2.isCategorical()).toEqual(false);
 });
 
-describe('renderFieldMetaPopover', () => {
+describe('renderDataMappingPopover', () => {
   test('Should enable toggle when field is backed by geojson-source', () => {
     const colorStyle = makeProperty(
       {
@@ -590,7 +590,7 @@ describe('renderFieldMetaPopover', () => {
       mockField
     );
 
-    const legendRow = colorStyle.renderFieldMetaPopover(() => {});
+    const legendRow = colorStyle.renderDataMappingPopover(() => {});
     expect(legendRow).toMatchSnapshot();
   });
 
@@ -609,7 +609,7 @@ describe('renderFieldMetaPopover', () => {
       nonGeoJsonField
     );
 
-    const legendRow = colorStyle.renderFieldMetaPopover(() => {});
+    const legendRow = colorStyle.renderDataMappingPopover(() => {});
     expect(legendRow).toMatchSnapshot();
   });
 });

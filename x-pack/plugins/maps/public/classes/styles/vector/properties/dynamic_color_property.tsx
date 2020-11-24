@@ -400,7 +400,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         breaks.push({
           color,
           symbolId,
-          label: stop,
+          label: this.formatField(stop),
         });
       }
     });
@@ -413,12 +413,16 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
+    let breaks = [];
+    if (this.isOrdinal()) {
+      breaks = this._getOrdinalBreaks(symbolId);
+    } else if (this.isCategorical()) {
+      breaks = this._getCategoricalBreaks(symbolId);
+    }
     return (
       <BreakedLegend
         style={this}
-        breaks={
-          this.isOrdinal() ? this._getOrdinalBreaks(symbolId) : this._getCategoricalBreaks(symbolId)
-        }
+        breaks={breaks}
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
       />

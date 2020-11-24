@@ -326,7 +326,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
 </div>
 `;
 
-exports[`renderFieldMetaPopover Should disable toggle when field is not backed by geojson source 1`] = `
+exports[`renderDataMappingPopover Should disable toggle when field is not backed by geojson source 1`] = `
 <OrdinalFieldMetaPopover
   fieldMetaOptions={
     Object {
@@ -334,12 +334,13 @@ exports[`renderFieldMetaPopover Should disable toggle when field is not backed b
     }
   }
   onChange={[Function]}
+  stepFunction="EASING_BETWEEN_MIN_AND_MAX"
   styleName="lineColor"
   switchDisabled={true}
 />
 `;
 
-exports[`renderFieldMetaPopover Should enable toggle when field is backed by geojson-source 1`] = `
+exports[`renderDataMappingPopover Should enable toggle when field is backed by geojson-source 1`] = `
 <OrdinalFieldMetaPopover
   fieldMetaOptions={
     Object {
@@ -347,6 +348,7 @@ exports[`renderFieldMetaPopover Should enable toggle when field is backed by geo
     }
   }
   onChange={[Function]}
+  stepFunction="EASING_BETWEEN_MIN_AND_MAX"
   styleName="lineColor"
   switchDisabled={false}
 />
