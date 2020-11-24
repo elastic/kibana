@@ -73,9 +73,7 @@ export interface ExternalService {
   findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
 }
 
-export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
-  externalObject: Record<string, any>;
-}
+export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;

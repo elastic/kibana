@@ -123,7 +123,7 @@ async function executor(
 
     data = await api.pushToService({
       externalService,
-      params: { ...pushToServiceParams, externalObject: {} },
+      params: pushToServiceParams,
       logger,
     });
 

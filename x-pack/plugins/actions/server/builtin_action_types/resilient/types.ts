@@ -109,9 +109,7 @@ export interface ExternalService {
   updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
 }
 
-export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
-  externalObject: Record<string, any>;
-}
+export type PushToServiceApiParams = ExecutorSubActionPushParams;
 export type ExecutorSubActionGetIncidentTypesParams = TypeOf<
   typeof ExecutorSubActionGetIncidentTypesParamsSchema
 >;
