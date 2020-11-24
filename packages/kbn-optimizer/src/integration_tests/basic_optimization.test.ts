@@ -232,8 +232,11 @@ it('uses cache on second run and exist cleanly', async () => {
   `);
 });
 
-// test is failing since actual snapshot is modified when running with code coverage
-(!!process.env.CODE_COVERAGE ? it.skip : it)('prepares assets for distribution', async () => {
+it('prepares assets for distribution', async () => {
+  if (process.env.CODE_COVERAGE) {
+    // test fails when testing coverage because source includes instrumentation, so skip it
+    return;
+  }
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
