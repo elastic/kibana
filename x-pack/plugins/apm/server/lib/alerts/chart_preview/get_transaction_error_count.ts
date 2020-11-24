@@ -6,27 +6,38 @@
 
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
-import { ErrorCountAlertParams } from '../../../routes/alerts/chart_preview';
+import { AlertParams } from '../../../routes/alerts/chart_preview';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { Setup } from '../../helpers/setup_request';
+
+const BUCKET_SIZE = 20;
 
 export async function getTransactionErrorCountChartPreview({
   setup,
   alertParams,
 }: {
-  setup: Setup & SetupTimeRange;
-  alertParams: ErrorCountAlertParams;
+  setup: Setup;
+  alertParams: AlertParams;
 }) {
-  const { start, end, apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end });
-  const { threshold, serviceName, environment } = alertParams;
+  const { apmEventClient } = setup;
+  const {
+    windowSize,
+    windowUnit,
+    threshold,
+    serviceName,
+    environment,
+  } = alertParams;
 
   const query = {
     bool: {
       filter: [
-        { range: rangeFilter(start, end) },
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${windowSize * BUCKET_SIZE}${windowUnit}`,
+            },
+          },
+        },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
         ...getEnvironmentUiFilterES(environment),
       ],
@@ -37,9 +48,7 @@ export async function getTransactionErrorCountChartPreview({
     timeseries: {
       date_histogram: {
         field: '@timestamp',
-        fixed_interval: intervalString,
-        min_doc_count: 0,
-        extended_bounds: { min: start, max: end },
+        fixed_interval: `${windowSize}${windowUnit}`,
       },
     },
   };
@@ -56,10 +65,10 @@ export async function getTransactionErrorCountChartPreview({
   }
 
   return resp.aggregations.timeseries.buckets.map((bucket) => {
-    const errorCount = bucket.doc_count;
+    const errorCount = ;
     return {
       x: bucket.key,
-      y: errorCount > threshold ? errorCount : null,
+      y: bucket.doc_count
     };
   });
 }

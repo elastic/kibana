@@ -56,8 +56,8 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
         endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
         params: {
           query: {
-            start: getParsedDate(`now-${windowSize}${windowUnit}`)!,
-            end: getParsedDate('now')!,
+            windowSize,
+            windowUnit,
             threshold: threshold / 100,
             environment,
             serviceName,

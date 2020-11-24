@@ -12,9 +12,14 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { createRoute } from '../create_route';
 import { rangeRt } from '../default_api_types';
 
+const typeNumber = jsonRt.pipe(t.number);
+
 const alertParamsRt = t.intersection([
-  t.type({ threshold: jsonRt.pipe(t.number) }),
-  rangeRt,
+  t.type({
+    windowSize: typeNumber,
+    windowUnit: t.string,
+    threshold: typeNumber,
+  }),
   t.partial({
     serviceName: t.string,
     environment: t.string,
@@ -30,87 +35,39 @@ export const transactionErrorRateChartPreview = createRoute({
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const {
-      threshold,
-      serviceName,
-      environment,
-      transactionType,
-      start,
-      end,
-    } = context.params.query;
+    const { _debug, ...alertParams } = context.params.query;
+
     return getTransactionErrorRateChartPreview({
       setup,
-      alertParams: {
-        threshold,
-        serviceName,
-        environment,
-        transactionType,
-        start,
-        end,
-      },
+      alertParams,
     });
   },
 });
 
-const errorCountAlertParamsRt = t.intersection([
-  t.type({ threshold: jsonRt.pipe(t.number) }),
-  rangeRt,
-  t.partial({
-    serviceName: t.string,
-    environment: t.string,
-  }),
-]);
-
-export type ErrorCountAlertParams = t.TypeOf<typeof errorCountAlertParamsRt>;
-
 export const transactionErrorCountChartPreview = createRoute({
   endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
-  params: t.type({ query: errorCountAlertParamsRt }),
+  params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const {
-      threshold,
-      serviceName,
-      environment,
-      start,
-      end,
-    } = context.params.query;
+    const { _debug, ...alertParams } = context.params.query;
     return getTransactionErrorCountChartPreview({
       setup,
-      alertParams: {
-        threshold,
-        serviceName,
-        environment,
-        start,
-        end,
-      },
+      alertParams,
     });
   },
 });
 
 export const transactionDurationChartPreview = createRoute({
   endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
-  params: t.type({ query: errorCountAlertParamsRt }),
+  params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const {
-      threshold,
-      serviceName,
-      environment,
-      start,
-      end,
-    } = context.params.query;
+    const { _debug, ...alertParams } = context.params.query;
     return getTransactionDurationChartPreview({
       setup,
-      alertParams: {
-        threshold,
-        serviceName,
-        environment,
-        start,
-        end,
-      },
+      alertParams,
     });
   },
 });
