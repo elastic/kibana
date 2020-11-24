@@ -5,10 +5,12 @@
  */
 
 import { MockedKeys } from '../../../../../../../packages/kbn-utility-types/jest/index';
-import { FleetSetupDeps, FleetStartDeps, FleetStartServices } from '../../../plugin';
+import { FleetSetupDeps, FleetStart, FleetStartDeps, FleetStartServices } from '../../../plugin';
 
 export type MockedFleetStartServices = MockedKeys<FleetStartServices>;
 
 export type MockedFleetSetupDeps = MockedKeys<FleetSetupDeps>;
 
 export type MockedFleetStartDeps = MockedKeys<FleetStartDeps>;
+
+export type MockedFleetStart = MockedKeys<FleetStart>;

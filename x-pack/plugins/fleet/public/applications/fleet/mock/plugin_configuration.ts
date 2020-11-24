@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IngestManagerConfigType } from '../../../plugin';
+import { FleetConfigType } from '../../../plugin';
 
-export const createConfigurationMock = (): IngestManagerConfigType => {
+export const createConfigurationMock = (): FleetConfigType => {
   return {
     enabled: true,
     registryUrl: '',

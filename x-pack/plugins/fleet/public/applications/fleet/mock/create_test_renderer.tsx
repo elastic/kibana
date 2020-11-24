@@ -9,12 +9,12 @@ import React, { memo } from 'react';
 import { render as reactRender, RenderOptions, RenderResult, act } from '@testing-library/react';
 import { ScopedHistory } from '../../../../../../../src/core/public';
 import { FleetAppContext } from '../app';
-import { FleetConfigType, FleetStart } from '../../../plugin';
+import { FleetConfigType } from '../../../plugin';
 import { createConfigurationMock } from './plugin_configuration';
 import { UIExtensionsStorage } from '../types';
 import { createStartMock } from './plugin_interfaces';
 import { createStartServices } from './fleet_start_services';
-import { MockedFleetStartServices } from './types';
+import { MockedFleetStart, MockedFleetStartServices } from './types';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -31,7 +31,7 @@ export interface TestRenderer {
   startServices: MockedFleetStartServices;
   config: FleetConfigType;
   /** The Interface returned by the Fleet plugin `start()` phase */
-  startInterface: FleetStart;
+  startInterface: MockedFleetStart;
   kibanaVersion: string;
   AppWrapper: React.FC<any>;
   render: UiRender;
