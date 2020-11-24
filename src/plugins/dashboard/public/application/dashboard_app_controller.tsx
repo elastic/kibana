@@ -263,6 +263,16 @@ export class DashboardAppController {
 
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
+    const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
+
+    const getDashTitle = () =>
+      getDashboardTitle(
+        dashboardStateManager.getTitle(),
+        dashboardStateManager.getViewMode(),
+        dashboardStateManager.getIsDirty(timefilter),
+        dashboardStateManager.isNew()
+      );
+
     const getShouldShowEditHelp = () =>
       !dashboardStateManager.getPanels().length &&
       dashboardStateManager.getIsEditMode() &&
@@ -431,7 +441,7 @@ export class DashboardAppController {
     >(DASHBOARD_CONTAINER_TYPE);
 
     searchService.session.setSearchSessionRestorationInfoProvider({
-      getName: async () => 'Dashboard',
+      getName: async () => getDashTitle(),
       getUrlGeneratorData: async () => {
         const appState = dashboardStateManager.getAppState();
         const state: DashboardUrlGeneratorState = {
@@ -577,16 +587,6 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || queryStringManager.getDefaultQuery(),
       filterManager.getFilters()
     );
-
-    const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
-
-    const getDashTitle = () =>
-      getDashboardTitle(
-        dashboardStateManager.getTitle(),
-        dashboardStateManager.getViewMode(),
-        dashboardStateManager.getIsDirty(timefilter),
-        dashboardStateManager.isNew()
-      );
 
     // Push breadcrumbs to new header navigation
     const updateBreadcrumbs = () => {
