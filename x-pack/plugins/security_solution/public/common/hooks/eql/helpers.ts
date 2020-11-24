@@ -116,8 +116,8 @@ export const getEqlAggsData = (
     if (timestamp == null) {
       return acc;
     }
-
-    const eventTimestamp = Date.parse(timestamp);
+    const eventDate = new Date(timestamp).toISOString();
+    const eventTimestamp = Date.parse(eventDate);
     const bucket =
       range === 'h'
         ? calculateBucketForHour(eventTimestamp, relativeNow)

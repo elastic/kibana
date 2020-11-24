@@ -11,7 +11,6 @@ import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
 import { SearchTimeoutError } from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
@@ -25,13 +24,12 @@ const complete = jest.fn();
 let searchInterceptor: EnhancedSearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
-let fetchMock: jest.Mock<any>;
 
 jest.useFakeTimers();
 
 function mockFetchImplementation(responses: any[]) {
   let i = 0;
-  fetchMock.mockImplementation(() => {
+  mockCoreSetup.http.fetch.mockImplementation(() => {
     const { time = 0, value = {}, isError = false } = responses[i++];
     return new Promise((resolve, reject) =>
       setTimeout(() => {
@@ -48,7 +46,6 @@ describe('EnhancedSearchInterceptor', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     const dataPluginMockStart = dataPluginMock.createStartContract();
-    fetchMock = jest.fn();
 
     mockCoreSetup.uiSettings.get.mockImplementation((name: string) => {
       switch (name) {
@@ -77,11 +74,7 @@ describe('EnhancedSearchInterceptor', () => {
       ]);
     });
 
-    const bfetchMock = bfetchPluginMock.createSetupContract();
-    bfetchMock.batchedFunction.mockReturnValue(fetchMock);
-
     searchInterceptor = new EnhancedSearchInterceptor({
-      bfetch: bfetchMock,
       toasts: mockCoreSetup.notifications.toasts,
       startServices: mockPromise as any,
       http: mockCoreSetup.http,
@@ -254,7 +247,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
 
-      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalled();
     });
 
@@ -278,7 +271,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBeInstanceOf(SearchTimeoutError);
-      expect(fetchMock).toHaveBeenCalled();
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalled();
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
     });
 
@@ -310,7 +303,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(next).toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
-      expect(fetchMock).toHaveBeenCalled();
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalled();
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
 
       // Long enough to reach the timeout but not long enough to reach the next response
@@ -318,7 +311,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBeInstanceOf(SearchTimeoutError);
-      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalled();
     });
 
@@ -352,7 +345,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(next).toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
-      expect(fetchMock).toHaveBeenCalled();
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalled();
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
 
       // Long enough to reach the timeout but not long enough to reach the next response
@@ -360,7 +353,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBe(responses[1].value);
-      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(mockCoreSetup.http.fetch).toHaveBeenCalledTimes(2);
       expect(mockCoreSetup.http.delete).toHaveBeenCalled();
     });
   });
@@ -392,7 +385,9 @@ describe('EnhancedSearchInterceptor', () => {
 
       await timeTravel();
 
-      const areAllRequestsAborted = fetchMock.mock.calls.every(([_, signal]) => signal?.aborted);
+      const areAllRequestsAborted = mockCoreSetup.http.fetch.mock.calls.every(
+        ([{ signal }]) => signal?.aborted
+      );
       expect(areAllRequestsAborted).toBe(true);
       expect(mockUsageCollector.trackQueriesCancelled).toBeCalledTimes(1);
     });
