@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
 import { capitalize } from 'lodash/fp';
 import { CaseField, ActionType, ThirdPartyField } from '../../containers/configure/types';
@@ -26,18 +26,12 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
   const selectedActionTypeCapitalized = useMemo(() => capitalize(selectedActionType), [
     selectedActionType,
   ]);
-  const selectedThirdPartyCapitalized = useMemo(() => capitalize(selectedThirdParty), [
-    selectedThirdParty,
-  ]);
-  const securitySolutionFieldCapitalized = useMemo(() => capitalize(securitySolutionField), [
-    securitySolutionField,
-  ]);
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiFlexGroup component="span" justifyContent="spaceBetween">
           <EuiFlexItem component="span" grow={false}>
-            {securitySolutionFieldCapitalized}
+            <EuiCode>{securitySolutionField}</EuiCode>
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiIcon type="sortRight" />
@@ -45,7 +39,11 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        {isLoading ? <EuiLoadingSpinner size="m" /> : selectedThirdPartyCapitalized}
+        <EuiFlexGroup component="span" justifyContent="spaceBetween">
+          <EuiFlexItem component="span" grow={false}>
+            {isLoading ? <EuiLoadingSpinner size="m" /> : <EuiCode>{selectedThirdParty}</EuiCode>}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         {isLoading ? <EuiLoadingSpinner size="m" /> : selectedActionTypeCapitalized}

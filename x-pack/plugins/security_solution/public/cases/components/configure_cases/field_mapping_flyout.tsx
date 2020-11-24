@@ -21,14 +21,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import { ConnectorField } from '../../../../../case/common/api';
-import {
-  ActionConnector,
-  useActionsConnectorsContext,
-} from '../../../../../triggers_actions_ui/public';
+import { ActionConnector } from '../../../../../triggers_actions_ui/public';
 import { ActionType, CaseField, CaseConnectorMapping } from '../../containers/configure/types';
 import { useGetFields } from '../../containers/use_get_fields';
 import { FieldMappingRow } from './field_mapping_row_new';
 import { setActionTypeToMapping } from './utils';
+import { connectorsConfiguration } from '../../../common/lib/connectors/config';
 interface Props {
   connector: ActionConnector;
   onClose: () => void;
@@ -148,12 +146,7 @@ interface ValidateFields {
 export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [newMapping, setNewMapping] = useState<CaseConnectorMapping[]>([]);
-  const { actionTypeRegistry } = useActionsConnectorsContext();
   const { fields, isLoading: isFieldsLoading } = useGetFields(connector.id, connector.actionTypeId);
-  const actionTypeModel = useMemo(() => actionTypeRegistry.get(connector.actionTypeId), [
-    actionTypeRegistry,
-    connector.actionTypeId,
-  ]);
   const thirdPartyOptions = useMemo(() => (fields.length ? getThirdPartyOptions(fields) : []), [
     fields,
   ]);
@@ -257,11 +250,9 @@ export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionEditTitle" size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          {actionTypeModel ? (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeModel.iconClass} size="m" />
-            </EuiFlexItem>
-          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={connectorsConfiguration[connector.actionTypeId]?.logo ?? ''} size="m" />
+          </EuiFlexItem>
           <EuiFlexItem>{i18n.EDIT_FIELD_MAPPING_TITLE(connector.name)}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
