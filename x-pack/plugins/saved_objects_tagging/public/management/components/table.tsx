@@ -23,6 +23,7 @@ interface TagTableProps {
   onSelectionChange: (selection: TagWithRelations[]) => void;
   onEdit: (tag: TagWithRelations) => void;
   onDelete: (tag: TagWithRelations) => void;
+  onAssign: (tag: TagWithRelations) => void;
   getTagRelationUrl: (tag: TagWithRelations) => string;
   onShowRelations: (tag: TagWithRelations) => void;
   actionBar: ReactNode;
@@ -54,6 +55,7 @@ export const TagTable: FC<TagTableProps> = ({
   onSelectionChange,
   onEdit,
   onDelete,
+  onAssign,
   onShowRelations,
   getTagRelationUrl,
   actionBar,
@@ -74,6 +76,7 @@ export const TagTable: FC<TagTableProps> = ({
           defaultMessage: 'Edit {name} tag',
           values: { name },
         }),
+      isPrimary: true,
       description: i18n.translate(
         'xpack.savedObjectsTagging.management.table.actions.edit.description',
         {
@@ -84,6 +87,25 @@ export const TagTable: FC<TagTableProps> = ({
       icon: 'pencil',
       onClick: (object: TagWithRelations) => onEdit(object),
       'data-test-subj': 'tagsTableAction-edit',
+    });
+  }
+  if (capabilities.assign) {
+    actions.push({
+      name: ({ name }) =>
+        i18n.translate('xpack.savedObjectsTagging.management.table.actions.assign.title', {
+          defaultMessage: 'Manage {name} assignments',
+          values: { name },
+        }),
+      description: i18n.translate(
+        'xpack.savedObjectsTagging.management.table.actions.assign.description',
+        {
+          defaultMessage: 'Manage assignments',
+        }
+      ),
+      type: 'icon',
+      icon: 'tag',
+      onClick: (object: TagWithRelations) => onAssign(object),
+      'data-test-subj': 'tagsTableAction-delete',
     });
   }
   if (capabilities.delete) {
@@ -173,7 +195,7 @@ export const TagTable: FC<TagTableProps> = ({
             name: i18n.translate('xpack.savedObjectsTagging.management.table.columns.actions', {
               defaultMessage: 'Actions',
             }),
-            width: '100px',
+            width: '150px',
             actions,
           },
         ]

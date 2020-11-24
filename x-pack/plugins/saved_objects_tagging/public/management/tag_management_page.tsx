@@ -218,6 +218,19 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     [selectedTags, fetchTags, notifications, unmount$]
   );
 
+  const manageTagAssignments = useCallback(
+    async (tag: TagWithRelations) => {
+      try {
+        const bulkAssign = bulkActions.find((action) => action.id === 'assign')!;
+        await bulkAssign.execute([tag.id], { canceled$: unmount$ });
+      } finally {
+        setLoading(false);
+      }
+      await fetchTags();
+    },
+    [bulkActions, unmount$, fetchTags]
+  );
+
   const actionBar = useMemo(
     () => (
       <ActionBar
@@ -253,6 +266,9 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
         }}
         onDelete={(tag) => {
           deleteTagWithConfirm(tag);
+        }}
+        onAssign={(tag) => {
+          manageTagAssignments(tag);
         }}
         getTagRelationUrl={getTagRelationUrl}
         onShowRelations={(tag) => {
