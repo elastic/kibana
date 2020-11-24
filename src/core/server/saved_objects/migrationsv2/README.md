@@ -85,11 +85,11 @@ enabling, disabling, before or after a version upgrade.
 7. Ensure that Kibana logs a warning, but continues to start even though there
    are saved object documents which don't belong to an enable plugin
 
-### Test scenario 2 (multiple instances, enable a plugin after migration):
+#### Test scenario 2 (multiple instances, enable a plugin after migration):
 Follow the steps from 'Test scenario 1', but perform the migration with
 multiple instances of Kibana
 
-### Test scenario 3 (multiple instances, mixed plugin enabled configs):
+#### Test scenario 3 (multiple instances, mixed plugin enabled configs):
 We don't support this upgrade scenario, but it's worth making sure we don't
 have data loss when there's a user error.
 1. Start an old version of Kibana (< 7.11)
@@ -101,3 +101,5 @@ have data loss when there's a user error.
    other half.
 5. Ensure that the document from step (2) has been migrated
    (`migrationVersion` contains 7.11.0)
+
+### 

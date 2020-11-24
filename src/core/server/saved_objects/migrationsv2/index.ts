@@ -25,7 +25,7 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { cloneDeep } from 'lodash';
-import { flow } from 'fp-ts/lib/function';
+import { errors as EsClientErrors } from '@elastic/elasticsearch';
 import * as Actions from './actions';
 import { IndexMapping } from '../mappings';
 import { Logger } from '../../logging';
@@ -42,8 +42,8 @@ export interface BaseState extends ControlState {
   /** The mappings to apply to the target index */
   targetMappings: IndexMapping;
   /** Script to apply to a legacy index before it can be used as a migration source */
-  preMigrationScript?: string;
-  migrationVersionPerType: SavedObjectsMigrationVersion;
+  preMigrationScript: Option.Option<string>;
+  outdatedDocumentsQuery: Record<string, unknown>;
   retryCount: number;
   retryDelay: number;
   logs: Array<{ level: 'error' | 'info'; message: string }>;
@@ -66,6 +66,7 @@ export type PostInitState = BaseState & {
   /** The target index is the index to which the migration writes */
   target: string;
   versionIndexReadyActions: Option.Option<AliasAction[]>;
+  outdatedDocumentsQuery: Record<string, unknown>;
 };
 
 export type DoneState = BaseState & {
@@ -109,28 +110,14 @@ export type UpdateTargetMappingsWaitForTaskState = PostInitState & {
 };
 
 export type OutdatedDocumentsSearch = PostInitState & {
-  /** Start a scroll search for outdated documents in the target index */
+  /** Search for outdated documents in the target index */
   controlState: 'OUTDATED_DOCUMENTS_SEARCH';
-  outdatedDocumentsQuery: Record<string, unknown>;
-};
-
-export type OutdatedDocumentsScroll = PostInitState & {
-  /** Retrieve the next batch of results from the scroll search for outdated documents in the target index */
-  controlState: 'OUTDATED_DOCUMENTS_SCROLL';
-  transformDocumentsScrollId: string;
 };
 
 export type OutdatedDocumentsTransform = PostInitState & {
   /** Transform a batch of outdated documents to their latest version and write them to the target index */
   controlState: 'OUTDATED_DOCUMENTS_TRANSFORM';
   outdatedDocuments: SavedObjectsRawDoc[];
-  transformDocumentsScrollId: string;
-};
-
-export type OutdatedDocumentsClearScroll = PostInitState & {
-  /** When there are no more results, clear the scroll */
-  controlState: 'OUTDATED_DOCUMENTS_CLEAR_SCROLL';
-  transformDocumentsScrollId: string;
 };
 
 export type MarkVersionIndexReady = PostInitState & {
@@ -195,9 +182,7 @@ export type State =
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState
   | OutdatedDocumentsSearch
-  | OutdatedDocumentsScroll
   | OutdatedDocumentsTransform
-  | OutdatedDocumentsClearScroll
   | MarkVersionIndexReady
   | LegacyCreateReindexTargetState
   | LegacySetWriteBlockState
@@ -211,6 +196,14 @@ export type State =
 function throwBadControlState(p: never): never;
 function throwBadControlState(controlState: any) {
   throw new Error('Unknown control state: ' + controlState);
+}
+
+/**
+ * A helper function/type for ensuring that all response types are handled.
+ */
+function throwBadResponse(p: never): never;
+function throwBadResponse(res: any) {
+  throw new Error('Unexpected action response: ' + res);
 }
 
 /**
@@ -289,6 +282,30 @@ export type ResponseType<ControlState extends AllActionStates> = Await<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
+const isRetryableEsClientError = (e: EsClientErrors.ElasticsearchClientError): boolean => {
+  const retryResponseStatuses = [
+    503, // ServiceUnavailable
+    401, // AuthorizationException
+    403, // AuthenticationException
+    408, // RequestTimeout
+    410, // Gone
+    429, // TooManyRequests
+  ];
+
+  if (
+    e instanceof EsClientErrors.NoLivingConnectionsError ||
+    e instanceof EsClientErrors.ConnectionError ||
+    e instanceof EsClientErrors.TimeoutError ||
+    (e instanceof EsClientErrors.ResponseError &&
+      (retryResponseStatuses.includes(e.statusCode) ||
+        e.body?.error?.type === 'snapshot_in_progress_exception'))
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 const delayOrResetRetryState = <S extends State>(
   state: S,
   resW: ResponseType<AllActionStates>
@@ -330,21 +347,34 @@ const delayOrResetRetryState = <S extends State>(
     return { ...state, ...{ retryCount: 0, retryDelay: 0 } };
   };
 
-  return Either.fold(delayRetryState, resetRetryState)(resW);
+  return Either.fold(delayRetryState, resetRetryState)((resW as unknown) as any);
 };
 
-export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
+export const model = (
+  currentState: State,
+  resW:
+    | ResponseType<AllActionStates>
+    | Either.Either<EsClientErrors.ElasticsearchClientError, never>
+): State => {
   // The action response `resW` is weakly typed, the type includes all action
-  // responses. Each control state only triggers one action so each control
-  // state only has one action response type. This allows us to narrow the
-  // response type to only the action response associated with a specific
-  // control state using
+  // responses and ElasticsearchClientErrors. Each control state only triggers
+  // one action so each control state only has one action response type. This
+  // allows us to narrow the response type to only the action response
+  // associated with a specific control state using:
   // `const res = resW as ResponseType<typeof stateP.controlState>;`
 
   let stateP: State = cloneDeep(currentState);
-  stateP = delayOrResetRetryState(stateP, resW);
-  if (Either.isLeft(resW)) {
-    return stateP;
+  if (Either.isLeft<unknown, unknown>(resW)) {
+    if (resW.left instanceof Error) {
+      if (isRetryableEsClientError(resW.left)) {
+        stateP = delayOrResetRetryState(stateP, resW);
+        return stateP;
+      } else {
+        throw resW.left;
+      }
+    }
+  } else {
+    stateP = delayOrResetRetryState(stateP, resW);
   }
 
   if (stateP.controlState === 'INIT') {
@@ -488,22 +518,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ]),
         };
       }
+    } else {
+      // return throwBadResponse(res);
     }
     return stateP;
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isLeft(res)) {
-      // Ignore if legacy index doesn't exist, this probably means another
-      // Kibana instance already completed the legacy pre-migration and
-      // deleted it
-      if (res.left.message === 'index_not_found_exception') {
-        return delayOrResetRetryState(stateP, Either.right({}));
-      } else {
-        return stateP;
+
+    // If the write block is sucessfully in place
+    if (Either.isRight(res)) {
+      stateP = { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
+    } else if (Either.isLeft(res)) {
+      // If the write block failed because the index doesn't exist, it means
+      // another instance already completed the legacy pre-migration. Proceed
+      // to the next step.
+      if (res.left === 'index_not_found_exception') {
+        stateP = { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
+      } else if (res.left === 'set_write_block_failed') {
+        stateP = delayOrResetRetryState(stateP, res);
       }
     } else {
-      return { ...stateP, controlState: 'LEGACY_CREATE_REINDEX_TARGET' };
+      return throwBadResponse(res);
     }
+
+    return stateP;
   } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isLeft(res)) {
@@ -586,83 +624,43 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ],
       };
     }
-    const outdatedDocumentsQuery = {
-      bool: {
-        should: Object.entries(stateP.migrationVersionPerType).map(([type, latestVersion]) => ({
-          bool: {
-            must: [
-              { exists: { field: type } },
-              {
-                bool: {
-                  must_not: { term: { [`migrationVersion.${type}`]: '7.11.0' } }, // TODO replace with `latestVersion`
-                },
-              },
-            ],
-          },
-        })),
-      },
-    };
     return {
       ...stateP,
       controlState: 'OUTDATED_DOCUMENTS_SEARCH',
-      outdatedDocumentsQuery,
     };
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
-      // If there are no more results, clear the scroll
-      if (res.right.docs.length === 0) {
+      // If outdated documents were found, transform them
+      if (res.right.hits.length > 0) {
         return {
           ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_CLEAR_SCROLL',
-          transformDocumentsScrollId: res.right.scrollId,
+          controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
+          outdatedDocuments: res.right.hits,
         };
+      } else {
+        // If there are no more results we have transformed all outdated
+        // documents and can proceed to the next step
+        if (Option.isSome(stateP.versionIndexReadyActions)) {
+          return {
+            ...stateP,
+            controlState: 'MARK_VERSION_INDEX_READY',
+            versionIndexReadyActions: stateP.versionIndexReadyActions,
+          };
+        } else {
+          return {
+            ...stateP,
+            controlState: 'DONE',
+          };
+        }
       }
-
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
-        transformDocumentsScrollId: res.right.scrollId,
-        outdatedDocuments: res.right.docs,
-      };
-    }
-    return stateP;
-  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SCROLL') {
-    const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isRight(res)) {
-      // If there are no more results, clear the scroll
-      if (res.right.docs.length === 0) {
-        return {
-          ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_CLEAR_SCROLL',
-        };
-      }
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_TRANSFORM',
-        transformDocumentsScrollId: res.right.scrollId,
-        outdatedDocuments: res.right.docs,
-      };
     }
     return stateP;
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_TRANSFORM') {
     return {
       ...stateP,
-      controlState: 'OUTDATED_DOCUMENTS_SCROLL',
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH',
     };
-  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_CLEAR_SCROLL') {
-    if (Option.isSome(stateP.versionIndexReadyActions)) {
-      return {
-        ...stateP,
-        controlState: 'MARK_VERSION_INDEX_READY',
-        versionIndexReadyActions: stateP.versionIndexReadyActions,
-      };
-    } else {
-      return {
-        ...stateP,
-        controlState: 'DONE',
-      };
-    }
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
     if (Option.isSome(stateP.versionIndexReadyActions)) {
       return {
@@ -694,7 +692,7 @@ export const nextActionMap = (
     INIT: (state: InitState) =>
       Actions.fetchIndices(client, [currentAlias(state), versionAlias(state)]),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
-      Actions.setIndexWriteBlock(client, state.source.value),
+      Actions.setWriteBlock(client, state.source.value),
     CREATE_NEW_TARGET: (state: CreateNewTargetState) =>
       Actions.createIndex(client, state.target, state.targetMappings),
     CLONE_SOURCE_TO_TARGET: (state: CloneSourceToTargetState) =>
@@ -705,10 +703,6 @@ export const nextActionMap = (
       Actions.waitForTask(client, state.updateTargetMappingsTaskId, '60s'),
     OUTDATED_DOCUMENTS_SEARCH: (state: OutdatedDocumentsSearch) =>
       Actions.search(client, state.target, state.outdatedDocumentsQuery),
-    OUTDATED_DOCUMENTS_SCROLL: (state: OutdatedDocumentsScroll) =>
-      Actions.scroll(client, state.transformDocumentsScrollId),
-    OUTDATED_DOCUMENTS_CLEAR_SCROLL: (state: OutdatedDocumentsClearScroll) =>
-      Actions.clearScroll(client, state.transformDocumentsScrollId),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       pipe(
         TaskEither.tryCatch(
@@ -726,7 +720,7 @@ export const nextActionMap = (
     LEGACY_REINDEX: (state: LegacyReindexState) =>
       Actions.reindex(client, state.legacy, state.source.value, state.preMigrationScript),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
-      Actions.setIndexWriteBlock(client, state.legacy),
+      Actions.setWriteBlock2(client, state.legacy),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForTask(client, state.preMigrationUpdateTaskId, '60s'),
     LEGACY_DELETE: (state: LegacyDeleteState) =>
@@ -747,6 +741,12 @@ export const next = (
     };
   };
 
+  const tryCatch = <F extends (...args: any) => any>(
+    fn: F
+  ): (() => ReturnType<F> | Promise<EsClientErrors.ElasticsearchClientError>) => {
+    return () => fn().catch((e: EsClientErrors.ElasticsearchClientError) => e);
+  };
+
   const map = nextActionMap(client, transformRawDocs);
 
   if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
@@ -759,7 +759,7 @@ export const next = (
     const nextAction = map[state.controlState] as (
       state: State
     ) => ReturnType<typeof map[AllActionStates]>;
-    return delay(nextAction(state));
+    return delay(tryCatch(nextAction(state)));
   }
 };
 
@@ -783,13 +783,30 @@ export async function migrationStateMachine({
   migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
 }) {
+  const outdatedDocumentsQuery = {
+    bool: {
+      should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
+        bool: {
+          must: [
+            { exists: { field: type } },
+            {
+              bool: {
+                must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+              },
+            },
+          ],
+        },
+      })),
+    },
+  };
+
   const initialState: State = {
     indexPrefix,
     controlState: 'INIT',
     kibanaVersion,
-    preMigrationScript,
+    preMigrationScript: Option.fromNullable(preMigrationScript),
     targetMappings,
-    migrationVersionPerType,
+    outdatedDocumentsQuery,
     retryCount: 0,
     retryDelay: 0,
     logs: [],

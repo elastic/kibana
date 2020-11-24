@@ -23,7 +23,7 @@ import * as Option from 'fp-ts/lib/Option';
 import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { ElasticsearchClient, ShardsResponse } from '../../elasticsearch';
+import { ElasticsearchClient } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '../serialization';
 
@@ -51,7 +51,7 @@ const retryResponseStatuses = [
   410, // Gone
 ];
 
-const catchRetryableEsClientErrors = (e: ElasticsearchClientError) => {
+const catchEsClientErrors = (e: ElasticsearchClientError) => {
   if (
     e instanceof EsErrors.NoLivingConnectionsError ||
     e instanceof EsErrors.ConnectionError ||
@@ -62,7 +62,7 @@ const catchRetryableEsClientErrors = (e: ElasticsearchClientError) => {
   ) {
     return Either.left(e);
   } else {
-    return Promise.reject(e);
+    throw e;
   }
 };
 
@@ -72,9 +72,8 @@ export type FetchIndexResponse = Record<
 >;
 
 /**
- * Returns an `Option` wrapping the response of the `indices.get` API. The
- * `Option` is a `Some` if the index exists, and a `None` if the index doesn't
- * exist.
+ * Fetches information about the given indices including aliases, mappings and
+ * settings.
  *
  * @param client
  * @param indexToFetch
@@ -94,19 +93,35 @@ export const fetchIndices = (
     .then(({ body }) => {
       return Either.right(body);
     })
-    .catch(catchRetryableEsClientErrors);
+    .catch(catchEsClientErrors);
 };
 
 export interface SetIndexWriteBlockResponse {
   acknowledged: boolean;
+  shards_acknowledged: boolean;
 }
 
-export const setIndexWriteBlock = (
+/**
+ * Sets a write block in place for the given index. If the response includes
+ * `acknowledged: true` all in-progress writes have drained and no further
+ * writes to this index will be possible.
+ *
+ * The first time the write block is added to an index the response will
+ * include `shards_acknowledged: true` but once the block is in place,
+ * subsequent calls return `shards_acknowledged: false`
+ *
+ * @param client
+ * @param index
+ */
+export const setWriteBlock = (
   client: ElasticsearchClient,
   index: string
 ): TaskEither.TaskEither<ExpectedErrors, SetIndexWriteBlockResponse> => () => {
   return client.indices
-    .addBlock(
+    .addBlock<{
+      acknowledged: boolean;
+      shards_acknowledged: boolean;
+    }>(
       {
         index,
         block: 'write',
@@ -114,15 +129,42 @@ export const setIndexWriteBlock = (
       { maxRetries: 0 /** handle retry ourselves for now */ }
     )
     .then((res) => {
-      // Note: initial conversations with Yannick gave me the impression we
-      // need to check for `shards_acknowledged=true` here too. But if the
-      // lock is already in place `shards_acknowledged` is always false.
-      // Follow-up with ES-team, do we need to check index status >= yellow?
-      return Either.right({
-        acknowledged: res.body.acknowledged,
-      });
+      return Either.right(res.body);
     })
-    .catch(catchRetryableEsClientErrors);
+    .catch(catchEsClientErrors);
+};
+
+export const setWriteBlock2 = (
+  client: ElasticsearchClient,
+  index: string
+): TaskEither.TaskEither<
+  'set_write_block_failed' | 'index_not_found_exception',
+  'set_write_block_succeeded'
+> => () => {
+  return client.indices
+    .addBlock<{
+      acknowledged: boolean;
+      shards_acknowledged: boolean;
+    }>(
+      {
+        index,
+        block: 'write',
+      },
+      { maxRetries: 0 /** handle retry ourselves for now */ }
+    )
+    .then((res) => {
+      return res.body.acknowledged === true
+        ? Either.right('set_write_block_succeeded' as const)
+        : Either.left('set_write_block_failed' as const);
+    })
+    .catch((e: ElasticsearchClientError) => {
+      if (e instanceof EsErrors.ResponseError) {
+        if (e.message === 'index_not_found_exception') {
+          return Either.left(e.message);
+        }
+      }
+      throw e;
+    });
 };
 
 const waitForStatus = (
@@ -135,7 +177,7 @@ const waitForStatus = (
     .then(() => {
       return Either.right({});
     })
-    .catch(catchRetryableEsClientErrors);
+    .catch(catchEsClientErrors);
 };
 
 export type CloneIndexResponse = AcknowledgeResponse;
@@ -202,7 +244,7 @@ export const cloneIndex = (
             shardsAcknowledged: false,
           });
         } else {
-          return catchRetryableEsClientErrors(error);
+          return catchEsClientErrors(error);
         }
       });
   };
@@ -270,7 +312,7 @@ export const waitForTask = (
         description: body.task.description,
       });
     })
-    .catch(catchRetryableEsClientErrors);
+    .catch(catchEsClientErrors);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -285,7 +327,7 @@ export const deleteIndex = (
     .then(() => {
       return Either.right({});
     })
-    .catch(catchRetryableEsClientErrors);
+    .catch(catchEsClientErrors);
 };
 
 export interface UpdateByQueryResponse {
@@ -339,7 +381,7 @@ export const updateByQuery = (
     .then(({ body: { task: taskId } }) => {
       return Either.right({ taskId });
     })
-    .catch(catchRetryableEsClientErrors);
+    .catch(catchEsClientErrors);
 };
 
 export interface ReindexResponse {
@@ -364,7 +406,7 @@ export const reindex = (
   client: ElasticsearchClient,
   sourceIndex: string,
   targetIndex: string,
-  reindexScript?: string
+  reindexScript: Option.Option<string>
 ): TaskEither.TaskEither<ExpectedErrors, ReindexResponse> => () => {
   return client
     .reindex({
@@ -382,13 +424,13 @@ export const reindex = (
           // Don't override existing documents, only create if missing
           op_type: 'create',
         },
-        script:
-          reindexScript != null
-            ? {
-                source: reindexScript,
-                lang: 'painless',
-              }
-            : undefined,
+        script: Option.fold(
+          () => undefined,
+          () => ({
+            source: reindexScript,
+            lang: 'painless',
+          })
+        )(reindexScript),
       },
       // force a refresh so that we can query the target index
       refresh: true,
@@ -398,7 +440,7 @@ export const reindex = (
     .then(({ body: { task: taskId } }) => {
       return Either.right({ taskId });
     })
-    .catch(catchRetryableEsClientErrors);
+    .catch(catchEsClientErrors);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -431,7 +473,7 @@ export const updateAliases = (
       console.log(err.meta.body);
       throw err;
     })
-    .catch(catchRetryableEsClientErrors);
+    .catch(catchEsClientErrors);
 };
 
 export interface AcknowledgeResponse {
@@ -513,7 +555,7 @@ export const createIndex = (
             shardsAcknowledged: false,
           });
         } else {
-          return catchRetryableEsClientErrors(error);
+          return catchEsClientErrors(error);
         }
       });
   };
@@ -566,7 +608,7 @@ export const updateAndPickupMappings = (
         // TODO do we need to check res.body.acknowledged?
         return Either.right({ acknowledged: res.body.acknowledged });
       })
-      .catch(catchRetryableEsClientErrors);
+      .catch(catchEsClientErrors);
   };
 
   return pipe(
@@ -576,23 +618,8 @@ export const updateAndPickupMappings = (
     })
   );
 };
-
-interface ElasticSearchResponse {
-  took: number;
-  timed_out: boolean;
-  _scroll_id: string;
-  _shards: ShardsResponse;
-  hits: {
-    total: number;
-    // when `filter_path` is specified, ES doesn't return empty arrays, so if
-    // there are no search results res.hits.hits will be undefined.
-    hits?: SavedObjectsRawDoc[];
-  };
-}
-
 export interface SearchResponse {
-  scrollId: string;
-  docs: SavedObjectsRawDoc[];
+  hits: SavedObjectsRawDoc[];
 }
 
 export const search = (
@@ -601,107 +628,45 @@ export const search = (
   query: Record<string, unknown>
 ): TaskEither.TaskEither<ExpectedErrors | Error, SearchResponse> => () => {
   return client
-    .search<ElasticSearchResponse>({
+    .search<{
+      // when `filter_path` is specified, ES doesn't return empty arrays, so if
+      // there are no search results res.body.hits will be undefined.
+      hits?: {
+        hits?: SavedObjectsRawDoc[];
+      };
+    }>({
       index,
-      // How long to keep the scroll context alive. This only needs to be long
-      // enough to process a single batch since every new scroll request will
-      // reset this scroll's expiry.
-      // Because we transform and write each batch before reading the next
-      // batch this needs to be long enough to complete the bulk update and
-      // potentially retry transient failures.
-      // TODO (profile/tune this parameter):
-      //  - Can we make it smaller? How do migrations behave when the scroll expires
-      //  - Is it too large? How do migrations behave when we go into a bootloop and
-      // continuously open new scroll requests?
-      scroll: '5m',
-      // Scroll searches have optimizations that make them faster when the
-      // sort order is _doc (the "natural" index order).
+      // Optimize search performance by sorting by the "natural" index order
       sort: ['_doc'],
       // Return the _seq_no and _primary_term so we can use optimistic
       // concurrency control for updates
       seq_no_primary_term: true,
-      // Return batches of 100 documents
-      // TODO (profile/tune): Although smaller batches might be less efficient
-      // it reduces the time to process a single batch thus reducing the
-      // likelihood that our scroll expires.
+      // Return batches of 100 documents. Smaller batches reduce the memory
+      // pressure on Elasticsearch and Kibana so are less likely to cause
+      // failures.
+      // TODO (profile/tune): How much smaller can we make this number before
+      // it starts impacting how long migrations take to perform?
       size: 100,
       body: {
         query,
       },
+      // Don't return partial results if timeouts or shard failures are
+      // encountered. Set explicitly to avoid users overriding the
+      // search.default_allow_partial_results cluster setting to false.
+      allow_partial_search_results: true,
+      // Improve performance by not calculating the total number of hits
+      // matching the query.
+      track_total_hits: false,
       // Reduce the response payload size by only returning the data we care about
       filter_path: [
-        '_scroll_id',
-        '_shards',
-        'hits.total',
         'hits.hits._id',
         'hits.hits._source',
         'hits.hits._seq_no',
         'hits.hits._primary_term',
       ],
     })
-    .then((res) => {
-      // Check that all shards successfully executed the query
-      // Kibana uses a single shard by default but users can override this
-      if (res.body._shards.successful < res.body._shards.total) {
-        return Either.left(new Error('Search request did not successfully execute on all shards'));
-      }
-      if (res.body.timed_out) {
-        return Either.left(new Error('Search request timeout'));
-      }
-      return Either.right({ scrollId: res.body._scroll_id, docs: res.body.hits.hits ?? [] });
-    })
-    .catch(catchRetryableEsClientErrors);
-};
-
-export const scroll = (
-  client: ElasticsearchClient,
-  scrollId: string
-): TaskEither.TaskEither<ExpectedErrors | Error, SearchResponse> => () => {
-  return client
-    .scroll<ElasticSearchResponse>({
-      // How long to keep the scroll context alive. This only needs to be long
-      // enough to process a single batch since every new scroll request will
-      // reset this scroll's expiry.
-      // Because we transform and write each batch before reading the next
-      // batch this needs to be long enough to complete the bulk update and
-      // potentially retry transient failures.
-      // TODO (profile/tune this parameter):
-      //  - Can we make it smaller? How do migrations behave when the scroll expires
-      //  - Is it too large? How do migrations behave when we go into a bootloop and
-      // continuously open new scroll requests?
-      scroll: '5m',
-      scroll_id: scrollId,
-    })
-    .then((res) => {
-      // Check that all shards successfully executed the query
-      // Kibana uses a single shard by default but users can override this
-      if (res.body._shards.successful < res.body._shards.total) {
-        return Either.left(new Error('Search request did not successfully execute on all shards'));
-      }
-      if (res.body.timed_out) {
-        return Either.left(new Error('Search request timeout'));
-      }
-      return Either.right({ scrollId: res.body._scroll_id, docs: res.body.hits.hits ?? [] });
-    })
-    .catch(catchRetryableEsClientErrors);
-};
-
-export const clearScroll = (
-  client: ElasticsearchClient,
-  scrollId: string
-): TaskEither.TaskEither<ExpectedErrors | Error, { succeeded: boolean }> => () => {
-  return client
-    .clearScroll<{ succeeded: boolean; freed: number }>({
-      scroll_id: scrollId,
-    })
-    .then((res) => {
-      if (res.body.succeeded) {
-        return Either.right({ succeeded: true });
-      } else {
-        return Either.left(new Error('Unable to free search scroll'));
-      }
-    })
-    .catch(catchRetryableEsClientErrors);
+    .then((res) => Either.right({ hits: res.body.hits?.hits ?? [] }))
+    .catch(catchEsClientErrors);
 };
 
 export const bulkIndex = (
@@ -758,5 +723,5 @@ export const bulkIndex = (
         return Either.left(new Error(JSON.stringify(errors)));
       }
     })
-    .catch(catchRetryableEsClientErrors);
+    .catch(catchEsClientErrors);
 };
