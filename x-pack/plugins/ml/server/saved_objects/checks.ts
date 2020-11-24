@@ -156,7 +156,7 @@ export function checksFactory(
     };
   }
 
-  async function deleteJobsCheck(
+  async function canDeleteJobs(
     request: KibanaRequest,
     jobType: JobType,
     jobIds: string[],
@@ -256,5 +256,5 @@ export function checksFactory(
     }, {} as DeleteJobCheckResponse);
   }
 
-  return { checkStatus, deleteJobsCheck };
+  return { checkStatus, canDeleteJobs };
 }

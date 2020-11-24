@@ -239,7 +239,7 @@ export function savedObjectsRoutes(
    */
   router.post(
     {
-      path: '/api/ml/saved_objects/delete_job_check/{jobType}',
+      path: '/api/ml/saved_objects/can_delete_job/{jobType}',
       validate: {
         params: jobTypeSchema,
         body: jobIdsSchema,
@@ -253,8 +253,8 @@ export function savedObjectsRoutes(
         const { jobType } = request.params;
         const { jobIds }: { jobIds: string[] } = request.body;
 
-        const { deleteJobsCheck } = checksFactory(client, jobSavedObjectService);
-        const body = await deleteJobsCheck(
+        const { canDeleteJobs } = checksFactory(client, jobSavedObjectService);
+        const body = await canDeleteJobs(
           request,
           jobType,
           jobIds,
