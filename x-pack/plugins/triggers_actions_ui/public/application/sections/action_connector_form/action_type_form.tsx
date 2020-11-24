@@ -34,12 +34,14 @@ import {
   ActionConnector,
   ActionVariables,
   ActionVariable,
+  ActionTypeRegistryContract,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
 import { resolvedActionGroupMessage } from '../../constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;
@@ -54,19 +56,15 @@ export type ActionTypeFormProps = {
   setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
+  actionTypeRegistry: ActionTypeRegistryContract;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
   | 'actionGroups'
   | 'setActionGroupIdByIndex'
   | 'setActionParamsProperty'
-  | 'http'
-  | 'actionTypeRegistry'
-  | 'toastNotifications'
-  | 'docLinks'
   | 'messageVariables'
   | 'defaultActionMessage'
-  | 'capabilities'
 >;
 
 const preconfiguredMessage = i18n.translate(
@@ -87,17 +85,16 @@ export const ActionTypeForm = ({
   setActionParamsProperty,
   actionTypesIndex,
   connectors,
-  http,
-  toastNotifications,
-  docLinks,
-  capabilities,
-  actionTypeRegistry,
   defaultActionGroupId,
   defaultActionMessage,
   messageVariables,
   actionGroups,
   setActionGroupIdByIndex,
+  actionTypeRegistry,
 }: ActionTypeFormProps) => {
+  const {
+    application: { capabilities },
+  } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
   const [availableDefaultActionMessage, setAvailableDefaultActionMessage] = useState<
@@ -272,9 +269,6 @@ export const ActionTypeForm = ({
               editAction={setActionParamsProperty}
               messageVariables={availableActionVariables}
               defaultMessage={availableDefaultActionMessage}
-              docLinks={docLinks}
-              http={http}
-              toastNotifications={toastNotifications}
               actionConnector={actionConnector}
             />
           </Suspense>

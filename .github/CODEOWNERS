@@ -69,7 +69,8 @@
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/plugins/apm_oss/  @elastic/apm-ui
-/src/apm.js @watson @vigneshshanmugam
+/src/apm.js @elastic/kibana-core @vigneshshanmugam
+/packages/kbn-apm-config-loader/ @elastic/kibana-core @vigneshshanmugam
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
@@ -141,9 +142,8 @@
 #CC# /src/plugins/maps_oss/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 #CC# /x-pack/plugins/maps_legacy_licensing @elastic/kibana-gis
-#CC# /src/plugins/home/server/tutorials @elastic/kibana-gis
-#CC# /src/plugins/tile_map/ @elastic/kibana-gis
-#CC# /src/plugins/region_map/ @elastic/kibana-gis
+/src/plugins/tile_map/ @elastic/kibana-gis
+/src/plugins/region_map/ @elastic/kibana-gis
 
 # Operations
 /src/dev/ @elastic/kibana-operations

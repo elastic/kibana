@@ -13,3 +13,7 @@ export const jobsAndSpaces = schema.object({
 });
 
 export const repairJobObjects = schema.object({ simulate: schema.maybe(schema.boolean()) });
+
+export const jobTypeSchema = schema.object({
+  jobType: schema.string(),
+});
