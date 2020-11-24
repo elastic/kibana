@@ -47,16 +47,16 @@ describe('CoreUsageStatsClient', () => {
   // mock data for existing fields
   const savedObjectsImport = {
     total: 5,
-    createNewCopies: { enabled: 2, disabled: 3 },
-    overwrite: { enabled: 1, disabled: 4 },
+    createNewCopiesEnabled: { yes: 2, no: 3 },
+    overwriteEnabled: { yes: 1, no: 4 },
   };
   const savedObjectsResolveImportErrors = {
     total: 13,
-    createNewCopies: { enabled: 6, disabled: 7 },
+    createNewCopiesEnabled: { yes: 6, no: 7 },
   };
   const savedObjectsExport = {
     total: 17,
-    allTypes: { yes: 8, no: 9 },
+    allTypesSelected: { yes: 8, no: 9 },
   };
 
   describe('#getUsageStats', () => {
@@ -90,8 +90,8 @@ describe('CoreUsageStatsClient', () => {
           apiCalls: {
             savedObjectsImport: {
               total: 1,
-              createNewCopies: { enabled: 0, disabled: 1 },
-              overwrite: { enabled: 0, disabled: 1 },
+              createNewCopiesEnabled: { yes: 0, no: 1 },
+              overwriteEnabled: { yes: 0, no: 1 },
             },
           },
         },
@@ -118,13 +118,13 @@ describe('CoreUsageStatsClient', () => {
             // these fields are changed
             savedObjectsImport: {
               total: savedObjectsImport.total + 1,
-              createNewCopies: {
-                enabled: savedObjectsImport.createNewCopies.enabled + 1,
-                disabled: savedObjectsImport.createNewCopies.disabled,
+              createNewCopiesEnabled: {
+                yes: savedObjectsImport.createNewCopiesEnabled.yes + 1,
+                no: savedObjectsImport.createNewCopiesEnabled.no,
               },
-              overwrite: {
-                enabled: savedObjectsImport.overwrite.enabled + 1,
-                disabled: savedObjectsImport.overwrite.disabled,
+              overwriteEnabled: {
+                yes: savedObjectsImport.overwriteEnabled.yes + 1,
+                no: savedObjectsImport.overwriteEnabled.no,
               },
             },
             // these fields are unchanged
@@ -151,7 +151,7 @@ describe('CoreUsageStatsClient', () => {
           apiCalls: {
             savedObjectsResolveImportErrors: {
               total: 1,
-              createNewCopies: { enabled: 0, disabled: 1 },
+              createNewCopiesEnabled: { yes: 0, no: 1 },
             },
           },
         },
@@ -177,9 +177,9 @@ describe('CoreUsageStatsClient', () => {
             // these fields are changed
             savedObjectsResolveImportErrors: {
               total: savedObjectsResolveImportErrors.total + 1,
-              createNewCopies: {
-                enabled: savedObjectsResolveImportErrors.createNewCopies.enabled + 1,
-                disabled: savedObjectsResolveImportErrors.createNewCopies.disabled,
+              createNewCopiesEnabled: {
+                yes: savedObjectsResolveImportErrors.createNewCopiesEnabled.yes + 1,
+                no: savedObjectsResolveImportErrors.createNewCopiesEnabled.no,
               },
             },
             // these fields are unchanged
@@ -207,7 +207,7 @@ describe('CoreUsageStatsClient', () => {
           apiCalls: {
             savedObjectsExport: {
               total: 1,
-              allTypes: { yes: 0, no: 1 },
+              allTypesSelected: { yes: 0, no: 1 },
             },
           },
         },
@@ -234,9 +234,9 @@ describe('CoreUsageStatsClient', () => {
             // these fields are changed
             savedObjectsExport: {
               total: savedObjectsExport.total + 1,
-              allTypes: {
-                yes: savedObjectsExport.allTypes.yes + 1,
-                no: savedObjectsExport.allTypes.no,
+              allTypesSelected: {
+                yes: savedObjectsExport.allTypesSelected.yes + 1,
+                no: savedObjectsExport.allTypesSelected.no,
               },
             },
             // these fields are unchanged

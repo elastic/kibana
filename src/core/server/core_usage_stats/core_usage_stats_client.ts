@@ -43,16 +43,16 @@ export type IncrementSavedObjectsExportOptions = Pick<SavedObjectsExportOptions,
 
 const SAVED_OBJECTS_IMPORT_DEFAULT = Object.freeze({
   total: 0,
-  createNewCopies: Object.freeze({ enabled: 0, disabled: 0 }),
-  overwrite: Object.freeze({ enabled: 0, disabled: 0 }),
+  createNewCopiesEnabled: Object.freeze({ yes: 0, no: 0 }),
+  overwriteEnabled: Object.freeze({ yes: 0, no: 0 }),
 });
 const SAVED_OBJECTS_RESOLVE_IMPORT_ERRORS_DEFAULT = Object.freeze({
   total: 0,
-  createNewCopies: Object.freeze({ enabled: 0, disabled: 0 }),
+  createNewCopiesEnabled: Object.freeze({ yes: 0, no: 0 }),
 });
 const SAVED_OBJECTS_EXPORT_DEFAULT = Object.freeze({
   total: 0,
-  allTypes: Object.freeze({ yes: 0, no: 0 }),
+  allTypesSelected: Object.freeze({ yes: 0, no: 0 }),
 });
 
 /** @internal */
@@ -91,8 +91,11 @@ export class CoreUsageStatsClient {
         ...apiCalls,
         savedObjectsImport: {
           total: current.total + 1,
-          createNewCopies: incrementBooleanCount(current.createNewCopies, createNewCopies),
-          overwrite: incrementBooleanCount(current.overwrite, overwrite),
+          createNewCopiesEnabled: incrementBooleanCounter(
+            current.createNewCopiesEnabled,
+            createNewCopies
+          ),
+          overwriteEnabled: incrementBooleanCounter(current.overwriteEnabled, overwrite),
         },
       },
     };
@@ -114,7 +117,10 @@ export class CoreUsageStatsClient {
         ...apiCalls,
         savedObjectsResolveImportErrors: {
           total: current.total + 1,
-          createNewCopies: incrementBooleanCount(current.createNewCopies, createNewCopies),
+          createNewCopiesEnabled: incrementBooleanCounter(
+            current.createNewCopiesEnabled,
+            createNewCopies
+          ),
         },
       },
     };
@@ -136,10 +142,7 @@ export class CoreUsageStatsClient {
         ...apiCalls,
         savedObjectsExport: {
           total: current.total + 1,
-          allTypes: {
-            yes: current.allTypes.yes + (isAllTypesSelected ? 1 : 0),
-            no: current.allTypes.no + (isAllTypesSelected ? 0 : 1),
-          },
+          allTypesSelected: incrementBooleanCounter(current.allTypesSelected, isAllTypesSelected),
         },
       },
     };
@@ -152,9 +155,9 @@ export class CoreUsageStatsClient {
   }
 }
 
-function incrementBooleanCount(current: { enabled: number; disabled: number }, value: boolean) {
+function incrementBooleanCounter(current: { yes: number; no: number }, value: boolean) {
   return {
-    enabled: current.enabled + (value ? 1 : 0),
-    disabled: current.disabled + (value ? 0 : 1),
+    yes: current.yes + (value ? 1 : 0),
+    no: current.no + (value ? 0 : 1),
   };
 }

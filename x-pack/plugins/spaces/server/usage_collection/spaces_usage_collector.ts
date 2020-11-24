@@ -204,20 +204,20 @@ export function getSpacesUsageCollector(
       apiCalls: {
         copySavedObjects: {
           total: { type: 'long' },
-          createNewCopies: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
+          createNewCopiesEnabled: {
+            yes: { type: 'long' },
+            no: { type: 'long' },
           },
-          overwrite: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
+          overwriteEnabled: {
+            yes: { type: 'long' },
+            no: { type: 'long' },
           },
         },
         resolveCopySavedObjectsErrors: {
           total: { type: 'long' },
-          createNewCopies: {
-            enabled: { type: 'long' },
-            disabled: { type: 'long' },
+          createNewCopiesEnabled: {
+            yes: { type: 'long' },
+            no: { type: 'long' },
           },
         },
       },

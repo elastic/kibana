@@ -8,20 +8,20 @@ export interface UsageStats {
   apiCalls?: {
     copySavedObjects?: {
       total: number;
-      createNewCopies: {
-        enabled: number;
-        disabled: number;
+      createNewCopiesEnabled: {
+        yes: number;
+        no: number;
       };
-      overwrite: {
-        enabled: number;
-        disabled: number;
+      overwriteEnabled: {
+        yes: number;
+        no: number;
       };
     };
     resolveCopySavedObjectsErrors?: {
       total: number;
-      createNewCopies: {
-        enabled: number;
-        disabled: number;
+      createNewCopiesEnabled: {
+        yes: number;
+        no: number;
       };
     };
   };

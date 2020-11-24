@@ -17,12 +17,12 @@ type IncrementResolveCopySavedObjectsErrorsOptions = Pick<
 
 const COPY_DEFAULT = Object.freeze({
   total: 0,
-  createNewCopies: Object.freeze({ enabled: 0, disabled: 0 }),
-  overwrite: Object.freeze({ enabled: 0, disabled: 0 }),
+  createNewCopiesEnabled: Object.freeze({ yes: 0, no: 0 }),
+  overwriteEnabled: Object.freeze({ yes: 0, no: 0 }),
 });
 const RESOLVE_COPY_ERRORS_DEFAULT = Object.freeze({
   total: 0,
-  createNewCopies: Object.freeze({ enabled: 0, disabled: 0 }),
+  createNewCopiesEnabled: Object.freeze({ yes: 0, no: 0 }),
 });
 
 export class UsageStatsClient {
@@ -60,8 +60,11 @@ export class UsageStatsClient {
         ...apiCalls,
         copySavedObjects: {
           total: current.total + 1,
-          createNewCopies: incrementBooleanCount(current.createNewCopies, createNewCopies),
-          overwrite: incrementBooleanCount(current.overwrite, overwrite),
+          createNewCopiesEnabled: incrementBooleanCounter(
+            current.createNewCopiesEnabled,
+            createNewCopies
+          ),
+          overwriteEnabled: incrementBooleanCounter(current.overwriteEnabled, overwrite),
         },
       },
     };
@@ -81,7 +84,10 @@ export class UsageStatsClient {
         ...apiCalls,
         resolveCopySavedObjectsErrors: {
           total: current.total + 1,
-          createNewCopies: incrementBooleanCount(current.createNewCopies, createNewCopies),
+          createNewCopiesEnabled: incrementBooleanCounter(
+            current.createNewCopiesEnabled,
+            createNewCopies
+          ),
         },
       },
     };
@@ -94,9 +100,9 @@ export class UsageStatsClient {
   }
 }
 
-function incrementBooleanCount(current: { enabled: number; disabled: number }, value: boolean) {
+function incrementBooleanCounter(current: { yes: number; no: number }, value: boolean) {
   return {
-    enabled: current.enabled + (value ? 1 : 0),
-    disabled: current.disabled + (value ? 0 : 1),
+    yes: current.yes + (value ? 1 : 0),
+    no: current.no + (value ? 0 : 1),
   };
 }

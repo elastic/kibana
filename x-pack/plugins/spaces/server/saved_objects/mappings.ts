@@ -48,18 +48,18 @@ export const UsageStatsMappings = deepFreeze({
           type: 'object',
           properties: {
             total: { type: 'long' },
-            createNewCopies: {
+            createNewCopiesEnabled: {
               type: 'object',
               properties: {
-                enabled: { type: 'long' },
-                disabled: { type: 'long' },
+                yes: { type: 'long' },
+                no: { type: 'long' },
               },
             },
-            overwrite: {
+            overwriteEnabled: {
               type: 'object',
               properties: {
-                enabled: { type: 'long' },
-                disabled: { type: 'long' },
+                yes: { type: 'long' },
+                no: { type: 'long' },
               },
             },
           },
@@ -68,11 +68,11 @@ export const UsageStatsMappings = deepFreeze({
           type: 'object',
           properties: {
             total: { type: 'long' },
-            createNewCopies: {
+            createNewCopiesEnabled: {
               type: 'object',
               properties: {
-                enabled: { type: 'long' },
-                disabled: { type: 'long' },
+                yes: { type: 'long' },
+                no: { type: 'long' },
               },
             },
           },

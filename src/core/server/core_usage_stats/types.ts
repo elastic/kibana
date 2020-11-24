@@ -27,25 +27,25 @@ export interface CoreUsageStats {
   apiCalls?: {
     savedObjectsImport?: {
       total: number;
-      createNewCopies: {
-        enabled: number;
-        disabled: number;
+      createNewCopiesEnabled: {
+        yes: number;
+        no: number;
       };
-      overwrite: {
-        enabled: number;
-        disabled: number;
+      overwriteEnabled: {
+        yes: number;
+        no: number;
       };
     };
     savedObjectsResolveImportErrors?: {
       total: number;
-      createNewCopies: {
-        enabled: number;
-        disabled: number;
+      createNewCopiesEnabled: {
+        yes: number;
+        no: number;
       };
     };
     savedObjectsExport?: {
       total: number;
-      allTypes: {
+      allTypesSelected: {
         yes: number;
         no: number;
       };

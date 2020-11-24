@@ -29,18 +29,18 @@ export const CoreUsageStatsMappings = deepFreeze({
           type: 'object',
           properties: {
             total: { type: 'long' },
-            createNewCopies: {
+            createNewCopiesEnabled: {
               type: 'object',
               properties: {
-                enabled: { type: 'long' },
-                disabled: { type: 'long' },
+                yes: { type: 'long' },
+                no: { type: 'long' },
               },
             },
-            overwrite: {
+            overwriteEnabled: {
               type: 'object',
               properties: {
-                enabled: { type: 'long' },
-                disabled: { type: 'long' },
+                yes: { type: 'long' },
+                no: { type: 'long' },
               },
             },
           },
@@ -49,11 +49,11 @@ export const CoreUsageStatsMappings = deepFreeze({
           type: 'object',
           properties: {
             total: { type: 'long' },
-            createNewCopies: {
+            createNewCopiesEnabled: {
               type: 'object',
               properties: {
-                enabled: { type: 'long' },
-                disabled: { type: 'long' },
+                yes: { type: 'long' },
+                no: { type: 'long' },
               },
             },
           },
@@ -62,7 +62,7 @@ export const CoreUsageStatsMappings = deepFreeze({
           type: 'object',
           properties: {
             total: { type: 'long' },
-            allTypes: {
+            allTypesSelected: {
               type: 'object',
               properties: {
                 yes: { type: 'long' },

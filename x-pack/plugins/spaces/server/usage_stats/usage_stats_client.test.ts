@@ -30,12 +30,12 @@ describe('UsageStatsClient', () => {
   // mock data for existing fields
   const copySavedObjects = {
     total: 5,
-    createNewCopies: { enabled: 2, disabled: 3 },
-    overwrite: { enabled: 1, disabled: 4 },
+    createNewCopiesEnabled: { yes: 2, no: 3 },
+    overwriteEnabled: { yes: 1, no: 4 },
   };
   const resolveCopySavedObjectsErrors = {
     total: 13,
-    createNewCopies: { enabled: 6, disabled: 7 },
+    createNewCopiesEnabled: { yes: 6, no: 7 },
   };
 
   describe('#getUsageStats', () => {
@@ -69,8 +69,8 @@ describe('UsageStatsClient', () => {
           apiCalls: {
             copySavedObjects: {
               total: 1,
-              createNewCopies: { enabled: 0, disabled: 1 },
-              overwrite: { enabled: 0, disabled: 1 },
+              createNewCopiesEnabled: { yes: 0, no: 1 },
+              overwriteEnabled: { yes: 0, no: 1 },
             },
           },
         },
@@ -95,13 +95,13 @@ describe('UsageStatsClient', () => {
             // these fields are changed
             copySavedObjects: {
               total: copySavedObjects.total + 1,
-              createNewCopies: {
-                enabled: copySavedObjects.createNewCopies.enabled + 1,
-                disabled: copySavedObjects.createNewCopies.disabled,
+              createNewCopiesEnabled: {
+                yes: copySavedObjects.createNewCopiesEnabled.yes + 1,
+                no: copySavedObjects.createNewCopiesEnabled.no,
               },
-              overwrite: {
-                enabled: copySavedObjects.overwrite.enabled + 1,
-                disabled: copySavedObjects.overwrite.disabled,
+              overwriteEnabled: {
+                yes: copySavedObjects.overwriteEnabled.yes + 1,
+                no: copySavedObjects.overwriteEnabled.no,
               },
             },
             // these fields are unchanged
@@ -125,7 +125,7 @@ describe('UsageStatsClient', () => {
           apiCalls: {
             resolveCopySavedObjectsErrors: {
               total: 1,
-              createNewCopies: { enabled: 0, disabled: 1 },
+              createNewCopiesEnabled: { yes: 0, no: 1 },
             },
           },
         },
@@ -149,9 +149,9 @@ describe('UsageStatsClient', () => {
             // these fields are changed
             resolveCopySavedObjectsErrors: {
               total: resolveCopySavedObjectsErrors.total + 1,
-              createNewCopies: {
-                enabled: resolveCopySavedObjectsErrors.createNewCopies.enabled + 1,
-                disabled: resolveCopySavedObjectsErrors.createNewCopies.disabled,
+              createNewCopiesEnabled: {
+                yes: resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes + 1,
+                no: resolveCopySavedObjectsErrors.createNewCopiesEnabled.no,
               },
             },
             // these fields are unchanged

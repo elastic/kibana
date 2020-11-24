@@ -1524,22 +1524,22 @@
                 "total": {
                   "type": "long"
                 },
-                "createNewCopies": {
+                "createNewCopiesEnabled": {
                   "properties": {
-                    "enabled": {
+                    "yes": {
                       "type": "long"
                     },
-                    "disabled": {
+                    "no": {
                       "type": "long"
                     }
                   }
                 },
-                "overwrite": {
+                "overwriteEnabled": {
                   "properties": {
-                    "enabled": {
+                    "yes": {
                       "type": "long"
                     },
-                    "disabled": {
+                    "no": {
                       "type": "long"
                     }
                   }
@@ -1551,12 +1551,12 @@
                 "total": {
                   "type": "long"
                 },
-                "createNewCopies": {
+                "createNewCopiesEnabled": {
                   "properties": {
-                    "enabled": {
+                    "yes": {
                       "type": "long"
                     },
-                    "disabled": {
+                    "no": {
                       "type": "long"
                     }
                   }
@@ -1568,7 +1568,7 @@
                 "total": {
                   "type": "long"
                 },
-                "allTypes": {
+                "allTypesSelected": {
                   "properties": {
                     "yes": {
                       "type": "long"
