@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mergeMap } from 'rxjs/operators';
-import { ISearchStrategy, PluginStart } from '../../../../../../src/plugins/data/server';
+import { map, mergeMap } from 'rxjs/operators';
+import {
+  ISearchStrategy,
+  PluginStart,
+  shimHitsTotal,
+} from '../../../../../../src/plugins/data/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/common';
 import {
   FactoryQueryTypes,
@@ -28,9 +32,17 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
       const queryFactory: SecuritySolutionFactory<T> =
         securitySolutionFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
-      return es
-        .search({ ...request, params: dsl }, options, deps)
-        .pipe(mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes)));
+      return es.search({ ...request, params: dsl }, options, deps).pipe(
+        map((response) => {
+          return {
+            ...response,
+            ...{
+              rawResponse: shimHitsTotal(response.rawResponse),
+            },
+          };
+        }),
+        mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes))
+      );
     },
     cancel: async (id, options, deps) => {
       if (es.cancel) {
