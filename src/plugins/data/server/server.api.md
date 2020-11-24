@@ -153,11 +153,6 @@ export enum BUCKET_TYPES {
     TERMS = "terms"
 }
 
-// Warning: (ae-missing-release-tag) "calcAutoIntervalLessThan" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
-export function calcAutoIntervalLessThan(maxBucketCount: number, duration: number): moment.Duration;
-
 // Warning: (ae-missing-release-tag) "castEsToKbnFieldTypeName" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
@@ -1079,6 +1074,7 @@ export const search: {
         siblingPipelineType: string;
         termsAggFilter: string[];
         toAbsoluteDates: typeof toAbsoluteDates;
+        calcAutoIntervalLessThan: typeof calcAutoIntervalLessThan;
     };
     getRequestInspectorStats: typeof getRequestInspectorStats;
     getResponseInspectorStats: typeof getResponseInspectorStats;
@@ -1255,6 +1251,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:281:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:285:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:288:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:289:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index_patterns/index_patterns_service.ts:58:14 - (ae-forgotten-export) The symbol "IndexPatternsService" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:88:66 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/search/types.ts:104:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts

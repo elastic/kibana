@@ -186,6 +186,7 @@ import {
   includeTotalLoaded,
   toKibanaSearchResponse,
   getTotalLoaded,
+  calcAutoIntervalLessThan,
 } from '../common';
 
 export {
@@ -223,7 +224,6 @@ export {
   TabbedAggColumn,
   TabbedAggRow,
   TabbedTable,
-  calcAutoIntervalLessThan,
 } from '../common';
 
 export {
@@ -273,6 +273,7 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    calcAutoIntervalLessThan,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

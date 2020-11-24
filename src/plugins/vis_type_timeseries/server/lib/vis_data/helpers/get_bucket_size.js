@@ -25,7 +25,7 @@ import {
 } from './unit_to_seconds';
 import { getTimerange } from './get_timerange';
 import { INTERVAL_STRING_RE, GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
-import { calcAutoIntervalLessThan } from '../../../../../data/server';
+import { search } from '../../../../../data/server';
 
 const calculateBucketData = (timeInterval, capabilities) => {
   let intervalString = capabilities
@@ -69,7 +69,7 @@ const calculateBucketSizeForAutoInterval = (req, maxBars) => {
   const { from, to } = getTimerange(req);
   const timerange = to.valueOf() - from.valueOf();
 
-  return calcAutoIntervalLessThan(maxBars, timerange).asSeconds();
+  return search.aggs.calcAutoIntervalLessThan(maxBars, timerange).asSeconds();
 };
 
 export const getBucketSize = (req, interval, capabilities, maxBars) => {

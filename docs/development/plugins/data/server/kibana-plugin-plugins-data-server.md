@@ -28,7 +28,6 @@
 
 |  Function | Description |
 |  --- | --- |
-|  [calcAutoIntervalLessThan(maxBucketCount, duration)](./kibana-plugin-plugins-data-server.calcautointervallessthan.md) | Pick a "pretty" interval that produces no more than the maxBucketCount for the given time range. |
 |  [getCapabilitiesForRollupIndices(indices)](./kibana-plugin-plugins-data-server.getcapabilitiesforrollupindices.md) |  |
 |  [getDefaultSearchParams(uiSettingsClient)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
 |  [getShardTimeout(config)](./kibana-plugin-plugins-data-server.getshardtimeout.md) |  |
