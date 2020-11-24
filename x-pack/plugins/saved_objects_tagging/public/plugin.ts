@@ -43,7 +43,7 @@ export class SavedObjectTaggingPlugin
       title: i18n.translate('xpack.savedObjectsTagging.management.sectionLabel', {
         defaultMessage: 'Tags',
       }),
-      order: 2,
+      order: 1.5,
       mount: async (mountParams) => {
         const { mountSection } = await import('./management');
         return mountSection({

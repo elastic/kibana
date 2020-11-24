@@ -29,6 +29,7 @@ export const getBulkAssignAction = ({
 }: GetBulkAssignActionOptions): TagBulkAction => {
   const openFlyout = getAssignFlyoutOpener({
     overlays,
+    notifications,
     tagCache,
     assignmentService,
   });

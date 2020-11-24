@@ -6,6 +6,8 @@
 
 import React, { FC, useState, useEffect, useCallback } from 'react';
 import { EuiFlyoutFooter, EuiFlyoutHeader, EuiFlexItem, Query } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { NotificationsStart } from 'src/core/public';
 import { AssignableObject } from '../../../common/assignments';
 import { ITagAssignmentService, ITagsCache } from '../../services';
 import { parseQuery, computeRequiredChanges } from './lib';
@@ -25,6 +27,7 @@ interface AssignFlyoutProps {
   tagIds: string[];
   allowedTypes: string[];
   assignmentService: ITagAssignmentService;
+  notifications: NotificationsStart;
   tagCache: ITagsCache;
   onClose: () => Promise<void>;
 }
@@ -40,6 +43,7 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
   tagIds,
   tagCache,
   allowedTypes,
+  notifications,
   assignmentService,
   onClose,
 }) => {
@@ -48,6 +52,7 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
   const [initialStatus, setInitialStatus] = useState<AssignmentStatusMap>({});
   const [overrides, setOverrides] = useState<AssignmentOverrideMap>({});
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [isSaving, setSaving] = useState<boolean>(false);
   const [initiallyAssigned, setInitiallyAssigned] = useState<number>(0);
   const [pendingChangeCount, setPendingChangeCount] = useState<number>(0);
 
@@ -90,14 +95,25 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
   }, [initialStatus, overrides, results]);
 
   const onSave = useCallback(async () => {
+    setSaving(true);
     const changes = computeRequiredChanges({ objects: results, initialStatus, overrides });
     await assignmentService.updateTagAssignments({
       tags: tagIds,
       assign: changes.assigned.map(({ type, id }) => ({ type, id })),
       unassign: changes.unassigned.map(({ type, id }) => ({ type, id })),
     });
-    // TODO: close the modal and stuff.
-  }, [tagIds, results, initialStatus, overrides, assignmentService]);
+
+    notifications.toasts.addSuccess(
+      i18n.translate('xpack.savedObjectsTagging.assignFlyout.successNotificationTitle', {
+        defaultMessage:
+          'Saved assignments to {count, plural, one {1 saved object} other {# saved objects}}',
+        values: {
+          count: changes.assigned.length + changes.unassigned.length,
+        },
+      })
+    );
+    onClose();
+  }, [tagIds, results, initialStatus, overrides, notifications, assignmentService, onClose]);
 
   const resetAll = useCallback(() => {
     setOverrides({});
@@ -162,7 +178,12 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
         />
       </EuiFlexItem>
       <EuiFlyoutFooter>
-        <AssignFlyoutFooter onSave={onSave} onCancel={onClose} />
+        <AssignFlyoutFooter
+          isSaving={isSaving}
+          hasPendingChanges={pendingChangeCount > 0}
+          onSave={onSave}
+          onCancel={onClose}
+        />
       </EuiFlyoutFooter>
     </>
   );

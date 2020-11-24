@@ -9,11 +9,18 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface AssignFlyoutFooterProps {
+  isSaving: boolean;
+  hasPendingChanges: boolean;
   onCancel: () => void;
   onSave: () => void;
 }
 
-export const AssignFlyoutFooter: FC<AssignFlyoutFooterProps> = ({ onCancel, onSave }) => {
+export const AssignFlyoutFooter: FC<AssignFlyoutFooterProps> = ({
+  isSaving,
+  hasPendingChanges,
+  onCancel,
+  onSave,
+}) => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
@@ -25,7 +32,14 @@ export const AssignFlyoutFooter: FC<AssignFlyoutFooterProps> = ({ onCancel, onSa
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton onClick={onSave} fill iconType="save" data-test-subj="assignFlyoutConfirmButton">
+        <EuiButton
+          onClick={onSave}
+          isLoading={isSaving}
+          disabled={!hasPendingChanges}
+          fill
+          iconType="save"
+          data-test-subj="assignFlyoutConfirmButton"
+        >
           <FormattedMessage
             id="xpack.savedObjectsTagging.assignFlyout.confirmButtonLabel"
             defaultMessage="Save tag assignments"
