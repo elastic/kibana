@@ -18,8 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Datatable } from 'src/plugins/expressions/public';
 import { FormatFactory } from '../../../../data/common/field_formats/utils';
-import { DataPublicPluginStart, exportAsCSVs } from '../../../../data/public';
+import { DataPublicPluginStart, exporters } from '../../../../data/public';
 import { downloadMultipleAs } from '../../../../share/public';
 import { Adapters, IEmbeddable } from '../../../../embeddable/public';
 import { ActionByType } from '../../../../ui_actions/public';
@@ -56,7 +57,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
   }
 
   public readonly getDisplayName = (context: ExportContext): string =>
-    i18n.translate('xpack.lens.DownloadCreateDrilldownAction.displayName', {
+    i18n.translate('dashboard.actions.DownloadCreateDrilldownAction.displayName', {
       defaultMessage: 'Download as CSV',
     });
 
@@ -103,12 +104,15 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
     }
     // Visualize
     if (type === 'visualization') {
-      const datatable = await adapters.data.tabular();
-      datatable.columns = datatable.columns.map(({ field, ...rest }: { field: string }) => ({
-        id: field,
-        field,
-        ...rest,
-      }));
+      const tabularData = (await adapters.data?.getTabular()!).data!;
+      const datatable = {
+        columns: tabularData.columns.map(({ field, ...rest }: { field: string }) => ({
+          id: field,
+          field,
+          ...rest,
+        })),
+        rows: tabularData.rows,
+      };
       return { layer1: datatable };
     }
     // Lens
@@ -132,17 +136,32 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
     if (!formatFactory) {
       return;
     }
-    const datatables = await this.getDataTableContent(
+    const adapters = (await this.getDataTableContent(
       context?.embeddable?.type,
       context?.embeddable?.getInspectorAdapters()
-    );
+    )) as Record<string, Datatable>;
 
-    if (datatables) {
-      const content = exportAsCSVs(context?.embeddable?.getTitle()!, datatables, {
-        csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
-        quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
-        formatFactory,
-      });
+    if (adapters) {
+      const datatables = Object.values(adapters);
+      const content = datatables.reduce<Record<string, { content: string; type: string }>>(
+        (memo, datatable, i) => {
+          // skip empty datatables
+          if (datatable) {
+            const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+
+            memo[`${context!.embeddable!.getTitle()!}${postFix}.csv`] = {
+              content: exporters.datatableToCSV(datatable, {
+                csvSeparator: this.params.core.uiSettings.get('csv:separator', ','),
+                quoteValues: this.params.core.uiSettings.get('csv:quoteValues', true),
+                formatFactory,
+              }),
+              type: exporters.CSV_MIME_TYPE,
+            };
+          }
+          return memo;
+        },
+        {}
+      );
 
       if (context.asString) {
         return content;
