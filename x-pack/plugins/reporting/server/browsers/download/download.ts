@@ -36,7 +36,7 @@ export async function download(url: string, path: string, logger: GenericLevelLo
       hash.update(chunk);
     });
 
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       resp.data
         .on('error', (err: Error) => {
           logger.error(err);

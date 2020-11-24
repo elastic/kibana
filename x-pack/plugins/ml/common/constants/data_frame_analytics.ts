@@ -9,13 +9,14 @@ export const ANALYSIS_CONFIG_TYPE = {
   REGRESSION: 'regression',
   CLASSIFICATION: 'classification',
 } as const;
+
 export const DEFAULT_RESULTS_FIELD = 'ml';
 
 export const JOB_MAP_NODE_TYPES = {
   ANALYTICS: 'analytics',
   TRANSFORM: 'transform',
   INDEX: 'index',
-  INFERENCE_MODEL: 'inferenceModel',
+  TRAINED_MODEL: 'trainedModel',
 } as const;
 
 export type JobMapNodeTypes = typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES];

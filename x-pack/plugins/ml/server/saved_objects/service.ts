@@ -5,10 +5,16 @@
  */
 
 import RE2 from 're2';
-import { KibanaRequest, SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/server';
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResult,
+} from 'kibana/server';
 import type { SecurityPluginSetup } from '../../../security/server';
 import { JobType, ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 import { MLJobNotFound } from '../lib/ml_client';
+import { getSavedObjectClientError } from './util';
 import { authorizationProvider } from './authorization';
 
 export interface JobObject {
@@ -61,14 +67,24 @@ export function jobSavedObjectServiceFactory(
 
   async function _createJob(jobType: JobType, jobId: string, datafeedId?: string) {
     await isMlReady();
+
     const job: JobObject = {
       job_id: jobId,
       datafeed_id: datafeedId ?? null,
       type: jobType,
     };
+
+    const id = savedObjectId(job);
+
+    try {
+      await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, id, { force: true });
+    } catch (error) {
+      // the saved object may exist if a previous job with the same ID has been deleted.
+      // if not, this error will be throw which we ignore.
+    }
+
     await savedObjectsClient.create<JobObject>(ML_SAVED_OBJECT_TYPE, job, {
-      id: savedObjectId(job),
-      overwrite: true,
+      id,
     });
   }
 
@@ -120,6 +136,15 @@ export function jobSavedObjectServiceFactory(
 
   async function getAllJobObjects(jobType?: JobType, currentSpaceOnly: boolean = true) {
     return await _getJobObjects(jobType, undefined, undefined, currentSpaceOnly);
+  }
+
+  async function getJobObject(
+    jobType: JobType,
+    jobId: string,
+    currentSpaceOnly: boolean = true
+  ): Promise<SavedObjectsFindResult<JobObject> | undefined> {
+    const [jobObject] = await _getJobObjects(jobType, jobId, undefined, currentSpaceOnly);
+    return jobObject;
   }
 
   async function getAllJobObjectsForAllSpaces(jobType?: JobType) {
@@ -257,7 +282,7 @@ export function jobSavedObjectServiceFactory(
         } catch (error) {
           results[id] = {
             success: false,
-            error,
+            error: getSavedObjectClientError(error),
           };
         }
       }
@@ -278,7 +303,7 @@ export function jobSavedObjectServiceFactory(
         } catch (error) {
           results[job.attributes.job_id] = {
             success: false,
-            error,
+            error: getSavedObjectClientError(error),
           };
         }
       }
@@ -296,6 +321,7 @@ export function jobSavedObjectServiceFactory(
 
   return {
     getAllJobObjects,
+    getJobObject,
     createAnomalyDetectionJob,
     createDataFrameAnalyticsJob,
     deleteAnomalyDetectionJob,
