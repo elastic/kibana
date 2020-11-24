@@ -22,10 +22,18 @@ import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { calculateAggRoot } from './calculate_agg_root';
 import { createPositiveRate, filter } from '../series/positive_rate';
 
-export function positiveRate(req, panel, esQueryConfig, indexPatternObject) {
+export function positiveRate(
+  req,
+  panel,
+  esQueryConfig,
+  indexPatternObject,
+  capabilities,
+  { barTargetUiSettings }
+) {
   return (next) => (doc) => {
     const { interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
-    const { intervalString } = getBucketSize(req, interval);
+    const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
+
     panel.series.forEach((column) => {
       const aggRoot = calculateAggRoot(doc, column);
       column.metrics.filter(filter).forEach(createPositiveRate(doc, intervalString, aggRoot));

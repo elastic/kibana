@@ -6,19 +6,19 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CoreSetup } from 'kibana/server';
-import { getIsFleetEnabled } from './config_collectors';
+import { getIsAgentsEnabled } from './config_collectors';
 import { AgentUsage, getAgentUsage } from './agent_collectors';
 import { getInternalSavedObjectsClient } from './helpers';
 import { PackageUsage, getPackageUsage } from './package_collectors';
 import { FleetConfigType } from '..';
 
 interface Usage {
-  fleet_enabled: boolean;
+  agents_enabled: boolean;
   agents: AgentUsage;
   packages: PackageUsage[];
 }
 
-export function registerIngestManagerUsageCollector(
+export function registerFleetUsageCollector(
   core: CoreSetup,
   config: FleetConfigType,
   usageCollection: UsageCollectionSetup | undefined
@@ -30,19 +30,19 @@ export function registerIngestManagerUsageCollector(
   }
 
   // create usage collector
-  const ingestManagerCollector = usageCollection.makeUsageCollector<Usage>({
-    type: 'ingest_manager',
+  const fleetCollector = usageCollection.makeUsageCollector<Usage>({
+    type: 'fleet',
     isReady: () => true,
     fetch: async () => {
       const soClient = await getInternalSavedObjectsClient(core);
       return {
-        fleet_enabled: getIsFleetEnabled(config),
+        agents_enabled: getIsAgentsEnabled(config),
         agents: await getAgentUsage(soClient),
         packages: await getPackageUsage(soClient),
       };
     },
     schema: {
-      fleet_enabled: { type: 'boolean' },
+      agents_enabled: { type: 'boolean' },
       agents: {
         total: { type: 'long' },
         online: { type: 'long' },
@@ -61,5 +61,5 @@ export function registerIngestManagerUsageCollector(
   });
 
   // register usage collector
-  usageCollection.registerCollector(ingestManagerCollector);
+  usageCollection.registerCollector(fleetCollector);
 }

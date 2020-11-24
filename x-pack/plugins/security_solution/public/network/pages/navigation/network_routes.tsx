@@ -27,6 +27,7 @@ import { UpdateDateRange } from '../../../common/components/charts/common';
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
   ({
     networkPagePath,
+    docValueFields,
     type,
     to,
     filterQuery,
@@ -107,7 +108,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     return (
       <Switch>
         <Route path={`/:tabName(${NetworkRouteType.dns})`}>
-          <DnsQueryTabBody {...tabProps} />
+          <DnsQueryTabBody {...tabProps} docValueFields={docValueFields} />
         </Route>
         <Route path={`/:tabName(${NetworkRouteType.flows})`}>
           <>
