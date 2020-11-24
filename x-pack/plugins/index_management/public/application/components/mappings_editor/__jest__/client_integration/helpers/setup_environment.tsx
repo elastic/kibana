@@ -77,11 +77,18 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
 });
 
+const defaultProps = {
+  docLinks: {
+    DOC_LINK_VERSION: 'master',
+    ELASTIC_WEBSITE_URL: 'https://jest.elastic.co',
+  },
+};
+
 export const WithAppDependencies = (Comp: any) => (props: any) => (
   <KibanaReactContextProvider>
     <MappingsEditorProvider>
       <GlobalFlyoutProvider>
-        <Comp {...props} />
+        <Comp {...defaultProps} {...props} />
       </GlobalFlyoutProvider>
     </MappingsEditorProvider>
   </KibanaReactContextProvider>

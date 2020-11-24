@@ -50,9 +50,10 @@ interface Props {
 }
 
 export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSettings }: Props) => {
-  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<
-    MappingsEditorParsedMetadata
-  >(() => {
+  const {
+    parsedDefaultValue,
+    multipleMappingsDeclared,
+  } = useMemo<MappingsEditorParsedMetadata>(() => {
     const mappingsDefinition = extractMappingsDefinition(value);
 
     if (mappingsDefinition === null) {

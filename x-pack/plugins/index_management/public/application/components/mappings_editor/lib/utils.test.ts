@@ -61,7 +61,6 @@ describe('utils', () => {
     test('returns label for fields', () => {
       expect(
         getTypeLabelFromField({
-          name: 'testField',
           type: 'keyword',
         })
       ).toBe('Keyword');

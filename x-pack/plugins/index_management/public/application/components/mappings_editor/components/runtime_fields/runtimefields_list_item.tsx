@@ -5,81 +5,27 @@
  */
 import React from 'react';
 import classNames from 'classnames';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-  EuiButtonIcon,
-  EuiToolTip,
-  // EuiIcon,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedRuntimeField } from '../../types';
 import { getTypeLabelFromField } from '../../lib';
 
-// import { CreateField } from './create_field';
 import { DeleteRuntimeFieldProvider } from './delete_field_provider';
 
 interface Props {
   field: NormalizedRuntimeField;
-  // allFields: NormalizedFields['byId'];
-  // isCreateFieldFormVisible: boolean;
   areActionButtonsVisible: boolean;
   isHighlighted: boolean;
   isDimmed: boolean;
-  // isLastItem: boolean;
   editField(): void;
 }
 
 function RuntimeFieldsListItemComponent(
-  {
-    field,
-    areActionButtonsVisible,
-    isHighlighted,
-    isDimmed,
-    editField,
-  }: // allFields,
-  //
-  //
-  // isCreateFieldFormVisible,
-  //
-  // isLastItem,
-  // childFieldsArray,
-  // maxNestedDepth,
-
-  // toggleExpand,
-  // treeDepth,
-  Props,
+  { field, areActionButtonsVisible, isHighlighted, isDimmed, editField }: Props,
   ref: React.Ref<HTMLLIElement>
 ) {
-  const {
-    source,
-    // id,
-    // isMultiField,
-    // canHaveChildFields,
-    // hasChildFields,
-    // canHaveMultiFields,
-    // hasMultiFields,
-    // isExpanded,
-    // path,
-  } = field;
-
-  // const renderCreateField = () => {
-  //   if (!isCreateFieldFormVisible) {
-  //     return null;
-  //   }
-
-  //   return (
-  //     <CreateField
-  //       allFields={allFields}
-  //       isRootLevelField={false}
-  //       isMultiField={canHaveMultiFields}
-  //       paddingLeft={indentCreateField}
-  //       maxNestedDepth={maxNestedDepth}
-  //     />
-  //   );
-  // };
+  const { source } = field;
 
   const renderActionButtons = () => {
     if (!areActionButtonsVisible) {
@@ -110,19 +56,6 @@ function RuntimeFieldsListItemComponent(
                 onClick={addField}
                 data-test-subj="addMultiFieldButton"
                 aria-label={addMultiFieldButtonLabel}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )} */}
-
-        {/* {canHaveChildFields && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={addPropertyButtonLabel}>
-              <EuiButtonIcon
-                iconType="plusInCircle"
-                onClick={addField}
-                data-test-subj="addPropertyButton"
-                aria-label={addPropertyButtonLabel}
               />
             </EuiToolTip>
           </EuiFlexItem>
