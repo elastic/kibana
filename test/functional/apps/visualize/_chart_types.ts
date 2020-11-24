@@ -49,18 +49,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let expectedChartTypes = [
         'Area',
         'Coordinate Map',
-        'Data Table',
+        'Data table',
         'Gauge',
         'Goal',
-        'Heat Map',
-        'Horizontal Bar',
+        'Heat map',
+        'Horizontal bar',
         'Line',
         'Metric',
         'Pie',
         'Region Map',
-        'Tag Cloud',
+        'Tag cloud',
         'Timelion',
-        'Vertical Bar',
+        'Vertical bar',
       ];
       if (!isOss) {
         expectedChartTypes = _.remove(expectedChartTypes, function (n) {

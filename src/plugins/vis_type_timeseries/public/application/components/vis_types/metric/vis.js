@@ -95,4 +95,8 @@ MetricVisualization.propTypes = {
   getConfig: PropTypes.func,
 };
 
-export const metric = visWithSplits(MetricVisualization);
+const metric = visWithSplits(MetricVisualization);
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { metric as default };
