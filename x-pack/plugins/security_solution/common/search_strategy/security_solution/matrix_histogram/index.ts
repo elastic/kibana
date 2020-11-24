@@ -37,6 +37,7 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   stackByField: string;
   threshold?: { field: string | undefined; value: number } | undefined;
   inspect?: Maybe<Inspect>;
+  isPtrIncluded?: boolean;
 }
 
 export interface MatrixHistogramStrategyResponse extends IEsSearchResponse {
