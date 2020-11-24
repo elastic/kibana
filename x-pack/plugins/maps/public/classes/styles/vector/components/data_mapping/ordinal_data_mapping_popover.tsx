@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
-import { FieldMetaPopover } from './field_meta_popover';
+import { DataMappingPopover } from './data_mapping_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 import {
   DEFAULT_PERCENTILES,
@@ -83,7 +83,7 @@ interface Props {
   stepFunction: STEP_FUNCTION;
 }
 
-export function OrdinalFieldMetaPopover(props: Props) {
+export function OrdinalDataMappingPopover(props: Props) {
   function onIsEnabledChange(event: EuiSwitchEvent) {
     props.onChange({
       fieldMetaOptions: {
@@ -222,7 +222,7 @@ export function OrdinalFieldMetaPopover(props: Props) {
   }
 
   return (
-    <FieldMetaPopover>
+    <DataMappingPopover>
       <Fragment>
         <EuiFormRow
           label={i18n.translate('xpack.maps.styles.dataDomainOptions.stepFunctionLabel', {
@@ -250,6 +250,6 @@ export function OrdinalFieldMetaPopover(props: Props) {
           ? renderPercentilesForm()
           : renderEasingForm()}
       </Fragment>
-    </FieldMetaPopover>
+    </DataMappingPopover>
   );
 }

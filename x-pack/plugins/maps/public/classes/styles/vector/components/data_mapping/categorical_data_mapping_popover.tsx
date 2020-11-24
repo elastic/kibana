@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldMetaPopover } from './field_meta_popover';
+import { DataMappingPopover } from './data_mapping_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 
 type Props = {
@@ -17,7 +17,7 @@ type Props = {
   switchDisabled: boolean;
 };
 
-export function CategoricalFieldMetaPopover(props: Props) {
+export function CategoricalDataMappingPopover(props: Props) {
   const onIsEnabledChange = (event: EuiSwitchEvent) => {
     props.onChange({
       fieldMetaOptions: {
@@ -28,7 +28,7 @@ export function CategoricalFieldMetaPopover(props: Props) {
   };
 
   return (
-    <FieldMetaPopover>
+    <DataMappingPopover>
       <EuiFormRow display="columnCompressedSwitch">
         <EuiSwitch
           label={i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.categoricalLabel', {
@@ -40,6 +40,6 @@ export function CategoricalFieldMetaPopover(props: Props) {
           disabled={props.switchDisabled}
         />
       </EuiFormRow>
-    </FieldMetaPopover>
+    </DataMappingPopover>
   );
 }

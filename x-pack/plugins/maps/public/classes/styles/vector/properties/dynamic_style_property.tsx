@@ -21,8 +21,10 @@ import {
   RawValue,
   FieldFormatter,
 } from '../../../../../common/constants';
-import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
-import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
+import {
+  CategoricalDataMappingPopover,
+  OrdinalDataMappingPopover,
+} from '../components/data_mapping';
 import {
   CategoryFieldMeta,
   FieldMetaOptions,
@@ -394,13 +396,13 @@ export class DynamicStyleProperty<T>
     const switchDisabled = !!this._field && !this._field.canReadFromGeoJson();
 
     return this.isCategorical() ? (
-      <CategoricalFieldMetaPopover
+      <CategoricalDataMappingPopover
         fieldMetaOptions={this.getFieldMetaOptions()}
         onChange={onChange}
         switchDisabled={switchDisabled}
       />
     ) : (
-      <OrdinalFieldMetaPopover
+      <OrdinalDataMappingPopover
         fieldMetaOptions={this.getFieldMetaOptions()}
         styleName={this.getStyleName()}
         onChange={onChange}

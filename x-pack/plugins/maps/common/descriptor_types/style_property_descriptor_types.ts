@@ -158,7 +158,6 @@ export type OrientationStylePropertyDescriptor =
 export type SizeDynamicOptions = {
   minSize: number;
   maxSize: number;
-  stepFunction?: STEP_FUNCTION;
   field?: StylePropertyField;
   fieldMetaOptions: FieldMetaOptions;
 };

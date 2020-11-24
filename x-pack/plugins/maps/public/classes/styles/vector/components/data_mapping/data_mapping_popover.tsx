@@ -17,7 +17,7 @@ type State = {
   isPopoverOpen: boolean;
 };
 
-export class FieldMetaPopover extends Component<Props, State> {
+export class DataMappingPopover extends Component<Props, State> {
   state = {
     isPopoverOpen: false,
   };
@@ -53,7 +53,7 @@ export class FieldMetaPopover extends Component<Props, State> {
   render() {
     return (
       <EuiPopover
-        id="fieldMetaOptionsPopover"
+        id="dataMappingPopover"
         anchorPosition="leftCenter"
         button={this._renderButton()}
         isOpen={this.state.isPopoverOpen}
