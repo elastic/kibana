@@ -16,7 +16,7 @@ import { Phases } from '../../../../../../../common/types';
 import { useFormData, UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
-import { useSearchableSnapshotState } from '../../../form';
+import { useConfigurationIssues } from '../../../form';
 
 import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
 
@@ -44,7 +44,7 @@ const formFieldPaths = {
 
 export const ColdPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useSearchableSnapshotState();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
   const [formData] = useFormData({
     watch: [formFieldPaths.enabled],

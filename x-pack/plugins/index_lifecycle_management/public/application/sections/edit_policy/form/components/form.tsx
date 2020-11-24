@@ -8,7 +8,7 @@ import React, { FunctionComponent } from 'react';
 
 import { Form as LibForm, FormHook } from '../../../../../shared_imports';
 
-import { SearchableSnapshotStateProvider } from '../searchable_snapshot_state';
+import { ConfigurationIssuesProvider } from '../configuration_issues_context';
 
 interface Props {
   form: FormHook;
@@ -16,6 +16,6 @@ interface Props {
 
 export const Form: FunctionComponent<Props> = ({ form, children }) => (
   <LibForm form={form}>
-    <SearchableSnapshotStateProvider>{children}</SearchableSnapshotStateProvider>
+    <ConfigurationIssuesProvider>{children}</ConfigurationIssuesProvider>
   </LibForm>
 );

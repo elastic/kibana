@@ -25,7 +25,7 @@ import {
 import { useLoadSnapshotRepositories } from '../../../../../../services/api';
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
-import { useSearchableSnapshotState } from '../../../../form';
+import { useConfigurationIssues } from '../../../../form';
 
 import { i18nTexts } from '../../../../i18n_texts';
 
@@ -50,7 +50,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     services: { cloud },
   } = useKibana();
   const { getUrlForApp, policy } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useSearchableSnapshotState();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
   const { isLoading, error, data, resendRequest } = useLoadSnapshotRepositories();
 

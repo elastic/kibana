@@ -15,6 +15,6 @@ export * from './validations';
 export { Form } from './components';
 
 export {
-  SearchableSnapshotStateProvider,
-  useSearchableSnapshotState,
-} from './searchable_snapshot_state';
+  ConfigurationIssuesProvider,
+  useConfigurationIssues,
+} from './configuration_issues_context';

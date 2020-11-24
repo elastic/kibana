@@ -22,7 +22,7 @@ import { useFormData, UseField, ToggleField, NumericField } from '../../../../..
 import { Phases } from '../../../../../../../common/types';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
-import { useSearchableSnapshotState } from '../../../form';
+import { useConfigurationIssues } from '../../../form';
 
 import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
 
@@ -54,7 +54,7 @@ const formFieldPaths = {
 
 export const WarmPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useSearchableSnapshotState();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
   const [formData] = useFormData({
     watch: [useRolloverPath, formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
   });
