@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useMemo, useState, useCallback } from 'react';
+import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import url from 'url';
 import { encode } from 'rison-node';
@@ -19,12 +19,21 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
+import {
+  createStateContainer,
+  syncState,
+  createKbnUrlStateStorage,
+  INullableBaseStateContainer,
+  createStateContainerReactHelpers,
+  PureTransition,
+  getStateFromKbnUrl,
+} from '../../../../../../../../../../../src/plugins/kibana_utils/public';
 import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { TimeRange, esKuery } from '../../../../../../../../../../../src/plugins/data/public';
 import { LogStream } from '../../../../../../../../../infra/public';
 import { Agent } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
-import { AGENT_DATASET, DEFAULT_DATE_RANGE } from './constants';
+import { DEFAULT_DATE_RANGE, AGENT_DATASET } from './constants';
 import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
@@ -39,8 +48,43 @@ const DatePickerFlexItem = styled(EuiFlexItem)`
   max-width: 312px;
 `;
 
-export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agent }) => {
+interface AgentLogsProps {
+  agent: Agent;
+  state: AgentLogsState;
+}
+
+export interface AgentLogsState {
+  start: string;
+  end: string;
+  logLevels: string[];
+  datasets: string[];
+  query: string;
+}
+
+const defaultState: AgentLogsState = {
+  start: DEFAULT_DATE_RANGE.start,
+  end: DEFAULT_DATE_RANGE.end,
+  logLevels: [],
+  datasets: [AGENT_DATASET],
+  query: '',
+};
+
+const stateStorageKey = '_q';
+
+const stateContainer = createStateContainer<
+  AgentLogsState,
+  {
+    update: PureTransition<AgentLogsState, [Partial<AgentLogsState>]>;
+  }
+>(defaultState, {
+  update: (state) => (updatedState) => ({ ...state, ...updatedState }),
+});
+
+const AgentLogsUrlStateHelper = createStateContainerReactHelpers<typeof stateContainer>();
+
+const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agent, state }) => {
   const { data, application, http } = useStartServices();
+  const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
 
   // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
   const getDateRangeTimestamps = useCallback(
@@ -56,63 +100,66 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
     [data.query.timefilter.timefilter]
   );
 
-  // Initial time range filter
-  const [dateRange, setDateRange] = useState<{
-    startExpression: string;
-    endExpression: string;
-    startTimestamp: number;
-    endTimestamp: number;
-  }>({
-    startExpression: DEFAULT_DATE_RANGE.start,
-    endExpression: DEFAULT_DATE_RANGE.end,
-    ...getDateRangeTimestamps({ from: DEFAULT_DATE_RANGE.start, to: DEFAULT_DATE_RANGE.end })!,
-  });
-
   const tryUpdateDateRange = useCallback(
     (timeRange: TimeRange) => {
       const timestamps = getDateRangeTimestamps(timeRange);
       if (timestamps) {
-        setDateRange({
-          startExpression: timeRange.from,
-          endExpression: timeRange.to,
-          ...timestamps,
+        updateState({
+          start: timeRange.from,
+          end: timeRange.to,
         });
       }
     },
-    [getDateRangeTimestamps]
+    [getDateRangeTimestamps, updateState]
   );
 
-  // Filters
-  const [selectedLogLevels, setSelectedLogLevels] = useState<string[]>([]);
-  const [selectedDatasets, setSelectedDatasets] = useState<string[]>([AGENT_DATASET]);
+  const dateRangeTimestamps = useMemo(
+    () =>
+      getDateRangeTimestamps({
+        from: state.start,
+        to: state.end,
+      }),
+    [getDateRangeTimestamps, state.end, state.start]
+  );
 
-  // User query state
-  const [query, setQuery] = useState<string>('');
-  const [draftQuery, setDraftQuery] = useState<string>('');
-  const [isDraftQueryValid, setIsDraftQueryValid] = useState<boolean>(true);
-  const onUpdateDraftQuery = useCallback((newDraftQuery: string, runQuery?: boolean) => {
-    setDraftQuery(newDraftQuery);
+  // Query validation helper
+  const isQueryValid = useCallback((testQuery: string) => {
     try {
-      esKuery.fromKueryExpression(newDraftQuery);
-      setIsDraftQueryValid(true);
-      if (runQuery) {
-        setQuery(newDraftQuery);
-      }
+      esKuery.fromKueryExpression(testQuery);
+      return true;
     } catch (err) {
-      setIsDraftQueryValid(false);
+      return false;
     }
   }, []);
+
+  // User query state
+  const [draftQuery, setDraftQuery] = useState<string>(state.query);
+  const [isDraftQueryValid, setIsDraftQueryValid] = useState<boolean>(isQueryValid(state.query));
+  const onUpdateDraftQuery = useCallback(
+    (newDraftQuery: string, runQuery?: boolean) => {
+      setDraftQuery(newDraftQuery);
+      if (isQueryValid(newDraftQuery)) {
+        setIsDraftQueryValid(true);
+        if (runQuery) {
+          updateState({ query: newDraftQuery });
+        }
+      } else {
+        setIsDraftQueryValid(false);
+      }
+    },
+    [isQueryValid, updateState]
+  );
 
   // Build final log stream query from agent id, datasets, log levels, and user input
   const logStreamQuery = useMemo(
     () =>
       buildQuery({
         agentId: agent.id,
-        datasets: selectedDatasets,
-        logLevels: selectedLogLevels,
-        userQuery: query,
+        datasets: state.datasets,
+        logLevels: state.logLevels,
+        userQuery: state.query,
       }),
-    [agent.id, query, selectedDatasets, selectedLogLevels]
+    [agent.id, state.datasets, state.logLevels, state.query]
   );
 
   // Generate URL to pass page state to Logs UI
@@ -124,8 +171,8 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
           search: stringify(
             {
               logPosition: encode({
-                start: dateRange.startExpression,
-                end: dateRange.endExpression,
+                start: state.start,
+                end: state.end,
                 streamLive: false,
               }),
               logFilter: encode({
@@ -137,7 +184,7 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
           ),
         })
       ),
-    [logStreamQuery, dateRange.endExpression, dateRange.startExpression, http.basePath]
+    [http.basePath, state.start, state.end, logStreamQuery]
   );
 
   const agentVersion = agent.local_metadata?.elastic?.agent?.version;
@@ -151,6 +198,18 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
     }
     return semverGte(agentVersionWithPrerelease, '7.11.0');
   }, [agentVersion]);
+
+  const logStream = useMemo(
+    () => (
+      <LogStream
+        height="100%"
+        startTimestamp={dateRangeTimestamps!.startTimestamp}
+        endTimestamp={dateRangeTimestamps!.endTimestamp}
+        query={logStreamQuery}
+      />
+    ),
+    [dateRangeTimestamps, logStreamQuery]
+  );
 
   return (
     <WrapperFlexGroup direction="column" gutterSize="m">
@@ -166,28 +225,28 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
           <EuiFlexItem grow={false}>
             <EuiFilterGroup>
               <DatasetFilter
-                selectedDatasets={selectedDatasets}
-                onToggleDataset={(level: string) => {
-                  const currentLevels = [...selectedDatasets];
-                  const levelPosition = currentLevels.indexOf(level);
-                  if (levelPosition >= 0) {
-                    currentLevels.splice(levelPosition, 1);
-                    setSelectedDatasets(currentLevels);
+                selectedDatasets={state.datasets}
+                onToggleDataset={(dataset: string) => {
+                  const currentDatasets = [...state.datasets];
+                  const datasetPosition = currentDatasets.indexOf(dataset);
+                  if (datasetPosition >= 0) {
+                    currentDatasets.splice(datasetPosition, 1);
+                    updateState({ datasets: currentDatasets });
                   } else {
-                    setSelectedDatasets([...selectedDatasets, level]);
+                    updateState({ datasets: [...state.datasets, dataset] });
                   }
                 }}
               />
               <LogLevelFilter
-                selectedLevels={selectedLogLevels}
+                selectedLevels={state.logLevels}
                 onToggleLevel={(level: string) => {
-                  const currentLevels = [...selectedLogLevels];
+                  const currentLevels = [...state.logLevels];
                   const levelPosition = currentLevels.indexOf(level);
                   if (levelPosition >= 0) {
                     currentLevels.splice(levelPosition, 1);
-                    setSelectedLogLevels(currentLevels);
+                    updateState({ logLevels: currentLevels });
                   } else {
-                    setSelectedLogLevels([...selectedLogLevels, level]);
+                    updateState({ logLevels: [...state.logLevels, level] });
                   }
                 }}
               />
@@ -196,8 +255,8 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
           <DatePickerFlexItem grow={false}>
             <EuiSuperDatePicker
               showUpdateButton={false}
-              start={dateRange.startExpression}
-              end={dateRange.endExpression}
+              start={state.start}
+              end={state.end}
               onTimeChange={({ start, end }) => {
                 tryUpdateDateRange({
                   from: start,
@@ -219,14 +278,7 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel paddingSize="none">
-          <LogStream
-            height="100%"
-            startTimestamp={dateRange.startTimestamp}
-            endTimestamp={dateRange.endTimestamp}
-            query={logStreamQuery}
-          />
-        </EuiPanel>
+        <EuiPanel paddingSize="none">{logStream}</EuiPanel>
       </EuiFlexItem>
       {isLogLevelSelectionAvailable && (
         <EuiFlexItem grow={false}>
@@ -236,3 +288,36 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
     </WrapperFlexGroup>
   );
 });
+
+const AgentLogsConnected = AgentLogsUrlStateHelper.connect<AgentLogsProps, never>((state) => ({
+  state: state || defaultState,
+}))(AgentLogsUI);
+
+export const AgentLogs: React.FunctionComponent<Exclude<AgentLogsProps, 'state'>> = memo(
+  ({ ...props }) => {
+    useEffect(() => {
+      stateContainer.set({
+        ...defaultState,
+        ...getStateFromKbnUrl<AgentLogsState>(stateStorageKey, window.location.href),
+      });
+      const stateStorage = createKbnUrlStateStorage();
+      const { start, stop } = syncState({
+        storageKey: stateStorageKey,
+        stateContainer: stateContainer as INullableBaseStateContainer<AgentLogsState>,
+        stateStorage,
+      });
+      start();
+
+      return () => {
+        stop();
+        stateContainer.set(defaultState);
+      };
+    }, []);
+
+    return (
+      <AgentLogsUrlStateHelper.Provider value={stateContainer}>
+        <AgentLogsConnected {...props} />
+      </AgentLogsUrlStateHelper.Provider>
+    );
+  }
+);
