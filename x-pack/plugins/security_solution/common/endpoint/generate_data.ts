@@ -44,7 +44,7 @@ export type Event = AlertEvent | SafeEndpointEvent;
  */
 export const ANCESTRY_LIMIT: number = 2;
 
-interface EventOptions {
+export interface EventOptions {
   timestamp?: number;
   entityID?: string;
   parentEntityID?: string;
@@ -647,7 +647,7 @@ export class EndpointDocGenerator {
     const ancestry: string[] =
       options.ancestry?.slice(0, options?.ancestryArrayLimit ?? ANCESTRY_LIMIT) ?? [];
 
-    const processName = options.processName ? options.processName : randomProcessName();
+    const processName = options.processName ? options.processName : this.randomProcessName();
     const detailRecordForEventType =
       options.extensions ||
       ((eventCategory) => {
@@ -1637,6 +1637,11 @@ export class EndpointDocGenerator {
       HostPolicyResponseActionStatus.warning,
     ]);
   }
+
+  /** Return a random fake process name */
+  private randomProcessName(): string {
+    return this.randomChoice(fakeProcessNames);
+  }
 }
 
 const fakeProcessNames = [
@@ -1647,7 +1652,3 @@ const fakeProcessNames = [
   'iexlorer.exe',
   'explorer.exe',
 ];
-/** Return a random fake process name */
-function randomProcessName(): string {
-  return fakeProcessNames[Math.floor(Math.random() * fakeProcessNames.length)];
-}
