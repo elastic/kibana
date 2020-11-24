@@ -11,7 +11,6 @@ import { kea, MakeLogicType } from 'kea';
 import http from 'shared/http';
 import { IFlashMessagesProps } from 'shared/types';
 
-
 import routes from 'workplace_search/routes';
 
 import { AppLogic } from '../../../../app_logic';
@@ -19,13 +18,13 @@ import { SourceLogic } from '../../source_logic';
 
 const SUCCESS_MESSAGE = 'Display Settings have been successfuly updated.';
 
-import { IObject, DetailField, SearchResultConfig, OptionValue } from '../../../../types';
+import { DetailField, SearchResultConfig, OptionValue } from '../../../../types';
 
 export interface DisplaySettingsResponseProps {
   sourceName: string;
   searchResultConfig: SearchResultConfig;
-  schemaFields: IObject;
-  exampleDocuments: IObject[];
+  schemaFields: object;
+  exampleDocuments: object[];
 }
 
 export interface DisplaySettingsInitialData extends DisplaySettingsResponseProps {
@@ -47,12 +46,15 @@ interface DisplaySettingsActions {
   setUrlField(urlField: string): string;
   setSubtitleField(subtitleField: string | null): string | null;
   setDescriptionField(descriptionField: string | null): string | null;
-  setColorField(hex: string);
-  setDetailFields(result: DropResult);
-  openEditDetailField(editFieldIndex: number | null);
-  removeDetailField(index: number);
-  addDetailField(newField: DetailField);
-  updateDetailField(updatedField: DetailField, index: number | null);
+  setColorField(hex: string): string;
+  setDetailFields(result: DropResult): { result: DropResult };
+  openEditDetailField(editFieldIndex: number | null): number | null;
+  removeDetailField(index: number): number;
+  addDetailField(newField: DetailField): DetailField;
+  updateDetailField(
+    updatedField: DetailField,
+    index: number | null
+  ): { updatedField: DetailField; index: number };
   toggleFieldEditorModal(): void;
   toggleTitleFieldHover(): void;
   toggleSubtitleFieldHover(): void;
@@ -64,8 +66,8 @@ interface DisplaySettingsActions {
 interface DisplaySettingsValues {
   sourceName: string;
   sourceId: string;
-  schemaFields: IObject;
-  exampleDocuments: IObject[];
+  schemaFields: object;
+  exampleDocuments: object[];
   serverSearchResultConfig: SearchResultConfig;
   searchResultConfig: SearchResultConfig;
   serverRoute: string;
@@ -174,7 +176,7 @@ export const DisplaySettingsLogic = kea<
           const detailFields = cloneDeep(searchResultConfig.detailFields);
           const element = detailFields[source.index];
           detailFields.splice(source.index, 1);
-          detailFields.splice(destination.index, 0, element);
+          detailFields.splice(destination!.index, 0, element);
           return {
             ...searchResultConfig,
             detailFields,
@@ -285,7 +287,7 @@ export const DisplaySettingsLogic = kea<
     availableFieldOptions: [
       () => [selectors.fieldOptions, selectors.searchResultConfig],
       (fieldOptions, { detailFields }) => {
-        const usedFields = detailFields.map((usedField) =>
+        const usedFields = detailFields.map((usedField: DetailField) =>
           euiSelectObjectFromValue(usedField.fieldName)
         );
         return differenceBy(fieldOptions, usedFields, 'value');
@@ -328,7 +330,7 @@ const euiSelectObjectFromValue = (value: string) => ({ text: value, value });
 // submitted with no color and this results in a server error. The default should be black
 // and this allows the `searchResultConfig` and the `serverSearchResultConfig` reducers to
 // stay synced on initialization.
-const setDefaultColor = (searchResultConfig) => ({
+const setDefaultColor = (searchResultConfig: SearchResultConfig) => ({
   ...searchResultConfig,
   color: searchResultConfig.color || '#000000',
 });

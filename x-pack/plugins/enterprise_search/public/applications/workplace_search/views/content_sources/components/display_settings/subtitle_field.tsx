@@ -8,10 +8,10 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import { IObject } from 'workplace_search/types';
+import { Result } from '../../../../types';
 
 interface SubtitleFieldProps {
-  result: IObject;
+  result: Result;
   subtitleField: string | null;
   subtitleFieldHover: boolean;
 }

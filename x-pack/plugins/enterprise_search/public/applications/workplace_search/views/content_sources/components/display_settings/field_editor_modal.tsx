@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -44,7 +44,7 @@ export const FieldEditorModal: React.FC = () => {
   const [fieldName, setName] = useState(field.fieldName || '');
   const [label, setLabel] = useState(field.label || '');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (isEditing) {
       updateDetailField({ fieldName, label }, editFieldIndex);

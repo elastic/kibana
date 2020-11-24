@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { FormEvent, useEffect } from 'react';
 
 import { History } from 'history';
 import { useActions, useValues } from 'kea';
 import { useHistory } from 'react-router-dom';
 
-import { EuiButton, EuiEmptyPrompt, EuiTabbedContent, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiTabbedContent,
+  EuiPanel,
+  EuiTabbedContentTab,
+} from '@elastic/eui';
 
 import FlashMessages from 'shared/components/FlashMessages';
 import {
@@ -74,18 +80,16 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
     {
       id: 'search_results',
       name: 'Search Results',
-      disabled: false,
       content: <SearchResults />,
     },
     {
       id: 'result_detail',
       name: 'Result Detail',
-      disabled: false,
       content: <ResultDetail />,
     },
-  ];
+  ] as EuiTabbedContentTab[];
 
-  const onSelectedTabChanged = (tab) => {
+  const onSelectedTabChanged = (tab: EuiTabbedContentTab) => {
     const path =
       tab.id === tabs[1].id
         ? getContentSourcePath(DISPLAY_SETTINGS_RESULT_DETAIL_PATH, sourceId, isOrganization)
@@ -94,7 +98,7 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
     history.push(path);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     setServerData();
   };
