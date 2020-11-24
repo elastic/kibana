@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { UiSettingsType, StringValidation, ImageValidation } from '../../../../core/public';
 
 export interface FieldSetting {
@@ -41,7 +41,7 @@ export interface FieldSetting {
     docLinksKey: string;
   };
   metric?: {
-    type: UiStatsMetricType;
+    type: UiCounterMetricType;
     name: string;
   };
 }

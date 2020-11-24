@@ -34,7 +34,7 @@ export const createUsageCollector = (
   return {
     trackQueryTimedOut: async () => {
       const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiStats(
+      return usageCollection?.reportUiCounter(
         currentApp!,
         METRIC_TYPE.LOADED,
         SEARCH_EVENT_TYPE.QUERY_TIMED_OUT
@@ -42,7 +42,7 @@ export const createUsageCollector = (
     },
     trackQueriesCancelled: async () => {
       const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiStats(
+      return usageCollection?.reportUiCounter(
         currentApp!,
         METRIC_TYPE.LOADED,
         SEARCH_EVENT_TYPE.QUERIES_CANCELLED

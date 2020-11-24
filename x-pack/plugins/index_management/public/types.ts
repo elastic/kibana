@@ -10,8 +10,6 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/p
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';
 
-export type IndexMgmtMetricsType = 'loaded' | 'click' | 'count';
-
 export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
 }

@@ -22,7 +22,7 @@ import React from 'react';
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import {
   ApplicationStart,
   IUiSettingsClient,
@@ -72,7 +72,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   private readonly isLabsEnabled: boolean;
   private readonly trackUiMetric:
-    | ((type: UiStatsMetricType, eventNames: string | string[], count?: number) => void)
+    | ((type: UiCounterMetricType, eventNames: string | string[], count?: number) => void)
     | undefined;
 
   constructor(props: TypeSelectionProps) {
@@ -84,7 +84,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       showGroups: true,
     };
 
-    this.trackUiMetric = this.props.usageCollection?.reportUiStats.bind(
+    this.trackUiMetric = this.props.usageCollection?.reportUiCounter.bind(
       this.props.usageCollection,
       'visualize'
     );

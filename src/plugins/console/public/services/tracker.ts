@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { MetricsTracker } from '../types';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 const APP_TRACKER_NAME = 'console';
 
 export const createUsageTracker = (usageCollection?: UsageCollectionSetup): MetricsTracker => {
-  const track = (type: UiStatsMetricType, name: string) =>
-    usageCollection?.reportUiStats(APP_TRACKER_NAME, type, name);
+  const track = (type: UiCounterMetricType, name: string) =>
+    usageCollection?.reportUiCounter(APP_TRACKER_NAME, type, name);
 
   return {
     count: (eventName: string) => {

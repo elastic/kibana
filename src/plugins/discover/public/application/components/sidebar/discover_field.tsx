@@ -19,7 +19,7 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
 import { FieldDetails } from './types';
@@ -62,7 +62,7 @@ export interface DiscoverFieldProps {
    * @param metricType
    * @param eventName
    */
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverField({

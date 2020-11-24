@@ -39,7 +39,7 @@ export interface PublicConfigType {
 
 export interface UsageCollectionSetup {
   allowTrackUserAgent: (allow: boolean) => void;
-  reportUiStats: Reporter['reportUiStats'];
+  reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
   __LEGACY: {
     /**
@@ -53,7 +53,7 @@ export interface UsageCollectionSetup {
 }
 
 export interface UsageCollectionStart {
-  reportUiStats: Reporter['reportUiStats'];
+  reportUiCounter: Reporter['reportUiCounter'];
   METRIC_TYPE: typeof METRIC_TYPE;
 }
 
@@ -85,7 +85,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       allowTrackUserAgent: (allow: boolean) => {
         this.trackUserAgent = allow;
       },
-      reportUiStats: this.reporter.reportUiStats,
+      reportUiCounter: this.reporter.reportUiCounter,
       METRIC_TYPE,
       __LEGACY: {
         appChanged: (appId) => this.legacyAppId$.next(appId),
@@ -109,7 +109,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     reportApplicationUsage(merge(application.currentAppId$, this.legacyAppId$), this.reporter);
 
     return {
-      reportUiStats: this.reporter.reportUiStats,
+      reportUiCounter: this.reporter.reportUiCounter,
       METRIC_TYPE,
     };
   }

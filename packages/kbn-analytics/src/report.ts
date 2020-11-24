@@ -19,7 +19,7 @@
 
 import moment from 'moment-timezone';
 import { UnreachableCaseError, wrapArray } from './util';
-import { Metric, Stats, UiStatsMetricType, METRIC_TYPE } from './metrics';
+import { Metric, Stats, UiCounterMetricType, METRIC_TYPE } from './metrics';
 const REPORT_VERSION = 1;
 
 export interface Report {
@@ -30,7 +30,7 @@ export interface Report {
       key: string;
       appName: string;
       eventName: string;
-      type: UiStatsMetricType;
+      type: UiCounterMetricType;
       stats: Stats;
     }
   >;

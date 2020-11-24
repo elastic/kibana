@@ -16,7 +16,7 @@ import {
   EuiSelectableTemplateSitewideOption,
   EuiText,
 } from '@elastic/eui';
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
@@ -30,7 +30,7 @@ import { GlobalSearchPluginStart, GlobalSearchResult } from '../../../global_sea
 interface Props {
   globalSearch: GlobalSearchPluginStart['find'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
-  trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   basePathUrl: string;
   darkMode: boolean;
 }

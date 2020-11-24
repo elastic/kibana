@@ -23,7 +23,7 @@ import { fromQuery } from '../../shared/Links/url_helpers';
 import { TransactionOverview } from './';
 
 const KibanaReactContext = createKibanaReactContext({
-  usageCollection: { reportUiStats: () => {} },
+  usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
 const history = createMemoryHistory();

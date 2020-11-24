@@ -21,7 +21,7 @@ import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { QueryStart, SavedQuery } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
@@ -36,7 +36,7 @@ interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {

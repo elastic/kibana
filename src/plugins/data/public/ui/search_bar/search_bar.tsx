@@ -24,7 +24,7 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
@@ -80,7 +80,7 @@ export interface SearchBarOwnProps {
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
   // Track UI Metrics
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;

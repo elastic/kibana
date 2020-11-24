@@ -277,7 +277,7 @@ To track a user interaction, use the `reportUiStats` method exposed by the plugi
       setup(core, { usageCollection }) {
         if (usageCollection) {
           // Call the following method as many times as you want to report an increase in the count for this event
-          usageCollection.reportUiStats(`<AppName>`, usageCollection.METRIC_TYPE.CLICK, `<EventName>`);
+          usageCollection.reportUiCounter(`<AppName>`, usageCollection.METRIC_TYPE.CLICK, `<EventName>`);
         }
       }
     }

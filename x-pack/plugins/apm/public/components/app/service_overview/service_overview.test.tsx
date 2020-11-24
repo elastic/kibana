@@ -21,7 +21,7 @@ import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
 
 const KibanaReactContext = createKibanaReactContext({
-  usageCollection: { reportUiStats: () => {} },
+  usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
 function Wrapper({ children }: { children?: ReactNode }) {

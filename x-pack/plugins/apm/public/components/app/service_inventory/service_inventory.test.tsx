@@ -26,7 +26,7 @@ import { SessionStorageMock } from '../../../services/__test__/SessionStorageMoc
 import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
 
 const KibanaReactContext = createKibanaReactContext({
-  usageCollection: { reportUiStats: () => {} },
+  usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
 const addWarning = jest.fn();

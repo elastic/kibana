@@ -57,7 +57,7 @@ export async function mountManagementSection(
   const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
-  const trackUiMetric = usageCollection?.reportUiStats.bind(usageCollection, 'advanced_settings');
+  const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'advanced_settings');
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);

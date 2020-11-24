@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
 import React from 'react';
@@ -25,10 +25,10 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
   }
 
   public start(core: CoreStart, { globalSearch, usageCollection }: GlobalSearchBarPluginStartDeps) {
-    let trackUiMetric = (metricType: UiStatsMetricType, eventName: string | string[]) => {};
+    let trackUiMetric = (metricType: UiCounterMetricType, eventName: string | string[]) => {};
 
     if (usageCollection) {
-      trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'global_search_bar');
+      trackUiMetric = usageCollection.reportUiCounter.bind(usageCollection, 'global_search_bar');
     }
 
     core.chrome.navControls.registerCenter({
@@ -52,7 +52,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     navigateToUrl: ApplicationStart['navigateToUrl'],
     basePathUrl: string,
     darkMode: boolean,
-    trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void
+    trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void
   ) {
     ReactDOM.render(
       <I18nProvider>

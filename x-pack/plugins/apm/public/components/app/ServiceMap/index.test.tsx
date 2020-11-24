@@ -17,7 +17,7 @@ import * as useFetcherModule from '../../../hooks/useFetcher';
 import { ServiceMap } from './';
 
 const KibanaReactContext = createKibanaReactContext({
-  usageCollection: { reportUiStats: () => {} },
+  usageCollection: { reportUiCounter: () => {} },
 } as Partial<CoreStart>);
 
 const activeLicense = new License({

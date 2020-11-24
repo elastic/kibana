@@ -38,7 +38,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
@@ -1414,7 +1414,7 @@ export interface UiSettingsParams<T = unknown> {
     description?: string;
     // @deprecated
     metric?: {
-        type: UiStatsMetricType;
+        type: UiCounterMetricType;
         name: string;
     };
     name?: string;

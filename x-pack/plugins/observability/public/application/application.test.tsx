@@ -22,7 +22,7 @@ describe('renderApp', () => {
   });
   it('renders', async () => {
     const plugins = ({
-      usageCollection: { reportUiStats: () => {} },
+      usageCollection: { reportUiCounter: () => {} },
       data: {
         query: {
           timefilter: {

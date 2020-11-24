@@ -19,27 +19,27 @@
 
 import { METRIC_TYPE } from './';
 
-export type UiStatsMetricType = METRIC_TYPE.CLICK | METRIC_TYPE.LOADED | METRIC_TYPE.COUNT;
-export interface UiStatsMetricConfig {
-  type: UiStatsMetricType;
+export type UiCounterMetricType = METRIC_TYPE.CLICK | METRIC_TYPE.LOADED | METRIC_TYPE.COUNT;
+export interface UiCounterMetricConfig {
+  type: UiCounterMetricType;
   appName: string;
   eventName: string;
   count?: number;
 }
 
-export interface UiStatsMetric {
-  type: UiStatsMetricType;
+export interface UiCounterMetric {
+  type: UiCounterMetricType;
   appName: string;
   eventName: string;
   count: number;
 }
 
-export function createUiStatsMetric({
+export function createUiCounterMetric({
   type,
   appName,
   eventName,
   count = 1,
-}: UiStatsMetricConfig): UiStatsMetric {
+}: UiCounterMetricConfig): UiCounterMetric {
   return {
     type,
     appName,

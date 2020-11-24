@@ -22,7 +22,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 
-import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { FilterEditor } from './filter_editor';
 import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
@@ -48,7 +48,7 @@ interface Props {
   intl: InjectedIntl;
   appName: string;
   // Track UI Metrics
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 function FilterBarUI(props: Props) {
