@@ -21,7 +21,7 @@ import {
   getOtherCategoryLabel,
   // @ts-expect-error
 } from '../components/color/color_stops_utils';
-import { BreakedLegend } from '../components/legend/breaked_legend';
+import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
 
@@ -295,15 +295,20 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
   }
 
-  _getColorRampStops() {
+  _getOrdinalBreaks(symbolId?: string): Break[] {
     if (this._options.useCustomColorRamp && this._options.customColorRamp) {
-      return this._options.customColorRamp;
+      return this._options.customColorRamp.map((ordinalColorStop) => {
+        return {
+          color: ordinalColorStop.color,
+          symbolId,
+          label: this.formatField(ordinalColorStop.stop),
+        };
+      });
     }
 
     if (this.getStepFunction() === STEP_FUNCTION.PERCENTILES) {
       const percentilesFieldMeta = this.getPercentilesFieldMeta();
-      const userDefinedPercentiles = this.getFieldMetaOptions().percentiles;
-      if (!percentilesFieldMeta || !userDefinedPercentiles) {
+      if (!percentilesFieldMeta) {
         return [];
       }
       const colorStops = getPercentilesMbColorRampStops(
@@ -314,38 +319,45 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         return [];
       }
 
-      const colorRampStops = [];
-      const indexOfLastStop = colorStops.length - 2;
+      const breaks = [];
+      const lastStopIndex = colorStops.length - 2;
       for (let i = 0; i < colorStops.length; i += 2) {
-        let stop = '';
+        const hasNext = i < lastStopIndex;
+        const stopValue = colorStops[i];
+        const formattedStopValue = this.formatField(dynamicRound(stopValue));
+        const color = colorStops[i + 1];
+        const percentile = parseFloat(percentilesFieldMeta[i / 2].percentile);
+        const percentileLabel = `${percentile}${getOrdinalSuffix(percentile)}`;
+
+        const nextStopValue = hasNext ? colorStops[i + 2] : null;
+        const formattedNextStopValue = hasNext
+          ? this.formatField(dynamicRound(nextStopValue))
+          : null;
+        const nextPercentile = hasNext
+          ? parseFloat(percentilesFieldMeta[i / 2 + 1].percentile)
+          : null;
+        const nextPercentileLabel = hasNext
+          ? `${nextPercentile}${getOrdinalSuffix(nextPercentile)}`
+          : null;
+
+        let label = '';
         if (i === 0) {
-          const percentile = userDefinedPercentiles[0];
-          stop = `<${percentile}${getOrdinalSuffix(percentile)}: ${this.formatField(
-            dynamicRound(colorStops[i + 2])
-          )}`;
-        } else if (i === indexOfLastStop) {
-          const percentile = userDefinedPercentiles[userDefinedPercentiles.length - 1];
-          stop = `>${percentile}${getOrdinalSuffix(percentile)}: ${this.formatField(
-            dynamicRound(colorStops[i])
-          )}`;
+          label = `<${nextPercentileLabel}: ${formattedNextStopValue}`;
+        } else if (!hasNext) {
+          label = `>${percentileLabel}: ${formattedStopValue}`;
         } else {
-          const beginPercentile = userDefinedPercentiles[i / 2 - 1];
-          const begin = `${beginPercentile}${getOrdinalSuffix(
-            beginPercentile
-          )}:  ${this.formatField(dynamicRound(colorStops[i]))}`;
-          const endPercentile = userDefinedPercentiles[i / 2];
-          const end = `<${endPercentile}${getOrdinalSuffix(endPercentile)}: ${this.formatField(
-            dynamicRound(colorStops[i + 2])
-          )}`;
-          stop = `${begin} - ${end}`;
+          const begin = `${percentileLabel}: ${formattedStopValue}`;
+          const end = `<${nextPercentileLabel}: ${formattedNextStopValue}`;
+          label = `${begin} - ${end}`;
         }
 
-        colorRampStops.push({
-          stop,
-          color: colorStops[i + 1],
+        breaks.push({
+          color,
+          label,
+          symbolId,
         });
       }
-      return colorRampStops;
+      return breaks;
     }
 
     if (!this._options.color) {
@@ -364,7 +376,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       return [
         {
           color: colors[colors.length - 1],
-          stop: this.formatField(dynamicRound(rangeFieldMeta.max)),
+          label: this.formatField(dynamicRound(rangeFieldMeta.max)),
+          symbolId,
         },
       ];
     }
@@ -373,32 +386,15 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       const rawStopValue = rangeFieldMeta.min + rangeFieldMeta.delta * (index / colors.length);
       return {
         color,
-        stop: this.formatField(dynamicRound(rawStopValue)),
+        label: this.formatField(dynamicRound(rawStopValue)),
+        symbolId,
       };
     });
   }
 
-  _getColorStops() {
-    if (this.isOrdinal()) {
-      return {
-        stops: this._getColorRampStops(),
-        defaultColor: null,
-      };
-    } else if (this.isCategorical()) {
-      return this._getColorPaletteStops().map((colorStop) => {
-        return {
-          color: colorStop.color,
-          stop: this.formatField(colorStop.stop),
-        };
-      });
-    } else {
-      return EMPTY_STOPS;
-    }
-  }
-
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
-    const { stops, defaultColor } = this._getColorStops();
+  _getCategoricalBreaks(symbolId?: string): Break[] {
     const breaks = [];
+    const { stops, defaultColor } = this._getColorPaletteStops();
     stops.forEach(({ stop, color }: { stop: string | number | null; color: string }) => {
       if (stop !== null) {
         breaks.push({
@@ -408,18 +404,21 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         });
       }
     });
-    if (defaultColor) {
-      breaks.push({
-        color: defaultColor,
-        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
-        symbolId,
-      });
-    }
+    breaks.push({
+      color: defaultColor,
+      label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+      symbolId,
+    });
+    return breaks;
+  }
 
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
     return (
       <BreakedLegend
         style={this}
-        breaks={breaks}
+        breaks={
+          this.isOrdinal() ? this._getOrdinalBreaks(symbolId) : this._getCategoricalBreaks(symbolId)
+        }
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
       />
