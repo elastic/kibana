@@ -67,6 +67,7 @@ export const createGridColumns = (
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
             const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+            const cellContent = col.formatter?.convert(rowValue) || rowValue;
 
             const filterForText = i18n.translate(
               'visTypeTable.tableCellFilter.filterForValueText',
@@ -74,11 +75,20 @@ export const createGridColumns = (
                 defaultMessage: 'Filter for value',
               }
             );
+            const filterForAriaLabel = i18n.translate(
+              'visTypeTable.tableCellFilter.filterForValueAriaLabel',
+              {
+                defaultMessage: 'Filter for value: {cellContent}',
+                values: {
+                  cellContent,
+                },
+              }
+            );
 
             return (
               contentsIsDefined && (
                 <Component
-                  aria-label={filterForText}
+                  aria-label={filterForAriaLabel}
                   data-test-subj="tbvChartCell__filterForCellValue"
                   onClick={() =>
                     onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false)
@@ -93,6 +103,7 @@ export const createGridColumns = (
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
             const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+            const cellContent = col.formatter?.convert(rowValue) || rowValue;
 
             const filterOutText = i18n.translate(
               'visTypeTable.tableCellFilter.filterOutValueText',
@@ -100,11 +111,20 @@ export const createGridColumns = (
                 defaultMessage: 'Filter out value',
               }
             );
+            const filterOutAriaLabel = i18n.translate(
+              'visTypeTable.tableCellFilter.filterOutValueAriaLabel',
+              {
+                defaultMessage: 'Filter out value: {cellContent}',
+                values: {
+                  cellContent,
+                },
+              }
+            );
 
             return (
               contentsIsDefined && (
                 <Component
-                  aria-label={filterOutText}
+                  aria-label={filterOutAriaLabel}
                   onClick={() =>
                     onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true)
                   }
