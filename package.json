@@ -261,7 +261,6 @@
     "pdfmake": "^0.1.65",
     "pegjs": "0.10.0",
     "pngjs": "^3.4.0",
-    "podium": "^3.1.2",
     "prop-types": "^15.7.2",
     "proper-lockfile": "^3.2.0",
     "proxy-from-env": "1.0.0",
