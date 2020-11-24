@@ -17,7 +17,20 @@
  * under the License.
  */
 
-// @ts-ignore
-import defaultSpec from '!!raw-loader!./default.spec.hjson';
+import { getData } from '../services';
+import type { Data, VegaSpec } from '../data_model/types';
+import type { IndexPattern } from '../../../data/public';
 
-export const getDefaultSpec = () => defaultSpec;
+export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
+  const { indexPatterns } = getData();
+
+  return (
+    await Promise.all(
+      (Array.isArray(spec.data) ? spec.data : [spec.data]).map((d: Data) => {
+        if (d?.url?.index) {
+          return indexPatterns.findByTitle(d.url.index);
+        }
+      })
+    )
+  ).filter((index) => Boolean(index)) as IndexPattern[];
+};

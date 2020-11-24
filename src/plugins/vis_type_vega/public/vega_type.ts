@@ -25,7 +25,8 @@ import { DefaultEditorSize } from '../../vis_default_editor/public';
 import type { VegaVisualizationDependencies } from './plugin';
 
 import { createVegaRequestHandler } from './vega_request_handler';
-import { getDefaultSpec, extractIndexPatternsFromSpec } from './default_spec';
+import { getDefaultSpec } from './default_spec';
+import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
 import { createInspectorAdapters } from './vega_inspector';
 import { VIS_EVENT_TO_TRIGGER, VisGroups } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';

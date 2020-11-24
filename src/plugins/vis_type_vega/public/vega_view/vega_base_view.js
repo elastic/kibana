@@ -28,7 +28,7 @@ import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../data/public';
 
 import { getEnableExternalUrls, getData } from '../services';
-import { extractIndexPatternsFromSpec } from '../default_spec';
+import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
 vega.scheme('elastic', euiPaletteColorBlind());
 
