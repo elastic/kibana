@@ -133,16 +133,14 @@ export class SearchInterceptor {
       `/internal/search/${options?.strategy ?? ES_SEARCH_STRATEGY}/${id ?? ''}`,
       '/'
     );
+
+    const isCurrentSession =
+      options?.sessionId && this.deps.session.getSessionId() === options.sessionId;
+
     const body = JSON.stringify({
       sessionId: options?.sessionId,
-      isStored:
-        this.deps.session.getSessionId() === options?.sessionId
-          ? this.deps.session.isStored()
-          : false,
-      isRestore:
-        this.deps.session.getSessionId() === options?.sessionId
-          ? this.deps.session.isRestore()
-          : false,
+      isStored: isCurrentSession ? this.deps.session.isStored() : false,
+      isRestore: isCurrentSession ? this.deps.session.isRestore() : false,
       ...searchRequest,
     });
 
