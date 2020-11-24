@@ -46,9 +46,6 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   const {
     http,
     triggersActionsUi: { actionTypeRegistry },
-    notifications,
-    docLinks,
-    application: { capabilities },
   } = useKibana().services;
 
   const actions: AlertAction[] = useMemo(
@@ -119,18 +116,14 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       ) : null}
       <ActionForm
         actions={actions}
-        docLinks={docLinks}
-        capabilities={capabilities}
         messageVariables={messageVariables}
         defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
         setActionIdByIndex={setActionIdByIndex}
         setAlertProperty={setAlertProperty}
         setActionParamsProperty={setActionParamsProperty}
-        http={http}
         actionTypeRegistry={actionTypeRegistry}
         actionTypes={supportedActionTypes}
         defaultActionMessage={DEFAULT_ACTION_MESSAGE}
-        toastNotifications={notifications.toasts}
       />
     </>
   );
