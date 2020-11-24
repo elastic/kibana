@@ -251,7 +251,6 @@ export class DynamicStyleProperty<T>
     currentField: IESAggField,
     previousFieldDescriptor: StylePropertyField
   ): Promise<StylePropertyField | undefined> {
-    // Todo: individual style property classes would need to override this with "smart" behavior
     if (previousFieldDescriptor.name.endsWith(TOP_TERM_PERCENTAGE_SUFFIX)) {
       // Don't support auto-switching for top-term-percentages
       return;
