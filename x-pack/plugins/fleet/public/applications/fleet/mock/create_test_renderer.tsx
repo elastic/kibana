@@ -6,18 +6,14 @@
 
 import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
-import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
+import { render as reactRender, RenderOptions, RenderResult, act } from '@testing-library/react';
 import { ScopedHistory } from '../../../../../../../src/core/public';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { IStorage, Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { FleetAppContext } from '../app';
 import { FleetConfigType, FleetStart, FleetStartServices } from '../../../plugin';
-import { createStartDepsMock } from './plugin_dependencies';
 import { createConfigurationMock } from './plugin_configuration';
 import { UIExtensionsStorage } from '../types';
 import { createStartMock } from './plugin_interfaces';
-import { MockedKeys } from '../../../../../../../packages/kbn-utility-types/jest/index';
-import { setHttpClient } from '../hooks/use_request';
+import { createStartServices } from './fleet_start_services';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -32,41 +28,10 @@ export interface TestRenderer {
   render: UiRender;
 }
 
-const createMockStore = (): MockedKeys<IStorage> => {
-  let store: Record<string, any> = {};
-  return {
-    getItem: jest.fn().mockImplementation((key) => store[key]),
-    setItem: jest.fn().mockImplementation((key, value) => (store[key] = value)),
-    removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
-    clear: jest.fn().mockImplementation(() => (store = {})),
-  };
-};
-
-const configureStartServices = (services: FleetStartServices): void => {
-  // Store the http for use by useRequest
-  setHttpClient(services.http);
-
-  // Set Fleet available capabilities
-  services.application.capabilities = {
-    ...services.application.capabilities,
-    fleet: {
-      read: true,
-      write: true,
-    },
-  };
-};
-
 export const createTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
-  const startServices: FleetStartServices = {
-    ...coreMock.createStart({ basePath }),
-    ...createStartDepsMock(),
-    storage: new Storage(createMockStore()),
-  };
-
-  configureStartServices(startServices);
-
+  const startServices = createStartServices(basePath);
   const testRendererMocks: TestRenderer = {
     history: new ScopedHistory(createMemoryHistory({ initialEntries: [basePath] }), basePath),
     startServices,
@@ -88,10 +53,15 @@ export const createTestRendererMock = (): TestRenderer => {
       );
     }),
     render: (ui, options) => {
-      return reactRender(ui, {
-        wrapper: testRendererMocks.AppWrapper,
-        ...options,
+      let renderResponse: RenderResult;
+      act(() => {
+        renderResponse = reactRender(ui, {
+          wrapper: testRendererMocks.AppWrapper,
+          ...options,
+        });
       });
+      // @ts-ignore
+      return renderResponse;
     },
   };
 

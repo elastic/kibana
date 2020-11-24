@@ -16,7 +16,7 @@ describe('when on integration detail', () => {
 
   beforeEach(() => {
     testRenderer = createTestRendererMock();
-    testRenderer.history.push(pagePathGetters.integration_details({ pkgkey: 'ngnix' }));
+    testRenderer.history.push(pagePathGetters.integration_details({ pkgkey: 'ngnix-99.0.0' }));
   });
 
   describe('and a custom UI extension is NOT registered', () => {
