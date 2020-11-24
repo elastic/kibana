@@ -5,13 +5,7 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import {
-  Tag,
-  TagAttributes,
-  ITagsClient,
-  TagWithRelations,
-  AssignableObject,
-} from '../../../common/types';
+import { Tag, TagAttributes, ITagsClient, TagWithRelations } from '../../../common/types';
 import { ITagsChangeListener } from './tags_cache';
 
 export interface TagsClientOptions {
@@ -30,17 +24,6 @@ export interface FindTagsResponse {
   total: number;
 }
 
-export interface FindAssignableObjectOptions {
-  search?: string;
-  maxResults?: number;
-  types?: string[];
-}
-
-export interface FindAssignableObjectResponse {
-  objects: AssignableObject[];
-  total: number;
-}
-
 const trapErrors = (fn: () => void) => {
   try {
     fn();
@@ -51,7 +34,6 @@ const trapErrors = (fn: () => void) => {
 
 export interface ITagInternalClient extends ITagsClient {
   find(options: FindTagsOptions): Promise<FindTagsResponse>;
-  findAssignableObject(options: FindAssignableObjectOptions): Promise<AssignableObject[]>;
   bulkDelete(ids: string[]): Promise<void>;
 }
 
@@ -132,20 +114,6 @@ export class TagsClient implements ITagInternalClient {
         search,
       },
     });
-  }
-
-  public async findAssignableObject({ search, types, maxResults }: FindAssignableObjectOptions) {
-    const { objects } = await this.http.get<FindAssignableObjectResponse>(
-      '/internal/saved_objects_tagging/_find_assignable_objects',
-      {
-        query: {
-          search,
-          types,
-          max_results: maxResults,
-        },
-      }
-    );
-    return objects;
   }
 
   public async bulkDelete(tagIds: string[]) {

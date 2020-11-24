@@ -18,6 +18,10 @@ export interface AssignFlyoutResultListProps {
   onChange: (newOverrides: AssignmentOverrideMap) => void;
 }
 
+interface ResultInternals {
+  previously: 'on' | undefined;
+}
+
 export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
   results,
   isLoading,
@@ -36,7 +40,7 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
       label: result.title,
       key,
       checked: checkedStatus,
-      previousState: checkedStatus,
+      previously: checkedStatus,
       showIcons: false,
       prepend: (
         <>
@@ -44,18 +48,18 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
           <EuiIcon type={result.icon ?? 'empty'} title={result.type} />
         </>
       ),
-    } as EuiSelectableOption<{ previousState: 'on' | undefined }>;
+    } as EuiSelectableOption<ResultInternals>;
   });
 
   return (
-    <EuiSelectable<{ previousState: 'on' | undefined }>
+    <EuiSelectable<ResultInternals>
       height="full"
       options={options}
       allowExclusions={false}
       isLoading={isLoading}
       onChange={(newOptions) => {
         const newOverrides = newOptions.reduce<AssignmentOverrideMap>((memo, option) => {
-          if (option.checked === option.previousState) {
+          if (option.checked === option.previously) {
             return memo;
           }
           return {

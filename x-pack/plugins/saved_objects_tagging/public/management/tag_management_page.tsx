@@ -5,13 +5,14 @@
  */
 
 import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
+import { Subject } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import { EuiPageContent, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener, getEditModalOpener } from '../components/edition_modal';
-import { ITagInternalClient } from '../services';
+import { ITagInternalClient, ITagAssignmentService } from '../services';
 import { TagBulkAction } from './types';
 import { Header, TagTable, ActionBar } from './components';
 import { getBulkActions } from './actions';
@@ -21,6 +22,7 @@ interface TagManagementPageParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   core: CoreStart;
   tagClient: ITagInternalClient;
+  assignmentService: ITagAssignmentService;
   capabilities: TagsCapabilities;
 }
 
@@ -28,6 +30,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   setBreadcrumbs,
   core,
   tagClient,
+  assignmentService,
   capabilities,
 }) => {
   const { overlays, notifications, application, http } = core;
@@ -40,15 +43,26 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     return query ? Query.execute(query, allTags) : allTags;
   }, [allTags, query]);
 
+  const unmount$ = useMemo(() => {
+    return new Subject<void>();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      unmount$.next();
+    };
+  }, [unmount$]);
+
   const bulkActions = useMemo(() => {
     return getBulkActions({
       core,
       capabilities,
       tagClient,
+      assignmentService,
       setLoading,
       clearSelection: () => setSelectedTags([]),
     });
-  }, [core, capabilities, tagClient]);
+  }, [core, capabilities, tagClient, assignmentService]);
 
   const createModalOpener = useMemo(() => getCreateModalOpener({ overlays, tagClient }), [
     overlays,
@@ -181,7 +195,10 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   const executeBulkAction = useCallback(
     async (action: TagBulkAction) => {
       try {
-        await action.execute(selectedTags.map(({ id }) => id));
+        await action.execute(
+          selectedTags.map(({ id }) => id),
+          { canceled$: unmount$ }
+        );
       } catch (e) {
         notifications.toasts.addError(e, {
           title: i18n.translate('xpack.savedObjectsTagging.notifications.bulkActionError', {
@@ -195,7 +212,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
         await fetchTags();
       }
     },
-    [selectedTags, fetchTags, notifications]
+    [selectedTags, fetchTags, notifications, unmount$]
   );
 
   const actionBar = useMemo(

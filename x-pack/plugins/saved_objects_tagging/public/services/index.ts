@@ -13,3 +13,4 @@ export {
   isServerValidationError,
   TagServerValidationError,
 } from './tags';
+export { TagAssignmentService, ITagAssignmentService } from './assignments';

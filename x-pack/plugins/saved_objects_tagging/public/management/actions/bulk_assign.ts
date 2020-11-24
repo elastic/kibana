@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { from } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { OverlayStart, NotificationsStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { ITagInternalClient } from '../../services';
+import { ITagInternalClient, ITagAssignmentService } from '../../services';
 import { TagBulkAction } from '../types';
 import { getAssignFlyoutOpener } from '../../components/assign_flyout';
 
@@ -14,6 +16,7 @@ interface GetBulkAssignActionOptions {
   overlays: OverlayStart;
   notifications: NotificationsStart;
   tagClient: ITagInternalClient;
+  assignmentService: ITagAssignmentService;
   setLoading: (loading: boolean) => void;
 }
 
@@ -21,11 +24,13 @@ export const getBulkAssignAction = ({
   overlays,
   notifications,
   tagClient,
+  assignmentService,
   setLoading,
 }: GetBulkAssignActionOptions): TagBulkAction => {
   const openFlyout = getAssignFlyoutOpener({
     overlays,
     tagClient,
+    assignmentService,
   });
 
   return {
@@ -35,10 +40,18 @@ export const getBulkAssignAction = ({
     }),
     icon: 'tag',
     refreshAfterExecute: true,
-    execute: async (tagIds) => {
+    execute: async (tagIds, { canceled$ }) => {
       const flyout = await openFlyout({
         tagIds,
       });
+
+      // close the flyout when the action is canceled
+      // this is required when the user navigates away from the page
+      canceled$.pipe(takeUntil(from(flyout.onClose))).subscribe(() => {
+        flyout.close();
+      });
+
+      return flyout.onClose;
     },
   };
 };

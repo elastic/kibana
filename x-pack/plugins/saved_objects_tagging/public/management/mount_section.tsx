@@ -11,11 +11,12 @@ import { CoreSetup, ApplicationStart } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { getTagsCapabilities } from '../../common';
 import { SavedObjectTaggingPluginStart } from '../types';
-import { ITagInternalClient } from '../services';
+import { ITagInternalClient, ITagAssignmentService } from '../services';
 import { TagManagementPage } from './tag_management_page';
 
 interface MountSectionParams {
   tagClient: ITagInternalClient;
+  assignmentService: ITagAssignmentService;
   core: CoreSetup<{}, SavedObjectTaggingPluginStart>;
   mountParams: ManagementAppMountParams;
 }
@@ -31,7 +32,12 @@ const RedirectToHomeIfUnauthorized: FC<{
   return children! as React.ReactElement;
 };
 
-export const mountSection = async ({ tagClient, core, mountParams }: MountSectionParams) => {
+export const mountSection = async ({
+  tagClient,
+  assignmentService,
+  core,
+  mountParams,
+}: MountSectionParams) => {
   const [coreStart] = await core.getStartServices();
   const { element, setBreadcrumbs } = mountParams;
   const capabilities = getTagsCapabilities(coreStart.application.capabilities);
@@ -43,6 +49,7 @@ export const mountSection = async ({ tagClient, core, mountParams }: MountSectio
           setBreadcrumbs={setBreadcrumbs}
           core={coreStart}
           tagClient={tagClient}
+          assignmentService={assignmentService}
           capabilities={capabilities}
         />
       </RedirectToHomeIfUnauthorized>

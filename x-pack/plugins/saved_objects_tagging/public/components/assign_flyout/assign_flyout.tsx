@@ -8,7 +8,7 @@ import React, { FC, useState, useEffect, useCallback } from 'react';
 import { EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle, EuiFlexItem, Query } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AssignableObject } from '../../../common/types';
-import { ITagInternalClient } from '../../services';
+import { ITagInternalClient, ITagAssignmentService } from '../../services';
 import { parseQuery, computeRequiredChanges } from './lib';
 import { AssignmentOverrideMap, AssignmentStatus, AssignmentStatusMap } from './types';
 import {
@@ -25,6 +25,7 @@ interface AssignFlyoutProps {
   tagIds: string[];
   allowedTypes: string[];
   tagClient: ITagInternalClient;
+  assignmentService: ITagAssignmentService;
   onClose: () => Promise<void>;
 }
 
@@ -39,6 +40,7 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
   tagIds,
   allowedTypes,
   tagClient,
+  assignmentService,
   onClose,
 }) => {
   const [results, setResults] = useState<AssignableObject[]>([]);
@@ -52,7 +54,7 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
       setLoading(true);
       const { queryText, selectedTypes } = parseQuery(query);
 
-      const fetched = await tagClient.findAssignableObject({
+      const fetched = await assignmentService.findAssignableObject({
         search: queryText ? `${queryText}*` : undefined,
         types: selectedTypes,
         maxResults: 1000,
@@ -72,12 +74,11 @@ export const AssignFlyout: FC<AssignFlyoutProps> = ({
     };
 
     refreshResults();
-  }, [query, tagClient, tagIds]);
+  }, [query, assignmentService, tagIds]);
 
   const onSave = useCallback(() => {
     const changes = computeRequiredChanges({ objects: results, initialStatus, overrides });
-    // console.log('changes =', changes);
-    // TODO: implement.
+    // TODO: wire.
   }, [results, initialStatus, overrides]);
 
   const selectAll = useCallback(() => {
