@@ -188,6 +188,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const asScoped = this.asScopedProvider(core);
+    this.sessionService.start(core);
     return {
       aggs: this.aggsService.start({
         fieldFormats,

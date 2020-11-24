@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import moment, { Moment } from 'moment';
 import {
   CoreStart,
   KibanaRequest,
@@ -25,8 +26,7 @@ import {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from 'src/core/server';
-import moment, { Moment } from 'moment';
+} from '../../../../../core/server';
 import {
   BackgroundSessionSavedObjectAttributes,
   IKibanaSearchRequest,
@@ -38,7 +38,7 @@ import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
 
 const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
-export const INMEM_TRACKING_INTERVAL = 2000;
+export const INMEM_TRACKING_INTERVAL = 10 * 1000;
 export const INMEM_TRACKING_TIMEOUT_SEC = 60;
 export const MAX_UPDATE_RETRIES = 3;
 
@@ -88,14 +88,13 @@ export class BackgroundSessionService {
         type: BACKGROUND_SESSION_TYPE,
       };
     });
-    const res = await this.internalSavedObjectsClient.bulkGet<BackgroundSessionSavedObjectAttributes>(
-      activeMappingIds
-    );
+    const res = await this.internalSavedObjectsClient.bulkGet<
+      BackgroundSessionSavedObjectAttributes
+    >(activeMappingIds);
     return res.saved_objects;
   }
 
   private clearSessions = () => {
-    this.logger.debug(`clearSessions`);
     const curTime = moment();
     this.sessionSearchMap.forEach((sessionInfo, sessionId) => {
       if (
@@ -144,19 +143,21 @@ export class BackgroundSessionService {
   ) {
     if (!activeMappingObjects.length) return [];
 
-    const updatedSessions = activeMappingObjects?.map((sessionSavedObject) => {
-      const sessionInfo = this.sessionSearchMap.get(sessionSavedObject.id);
-      const idMapping = sessionInfo ? Object.fromEntries(sessionInfo.ids.entries()) : {};
-      sessionSavedObject.attributes.idMapping = {
-        ...sessionSavedObject.attributes.idMapping,
-        ...idMapping,
-      };
-      return sessionSavedObject;
-    });
+    const updatedSessions = activeMappingObjects
+      ?.filter((so) => !so.error)
+      .map((sessionSavedObject) => {
+        const sessionInfo = this.sessionSearchMap.get(sessionSavedObject.id);
+        const idMapping = sessionInfo ? Object.fromEntries(sessionInfo.ids.entries()) : {};
+        sessionSavedObject.attributes.idMapping = {
+          ...sessionSavedObject.attributes.idMapping,
+          ...idMapping,
+        };
+        return sessionSavedObject;
+      });
 
-    const updateResults = await this.internalSavedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
-      updatedSessions
-    );
+    const updateResults = await this.internalSavedObjectsClient.bulkUpdate<
+      BackgroundSessionSavedObjectAttributes
+    >(updatedSessions);
     return updateResults.saved_objects;
   }
 
