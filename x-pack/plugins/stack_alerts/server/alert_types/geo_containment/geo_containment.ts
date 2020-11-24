@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from 'src/core/server';
-import { executeEsQueryFactory, getShapesFilters } from './es_query_builder';
+import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
 import { AlertServices, AlertTypeState } from '../../../../alerts/server';
 import { ActionGroupId, GEO_CONTAINMENT_ID, GeoContainmentParams } from './alert_type';
 import { ResolvedActionGroup } from '../../../../alerts/common';
@@ -21,7 +21,6 @@ interface LatestEntityLocation {
 }
 
 // Flatten agg results and get latest locations for each entity
-// TODO: Consider map where `entityName` maps to latest location array
 export function transformResults(
   results: SearchResponse<unknown> | undefined,
   dateField: string,
@@ -170,6 +169,18 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       params.geoField
     );
 
+    // Cycle through instances that received no updates and keep active
+    const activeAlertsList = state.activeAlertsList || {};
+    _.forEach(activeAlertsList, (val, key) => {
+      if (!currLocationMap.has(key)) {
+        const containingShapeName =
+          shapesIdsNamesMap[val.containingShapeId] || val.containingShapeId;
+        const alertInstanceId = `${val.entityName}-${containingShapeName}`;
+        services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, val);
+      }
+    });
+
+    // Cycle through new alert statuses and set active
     currLocationMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
       const containingShapeName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
       const context = {
@@ -180,23 +191,20 @@ export const getGeoContainmentExecutor = (log: Logger) =>
         containingShapeName,
         date: dateInShape,
       };
-      // No guarantee of uniqueness if this uses human-readable name?
       const alertInstanceId = `${entityName}-${containingShapeName}`;
-      if (shapeLocationId === OTHER_CATEGORY) {
-        // Also need to resolve previously active entities that aren't in "other"
+      if (shapeLocationId !== OTHER_CATEGORY) {
+        activeAlertsList[entityName] = context;
         services
           .alertInstanceFactory(alertInstanceId)
           .scheduleActions(ResolvedActionGroup.id, context);
       } else {
-        // Need to store what's active or retrieve from alerting api
-        services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
+        delete activeAlertsList[entityName];
       }
-      // if in shape (not other) contained and alert
-      // if in other, not contained and no alert
-      // if no update, not resolve but also no alert
-      // Don't auto-resolve docs that don't have updates
-      // If contained, schedule contained action
     });
 
-    // Return state?
+    return {
+      activeAlertsList,
+      shapesFilters,
+      shapesIdsNamesMap,
+    };
   };
