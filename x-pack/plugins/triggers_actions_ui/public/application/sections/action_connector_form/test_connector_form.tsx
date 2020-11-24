@@ -20,8 +20,7 @@ import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnector } from '../../../types';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import { ActionTypeExecutorResult } from '../../../../../actions/common';
 
 export interface ConnectorAddFlyoutProps {
@@ -32,6 +31,7 @@ export interface ConnectorAddFlyoutProps {
   actionParams: Record<string, unknown>;
   onExecutAction: () => Promise<ActionTypeExecutorResult<unknown>>;
   executionResult: Option<ActionTypeExecutorResult<unknown>>;
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const TestConnectorForm = ({
@@ -42,8 +42,8 @@ export const TestConnectorForm = ({
   setActionParams,
   onExecutAction,
   isExecutingAction,
+  actionTypeRegistry,
 }: ConnectorAddFlyoutProps) => {
-  const { actionTypeRegistry, docLinks, http, toastNotifications } = useActionsConnectorsContext();
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 
@@ -75,9 +75,6 @@ export const TestConnectorForm = ({
                 })
               }
               messageVariables={[]}
-              docLinks={docLinks}
-              http={http}
-              toastNotifications={toastNotifications}
               actionConnector={connector}
             />
           </Suspense>

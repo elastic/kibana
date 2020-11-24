@@ -144,7 +144,7 @@ describe('chart selectors', () => {
         {
           color: errorColor,
           data: [{ x: 0, y: 0 }],
-          legendValue: '0.0 tpm',
+          legendValue: '0 tpm',
           title: 'HTTP 5xx',
           type: 'linemark',
         },

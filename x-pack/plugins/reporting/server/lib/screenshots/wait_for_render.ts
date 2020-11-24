@@ -36,7 +36,7 @@ export const waitForRenderComplete = async (
           const renderedTasks = [];
 
           function waitForRender(visualization: Element) {
-            return new Promise((resolve) => {
+            return new Promise<void>((resolve) => {
               visualization.addEventListener('renderComplete', () => resolve());
             });
           }

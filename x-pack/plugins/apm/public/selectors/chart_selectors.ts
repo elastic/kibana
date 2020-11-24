@@ -20,7 +20,7 @@ import {
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { getEmptySeries } from '../components/shared/charts/helper/get_empty_series';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
-import { asDecimal, asDuration, tpmUnit } from '../../common/utils/formatters';
+import { asDuration, asTransactionRate } from '../../common/utils/formatters';
 
 export interface ITpmBucket {
   title: string;
@@ -171,7 +171,7 @@ export function getTpmSeries(
     return {
       title: bucket.key,
       data: bucket.dataPoints,
-      legendValue: `${asDecimal(bucket.avg)} ${tpmUnit(transactionType || '')}`,
+      legendValue: asTransactionRate(bucket.avg),
       type: 'linemark',
       color: getColor(bucket.key),
     };
