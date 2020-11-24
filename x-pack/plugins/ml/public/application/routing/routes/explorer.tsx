@@ -235,7 +235,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
      * For the "View by" swim lane the limit is the cardinality of the influencer values,
      * which is known after the initial fetch.
      * When looking up for top influencers for selected range in Overall swim lane
-     * the result is filtered by top influencers values, hence there is no need ot set the limit.
+     * the result is filtered by top influencers values, hence there is no need to set the limit.
      */
     const swimlaneLimit =
       isViewBySwimLaneData(explorerState?.viewBySwimlaneData) && !selectedCells?.showTopFieldValues
