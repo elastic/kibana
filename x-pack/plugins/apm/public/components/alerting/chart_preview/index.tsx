@@ -12,6 +12,8 @@ import {
   LineAnnotation,
   niceTimeFormatter,
   Position,
+  RectAnnotation,
+  RectAnnotationDatum,
   ScaleType,
   Settings,
   TickFormatter,
@@ -21,13 +23,26 @@ import { max as getMax, min as getMin } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { Coordinate } from '../../../../typings/timeseries';
+import { useTheme } from '../../../hooks/useTheme';
 
 interface Props {
   yTickFormat?: TickFormatter;
   data?: Coordinate[];
+  threshold: number;
+  windowSize: number;
+  windowUnit: string;
 }
 
-export function ChartPreview({ data = [], yTickFormat }: Props) {
+const THRESHOLD_OPACITY = 0.3;
+
+export function ChartPreview({
+  data = [],
+  yTickFormat,
+  threshold,
+  windowSize,
+  windowUnit,
+}: Props) {
+  const theme = useTheme();
   if (!data.length) {
     return null;
   }
@@ -38,21 +53,25 @@ export function ChartPreview({ data = [], yTickFormat }: Props) {
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const dataValues = [0.030502885408079144].map((_, index) => ({
-    dataValue: _,
-    details: `detail-${index}`,
-  }));
-
   const style = {
     line: {
-      stroke: '#f00',
-      strokeWidth: 3,
-      // strokeWidth: 3,
-      // stroke: 'red',
-      // dash: [5, 5],
-      // opacity: 1,
+      strokeWidth: 2,
+      stroke: theme.eui.euiColorVis9,
+      opacity: 1,
     },
   };
+
+  const dataValuesGreen: RectAnnotationDatum[] = [
+    {
+      coordinates: {
+        x0: null,
+        x1: null,
+        y0: threshold,
+        y1: null,
+      },
+      details: `Threshold: ${yTickFormat ? yTickFormat(threshold) : threshold}`,
+    },
+  ];
 
   return (
     <>
@@ -63,11 +82,17 @@ export function ChartPreview({ data = [], yTickFormat }: Props) {
           <LineAnnotation
             id="annotation_1"
             domainType={AnnotationDomainTypes.YDomain}
-            dataValues={dataValues}
-            marker={<EuiIcon type="alert" />}
+            dataValues={[{ dataValue: threshold }]}
             markerPosition="left"
             style={style}
           />
+
+          <RectAnnotation
+            dataValues={dataValuesGreen}
+            id="rect3"
+            style={{ fill: theme.eui.euiColorVis9, opacity: THRESHOLD_OPACITY }}
+          />
+
           <Axis
             id="x-axis"
             position={Position.Bottom}
@@ -83,6 +108,7 @@ export function ChartPreview({ data = [], yTickFormat }: Props) {
             xAccessor="x"
             yAccessors={['y']}
             data={data}
+            color={theme.eui.euiColorVis1}
           />
         </Chart>
       </div>
