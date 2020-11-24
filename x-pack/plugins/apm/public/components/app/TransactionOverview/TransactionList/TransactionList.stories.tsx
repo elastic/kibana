@@ -6,10 +6,11 @@
 
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TransactionGroup } from '../../../../../server/lib/transaction_groups/fetcher';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 import { TransactionList } from './';
+
+type TransactionGroup = APIReturnType<'GET /api/apm/services/{serviceName}/transaction_groups'>['items'][0];
 
 export default {
   title: 'app/TransactionOverview/TransactionList',
