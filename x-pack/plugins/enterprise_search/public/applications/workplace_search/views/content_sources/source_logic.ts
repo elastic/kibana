@@ -146,6 +146,7 @@ interface PreContentSourceResponse {
 }
 
 export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
+  path: ['enterprise_search', 'workplace_search', 'source_logic'],
   actions: {
     onInitializeSource: (contentSource: ContentSourceFullData) => contentSource,
     onUpdateSourceName: (name: string) => name,
@@ -601,7 +602,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
 
       try {
         const response = await HttpLogic.values.http.post(route, {
-          body: JSON.stringify({ params }),
+          body: JSON.stringify({ ...params }),
         });
         actions.setCustomSourceData(response);
         successCallback();

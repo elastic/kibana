@@ -66,7 +66,6 @@ export async function removeInstallation(options: {
   deletePackageCache({
     name: pkgName,
     version: pkgVersion,
-    installSource: installation.install_source,
   });
 
   // successful delete's in SO client return {}. return something more useful

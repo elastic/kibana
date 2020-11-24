@@ -97,7 +97,8 @@ describe('buildRequestBody(req)', () => {
       series,
       config,
       indexPatternObject,
-      capabilities
+      capabilities,
+      { barTargetUiSettings: 50 }
     );
 
     expect(doc).toEqual({

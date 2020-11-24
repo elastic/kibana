@@ -30,6 +30,7 @@ import {
   EuiLink,
   EuiText,
   EuiNotificationBadge,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -461,19 +462,21 @@ export const AlertForm = ({
       defaultActionGroupId &&
       alert.alertTypeId &&
       alertTypesIndex?.has(alert.alertTypeId) ? (
-        <Suspense fallback={<CenterJustifiedSpinner />}>
-          <AlertParamsExpressionComponent
-            alertParams={alert.params}
-            alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
-            alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
-            errors={errors}
-            setAlertParams={setAlertParams}
-            setAlertProperty={setAlertProperty}
-            alertsContext={alertsContext}
-            defaultActionGroupId={defaultActionGroupId}
-            actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
-          />
-        </Suspense>
+        <EuiErrorBoundary>
+          <Suspense fallback={<CenterJustifiedSpinner />}>
+            <AlertParamsExpressionComponent
+              alertParams={alert.params}
+              alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+              alertThrottle={`${alertThrottle ?? 1}${alertThrottleUnit}`}
+              errors={errors}
+              setAlertParams={setAlertParams}
+              setAlertProperty={setAlertProperty}
+              alertsContext={alertsContext}
+              defaultActionGroupId={defaultActionGroupId}
+              actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
       ) : null}
       {canShowActions &&
       defaultActionGroupId &&
@@ -493,12 +496,8 @@ export const AlertForm = ({
           }
           setAlertProperty={setActions}
           setActionParamsProperty={setActionParamsProperty}
-          http={http}
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={alertTypeModel?.defaultActionMessage}
-          toastNotifications={toastNotifications}
-          docLinks={docLinks}
-          capabilities={capabilities}
         />
       ) : null}
     </Fragment>
