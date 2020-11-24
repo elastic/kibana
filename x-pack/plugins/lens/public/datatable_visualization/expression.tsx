@@ -10,7 +10,15 @@ import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { EuiBasicTable, EuiFlexGroup, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiBasicTableColumn,
+  EuiTableActionsColumnType,
+} from '@elastic/eui';
 import { IAggType } from 'src/plugins/data/public';
 import {
   FormatFactory,
@@ -27,7 +35,8 @@ import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart, ROW_CLICK_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
+import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 
 export interface DatatableColumns {
   columnIds: string[];
@@ -49,6 +58,12 @@ type DatatableRenderProps = DatatableProps & {
   onClickValue: (data: LensFilterEvent['data']) => void;
   onRowContextMenuClick: (data: LensTableRowContextMenuEvent['data']) => void;
   getType: (name: string) => IAggType;
+
+  /**
+   * A boolean for each table row, which is true if the row active
+   * ROW_CLICK_TRIGGER actions attached to it, otherwise false.
+   */
+  rowHasRowClickTriggerActions?: boolean[];
 };
 
 export interface DatatableRender {
@@ -150,6 +165,27 @@ export const getDatatableRenderer = (dependencies: {
     const onRowContextMenuClick = (data: LensTableRowContextMenuEvent['data']) => {
       handlers.event({ name: 'tableRowContextMenuClick', data });
     };
+    const uiActions = dependencies.uiActions;
+    const table = Object.values(config.data.tables)[0];
+    const rowHasRowClickTriggerActions: boolean[] = !table
+      ? []
+      : await Promise.all(
+          table.rows.map(async (row, rowIndex) => {
+            try {
+              const actions = await uiActions.getTriggerCompatibleActions(ROW_CLICK_TRIGGER, {
+                embeddable: ({} as unknown) as IEmbeddable,
+                data: {
+                  rowIndex,
+                  table,
+                },
+              });
+              return !!actions;
+            } catch {
+              return false;
+            }
+          })
+        );
+
     ReactDOM.render(
       <I18nProvider>
         <DatatableComponent
@@ -158,6 +194,7 @@ export const getDatatableRenderer = (dependencies: {
           onClickValue={onClickValue}
           onRowContextMenuClick={onRowContextMenuClick}
           getType={resolvedGetType}
+          rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
         />
       </I18nProvider>,
       domNode,
@@ -222,7 +259,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
     return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
 
-  const dataColumns = props.args.columns.columnIds
+  const tableColumns: Array<EuiBasicTableColumn<unknown>> = props.args.columns.columnIds
     .map((field) => {
       const col = firstTable.columns.find((c) => c.id === field);
       const filterable = bucketColumns.includes(field);
@@ -300,6 +337,34 @@ export function DatatableComponent(props: DatatableRenderProps) {
     })
     .filter(({ field }) => !!field);
 
+  if (!!props.rowHasRowClickTriggerActions) {
+    const actions: EuiTableActionsColumnType<unknown> = {
+      name: 'Actions',
+      actions: [
+        {
+          name: i18n.translate('xpack.lens.tableRowMore', {
+            defaultMessage: 'More',
+          }),
+          description: i18n.translate('xpack.lens.tableRowMoreDescription', {
+            defaultMessage: 'Table row context menu',
+          }),
+          type: 'icon',
+          icon: () => {
+            return 'boxesVertical';
+          },
+          onClick: ({ rowIndex }) => {
+            onRowContextMenuClick({
+              rowIndex,
+              table: firstTable,
+              columns: props.args.columns.columnIds,
+            });
+          },
+        },
+      ],
+    } as EuiTableActionsColumnType<unknown>;
+    tableColumns.push(actions);
+  }
+
   return (
     <VisualizationContainer
       reportTitle={props.args.title}
@@ -309,34 +374,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
         className="lnsDataTable"
         data-test-subj="lnsDataTable"
         tableLayout="auto"
-        columns={[
-          ...dataColumns,
-          {
-            name: 'Actions',
-            actions: [
-              {
-                name: () => null,
-                // i18n.translate('xpack.lens.tableRowMore', {
-                //   defaultMessage: 'More',
-                // }),
-                description: i18n.translate('xpack.lens.tableRowMoreDescription', {
-                  defaultMessage: 'Table row context menu',
-                }),
-                type: 'icon',
-                icon: () => {
-                  return 'boxesVertical';
-                },
-                onClick: ({ rowIndex }) => {
-                  onRowContextMenuClick({
-                    rowIndex,
-                    table: firstTable,
-                    columns: props.args.columns.columnIds,
-                  });
-                },
-              },
-            ],
-          },
-        ]}
+        columns={tableColumns}
         items={firstTable ? firstTable.rows.map((row, rowIndex) => ({ ...row, rowIndex })) : []}
       />
     </VisualizationContainer>
