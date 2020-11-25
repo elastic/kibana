@@ -16,20 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
-
-import type { Logger } from 'kibana/server';
-import type { ApiResponse } from '@elastic/elasticsearch';
-import type { SharedGlobalConfig } from 'kibana/server';
-
-import { doSearch, includeTotalLoaded, toKibanaSearchResponse, toSnakeCase } from '../../../common';
-import { trackSearchStatus } from './es_search_rxjs_utils';
-import { getDefaultSearchParams, getShardTimeout } from '../es_search';
-
+import { from, Observable } from 'rxjs';
+import { first, tap } from 'rxjs/operators';
+import type { SearchResponse } from 'elasticsearch';
+import type { Logger, SharedGlobalConfig } from 'kibana/server';
 import type { ISearchStrategy } from '../types';
-import type { SearchUsage } from '../collectors/usage';
-import type { IEsRawSearchResponse } from '../../../common';
+import type { SearchUsage } from '../collectors';
+import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
+import { toKibanaSearchResponse } from './response_utils';
+import { searchUsageObserver } from '../collectors/usage';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -43,19 +38,18 @@ export const esSearchStrategyProvider = (
       throw new Error(`Unsupported index pattern type ${request.indexType}`);
     }
 
-    return doSearch<ApiResponse<IEsRawSearchResponse>>(async () => {
+    const search = async () => {
       const config = await config$.pipe(first()).toPromise();
-      const params = toSnakeCase({
+      const params = {
         ...(await getDefaultSearchParams(uiSettingsClient)),
         ...getShardTimeout(config),
         ...request.params,
-      });
+      };
+      const promise = esClient.asCurrentUser.search<SearchResponse<unknown>>(params);
+      const { body } = await shimAbortSignal(promise, abortSignal);
+      return toKibanaSearchResponse(body);
+    };
 
-      return esClient.asCurrentUser.search(params);
-    }, abortSignal).pipe(
-      toKibanaSearchResponse(),
-      trackSearchStatus(logger, usage),
-      includeTotalLoaded()
-    );
+    return from(search()).pipe(tap(searchUsageObserver(logger, usage)));
   },
 });

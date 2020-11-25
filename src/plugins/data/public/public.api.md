@@ -12,6 +12,7 @@ import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch/lib/Transpo
 import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
+import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import Boom from '@hapi/boom';
 import { CoreSetup } from 'src/core/public';
 import { CoreSetup as CoreSetup_2 } from 'kibana/public';
@@ -1687,7 +1688,7 @@ export interface OptionedValueProp {
 // @public (undocumented)
 export class PainlessError extends EsError {
     // Warning: (ae-forgotten-export) The symbol "IEsError" needs to be exported by the entry point index.d.ts
-    constructor(err: IEsError, request: IKibanaSearchRequest);
+    constructor(err: IEsError);
     // (undocumented)
     getErrorMessage(application: ApplicationStart): JSX.Element;
     // (undocumented)
@@ -1735,7 +1736,7 @@ export class Plugin implements Plugin_2<DataPublicPluginSetup, DataPublicPluginS
     // Warning: (ae-forgotten-export) The symbol "ConfigSchema" needs to be exported by the entry point index.d.ts
     constructor(initializerContext: PluginInitializerContext_2<ConfigSchema>);
     // (undocumented)
-    setup(core: CoreSetup<DataStartDependencies, DataPublicPluginStart>, { expressions, uiActions, usageCollection }: DataSetupDependencies): DataPublicPluginSetup;
+    setup(core: CoreSetup<DataStartDependencies, DataPublicPluginStart>, { bfetch, expressions, uiActions, usageCollection }: DataSetupDependencies): DataPublicPluginSetup;
     // (undocumented)
     start(core: CoreStart_2, { uiActions }: DataStartDependencies): DataPublicPluginStart;
     // (undocumented)
@@ -2091,7 +2092,7 @@ export class SearchInterceptor {
     // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
     // (undocumented)
-    protected handleSearchError(e: any, request: IKibanaSearchRequest, timeoutSignal: AbortSignal, options?: ISearchOptions): Error;
+    protected handleSearchError(e: any, timeoutSignal: AbortSignal, options?: ISearchOptions): Error;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
@@ -2114,6 +2115,8 @@ export class SearchInterceptor {
 //
 // @public (undocumented)
 export interface SearchInterceptorDeps {
+    // (undocumented)
+    bfetch: BfetchPublicSetup;
     // (undocumented)
     http: CoreSetup_2['http'];
     // (undocumented)
@@ -2170,6 +2173,7 @@ export class SearchSource {
     // (undocumented)
     history: SearchRequest[];
     onRequestStart(handler: (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>): void;
+    removeField<K extends keyof SearchSourceFields>(field: K): this;
     serialize(): {
         searchSourceJSON: string;
         references: import("src/core/server").SavedObjectReference[];
