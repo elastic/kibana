@@ -14,7 +14,7 @@ export declare class ExpressionRenderHandler
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(element, { onRenderError })](./kibana-plugin-plugins-expressions-public.expressionrenderhandler._constructor_.md) |  | Constructs a new instance of the <code>ExpressionRenderHandler</code> class |
+|  [(constructor)(element, { onRenderError, renderMode })](./kibana-plugin-plugins-expressions-public.expressionrenderhandler._constructor_.md) |  | Constructs a new instance of the <code>ExpressionRenderHandler</code> class |
 
 ## Properties
 
