@@ -51,12 +51,12 @@ export const buildSeverityFromMapping = ({
   );
 
   severityMappingSorted.forEach((mapping) => {
-    const eventField = mapping.field;
+    const mappingField = mapping.field;
     const mappingValue = mapping.value;
-    const eventValue = get(eventField, eventSource);
+    const eventValue = get(mappingField, eventSource);
 
-    const normalizedEventValues = normalizeEventValue(eventField, eventValue);
-    const normalizedMappingValue = normalizeMappingValue(eventField, mappingValue);
+    const normalizedEventValues = normalizeEventValue(mappingField, eventValue);
+    const normalizedMappingValue = normalizeMappingValue(mappingField, mappingValue);
 
     if (normalizedEventValues.has(normalizedMappingValue)) {
       severityMatch = { ...mapping };
@@ -64,7 +64,7 @@ export const buildSeverityFromMapping = ({
   });
 
   if (severityMatch != null && SeverityIOTS.is(severityMatch.severity)) {
-    return overridenSeverity(severityMatch.severity, severityMatch.field);
+    return overriddenSeverity(severityMatch.severity, severityMatch.field);
   }
 
   return defaultSeverity(severity);
@@ -110,7 +110,7 @@ function defaultSeverity(value: Severity): BuildSeverityFromMappingReturn {
   };
 }
 
-function overridenSeverity(value: Severity, field: string): BuildSeverityFromMappingReturn {
+function overriddenSeverity(value: Severity, field: string): BuildSeverityFromMappingReturn {
   return {
     severity: value,
     severityMeta: {

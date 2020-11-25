@@ -44,7 +44,7 @@ describe('buildSeverityFromMapping', () => {
           { field: ECS_FIELD, operator: 'equals', value: '33', severity: 'high' },
           { field: ECS_FIELD, operator: 'equals', value: '43', severity: 'critical' },
         ],
-        expected: overridenSeverityOf('medium'),
+        expected: overriddenSeverityOf('medium'),
       });
     });
 
@@ -72,7 +72,7 @@ describe('buildSeverityFromMapping', () => {
           { field: ANY_FIELD, operator: 'equals', value: '33', severity: 'high' },
           { field: ANY_FIELD, operator: 'equals', value: '43', severity: 'critical' },
         ],
-        expected: overridenSeverityOf('medium', ANY_FIELD),
+        expected: overriddenSeverityOf('medium', ANY_FIELD),
       });
     });
 
@@ -85,7 +85,7 @@ describe('buildSeverityFromMapping', () => {
           { field: ANY_FIELD, operator: 'equals', value: 'anything', severity: 'medium' },
           { field: ANY_FIELD, operator: 'equals', value: 'hackerman', severity: 'critical' },
         ],
-        expected: overridenSeverityOf('critical', ANY_FIELD),
+        expected: overriddenSeverityOf('critical', ANY_FIELD),
       });
     });
   });
@@ -101,7 +101,7 @@ describe('buildSeverityFromMapping', () => {
           { field: ECS_FIELD, operator: 'equals', value: '33', severity: 'high' },
           { field: ECS_FIELD, operator: 'equals', value: '43', severity: 'critical' },
         ],
-        expected: overridenSeverityOf('critical'),
+        expected: overriddenSeverityOf('critical'),
       });
     });
 
@@ -116,7 +116,7 @@ describe('buildSeverityFromMapping', () => {
           { field: ANY_FIELD, operator: 'equals', value: 'foo', severity: 'low' },
           { field: ANY_FIELD, operator: 'equals', value: 'boo', severity: 'medium' },
         ],
-        expected: overridenSeverityOf('critical', ANY_FIELD),
+        expected: overriddenSeverityOf('critical', ANY_FIELD),
       });
     });
   });
@@ -131,7 +131,7 @@ describe('buildSeverityFromMapping', () => {
           { field: ECS_FIELD, operator: 'equals', value: '23', severity: 'critical' },
           { field: ECS_FIELD, operator: 'equals', value: '23', severity: 'high' },
         ],
-        expected: overridenSeverityOf('critical'),
+        expected: overriddenSeverityOf('critical'),
       });
     });
   });
@@ -162,7 +162,7 @@ function severityOf(value: Severity) {
   };
 }
 
-function overridenSeverityOf(value: Severity, field = ECS_FIELD) {
+function overriddenSeverityOf(value: Severity, field = ECS_FIELD) {
   return {
     severity: value,
     severityMeta: {

@@ -36,7 +36,7 @@ describe('buildRiskScoreFromMapping', () => {
         fieldValue: 42,
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
-        expected: overridenScoreOf(42),
+        expected: overriddenScoreOf(42),
       });
     });
 
@@ -45,7 +45,7 @@ describe('buildRiskScoreFromMapping', () => {
         fieldValue: 3.14,
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
-        expected: overridenScoreOf(3.14),
+        expected: overriddenScoreOf(3.14),
       });
     });
 
@@ -74,7 +74,7 @@ describe('buildRiskScoreFromMapping', () => {
         fieldValue: '42',
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
-        expected: overridenScoreOf(42),
+        expected: overriddenScoreOf(42),
       });
     });
 
@@ -83,7 +83,7 @@ describe('buildRiskScoreFromMapping', () => {
         fieldValue: '3.14',
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
-        expected: overridenScoreOf(3.14),
+        expected: overriddenScoreOf(3.14),
       });
     });
 
@@ -112,7 +112,7 @@ describe('buildRiskScoreFromMapping', () => {
         fieldValue: [3.14],
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
-        expected: overridenScoreOf(3.14),
+        expected: overriddenScoreOf(3.14),
       });
     });
 
@@ -121,7 +121,7 @@ describe('buildRiskScoreFromMapping', () => {
         fieldValue: [42, -42, 17, 87, 87.5, '86.5', 110, 66],
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
-        expected: overridenScoreOf(87.5),
+        expected: overriddenScoreOf(87.5),
       });
     });
 
@@ -130,7 +130,7 @@ describe('buildRiskScoreFromMapping', () => {
         fieldValue: [-1, 1, '3', '1.5', '3.14', 2],
         scoreDefault: 57,
         scoreMapping: mappingToSingleField(),
-        expected: overridenScoreOf(3.14),
+        expected: overriddenScoreOf(3.14),
       });
     });
   });
@@ -178,7 +178,7 @@ describe('buildRiskScoreFromMapping', () => {
           fieldValue: value,
           scoreDefault: 57,
           scoreMapping: mappingToSingleField(),
-          expected: overridenScoreOf(expectedScore),
+          expected: overriddenScoreOf(expectedScore),
         });
       });
     });
@@ -213,7 +213,7 @@ function scoreOf(value: number) {
   };
 }
 
-function overridenScoreOf(value: number) {
+function overriddenScoreOf(value: number) {
   return {
     riskScore: value,
     riskScoreMeta: { riskScoreOverridden: true },

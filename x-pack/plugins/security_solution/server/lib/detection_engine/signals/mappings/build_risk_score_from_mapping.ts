@@ -48,7 +48,7 @@ export const buildRiskScoreFromMapping = ({
 
   if (validNumbers.length > 0) {
     const maxNumber = getMaxOf(validNumbers);
-    return overridenScore(maxNumber);
+    return overriddenScore(maxNumber);
   }
 
   return defaultScore(riskScore);
@@ -83,6 +83,6 @@ function defaultScore(riskScore: RiskScore): BuildRiskScoreFromMappingReturn {
   return { riskScore, riskScoreMeta: {} };
 }
 
-function overridenScore(riskScore: RiskScore): BuildRiskScoreFromMappingReturn {
+function overriddenScore(riskScore: RiskScore): BuildRiskScoreFromMappingReturn {
   return { riskScore, riskScoreMeta: { riskScoreOverridden: true } };
 }
