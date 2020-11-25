@@ -132,6 +132,33 @@ test('completes stream observable when request finishes', async () => {
   expect(spy).toHaveBeenCalledTimes(1);
 });
 
+test('completes stream observable when aborted', async () => {
+  const env = setup();
+  const abort = new AbortController();
+  const { stream } = fetchStreaming({
+    url: 'http://example.com',
+    signal: abort.signal,
+  });
+
+  const spy = jest.fn();
+  stream.subscribe({
+    complete: spy,
+  });
+
+  expect(spy).toHaveBeenCalledTimes(0);
+
+  (env.xhr as any).responseText = 'foo';
+  env.xhr.onprogress!({} as any);
+
+  abort.abort();
+
+  (env.xhr as any).readyState = 4;
+  (env.xhr as any).status = 200;
+  env.xhr.onreadystatechange!({} as any);
+
+  expect(spy).toHaveBeenCalledTimes(1);
+});
+
 test('promise throws when request errors', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
