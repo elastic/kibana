@@ -144,43 +144,43 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
         </h3>
       }
       description={
-        <EuiTextColor color="subdued">
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
-            defaultMessage="Take a snapshot of the managed index in the selected repository and mount it as a searchable snapshot. {learnMoreLink}."
-            values={{
-              learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
-            }}
-          />
-        </EuiTextColor>
+        <>
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
+              defaultMessage="Take a snapshot of the managed index in the selected repository and mount it as a searchable snapshot. {learnMoreLink}."
+              values={{
+                learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
+              }}
+            />
+          </EuiTextColor>
+          {phase === 'hot' && isUsingSearchableSnapshotInHotPhase && (
+            <>
+              <EuiSpacer />
+              <EuiCallOut
+                data-test-subj="searchableSnapshotFieldsDisabledCallout"
+                title={i18n.translate(
+                  'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutTitle',
+                  { defaultMessage: 'Some actions have been disabled' }
+                )}
+                iconType="questionInCircle"
+              >
+                {i18n.translate(
+                  'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
+                  {
+                    defaultMessage:
+                      'Force merge, shrink, freeze and cold phase searchable snapshots are not allowed when searchable snapshots are enabled in the hot phase.',
+                  }
+                )}
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
+          )}
+        </>
       }
       fullWidth
     >
       <div className="ilmSearchableSnapshotField">
-        {phase === 'hot' && isUsingSearchableSnapshotInHotPhase && (
-          <>
-            <EuiCallOut
-              data-test-subj="searchableSnapshotFieldsDisabledCallout"
-              title={i18n.translate(
-                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutTitle',
-                { defaultMessage: 'Some actions have been disabled' }
-              )}
-              iconType="questionInCircle"
-            >
-              {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody', {
-                defaultMessage:
-                  'Force merge, shrink, freeze and cold phase searchable snapshots are not allowed when searchable snapshots are enabled in the hot phase.',
-              })}
-            </EuiCallOut>
-            <EuiSpacer size="s" />
-          </>
-        )}
-        {calloutContent && (
-          <>
-            {calloutContent}
-            <EuiSpacer size="s" />
-          </>
-        )}
         <UseField<string>
           config={{
             defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
@@ -226,6 +226,12 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             );
           }}
         </UseField>
+        {calloutContent && (
+          <>
+            <EuiSpacer size="s" />
+            {calloutContent}
+          </>
+        )}
       </div>
     </DescribedFormField>
   );
