@@ -342,7 +342,7 @@ export const ModelsList: FC = () => {
       onClick: async (item) => {
         const path = await mlUrlGenerator.createUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
-          pageState: { jobId: item.metadata?.analytics_config.id },
+          pageState: { modelId: item.model_id },
         });
 
         await navigateToPath(path, false);

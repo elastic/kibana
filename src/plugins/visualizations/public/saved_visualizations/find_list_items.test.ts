@@ -24,9 +24,8 @@ import { VisTypeAlias } from '../vis_types';
 
 describe('saved_visualizations', () => {
   function testProps() {
-    const savedObjects = coreMock.createStart().savedObjects.client as jest.Mocked<
-      SavedObjectsClientContract
-    >;
+    const savedObjects = coreMock.createStart().savedObjects
+      .client as jest.Mocked<SavedObjectsClientContract>;
     (savedObjects.find as jest.Mock).mockImplementation(() => ({
       total: 0,
       savedObjects: [],

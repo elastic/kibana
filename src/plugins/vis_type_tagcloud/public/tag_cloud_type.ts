@@ -27,13 +27,13 @@ import { toExpressionAst } from './to_ast';
 
 export const tagCloudVisTypeDefinition = {
   name: 'tagcloud',
-  title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
+  title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag cloud' }),
   icon: 'visTagCloud',
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];
   },
   description: i18n.translate('visTypeTagCloud.vis.tagCloudDescription', {
-    defaultMessage: 'A group of words, sized according to their importance',
+    defaultMessage: 'Display word frequency with font size.',
   }),
   visConfig: {
     defaults: {

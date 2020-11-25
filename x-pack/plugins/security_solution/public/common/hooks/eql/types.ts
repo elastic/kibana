@@ -25,5 +25,5 @@ export interface EqlPreviewResponse {
 }
 
 export interface Source {
-  '@timestamp': string;
+  '@timestamp': string | number;
 }

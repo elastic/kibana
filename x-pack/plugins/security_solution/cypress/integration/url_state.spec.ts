@@ -225,7 +225,7 @@ describe('url state', () => {
     openTimelineUsingToggle();
     populateTimeline();
 
-    cy.route2('PATCH', '/api/timeline').as('timeline');
+    cy.intercept('PATCH', '/api/timeline').as('timeline');
 
     addNameToTimeline(timeline.title);
     waitForTimelineChanges();

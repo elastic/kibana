@@ -19,8 +19,8 @@ import { CASES_URL } from '../urls/navigation';
 
 describe('Cases connectors', () => {
   before(() => {
-    cy.route2('POST', '/api/actions/action').as('createConnector');
-    cy.route2('POST', '/api/cases/configure').as('saveConnector');
+    cy.intercept('POST', '/api/actions/action').as('createConnector');
+    cy.intercept('POST', '/api/cases/configure').as('saveConnector');
   });
 
   it('Configures a new connector', () => {

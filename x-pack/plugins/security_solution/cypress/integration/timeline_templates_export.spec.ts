@@ -16,8 +16,8 @@ import { addNameToTimeline, closeTimeline, createNewTimelineTemplate } from '../
 describe('Export timelines', () => {
   before(() => {
     esArchiverLoad('timeline');
-    cy.route2('PATCH', '/api/timeline').as('timeline');
-    cy.route2('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
+    cy.intercept('PATCH', '/api/timeline').as('timeline');
+    cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
   });
 
   after(() => {

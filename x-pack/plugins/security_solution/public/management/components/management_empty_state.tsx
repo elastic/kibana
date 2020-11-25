@@ -170,8 +170,7 @@ const EndpointsEmptyState = React.memo<{
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.list.stepTwoTitle', {
-          defaultMessage:
-            'Enroll your agents enabled with Endpoint Security through Ingest Manager',
+          defaultMessage: 'Enroll your agents enabled with Endpoint Security through Fleet',
         }),
         status: actionDisabled ? 'disabled' : '',
         children: (

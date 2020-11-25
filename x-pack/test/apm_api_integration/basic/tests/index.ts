@@ -24,6 +24,7 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
 
     describe('Service overview', function () {
       loadTestFile(require.resolve('./service_overview/error_groups'));
+      loadTestFile(require.resolve('./service_overview/transaction_groups'));
     });
 
     describe('Settings', function () {

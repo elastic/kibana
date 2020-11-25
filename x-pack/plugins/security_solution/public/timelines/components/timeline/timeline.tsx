@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiProgress } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiProgress,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
@@ -35,6 +42,8 @@ import {
 import { useManageTimeline } from '../manage_timeline';
 import { TimelineType, TimelineStatusLiteral } from '../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../detections/components/alerts_table/default_config';
+import { GraphOverlay } from '../graph_overlay';
+import { EventDetails } from './event_details';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -79,11 +88,27 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   padding: 0 10px 5px 12px;
 `;
 
+const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
+  width: 100%;
+  overflow: hidden;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+`;
+
+const ScrollableFlexItem = styled(EuiFlexItem)`
+  overflow: auto;
+`;
+
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
   color: #fff;
   padding: 10px 15px;
   font-size: 0.8em;
+`;
+
+const VerticalRule = styled.div`
+  width: 2px;
+  height: 100%;
+  background: ${({ theme }) => theme.eui.euiColorLightShade};
 `;
 
 export interface Props {
@@ -261,20 +286,30 @@ export const TimelineComponent: React.FC<Props> = ({
             loading={loading}
             refetch={refetch}
           />
-          <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
-            <StatefulBody
-              browserFields={browserFields}
-              data={events}
-              docValueFields={docValueFields}
-              id={id}
-              refetch={refetch}
-              sort={sort}
-              toggleColumn={toggleColumn}
+          {graphEventId && (
+            <GraphOverlay
+              graphEventId={graphEventId}
+              isEventViewer={false}
+              timelineId={id}
+              timelineType={timelineType}
             />
-          </StyledEuiFlyoutBody>
-          {
-            /** Hide the footer if Resolver is showing. */
-            !graphEventId && (
+          )}
+          <FullWidthFlexGroup $visible={!graphEventId}>
+            <ScrollableFlexItem grow={2}>
+              <StyledEuiFlyoutBody
+                data-test-subj="eui-flyout-body"
+                className="timeline-flyout-body"
+              >
+                <StatefulBody
+                  browserFields={browserFields}
+                  data={events}
+                  docValueFields={docValueFields}
+                  id={id}
+                  refetch={refetch}
+                  sort={sort}
+                  toggleColumn={toggleColumn}
+                />
+              </StyledEuiFlyoutBody>
               <StyledEuiFlyoutFooter
                 data-test-subj="eui-flyout-footer"
                 className="timeline-flyout-footer"
@@ -295,8 +330,17 @@ export const TimelineComponent: React.FC<Props> = ({
                   totalCount={totalCount}
                 />
               </StyledEuiFlyoutFooter>
-            )
-          }
+            </ScrollableFlexItem>
+            <VerticalRule />
+            <ScrollableFlexItem grow={1}>
+              <EventDetails
+                browserFields={browserFields}
+                docValueFields={docValueFields}
+                timelineId={id}
+                toggleColumn={toggleColumn}
+              />
+            </ScrollableFlexItem>
+          </FullWidthFlexGroup>
         </>
       ) : null}
     </TimelineContainer>

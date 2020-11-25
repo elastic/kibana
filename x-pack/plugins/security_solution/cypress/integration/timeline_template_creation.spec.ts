@@ -45,7 +45,7 @@ import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Timeline Templates', () => {
   before(() => {
-    cy.route2('PATCH', '/api/timeline').as('timeline');
+    cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
   it('Creates a timeline template', async () => {

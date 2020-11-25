@@ -20,7 +20,7 @@ const EXPECTED_EXPORTED_RULE_FILE_PATH = 'cypress/test_files/expected_rules_expo
 describe('Export rules', () => {
   before(() => {
     esArchiverLoad('export_rule');
-    cy.route2(
+    cy.intercept(
       'POST',
       '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
     ).as('export');

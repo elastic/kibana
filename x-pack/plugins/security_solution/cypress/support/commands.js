@@ -30,13 +30,13 @@
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
-Cypress.Commands.add('stubSearchStrategyApi', function (
-  dataFileName,
-  searchStrategyName = 'securitySolutionSearchStrategy'
-) {
-  cy.fixture(dataFileName).as(`${dataFileName}JSON`);
-  cy.route2('POST', `/internal/search/${searchStrategyName}`, { fixture: dataFileName });
-});
+Cypress.Commands.add(
+  'stubSearchStrategyApi',
+  function (dataFileName, searchStrategyName = 'securitySolutionSearchStrategy') {
+    cy.fixture(dataFileName).as(`${dataFileName}JSON`);
+    cy.intercept('POST', `/internal/search/${searchStrategyName}`, { fixture: dataFileName });
+  }
+);
 
 Cypress.Commands.add(
   'attachFile',

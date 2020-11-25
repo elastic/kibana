@@ -148,7 +148,7 @@ describe('value lists', () => {
 
       it('deletes a "ip_range" from an uploaded file', () => {
         const listName = 'cidr_list.txt';
-        importValueList(listName, 'ip_range');
+        importValueList(listName, 'ip_range', ['192.168.100.0']);
         openValueListsModal();
         deleteValueListsFile(listName);
         cy.get(VALUE_LISTS_TABLE)
@@ -162,7 +162,7 @@ describe('value lists', () => {
     describe('export list types', () => {
       it('exports a "keyword" list from an uploaded file', () => {
         const listName = 'value_list.txt';
-        cy.route2('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
         importValueList('value_list.txt', 'keyword');
         openValueListsModal();
         exportValueList();
@@ -177,7 +177,7 @@ describe('value lists', () => {
 
       it('exports a "text" list from an uploaded file', () => {
         const listName = 'value_list.txt';
-        cy.route2('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
         importValueList(listName, 'text');
         openValueListsModal();
         exportValueList();
@@ -192,7 +192,7 @@ describe('value lists', () => {
 
       it('exports a "ip" list from an uploaded file', () => {
         const listName = 'ip_list.txt';
-        cy.route2('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
         importValueList(listName, 'ip');
         openValueListsModal();
         exportValueList();
@@ -207,8 +207,8 @@ describe('value lists', () => {
 
       it('exports a "ip_range" list from an uploaded file', () => {
         const listName = 'cidr_list.txt';
-        cy.route2('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
-        importValueList(listName, 'ip_range');
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
+        importValueList(listName, 'ip_range', ['192.168.100.0']);
         openValueListsModal();
         exportValueList();
         cy.wait('@exportList').then(({ response }) => {
