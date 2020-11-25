@@ -14,12 +14,12 @@ import React, {
 
 import { PointerEvent } from '@elastic/charts';
 
-export const PointerEventContext = createContext<{
+export const ChartPointerEventContext = createContext<{
   pointerEvent: PointerEvent | null;
   setPointerEvent: Dispatch<SetStateAction<PointerEvent | null>>;
 } | null>(null);
 
-export function PointerEventContextProvider({
+export function ChartPointerEventContextProvider({
   children,
 }: {
   children: ReactNode;
@@ -27,7 +27,7 @@ export function PointerEventContextProvider({
   const [pointerEvent, setPointerEvent] = useState<PointerEvent | null>(null);
 
   return (
-    <PointerEventContext.Provider
+    <ChartPointerEventContext.Provider
       value={{ pointerEvent, setPointerEvent }}
       children={children}
     />

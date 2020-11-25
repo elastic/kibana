@@ -24,7 +24,7 @@ import { useChartTheme } from '../../../../../observability/public';
 import { TimeSeries } from '../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { usePointerEvent } from '../../../hooks/use_pointer_event';
+import { useChartPointerEvent } from '../../../hooks/use_chart_pointer_event';
 import { unit } from '../../../style/variables';
 import { Annotations } from './annotations';
 import { ChartContainer } from './chart_container';
@@ -60,7 +60,7 @@ export function TimeseriesChart({
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
   const chartTheme = useChartTheme();
-  const { pointerEvent, setPointerEvent } = usePointerEvent();
+  const { pointerEvent, setPointerEvent } = useChartPointerEvent();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
 

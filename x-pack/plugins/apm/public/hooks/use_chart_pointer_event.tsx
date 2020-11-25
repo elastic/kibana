@@ -5,13 +5,13 @@
  */
 
 import { useContext } from 'react';
-import { PointerEventContext } from '../context/pointer_event_context';
+import { ChartPointerEventContext } from '../context/chart_pointer_event_context';
 
-export function usePointerEvent() {
-  const context = useContext(PointerEventContext);
+export function useChartPointerEvent() {
+  const context = useContext(ChartPointerEventContext);
 
   if (!context) {
-    throw new Error('Missing PointerEventContext provider');
+    throw new Error('Missing ChartPointerEventContext provider');
   }
 
   return context;

@@ -22,7 +22,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { PointerEventContextProvider } from '../../../context/pointer_event_context';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event_context';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
@@ -178,7 +178,7 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
         </MetadataFlexGroup>
       )}
       {agentName && (
-        <PointerEventContextProvider>
+        <ChartPointerEventContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
             {data.charts.map((chart) => (
               <EuiFlexItem key={chart.key}>
@@ -194,12 +194,12 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
             ))}
           </EuiFlexGrid>
           <EuiSpacer size="xxl" />
-        </PointerEventContextProvider>
+        </ChartPointerEventContextProvider>
       )}
       <SearchBar />
       <EuiPage>
         {agentName && (
-          <PointerEventContextProvider>
+          <ChartPointerEventContextProvider>
             <EuiFlexGrid columns={2} gutterSize="s">
               {data.charts.map((chart) => (
                 <EuiFlexItem key={chart.key}>
@@ -215,7 +215,7 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
               ))}
             </EuiFlexGrid>
             <EuiSpacer size="xxl" />
-          </PointerEventContextProvider>
+          </ChartPointerEventContextProvider>
         )}
       </EuiPage>
     </>

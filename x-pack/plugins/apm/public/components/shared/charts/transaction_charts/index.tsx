@@ -20,7 +20,7 @@ import {
   TRANSACTION_ROUTE_CHANGE,
 } from '../../../../../common/transaction_types';
 import { asTransactionRate } from '../../../../../common/utils/formatters';
-import { PointerEventContextProvider } from '../../../../context/pointer_event_context';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event_context';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
@@ -51,7 +51,7 @@ export function TransactionCharts({
 
   return (
     <>
-      <PointerEventContextProvider>
+      <ChartPointerEventContextProvider>
         <EuiFlexGrid columns={2} gutterSize="s">
           <EuiFlexItem data-cy={`transaction-duration-charts`}>
             <EuiPanel>
@@ -109,7 +109,7 @@ export function TransactionCharts({
             <TransactionBreakdownChart />
           </EuiFlexItem>
         </EuiFlexGrid>
-      </PointerEventContextProvider>
+      </ChartPointerEventContextProvider>
     </>
   );
 }
