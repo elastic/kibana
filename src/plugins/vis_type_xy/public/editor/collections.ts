@@ -18,15 +18,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Fit, Position } from '@elastic/charts';
+import { Fit } from '@elastic/charts';
 
-import { AxisMode, ChartMode, InterpolationMode, ThresholdLineStyle, ScaleType } from '../types';
+import { AxisMode, ChartMode, InterpolationMode, ThresholdLineStyle } from '../types';
 import { ChartType } from '../../common';
 import { LabelRotation } from '../../../charts/public';
+import { getScaleTypes } from './scale_types';
+import { getPositions } from './positions';
 
-export { getScaleTypes } from './scale_types';
-
-export { getPositions } from './positions';
+export { getScaleTypes, getPositions };
 
 export const getChartTypes = () => [
   {
