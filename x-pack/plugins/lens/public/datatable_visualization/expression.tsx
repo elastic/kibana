@@ -36,7 +36,7 @@ import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { UiActionsStart, ROW_CLICK_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
-import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
+import { IEmbeddable, isEmbeddable } from '../../../../../src/plugins/embeddable/public';
 
 export interface DatatableColumns {
   columnIds: string[];
@@ -166,25 +166,35 @@ export const getDatatableRenderer = (dependencies: {
       handlers.event({ name: 'tableRowContextMenuClick', data });
     };
     const uiActions = dependencies.uiActions;
-    const table = Object.values(config.data.tables)[0];
-    const rowHasRowClickTriggerActions: boolean[] = !table
-      ? []
-      : await Promise.all(
-          table.rows.map(async (row, rowIndex) => {
-            try {
-              const actions = await uiActions.getTriggerCompatibleActions(ROW_CLICK_TRIGGER, {
-                embeddable: ({} as unknown) as IEmbeddable,
-                data: {
-                  rowIndex,
-                  table,
-                },
-              });
-              return !!actions;
-            } catch {
-              return false;
-            }
-          })
-        );
+    const { data } = handlers;
+
+    // An entrly for each table row, whether it has any actions attached to
+    // ROW_CLICK_TRIGGER trigger.
+    let rowHasRowClickTriggerActions: boolean[] = [];
+    if (data && typeof data === 'object') {
+      const embeddable = (data as { embeddable?: IEmbeddable }).embeddable;
+      if (isEmbeddable(embeddable)) {
+        const table = Object.values(config.data.tables)[0];
+        if (!!table) {
+          rowHasRowClickTriggerActions = await Promise.all(
+            table.rows.map(async (row, rowIndex) => {
+              try {
+                const actions = await uiActions.getTriggerCompatibleActions(ROW_CLICK_TRIGGER, {
+                  embeddable,
+                  data: {
+                    rowIndex,
+                    table,
+                  },
+                });
+                return actions.length > 0;
+              } catch {
+                return false;
+              }
+            })
+          );
+        }
+      }
+    }
 
     ReactDOM.render(
       <I18nProvider>

@@ -200,6 +200,9 @@ export class Embeddable
         searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
         renderMode={input.renderMode}
+        data={{
+          embeddable: this,
+        }}
       />,
       domNode
     );

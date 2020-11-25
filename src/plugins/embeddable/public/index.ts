@@ -54,6 +54,7 @@ export {
   ErrorEmbeddable,
   IContainer,
   IEmbeddable,
+  isEmbeddable,
   isErrorEmbeddable,
   openAddPanelFlyout,
   OutputSpec,
