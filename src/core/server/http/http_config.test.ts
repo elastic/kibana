@@ -261,6 +261,51 @@ describe('with compression', () => {
   });
 });
 
+describe('cors', () => {
+  describe('origin', () => {
+    it('list cannot be empty', () => {
+      expect(() =>
+        config.schema.validate({
+          cors: {
+            origin: [],
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+              "[cors.origin]: types that failed validation:
+              - [cors.origin.0]: expected value to equal [*]
+              - [cors.origin.1]: array size is [0], but cannot be smaller than [1]"
+          `);
+    });
+
+    it('consist of list of valid URLs', () => {
+      const origin = ['http://127.0.0.1:3000', 'https://elastic.co'];
+      expect(
+        config.schema.validate({
+          cors: { origin },
+        }).cors.origin
+      ).toStrictEqual(origin);
+    });
+
+    it('can be configures as "*" wildcard', () => {
+      expect(config.schema.validate({ cors: { origin: '*' } }).cors.origin).toBe('*');
+    });
+  });
+  describe('credentials', () => {
+    it('cannot use wildcard origin if "credentials: true"', () => {
+      expect(
+        () => config.schema.validate({ cors: { credentials: true, origin: '*' } }).cors.origin
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
+      );
+      expect(
+        () => config.schema.validate({ cors: { credentials: true } }).cors.origin
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
+      );
+    });
+  });
+});
+
 describe('HttpConfig', () => {
   it('converts customResponseHeaders to strings or arrays of strings', () => {
     const httpSchema = config.schema;
