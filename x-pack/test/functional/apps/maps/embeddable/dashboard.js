@@ -16,9 +16,16 @@ export default function ({ getPageObjects, getService }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const security = getService('security');
 
   describe('embed in dashboard', () => {
     before(async () => {
+      await security.testUser.setRoles([
+        'test_logstash_reader',
+        'geoshape_data_reader',
+        'meta_for_geoshape_data_reader',
+        'global_dashboard_read',
+      ]);
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
         [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: true,
@@ -31,6 +38,7 @@ export default function ({ getPageObjects, getService }) {
       await kibanaServer.uiSettings.replace({
         [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: false,
       });
+      await security.testUser.restoreDefaults();
     });
 
     async function getRequestTimestamp() {

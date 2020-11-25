@@ -12,8 +12,25 @@ export default function ({ getPageObjects, getService }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
 
   describe('save and return work flow', () => {
+    before(async () => {
+      await security.testUser.setRoles(
+        [
+          'test_logstash_reader',
+          'global_maps_all',
+          'geoshape_data_reader',
+          'global_dashboard_all',
+          'meta_for_geoshape_data_reader',
+        ],
+        false
+      );
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
     describe('new map', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
