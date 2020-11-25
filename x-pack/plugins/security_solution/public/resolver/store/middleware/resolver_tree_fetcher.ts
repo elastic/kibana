@@ -7,7 +7,7 @@
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { ResolverTree, ResolverEntityIndex } from '../../../../common/endpoint/types';
 
-import { ResolverState, DataAccessLayer } from '../../types';
+import { ResolverState, ResolverMiddlewareFactoryDependencies } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 /**
@@ -18,7 +18,7 @@ import { ResolverAction } from '../actions';
  * This is a factory because it is stateful and keeps that state in closure.
  */
 export function ResolverTreeFetcher(
-  dataAccessLayer: DataAccessLayer,
+  { dataAccessLayer }: ResolverMiddlewareFactoryDependencies,
   api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
 ): () => void {
   let lastRequestAbortController: AbortController | undefined;

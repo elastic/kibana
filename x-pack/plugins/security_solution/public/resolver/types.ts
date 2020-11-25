@@ -19,6 +19,11 @@ import {
   ResolverPaginatedEvents,
 } from '../../common/endpoint/types';
 
+export interface ResolverMiddlewareFactoryDependencies {
+  dataAccessLayer: DataAccessLayer;
+  timestamp: () => number;
+}
+
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
  */
@@ -690,21 +695,25 @@ export interface ResolverPluginSetup {
   /**
    * Provide access to the instance of the `react-redux` `Provider` that Resolver recognizes.
    */
-  Provider: typeof Provider;
+  // Provider: typeof Provider;
   /**
    * Takes a `DataAccessLayer`, which could be a mock one, and returns an redux Store.
    * All data acess (e.g. HTTP requests) are done through the store.
    */
-  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<ResolverState, ResolverAction>;
+  // storeFactory: (dataAccessLayer: DataAccessLayer) => Store<ResolverState, ResolverAction>;
 
   /**
    * The Resolver component without the required Providers.
    * You must wrap this component in: `I18nProvider`, `Router` (from react-router,) `KibanaContextProvider`,
    * and the `Provider` component provided by this object.
    */
-  ResolverWithoutProviders: React.MemoExoticComponent<
+  /* ResolverWithoutProviders: React.MemoExoticComponent<
     React.ForwardRefExoticComponent<ResolverProps & React.RefAttributes<unknown>>
-  >;
+  >;*/
+
+  ResolverFactory: (
+    dataAccessLayer: DataAccessLayer
+  ) => React.ForwardRefExoticComponent<ResolverProps & React.RefAttributes<unknown>>;
 
   /**
    * A collection of mock objects that can be used in examples or in testing.

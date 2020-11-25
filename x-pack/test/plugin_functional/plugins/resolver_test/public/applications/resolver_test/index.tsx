@@ -57,9 +57,7 @@ const AppRoot = React.memo(
     resolverPluginSetup: ResolverPluginSetup;
   }) => {
     const {
-      Provider,
-      storeFactory,
-      ResolverWithoutProviders,
+      ResolverFactory,
       mocks: {
         dataAccessLayer: { noAncestorsTwoChildrenWithRelatedEventsOnOrigin },
       },
@@ -69,23 +67,22 @@ const AppRoot = React.memo(
       [noAncestorsTwoChildrenWithRelatedEventsOnOrigin]
     );
 
-    const store = useMemo(() => {
-      return storeFactory(dataAccessLayer);
-    }, [storeFactory, dataAccessLayer]);
+    const Resolver = useMemo(() => ResolverFactory(dataAccessLayer), [
+      ResolverFactory,
+      dataAccessLayer,
+    ]);
+
+    // const store = useMemo(() => {
+    //   return storeFactory(dataAccessLayer);
+    // }, [storeFactory, dataAccessLayer]);
 
     return (
       <I18nProvider>
         <Router history={parameters.history}>
           <KibanaContextProvider services={coreStart}>
-            <Provider store={store}>
-              <Wrapper>
-                <ResolverWithoutProviders
-                  databaseDocumentID=""
-                  resolverComponentInstanceID="test"
-                  indices={[]}
-                />
-              </Wrapper>
-            </Provider>
+            <Wrapper>
+              <Resolver databaseDocumentID="" resolverComponentInstanceID="test" indices={[]} />
+            </Wrapper>
           </KibanaContextProvider>
         </Router>
       </I18nProvider>

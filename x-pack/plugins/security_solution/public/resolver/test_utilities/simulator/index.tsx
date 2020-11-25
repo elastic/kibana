@@ -97,12 +97,17 @@ export class Simulator {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
 
+    this.sideEffectSimulator = sideEffectSimulatorFactory();
+
     /**
      * Create the real resolver middleware with a fake data access layer.
      * By providing different data access layers, you can simulate different data and server environments.
      */
     const middlewareEnhancer = applyMiddleware(
-      resolverMiddlewareFactory(dataAccessLayer),
+      resolverMiddlewareFactory({
+        dataAccessLayer,
+        timestamp: () => this.sideEffectSimulator.mock.timestamp(),
+      }),
       // install the spyMiddleware
       this.spyMiddleware.middleware
     );
@@ -118,8 +123,6 @@ export class Simulator {
     const coreStart = coreMock.createStart();
 
     coreStart.uiSettings.get.mockImplementation(uiSetting);
-
-    this.sideEffectSimulator = sideEffectSimulatorFactory();
 
     // Render Resolver via the `MockResolver` component, using `enzyme`.
     this.wrapper = mount(

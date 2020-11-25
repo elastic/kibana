@@ -5,7 +5,7 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
-import { ResolverState, DataAccessLayer } from '../../types';
+import { ResolverState, DataAccessLayer, ResolverMiddlewareFactoryDependencies } from '../../types';
 import { ResolverTreeFetcher } from './resolver_tree_fetcher';
 
 import { ResolverAction } from '../actions';
@@ -13,7 +13,7 @@ import { RelatedEventsFetcher } from './related_events_fetcher';
 import { CurrentRelatedEventFetcher } from './current_related_event_fetcher';
 
 type MiddlewareFactory<S = ResolverState> = (
-  dataAccessLayer: DataAccessLayer
+  dependencies: ResolverMiddlewareFactoryDependencies
 ) => (
   api: MiddlewareAPI<Dispatch<ResolverAction>, S>
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
@@ -24,11 +24,16 @@ type MiddlewareFactory<S = ResolverState> = (
  * For actions that the application triggers directly, use `app` as a prefix for the type.
  * For actions that are triggered as a result of server interaction, use `server` as a prefix for the type.
  */
-export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: DataAccessLayer) => {
+export const resolverMiddlewareFactory: MiddlewareFactory = (
+  dependencies: ResolverMiddlewareFactoryDependencies
+) => {
   return (api) => (next) => {
-    const resolverTreeFetcher = ResolverTreeFetcher(dataAccessLayer, api);
-    const relatedEventsFetcher = RelatedEventsFetcher(dataAccessLayer, api);
-    const currentRelatedEventFetcher = CurrentRelatedEventFetcher(dataAccessLayer, api);
+    const resolverTreeFetcher = ResolverTreeFetcher(dependencies, { ...api, dispatch: next });
+    const relatedEventsFetcher = RelatedEventsFetcher(dependencies, { ...api, dispatch: next });
+    const currentRelatedEventFetcher = CurrentRelatedEventFetcher(dependencies, {
+      ...api,
+      dispatch: next,
+    });
     return async (action: ResolverAction) => {
       next(action);
 

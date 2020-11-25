@@ -8,12 +8,16 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { isEqual } from 'lodash';
 import { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
 
-import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
+import {
+  ResolverState,
+  PanelViewAndParameters,
+  ResolverMiddlewareFactoryDependencies,
+} from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 
 export function RelatedEventsFetcher(
-  dataAccessLayer: DataAccessLayer,
+  { dataAccessLayer }: ResolverMiddlewareFactoryDependencies,
   api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
 ): () => void {
   let last: PanelViewAndParameters | undefined;
