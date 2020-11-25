@@ -159,6 +159,7 @@ export const SaveRule = (props: SaveRuleProps) => {
   const { dataSubmitted, loading, saveRuleData, saveSuccess, triggerCount } = state;
 
   const startSaveRule = async () => {
+    console.log('test PR');
     try {
       const newQuery = await convertQuery(query);
       dispatch({ type: 'START_SAVE_RULE', query: newQuery });
