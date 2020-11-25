@@ -17,23 +17,21 @@
  * under the License.
  */
 
-import { SearchSource } from '../../../data/public';
-import { SavedObjectSaveOpts } from '../../../saved_objects/public';
+import React from 'react';
+import { shallow } from 'enzyme';
 
-export type SortOrder = [string, string];
-export interface SavedSearch {
-  readonly id: string;
-  title: string;
-  searchSource: SearchSource;
-  description?: string;
-  columns: string[];
-  sort: SortOrder[];
-  destroy: () => void;
-  save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
-  lastSavedTitle?: string;
-  copyOnSave?: boolean;
-}
-export interface SavedSearchLoader {
-  get: (id: string) => Promise<SavedSearch>;
-  urlFor: (id: string) => string;
-}
+jest.mock('../../../kibana_services', () => {
+  return {
+    getServices: () => ({
+      core: { uiSettings: {}, savedObjects: {} },
+      addBasePath: (path: string) => path,
+    }),
+  };
+});
+
+import { OpenSearchPanel } from './open_search_panel';
+
+test('render', () => {
+  const component = shallow(<OpenSearchPanel onClose={jest.fn()} makeUrl={jest.fn()} />);
+  expect(component).toMatchSnapshot();
+});

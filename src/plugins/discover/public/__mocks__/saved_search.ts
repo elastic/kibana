@@ -17,30 +17,25 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { OpenSearchPanel } from './open_search_panel';
+import { SavedSearch } from '../saved_searches';
 
-let isOpen = false;
-
-export function showOpenSearchPanel({ makeUrl, I18nContext }) {
-  if (isOpen) {
-    return;
-  }
-
-  isOpen = true;
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    isOpen = false;
-  };
-
-  document.body.appendChild(container);
-  const element = (
-    <I18nContext>
-      <OpenSearchPanel onClose={onClose} makeUrl={makeUrl} />
-    </I18nContext>
-  );
-  ReactDOM.render(element, container);
-}
+export const savedSearchMock = ({
+  id: 'the-saved-search-id',
+  type: 'search',
+  attributes: {
+    title: 'the-saved-search-title',
+    kibanaSavedObjectMeta: {
+      searchSourceJSON:
+        '{"highlightAll":true,"version":true,"query":{"query":"foo : \\"bar\\" ","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+    },
+  },
+  references: [
+    {
+      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+      type: 'index-pattern',
+      id: 'the-index-pattern-id',
+    },
+  ],
+  migrationVersion: { search: '7.5.0' },
+  error: undefined,
+} as unknown) as SavedSearch;
