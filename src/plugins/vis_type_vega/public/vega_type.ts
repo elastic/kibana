@@ -74,14 +74,12 @@ export const createVegaTypeDefinition = (
       return [VIS_EVENT_TO_TRIGGER.applyFilter];
     },
     getUsedIndexPattern: async (visParams) => {
-      if (visParams.spec) {
-        try {
-          const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
+      try {
+        const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
 
-          return extractIndexPatternsFromSpec(spec as VegaSpec);
-        } catch (e) {
-          // spec is invalid
-        }
+        return extractIndexPatternsFromSpec(spec as VegaSpec);
+      } catch (e) {
+        // spec is invalid
       }
       return [];
     },
