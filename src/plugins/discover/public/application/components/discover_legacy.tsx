@@ -32,6 +32,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'kibana/public';
+import classNames from 'classnames';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { getServices, IndexPattern } from '../../kibana_services';
@@ -152,6 +153,7 @@ export function DiscoverLegacy({
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
+  const contentCentered = resultState === 'uninitialized';
 
   return (
     <I18nProvider>
@@ -206,7 +208,14 @@ export function DiscoverLegacy({
               </EuiFlexItem>
             </EuiHideFor>
             <EuiFlexItem className="dscPageContent__wrapper">
-              <EuiPageContent paddingSize="none" className="dscPageContent">
+              <EuiPageContent
+                verticalPosition={contentCentered ? 'center' : undefined}
+                horizontalPosition={contentCentered ? 'center' : undefined}
+                paddingSize="none"
+                className={classNames('dscPageContent', {
+                  'dscPageContent--centered': contentCentered,
+                })}
+              >
                 {resultState === 'none' && (
                   <DiscoverNoResults
                     timeFieldName={opts.timefield}
