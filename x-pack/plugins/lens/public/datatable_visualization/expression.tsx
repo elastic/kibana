@@ -359,7 +359,12 @@ export function DatatableComponent(props: DatatableRenderProps) {
             defaultMessage: 'Table row context menu',
           }),
           type: 'icon',
-          icon: () => {
+          icon: ({ rowIndex }: { rowIndex: number }) => {
+            if (
+              !!props.rowHasRowClickTriggerActions &&
+              !props.rowHasRowClickTriggerActions[rowIndex]
+            )
+              return 'empty';
             return 'boxesVertical';
           },
           onClick: ({ rowIndex }) => {
