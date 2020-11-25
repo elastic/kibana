@@ -5,13 +5,13 @@
  */
 
 import { useContext } from 'react';
-import { ChartsSyncContext } from '../context/charts_sync_context';
+import { ChartPointerEventContext } from '../context/chart_pointer_event_context';
 
-export function useChartsSync() {
-  const context = useContext(ChartsSyncContext);
+export function useChartPointerEvent() {
+  const context = useContext(ChartPointerEventContext);
 
   if (!context) {
-    throw new Error('Missing ChartsSync context provider');
+    throw new Error('Missing ChartPointerEventContext provider');
   }
 
   return context;

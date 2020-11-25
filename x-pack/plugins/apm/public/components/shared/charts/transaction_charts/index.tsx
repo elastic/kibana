@@ -21,7 +21,7 @@ import {
 } from '../../../../../common/transaction_types';
 import { asTransactionRate } from '../../../../../common/utils/formatters';
 import { AnnotationsContextProvider } from '../../../../context/annotations_context';
-import { ChartsSyncContextProvider } from '../../../../context/charts_sync_context';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event_context';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
@@ -53,7 +53,7 @@ export function TransactionCharts({
   return (
     <>
       <AnnotationsContextProvider>
-        <ChartsSyncContextProvider>
+        <ChartPointerEventContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem data-cy={`transaction-duration-charts`}>
               <EuiPanel>
@@ -113,7 +113,7 @@ export function TransactionCharts({
               <TransactionBreakdownChart />
             </EuiFlexItem>
           </EuiFlexGrid>
-        </ChartsSyncContextProvider>
+        </ChartPointerEventContextProvider>
       </AnnotationsContextProvider>
     </>
   );
