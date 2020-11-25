@@ -607,7 +607,60 @@ export const formattedSearchStrategyResponse = {
   loaded: 21,
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggregations": {\n      "host_count": {\n        "cardinality": {\n          "field": "host.name"\n        }\n      },\n      "host_data": {\n        "terms": {\n          "size": 10,\n          "field": "host.name",\n          "order": {\n            "lastSeen": "desc"\n          }\n        },\n        "aggs": {\n          "lastSeen": {\n            "max": {\n              "field": "@timestamp"\n            }\n          },\n          "os": {\n            "top_hits": {\n              "size": 1,\n              "sort": [\n                {\n                  "@timestamp": {\n                    "order": "desc"\n                  }\n                }\n              ],\n              "_source": {\n                "includes": [\n                  "host.os.*"\n                ]\n              }\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "filter": [\n          {\n            "bool": {\n              "must": [],\n              "filter": [\n                {\n                  "match_all": {}\n                }\n              ],\n              "should": [],\n              "must_not": []\n            }\n          },\n          {\n            "range": {\n              "@timestamp": {\n                "gte": "2020-09-03T09:15:21.415Z",\n                "lte": "2020-09-04T09:15:21.415Z",\n                "format": "strict_date_optional_time"\n              }\n            }\n          }\n        ]\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            docvalue_fields: mockOptions.docValueFields,
+            aggregations: {
+              host_count: { cardinality: { field: 'host.name' } },
+              host_data: {
+                terms: { size: 10, field: 'host.name', order: { lastSeen: 'desc' } },
+                aggs: {
+                  lastSeen: { max: { field: '@timestamp' } },
+                  os: {
+                    top_hits: {
+                      size: 1,
+                      sort: [{ '@timestamp': { order: 'desc' } }],
+                      _source: { includes: ['host.os.*'] },
+                    },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: '2020-09-03T09:15:21.415Z',
+                        lte: '2020-09-04T09:15:21.415Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+            track_total_hits: false,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   edges: [
@@ -761,6 +814,7 @@ export const expectedDsl = {
         ],
       },
     },
+    docvalue_fields: mockOptions.docValueFields,
     size: 0,
     track_total_hits: false,
   },
