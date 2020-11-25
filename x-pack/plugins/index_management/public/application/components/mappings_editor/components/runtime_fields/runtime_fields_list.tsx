@@ -27,6 +27,7 @@ export const RuntimeFieldsList = () => {
   const {
     runtimeFields,
     runtimeFieldsList: { status, fieldToEdit },
+    fields,
   } = useMappingsState();
 
   const dispatch = useDispatch();
@@ -75,6 +76,10 @@ export const RuntimeFieldsList = () => {
           onCancel: exitEdit,
           defaultValue: fieldToEdit ? runtimeFields[fieldToEdit]?.source : undefined,
           docLinks: docLinks!,
+          ctx: {
+            namesNotAllowed: Object.values(runtimeFields).map((field) => field.source.name),
+            existingConcreteFields: Object.values(fields.byId).map((field) => field.source.name),
+          },
         },
         flyoutProps: {
           'data-test-subj': 'runtimeFieldEditor',
@@ -91,6 +96,7 @@ export const RuntimeFieldsList = () => {
     status,
     fieldToEdit,
     runtimeFields,
+    fields,
     docLinks,
     addContentToGlobalFlyout,
     removeContentFromGlobalFlyout,

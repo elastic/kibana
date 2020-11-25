@@ -14,9 +14,20 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiLink,
+  EuiCallOut,
 } from '@elastic/eui';
 
-import { useForm, Form, FormHook, UseField, TextField, CodeEditor } from '../../shared_imports';
+import {
+  useForm,
+  useFormData,
+  Form,
+  FormHook,
+  UseField,
+  TextField,
+  CodeEditor,
+  ValidationFunc,
+  FieldConfig,
+} from '../../shared_imports';
 import { RuntimeField } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { schema } from './schema';
@@ -33,11 +44,60 @@ export interface Props {
   };
   defaultValue?: RuntimeField;
   onChange?: (state: FormState) => void;
+  /**
+   * Optional context object
+   */
+  ctx?: {
+    /** An array of field name not allowed */
+    namesNotAllowed?: string[];
+    /**
+     * An array of existing concrete fields. If the user gives a name to the runtime
+     * field that matches one of the concrete fields, a callout will be displayed
+     * to indicate that this runtime field will shadow the concrete field.
+     */
+    existingConcreteFields?: string[];
+  };
 }
 
-const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
+const createNameNotAllowedValidator = (
+  namesNotAllowed: string[]
+): ValidationFunc<{}, string, string> => ({ value }) => {
+  if (namesNotAllowed.includes(value)) {
+    return {
+      message: i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.existRuntimeFieldNamesValidationErrorMessage',
+        {
+          defaultMessage: 'There is already a field with this name.',
+        }
+      ),
+    };
+  }
+};
+
+const RuntimeFieldFormComp = ({
+  defaultValue,
+  onChange,
+  links,
+  ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
+}: Props) => {
   const { form } = useForm<RuntimeField>({ defaultValue, schema });
   const { submit, isValid: isFormValid, isSubmitted } = form;
+  const [{ name }] = useFormData<RuntimeField>({ form, watch: 'name' });
+
+  let nameFieldConfig = schema.name as FieldConfig<string, RuntimeField>;
+
+  if (namesNotAllowed) {
+    // Add validation to not allow duplicates
+    nameFieldConfig = {
+      ...nameFieldConfig!,
+      validations: [
+        ...(nameFieldConfig.validations ?? []),
+        {
+          validator: createNameNotAllowedValidator(namesNotAllowed),
+        },
+      ],
+    };
+  }
 
   useEffect(() => {
     if (onChange) {
@@ -50,7 +110,12 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
       <EuiFlexGroup>
         {/* Name */}
         <EuiFlexItem>
-          <UseField path="name" component={TextField} data-test-subj="nameField" />
+          <UseField<string, RuntimeField>
+            path="name"
+            config={nameFieldConfig}
+            component={TextField}
+            data-test-subj="nameField"
+          />
         </EuiFlexItem>
 
         {/* Return type */}
@@ -91,6 +156,27 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
           </UseField>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {existingConcreteFields.includes(name) && (
+        <>
+          <EuiSpacer />
+          <EuiCallOut
+            title={i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutTitle', {
+              defaultMessage: 'Field shadowing',
+            })}
+            iconType="pin"
+            size="s"
+            data-test-subj="shadowingFieldCallout"
+          >
+            <div>
+              {i18n.translate('xpack.runtimeFields.form.fieldShadowingCalloutDescription', {
+                defaultMessage:
+                  'This field has the same name as one of your concrete fields. This means that its value will override your mapped field.',
+              })}
+            </div>
+          </EuiCallOut>
+        </>
+      )}
 
       <EuiSpacer size="l" />
 
