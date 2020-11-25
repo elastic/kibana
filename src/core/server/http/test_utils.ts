@@ -40,6 +40,9 @@ configService.atPath.mockReturnValue(
     ssl: {
       enabled: false,
     },
+    cors: {
+      enabled: false,
+    },
     compression: { enabled: true },
     xsrf: {
       disableProtection: true,

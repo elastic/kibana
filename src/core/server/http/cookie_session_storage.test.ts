@@ -67,6 +67,9 @@ configService.atPath.mockReturnValue(
       allowFromAnyIp: true,
       ipAllowlist: [],
     },
+    cors: {
+      enabled: false,
+    },
   } as any)
 );
 

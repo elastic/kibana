@@ -58,6 +58,9 @@ describe('core lifecycle handlers', () => {
         ssl: {
           enabled: false,
         },
+        cors: {
+          enabled: false,
+        },
         compression: { enabled: true },
         name: kibanaName,
         customResponseHeaders: {
