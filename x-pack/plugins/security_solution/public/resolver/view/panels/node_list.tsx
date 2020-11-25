@@ -164,7 +164,6 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
       onClick={handleOnClick}
       href={linkProps.href}
       data-test-subj="resolver:node-list:node-link"
-      data-test-node-list-id={nodeID}
       data-test-node-state={nodeState}
     >
       {name === undefined ? (

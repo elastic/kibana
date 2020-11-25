@@ -32,18 +32,12 @@ export function NodeDataFetcher(
   return async () => {
     const state = api.getState();
 
-    const time = Date.now();
-    const isAnimating = selectors.isAnimating(state)(time);
     /**
-     * Animating only occurs when the camera is snapping to a specific node in the tree
-     * it is not set to true when a user is panning. If we are animating let's skip trying to load nodes until
-     * the camera has settled.
+     * Using the greatest positive number here so that we will request the node data for the nodes in view
+     * before the animation finishes. This will be a better user experience since we'll start the request while
+     * the camera is panning and there's a higher chance it'll be finished once the camera finishes panning.
      */
-    if (isAnimating) {
-      return;
-    }
-
-    const visibleNodes: Set<string> = selectors.visibleNodes(state)(time);
+    const visibleNodes: Set<string> = selectors.visibleNodes(state)(Number.POSITIVE_INFINITY);
     const nodeData = selectors.nodeData(state);
 
     // Get the visible nodes that we haven't already requested or received data for
@@ -118,7 +112,6 @@ export function NodeDataFetcher(
         }
       }
 
-      console.log('new data ', newData);
       /**
        * Dispatch an action including the new node data we received and the original IDs we requested. We might
        * not have received events for each node so the original IDs will help with identifying nodes that we have

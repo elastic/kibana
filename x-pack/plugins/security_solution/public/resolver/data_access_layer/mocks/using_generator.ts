@@ -284,7 +284,6 @@ export function usingGenerator(
           },
           []
         );
-        console.log('builtTree length', builtTree.length);
         return builtTree;
       },
 

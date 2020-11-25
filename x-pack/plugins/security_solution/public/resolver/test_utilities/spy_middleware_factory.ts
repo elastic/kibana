@@ -40,6 +40,22 @@ export const spyMiddlewareFactory: () => SpyMiddleware = () => {
     },
     actions,
     debugActions() {
+      function replacer(
+        this: Record<string | number, unknown>,
+        key: string | number,
+        value: unknown
+      ) {
+        const originalObject = this[key];
+        if (originalObject instanceof Map) {
+          return {
+            dataType: 'Map',
+            value: Array.from(originalObject.entries()), // or with spread: value: [...originalObject]
+          };
+        } else {
+          return value;
+        }
+      }
+
       let stop: boolean = false;
       (async () => {
         for await (const actionStatePair of actions()) {
@@ -49,9 +65,9 @@ export const spyMiddlewareFactory: () => SpyMiddleware = () => {
           // eslint-disable-next-line no-console
           console.log(
             'action',
-            JSON.stringify(actionStatePair.action, null, 2),
+            JSON.stringify(actionStatePair.action, replacer, 2),
             'state',
-            JSON.stringify(actionStatePair.state, null, 2)
+            JSON.stringify(actionStatePair.state, replacer, 2)
           );
         }
       })();

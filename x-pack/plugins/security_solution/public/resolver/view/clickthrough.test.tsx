@@ -14,6 +14,7 @@ import { urlSearch } from '../test_utilities/url_search';
 import { Vector2, AABB } from '../types';
 import { usingGenerator } from '../data_access_layer/mocks/using_generator';
 import { ReactWrapper } from 'enzyme';
+import { nudgeAnimationDuration } from '../store/camera/scaling_constants';
 
 let simulator: Simulator;
 let databaseDocumentID: string;
@@ -229,34 +230,41 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
   });
 
   describe('when clicking on a node in the panel whose node data has not yet been loaded', () => {
-    let nodeToTest: ReactWrapper | undefined;
-    let other: ReactWrapper | undefined;
-    beforeEach(async () => {
-      nodeToTest = (
-        await simulator.resolveWrapper(() => simulator.testSubject('resolver:node-list:node-link'))
-      )
-        ?.findWhere((wrapper) => wrapper.prop('data-test-node-state') === 'loading')
-        ?.first();
+    let getLoadingNodeInList;
 
-      if (nodeToTest) {
-        console.log('clicking node', nodeToTest.props());
-        nodeToTest.simulate('click', { button: 0 });
-        console.log('id ', nodeToTest.prop('data-test-node-list-id'));
-        other = simulator.processNodeElements({
-          entityID: nodeToTest.prop('data-test-node-list-id'),
-          selected: true,
-        });
-        console.log('other ', simulator.processNodeElements().length);
+    beforeEach(async () => {
+      // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
+      // loading that is outside of the initial loaded view
+      getLoadingNodeInList = async () => {
+        return (
+          await simulator.resolveWrapper(() =>
+            simulator.testSubject('resolver:node-list:node-link')
+          )
+        )
+          ?.findWhere((wrapper) => wrapper.prop('data-test-node-state') === 'loading')
+          ?.first();
+      };
+
+      const loadingNode = await getLoadingNodeInList();
+
+      if (!loadingNode) {
+        throw new Error("Unable to find a node without it's node data");
       }
+      loadingNode.simulate('click', { button: 0 });
+      // the time here is equivalent to the animation duration in the camera reducer
+      simulator.runAnimationFramesTimeFromNow(1000);
     });
 
-    it.only('should load the node data', async () => {
+    it('should load the node data', async () => {
+      const node: () => Promise<ReactWrapper | undefined> = () =>
+        simulator.resolveWrapper(() => simulator.selectedProcessNode('2kt059pl3i'));
+
       await expect(
-        simulator.map(() => ({
-          nodeState: nodeToTest?.prop('data-test-node-state'),
+        simulator.map(async () => ({
+          nodeState: (await node())?.prop('data-test-resolver-node-state'),
         }))
-      ).not.toYieldEqualTo({
-        nodeState: 'loading',
+      ).toYieldEqualTo({
+        nodeState: 'terminated',
       });
     });
   });
