@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Url from 'url';
 import Path from 'path';
 import getPort from 'get-port';
 import type { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { kbnTestConfig } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -24,16 +26,19 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
   };
 
+  const { protocol, hostname } = kbnTestConfig.getUrlParts();
   const pluginPort = await getPort({ port: 9000 });
+  const originUrl = Url.format({
+    protocol,
+    hostname,
+    port: pluginPort,
+  });
 
   return {
     testFiles: [require.resolve('./tests')],
     servers,
     services: kibanaFunctionalConfig.get('services'),
     pageObjects,
-    browser: {
-      acceptInsecureCerts: true,
-    },
     junit: {
       reportName: 'Kibana CORS with X-Pack Security',
     },
@@ -51,7 +56,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--test.cors.port=${pluginPort}`,
         '--server.cors.enabled=true',
         '--server.cors.credentials=true',
-        `--server.cors.origin=["http://127.0.0.1:${pluginPort}"]`,
+        `--server.cors.origin=["${originUrl}"]`,
       ],
     },
   };

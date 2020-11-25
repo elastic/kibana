@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Hapi from '@hapi/hapi';
+import { kbnTestConfig } from '@kbn/test';
 import { take } from 'rxjs/operators';
 import Url from 'url';
 import abab from 'abab';
@@ -11,7 +12,7 @@ import abab from 'abab';
 import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/server';
 import type { ConfigSchema } from './config';
 
-const apiToken = abab.btoa('elastic:changeme');
+const apiToken = abab.btoa(kbnTestConfig.getUrlParts().auth);
 
 function renderBody(kibanaUrl: string) {
   const url = Url.resolve(kibanaUrl, '/core-test');
