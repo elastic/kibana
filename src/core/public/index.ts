@@ -131,6 +131,7 @@ export {
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
   SavedObjectsClient,

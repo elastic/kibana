@@ -80,7 +80,12 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
 
         const { filename } = (request.body.file as HapiReadableStream).hapi;
         const fileExtension = extname(filename).toLowerCase();
@@ -164,6 +169,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   threat_query: threatQuery,
                   threat_mapping: threatMapping,
                   threat_language: threatLanguage,
+                  concurrent_searches: concurrentSearches,
+                  items_per_search: itemsPerSearch,
                   threshold,
                   timestamp_override: timestampOverride,
                   to,
@@ -230,6 +237,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       threatQuery,
                       threatMapping,
                       threatLanguage,
+                      concurrentSearches,
+                      itemsPerSearch,
                       timestampOverride,
                       references,
                       note,
@@ -279,6 +288,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       threatQuery,
                       threatMapping,
                       threatLanguage,
+                      concurrentSearches,
+                      itemsPerSearch,
                       references,
                       note,
                       version,

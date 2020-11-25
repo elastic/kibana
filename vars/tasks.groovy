@@ -11,7 +11,6 @@ def check() {
     kibanaPipeline.scriptTask('Check Bundle Limits', 'test/scripts/checks/bundle_limits.sh'),
     kibanaPipeline.scriptTask('Check i18n', 'test/scripts/checks/i18n.sh'),
     kibanaPipeline.scriptTask('Check File Casing', 'test/scripts/checks/file_casing.sh'),
-    kibanaPipeline.scriptTask('Check Lockfile Symlinks', 'test/scripts/checks/lock_file_symlinks.sh'),
     kibanaPipeline.scriptTask('Check Licenses', 'test/scripts/checks/licenses.sh'),
     kibanaPipeline.scriptTask('Verify NOTICE', 'test/scripts/checks/verify_notice.sh'),
     kibanaPipeline.scriptTask('Test Projects', 'test/scripts/checks/test_projects.sh'),
@@ -41,7 +40,14 @@ def test() {
 }
 
 def functionalOss(Map params = [:]) {
-  def config = params ?: [ciGroups: true, firefox: true, accessibility: true, pluginFunctional: true, visualRegression: false]
+  def config = params ?: [
+    serverIntegration: true,
+    ciGroups: true,
+    firefox: true,
+    accessibility: true,
+    pluginFunctional: true,
+    visualRegression: false,
+  ]
 
   task {
     kibanaPipeline.buildOss(6)
@@ -65,6 +71,10 @@ def functionalOss(Map params = [:]) {
 
     if (config.visualRegression) {
       task(kibanaPipeline.functionalTestProcess('oss-visualRegression', './test/scripts/jenkins_visual_regression.sh'))
+    }
+
+    if (config.serverIntegration) {
+      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/server_integration.sh'))
     }
   }
 }

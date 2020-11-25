@@ -58,6 +58,8 @@ describe('taskIntervals', () => {
       expect(parseIntervalAsSecond('20m')).toEqual(20 * 60);
       expect(parseIntervalAsSecond('61m')).toEqual(61 * 60);
       expect(parseIntervalAsSecond('90m')).toEqual(90 * 60);
+      expect(parseIntervalAsSecond('2h')).toEqual(2 * 60 * 60);
+      expect(parseIntervalAsSecond('9d')).toEqual(9 * 60 * 60 * 24);
     });
   });
 
@@ -94,6 +96,8 @@ describe('taskIntervals', () => {
       expect(parseIntervalAsMillisecond('20m')).toEqual(20 * 60 * 1000);
       expect(parseIntervalAsMillisecond('61m')).toEqual(61 * 60 * 1000);
       expect(parseIntervalAsMillisecond('90m')).toEqual(90 * 60 * 1000);
+      expect(parseIntervalAsMillisecond('1h')).toEqual(60 * 60 * 1000);
+      expect(parseIntervalAsMillisecond('3d')).toEqual(3 * 24 * 60 * 60 * 1000);
     });
   });
 

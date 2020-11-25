@@ -45,6 +45,7 @@ export interface HeaderSectionProps extends HeaderProps {
   title: string | React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
+  growLeftSplit?: boolean;
 }
 
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
@@ -57,10 +58,11 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   title,
   titleSize = 'm',
   tooltip,
+  growLeftSplit = true,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
     <EuiFlexGroup alignItems="center">
-      <EuiFlexItem>
+      <EuiFlexItem grow={growLeftSplit}>
         <EuiFlexGroup alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiTitle size={titleSize}>

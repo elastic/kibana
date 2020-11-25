@@ -18,7 +18,7 @@ import {
   BrowserField,
   BrowserFields,
 } from '../../../../common/search_strategy/index_fields';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';

@@ -69,41 +69,48 @@ export type ShardError = Partial<{
   }>;
 }>;
 
-export interface SearchResponse<T> {
+export interface SearchHits<T> {
+  total: TotalValue | number;
+  max_score: number;
+  hits: Array<
+    BaseHit<T> & {
+      _type: string;
+      _score: number;
+      _version?: number;
+      _explanation?: Explanation;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      highlight?: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      inner_hits?: any;
+      matched_queries?: string[];
+      sort?: string[];
+    }
+  >;
+}
+
+export interface BaseSearchResponse<T> {
+  hits: SearchHits<T>;
+}
+
+export interface SearchResponse<T> extends BaseSearchResponse<T> {
   took: number;
   timed_out: boolean;
   _scroll_id?: string;
   _shards: ShardsResponse;
-  hits: {
-    total: TotalValue | number;
-    max_score: number;
-    hits: Array<
-      BaseHit<T> & {
-        _type: string;
-        _score: number;
-        _version?: number;
-        _explanation?: Explanation;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        highlight?: any;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        inner_hits?: any;
-        matched_queries?: string[];
-        sort?: string[];
-      }
-    >;
-  };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   aggregations?: any;
 }
 
 export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 
+export interface TermAggregationBucket {
+  key: string;
+  doc_count: number;
+}
+
 export interface TermAggregation {
   [agg: string]: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-    }>;
+    buckets: TermAggregationBucket[];
   };
 }
 
@@ -143,8 +150,13 @@ export interface MSearchHeader {
 export interface AggregationRequest {
   [aggField: string]: {
     terms?: {
-      field: string;
+      field?: string;
+      missing?: string;
       size?: number;
+      script?: {
+        source: string;
+        lang: string;
+      };
       order?: {
         [aggSortField: string]: SortRequestDirection;
       };

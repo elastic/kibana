@@ -25,10 +25,4 @@ export type PromiseValueType<Value> = Value extends Promise<infer Value>
   ? Value
   : Value;
 
-export type PromiseReturnType<Func> = Func extends (
-  ...args: any[]
-) => Promise<infer Value>
-  ? Value
-  : Func;
-
 export type Maybe<T> = T | null | undefined;

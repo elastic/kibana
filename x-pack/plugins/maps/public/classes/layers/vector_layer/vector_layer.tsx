@@ -46,18 +46,20 @@ import {
   DynamicStylePropertyOptions,
   MapFilters,
   MapQuery,
+  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { CustomIconAndTooltipContent, ILayer } from '../layer';
-import { IJoin, PropertiesMap } from '../../joins/join';
+import { IJoin } from '../../joins/join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IESSource } from '../../sources/es_source';
+import { PropertiesMap } from '../../../../common/elasticsearch_util';
 
 interface SourceResult {
   refreshed: boolean;
@@ -239,7 +241,7 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
-    const searchFilters = this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
       dataFilters,
       this.getSource(),
       this.getCurrentStyle()
@@ -252,6 +254,7 @@ export class VectorLayer extends AbstractLayer {
       timeFilters: searchFilters.timeFilters,
       filters: searchFilters.filters,
       applyGlobalQuery: searchFilters.applyGlobalQuery,
+      applyGlobalTime: searchFilters.applyGlobalTime,
     };
 
     let bounds = null;
@@ -313,6 +316,22 @@ export class VectorLayer extends AbstractLayer {
     return indexPatternIds;
   }
 
+  async isFilteredByGlobalTime(): Promise<boolean> {
+    if (this.getSource().getApplyGlobalTime() && (await this.getSource().isTimeAware())) {
+      return true;
+    }
+
+    const joinPromises = this.getValidJoins().map(async (join) => {
+      return (
+        join.getRightJoinSource().getApplyGlobalTime() &&
+        (await join.getRightJoinSource().isTimeAware())
+      );
+    });
+    return (await Promise.all(joinPromises)).some((isJoinTimeAware: boolean) => {
+      return isJoinTimeAware;
+    });
+  }
+
   async _syncJoin({
     join,
     startLoading,
@@ -324,11 +343,12 @@ export class VectorLayer extends AbstractLayer {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
-    const searchFilters = {
+    const searchFilters: VectorJoinSourceRequestMeta = {
       ...dataFilters,
       fieldNames: joinSource.getFieldNames(),
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: joinSource.getApplyGlobalQuery(),
+      applyGlobalTime: joinSource.getApplyGlobalTime(),
     };
     const prevDataRequest = this.getDataRequest(sourceDataId);
 
@@ -386,9 +406,11 @@ export class VectorLayer extends AbstractLayer {
     source: IVectorSource,
     style: IVectorStyle
   ): VectorSourceRequestMeta {
+    const styleFieldNames =
+      style.getType() === LAYER_STYLE_TYPE.VECTOR ? style.getSourceFieldNames() : [];
     const fieldNames = [
       ...source.getFieldNames(),
-      ...(style.getType() === LAYER_STYLE_TYPE.VECTOR ? style.getSourceFieldNames() : []),
+      ...styleFieldNames,
       ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
 
@@ -399,6 +421,7 @@ export class VectorLayer extends AbstractLayer {
       geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
       sourceQuery: sourceQuery ? sourceQuery : undefined,
       applyGlobalQuery: source.getApplyGlobalQuery(),
+      applyGlobalTime: source.getApplyGlobalTime(),
       sourceMeta: source.getSyncMeta(),
     };
   }
@@ -464,7 +487,11 @@ export class VectorLayer extends AbstractLayer {
     } = syncContext;
     const dataRequestId = SOURCE_DATA_REQUEST_ID;
     const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
-    const searchFilters = this._getSearchFilters(dataFilters, source, style);
+    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
+      dataFilters,
+      source,
+      style
+    );
     const prevDataRequest = this.getSourceDataRequest();
     const canSkipFetch = await canSkipSourceUpdate({
       source,

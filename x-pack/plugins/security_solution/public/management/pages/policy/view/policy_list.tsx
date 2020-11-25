@@ -46,7 +46,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreatePackagePolicyRouteState } from '../../../../../../ingest_manager/public';
+import { CreatePackagePolicyRouteState } from '../../../../../../fleet/public';
 import { MANAGEMENT_APP_ID } from '../../../common/constants';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 

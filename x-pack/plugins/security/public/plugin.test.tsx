@@ -45,6 +45,7 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getType: expect.any(Function),
           getFeatures: expect.any(Function),
           features$: expect.any(Observable),
         },
@@ -73,6 +74,7 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getType: expect.any(Function),
           getFeatures: expect.any(Function),
           features$: expect.any(Observable),
         },
@@ -97,7 +99,12 @@ describe('Security Plugin', () => {
           data: {} as DataPublicPluginStart,
           features: {} as FeaturesPluginStart,
         })
-      ).toBeUndefined();
+      ).toEqual({
+        navControlService: {
+          getUserMenuLinks$: expect.any(Function),
+          addUserMenuLinks: expect.any(Function),
+        },
+      });
     });
 
     it('starts Management Service if `management` plugin is available', () => {

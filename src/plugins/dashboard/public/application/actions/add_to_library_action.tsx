@@ -26,6 +26,7 @@ import {
   PanelNotFoundError,
   EmbeddableInput,
   isReferenceOrValueEmbeddable,
+  isErrorEmbeddable,
 } from '../../../../embeddable/public';
 import { NotificationsStart } from '../../../../../core/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
@@ -61,7 +62,8 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
 
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
     return Boolean(
-      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+      !isErrorEmbeddable(embeddable) &&
+        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&
         embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&

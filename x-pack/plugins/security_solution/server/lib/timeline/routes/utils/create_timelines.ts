@@ -5,6 +5,7 @@
  */
 import { isEmpty } from 'lodash/fp';
 
+import moment from 'moment';
 import * as timelineLib from '../../saved_object';
 import * as pinnedEventLib from '../../../pinned_event/saved_object';
 import * as noteLib from '../../../note/saved_object';
@@ -128,15 +129,20 @@ export const createTimelines = async ({
   isImmutable,
   overrideNotesOwner = true,
 }: CreateTimelineProps): Promise<ResponseTimeline> => {
+  const timerangeStart = isImmutable
+    ? moment().subtract(24, 'hours').toISOString()
+    : timeline.dateRange?.start;
+  const timerangeEnd = isImmutable ? moment().toISOString() : timeline.dateRange?.end;
   const responseTimeline = await saveTimelines(
     frameworkRequest,
-    timeline,
+    { ...timeline, dateRange: { start: timerangeStart, end: timerangeEnd } },
     timelineSavedObjectId,
     timelineVersion,
     isImmutable
   );
   const newTimelineSavedObjectId = responseTimeline.timeline.savedObjectId;
   const newTimelineVersion = responseTimeline.timeline.version;
+
   let myPromises: unknown[] = [];
   if (pinnedEventIds != null && !isEmpty(pinnedEventIds)) {
     myPromises = [

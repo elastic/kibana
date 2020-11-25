@@ -23,7 +23,7 @@ import {
   waitForSignalsToBePresent,
 } from '../../utils';
 
-import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
 
 // eslint-disable-next-line import/no-default-export
@@ -99,7 +99,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should be able to execute and get 10 signals when doing a specific query', async () => {
         const rule: CreateRulesSchema = {
-          ...getCreateThreatMatchRulesSchemaMock(),
+          description: 'Detecting root and admin users',
+          name: 'Query with a rule id',
+          severity: 'high',
+          type: 'threat_match',
+          risk_score: 55,
+          language: 'kuery',
+          rule_id: 'rule-1',
           from: '1900-01-01T00:00:00.000Z',
           query: '*:*',
           threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
@@ -127,7 +133,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return 0 matches if the mapping does not match against anything in the mapping', async () => {
         const rule: CreateRulesSchema = {
-          ...getCreateThreatMatchRulesSchemaMock(),
+          description: 'Detecting root and admin users',
+          name: 'Query with a rule id',
+          severity: 'high',
+          type: 'threat_match',
+          risk_score: 55,
+          language: 'kuery',
+          rule_id: 'rule-1',
           from: '1900-01-01T00:00:00.000Z',
           query: '*:*',
           threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
@@ -155,7 +167,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return 0 signals when using an AND and one of the clauses does not have data', async () => {
         const rule: CreateRulesSchema = {
-          ...getCreateThreatMatchRulesSchemaMock(),
+          description: 'Detecting root and admin users',
+          name: 'Query with a rule id',
+          severity: 'high',
+          type: 'threat_match',
+          risk_score: 55,
+          language: 'kuery',
+          rule_id: 'rule-1',
           from: '1900-01-01T00:00:00.000Z',
           query: '*:*',
           threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
@@ -187,7 +205,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return 0 signals when using an AND and one of the clauses has a made up value that does not exist', async () => {
         const rule: CreateRulesSchema = {
-          ...getCreateThreatMatchRulesSchemaMock(),
+          description: 'Detecting root and admin users',
+          name: 'Query with a rule id',
+          severity: 'high',
+          type: 'threat_match',
+          risk_score: 55,
+          language: 'kuery',
+          rule_id: 'rule-1',
           from: '1900-01-01T00:00:00.000Z',
           query: '*:*',
           threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip

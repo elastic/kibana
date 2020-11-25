@@ -45,6 +45,7 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 export class BaseAlert {
   public type!: string;
   public label!: string;
+  public description!: string;
   public defaultThrottle: string = '1d';
   public defaultInterval: string = '1m';
   public rawAlert: Alert | undefined;

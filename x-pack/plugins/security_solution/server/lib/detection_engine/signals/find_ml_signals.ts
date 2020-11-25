@@ -6,13 +6,14 @@
 
 import dateMath from '@elastic/datemath';
 
-import { KibanaRequest } from '../../../../../../../src/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../../ml/server';
 import { AnomalyResults, getAnomalies } from '../../machine_learning';
 
 export const findMlSignals = async ({
   ml,
   request,
+  savedObjectsClient,
   jobId,
   anomalyThreshold,
   from,
@@ -20,12 +21,13 @@ export const findMlSignals = async ({
 }: {
   ml: MlPluginSetup;
   request: KibanaRequest;
+  savedObjectsClient: SavedObjectsClientContract;
   jobId: string;
   anomalyThreshold: number;
   from: string;
   to: string;
 }): Promise<AnomalyResults> => {
-  const { mlAnomalySearch } = ml.mlSystemProvider(request);
+  const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
   const params = {
     jobIds: [jobId],
     threshold: anomalyThreshold,

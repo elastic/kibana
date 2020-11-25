@@ -25,6 +25,7 @@ describe('ActionContext', () => {
       date: '2020-01-01T00:00:00.000Z',
       group: '[group]',
       value: 42,
+      function: 'count > 4',
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(
@@ -53,6 +54,7 @@ describe('ActionContext', () => {
       date: '2020-01-01T00:00:00.000Z',
       group: '[group]',
       value: 42,
+      function: 'avg([aggField]) > 4.2',
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(
@@ -80,6 +82,7 @@ describe('ActionContext', () => {
       date: '2020-01-01T00:00:00.000Z',
       group: '[group]',
       value: 4,
+      function: 'count between 4,5',
     };
     const context = addMessages({ name: '[alert-name]' }, base, params);
     expect(context.title).toMatchInlineSnapshot(

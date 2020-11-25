@@ -64,6 +64,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
 
   public type = ALERT_MISSING_MONITORING_DATA;
   public label = ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label;
+  public description = ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].description;
 
   protected defaultParams: MissingDataParams = {
     duration: DEFAULT_DURATION,

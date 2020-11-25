@@ -17,6 +17,7 @@ import { MonitorListComponent, noItemsMessage } from '../monitor_list';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 import * as redux from 'react-redux';
 import moment from 'moment';
+import { IHttpFetchError } from '../../../../../../../../src/core/public';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -134,7 +135,6 @@ describe('MonitorList component', () => {
       setItem: jest.fn(),
     };
 
-    //  @ts-expect-error replacing a call to localStorage we use for monitor list size
     global.localStorage = localStorageMock;
   });
 
@@ -187,7 +187,11 @@ describe('MonitorList component', () => {
   it('renders error list', () => {
     const component = shallowWithRouter(
       <MonitorListComponent
-        monitorList={{ list: getMonitorList(), error: new Error('foo message'), loading: false }}
+        monitorList={{
+          list: getMonitorList(),
+          error: new Error('foo message') as IHttpFetchError,
+          loading: false,
+        }}
         pageSize={10}
         setPageSize={jest.fn()}
       />

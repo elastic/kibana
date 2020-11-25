@@ -98,7 +98,6 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
               readOnly={readOnly}
               value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="apiUrlFromInput"
-              placeholder="https://<site-url>"
               onChange={(evt) => handleOnChangeActionConfig('apiUrl', evt.target.value)}
               onBlur={() => {
                 if (!apiUrl) {

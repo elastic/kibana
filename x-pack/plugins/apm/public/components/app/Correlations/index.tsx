@@ -75,7 +75,7 @@ export function Correlations() {
 
   return (
     <>
-      <EuiTitle size="m">
+      <EuiTitle>
         <h2>Correlations</h2>
       </EuiTitle>
 

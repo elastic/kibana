@@ -6,7 +6,6 @@
 
 import { kea, MakeLogicType } from 'kea';
 import { isEqual } from 'lodash';
-import { History } from 'history';
 import { i18n } from '@kbn/i18n';
 
 import { HttpLogic } from '../../../shared/http';
@@ -20,26 +19,26 @@ import {
 } from '../../../shared/flash_messages';
 import { GROUPS_PATH } from '../../routes';
 
-import { IContentSourceDetails, IGroupDetails, IUser, ISourcePriority } from '../../types';
+import { ContentSourceDetails, GroupDetails, User, SourcePriority } from '../../types';
 
 export const MAX_NAME_LENGTH = 40;
 
-export interface IGroupActions {
-  onInitializeGroup(group: IGroupDetails): IGroupDetails;
-  onGroupNameChanged(group: IGroupDetails): IGroupDetails;
-  onGroupPrioritiesChanged(group: IGroupDetails): IGroupDetails;
+interface GroupActions {
+  onInitializeGroup(group: GroupDetails): GroupDetails;
+  onGroupNameChanged(group: GroupDetails): GroupDetails;
+  onGroupPrioritiesChanged(group: GroupDetails): GroupDetails;
   onGroupNameInputChange(groupName: string): string;
   addGroupSource(sourceId: string): string;
   removeGroupSource(sourceId: string): string;
   addGroupUser(userId: string): string;
   removeGroupUser(userId: string): string;
-  onGroupSourcesSaved(group: IGroupDetails): IGroupDetails;
-  onGroupUsersSaved(group: IGroupDetails): IGroupDetails;
+  onGroupSourcesSaved(group: GroupDetails): GroupDetails;
+  onGroupUsersSaved(group: GroupDetails): GroupDetails;
   setGroupModalErrors(errors: string[]): string[];
-  hideSharedSourcesModal(group: IGroupDetails): IGroupDetails;
-  hideManageUsersModal(group: IGroupDetails): IGroupDetails;
-  selectAllSources(contentSources: IContentSourceDetails[]): IContentSourceDetails[];
-  selectAllUsers(users: IUser[]): IUser[];
+  hideSharedSourcesModal(group: GroupDetails): GroupDetails;
+  hideManageUsersModal(group: GroupDetails): GroupDetails;
+  selectAllSources(contentSources: ContentSourceDetails[]): ContentSourceDetails[];
+  selectAllUsers(users: User[]): User[];
   updatePriority(id: string, boost: number): { id: string; boost: number };
   resetGroup(): void;
   showConfirmDeleteModal(): void;
@@ -55,8 +54,8 @@ export interface IGroupActions {
   saveGroupSourcePrioritization(): void;
 }
 
-export interface IGroupValues {
-  group: IGroupDetails;
+interface GroupValues {
+  group: GroupDetails;
   dataLoading: boolean;
   manageUsersModalVisible: boolean;
   managerModalFormErrors: string[];
@@ -66,36 +65,36 @@ export interface IGroupValues {
   selectedGroupSources: string[];
   selectedGroupUsers: string[];
   groupPrioritiesUnchanged: boolean;
-  activeSourcePriorities: ISourcePriority;
-  cachedSourcePriorities: ISourcePriority;
+  activeSourcePriorities: SourcePriority;
+  cachedSourcePriorities: SourcePriority;
 }
 
-export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
+export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
   path: ['enterprise_search', 'workplace_search', 'group'],
   actions: {
-    onInitializeGroup: (group: IGroupDetails) => group,
-    onGroupNameChanged: (group: IGroupDetails) => group,
-    onGroupPrioritiesChanged: (group: IGroupDetails) => group,
-    onGroupNameInputChange: (groupName: string) => groupName,
-    addGroupSource: (sourceId: string) => sourceId,
-    removeGroupSource: (sourceId: string) => sourceId,
-    addGroupUser: (userId: string) => userId,
-    removeGroupUser: (userId: string) => userId,
-    onGroupSourcesSaved: (group: IGroupDetails) => group,
-    onGroupUsersSaved: (group: IGroupDetails) => group,
-    setGroupModalErrors: (errors: string[]) => errors,
-    hideSharedSourcesModal: (group: IGroupDetails) => group,
-    hideManageUsersModal: (group: IGroupDetails) => group,
-    selectAllSources: (contentSources: IContentSourceDetails[]) => contentSources,
-    selectAllUsers: (users: IUser[]) => users,
-    updatePriority: (id: string, boost: number) => ({ id, boost }),
+    onInitializeGroup: (group) => group,
+    onGroupNameChanged: (group) => group,
+    onGroupPrioritiesChanged: (group) => group,
+    onGroupNameInputChange: (groupName) => groupName,
+    addGroupSource: (sourceId) => sourceId,
+    removeGroupSource: (sourceId) => sourceId,
+    addGroupUser: (userId) => userId,
+    removeGroupUser: (userId) => userId,
+    onGroupSourcesSaved: (group) => group,
+    onGroupUsersSaved: (group) => group,
+    setGroupModalErrors: (errors) => errors,
+    hideSharedSourcesModal: (group) => group,
+    hideManageUsersModal: (group) => group,
+    selectAllSources: (contentSources) => contentSources,
+    selectAllUsers: (users) => users,
+    updatePriority: (id, boost) => ({ id, boost }),
     resetGroup: () => true,
     showConfirmDeleteModal: () => true,
     hideConfirmDeleteModal: () => true,
     showSharedSourcesModal: () => true,
     showManageUsersModal: () => true,
     resetFlashMessages: () => true,
-    initializeGroup: (groupId: string, history: History) => ({ groupId, history }),
+    initializeGroup: (groupId) => ({ groupId }),
     deleteGroup: () => true,
     updateGroupName: () => true,
     saveGroupSources: () => true,
@@ -104,13 +103,13 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
   },
   reducers: {
     group: [
-      {} as IGroupDetails,
+      {} as GroupDetails,
       {
         onInitializeGroup: (_, group) => group,
         onGroupNameChanged: (_, group) => group,
         onGroupSourcesSaved: (_, group) => group,
         onGroupUsersSaved: (_, group) => group,
-        resetGroup: () => ({} as IGroupDetails),
+        resetGroup: () => ({} as GroupDetails),
       },
     ],
     dataLoading: [
@@ -375,8 +374,8 @@ export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
   }),
 });
 
-const mapPriorities = (contentSources: IContentSourceDetails[]): ISourcePriority => {
-  const prioritiesMap = {} as ISourcePriority;
+const mapPriorities = (contentSources: ContentSourceDetails[]): SourcePriority => {
+  const prioritiesMap = {} as SourcePriority;
   contentSources.forEach(({ id, boost }) => {
     prioritiesMap[id] = boost;
   });

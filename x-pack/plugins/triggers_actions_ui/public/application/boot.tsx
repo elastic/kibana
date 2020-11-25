@@ -9,7 +9,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { SavedObjectsClientContract } from 'src/core/public';
 
 import { App, AppDeps } from './app';
-import { setSavedObjectsClient } from '../common/lib/index_threshold_api';
+import { setSavedObjectsClient } from '../common/lib/data_apis';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;

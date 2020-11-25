@@ -39,7 +39,7 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
 };
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {
-  const res = await context.search({
+  const { body: res } = await context.search({
     index: context.heartbeatIndices,
     body: statusCountBody(await context.dateAndCustomFilters()),
   });

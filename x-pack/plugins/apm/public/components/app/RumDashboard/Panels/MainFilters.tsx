@@ -44,11 +44,11 @@ export function MainFilters() {
           serviceNames={data ?? []}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <UserPercentile />
-      </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
         <EnvironmentFilter />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <UserPercentile />
       </EuiFlexItem>
     </>
   );

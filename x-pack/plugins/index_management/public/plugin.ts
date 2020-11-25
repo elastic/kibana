@@ -6,10 +6,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from '../../../../src/core/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
 
-import { IngestManagerSetup } from '../../ingest_manager/public';
 import { UIM_APP_NAME, PLUGIN } from '../common/constants';
 
 import { httpService } from './application/services/http';
@@ -19,18 +16,13 @@ import { UiMetricService } from './application/services/ui_metric';
 import { setExtensionsService } from './application/store/selectors';
 import { setUiMetricService } from './application/services/api';
 
-import { IndexMgmtMetricsType } from './types';
-import { ExtensionsService, ExtensionsSetup } from './services';
-
-export interface IndexManagementPluginSetup {
-  extensionsService: ExtensionsSetup;
-}
-
-interface PluginsDependencies {
-  ingestManager?: IngestManagerSetup;
-  usageCollection: UsageCollectionSetup;
-  management: ManagementSetup;
-}
+import {
+  IndexManagementPluginSetup,
+  IndexMgmtMetricsType,
+  SetupDependencies,
+  StartDependencies,
+} from './types';
+import { ExtensionsService } from './services';
 
 export class IndexMgmtUIPlugin {
   private uiMetricService = new UiMetricService<IndexMgmtMetricsType>(UIM_APP_NAME);
@@ -43,7 +35,10 @@ export class IndexMgmtUIPlugin {
     setUiMetricService(this.uiMetricService);
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexManagementPluginSetup {
+  public setup(
+    coreSetup: CoreSetup<StartDependencies>,
+    plugins: SetupDependencies
+  ): IndexManagementPluginSetup {
     const { http, notifications } = coreSetup;
     const { ingestManager, usageCollection, management } = plugins;
 

@@ -22,7 +22,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
@@ -83,7 +83,7 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
       <ApmHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+            <EuiTitle>
               <h1>{serviceName}</h1>
             </EuiTitle>
           </EuiFlexItem>

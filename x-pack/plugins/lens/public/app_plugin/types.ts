@@ -28,6 +28,7 @@ import { NavigationPublicPluginStart } from '../../../../../src/plugins/navigati
 import { LensAttributeService } from '../lens_attribute_service';
 import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DashboardFeatureFlagConfig } from '../../../../../src/plugins/dashboard/public';
+import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
@@ -99,6 +100,7 @@ export interface LensAppServices {
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
   savedObjectsClient: SavedObjectsStart['client'];
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
 
   // Temporarily required until the 'by value' paradigm is default.

@@ -18,6 +18,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams
 |  [dataAttrs](./kibana-plugin-plugins-expressions-public.reactexpressionrendererprops.dataattrs.md) | <code>string[]</code> |  |
 |  [debounce](./kibana-plugin-plugins-expressions-public.reactexpressionrendererprops.debounce.md) | <code>number</code> |  |
 |  [expression](./kibana-plugin-plugins-expressions-public.reactexpressionrendererprops.expression.md) | <code>string &#124; ExpressionAstExpression</code> |  |
+|  [onData$](./kibana-plugin-plugins-expressions-public.reactexpressionrendererprops.ondata_.md) | <code>&lt;TData, TInspectorAdapters&gt;(data: TData, adapters?: TInspectorAdapters) =&gt; void</code> |  |
 |  [onEvent](./kibana-plugin-plugins-expressions-public.reactexpressionrendererprops.onevent.md) | <code>(event: ExpressionRendererEvent) =&gt; void</code> |  |
 |  [padding](./kibana-plugin-plugins-expressions-public.reactexpressionrendererprops.padding.md) | <code>'xs' &#124; 's' &#124; 'm' &#124; 'l' &#124; 'xl'</code> |  |
 |  [reload$](./kibana-plugin-plugins-expressions-public.reactexpressionrendererprops.reload_.md) | <code>Observable&lt;unknown&gt;</code> | An observable which can be used to re-run the expression without destroying the component |

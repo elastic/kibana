@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
 import { Logger } from '@kbn/logging';
-import { PromiseReturnType } from '../../../../typings/common';
+import { isEmpty } from 'lodash';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { hasHistoricalAgentData } from './has_historical_agent_data';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
+import { hasHistoricalAgentData } from './has_historical_agent_data';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
 

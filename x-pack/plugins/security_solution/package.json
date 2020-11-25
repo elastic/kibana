@@ -1,4 +1,4 @@
-  {
+{
   "author": "Elastic",
   "name": "security_solution",
   "version": "8.0.0",
@@ -8,18 +8,10 @@
     "extract-mitre-attacks": "node scripts/extract_tactics_techniques_mitre.js && node ../../../scripts/eslint ./public/detections/mitre/mitre_tactics_techniques.ts --fix",
     "build-beat-doc": "node scripts/beat_docs/build.js && node ../../../scripts/eslint ./server/utils/beat_schema/fields.ts --fix",
     "build-graphql-types": "node scripts/generate_types_from_graphql.js",
-    "cypress:open": "cypress open --config-file ./cypress/cypress.json",
+    "cypress:open": "../../../node_modules/.bin/cypress open --config-file ./cypress/cypress.json",
     "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/security_solution_cypress/visual_config.ts",
-    "cypress:run": "cypress run --browser chrome --headless --spec ./cypress/integration/**/*.spec.ts --config-file ./cypress/cypress.json --reporter ../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json; status=$?; ../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json; ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results; mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/ && exit $status;",
+    "cypress:run": "../../../node_modules/.bin/cypress run --browser chrome --headless --spec ./cypress/integration/**/*.spec.ts --config-file ./cypress/cypress.json --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json; status=$?; ../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json; ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results; mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/ && exit $status;",
     "cypress:run-as-ci": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/security_solution_cypress/cli_config.ts",
     "test:generate": "node scripts/endpoint/resolver_generator"
-  },
-  "devDependencies": {
-    "@types/md5": "^2.2.0",
-    "@types/rbush": "^3.0.0",
-    "@types/seedrandom": ">=2.0.0 <4.0.0",
-    "querystring": "^0.2.0",
-    "rbush": "^3.0.1",
-    "redux-devtools-extension": "^2.13.8"
   }
 }

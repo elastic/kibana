@@ -7,6 +7,7 @@
 import {
   EuiFlexGrid,
   EuiFlexItem,
+  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
@@ -15,9 +16,10 @@ import React, { useMemo } from 'react';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { MetricsChart } from '../../shared/charts/MetricsChart';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { Projection } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { SearchBar } from '../../shared/search_bar';
 
 interface ServiceMetricsProps {
   agentName: string;
@@ -46,26 +48,28 @@ export function ServiceMetrics({
 
   return (
     <>
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localFiltersConfig} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <ChartsSyncContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              {data.charts.map((chart) => (
-                <EuiFlexItem key={chart.key}>
-                  <EuiPanel>
-                    <MetricsChart start={start} end={end} chart={chart} />
-                  </EuiPanel>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGrid>
-            <EuiSpacer size="xxl" />
-          </ChartsSyncContextProvider>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SearchBar />
+      <EuiPage>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localFiltersConfig} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            <ChartsSyncContextProvider>
+              <EuiFlexGrid columns={2} gutterSize="s">
+                {data.charts.map((chart) => (
+                  <EuiFlexItem key={chart.key}>
+                    <EuiPanel>
+                      <MetricsChart start={start} end={end} chart={chart} />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGrid>
+              <EuiSpacer size="xxl" />
+            </ChartsSyncContextProvider>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
     </>
   );
 }

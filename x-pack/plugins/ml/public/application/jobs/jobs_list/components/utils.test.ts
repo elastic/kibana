@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getGroupQueryText, getSelectedIdFromUrl } from './utils';
+import { getSelectedIdFromUrl } from './utils';
 
 describe('ML - Jobs List utils', () => {
   const jobId = 'test_job_id_1';
@@ -30,18 +30,6 @@ describe('ML - Jobs List utils', () => {
       const expected = { groupIds: [groupIdOne] };
       const actual = getSelectedIdFromUrl(groupIdUrl);
       expect(actual).toStrictEqual(expected);
-    });
-  });
-
-  describe('getGroupQueryText', () => {
-    it('should get query string for selected group ids', () => {
-      const actual = getGroupQueryText([groupIdOne, groupIdTwo]);
-      expect(actual).toBe(`groups:(${groupIdOne} or ${groupIdTwo})`);
-    });
-
-    it('should get query string for selected group id', () => {
-      const actual = getGroupQueryText([groupIdOne]);
-      expect(actual).toBe(`groups:(${groupIdOne})`);
     });
   });
 });

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export { BASE_ALERT_API_PATH } from '../../../../alerts/common';
 export { BASE_ACTION_API_PATH } from '../../../../actions/common';
 
@@ -13,6 +15,13 @@ export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToAlerts = `/alerts`;
 export const routeToAlertDetails = `/alert/:alertId`;
+
+export const resolvedActionGroupMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionForm.ResolvedMessage',
+  {
+    defaultMessage: 'Resolved',
+  }
+);
 
 export { TIME_UNITS } from './time_units';
 export enum SORT_ORDERS {

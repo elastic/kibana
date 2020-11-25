@@ -10,6 +10,7 @@ import { UserRT } from '../user';
 
 const CommentBasicRt = rt.type({
   comment: rt.string,
+  type: rt.union([rt.literal('alert'), rt.literal('user')]),
 });
 
 export const CommentAttributesRt = rt.intersection([
@@ -37,7 +38,7 @@ export const CommentResponseRt = rt.intersection([
 export const AllCommentsResponseRT = rt.array(CommentResponseRt);
 
 export const CommentPatchRequestRt = rt.intersection([
-  rt.partial(CommentRequestRt.props),
+  rt.partial(CommentBasicRt.props),
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
@@ -47,6 +48,11 @@ export const CommentsResponseRt = rt.type({
   per_page: rt.number,
   total: rt.number,
 });
+
+export enum CommentType {
+  user = 'user',
+  alert = 'alert',
+}
 
 export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 

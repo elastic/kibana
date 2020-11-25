@@ -130,6 +130,26 @@ describe('#asScoped', () => {
     audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).not.toHaveBeenCalled();
   });
+
+  it('does not log to audit logger if no event was generated', async () => {
+    const audit = new AuditService(logger).setup({
+      license,
+      config: {
+        enabled: true,
+        ignore_filters: [{ actions: ['ACTION'] }],
+      },
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+    });
+    const request = httpServerMock.createKibanaRequest({
+      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+    });
+
+    audit.asScoped(request).log(undefined);
+    expect(logger.info).not.toHaveBeenCalled();
+  });
 });
 
 describe('#createLoggingConfig', () => {

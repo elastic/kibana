@@ -161,7 +161,7 @@ export function createLayerDescriptor({
     const joinId = uuid();
     const joinKey = getJoinAggKey({
       aggType: metricsDescriptor.type,
-      aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+      aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
       rightSourceId: joinId,
     });
     return VectorLayer.createDescriptor({
@@ -177,6 +177,8 @@ export function createLayerDescriptor({
             term: 'client.geo.country_iso_code',
             metrics: [metricsDescriptor],
             whereQuery: apmSourceQuery,
+            applyGlobalQuery: true,
+            applyGlobalTime: true,
           },
         },
       ],
@@ -217,7 +219,7 @@ export function createLayerDescriptor({
 
   const metricSourceKey = getSourceAggKey({
     aggType: metricsDescriptor.type,
-    aggFieldName: metricsDescriptor.field,
+    aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : undefined,
   });
   const metricStyleField = {
     name: metricSourceKey,

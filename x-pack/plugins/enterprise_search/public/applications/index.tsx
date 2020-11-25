@@ -14,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { AppMountParameters, CoreStart } from 'src/core/public';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
-import { IInitialAppData } from '../../common/types';
+import { InitialAppData } from '../../common/types';
 
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
@@ -29,7 +29,7 @@ import { externalUrl } from './shared/enterprise_search_url';
  */
 
 export const renderApp = (
-  App: React.FC<IInitialAppData>,
+  App: React.FC<InitialAppData>,
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {

@@ -21,8 +21,9 @@ import {
 import * as useAnomalyDetectionJobs from '../../../hooks/useAnomalyDetectionJobs';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import * as useLocalUIFilters from '../../../hooks/useLocalUIFilters';
-import * as urlParamsHooks from '../../../hooks/useUrlParams';
+import * as useDynamicIndexPatternHooks from '../../../hooks/useDynamicIndexPattern';
 import { SessionStorageMock } from '../../../services/__test__/SessionStorageMock';
+import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiStats: () => {} },
@@ -50,7 +51,16 @@ function wrapper({ children }: { children?: ReactNode }) {
       <EuiThemeProvider>
         <KibanaReactContext.Provider>
           <MockApmPluginContextWrapper value={mockPluginContext}>
-            {children}
+            <MockUrlParamsContextProvider
+              params={{
+                rangeFrom: 'now-15m',
+                rangeTo: 'now',
+                start: 'mystart',
+                end: 'myend',
+              }}
+            >
+              {children}
+            </MockUrlParamsContextProvider>
           </MockApmPluginContextWrapper>
         </KibanaReactContext.Provider>
       </EuiThemeProvider>
@@ -62,16 +72,6 @@ describe('ServiceInventory', () => {
   beforeEach(() => {
     // @ts-expect-error
     global.sessionStorage = new SessionStorageMock();
-
-    // mock urlParams
-    jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
-      urlParams: {
-        start: 'myStart',
-        end: 'myEnd',
-      },
-      refreshTimeRange: jest.fn(),
-      uiFilters: {},
-    });
 
     jest.spyOn(useLocalUIFilters, 'useLocalUIFilters').mockReturnValue({
       filters: [],
@@ -89,6 +89,13 @@ describe('ServiceInventory', () => {
           hasLegacyJobs: false,
         },
         refetch: () => undefined,
+      });
+
+    jest
+      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPattern')
+      .mockReturnValue({
+        indexPattern: undefined,
+        status: FETCH_STATUS.SUCCESS,
       });
   });
 
@@ -149,7 +156,7 @@ describe('ServiceInventory', () => {
       "Looks like you don't have any APM services installed. Let's add some!"
     );
 
-    expect(gettingStartedMessage).not.toBeEmpty();
+    expect(gettingStartedMessage).not.toBeEmptyDOMElement();
   });
 
   it('should render empty message, when list is empty and historical data is found', async () => {
@@ -165,7 +172,7 @@ describe('ServiceInventory', () => {
     await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
     const noServicesText = await findByText('No services found');
 
-    expect(noServicesText).not.toBeEmpty();
+    expect(noServicesText).not.toBeEmptyDOMElement();
   });
 
   describe('when legacy data is found', () => {

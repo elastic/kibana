@@ -6,7 +6,7 @@
 
 import createContainer from 'constate';
 import { useCallback, useMemo, useState } from 'react';
-import { useMountedState } from 'react-use';
+import useMountedState from 'react-use/lib/useMountedState';
 import type { HttpHandler } from 'src/core/public';
 import {
   LogSourceConfiguration,

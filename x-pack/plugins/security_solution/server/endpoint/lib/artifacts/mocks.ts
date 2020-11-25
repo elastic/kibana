@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PackagePolicy } from '../../../../../ingest_manager/common';
-import { createPackagePolicyMock } from '../../../../../ingest_manager/common/mocks';
+import { PackagePolicy } from '../../../../../fleet/common';
+import { createPackagePolicyMock } from '../../../../../fleet/common/mocks';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import {
   getInternalArtifactMock,

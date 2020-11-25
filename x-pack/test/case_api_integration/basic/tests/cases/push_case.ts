@@ -130,7 +130,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
 
       const { body } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/_push`)
@@ -143,6 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
           external_url: 'external_url',
         })
         .expect(200);
+
       expect(body.comments[0].pushed_by).to.eql(defaultUser);
     });
 

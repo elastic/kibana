@@ -5,18 +5,21 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { UMElasticsearchQueryFn } from '../adapters';
-import { IndexPatternsFetcher, FieldDescriptor } from '../../../../../../src/plugins/data/server';
+import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
+import { DynamicSettings } from '../../../common/runtime_types';
 
 export interface IndexPatternTitleAndFields {
   title: string;
   fields: FieldDescriptor[];
 }
 
-export const getUptimeIndexPattern: UMElasticsearchQueryFn<
-  { esClient: ElasticsearchClient },
-  IndexPatternTitleAndFields | undefined
-> = async ({ esClient, dynamicSettings }) => {
+export const getUptimeIndexPattern = async ({
+  esClient,
+  dynamicSettings,
+}: {
+  esClient: ElasticsearchClient;
+  dynamicSettings: DynamicSettings;
+}): Promise<IndexPatternTitleAndFields | undefined> => {
   const indexPatternsFetcher = new IndexPatternsFetcher(esClient);
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
@@ -28,12 +31,10 @@ export const getUptimeIndexPattern: UMElasticsearchQueryFn<
       pattern: dynamicSettings.heartbeatIndices,
     });
 
-    const indexPattern: IndexPatternTitleAndFields = {
+    return {
       fields,
       title: dynamicSettings.heartbeatIndices,
     };
-
-    return indexPattern;
   } catch (e) {
     const notExists = e.output?.statusCode === 404;
     if (notExists) {

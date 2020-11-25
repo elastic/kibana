@@ -29,7 +29,7 @@ import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { AgentDetailsReassignPolicyAction } from '../../../../../../../ingest_manager/public';
+import { AgentDetailsReassignPolicyAction } from '../../../../../../../fleet/public';
 import { EndpointPolicyLink } from '../components/endpoint_policy_link';
 
 const HostIds = styled(EuiListGroupItem)`

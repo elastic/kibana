@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { AdvancedOptions } from '../advanced_options';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 
 describe('AdvancedOptions', () => {
   it('should render normally', () => {

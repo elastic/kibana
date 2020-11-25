@@ -18,12 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../../common/search';
-
-export type ISearch = (
-  request: IKibanaSearchRequest,
-  options?: ISearchOptions
-) => Observable<IKibanaSearchResponse>;
+import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -32,6 +27,13 @@ export type ISearchGeneric = <
   request: SearchStrategyRequest,
   options?: ISearchOptions
 ) => Observable<SearchStrategyResponse>;
+
+export type ISearchCancelGeneric = (id: string, options?: ISearchOptions) => Promise<void>;
+
+export interface ISearchClient {
+  search: ISearchGeneric;
+  cancel: ISearchCancelGeneric;
+}
 
 export interface IKibanaSearchResponse<RawResponse = any> {
   /**
@@ -61,6 +63,9 @@ export interface IKibanaSearchResponse<RawResponse = any> {
    */
   isPartial?: boolean;
 
+  /**
+   * The raw response returned by the internal search method (usually the raw ES response)
+   */
   rawResponse: RawResponse;
 }
 
@@ -71,4 +76,20 @@ export interface IKibanaSearchRequest<Params = any> {
   id?: string;
 
   params?: Params;
+}
+
+export interface ISearchOptions {
+  /**
+   * An `AbortSignal` that allows the caller of `search` to abort a search request.
+   */
+  abortSignal?: AbortSignal;
+  /**
+   * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
+   */
+  strategy?: string;
+
+  /**
+   * A session ID, grouping multiple search requests into a single session.
+   */
+  sessionId?: string;
 }

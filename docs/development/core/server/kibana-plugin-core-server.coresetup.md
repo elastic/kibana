@@ -21,6 +21,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 |  [elasticsearch](./kibana-plugin-core-server.coresetup.elasticsearch.md) | <code>ElasticsearchServiceSetup</code> | [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |
 |  [getStartServices](./kibana-plugin-core-server.coresetup.getstartservices.md) | <code>StartServicesAccessor&lt;TPluginsStart, TStart&gt;</code> | [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) |
 |  [http](./kibana-plugin-core-server.coresetup.http.md) | <code>HttpServiceSetup &amp; {</code><br/><code>        resources: HttpResources;</code><br/><code>    }</code> | [HttpServiceSetup](./kibana-plugin-core-server.httpservicesetup.md) |
+|  [i18n](./kibana-plugin-core-server.coresetup.i18n.md) | <code>I18nServiceSetup</code> | [I18nServiceSetup](./kibana-plugin-core-server.i18nservicesetup.md) |
 |  [logging](./kibana-plugin-core-server.coresetup.logging.md) | <code>LoggingServiceSetup</code> | [LoggingServiceSetup](./kibana-plugin-core-server.loggingservicesetup.md) |
 |  [metrics](./kibana-plugin-core-server.coresetup.metrics.md) | <code>MetricsServiceSetup</code> | [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) |
 |  [savedObjects](./kibana-plugin-core-server.coresetup.savedobjects.md) | <code>SavedObjectsServiceSetup</code> | [SavedObjectsServiceSetup](./kibana-plugin-core-server.savedobjectsservicesetup.md) |

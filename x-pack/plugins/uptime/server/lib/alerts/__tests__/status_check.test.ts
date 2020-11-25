@@ -56,6 +56,8 @@ const mockOptions = (
   services = alertsMock.createAlertServices(),
   state = {}
 ): any => {
+  services.scopedClusterClient = jest.fn() as any;
+
   services.savedObjectsClient.get.mockResolvedValue({
     id: '',
     type: '',
@@ -282,7 +284,8 @@ describe('status check alert', () => {
       expect.assertions(5);
       toISOStringSpy.mockImplementation(() => 'foo date string');
       const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
-      mockGetter.mockReturnValue([
+
+      mockGetter.mockReturnValueOnce([
         {
           monitorId: 'first',
           location: 'harrisburg',
@@ -326,6 +329,7 @@ describe('status check alert', () => {
       const state = await alert.executor(options);
       const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
       expect(mockGetter).toHaveBeenCalledTimes(1);
+
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -1201,10 +1205,10 @@ describe('status check alert', () => {
     it('creates a set of unique IDs from a list of composite unique objects', () => {
       expect(getUniqueIdsByLoc(downItems, availItems)).toEqual(
         new Set<string>([
-          'firstharrisburg',
-          'firstfairbanks',
-          'secondharrisburg',
-          'secondfairbanks',
+          'first-harrisburg',
+          'first-fairbanks',
+          'second-harrisburg',
+          'second-fairbanks',
         ])
       );
     });

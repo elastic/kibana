@@ -29,7 +29,7 @@ module.exports = {
   roots: [`${rootDir}/common`, `${rootDir}/public`, `${rootDir}/server`],
   collectCoverage: true,
   collectCoverageFrom: [
-    ...jestConfig.collectCoverageFrom,
+    ...(jestConfig.collectCoverageFrom ?? []),
     '**/*.{js,mjs,jsx,ts,tsx}',
     '!**/*.stories.{js,mjs,ts,tsx}',
     '!**/dev_docs/**',

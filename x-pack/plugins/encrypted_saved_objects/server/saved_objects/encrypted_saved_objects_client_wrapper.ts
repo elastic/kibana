@@ -22,7 +22,9 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsRemoveReferencesToOptions,
   ISavedObjectTypeRegistry,
+  SavedObjectsRemoveReferencesToResponse,
 } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsService } from '../crypto';
@@ -255,6 +257,14 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     options?: SavedObjectsDeleteFromNamespacesOptions
   ) {
     return await this.options.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+  }
+
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ): Promise<SavedObjectsRemoveReferencesToResponse> {
+    return await this.options.baseClient.removeReferencesTo(type, id, options);
   }
 
   /**

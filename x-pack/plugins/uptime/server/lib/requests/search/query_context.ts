@@ -5,13 +5,13 @@
  */
 
 import moment from 'moment';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 
 export class QueryContext {
-  callES: LegacyAPICaller;
+  callES: ElasticsearchClient;
   heartbeatIndices: string;
   dateRangeStart: string;
   dateRangeEnd: string;
@@ -43,12 +43,12 @@ export class QueryContext {
 
   async search(params: any): Promise<any> {
     params.index = this.heartbeatIndices;
-    return this.callES('search', params);
+    return this.callES.search(params);
   }
 
   async count(params: any): Promise<any> {
     params.index = this.heartbeatIndices;
-    return this.callES('count', params);
+    return this.callES.count(params);
   }
 
   async dateAndCustomFilters(): Promise<any[]> {

@@ -18,7 +18,7 @@ node scripts/es snapshot --download-only;
 node scripts/es snapshot --license=oss --download-only;
 
 # download reporting browsers
-(cd "x-pack" && yarn gulp downloadChromium);
+(cd "x-pack" && node ../node_modules/.bin/gulp downloadChromium);
 
 # cache the chromedriver archive
 chromedriverDistVersion="$(node -e "console.log(require('chromedriver').version)")"
@@ -50,10 +50,6 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
   .es \
   .chromedriver \
   .geckodriver;
-
-echo "Adding node_modules"
-# Find all of the node_modules directories that aren't test fixtures, and aren't inside other node_modules directories, and append them to the tar
-find . -type d -name node_modules -not -path '*__fixtures__*' -prune -print0 | xargs -0I % tar -rf "$HOME/.kibana/bootstrap_cache/$branch.tar" "%"
 
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 

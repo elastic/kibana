@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger } from '@kbn/logging';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { PromiseReturnType } from '../../../../typings/common';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getServicesProjection } from '../../../projections/services';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import {
-  getTransactionDurationAverages,
   getAgentNames,
-  getTransactionRates,
-  getTransactionErrorRates,
   getEnvironments,
   getHealthStatuses,
+  getTransactionDurationAverages,
+  getTransactionErrorRates,
+  getTransactionRates,
 } from './get_services_items_stats';
 
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;

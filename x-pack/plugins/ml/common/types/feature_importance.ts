@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export type FeatureImportanceClassName = string | number | boolean;
+
 export interface ClassFeatureImportance {
-  class_name: string | boolean;
+  class_name: FeatureImportanceClassName;
   importance: number;
 }
 
@@ -18,7 +20,7 @@ export interface FeatureImportance {
 }
 
 export interface TopClass {
-  class_name: string;
+  class_name: FeatureImportanceClassName;
   class_probability: number;
   class_score: number;
 }
@@ -26,7 +28,7 @@ export interface TopClass {
 export type TopClasses = TopClass[];
 
 export interface ClassFeatureImportanceSummary {
-  class_name: string;
+  class_name: FeatureImportanceClassName;
   importance: {
     max: number;
     min: number;
@@ -52,6 +54,22 @@ export type TotalFeatureImportance =
   | ClassificationTotalFeatureImportance
   | RegressionTotalFeatureImportance;
 
+export interface FeatureImportanceClassBaseline {
+  class_name: FeatureImportanceClassName;
+  baseline: number;
+}
+export interface ClassificationFeatureImportanceBaseline {
+  classes: FeatureImportanceClassBaseline[];
+}
+
+export interface RegressionFeatureImportanceBaseline {
+  baseline: number;
+}
+
+export type FeatureImportanceBaseline =
+  | ClassificationFeatureImportanceBaseline
+  | RegressionFeatureImportanceBaseline;
+
 export function isClassificationTotalFeatureImportance(
   summary: ClassificationTotalFeatureImportance | RegressionTotalFeatureImportance
 ): summary is ClassificationTotalFeatureImportance {
@@ -62,4 +80,20 @@ export function isRegressionTotalFeatureImportance(
   summary: ClassificationTotalFeatureImportance | RegressionTotalFeatureImportance
 ): summary is RegressionTotalFeatureImportance {
   return (summary as RegressionTotalFeatureImportance).importance !== undefined;
+}
+
+export function isClassificationFeatureImportanceBaseline(
+  baselineData: any
+): baselineData is ClassificationFeatureImportanceBaseline {
+  return (
+    typeof baselineData === 'object' &&
+    baselineData.hasOwnProperty('classes') &&
+    Array.isArray(baselineData.classes)
+  );
+}
+
+export function isRegressionFeatureImportanceBaseline(
+  baselineData: any
+): baselineData is RegressionFeatureImportanceBaseline {
+  return typeof baselineData === 'object' && baselineData.hasOwnProperty('baseline');
 }

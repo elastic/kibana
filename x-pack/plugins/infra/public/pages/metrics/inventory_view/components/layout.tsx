@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { useInterval } from 'react-use';
+import useInterval from 'react-use/lib/useInterval';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AutoSizer } from '../../../../components/auto_sizer';

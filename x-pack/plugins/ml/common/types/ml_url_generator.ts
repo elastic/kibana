@@ -159,7 +159,7 @@ export interface DataFrameAnalyticsQueryState {
 }
 
 export type DataFrameAnalyticsUrlState = MLPageState<
-  typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+  typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE | typeof ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
   DataFrameAnalyticsQueryState | undefined
 >;
 

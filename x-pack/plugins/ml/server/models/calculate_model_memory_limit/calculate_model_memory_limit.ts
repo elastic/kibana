@@ -10,6 +10,7 @@ import { MLCATEGORY } from '../../../common/constants/field_types';
 import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelMemoryEstimationResult {
   /**
@@ -123,8 +124,10 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
   };
 };
 
-export function calculateModelMemoryLimitProvider(client: IScopedClusterClient) {
-  const { asInternalUser } = client;
+export function calculateModelMemoryLimitProvider(
+  client: IScopedClusterClient,
+  mlClient: MlClient
+) {
   const getCardinalities = cardinalityCheckProvider(client);
 
   /**
@@ -141,7 +144,7 @@ export function calculateModelMemoryLimitProvider(client: IScopedClusterClient) 
     latestMs: number,
     allowMMLGreaterThanMax = false
   ): Promise<ModelMemoryEstimationResult> {
-    const { body: info } = await asInternalUser.ml.info<MlInfoResponse>();
+    const { body: info } = await mlClient.info<MlInfoResponse>();
     const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
     const effectiveMaxModelMemoryLimit = info.limits.effective_max_model_memory_limit?.toUpperCase();
 
@@ -154,7 +157,7 @@ export function calculateModelMemoryLimitProvider(client: IScopedClusterClient) 
       latestMs
     );
 
-    const { body } = await asInternalUser.ml.estimateModelMemory<ModelMemoryEstimateResponse>({
+    const { body } = await mlClient.estimateModelMemory<ModelMemoryEstimateResponse>({
       body: {
         analysis_config: analysisConfig,
         overall_cardinality: overallCardinality,

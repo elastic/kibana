@@ -15,7 +15,7 @@ Environment=KBN_PATH_CONF=/etc/kibana
 EnvironmentFile=-/etc/default/kibana
 EnvironmentFile=-/etc/sysconfig/kibana
 
-ExecStart=/usr/share/kibana/bin/kibana --logging.dest="/var/log/kibana/kibana.log"
+ExecStart=/usr/share/kibana/bin/kibana --logging.dest="/var/log/kibana/kibana.log" --pid.file="/run/kibana/kibana.pid"
 
 Restart=on-failure
 RestartSec=3

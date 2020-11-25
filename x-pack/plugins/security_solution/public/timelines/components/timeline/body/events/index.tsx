@@ -94,7 +94,6 @@ const EventsComponent: React.FC<Props> = ({
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
         containerElementRef={containerElementRef}
-        disableSensorVisibility={data != null && data.length < 101}
         docValueFields={docValueFields}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}

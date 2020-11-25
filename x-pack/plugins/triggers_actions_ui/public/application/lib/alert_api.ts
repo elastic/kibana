@@ -11,7 +11,14 @@ import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
 import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerts/common';
 import { BASE_ALERT_API_PATH } from '../constants';
-import { Alert, AlertType, AlertUpdates, AlertTaskState, AlertInstanceSummary } from '../../types';
+import {
+  Alert,
+  AlertAggregations,
+  AlertType,
+  AlertUpdates,
+  AlertTaskState,
+  AlertInstanceSummary,
+} from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
@@ -58,6 +65,36 @@ export async function loadAlertInstanceSummary({
   return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}/_instance_summary`);
 }
 
+export const mapFiltersToKql = ({
+  typesFilter,
+  actionTypesFilter,
+  alertStatusesFilter,
+}: {
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  alertStatusesFilter?: string[];
+}): string[] => {
+  const filters = [];
+  if (typesFilter && typesFilter.length) {
+    filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
+  }
+  if (actionTypesFilter && actionTypesFilter.length) {
+    filters.push(
+      [
+        '(',
+        actionTypesFilter
+          .map((id) => `alert.attributes.actions:{ actionTypeId:${id} }`)
+          .join(' OR '),
+        ')',
+      ].join('')
+    );
+  }
+  if (alertStatusesFilter && alertStatusesFilter.length) {
+    filters.push(`alert.attributes.executionStatus.status:(${alertStatusesFilter.join(' or ')})`);
+  }
+  return filters;
+};
+
 export async function loadAlerts({
   http,
   page,
@@ -78,24 +115,7 @@ export async function loadAlerts({
   total: number;
   data: Alert[];
 }> {
-  const filters = [];
-  if (typesFilter && typesFilter.length) {
-    filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
-  }
-  if (actionTypesFilter && actionTypesFilter.length) {
-    filters.push(
-      [
-        '(',
-        actionTypesFilter
-          .map((id) => `alert.attributes.actions:{ actionTypeId:${id} }`)
-          .join(' OR '),
-        ')',
-      ].join('')
-    );
-  }
-  if (alertStatusesFilter && alertStatusesFilter.length) {
-    filters.push(`alert.attributes.executionStatus.status:(${alertStatusesFilter.join(' or ')})`);
-  }
+  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
   return await http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {
       page: page.index + 1,
@@ -106,6 +126,30 @@ export async function loadAlerts({
       default_search_operator: 'AND',
       sort_field: 'name.keyword',
       sort_order: 'asc',
+    },
+  });
+}
+
+export async function loadAlertAggregations({
+  http,
+  searchText,
+  typesFilter,
+  actionTypesFilter,
+  alertStatusesFilter,
+}: {
+  http: HttpSetup;
+  searchText?: string;
+  typesFilter?: string[];
+  actionTypesFilter?: string[];
+  alertStatusesFilter?: string[];
+}): Promise<AlertAggregations> {
+  const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
+  return await http.get(`${BASE_ALERT_API_PATH}/_aggregate`, {
+    query: {
+      search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
+      search: searchText,
+      filter: filters.length ? filters.join(' and ') : undefined,
+      default_search_operator: 'AND',
     },
   });
 }

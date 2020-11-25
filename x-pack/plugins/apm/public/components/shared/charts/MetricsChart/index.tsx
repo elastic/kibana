@@ -19,7 +19,7 @@ import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform
 import CustomPlot from '../CustomPlot';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { useChartsSync } from '../../../../hooks/useChartsSync';
+import { useLegacyChartsSync as useChartsSync } from '../../../../hooks/use_charts_sync';
 import { Maybe } from '../../../../../typings/common';
 
 interface Props {

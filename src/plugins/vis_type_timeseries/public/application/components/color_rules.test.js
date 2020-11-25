@@ -22,7 +22,7 @@ import { collectionActions } from './lib/collection_actions';
 import { ColorRules } from './color_rules';
 import { keys } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 
 describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js', () => {
   let defaultProps;

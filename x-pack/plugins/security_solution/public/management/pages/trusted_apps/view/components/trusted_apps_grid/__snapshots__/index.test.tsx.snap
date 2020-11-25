@@ -412,7 +412,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -1168,7 +1168,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -1924,7 +1924,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -3222,7 +3222,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -3978,7 +3978,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -4734,7 +4734,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -5990,7 +5990,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -6746,7 +6746,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -7502,7 +7502,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>

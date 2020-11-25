@@ -82,3 +82,35 @@ export function createDataFrameAnalyticsExplorationUrl(
 
   return url;
 }
+
+/**
+ * Creates URL to the DataFrameAnalytics Map page
+ */
+export function createDataFrameAnalyticsMapUrl(
+  appBasePath: string,
+  mlUrlGeneratorState: DataFrameAnalyticsExplorationUrlState['pageState']
+): string {
+  let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_MAP}`;
+
+  if (mlUrlGeneratorState) {
+    const { jobId, analysisType, defaultIsTraining, globalState } = mlUrlGeneratorState;
+
+    const queryState: DataFrameAnalyticsExplorationQueryState = {
+      ml: {
+        jobId,
+        analysisType,
+        defaultIsTraining,
+      },
+      ...globalState,
+    };
+
+    url = setStateToKbnUrl<DataFrameAnalyticsExplorationQueryState>(
+      '_g',
+      queryState,
+      { useHash: false, storeInHashQuery: false },
+      url
+    );
+  }
+
+  return url;
+}

@@ -27,6 +27,8 @@ export interface BaseActionContext extends AlertInstanceContext {
   date: string;
   // the value that met the threshold
   value: number;
+  // the function that is used
+  function: string;
 }
 
 export function addMessages(
@@ -42,9 +44,6 @@ export function addMessages(
     },
   });
 
-  const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
-  const humanFn = `${agg} ${params.thresholdComparator} ${params.threshold.join(',')}`;
-
   const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
   const message = i18n.translate(
     'xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription',
@@ -55,7 +54,7 @@ export function addMessages(
         name: alertInfo.name,
         group: baseContext.group,
         value: baseContext.value,
-        function: humanFn,
+        function: baseContext.function,
         window,
         date: baseContext.date,
       },

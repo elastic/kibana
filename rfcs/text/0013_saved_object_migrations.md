@@ -212,39 +212,68 @@ Note:
    If none of the aliases exists, this is a new Elasticsearch cluster and no
    migrations are necessary. Create the `.kibana_7.10.0_001` index with the
    following aliases: `.kibana_current` and `.kibana_7.10.0`.
-2. If `.kibana_current` and `.kibana_7.10.0` both exists and are pointing to the same index this version's migration has already been completed.
+2. If the source is a < v6.5 `.kibana` index or < 7.4 `.kibana_task_manager`
+   index prepare the legacy index for a migration:
+   1. Mark the legacy index as read-only and wait for all in-flight operations to drain (requires https://github.com/elastic/elasticsearch/pull/58094). This prevents any further writes from outdated nodes. Assuming this API is similar to the existing `/<index>/_close` API, we expect to receive `"acknowledged" : true` and `"shards_acknowledged" : true`. If all shards don’t acknowledge within the timeout, retry the operation until it succeeds.
+   2. Clone the legacy index into a new index which has writes enabled. Use a fixed index name i.e `.kibana_pre6.5.0_001` or `.kibana_task_manager_pre7.4.0_001`. `POST /.kibana/_clone/.kibana_pre6.5.0_001?wait_for_active_shards=all {"settings": {"index.blocks.write": false}}`. Ignore errors if the clone already exists. Ignore errors if the legacy source doesn't exist.
+   3. Wait for the cloning to complete `GET /_cluster/health/.kibana_pre6.5.0_001?wait_for_status=green&timeout=60s` If cloning doesn’t complete within the 60s timeout, log a warning for visibility and poll again.
+   4. Apply the `convertToAlias` script if defined `POST /.kibana_pre6.5.0_001/_update_by_query?conflicts=proceed {"script": {...}}`. The `convertToAlias` script will have to be idempotent, preferably setting `ctx.op="noop"` on subsequent runs to avoid unecessary writes.
+   5. Delete the legacy index and replace it with an alias of the same name
+      ```
+      POST /_aliases
+      {
+        "actions" : [
+            { "add":  { "index": ".kibana_pre6.5.0_001", "alias": ".kibana" } },
+            { "remove_index": { "index": ".kibana" } }
+        ]
+      }
+      ```.
+      Unlike the delete index API, the `remove_index` action will fail if
+      provided with an _alias_. Ignore "The provided expression [.kibana]
+      matches an alias, specify the corresponding concrete indices instead."
+      or "index_not_found_exception" errors. These actions are applied
+      atomically so that other Kibana instances will always see either a
+      `.kibana` index or an alias, but never neither.
+   6. Use the cloned `.kibana_pre6.5.0_001` as the source for the rest of the migration algorithm.
+3. If `.kibana_current` and `.kibana_7.10.0` both exists and are pointing to the same index this version's migration has already been completed.
    1. Because the same version can have plugins enabled at any point in time,
       perform the mappings update in step (6) and migrate outdated documents
       with step (7).
    2. Skip to step (9) to start serving traffic.
-3. Fail the migration if:
+4. Fail the migration if:
    1. `.kibana_current` is pointing to an index that belongs to a later version of Kibana .e.g. `.kibana_7.12.0_001`
    2. (Only in 8.x) The source index contains documents that belong to an unknown Saved Object type (from a disabled plugin). Log an error explaining that the plugin that created these documents needs to be enabled again or that these objects should be deleted. See section (4.2.1.4).
-4. Mark the source index as read-only and wait for all in-flight operations to drain (requires https://github.com/elastic/elasticsearch/pull/58094). This prevents any further writes from outdated nodes. Assuming this API is similar to the existing `/<index>/_close` API, we expect to receive `"acknowledged" : true` and `"shards_acknowledged" : true`. If all shards don’t acknowledge within the timeout, retry the operation until it succeeds.
-5. Clone the source index into a new target index which has writes enabled. All nodes on the same version will use the same fixed index name e.g. `.kibana_7.10.0_001`. The `001` postfix isn't used by Kibana, but allows for re-indexing an index should this be required by an Elasticsearch upgrade. E.g. re-index `.kibana_7.10.0_001` into `.kibana_7.10.0_002` and point the `.kibana_7.10.0` alias to `.kibana_7.10.0_002`.
+5. Mark the source index as read-only and wait for all in-flight operations to drain (requires https://github.com/elastic/elasticsearch/pull/58094). This prevents any further writes from outdated nodes. Assuming this API is similar to the existing `/<index>/_close` API, we expect to receive `"acknowledged" : true` and `"shards_acknowledged" : true`. If all shards don’t acknowledge within the timeout, retry the operation until it succeeds.
+6. Clone the source index into a new target index which has writes enabled. All nodes on the same version will use the same fixed index name e.g. `.kibana_7.10.0_001`. The `001` postfix isn't used by Kibana, but allows for re-indexing an index should this be required by an Elasticsearch upgrade. E.g. re-index `.kibana_7.10.0_001` into `.kibana_7.10.0_002` and point the `.kibana_7.10.0` alias to `.kibana_7.10.0_002`.
    1. `POST /.kibana_n/_clone/.kibana_7.10.0_001?wait_for_active_shards=all {"settings": {"index.blocks.write": false}}`. Ignore errors if the clone already exists.
    2. Wait for the cloning to complete `GET /_cluster/health/.kibana_7.10.0_001?wait_for_status=green&timeout=60s` If cloning doesn’t complete within the 60s timeout, log a warning for visibility and poll again.
-6. Update the mappings of the target index
+7. Update the mappings of the target index
    1. Retrieve the existing mappings including the `migrationMappingPropertyHashes` metadata.
    2. Update the mappings with `PUT /.kibana_7.10.0_001/_mapping`. The API deeply merges any updates so this won't remove the mappings of any plugins that were enabled in a previous version but are now disabled.
    3. Ensure that fields are correctly indexed using the target index's latest mappings `POST /.kibana_7.10.0_001/_update_by_query?conflicts=proceed`. In the future we could optimize this query by only targeting documents:
       1. That belong to a known saved object type.
       2. Which don't have outdated migrationVersion numbers since these will be transformed anyway.
       3. That belong to a type whose mappings were changed by comparing the `migrationMappingPropertyHashes`. (Metadata, unlike the mappings isn't commutative, so there is a small chance that the metadata hashes do not accurately reflect the latest mappings, however, this will just result in an less efficient query).
-7. Transform documents by reading batches of outdated documents from the target index then transforming and updating them with optimistic concurrency control. 
+8. Transform documents by reading batches of outdated documents from the target index then transforming and updating them with optimistic concurrency control. 
    1. Ignore any version conflict errors.
    2. If a document transform throws an exception, add the document to a failure list and continue trying to transform all other documents. If any failures occured, log the complete list of documents that failed to transform. Fail the migration.
-8. Mark the migration as complete by doing a single atomic operation (requires https://github.com/elastic/elasticsearch/pull/58100) that:
-   1. Checks that `.kibana-current` alias is still pointing to the source index
-   2. Points the `.kibana-7.10.0`  and `.kibana_current` aliases to the target index.
-   3. If this fails with a "required alias [.kibana_current] does not exist" error fetch `.kibana_current` again:
+9.  Mark the migration as complete by doing a single atomic operation (requires https://github.com/elastic/elasticsearch/pull/58100) that:
+   3. Checks that `.kibana_current` alias is still pointing to the source index
+   4. Points the `.kibana_7.10.0`  and `.kibana_current` aliases to the target index.
+   5. If this fails with a "required alias [.kibana_current] does not exist" error fetch `.kibana_current` again:
       1. If `.kibana_current` is _not_ pointing to our target index fail the migration.
       2. If `.kibana_current` is pointing to our target index the migration has succeeded and we can proceed to step (9).
-9.  Start serving traffic.
+10. Start serving traffic.
+
+This algorithm shares a weakness with our existing migration algorithm
+(since v7.4). When the task manager index gets reindexed a reindex script is
+applied. Because we delete the original task manager index there is no way to
+rollback a failed task manager migration without a snapshot.
 
 Together with the limitations, this algorithm ensures that migrations are
 idempotent. If two nodes are started simultaneously, both of them will start
-transforming documents in that version's target index, but because migrations are idempotent, it doesn’t matter which node’s writes win.
+transforming documents in that version's target index, but because migrations
+are idempotent, it doesn’t matter which node’s writes win.
 
 <details>
   <summary>In the future, this algorithm could enable (2.6) "read-only functionality during the downtime window" but this is outside of the scope of this RFC.</summary>

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CSV_JOB_TYPE } from '../../../constants';
+import { CSV_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import { IndexPatternSavedObject, JobParamsCSV, TaskPayloadCSV } from './types';

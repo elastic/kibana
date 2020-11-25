@@ -187,7 +187,7 @@ export const MonitorListComponent: ({
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
-        error={error?.message}
+        error={error?.body?.message || error?.message}
         loading={loading}
         isExpandable={true}
         hasActions={true}

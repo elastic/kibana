@@ -18,8 +18,8 @@ import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
 import { CriteriaField } from './index';
+import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 interface ResultResponse {
   success: boolean;
@@ -263,57 +263,59 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       ];
 
       return mlApiServices.results
-        .anomalySearch$({
-          index: ML_RESULTS_INDEX_PATTERN,
-          size: 0,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    query_string: {
-                      query: 'result_type:model_plot',
-                      analyze_wildcard: true,
+        .anomalySearch$(
+          {
+            size: 0,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      query_string: {
+                        query: 'result_type:model_plot',
+                        analyze_wildcard: true,
+                      },
                     },
-                  },
-                  {
-                    bool: {
-                      must: mustCriteria,
-                      should: shouldCriteria,
-                      minimum_should_match: 1,
+                    {
+                      bool: {
+                        must: mustCriteria,
+                        should: shouldCriteria,
+                        minimum_should_match: 1,
+                      },
                     },
-                  },
-                ],
-              },
-            },
-            aggs: {
-              times: {
-                date_histogram: {
-                  field: 'timestamp',
-                  fixed_interval: `${intervalMs}ms`,
-                  min_doc_count: 0,
+                  ],
                 },
-                aggs: {
-                  actual: {
-                    avg: {
-                      field: 'actual',
-                    },
+              },
+              aggs: {
+                times: {
+                  date_histogram: {
+                    field: 'timestamp',
+                    fixed_interval: `${intervalMs}ms`,
+                    min_doc_count: 0,
                   },
-                  modelUpper: {
-                    [modelAggs.max]: {
-                      field: 'model_upper',
+                  aggs: {
+                    actual: {
+                      avg: {
+                        field: 'actual',
+                      },
                     },
-                  },
-                  modelLower: {
-                    [modelAggs.min]: {
-                      field: 'model_lower',
+                    modelUpper: {
+                      [modelAggs.max]: {
+                        field: 'model_upper',
+                      },
+                    },
+                    modelLower: {
+                      [modelAggs.min]: {
+                        field: 'model_lower',
+                      },
                     },
                   },
                 },
               },
             },
           },
-        })
+          [jobId]
+        )
         .pipe(
           map((resp) => {
             const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
@@ -343,12 +345,13 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
     // 'fieldValue' properties.
     // Pass an empty array or ['*'] to search over all job IDs.
     getRecordsForCriteria(
-      jobIds: string[] | undefined,
+      jobIds: string[],
       criteriaFields: CriteriaField[],
       threshold: any,
-      earliestMs: number,
-      latestMs: number,
-      maxResults: number | undefined
+      earliestMs: number | null,
+      latestMs: number | null,
+      maxResults: number | undefined,
+      functionDescription?: string
     ): Observable<RecordsForCriteria> {
       const obj: RecordsForCriteria = { success: true, records: [] };
 
@@ -399,31 +402,46 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         });
       });
 
-      return mlApiServices.results
-        .anomalySearch$({
-          index: ML_RESULTS_INDEX_PATTERN,
-          size: maxResults !== undefined ? maxResults : 100,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    query_string: {
-                      query: 'result_type:record',
-                      analyze_wildcard: false,
-                    },
-                  },
-                  {
-                    bool: {
-                      must: boolCriteria,
-                    },
-                  },
-                ],
-              },
-            },
-            sort: [{ record_score: { order: 'desc' } }],
+      if (functionDescription !== undefined) {
+        const mlFunctionToPlotIfMetric =
+          functionDescription !== undefined
+            ? aggregationTypeTransform.toML(functionDescription)
+            : functionDescription;
+
+        boolCriteria.push({
+          term: {
+            function_description: mlFunctionToPlotIfMetric,
           },
-        })
+        });
+      }
+
+      return mlApiServices.results
+        .anomalySearch$(
+          {
+            size: maxResults !== undefined ? maxResults : 100,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      query_string: {
+                        query: 'result_type:record',
+                        analyze_wildcard: false,
+                      },
+                    },
+                    {
+                      bool: {
+                        must: boolCriteria,
+                      },
+                    },
+                  ],
+                },
+              },
+              sort: [{ record_score: { order: 'desc' } }],
+            },
+          },
+          jobIds
+        )
         .pipe(
           map((resp) => {
             if (resp.hits.total.value > 0) {
@@ -441,7 +459,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
     // Returned response contains a events property, which will only
     // contains keys for jobs which have scheduled events for the specified time range.
     getScheduledEventsByBucket(
-      jobIds: string[] | undefined,
+      jobIds: string[],
       earliestMs: number,
       latestMs: number,
       intervalMs: number,
@@ -484,46 +502,47 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       }
 
       return mlApiServices.results
-        .anomalySearch$({
-          index: ML_RESULTS_INDEX_PATTERN,
-          size: 0,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    query_string: {
-                      query: 'result_type:bucket',
-                      analyze_wildcard: false,
+        .anomalySearch$(
+          {
+            size: 0,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      query_string: {
+                        query: 'result_type:bucket',
+                        analyze_wildcard: false,
+                      },
                     },
-                  },
-                  {
-                    bool: {
-                      must: boolCriteria,
+                    {
+                      bool: {
+                        must: boolCriteria,
+                      },
                     },
-                  },
-                ],
-              },
-            },
-            aggs: {
-              jobs: {
-                terms: {
-                  field: 'job_id',
-                  min_doc_count: 1,
-                  size: maxJobs,
+                  ],
                 },
-                aggs: {
-                  times: {
-                    date_histogram: {
-                      field: 'timestamp',
-                      fixed_interval: `${intervalMs}ms`,
-                      min_doc_count: 1,
-                    },
-                    aggs: {
-                      events: {
-                        terms: {
-                          field: 'scheduled_events',
-                          size: maxEvents,
+              },
+              aggs: {
+                jobs: {
+                  terms: {
+                    field: 'job_id',
+                    min_doc_count: 1,
+                    size: maxJobs,
+                  },
+                  aggs: {
+                    times: {
+                      date_histogram: {
+                        field: 'timestamp',
+                        fixed_interval: `${intervalMs}ms`,
+                        min_doc_count: 1,
+                      },
+                      aggs: {
+                        events: {
+                          terms: {
+                            field: 'scheduled_events',
+                            size: maxEvents,
+                          },
                         },
                       },
                     },
@@ -532,7 +551,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
               },
             },
           },
-        })
+          jobIds
+        )
         .pipe(
           map((resp) => {
             const dataByJobId = get(resp, ['aggregations', 'jobs', 'buckets'], []);

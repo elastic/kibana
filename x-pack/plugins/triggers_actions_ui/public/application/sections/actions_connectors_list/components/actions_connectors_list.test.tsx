@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
 import { ActionsConnectorsList } from './actions_connectors_list';
 import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';

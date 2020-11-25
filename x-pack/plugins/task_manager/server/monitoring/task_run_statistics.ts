@@ -20,7 +20,7 @@ import {
 } from '../task_events';
 import { isOk, Ok, unwrap } from '../lib/result_type';
 import { ConcreteTaskInstance } from '../task';
-import { TaskRunResult } from '../task_runner';
+import { TaskRunResult } from '../task_running';
 import { FillPoolResult } from '../lib/fill_pool';
 import {
   AveragedStat,

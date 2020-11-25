@@ -10,7 +10,7 @@ import { RouteInitialization } from '../types';
 /**
  * Routes for notification settings
  */
-export function notificationRoutes({ router, mlLicense }: RouteInitialization) {
+export function notificationRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup NotificationSettings
    *
@@ -26,7 +26,7 @@ export function notificationRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
         const { body } = await client.asCurrentUser.cluster.getSettings({
           include_defaults: true,

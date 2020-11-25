@@ -28,13 +28,13 @@
 
 |  Function | Description |
 |  --- | --- |
+|  [getCapabilitiesForRollupIndices(indices)](./kibana-plugin-plugins-data-server.getcapabilitiesforrollupindices.md) |  |
 |  [getDefaultSearchParams(uiSettingsClient)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
 |  [getShardTimeout(config)](./kibana-plugin-plugins-data-server.getshardtimeout.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
-|  [toSnakeCase(obj)](./kibana-plugin-plugins-data-server.tosnakecase.md) |  |
 |  [usageProvider(core)](./kibana-plugin-plugins-data-server.usageprovider.md) |  |
 
 ## Interfaces
@@ -45,6 +45,7 @@
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
+|  [IEsRawSearchResponse](./kibana-plugin-plugins-data-server.iesrawsearchresponse.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
@@ -58,6 +59,7 @@
 |  [PluginSetup](./kibana-plugin-plugins-data-server.pluginsetup.md) |  |
 |  [PluginStart](./kibana-plugin-plugins-data-server.pluginstart.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-server.refreshinterval.md) |  |
+|  [SearchStrategyDependencies](./kibana-plugin-plugins-data-server.searchstrategydependencies.md) |  |
 |  [SearchUsage](./kibana-plugin-plugins-data-server.searchusage.md) |  |
 |  [TabbedAggColumn](./kibana-plugin-plugins-data-server.tabbedaggcolumn.md) | \* |
 |  [TabbedTable](./kibana-plugin-plugins-data-server.tabbedtable.md) | \* |
@@ -76,6 +78,7 @@
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
+|  [mergeCapabilitiesWithFields](./kibana-plugin-plugins-data-server.mergecapabilitieswithfields.md) |  |
 |  [search](./kibana-plugin-plugins-data-server.search.md) |  |
 |  [UI\_SETTINGS](./kibana-plugin-plugins-data-server.ui_settings.md) |  |
 
@@ -87,6 +90,10 @@
 |  [AggGroupName](./kibana-plugin-plugins-data-server.agggroupname.md) |  |
 |  [AggParam](./kibana-plugin-plugins-data-server.aggparam.md) |  |
 |  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.esaggsexpressionfunctiondefinition.md) |  |
+|  [ExecutionContextSearch](./kibana-plugin-plugins-data-server.executioncontextsearch.md) |  |
+|  [ExpressionFunctionKibana](./kibana-plugin-plugins-data-server.expressionfunctionkibana.md) |  |
+|  [ExpressionFunctionKibanaContext](./kibana-plugin-plugins-data-server.expressionfunctionkibanacontext.md) |  |
+|  [ExpressionValueSearchContext](./kibana-plugin-plugins-data-server.expressionvaluesearchcontext.md) |  |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-server.fieldformatsgetconfigfn.md) |  |
 |  [Filter](./kibana-plugin-plugins-data-server.filter.md) |  |
 |  [IAggConfig](./kibana-plugin-plugins-data-server.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
@@ -95,6 +102,7 @@
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-server.ifieldparamtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-server.imetricaggtype.md) |  |
+|  [KibanaContext](./kibana-plugin-plugins-data-server.kibanacontext.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
 |  [TabbedAggRow](./kibana-plugin-plugins-data-server.tabbedaggrow.md) | \* |

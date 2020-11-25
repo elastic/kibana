@@ -102,16 +102,16 @@ describe('EventLogger', () => {
       event: { provider: 'test-provider', action: 'a' },
     });
 
-    const ignoredTimestamp = '1999-01-01T00:00:00Z';
+    const respectedTimestamp = '2999-01-01T00:00:00.000Z';
     eventLogger.logEvent({
-      '@timestamp': ignoredTimestamp,
+      '@timestamp': respectedTimestamp,
       event: {
         action: 'b',
       },
     });
     const event = await waitForLogEvent(systemLogger);
 
-    expect(event!['@timestamp']).not.toEqual(ignoredTimestamp);
+    expect(event!['@timestamp']).toEqual(respectedTimestamp);
     expect(event?.event?.action).toEqual('b');
   });
 

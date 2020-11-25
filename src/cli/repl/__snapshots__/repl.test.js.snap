@@ -5,8 +5,14 @@ exports[`repl it allows print depth to be specified 1`] = `"{ [32m'0'[39m: { 
 exports[`repl it colorizes raw values 1`] = `"{ meaning: [33m42[39m }"`;
 
 exports[`repl it handles deep and recursive objects 1`] = `
-"{ [32m'0'[39m: { [32m'1'[39m: { [32m'2'[39m: { [32m'3'[39m: { [32m'4'[39m: { [32m'5'[39m: [36m[Object][39m } } } } },
-  whoops: [36m[Circular][39m }"
+"{
+  [32m'0'[39m: {
+    [32m'1'[39m: {
+      [32m'2'[39m: { [32m'3'[39m: { [32m'4'[39m: { [32m'5'[39m: [36m[Object][39m } } }
+    }
+  },
+  whoops: [36m[Circular][39m
+}"
 `;
 
 exports[`repl it handles undefined 1`] = `"[90mundefined[39m"`;
@@ -45,8 +51,14 @@ Array [
   Array [
     "Promise Rejected: 
 ",
-    "{ [32m'0'[39m: { [32m'1'[39m: { [32m'2'[39m: { [32m'3'[39m: { [32m'4'[39m: { [32m'5'[39m: [36m[Object][39m } } } } },
-  whoops: [36m[Circular][39m }",
+    "{
+  [32m'0'[39m: {
+    [32m'1'[39m: {
+      [32m'2'[39m: { [32m'3'[39m: { [32m'4'[39m: { [32m'5'[39m: [36m[Object][39m } } }
+    }
+  },
+  whoops: [36m[Circular][39m
+}",
   ],
 ]
 `;
@@ -59,8 +71,14 @@ Array [
   Array [
     "Promise Resolved: 
 ",
-    "{ [32m'0'[39m: { [32m'1'[39m: { [32m'2'[39m: { [32m'3'[39m: { [32m'4'[39m: { [32m'5'[39m: [36m[Object][39m } } } } },
-  whoops: [36m[Circular][39m }",
+    "{
+  [32m'0'[39m: {
+    [32m'1'[39m: {
+      [32m'2'[39m: { [32m'3'[39m: { [32m'4'[39m: { [32m'5'[39m: [36m[Object][39m } } }
+    }
+  },
+  whoops: [36m[Circular][39m
+}",
   ],
 ]
 `;

@@ -38,6 +38,7 @@ import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -88,6 +89,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
+  const toastNotificationService = useToastNotificationService();
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
@@ -293,6 +295,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   return (
     <TimeSeriesExplorer
       {...{
+        toastNotificationService,
         appStateHandler,
         autoZoomDuration,
         bounds,

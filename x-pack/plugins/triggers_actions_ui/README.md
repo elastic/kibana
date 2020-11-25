@@ -220,7 +220,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       <EuiFormLabel>
         <FormattedMessage
           defaultMessage="Select Index to query:"
-          id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+          id="xpack.stackAlerts.threshold.ui.selectIndex"
         />
   ....
       </Fragment>
@@ -1319,19 +1319,19 @@ ActionForm Props definition:
 interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
+  actionGroups?: ActionGroup[];
   setActionIdByIndex: (id: string, index: number) => void;
+  setActionGroupIdByIndex?: (group: string, index: number) => void;
   setAlertProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  toastNotifications: ToastsSetup;
+  docLinks: DocLinksStart;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
-  consumer: string;
+  capabilities: ApplicationStart['capabilities'];
 }
 
 ```
@@ -1339,17 +1339,20 @@ interface ActionAccordionFormProps {
 |Property|Description|
 |---|---|
 |actions|List of actions comes from alert.actions property.|
-|defaultActionGroupId|Default action group id to which each new action will belong to.|
+|defaultActionGroupId|Default action group id to which each new action will belong by default.|
+|actionGroups|Optional. List of action groups to which new action can be assigned. The RunWhen field is only displayed when these action groups are specified|
 |setActionIdByIndex|Function for changing action 'id' by the proper index in alert.actions array.|
+|setActionGroupIdByIndex|Function for changing action 'group' by the proper index in alert.actions array.|
 |setAlertProperty|Function for changing alert property 'actions'. Used when deleting action from the array to reset it.|
 |setActionParamsProperty|Function for changing action key/value property by index in alert.actions array.|
 |http|HttpSetup needed for executing API calls.|
 |actionTypeRegistry|Registry for action types.|
-|toastNotifications|Toast messages.|
+|toastNotifications|Toast messages  Plugin Setup Contract.|
+|docLinks|Documentation links Plugin Start Contract.|
 |actionTypes|Optional property, which allowes to define a list of available actions specific for a current plugin.|
 |actionTypes|Optional property, which allowes to define a list of variables for action 'message' property.|
 |defaultActionMessage|Optional property, which allowes to define a message value for action with 'message' property.|
-|consumer|Name of the plugin that creates an action.|
+|capabilities|Kibana core's Capabilities ApplicationStart['capabilities'].|
 
 
 AlertsContextProvider value options:

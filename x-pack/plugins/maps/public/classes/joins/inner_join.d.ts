@@ -5,19 +5,20 @@
  */
 
 import { Feature, GeoJsonProperties } from 'geojson';
-import { IESTermSource } from '../sources/es_term_source';
-import { IJoin, PropertiesMap } from './join';
+import { ESTermSource } from '../sources/es_term_source';
+import { IJoin } from './join';
 import { JoinDescriptor } from '../../../common/descriptor_types';
 import { ISource } from '../sources/source';
 import { ITooltipProperty } from '../tooltips/tooltip_property';
 import { IField } from '../fields/field';
+import { PropertiesMap } from '../../../common/elasticsearch_util';
 
 export class InnerJoin implements IJoin {
   constructor(joinDescriptor: JoinDescriptor, leftSource: ISource);
 
   destroy: () => void;
 
-  getRightJoinSource(): IESTermSource;
+  getRightJoinSource(): ESTermSource;
 
   toDescriptor(): JoinDescriptor;
 

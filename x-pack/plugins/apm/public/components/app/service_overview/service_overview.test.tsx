@@ -4,24 +4,76 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { CoreStart } from 'src/core/public';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
+import {
+  mockApmPluginContextValue,
+  MockApmPluginContextWrapper,
+} from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/MockUrlParamsContextProvider';
+import * as useDynamicIndexPatternHooks from '../../../hooks/useDynamicIndexPattern';
+import * as useFetcherHooks from '../../../hooks/useFetcher';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
 
+const KibanaReactContext = createKibanaReactContext({
+  usageCollection: { reportUiStats: () => {} },
+} as Partial<CoreStart>);
+
 function Wrapper({ children }: { children?: ReactNode }) {
+  const value = ({
+    ...mockApmPluginContextValue,
+    core: {
+      ...mockApmPluginContextValue.core,
+      http: {
+        basePath: { prepend: () => {} },
+        get: () => {},
+      },
+    },
+  } as unknown) as ApmPluginContextValue;
+
   return (
-    <MemoryRouter>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+    <MemoryRouter keyLength={0}>
+      <KibanaReactContext.Provider>
+        <MockApmPluginContextWrapper value={value}>
+          <MockUrlParamsContextProvider
+            params={{ rangeFrom: 'now-15m', rangeTo: 'now' }}
+          >
+            {children}
+          </MockUrlParamsContextProvider>
+        </MockApmPluginContextWrapper>
+      </KibanaReactContext.Provider>
     </MemoryRouter>
   );
 }
 
 describe('ServiceOverview', () => {
   it('renders', () => {
+    jest
+      .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPattern')
+      .mockReturnValue({
+        indexPattern: undefined,
+        status: FETCH_STATUS.SUCCESS,
+      });
+    jest.spyOn(useFetcherHooks, 'useFetcher').mockReturnValue({
+      data: {
+        items: [],
+        tableOptions: {
+          pageIndex: 0,
+          sort: { direction: 'desc', field: 'test field' },
+        },
+        totalItemCount: 0,
+      },
+      refetch: () => {},
+      status: FETCH_STATUS.SUCCESS,
+    });
+
     expect(() =>
-      render(<ServiceOverview serviceName="test service name" />, {
+      renderWithTheme(<ServiceOverview serviceName="test service name" />, {
         wrapper: Wrapper,
       })
     ).not.toThrowError();

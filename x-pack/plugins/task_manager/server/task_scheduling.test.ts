@@ -21,7 +21,7 @@ import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskLifecycleResult, TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
-import { TaskRunResult } from './task_runner';
+import { TaskRunResult } from './task_running';
 import { mockLogger } from './test_utils';
 
 describe('TaskScheduling', () => {

@@ -19,6 +19,7 @@ import {
   POLICY_WITH_INCLUDE_EXCLUDE,
   POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,
   POLICY_WITH_NODE_ROLE_ALLOCATION,
+  getDefaultHotPhasePolicy,
 } from './constants';
 
 window.scrollTo = jest.fn();
@@ -33,7 +34,7 @@ describe('<EditPolicy />', () => {
   describe('hot phase', () => {
     describe('serialization', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
         httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
         await act(async () => {
@@ -367,7 +368,6 @@ describe('<EditPolicy />', () => {
       expect(testBed.find('snapshotPolicyCombobox').prop('data-currentvalue')).toEqual([
         {
           label: DELETE_PHASE_POLICY.policy.phases.delete?.actions.wait_for_snapshot?.policy,
-          value: DELETE_PHASE_POLICY.policy.phases.delete?.actions.wait_for_snapshot?.policy,
         },
       ]);
     });
@@ -412,7 +412,7 @@ describe('<EditPolicy />', () => {
     test('wait for snapshot field should delete action if field is empty', async () => {
       const { actions } = testBed;
 
-      actions.setWaitForSnapshotPolicy('');
+      await actions.setWaitForSnapshotPolicy('');
       await actions.savePolicy();
 
       const expected = {

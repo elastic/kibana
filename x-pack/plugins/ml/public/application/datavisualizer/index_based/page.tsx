@@ -507,7 +507,7 @@ export const Page: FC = () => {
       if (fieldData !== undefined) {
         const metricConfig: FieldVisConfig = {
           ...fieldData,
-          fieldFormat: field.format,
+          fieldFormat: currentIndexPattern.getFormatterForField(field),
           type: ML_JOB_FIELD_TYPES.NUMBER,
           loading: true,
           aggregatable: true,
@@ -617,7 +617,7 @@ export const Page: FC = () => {
 
       const nonMetricConfig = {
         ...fieldData,
-        fieldFormat: field.format,
+        fieldFormat: currentIndexPattern.getFormatterForField(field),
         aggregatable: field.aggregatable,
         scripted: field.scripted,
         loading: fieldData.existsInDocs,

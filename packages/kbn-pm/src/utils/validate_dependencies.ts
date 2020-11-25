@@ -21,12 +21,14 @@
 import { stringify as stringifyLockfile } from '@yarnpkg/lockfile';
 import dedent from 'dedent';
 import chalk from 'chalk';
+import { sep } from 'path';
 
 import { writeFile } from './fs';
 import { Kibana } from './kibana';
 import { YarnLock } from './yarn_lock';
 import { log } from './log';
 import { Project } from './project';
+import { isLinkDependency } from './package_json';
 import { ITree, treeToString } from './projects_tree';
 
 export async function validateDependencies(kbn: Kibana, yarnLock: YarnLock) {
@@ -102,6 +104,11 @@ export async function validateDependencies(kbn: Kibana, yarnLock: YarnLock) {
   // look through all the package.json files to find packages which have mismatched version ranges
   const depRanges = new Map<string, Array<{ range: string; projects: Project[] }>>();
   for (const project of kbn.getAllProjects().values()) {
+    // Skip if this is an external plugin
+    if (project.path.includes(`${kbn.kibanaProject?.path}${sep}plugins`)) {
+      continue;
+    }
+
     for (const [dep, range] of Object.entries(project.allDependencies)) {
       const existingDep = depRanges.get(dep);
       if (!existingDep) {
@@ -128,7 +135,9 @@ export async function validateDependencies(kbn: Kibana, yarnLock: YarnLock) {
   }
 
   const duplicateRanges = Array.from(depRanges.entries())
-    .filter(([, ranges]) => ranges.length > 1)
+    .filter(
+      ([, ranges]) => ranges.length > 1 && !ranges.every((rng) => isLinkDependency(rng.range))
+    )
     .reduce(
       (acc: string[], [dep, ranges]) => [
         ...acc,

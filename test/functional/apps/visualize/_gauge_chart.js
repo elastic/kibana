@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
   describe('gauge chart', function indexPatternCreation() {
     async function initGaugeVis() {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickGauge');
       await PageObjects.visualize.clickGauge();
       await PageObjects.visualize.clickNewSearch();

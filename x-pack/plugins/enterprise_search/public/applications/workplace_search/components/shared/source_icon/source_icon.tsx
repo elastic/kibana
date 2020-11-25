@@ -12,14 +12,14 @@ import _camelCase from 'lodash/camelCase';
 
 import { images } from '../assets';
 
-interface ISourceIconProps {
+interface SourceIconProps {
   serviceType: string;
   name: string;
   className?: string;
   wrapped?: boolean;
 }
 
-export const SourceIcon: React.FC<ISourceIconProps> = ({
+export const SourceIcon: React.FC<SourceIconProps> = ({
   name,
   serviceType,
   className,

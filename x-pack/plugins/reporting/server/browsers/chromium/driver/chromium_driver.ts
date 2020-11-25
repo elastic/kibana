@@ -333,12 +333,8 @@ export class HeadlessChromiumDriver {
   private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
     const { hostname, protocol, port, pathname } = parseUrl(url);
 
-    if (pathname === undefined) {
-      // There's a discrepancy between the NodeJS docs and the typescript types. NodeJS docs
-      // just say 'string' and the typescript types say 'string | undefined'. We haven't hit a
-      // situation where it's undefined but here's an explicit Error if we do.
-      throw new Error(`pathname is undefined, don't know how to proceed`);
-    }
+    if (port === null) throw new Error(`URL missing port: ${url}`);
+    if (pathname === null) throw new Error(`URL missing pathname: ${url}`);
 
     return (
       hostname === conditions.hostname &&

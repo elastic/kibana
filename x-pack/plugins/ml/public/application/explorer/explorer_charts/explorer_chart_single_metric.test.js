@@ -24,7 +24,7 @@ jest.mock('../../services/field_format_service', () => ({
   },
 }));
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';

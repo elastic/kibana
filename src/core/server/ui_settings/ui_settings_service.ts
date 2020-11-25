@@ -109,15 +109,17 @@ export class UiSettingsService
 
   private validatesDefinitions() {
     for (const [key, definition] of this.uiSettingsDefaults) {
-      if (definition.schema) {
-        definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
+      if (!definition.schema) {
+        throw new Error(`Validation schema is not provided for [${key}] UI Setting`);
       }
+      definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
     }
   }
 
   private validatesOverrides() {
     for (const [key, value] of Object.entries(this.overrides)) {
       const definition = this.uiSettingsDefaults.get(key);
+      // overrides might contain UiSettings for a disabled plugin
       if (definition?.schema) {
         definition.schema.validate(value, {}, `ui settings overrides [${key}]`);
       }

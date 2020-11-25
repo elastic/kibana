@@ -4045,7 +4045,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'ayrMZnQBB-gskcly0w7l',
-        instances: 0,
+        instances: 1,
         process: {
           args: [
             'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.631.0.exe',
@@ -4073,7 +4073,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'M-GvaHQBA6bGZw2uBoYz',
-        instances: 0,
+        instances: 1,
         process: {
           args: [
             'C:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.323.673.0.exe',
@@ -4101,7 +4101,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'cinEZnQBB-gskclyvNmU',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['C:\\Windows\\system32\\devicecensus.exe'],
           name: ['DeviceCensus.exe'],
@@ -4125,7 +4125,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'HNKSZHQBA6bGZw2uCtRk',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['C:\\Windows\\system32\\disksnapshot.exe', '-z'],
           name: ['DiskSnapshot.exe'],
@@ -4149,7 +4149,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: '2zncaHQBB-gskcly1QaD',
-        instances: 0,
+        instances: 1,
         process: {
           args: [
             'C:\\Windows\\TEMP\\88C4F57A-8744-4EA6-824E-88FEF8A0E9DD\\dismhost.exe',
@@ -4176,7 +4176,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'gdVuZXQBA6bGZw2uFsPP',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['C:\\Windows\\System32\\sihclient.exe', '/cv', '33nfV21X50ie84HvATAt1w.0.1'],
           name: ['SIHClient.exe'],
@@ -4200,7 +4200,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: '6NmKZnQBA6bGZw2uma12',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['C:\\Windows\\system32\\speech_onecore\\common\\SpeechModelDownload.exe'],
           name: ['SpeechModelDownload.exe'],
@@ -4224,7 +4224,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'Pi68Z3QBc39KFIJb3txa',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['C:\\Windows\\system32\\usoclient.exe', 'StartScan'],
           name: ['UsoClient.exe'],
@@ -4248,7 +4248,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'Ziw-Z3QBB-gskcly0vqU',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['/etc/cron.daily/apt-compat'],
           name: ['apt-compat'],
@@ -4272,7 +4272,7 @@ export const formattedSearchStrategyResponse = {
     {
       node: {
         _id: 'aSw-Z3QBB-gskcly0vqU',
-        instances: 0,
+        instances: 1,
         process: {
           args: ['/etc/cron.daily/bsdmainutils'],
           name: ['bsdmainutils'],

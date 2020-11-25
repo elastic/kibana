@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ValuesType } from 'utility-types';
-import { PromiseReturnType } from '../../../../../typings/common';
-import { joinByKey } from '../../../../../common/utils/join_by_key';
-import { ProcessorEvent } from '../../../../../common/processor_event';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRACE_ID,
@@ -16,13 +14,15 @@ import {
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../../common/processor_event';
+import { joinByKey } from '../../../../../common/utils/join_by_key';
 import { rangeFilter } from '../../../../../common/utils/range_filter';
-import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../../helpers/aggregated_transactions';
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 function getHistogramAggOptions({
   bucketSize,

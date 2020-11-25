@@ -15,7 +15,7 @@ import {
   MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
-import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
+import { Agent, AgentStatus } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';

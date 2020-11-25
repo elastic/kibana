@@ -10,7 +10,7 @@ import { EuiCheckbox, EuiText, EuiTitle, EuiSpacer, EuiPanel } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 
 import { CredentialsLogic } from '../../credentials_logic';
-import { ITokenReadWrite } from '../../types';
+import { TokenReadWrite } from '../../types';
 
 export const FormKeyReadWriteAccess: React.FC = () => {
   const { setTokenReadWrite } = useActions(CredentialsLogic);
@@ -37,7 +37,7 @@ export const FormKeyReadWriteAccess: React.FC = () => {
           name="read"
           id="read"
           checked={activeApiToken.read}
-          onChange={(e) => setTokenReadWrite(e.target as ITokenReadWrite)}
+          onChange={(e) => setTokenReadWrite(e.target as TokenReadWrite)}
           label={i18n.translate(
             'xpack.enterpriseSearch.appSearch.credentials.formReadWrite.readLabel',
             { defaultMessage: 'Read Access' }
@@ -47,7 +47,7 @@ export const FormKeyReadWriteAccess: React.FC = () => {
           name="write"
           id="write"
           checked={activeApiToken.write}
-          onChange={(e) => setTokenReadWrite(e.target as ITokenReadWrite)}
+          onChange={(e) => setTokenReadWrite(e.target as TokenReadWrite)}
           label={i18n.translate(
             'xpack.enterpriseSearch.appSearch.credentials.formReadWrite.writeLabel',
             { defaultMessage: 'Write Access' }

@@ -19,7 +19,7 @@ export const findPotentialMatches = async (
   searchAfter: any,
   size: number
 ) => {
-  const queryResult = await query(queryContext, searchAfter, size);
+  const { body: queryResult } = await query(queryContext, searchAfter, size);
   const monitorIds: string[] = [];
   get<any>(queryResult, 'aggregations.monitors.buckets', []).forEach((b: any) => {
     const monitorId = b.key.monitor_id;

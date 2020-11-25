@@ -7,9 +7,9 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { findAllUnenrolledAgentIds } from './unenroll';
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
-import { AgentService } from '../../../../../../ingest_manager/server/services';
+import { AgentService } from '../../../../../../fleet/server/services';
 import { createMockAgentService } from '../../../mocks';
-import { Agent } from '../../../../../../ingest_manager/common/types/models';
+import { Agent } from '../../../../../../fleet/common/types/models';
 
 describe('test find all unenrolled Agent id', () => {
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;

@@ -9,6 +9,12 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
+import {
+  CreateRulesSchema,
+  UpdateRulesSchema,
+  FullResponseSchema,
+  QueryCreateSchema,
+} from '../../plugins/security_solution/common/detection_engine/schemas/request';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
 import {
   CreateExceptionListItemSchema,
@@ -21,8 +27,6 @@ import {
   Status,
   SignalIds,
 } from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
-import { CreateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
-import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
 import {
   DETECTION_ENGINE_INDEX_URL,
@@ -37,8 +41,8 @@ import {
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedProperties = (
-  rule: Partial<RulesSchema>
-): Partial<RulesSchema> => {
+  rule: FullResponseSchema
+): Partial<FullResponseSchema> => {
   const {
     /* eslint-disable @typescript-eslint/naming-convention */
     created_at,
@@ -61,8 +65,8 @@ export const removeServerGeneratedProperties = (
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedPropertiesIncludingRuleId = (
-  rule: Partial<RulesSchema>
-): Partial<RulesSchema> => {
+  rule: FullResponseSchema
+): Partial<FullResponseSchema> => {
   const ruleWithRemovedProperties = removeServerGeneratedProperties(rule);
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
@@ -74,7 +78,7 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
  * @param ruleId
  * @param enabled Enables the rule on creation or not. Defaulted to false to enable it on import
  */
-export const getSimpleRule = (ruleId = 'rule-1', enabled = true): CreateRulesSchema => ({
+export const getSimpleRule = (ruleId = 'rule-1', enabled = true): QueryCreateSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
   enabled,
@@ -139,6 +143,19 @@ export const getQuerySignalIds = (signalIds: SignalIds) => ({
   query: {
     terms: {
       _id: signalIds,
+    },
+  },
+});
+
+/**
+ * Given an array of ruleIds for a test this will get the signals
+ * created from that rule_id.
+ * @param ruleIds The rule_id to search for signals
+ */
+export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
+  query: {
+    terms: {
+      'signal.rule.rule_id': ruleIds,
     },
   },
 });
@@ -371,7 +388,7 @@ export const getSimpleRuleAsNdjson = (ruleIds: string[], enabled = false): Buffe
  * testing upload features.
  * @param rule The rule to convert to ndjson
  */
-export const ruleToNdjson = (rule: Partial<CreateRulesSchema>): Buffer => {
+export const ruleToNdjson = (rule: CreateRulesSchema): Buffer => {
   const stringified = JSON.stringify(rule);
   return Buffer.from(`${stringified}\n`);
 };
@@ -712,7 +729,7 @@ export const countDownTest = async (
 export const createRule = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   rule: CreateRulesSchema
-): Promise<RulesSchema> => {
+): Promise<FullResponseSchema> => {
   const { body } = await supertest
     .post(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
@@ -830,6 +847,22 @@ export const getAllSignals = async (
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQueryAllSignals())
+    .expect(200);
+  return signalsOpen;
+};
+
+export const getSignalsByRuleIds = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  ruleIds: string[]
+): Promise<
+  SearchResponse<{
+    signal: Signal;
+  }>
+> => {
+  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsRuleId(ruleIds))
     .expect(200);
   return signalsOpen;
 };

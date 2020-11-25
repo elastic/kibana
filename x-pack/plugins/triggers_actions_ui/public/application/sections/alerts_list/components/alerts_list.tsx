@@ -40,7 +40,12 @@ import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { AlertStatusFilter, getHealthColor } from './alert_status_filter';
-import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
+import {
+  loadAlerts,
+  loadAlertAggregations,
+  loadAlertTypes,
+  deleteAlerts,
+} from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
@@ -178,7 +183,7 @@ export const AlertsList: React.FunctionComponent = () => {
           actionTypesFilter,
           alertStatusesFilter,
         });
-        await loadAlertsTotalStatuses();
+        await loadAlertAggs();
         setAlertsState({
           isLoading: false,
           data: alertsResponse.data,
@@ -202,21 +207,18 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
-  async function loadAlertsTotalStatuses() {
-    let alertsStatuses = {};
+  async function loadAlertAggs() {
     try {
-      AlertExecutionStatusValues.forEach(async (status: string) => {
-        const alertsTotalResponse = await loadAlerts({
-          http,
-          page: { index: 0, size: 0 },
-          searchText,
-          typesFilter,
-          actionTypesFilter,
-          alertStatusesFilter: [status],
-        });
-        setAlertsStatusesTotal({ ...alertsStatuses, [status]: alertsTotalResponse.total });
-        alertsStatuses = { ...alertsStatuses, [status]: alertsTotalResponse.total };
+      const alertsAggs = await loadAlertAggregations({
+        http,
+        searchText,
+        typesFilter,
+        actionTypesFilter,
+        alertStatusesFilter,
       });
+      if (alertsAggs?.alertExecutionStatus) {
+        setAlertsStatusesTotal(alertsAggs.alertExecutionStatus);
+      }
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -670,6 +672,7 @@ export const AlertsList: React.FunctionComponent = () => {
           capabilities,
           dataUi: dataPlugin.ui,
           dataIndexPatterns: dataPlugin.indexPatterns,
+          kibanaFeatures,
         }}
       >
         <AlertAdd

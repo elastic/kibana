@@ -177,8 +177,6 @@ const EventsViewerComponent: React.FC<Props> = ({
     filters,
     kqlQuery: query,
     kqlMode,
-    start,
-    end,
     isEventViewer: true,
   });
 

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import { UpgradeFailure } from './upgrade_failure';
 
 describe('UpgradeFailure component', () => {

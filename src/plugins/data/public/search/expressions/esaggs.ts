@@ -267,6 +267,8 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 
+    const resolvedTimeRange = input?.timeRange && calculateBounds(input.timeRange);
+
     const response = await handleCourierRequest({
       searchSource,
       aggs,
@@ -303,7 +305,10 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
                 input?.timeRange &&
                 args.timeFields &&
                 args.timeFields.includes(column.aggConfig.params.field?.name)
-                  ? { from: input.timeRange.from, to: input.timeRange.to }
+                  ? {
+                      from: resolvedTimeRange?.min?.toISOString(),
+                      to: resolvedTimeRange?.max?.toISOString(),
+                    }
                   : undefined,
               ...column.aggConfig.serialize(),
             },

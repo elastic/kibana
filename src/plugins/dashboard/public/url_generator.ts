@@ -29,6 +29,7 @@ import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { ViewMode } from '../../embeddable/public';
+import { DashboardConstants } from './dashboard_constants';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -79,6 +80,12 @@ export interface DashboardUrlGeneratorState {
    * View mode of the dashboard.
    */
   viewMode?: ViewMode;
+
+  /**
+   * Search search session ID to restore.
+   * (Background search)
+   */
+  searchSessionId?: string;
 }
 
 export const createDashboardUrlGenerator = (
@@ -124,7 +131,7 @@ export const createDashboardUrlGenerator = (
       ...state.filters,
     ];
 
-    const appStateUrl = setStateToKbnUrl(
+    let url = setStateToKbnUrl(
       STATE_STORAGE_KEY,
       cleanEmptyKeys({
         query: state.query,
@@ -135,7 +142,7 @@ export const createDashboardUrlGenerator = (
       `${appBasePath}#/${hash}`
     );
 
-    return setStateToKbnUrl<QueryState>(
+    url = setStateToKbnUrl<QueryState>(
       GLOBAL_STATE_STORAGE_KEY,
       cleanEmptyKeys({
         time: state.timeRange,
@@ -143,7 +150,13 @@ export const createDashboardUrlGenerator = (
         refreshInterval: state.refreshInterval,
       }),
       { useHash },
-      appStateUrl
+      url
     );
+
+    if (state.searchSessionId) {
+      url = `${url}&${DashboardConstants.SEARCH_SESSION_ID}=${state.searchSessionId}`;
+    }
+
+    return url;
   },
 });

@@ -118,6 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -139,6 +140,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -160,6 +162,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -181,6 +184,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')

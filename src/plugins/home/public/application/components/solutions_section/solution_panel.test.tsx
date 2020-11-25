@@ -32,6 +32,12 @@ const solutionEntry = {
   order: 1,
 };
 
+jest.mock('../../kibana_services', () => ({
+  getServices: () => ({
+    trackUiMetric: jest.fn(),
+  }),
+}));
+
 const addBasePathMock = (path: string) => (path ? path : 'path');
 
 describe('SolutionPanel', () => {

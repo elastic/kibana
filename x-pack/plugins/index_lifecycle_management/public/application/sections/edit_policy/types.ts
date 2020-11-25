@@ -38,6 +38,10 @@ interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
   freezeEnabled: boolean;
 }
 
+interface DeletePhaseMetaFields extends MinAgeField {
+  enabled: boolean;
+}
+
 /**
  * Describes the shape of data after deserialization.
  */
@@ -50,5 +54,6 @@ export interface FormInternal extends SerializedPolicy {
     hot: HotPhaseMetaFields;
     warm: WarmPhaseMetaFields;
     cold: ColdPhaseMetaFields;
+    delete: DeletePhaseMetaFields;
   };
 }

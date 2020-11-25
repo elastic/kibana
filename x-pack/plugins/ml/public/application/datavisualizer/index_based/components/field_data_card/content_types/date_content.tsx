@@ -25,7 +25,7 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
   return (
     <div className="mlFieldDataCard__stats">
       <div>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" data-test-subj="mlFieldDataCardDocCount">
           <EuiIcon type="document" />
           &nbsp;
           <FormattedMessage
@@ -41,7 +41,7 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
 
       <EuiSpacer size="m" />
 
-      <div>
+      <div data-test-subj="mlFieldDataCardEarliest">
         <FormattedMessage
           id="xpack.ml.fieldDataCard.cardDate.earliestDescription"
           defaultMessage="earliest {earliestFormatted}"
@@ -53,7 +53,7 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
 
       <EuiSpacer size="s" />
 
-      <div>
+      <div data-test-subj="mlFieldDataCardLatest">
         <FormattedMessage
           id="xpack.ml.fieldDataCard.cardDate.latestDescription"
           defaultMessage="latest {latestFormatted}"

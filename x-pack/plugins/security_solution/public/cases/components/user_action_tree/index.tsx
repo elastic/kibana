@@ -217,8 +217,8 @@ export const UserActionTree = React.memo(
       () => ({
         username: (
           <UserActionUsername
-            username={caseData.createdBy.username ?? i18n.UNKNOWN}
-            fullName={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''}
+            username={caseData.createdBy.username}
+            fullName={caseData.createdBy.fullName}
           />
         ),
         event: i18n.ADDED_DESCRIPTION,
@@ -270,8 +270,8 @@ export const UserActionTree = React.memo(
                   {
                     username: (
                       <UserActionUsername
-                        username={comment.createdBy.username ?? ''}
-                        fullName={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
+                        username={comment.createdBy.username}
+                        fullName={comment.createdBy.fullName}
                       />
                     ),
                     'data-test-subj': `comment-create-action-${comment.id}`,
@@ -418,17 +418,11 @@ export const UserActionTree = React.memo(
     const bottomActions = [
       {
         username: (
-          <UserActionUsername
-            username={currentUser != null ? currentUser.username ?? '' : ''}
-            fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
-          />
+          <UserActionUsername username={currentUser?.username} fullName={currentUser?.fullName} />
         ),
         'data-test-subj': 'add-comment',
         timelineIcon: (
-          <UserActionAvatar
-            username={currentUser != null ? currentUser.username ?? '' : ''}
-            fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
-          />
+          <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
         ),
         className: 'isEdit',
         children: MarkdownNewComment,

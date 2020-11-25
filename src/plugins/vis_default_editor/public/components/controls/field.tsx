@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import React, { useState, useCallback } from 'react';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

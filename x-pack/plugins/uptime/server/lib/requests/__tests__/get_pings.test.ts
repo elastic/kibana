@@ -7,6 +7,7 @@
 import { getPings } from '../get_pings';
 import { set } from '@elastic/safer-lodash-set';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;
@@ -49,15 +50,17 @@ describe('getAll', () => {
       },
     ];
     mockEsSearchResult = {
-      hits: {
-        total: {
-          value: mockHits.length,
+      body: {
+        hits: {
+          total: {
+            value: mockHits.length,
+          },
+          hits: mockHits,
         },
-        hits: mockHits,
-      },
-      aggregations: {
-        locations: {
-          buckets: [{ key: 'foo' }],
+        aggregations: {
+          locations: {
+            buckets: [{ key: 'foo' }],
+          },
         },
       },
     };
@@ -84,8 +87,9 @@ describe('getAll', () => {
   });
 
   it('returns data in the appropriate shape', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
     const result = await getPings({
       callES: mockEsClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -102,12 +106,12 @@ describe('getAll', () => {
     expect(pings[0].timestamp).toBe('2018-10-30T18:51:59.792Z');
     expect(pings[1].timestamp).toBe('2018-10-30T18:53:59.792Z');
     expect(pings[2].timestamp).toBe('2018-10-30T18:55:59.792Z');
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
   });
 
   it('creates appropriate sort and size parameters', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -117,10 +121,9 @@ describe('getAll', () => {
     });
     set(expectedGetAllParams, 'body.sort[0]', { timestamp: { order: 'asc' } });
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "search",
         Object {
           "body": Object {
             "aggregations": Object {
@@ -186,8 +189,8 @@ describe('getAll', () => {
   });
 
   it('omits the sort param when no sort passed', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -195,10 +198,9 @@ describe('getAll', () => {
       size: 12,
     });
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "search",
         Object {
           "body": Object {
             "aggregations": Object {
@@ -264,8 +266,8 @@ describe('getAll', () => {
   });
 
   it('omits the size param when no size passed', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -273,10 +275,9 @@ describe('getAll', () => {
       sort: 'desc',
     });
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "search",
         Object {
           "body": Object {
             "aggregations": Object {
@@ -342,8 +343,8 @@ describe('getAll', () => {
   });
 
   it('adds a filter for monitor ID', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -351,10 +352,9 @@ describe('getAll', () => {
       monitorId: 'testmonitorid',
     });
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "search",
         Object {
           "body": Object {
             "aggregations": Object {
@@ -425,8 +425,8 @@ describe('getAll', () => {
   });
 
   it('adds a filter for monitor status', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue(mockEsSearchResult);
+    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -434,10 +434,9 @@ describe('getAll', () => {
       status: 'down',
     });
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "search",
         Object {
           "body": Object {
             "aggregations": Object {

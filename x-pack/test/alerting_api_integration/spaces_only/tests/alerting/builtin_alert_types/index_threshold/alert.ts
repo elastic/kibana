@@ -26,6 +26,8 @@ const ALERT_INTERVALS_TO_WRITE = 5;
 const ALERT_INTERVAL_SECONDS = 3;
 const ALERT_INTERVAL_MILLIS = ALERT_INTERVAL_SECONDS * 1000;
 
+const DefaultActionMessage = `alert {{alertName}} group {{context.group}} value {{context.value}} exceeded threshold {{context.function}} over {{params.timeWindowSize}}{{params.timeWindowUnit}} on {{context.date}}`;
+
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -85,7 +87,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
       const docs = await waitForDocs(2);
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name, value, title, message } = doc._source.params;
+        const { name, title, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         expect(group).to.be('all documents');
@@ -93,9 +95,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         // we'll check title and message in this test, but not subsequent ones
         expect(title).to.be('alert always fire group all documents exceeded threshold');
 
-        const expectedPrefix = `alert always fire group all documents value ${value} exceeded threshold count > -1 over`;
-        const messagePrefix = message.substr(0, expectedPrefix.length);
-        expect(messagePrefix).to.be(expectedPrefix);
+        const messagePattern = /alert always fire group all documents value \d+ exceeded threshold count &gt; -1 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
     });
 
@@ -128,10 +129,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         if (group === 'group-0') inGroup0++;
+
+        const messagePattern = /alert always fire group group-\d value \d+ exceeded threshold count .+ over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
 
       // there should be 2 docs in group-0, rando split between others
@@ -163,9 +167,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       const docs = await waitForDocs(2);
       for (const doc of docs) {
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
+
+        const messagePattern = /alert always fire group all documents value \d+ exceeded threshold sum\(testedValue\) between 0,1000000 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
     });
 
@@ -195,9 +202,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       const docs = await waitForDocs(4);
       for (const doc of docs) {
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
+
+        const messagePattern = /alert always fire group all documents value .+ exceeded threshold avg\(testedValue\) .+ 0 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
     });
 
@@ -232,10 +242,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         if (group === 'group-2') inGroup2++;
+
+        const messagePattern = /alert always fire group group-. value \d+ exceeded threshold max\(testedValue\) .* 0 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
 
       // there should be 2 docs in group-2, rando split between others
@@ -274,10 +287,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       for (const doc of docs) {
         const { group } = doc._source;
-        const { name } = doc._source.params;
+        const { name, message } = doc._source.params;
 
         expect(name).to.be('always fire');
         if (group === 'group-0') inGroup0++;
+
+        const messagePattern = /alert always fire group group-. value \d+ exceeded threshold min\(testedValue\) .* 0 over 15s on \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+        expect(message).to.match(messagePattern);
       }
 
       // there should be 2 docs in group-0, rando split between others
@@ -329,7 +345,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 name: '{{{alertName}}}',
                 value: '{{{context.value}}}',
                 title: '{{{context.title}}}',
-                message: '{{{context.message}}}',
+                message: DefaultActionMessage,
               },
               date: '{{{context.date}}}',
               // TODO: I wanted to write the alert value here, but how?

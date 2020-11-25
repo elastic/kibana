@@ -25,15 +25,18 @@ import { EditorController } from './application';
 // @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
 import { VisEditor } from './application/components/vis_editor_lazy';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
+import { getDataStart } from './services';
+import { INDEXES_SEPARATOR } from '../common/constants';
 
 export const metricsVisDefinition = {
   name: 'metrics',
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
-    defaultMessage: 'Build time-series using a visual pipeline interface',
+    defaultMessage: 'Perform advanced analysis of your time series data.',
   }),
   icon: 'visVisualBuilder',
+  group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
       id: '61ca57f0-469d-11e7-af02-69e470af7417',
@@ -83,5 +86,21 @@ export const metricsVisDefinition = {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },
   inspectorAdapters: {},
+  getUsedIndexPattern: async (params: VisParams) => {
+    const { indexPatterns } = getDataStart();
+    const indexes: string = params.index_pattern;
+
+    if (indexes) {
+      const cachedIndexes = await indexPatterns.getIdsWithTitle();
+      const ids = indexes
+        .split(INDEXES_SEPARATOR)
+        .map((title) => cachedIndexes.find((i) => i.title === title)?.id)
+        .filter((id) => id);
+
+      return Promise.all(ids.map((id) => indexPatterns.get(id!)));
+    }
+
+    return [];
+  },
   responseHandler: 'none',
 };

@@ -6,7 +6,7 @@
 
 import { FC } from 'react';
 
-import { getDateFormatTz, TimeRangeBounds } from '../explorer/explorer_utils';
+import { TimeRangeBounds } from '../explorer/explorer_utils';
 
 declare const TimeSeriesExplorer: FC<{
   appStateHandler: (action: string, payload: any) => void;

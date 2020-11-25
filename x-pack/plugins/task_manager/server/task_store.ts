@@ -56,7 +56,7 @@ import {
 } from './queries/mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from './task_type_dictionary';
 
-import { ESSearchResponse, ESSearchBody } from '../../apm/typings/elasticsearch';
+import { ESSearchResponse, ESSearchBody } from '../../../typings/elasticsearch';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;

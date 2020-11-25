@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { asDuration } from '../../../../common/utils/formatters';
-import { ESFilter } from '../../../../typings/elasticsearch';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -14,6 +12,8 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { asDuration } from '../../../../common/utils/formatters';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getDurationForPercentile } from './get_duration_for_percentile';
 import {

@@ -53,68 +53,70 @@ export function getScoresByRecord(
     }
 
     ml.results
-      .anomalySearch({
-        size: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  query_string: {
-                    query: 'result_type:record',
-                  },
-                },
-                {
-                  bool: {
-                    must: [
-                      {
-                        range: {
-                          timestamp: {
-                            gte: earliestMs,
-                            lte: latestMs,
-                            format: 'epoch_millis',
-                          },
-                        },
-                      },
-                      {
-                        query_string: {
-                          query: jobIdFilterStr,
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-          aggs: {
-            detector_index: {
-              terms: {
-                field: 'detector_index',
-                order: {
-                  recordScore: 'desc',
-                },
-              },
-              aggs: {
-                recordScore: {
-                  max: {
-                    field: 'record_score',
-                  },
-                },
-                byTime: {
-                  date_histogram: {
-                    field: 'timestamp',
-                    fixed_interval: `${intervalMs}ms`,
-                    min_doc_count: 1,
-                    extended_bounds: {
-                      min: earliestMs,
-                      max: latestMs,
+      .anomalySearch(
+        {
+          size: 0,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    query_string: {
+                      query: 'result_type:record',
                     },
                   },
-                  aggs: {
-                    recordScore: {
-                      max: {
-                        field: 'record_score',
+                  {
+                    bool: {
+                      must: [
+                        {
+                          range: {
+                            timestamp: {
+                              gte: earliestMs,
+                              lte: latestMs,
+                              format: 'epoch_millis',
+                            },
+                          },
+                        },
+                        {
+                          query_string: {
+                            query: jobIdFilterStr,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            aggs: {
+              detector_index: {
+                terms: {
+                  field: 'detector_index',
+                  order: {
+                    recordScore: 'desc',
+                  },
+                },
+                aggs: {
+                  recordScore: {
+                    max: {
+                      field: 'record_score',
+                    },
+                  },
+                  byTime: {
+                    date_histogram: {
+                      field: 'timestamp',
+                      fixed_interval: `${intervalMs}ms`,
+                      min_doc_count: 1,
+                      extended_bounds: {
+                        min: earliestMs,
+                        max: latestMs,
+                      },
+                    },
+                    aggs: {
+                      recordScore: {
+                        max: {
+                          field: 'record_score',
+                        },
                       },
                     },
                   },
@@ -123,7 +125,8 @@ export function getScoresByRecord(
             },
           },
         },
-      })
+        [jobId]
+      )
       .then((resp: any) => {
         const detectorsByIndex = get(resp, ['aggregations', 'detector_index', 'buckets'], []);
         detectorsByIndex.forEach((dtr: any) => {

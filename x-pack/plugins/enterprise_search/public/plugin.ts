@@ -17,22 +17,23 @@ import {
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { LicensingPluginStart } from '../../licensing/public';
+
 import {
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
-import { IInitialAppData } from '../common/types';
+import { InitialAppData } from '../common/types';
 
 export interface ClientConfigType {
   host?: string;
 }
-export interface ClientData extends IInitialAppData {
+export interface ClientData extends InitialAppData {
   publicUrl?: string;
   errorConnecting?: boolean;
 }
 
-export interface PluginsSetup {
+interface PluginsSetup {
   home?: HomePublicPluginSetup;
 }
 export interface PluginsStart {

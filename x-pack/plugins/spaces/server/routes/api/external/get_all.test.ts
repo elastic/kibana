@@ -75,66 +75,54 @@ describe('GET /spaces/space', () => {
     };
   };
 
-  it(`returns all available spaces`, async () => {
-    const { routeHandler } = await setup();
+  [undefined, 'any', 'copySavedObjectsIntoSpace', 'shareSavedObjectsIntoSpace'].forEach(
+    (purpose) => {
+      describe(`with purpose='${purpose}'`, () => {
+        it(`returns expected result when not specifying include_authorized_purposes`, async () => {
+          const { routeHandler } = await setup();
 
-    const request = httpServerMock.createKibanaRequest({
-      method: 'get',
-    });
+          const request = httpServerMock.createKibanaRequest({ method: 'get', query: { purpose } });
+          const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+          expect(response.status).toEqual(200);
+          expect(response.payload).toEqual(spaces);
+        });
 
-    expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(spaces);
-  });
+        it(`returns expected result when specifying include_authorized_purposes=true`, async () => {
+          const { routeHandler } = await setup();
 
-  it(`returns all available spaces with the 'any' purpose`, async () => {
-    const { routeHandler } = await setup();
+          const request = httpServerMock.createKibanaRequest({
+            method: 'get',
+            query: { purpose, include_authorized_purposes: true },
+          });
+          const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-    const request = httpServerMock.createKibanaRequest({
-      query: {
-        purpose: 'any',
-      },
-      method: 'get',
-    });
+          if (purpose === undefined) {
+            expect(response.status).toEqual(200);
+            expect(response.payload).toEqual(spaces);
+          } else {
+            expect(response.status).toEqual(400);
+            expect(response.payload).toEqual(
+              new Error(`'purpose' cannot be supplied with 'includeAuthorizedPurposes'`)
+            );
+          }
+        });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+        it(`returns expected result when specifying include_authorized_purposes=false`, async () => {
+          const { routeHandler } = await setup();
 
-    expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(spaces);
-  });
+          const request = httpServerMock.createKibanaRequest({
+            method: 'get',
+            query: { purpose, include_authorized_purposes: false },
+          });
+          const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
-  it(`returns all available spaces with the 'copySavedObjectsIntoSpace' purpose`, async () => {
-    const { routeHandler } = await setup();
-
-    const request = httpServerMock.createKibanaRequest({
-      query: {
-        purpose: 'copySavedObjectsIntoSpace',
-      },
-      method: 'get',
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(spaces);
-  });
-
-  it(`returns all available spaces with the 'shareSavedObjectsIntoSpace' purpose`, async () => {
-    const { routeHandler } = await setup();
-
-    const request = httpServerMock.createKibanaRequest({
-      query: {
-        purpose: 'shareSavedObjectsIntoSpace',
-      },
-      method: 'get',
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    expect(response.status).toEqual(200);
-    expect(response.payload).toEqual(spaces);
-  });
+          expect(response.status).toEqual(200);
+          expect(response.payload).toEqual(spaces);
+        });
+      });
+    }
+  );
 
   it(`returns http/403 when the license is invalid`, async () => {
     const { routeHandler } = await setup();

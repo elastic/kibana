@@ -11,17 +11,6 @@
   position: relative; // For positioning the dnd overlay
   min-height: $euiSizeXXL * 10;
 
-  .lnsWorkspacePanelWrapper__pageContentHeader {
-    @include euiTitle('xs');
-    padding: $euiSizeM;
-    // override EuiPage
-    margin-bottom: 0 !important; // sass-lint:disable-line no-important
-  }
-
-  .lnsWorkspacePanelWrapper__pageContentHeader--unsaved {
-    color: $euiTextSubduedColor;
-  }
-
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiScrollBar;
     flex-grow: 1;

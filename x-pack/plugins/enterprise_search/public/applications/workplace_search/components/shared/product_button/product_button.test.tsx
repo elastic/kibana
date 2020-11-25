@@ -5,6 +5,7 @@
  */
 
 import '../../../../__mocks__/kea.mock';
+import { mockTelemetryActions } from '../../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -12,12 +13,6 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ProductButton } from './';
-
-jest.mock('../../../../shared/telemetry', () => ({
-  sendTelemetry: jest.fn(),
-  SendAppSearchTelemetry: jest.fn(),
-}));
-import { sendTelemetry } from '../../../../shared/telemetry';
 
 describe('ProductButton', () => {
   it('renders', () => {
@@ -32,7 +27,6 @@ describe('ProductButton', () => {
     const button = wrapper.find(EuiButton);
 
     button.simulate('click');
-    expect(sendTelemetry).toHaveBeenCalled();
-    (sendTelemetry as jest.Mock).mockClear();
+    expect(mockTelemetryActions.sendWorkplaceSearchTelemetry).toHaveBeenCalled();
   });
 });

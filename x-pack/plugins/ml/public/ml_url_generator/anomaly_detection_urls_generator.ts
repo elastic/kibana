@@ -6,7 +6,6 @@
 
 import { isEmpty } from 'lodash';
 import type {
-  AnomalyDetectionQueryState,
   AnomalyDetectionUrlState,
   ExplorerAppState,
   ExplorerGlobalState,
@@ -20,6 +19,8 @@ import type {
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { createGenericMlUrl } from './common';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
+import type { AnomalyDetectionJobsListState } from '../application/jobs/jobs_list/jobs';
+import { getGroupQueryText, getJobQueryText } from '../../common/util/string_utils';
 /**
  * Creates URL to the Anomaly Detection Job management page
  */
@@ -33,13 +34,19 @@ export function createAnomalyDetectionJobManagementUrl(
   }
   const { jobId, groupIds, globalState } = params;
   if (jobId || groupIds) {
-    const queryState: AnomalyDetectionQueryState = {
-      jobId,
-      groupIds,
+    const queryTextArr = [];
+    if (jobId) {
+      queryTextArr.push(getJobQueryText(jobId));
+    }
+    if (groupIds) {
+      queryTextArr.push(getGroupQueryText(groupIds));
+    }
+    const queryState: Partial<AnomalyDetectionJobsListState> = {
+      ...(queryTextArr.length > 0 ? { queryText: queryTextArr.join(' ') } : {}),
     };
 
-    url = setStateToKbnUrl<AnomalyDetectionQueryState>(
-      'mlManagement',
+    url = setStateToKbnUrl<Partial<AnomalyDetectionJobsListState>>(
+      '_a',
       queryState,
       { useHash: false, storeInHashQuery: false },
       url

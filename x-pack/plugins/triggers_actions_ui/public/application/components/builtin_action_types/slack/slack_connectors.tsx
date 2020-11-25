@@ -47,7 +47,6 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
             isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
             name="webhookUrl"
             readOnly={readOnly}
-            placeholder="Example: https://hooks.slack.com/services"
             value={webhookUrl || ''}
             data-test-subj="slackWebhookUrlInput"
             onChange={(e) => {

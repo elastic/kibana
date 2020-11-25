@@ -27,7 +27,6 @@ import {
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { LICENSE_TYPE } from '../../licensing/common/types';
 import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -75,6 +74,7 @@ import {
   getAuthorizationModeBySource,
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
+import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -260,14 +260,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       >(
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
-        if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
-          throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
-        }
-        if (LICENSE_TYPE[actionType.minimumLicenseRequired] < LICENSE_TYPE.gold) {
-          throw new Error(
-            `Third party action type "${actionType.id}" can only set minimumLicenseRequired to a gold license or higher`
-          );
-        }
+        ensureSufficientLicense(actionType);
         actionTypeRegistry.register(actionType);
       },
     };

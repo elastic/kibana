@@ -21,10 +21,10 @@ import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -69,7 +69,6 @@ export const useNetworkKpiUniquePrivateIps = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -168,7 +167,6 @@ export const useNetworkKpiUniquePrivateIps = ({
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

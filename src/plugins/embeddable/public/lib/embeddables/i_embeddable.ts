@@ -86,6 +86,11 @@ export interface IEmbeddable<
   enhancements?: object;
 
   /**
+   * If this embeddable has encountered a fatal error, that error will be stored here
+   **/
+  fatalError?: Error;
+
+  /**
    * A functional representation of the isContainer variable, but helpful for typescript to
    * know the shape if this returns true
    */

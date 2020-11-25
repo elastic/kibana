@@ -69,13 +69,13 @@ export async function watchStdioForLine(
       }
     }),
     createPromiseFromStreams([
-      proc.stdout,
+      proc.stdout!, // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),
     ]),
     createPromiseFromStreams([
-      proc.stderr,
+      proc.stderr!, // TypeScript note: As long as the proc stdio[1] is 'pipe', then stderr will not be null
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),

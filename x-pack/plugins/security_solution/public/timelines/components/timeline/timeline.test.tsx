@@ -116,6 +116,7 @@ describe('Timeline', () => {
       start: startDate,
       status: TimelineStatus.active,
       timelineType: TimelineType.default,
+      timerangeKind: 'absolute',
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };

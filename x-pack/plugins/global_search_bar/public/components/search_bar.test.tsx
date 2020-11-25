@@ -9,7 +9,7 @@ import { waitFor, act } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
 import { of, BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { applicationServiceMock } from '../../../../../src/core/public/mocks';
 import { GlobalSearchBatchedResults, GlobalSearchResult } from '../../../global_search/public';
 import { globalSearchPluginMock } from '../../../global_search/public/mocks';

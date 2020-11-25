@@ -6,7 +6,7 @@ beta[]
 
 --
 
-Alerting allows you to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>>, can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, actions>> and <<alert-types, alerts>> for you to use.
+Alerting allows you to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>>, can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, actions>> and <<alert-types, alerts>> (known as stack alerts) for you to use.
 
 image::images/alerting-overview.png[Alerts and actions UI]
 
@@ -169,12 +169,15 @@ If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-w
 
 To access alerting in a space, a user must have access to one of the following features:
 
+* Alerting
 * <<xpack-apm,*APM*>>
+* <<logs-app,*Logs*>>
 * <<metrics-app,*Metrics*>>
 * <<xpack-siem,*Security*>>
 * <<uptime-app,*Uptime*>>
 
-See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to these features. 
+See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to these features.
+Also note that a user will need +read+ privileges for the *Actions and Connectors* feature to attach actions to an alert or to edit an alert that has an action attached to it.
 
 [float]
 [[alerting-spaces]]

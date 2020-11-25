@@ -9,11 +9,8 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -85,7 +82,6 @@ export const useUncommonProcesses = ({
           docValueFields: docValueFields ?? [],
           factoryQueryType: HostsQueries.uncommonProcesses,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           pagination: generateTablePaginationOptions(activePage, limit),
           timerange: {
             interval: '12h',
@@ -204,7 +200,6 @@ export const useUncommonProcesses = ({
         docValueFields: docValueFields ?? [],
         factoryQueryType: HostsQueries.uncommonProcesses,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',

@@ -18,11 +18,8 @@ import {
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
 } from '../../../../common/search_strategy/security_solution';
-import {
-  AbortError,
-  isErrorResponse,
-  isCompleteResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -44,8 +41,6 @@ export interface UseMatrixHistogramArgs {
     doc_count: number;
   }>;
 }
-
-const ID = 'matrixHistogramQuery';
 
 export const useMatrixHistogram = ({
   endDate,
@@ -73,7 +68,6 @@ export const useMatrixHistogram = ({
     factoryQueryType: MatrixHistogramQuery,
     filterQuery: createFilter(filterQuery),
     histogramType,
-    id: ID,
     timerange: {
       interval: '12h',
       from: startDate,

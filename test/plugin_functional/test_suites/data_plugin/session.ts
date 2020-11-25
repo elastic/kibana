@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
+  const esArchiver = getService('esArchiver');
 
   const getSessionIds = async () => {
     const sessionsBtn = await testSubjects.find('showSessionsButton');
@@ -33,7 +34,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     return sessionIds.split(',');
   };
 
-  describe('Session management', function describeIndexTests() {
+  describe('Session management', function describeSessionManagementTests() {
     describe('Discover', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
@@ -75,6 +76,46 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       it('Starts a new session on filter change', async () => {
         await filterBar.addFilter('line_number', 'is', '4.3.108');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        const sessionIds = await getSessionIds();
+        expect(sessionIds.length).to.be(1);
+      });
+    });
+
+    describe('Dashboard', () => {
+      before(async () => {
+        await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/data');
+        await esArchiver.loadIfNeeded(
+          '../functional/fixtures/es_archiver/dashboard/current/kibana'
+        );
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      afterEach(async () => {
+        await testSubjects.click('clearSessionsButton');
+        await toasts.dismissAllToasts();
+      });
+
+      after(async () => {
+        await esArchiver.unload('../functional/fixtures/es_archiver/dashboard/current/data');
+        await esArchiver.unload('../functional/fixtures/es_archiver/dashboard/current/kibana');
+      });
+
+      it('on load there is a single session', async () => {
+        const sessionIds = await getSessionIds();
+        expect(sessionIds.length).to.be(1);
+      });
+
+      it('starts a session on refresh', async () => {
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const sessionIds = await getSessionIds();
+        expect(sessionIds.length).to.be(1);
+      });
+
+      it('starts a session on filter change', async () => {
+        await filterBar.removeAllFilters();
         const sessionIds = await getSessionIds();
         expect(sessionIds.length).to.be(1);
       });

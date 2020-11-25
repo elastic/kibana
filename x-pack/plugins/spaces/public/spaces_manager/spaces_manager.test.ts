@@ -6,7 +6,7 @@
 
 import { SpacesManager } from '.';
 import { coreMock } from 'src/core/public/mocks';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 
 describe('SpacesManager', () => {
   describe('#constructor', () => {

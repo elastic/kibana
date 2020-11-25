@@ -39,7 +39,6 @@ describe('attributeService', () => {
   let byValueInput: TestByValueInput;
   let byReferenceInput: { id: string; savedObjectId: string };
   const defaultSaveMethod = (
-    type: string,
     testAttributes: TestAttributes,
     savedObjectId?: string
   ): Promise<{ id: string }> => {
@@ -166,7 +165,7 @@ describe('attributeService', () => {
       expect(await attributeService.wrapAttributes(attributes, true, byReferenceInput)).toEqual(
         byReferenceInput
       );
-      expect(saveMethod).toHaveBeenCalledWith(defaultTestType, attributes, '123');
+      expect(saveMethod).toHaveBeenCalledWith(attributes, '123');
     });
 
     it('uses custom save method when given an id', async () => {
@@ -179,11 +178,7 @@ describe('attributeService', () => {
       expect(await attributeService.wrapAttributes(attributes, true, byReferenceInput)).toEqual(
         byReferenceInput
       );
-      expect(saveMethod).toHaveBeenCalledWith(
-        defaultTestType,
-        attributes,
-        byReferenceInput.savedObjectId
-      );
+      expect(saveMethod).toHaveBeenCalledWith(attributes, byReferenceInput.savedObjectId);
     });
 
     it('uses custom save method given no id', async () => {
@@ -196,7 +191,7 @@ describe('attributeService', () => {
       expect(await attributeService.wrapAttributes(attributes, true)).toEqual({
         savedObjectId: '678',
       });
-      expect(saveMethod).toHaveBeenCalledWith(defaultTestType, attributes, undefined);
+      expect(saveMethod).toHaveBeenCalledWith(attributes, undefined);
     });
   });
 });

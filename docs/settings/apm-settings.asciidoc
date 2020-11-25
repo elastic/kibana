@@ -43,6 +43,9 @@ Changing these settings may disable features of the APM App.
 | `xpack.apm.enabled`
   | Set to `false` to disable the APM app. Defaults to `true`.
 
+| `xpack.apm.maxServiceEnvironments`
+  | Maximum number of unique service environments recognized by the UI. Defaults to `100`.
+
 | `xpack.apm.serviceMapFingerprintBucketSize`
   | Maximum number of unique transaction combinations sampled for generating service map focused on a specific service. Defaults to `100`.
 
@@ -60,6 +63,10 @@ Changing these settings may disable features of the APM App.
 
 | `xpack.observability.annotations.index`
   | Index name where Observability annotations are stored. Defaults to `observability-annotations`.
+
+| `xpack.apm.searchAggregatedTransactions`
+  | experimental[] Enables Transaction histogram metrics. Defaults to `false`. When `true`, additional configuration in APM Server is required.
+    See {apm-server-ref-v}/transaction-metrics.html[Configure transaction metrics] for more information.
 
 | `apm_oss.indexPattern` {ess-icon}
   | The index pattern used for integrations with Machine Learning and Query Bar.

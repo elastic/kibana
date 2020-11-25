@@ -116,6 +116,7 @@ You can also configure both PKI and basic authentication for the same {kib} inst
 
 [source,yaml]
 --------------------------------------------------------------------------------
+server.ssl.clientAuthentication: optional
 xpack.security.authc.providers:
   pki.pki1:
     order: 0

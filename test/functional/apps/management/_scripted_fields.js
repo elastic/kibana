@@ -198,35 +198,44 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const expectedChartValues = [
-          ['14', '31'],
-          ['10', '29'],
-          ['7', '24'],
-          ['11', '24'],
-          ['12', '23'],
-          ['20', '23'],
-          ['19', '21'],
-          ['6', '20'],
-          ['17', '20'],
-          ['30', '20'],
-          ['13', '19'],
-          ['18', '18'],
-          ['16', '17'],
-          ['5', '16'],
-          ['8', '16'],
-          ['15', '14'],
-          ['3', '13'],
-          ['2', '12'],
-          ['9', '10'],
-          ['4', '9'],
-        ];
         await filterBar.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await inspector.open();
-        await inspector.setTablePageSize(50);
-        await inspector.expectTableData(expectedChartValues);
+        if (await PageObjects.common.isOss()) {
+          // OSS renders a vertical bar chart and we check the data in the Inspect panel
+          const expectedChartValues = [
+            ['14', '31'],
+            ['10', '29'],
+            ['7', '24'],
+            ['11', '24'],
+            ['12', '23'],
+            ['20', '23'],
+            ['19', '21'],
+            ['6', '20'],
+            ['17', '20'],
+            ['30', '20'],
+            ['13', '19'],
+            ['18', '18'],
+            ['16', '17'],
+            ['5', '16'],
+            ['8', '16'],
+            ['15', '14'],
+            ['3', '13'],
+            ['2', '12'],
+            ['9', '10'],
+            ['4', '9'],
+          ];
+
+          await inspector.open();
+          await inspector.setTablePageSize(50);
+          await inspector.expectTableData(expectedChartValues);
+        } else {
+          // verify Lens opens a visualization
+          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+            'Average of ram_Pain1'
+          );
+        }
       });
     });
 
@@ -309,11 +318,19 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await inspector.open();
-        await inspector.expectTableData([
-          ['good', '359'],
-          ['bad', '27'],
-        ]);
+        if (await PageObjects.common.isOss()) {
+          // OSS renders a vertical bar chart and we check the data in the Inspect panel
+          await inspector.open();
+          await inspector.expectTableData([
+            ['good', '359'],
+            ['bad', '27'],
+          ]);
+        } else {
+          // verify Lens opens a visualization
+          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+            'Top values of painString'
+          );
+        }
       });
     });
 
@@ -397,11 +414,19 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await inspector.open();
-        await inspector.expectTableData([
-          ['true', '359'],
-          ['false', '27'],
-        ]);
+        if (await PageObjects.common.isOss()) {
+          // OSS renders a vertical bar chart and we check the data in the Inspect panel
+          await inspector.open();
+          await inspector.expectTableData([
+            ['true', '359'],
+            ['false', '27'],
+          ]);
+        } else {
+          // verify Lens opens a visualization
+          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+            'Top values of painBool'
+          );
+        }
       });
     });
 
@@ -488,30 +513,39 @@ export default function ({ getService, getPageObjects }) {
       it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await inspector.open();
-        await inspector.setTablePageSize(50);
-        await inspector.expectTableData([
-          ['2015-09-17 20:00', '1'],
-          ['2015-09-17 21:00', '1'],
-          ['2015-09-17 23:00', '1'],
-          ['2015-09-18 00:00', '1'],
-          ['2015-09-18 03:00', '1'],
-          ['2015-09-18 04:00', '1'],
-          ['2015-09-18 04:00', '1'],
-          ['2015-09-18 04:00', '1'],
-          ['2015-09-18 04:00', '1'],
-          ['2015-09-18 05:00', '1'],
-          ['2015-09-18 05:00', '1'],
-          ['2015-09-18 05:00', '1'],
-          ['2015-09-18 05:00', '1'],
-          ['2015-09-18 06:00', '1'],
-          ['2015-09-18 06:00', '1'],
-          ['2015-09-18 06:00', '1'],
-          ['2015-09-18 06:00', '1'],
-          ['2015-09-18 07:00', '1'],
-          ['2015-09-18 07:00', '1'],
-          ['2015-09-18 07:00', '1'],
-        ]);
+
+        if (await PageObjects.common.isOss()) {
+          // OSS renders a vertical bar chart and we check the data in the Inspect panel
+          await inspector.open();
+          await inspector.setTablePageSize(50);
+          await inspector.expectTableData([
+            ['2015-09-17 20:00', '1'],
+            ['2015-09-17 21:00', '1'],
+            ['2015-09-17 23:00', '1'],
+            ['2015-09-18 00:00', '1'],
+            ['2015-09-18 03:00', '1'],
+            ['2015-09-18 04:00', '1'],
+            ['2015-09-18 04:00', '1'],
+            ['2015-09-18 04:00', '1'],
+            ['2015-09-18 04:00', '1'],
+            ['2015-09-18 05:00', '1'],
+            ['2015-09-18 05:00', '1'],
+            ['2015-09-18 05:00', '1'],
+            ['2015-09-18 05:00', '1'],
+            ['2015-09-18 06:00', '1'],
+            ['2015-09-18 06:00', '1'],
+            ['2015-09-18 06:00', '1'],
+            ['2015-09-18 06:00', '1'],
+            ['2015-09-18 07:00', '1'],
+            ['2015-09-18 07:00', '1'],
+            ['2015-09-18 07:00', '1'],
+          ]);
+        } else {
+          // verify Lens opens a visualization
+          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+            'painDate'
+          );
+        }
       });
     });
   });

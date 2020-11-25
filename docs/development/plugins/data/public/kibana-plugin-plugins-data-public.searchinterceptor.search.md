@@ -23,5 +23,5 @@ search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKib
 
 `Observable<IKibanaSearchResponse>`
 
-`Observalbe` emitting the search response or an error.
+`Observable` emitting the search response or an error.
 

@@ -26,7 +26,8 @@ function getMetricData(
   entityFields: EntityField[],
   earliestMs: number,
   latestMs: number,
-  intervalMs: number
+  intervalMs: number,
+  esMetricFunction?: string
 ): Observable<ModelPlotOutput> {
   if (
     isModelPlotChartableForDetector(job, detectorIndex) &&
@@ -88,7 +89,7 @@ function getMetricData(
         chartConfig.datafeedConfig.indices,
         entityFields,
         chartConfig.datafeedConfig.query,
-        chartConfig.metricFunction,
+        esMetricFunction ?? chartConfig.metricFunction,
         chartConfig.metricFieldName,
         chartConfig.timeField,
         earliestMs,

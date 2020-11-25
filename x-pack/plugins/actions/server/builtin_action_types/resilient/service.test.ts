@@ -11,7 +11,7 @@ import * as utils from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { incidentTypes, severity } from './mocks';
+import { incidentTypes, resilientFields, severity } from './mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -231,7 +231,7 @@ describe('IBM Resilient service', () => {
       requestMock.mockImplementation(() => {
         throw new Error('An error has occurred');
       });
-      expect(service.getIncident('1')).rejects.toThrow(
+      await expect(service.getIncident('1')).rejects.toThrow(
         'Unable to get incident with id 1. Error: An error has occurred'
       );
     });
@@ -310,7 +310,7 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(
+      await expect(
         service.createIncident({
           incident: {
             name: 'title',
@@ -418,7 +418,7 @@ describe('IBM Resilient service', () => {
     test('it should throw an error', async () => {
       mockIncidentUpdate(true);
 
-      expect(
+      await expect(
         service.updateIncident({
           incidentId: '1',
           incident: {
@@ -502,7 +502,7 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(
+      await expect(
         service.createComment({
           incidentId: '1',
           comment: {
@@ -541,7 +541,7 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(service.getIncidentTypes()).rejects.toThrow(
+      await expect(service.getIncidentTypes()).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to get incident types. Error: An error has occurred.'
       );
     });
@@ -578,8 +578,39 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(service.getIncidentTypes()).rejects.toThrow(
+      await expect(service.getIncidentTypes()).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to get incident types. Error: An error has occurred.'
+      );
+    });
+  });
+
+  describe('getFields', () => {
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() => ({
+        data: resilientFields,
+      }));
+      await service.getFields();
+
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        logger,
+        url: 'https://resilient.elastic.co/rest/orgs/201/types/incident/fields',
+      });
+    });
+    test('it returns common fields correctly', async () => {
+      requestMock.mockImplementation(() => ({
+        data: resilientFields,
+      }));
+      const res = await service.getFields();
+      expect(res).toEqual(resilientFields);
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('An error has occurred');
+      });
+      await expect(service.getFields()).rejects.toThrow(
+        'Unable to get fields. Error: An error has occurred'
       );
     });
   });

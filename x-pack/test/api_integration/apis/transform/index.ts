@@ -10,7 +10,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('Machine Learning', function () {
+  describe('transform', function () {
     this.tags(['transform']);
 
     before(async () => {

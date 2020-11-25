@@ -33,7 +33,7 @@ type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
 const allowedTypes = ['index-pattern', 'search'];
 const config = {
-  maxImportPayloadBytes: 10485760,
+  maxImportPayloadBytes: 26214400,
   maxImportExportSize: 10000,
 } as SavedObjectConfig;
 

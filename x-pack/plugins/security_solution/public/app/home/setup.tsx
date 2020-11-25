@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
-import { IngestManagerStart } from '../../../../ingest_manager/public';
+import { IngestManagerStart } from '../../../../fleet/public';
 
 export const Setup: React.FunctionComponent<{
   ingestManager: IngestManagerStart;

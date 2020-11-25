@@ -15,7 +15,7 @@ so that JSDoc appears in developers IDE when they use those `plugins.expressions
 <b>Signature:</b>
 
 ```typescript
-export declare class ExpressionsService implements PersistableState<ExpressionAstExpression> 
+export declare class ExpressionsService implements PersistableStateService<ExpressionAstExpression> 
 ```
 
 ## Constructors
@@ -39,8 +39,7 @@ export declare class ExpressionsService implements PersistableState<ExpressionAs
 |  [getType](./kibana-plugin-plugins-expressions-public.expressionsservice.gettype.md) |  | <code>ExpressionsServiceStart['getType']</code> |  |
 |  [getTypes](./kibana-plugin-plugins-expressions-public.expressionsservice.gettypes.md) |  | <code>() =&gt; ReturnType&lt;Executor['getTypes']&gt;</code> | Returns POJO map of all registered expression types, where keys are names of the types and values are <code>ExpressionType</code> instances. |
 |  [inject](./kibana-plugin-plugins-expressions-public.expressionsservice.inject.md) |  | <code>(state: ExpressionAstExpression, references: SavedObjectReference[]) =&gt; ExpressionAstExpression</code> | Injects saved object references into expression AST |
-|  [migrate](./kibana-plugin-plugins-expressions-public.expressionsservice.migrate.md) |  | <code>(state: SerializableState, version: string) =&gt; ExpressionAstExpression</code> | Injects saved object references into expression AST |
-|  [migrateToLatest](./kibana-plugin-plugins-expressions-public.expressionsservice.migratetolatest.md) |  | <code>(state: unknown, version: string) =&gt; ExpressionAstExpression</code> | Injects saved object references into expression AST |
+|  [migrate](./kibana-plugin-plugins-expressions-public.expressionsservice.migrate.md) |  | <code>(state: SerializableState, version: string) =&gt; ExpressionAstExpression</code> | Runs the migration (if it exists) for specified version. This will run a single migration step (ie from 7.10.0 to 7.10.1) |
 |  [registerFunction](./kibana-plugin-plugins-expressions-public.expressionsservice.registerfunction.md) |  | <code>(functionDefinition: AnyExpressionFunctionDefinition &#124; (() =&gt; AnyExpressionFunctionDefinition)) =&gt; void</code> | Register an expression function, which will be possible to execute as part of the expression pipeline.<!-- -->Below we register a function which simply sleeps for given number of milliseconds to delay the execution and outputs its input as-is.
 ```ts
 expressions.registerFunction({

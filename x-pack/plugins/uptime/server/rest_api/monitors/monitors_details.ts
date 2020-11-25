@@ -28,7 +28,6 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
       body: {
         ...(await libs.requests.getMonitorDetails({
           callES,
-          esClient: context.core.elasticsearch.client.asCurrentUser,
           dynamicSettings,
           monitorId,
           dateStart,

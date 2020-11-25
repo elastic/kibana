@@ -32,7 +32,8 @@ export const metricsRequestHandler = async ({
   const config = getUISettings();
   const timezone = getTimezone(config);
   const uiStateObj = uiState.get(visParams.type, {});
-  const parsedTimeRange = getDataStart().query.timefilter.timefilter.calculateBounds(timeRange);
+  const dataSearch = getDataStart();
+  const parsedTimeRange = dataSearch.query.timefilter.timefilter.calculateBounds(timeRange);
   const scaledDataFormat = config.get('dateFormat:scaled');
   const dateFormat = config.get('dateFormat');
 
@@ -53,6 +54,7 @@ export const metricsRequestHandler = async ({
           panels: [visParams],
           state: uiStateObj,
           savedObjectId: savedObjectId || 'unsaved',
+          sessionId: dataSearch.search.session.getSessionId(),
         }),
       });
 

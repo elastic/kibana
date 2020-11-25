@@ -26,7 +26,7 @@ Choose an import tool based on the format of your geospatial data.
 
 *Upload GeoJSON* indexes GeoJSON features as a geo_point or geo_shape.
 
-. <<maps-create>>.
+. <<maps-create, Create a new map>>.
 . Click *Add layer*.
 . Select *Upload GeoJSON*.
 . Use the file chooser to select a GeoJSON file.

@@ -71,8 +71,8 @@ export function spawnStreaming(
   const prefixedStdout = logTransformer({ tag: color.bold(prefix) });
   const prefixedStderr = logTransformer({ mergeMultiline: true, tag: color.bold(prefix) });
 
-  spawned.stdout.pipe(prefixedStdout).pipe(streamToLog(debug));
-  spawned.stderr.pipe(prefixedStderr).pipe(streamToLog(debug));
+  spawned.stdout!.pipe(prefixedStdout).pipe(streamToLog(debug)); // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
+  spawned.stderr!.pipe(prefixedStderr).pipe(streamToLog(debug)); // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
 
   return spawned;
 }

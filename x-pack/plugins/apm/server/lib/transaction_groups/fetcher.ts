@@ -3,24 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { take, sortBy } from 'lodash';
-import { Unionize } from 'utility-types';
+import { sortBy, take } from 'lodash';
 import moment from 'moment';
-import { joinByKey } from '../../../common/utils/join_by_key';
+import { Unionize } from 'utility-types';
+import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../common/elasticsearch_fieldnames';
+import { joinByKey } from '../../../common/utils/join_by_key';
 import { getTransactionGroupsProjection } from '../../projections/transaction_groups';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { PromiseReturnType } from '../../../../observability/typings/common';
-import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getAverages,
-  getSums,
-  getPercentiles,
   getCounts,
+  getPercentiles,
+  getSums,
 } from './get_transaction_group_stats';
 
 interface TopTransactionOptions {

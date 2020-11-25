@@ -121,6 +121,26 @@ export const DELETE_PHASE_POLICY: PolicyFromES = {
   name: POLICY_NAME,
 };
 
+export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    name: policyName,
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_age: '30d',
+            max_size: '50gb',
+          },
+        },
+      },
+    },
+  },
+  name: policyName,
+});
+
 export const POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION: PolicyFromES = {
   version: 1,
   modified_date: Date.now().toString(),

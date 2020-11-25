@@ -20,7 +20,9 @@ export function getAlertType(): AlertTypeModel {
   return {
     id: 'example.always-firing',
     name: 'Always Fires',
+    description: 'Alert when called',
     iconClass: 'bolt',
+    documentationUrl: null,
     alertParamsExpression: AlwaysFiringExpression,
     validate: (alertParams: AlwaysFiringParamsProps['alertParams']) => {
       const { instances } = alertParams;

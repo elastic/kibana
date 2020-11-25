@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { EmailActionConnector } from '../types';
 import EmailActionConnectorFields from './email_connector';
 import { DocLinksStart } from 'kibana/public';

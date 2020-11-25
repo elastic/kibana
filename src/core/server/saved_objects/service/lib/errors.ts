@@ -154,9 +154,10 @@ export class SavedObjectsErrorHelpers {
     return decorate(error, CODE_CONFLICT, 409, reason);
   }
 
-  public static createConflictError(type: string, id: string) {
+  public static createConflictError(type: string, id: string, reason?: string) {
     return SavedObjectsErrorHelpers.decorateConflictError(
-      Boom.conflict(`Saved object [${type}/${id}] conflict`)
+      Boom.conflict(`Saved object [${type}/${id}] conflict`),
+      reason
     );
   }
 

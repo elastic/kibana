@@ -4,25 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
-import color from 'color';
+import { uniq } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
-// @ts-ignore no types
-import { euiPaletteColorBlindBehindText } from '@elastic/eui/lib/services';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import {
   Chart,
   Datum,
-  Settings,
+  LayerValue,
   Partition,
   PartitionConfig,
   PartitionLayer,
   PartitionLayout,
   PartitionFillLabel,
   RecursivePartial,
-  LayerValue,
   Position,
+  Settings,
 } from '@elastic/charts';
 import { FormatFactory, LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
@@ -32,24 +29,27 @@ import { getSliceValue, getFilterContext } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import {
+  ChartsPluginSetup,
+  PaletteRegistry,
+  SeriesLayer,
+} from '../../../../../src/plugins/charts/public';
 import { LensIconChartDonut } from '../assets/chart_donut';
 
 const EMPTY_SLICE = Symbol('empty_slice');
-
-const sortedColors = euiPaletteColorBlindBehindText();
 
 export function PieComponent(
   props: PieExpressionProps & {
     formatFactory: FormatFactory;
     chartsThemeService: ChartsPluginSetup['theme'];
+    paletteService: PaletteRegistry;
     onClickValue: (data: LensFilterEvent['data']) => void;
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartsThemeService, onClickValue } = props;
+  const { chartsThemeService, paletteService, onClickValue } = props;
   const {
     shape,
     groups,
@@ -61,8 +61,8 @@ export function PieComponent(
     nestedLegend,
     percentDecimals,
     hideLabels,
+    palette,
   } = props.args;
-  const isDarkMode = chartsThemeService.useDarkMode();
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -73,7 +73,7 @@ export function PieComponent(
   }
 
   const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: false,
+    textInvertible: true,
     valueFont: {
       fontWeight: 700,
     },
@@ -86,6 +86,11 @@ export function PieComponent(
   }
 
   const bucketColumns = firstTable.columns.filter((col) => groups.includes(col.id));
+  const totalSeriesCount = uniq(
+    firstTable.rows.map((row) => {
+      return bucketColumns.map(({ id: columnId }) => row[columnId]).join(',');
+    })
+  ).length;
 
   const layers: PartitionLayer[] = bucketColumns.map((col, layerIndex) => {
     return {
@@ -100,34 +105,45 @@ export function PieComponent(
         }
         return String(d);
       },
-      fillLabel:
-        isDarkMode &&
-        shape === 'treemap' &&
-        layerIndex < bucketColumns.length - 1 &&
-        categoryDisplay !== 'hide'
-          ? { ...fillLabel, textColor: euiDarkVars.euiTextColor }
-          : fillLabel,
+      fillLabel,
       shape: {
         fillColor: (d) => {
+          const seriesLayers: SeriesLayer[] = [];
+
           // Color is determined by round-robin on the index of the innermost slice
           // This has to be done recursively until we get to the slice index
-          let parentIndex = 0;
           let tempParent: typeof d | typeof d['parent'] = d;
           while (tempParent.parent && tempParent.depth > 0) {
-            parentIndex = tempParent.sortIndex;
+            seriesLayers.unshift({
+              name: String(tempParent.parent.children[tempParent.sortIndex][0]),
+              rankAtDepth: tempParent.sortIndex,
+              totalSeriesAtDepth: tempParent.parent.children.length,
+            });
             tempParent = tempParent.parent;
           }
 
-          // Look up round-robin color from default palette
-          const outputColor = sortedColors[parentIndex % sortedColors.length];
-
           if (shape === 'treemap') {
             // Only highlight the innermost color of the treemap, as it accurately represents area
-            return layerIndex < bucketColumns.length - 1 ? 'rgba(0,0,0,0)' : outputColor;
+            if (layerIndex < bucketColumns.length - 1) {
+              return 'rgba(0,0,0,0)';
+            }
+            // only use the top level series layer for coloring
+            if (seriesLayers.length > 1) {
+              seriesLayers.pop();
+            }
           }
 
-          const lighten = (d.depth - 1) / (bucketColumns.length * 2);
-          return color(outputColor, 'hsl').lighten(lighten).hex();
+          const outputColor = paletteService.get(palette.name).getColor(
+            seriesLayers,
+            {
+              behindText: categoryDisplay !== 'hide',
+              maxDepth: bucketColumns.length,
+              totalSeries: totalSeriesCount,
+            },
+            palette.params
+          );
+
+          return outputColor || 'rgba(0,0,0,0)';
         },
       },
     };
@@ -237,7 +253,12 @@ export function PieComponent(
 
             onClickValue(desanitizeFilterContext(context));
           }}
-          theme={chartTheme}
+          theme={{
+            ...chartTheme,
+            background: {
+              color: undefined, // removes background for embeddables
+            },
+          }}
           baseTheme={chartBaseTheme}
         />
         <Partition

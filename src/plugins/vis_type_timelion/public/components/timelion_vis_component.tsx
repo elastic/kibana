@@ -40,7 +40,7 @@ import { tickFormatters } from '../helpers/tick_formatters';
 import { generateTicksProvider } from '../helpers/tick_generator';
 import { TimelionVisDependencies } from '../plugin';
 
-import './index.scss';
+import './timelion_vis.scss';
 
 interface CrosshairPlot extends jquery.flot.plot {
   setCrosshair: (pos: Position) => void;

@@ -13,14 +13,15 @@ import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { DOCS_PREFIX } from '../../routes';
 import GettingStarted from './assets/getting_started.png';
 
 export const SetupGuide: React.FC = () => (
   <SetupGuideLayout
     productName={APP_SEARCH_PLUGIN.NAME}
     productEuiIcon="logoAppSearch"
-    standardAuthLink="https://www.elastic.co/guide/en/app-search/current/security-and-users.html#app-search-self-managed-security-and-user-management-standard"
-    elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/app-search/current/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm"
+    standardAuthLink={`${DOCS_PREFIX}/security-and-users.html#app-search-self-managed-security-and-user-management-standard`}
+    elasticsearchNativeAuthLink={`${DOCS_PREFIX}/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm`}
   >
     <SetPageChrome
       trail={[

@@ -3,7 +3,13 @@
 source test/scripts/jenkins_test_setup_oss.sh
 
 if [[ -z "$CODE_COVERAGE" ]]; then
-  checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+  echo " -> Running functional and api tests"
+
+  checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" \
+    node scripts/functional_tests \
+      --debug --bail \
+      --kibana-install-dir "$KIBANA_INSTALL_DIR" \
+      --include-tag "ciGroup$CI_GROUP"
 
   if [[ ! "$TASK_QUEUE_PROCESS_ID" && "$CI_GROUP" == "1" ]]; then
     source test/scripts/jenkins_build_kbn_sample_panel_action.sh
@@ -21,7 +27,6 @@ else
   cd "kibana${CI_GROUP}"
 
   echo " -> running tests from the clone folder"
-  #yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
   node scripts/functional_tests --debug --include-tag "ciGroup$CI_GROUP"  --exclude-tag "skipCoverage" || true;
 
   if [[ -d target/kibana-coverage/functional ]]; then

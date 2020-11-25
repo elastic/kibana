@@ -150,7 +150,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
       esParams.body.aggs.monitors.composite.after = afterKey;
     }
 
-    const result = await callES('search', esParams);
+    const { body: result } = await callES.search(esParams);
     afterKey = result?.aggregations?.monitors?.after_key;
 
     queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || []));

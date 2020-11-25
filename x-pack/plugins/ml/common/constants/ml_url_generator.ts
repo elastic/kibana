@@ -12,6 +12,7 @@ export const ML_PAGES = {
   SINGLE_METRIC_VIEWER: 'timeseriesexplorer',
   DATA_FRAME_ANALYTICS_JOBS_MANAGE: 'data_frame_analytics',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
+  DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',
   /**
    * Page: Data Visualizer
    */

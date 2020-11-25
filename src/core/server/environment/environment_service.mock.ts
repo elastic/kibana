@@ -17,8 +17,7 @@
  * under the License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
-import { EnvironmentService, InternalEnvironmentServiceSetup } from './environment_service';
+import type { EnvironmentService, InternalEnvironmentServiceSetup } from './environment_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalEnvironmentServiceSetup> = {

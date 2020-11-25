@@ -18,14 +18,12 @@ import {
   LastEventIndexKey,
 } from '../../../../../common/search_strategy/timeline';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
-
-const ID = 'timelineEventsLastEventTimeQuery';
 
 export interface UseTimelineLastEventTimeArgs {
   lastSeen: string | null;
@@ -56,7 +54,6 @@ export const useTimelineLastEventTime = ({
     defaultIndex: indexNames,
     docValueFields,
     factoryQueryType: TimelineEventsQueries.lastEventTime,
-    id: ID,
     indexKey,
     details,
   });

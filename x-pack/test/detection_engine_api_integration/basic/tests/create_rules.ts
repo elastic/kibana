@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -65,13 +66,51 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule without an input index', async () => {
-        const { index, ...payload } = getSimpleRule();
-        const { index: _index, ...expected } = getSimpleRuleOutput();
+        const rule: CreateRulesSchema = {
+          name: 'Simple Rule Query',
+          description: 'Simple Rule Query',
+          enabled: true,
+          risk_score: 1,
+          rule_id: 'rule-1',
+          severity: 'high',
+          type: 'query',
+          query: 'user.name: root or user.name: admin',
+        };
+        const expected = {
+          actions: [],
+          author: [],
+          created_by: 'elastic',
+          description: 'Simple Rule Query',
+          enabled: true,
+          false_positives: [],
+          from: 'now-6m',
+          immutable: false,
+          interval: '5m',
+          rule_id: 'rule-1',
+          language: 'kuery',
+          output_index: '.siem-signals-default',
+          max_signals: 100,
+          risk_score: 1,
+          risk_score_mapping: [],
+          name: 'Simple Rule Query',
+          query: 'user.name: root or user.name: admin',
+          references: [],
+          severity: 'high',
+          severity_mapping: [],
+          updated_by: 'elastic',
+          tags: [],
+          to: 'now',
+          type: 'query',
+          threat: [],
+          throttle: 'no_actions',
+          exceptions_list: [],
+          version: 1,
+        };
 
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(payload)
+          .send(rule)
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);

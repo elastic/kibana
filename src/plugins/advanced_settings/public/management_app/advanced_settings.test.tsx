@@ -20,7 +20,7 @@
 import React from 'react';
 import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { mountWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { mountWithI18nProvider } from '@kbn/test/jest';
 import dedent from 'dedent';
 import {
   PublicUiSettingsParams,

@@ -72,7 +72,7 @@ const genBucketItem = ({
 describe('monitor availability', () => {
   describe('getMonitorAvailability', () => {
     it('applies bool filters to params', async () => {
-      const [callES, esMock] = setupMockEsCompositeQuery<
+      const esMock = setupMockEsCompositeQuery<
         AvailabilityKey,
         GetMonitorAvailabilityResult,
         AvailabilityDoc
@@ -109,16 +109,15 @@ describe('monitor availability', () => {
       }
     }`;
       await getMonitorAvailability({
-        callES,
+        callES: esMock,
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         filters: exampleFilter,
         range: 2,
         rangeUnit: 'w',
         threshold: '54',
       });
-      expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-      expect(method).toEqual('search');
+      expect(esMock.search).toHaveBeenCalledTimes(1);
+      const [params] = esMock.search.mock.calls[0];
       expect(params).toMatchInlineSnapshot(`
         Object {
           "body": Object {
@@ -245,7 +244,7 @@ describe('monitor availability', () => {
     });
 
     it('fetches a single page of results', async () => {
-      const [callES, esMock] = setupMockEsCompositeQuery<
+      const esMock = setupMockEsCompositeQuery<
         AvailabilityKey,
         GetMonitorAvailabilityResult,
         AvailabilityDoc
@@ -288,13 +287,12 @@ describe('monitor availability', () => {
         threshold: '69',
       };
       const result = await getMonitorAvailability({
-        callES,
+        callES: esMock,
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         ...clientParameters,
       });
-      expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-      expect(method).toEqual('search');
+      expect(esMock.search).toHaveBeenCalledTimes(1);
+      const [params] = esMock.search.mock.calls[0];
       expect(params).toMatchInlineSnapshot(`
         Object {
           "body": Object {
@@ -458,7 +456,7 @@ describe('monitor availability', () => {
     });
 
     it('fetches multiple pages', async () => {
-      const [callES, esMock] = setupMockEsCompositeQuery<
+      const esMock = setupMockEsCompositeQuery<
         AvailabilityKey,
         GetMonitorAvailabilityResult,
         AvailabilityDoc
@@ -512,7 +510,7 @@ describe('monitor availability', () => {
         genBucketItem
       );
       const result = await getMonitorAvailability({
-        callES,
+        callES: esMock,
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         range: 3,
         rangeUnit: 'M',
@@ -606,9 +604,8 @@ describe('monitor availability', () => {
           },
         ]
       `);
-      const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-      expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(2);
-      expect(method).toEqual('search');
+      const [params] = esMock.search.mock.calls[0];
+      expect(esMock.search).toHaveBeenCalledTimes(2);
       expect(params).toMatchInlineSnapshot(`
         Object {
           "body": Object {
@@ -701,9 +698,9 @@ describe('monitor availability', () => {
           "index": "heartbeat-8*",
         }
       `);
-      expect(esMock.callAsCurrentUser.mock.calls[1]).toMatchInlineSnapshot(`
+
+      expect(esMock.search.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
-          "search",
           Object {
             "body": Object {
               "aggs": Object {
@@ -803,7 +800,7 @@ describe('monitor availability', () => {
     });
 
     it('does not overwrite filters', async () => {
-      const [callES, esMock] = setupMockEsCompositeQuery<
+      const esMock = setupMockEsCompositeQuery<
         AvailabilityKey,
         GetMonitorAvailabilityResult,
         AvailabilityDoc
@@ -816,14 +813,14 @@ describe('monitor availability', () => {
         genBucketItem
       );
       await getMonitorAvailability({
-        callES,
+        callES: esMock,
         dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
         range: 3,
         rangeUnit: 's',
         threshold: '99',
         filters: JSON.stringify({ bool: { filter: [{ term: { 'monitor.id': 'foo' } }] } }),
       });
-      const [, params] = esMock.callAsCurrentUser.mock.calls[0];
+      const [params] = esMock.search.mock.calls[0];
       expect(params).toMatchInlineSnapshot(`
         Object {
           "body": Object {

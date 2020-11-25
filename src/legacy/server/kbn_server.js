@@ -31,7 +31,6 @@ import warningsMixin from './warnings';
 import configCompleteMixin from './config/complete';
 import { optimizeMixin } from '../../optimize';
 import { uiMixin } from '../ui';
-import { i18nMixin } from './i18n';
 
 /**
  * @typedef {import('./kbn_server').KibanaConfig} KibanaConfig
@@ -81,9 +80,6 @@ export default class KbnServer {
 
         loggingMixin,
         warningsMixin,
-
-        // scan translations dirs, register locale files and initialize i18n engine.
-        i18nMixin,
 
         // tell the config we are done loading plugins
         configCompleteMixin,

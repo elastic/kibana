@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('mgmt saved objects', function describeIndexTests() {
     beforeEach(async function () {
+      await esArchiver.load('empty_kibana');
       await esArchiver.load('discover');
       await PageObjects.settings.navigateTo();
     });

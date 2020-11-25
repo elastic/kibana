@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ConnectorAddModal } from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -65,8 +65,7 @@ describe('connector_add_modal', () => {
 
     const wrapper = mountWithIntl(
       <ConnectorAddModal
-        addModalVisible={true}
-        setAddModalVisibility={() => {}}
+        onClose={() => {}}
         actionType={actionType}
         http={deps!.http}
         actionTypeRegistry={deps!.actionTypeRegistry}

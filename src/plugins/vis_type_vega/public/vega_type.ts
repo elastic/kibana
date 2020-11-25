@@ -25,7 +25,7 @@ import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
 import { getDefaultSpec } from './default_spec';
 import { createInspectorAdapters } from './vega_inspector';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, VisGroups } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { VisParams } from './vega_fn';
 import { getInfoMessage } from './components/experimental_map_vis_info';
@@ -41,10 +41,17 @@ export const createVegaTypeDefinition = (
     title: 'Vega',
     getInfoMessage,
     description: i18n.translate('visTypeVega.type.vegaDescription', {
-      defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
+      defaultMessage: 'Use Vega to create new types of visualizations.',
       description: 'Vega and Vega-Lite are product names and should not be translated',
     }),
+    note: i18n.translate('visTypeVega.type.vegaNote', {
+      defaultMessage: 'Requires knowledge of Vega syntax.',
+    }),
     icon: 'visVega',
+    group: VisGroups.PROMOTED,
+    titleInWizard: i18n.translate('visTypeVega.type.vegaTitleInWizard', {
+      defaultMessage: 'Custom visualization',
+    }),
     visConfig: { defaults: { spec: getDefaultSpec() } },
     editorConfig: {
       optionsTemplate: VegaVisEditorComponent,

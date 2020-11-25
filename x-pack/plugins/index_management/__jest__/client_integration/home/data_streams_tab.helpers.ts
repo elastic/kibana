@@ -7,12 +7,8 @@
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
-import {
-  registerTestBed,
-  TestBed,
-  TestBedConfig,
-  findTestSubject,
-} from '../../../../../test_utils';
+import { EuiDescriptionListDescription } from '@elastic/eui';
+import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
 import { DataStream } from '../../../common';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
@@ -26,15 +22,19 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
-    clickDeletActionAt: (index: number) => void;
+    clickDeleteActionAt: (index: number) => void;
     clickConfirmDelete: () => void;
-    clickDeletDataStreamButton: () => void;
+    clickDeleteDataStreamButton: () => void;
+    clickDetailPanelIndexTemplateLink: () => void;
   };
   findDeleteActionAt: (index: number) => ReactWrapper;
   findDeleteConfirmationModal: () => ReactWrapper;
   findDetailPanel: () => ReactWrapper;
   findDetailPanelTitle: () => string;
   findEmptyPromptIndexTemplateLink: () => ReactWrapper;
+  findDetailPanelIlmPolicyLink: () => ReactWrapper;
+  findDetailPanelIlmPolicyName: () => ReactWrapper;
+  findDetailPanelIndexTemplateLink: () => ReactWrapper;
 }
 
 export const setup = async (overridingDependencies: any = {}): Promise<DataStreamsTabTestBed> => {
@@ -115,7 +115,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
 
   const findDeleteActionAt = findTestSubjectAt.bind(null, 'deleteDataStream');
 
-  const clickDeletActionAt = (index: number) => {
+  const clickDeleteActionAt = (index: number) => {
     findDeleteActionAt(index).simulate('click');
   };
 
@@ -135,9 +135,20 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     });
   };
 
-  const clickDeletDataStreamButton = () => {
+  const clickDeleteDataStreamButton = () => {
     const { find } = testBed;
     find('deleteDataStreamButton').simulate('click');
+  };
+
+  const clickDetailPanelIndexTemplateLink = async () => {
+    const { component, router, find } = testBed;
+    const indexTemplateLink = find('indexTemplateLink');
+
+    await act(async () => {
+      router.navigateTo(indexTemplateLink.props().href!);
+    });
+
+    component.update();
   };
 
   const findDetailPanel = () => {
@@ -150,6 +161,22 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     return find('dataStreamDetailPanelTitle').text();
   };
 
+  const findDetailPanelIlmPolicyLink = () => {
+    const { find } = testBed;
+    return find('ilmPolicyLink');
+  };
+
+  const findDetailPanelIndexTemplateLink = () => {
+    const { find } = testBed;
+    return find('indexTemplateLink');
+  };
+
+  const findDetailPanelIlmPolicyName = () => {
+    const descriptionList = testBed.component.find(EuiDescriptionListDescription);
+    // ilm policy is the last in the details list
+    return descriptionList.last();
+  };
+
   return {
     ...testBed,
     actions: {
@@ -159,15 +186,19 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
-      clickDeletActionAt,
+      clickDeleteActionAt,
       clickConfirmDelete,
-      clickDeletDataStreamButton,
+      clickDeleteDataStreamButton,
+      clickDetailPanelIndexTemplateLink,
     },
     findDeleteActionAt,
     findDeleteConfirmationModal,
     findDetailPanel,
     findDetailPanelTitle,
     findEmptyPromptIndexTemplateLink,
+    findDetailPanelIlmPolicyLink,
+    findDetailPanelIlmPolicyName,
+    findDetailPanelIndexTemplateLink,
   };
 };
 

@@ -17,8 +17,7 @@ export const createGetIndexPatternRoute: UMRestApiRouteFactory = (libs: UMServer
       return response.ok({
         body: {
           ...(await libs.requests.getIndexPattern({
-            callES,
-            esClient: _context.core.elasticsearch.client.asCurrentUser,
+            esClient: callES,
             dynamicSettings,
           })),
         },

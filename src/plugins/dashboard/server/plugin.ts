@@ -25,22 +25,34 @@ import {
   Logger,
 } from '../../../core/server';
 
-import { dashboardSavedObjectType } from './saved_objects';
+import { createDashboardSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
+import { EmbeddableSetup } from '../../embeddable/server';
 
-export class DashboardPlugin implements Plugin<DashboardPluginSetup, DashboardPluginStart> {
+interface SetupDeps {
+  embeddable: EmbeddableSetup;
+}
+
+export class DashboardPlugin
+  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: SetupDeps) {
     this.logger.debug('dashboard: Setup');
 
-    core.savedObjects.registerType(dashboardSavedObjectType);
+    core.savedObjects.registerType(
+      createDashboardSavedObjectType({
+        migrationDeps: {
+          embeddable: plugins.embeddable,
+        },
+      })
+    );
     core.capabilities.registerProvider(capabilitiesProvider);
 
     return {};

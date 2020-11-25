@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
+import { PaletteOutput } from 'src/plugins/charts/public';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -36,6 +37,7 @@ export function getSuggestions({
   state,
   keptLayerIds,
   subVisualizationId,
+  mainPalette,
 }: SuggestionRequest<State>): Array<VisualizationSuggestion<State>> {
   if (
     // We only render line charts for multi-row queries. We require at least
@@ -71,7 +73,8 @@ export function getSuggestions({
     table,
     keptLayerIds,
     state,
-    subVisualizationId as SeriesType | undefined
+    subVisualizationId as SeriesType | undefined,
+    mainPalette
   );
 
   if (suggestions && suggestions instanceof Array) {
@@ -85,7 +88,8 @@ function getSuggestionForColumns(
   table: TableSuggestion,
   keptLayerIds: string[],
   currentState?: State,
-  seriesType?: SeriesType
+  seriesType?: SeriesType,
+  mainPalette?: PaletteOutput
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
 
@@ -101,6 +105,7 @@ function getSuggestionForColumns(
       tableLabel: table.label,
       keptLayerIds,
       requestedSeriesType: seriesType,
+      mainPalette,
     });
   } else if (buckets.length === 0) {
     const [x, ...yValues] = prioritizeColumns(values);
@@ -114,6 +119,7 @@ function getSuggestionForColumns(
       tableLabel: table.label,
       keptLayerIds,
       requestedSeriesType: seriesType,
+      mainPalette,
     });
   }
 }
@@ -198,6 +204,7 @@ function getSuggestionsForLayer({
   tableLabel,
   keptLayerIds,
   requestedSeriesType,
+  mainPalette,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -208,6 +215,7 @@ function getSuggestionsForLayer({
   tableLabel?: string;
   keptLayerIds: string[];
   requestedSeriesType?: SeriesType;
+  mainPalette?: PaletteOutput;
 }): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
@@ -223,6 +231,8 @@ function getSuggestionsForLayer({
     changeType,
     xValue,
     keptLayerIds,
+    // only use palette if there is a breakdown by dimension
+    mainPalette: splitBy ? mainPalette : undefined,
   };
 
   // handles the simplest cases, acting as a chart switcher
@@ -449,6 +459,7 @@ function buildSuggestion({
   xValue,
   keptLayerIds,
   hide,
+  mainPalette,
 }: {
   currentState: XYState | undefined;
   seriesType: SeriesType;
@@ -460,6 +471,7 @@ function buildSuggestion({
   changeType: TableChangeType;
   keptLayerIds: string[];
   hide?: boolean;
+  mainPalette?: PaletteOutput;
 }) {
   if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
     splitBy = xValue;
@@ -469,6 +481,7 @@ function buildSuggestion({
   const accessors = yValues.map((col) => col.columnId);
   const newLayer = {
     ...existingLayer,
+    palette: mainPalette || ('palette' in existingLayer ? existingLayer.palette : undefined),
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
@@ -496,6 +509,7 @@ function buildSuggestion({
 
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+    valueLabels: currentState?.valueLabels || 'hide',
     fittingFunction: currentState?.fittingFunction || 'None',
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,

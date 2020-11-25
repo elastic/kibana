@@ -33,11 +33,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
 
       const { body: comment } = await supertest
         .delete(`${CASES_URL}/${postedCase.id}/comments/${patchedCase.comments[0].id}`)
         .set('kbn-xsrf', 'true')
+        .expect(204)
         .send();
 
       expect(comment).to.eql({});
@@ -53,13 +55,15 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
 
       const { body } = await supertest
         .delete(`${CASES_URL}/fake-id/comments/${patchedCase.comments[0].id}`)
         .set('kbn-xsrf', 'true')
         .send()
         .expect(404);
+
       expect(body.message).to.eql(
         `This comment ${patchedCase.comments[0].id} does not exist in fake-id).`
       );

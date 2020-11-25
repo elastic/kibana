@@ -20,10 +20,17 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin } from 'kibana/server';
-import { COLOR_MAPPING_SETTING } from '../common';
+import { COLOR_MAPPING_SETTING, palette, systemPalette } from '../common';
+import { ExpressionsServerSetup } from '../../expressions/server';
+
+interface SetupDependencies {
+  expressions: ExpressionsServerSetup;
+}
 
 export class ChartsServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, dependencies: SetupDependencies) {
+    dependencies.expressions.registerFunction(palette);
+    dependencies.expressions.registerFunction(systemPalette);
     core.uiSettings.register({
       [COLOR_MAPPING_SETTING]: {
         name: i18n.translate('charts.advancedSettings.visualization.colorMappingTitle', {

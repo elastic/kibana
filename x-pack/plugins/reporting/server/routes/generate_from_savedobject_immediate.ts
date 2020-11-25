@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
-import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFnFactory } from '../export_types/csv_from_savedobject/create_job';
 import { runTaskFnFactory } from '../export_types/csv_from_savedobject/execute_job';
 import {
@@ -19,6 +18,9 @@ import { TaskRunResult } from '../lib/tasks';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 import { getJobParamsFromRequest } from './lib/get_job_params_from_request';
 import { HandlerErrorFunction } from './types';
+
+const API_BASE_URL_V1 = '/api/reporting/v1';
+const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;
 
 export type CsvFromSavedObjectRequest = KibanaRequest<
   JobParamsPanelCsv,

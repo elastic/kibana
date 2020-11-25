@@ -11,7 +11,7 @@ import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { keyBy, mapValues } from 'lodash';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
-import { AggregationResultOf } from '../../../apm/typings/elasticsearch/aggregations';
+import { AggregationResultOf } from '../../../../typings/elasticsearch';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
 

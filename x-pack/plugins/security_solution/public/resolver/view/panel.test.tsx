@@ -13,7 +13,7 @@ import { urlSearch } from '../test_utilities/url_search';
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-describe(`Resolver: when analyzing a tree with no ancestors and two children and two related registry event on the origin, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
+describe(`Resolver: when analyzing a tree with no ancestors and two children and 2 related registry events and 1 event of each other category on the origin, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
    * Get (or lazily create and get) the simulator.
    */
@@ -272,22 +272,33 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         await expect(
           simulator().map(() => {
             // The link text is split across two columns. The first column is the count and the second column has the type.
+            const typesAndCounts: Array<{ type: string; link: string }> = [];
             const type = simulator().testSubject('resolver:panel:node-events:event-type-count');
             const link = simulator().testSubject('resolver:panel:node-events:event-type-link');
-            return {
-              typeLength: type.length,
-              linkLength: link.length,
-              typeText: type.text(),
-              linkText: link.text(),
-            };
+            for (let index = 0; index < type.length; index++) {
+              typesAndCounts.push({
+                type: type.at(index).text(),
+                link: link.at(index).text(),
+              });
+            }
+            return typesAndCounts;
           })
-        ).toYieldEqualTo({
-          typeLength: 1,
-          linkLength: 1,
-          linkText: 'registry',
-          // EUI's Table adds the column name to the value.
-          typeText: 'Count2',
-        });
+        ).toYieldEqualTo([
+          // Because there is no printed whitespace after "Count", the count immediately follows it.
+          { link: 'registry', type: 'Count2' },
+          { link: 'authentication', type: 'Count1' },
+          { link: 'database', type: 'Count1' },
+          { link: 'driver', type: 'Count1' },
+          { link: 'file', type: 'Count1' },
+          { link: 'host', type: 'Count1' },
+          { link: 'iam', type: 'Count1' },
+          { link: 'intrusion_detection', type: 'Count1' },
+          { link: 'malware', type: 'Count1' },
+          { link: 'network', type: 'Count1' },
+          { link: 'package', type: 'Count1' },
+          { link: 'process', type: 'Count1' },
+          { link: 'web', type: 'Count1' },
+        ]);
       });
       describe('and when the user clicks the registry events link', () => {
         beforeEach(async () => {
@@ -377,7 +388,11 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
               .testSubject('resolver:node-list:node-link:title')
               .map((node) => node.text());
           })
-        ).toYieldEqualTo(['c.ext', 'd', 'e']);
+        ).toYieldEqualTo([
+          'c.ext',
+          'd',
+          'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
+        ]);
       });
     });
   });

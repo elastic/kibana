@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EngineOverview } from './engine_overview';
+export { EngineOverviewLogic } from './engine_overview_logic';

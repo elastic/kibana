@@ -23,7 +23,7 @@ import {
 } from './metrics';
 import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
 import { countOperation, CountIndexPatternColumn } from './count';
-import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
+import { StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
 import { DateRange } from '../../../../common';
@@ -138,8 +138,6 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
 }
 
 interface BaseBuildColumnArgs {
-  suggestedPriority: DimensionPriority | undefined;
-  layerId: string;
   columns: Partial<Record<string, IndexPatternColumn>>;
   indexPattern: IndexPattern;
 }
@@ -174,8 +172,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
-      // previousColumn?: IndexPatternColumn;
-      previousColumn?: C;
+      previousColumn?: IndexPatternColumn;
     }
   ) => C;
   /**
@@ -191,15 +188,9 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
    * index pattern not just a field.
    *
    * @param oldColumn The column before the user changed the field.
-   * @param indexPattern The index pattern that field is on.
    * @param field The field that the user changed to.
    */
-  onFieldChange: (
-    // oldColumn: FieldBasedIndexPatternColumn,
-    oldColumn: C,
-    indexPattern: IndexPattern,
-    field: IndexPatternField
-  ) => C;
+  onFieldChange: (oldColumn: C, field: IndexPatternField) => C;
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {

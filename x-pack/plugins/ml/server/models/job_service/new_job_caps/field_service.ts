@@ -27,6 +27,7 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.INTEGER,
   ES_FIELD_TYPES.FLOAT,
   ES_FIELD_TYPES.LONG,
+  ES_FIELD_TYPES.UNSIGNED_LONG,
   ES_FIELD_TYPES.BYTE,
   ES_FIELD_TYPES.HALF_FLOAT,
   ES_FIELD_TYPES.SCALED_FLOAT,
@@ -245,6 +246,7 @@ function getNumericalFields(fields: Field[]): Field[] {
   return fields.filter(
     (f) =>
       f.type === ES_FIELD_TYPES.LONG ||
+      f.type === ES_FIELD_TYPES.UNSIGNED_LONG ||
       f.type === ES_FIELD_TYPES.INTEGER ||
       f.type === ES_FIELD_TYPES.SHORT ||
       f.type === ES_FIELD_TYPES.BYTE ||

@@ -39,9 +39,9 @@ import {
   Agent,
   ElasticsearchAssetType,
   EsAssetReference,
-} from '../../../../../ingest_manager/common/types/models';
+} from '../../../../../fleet/common/types/models';
 import { createV1SearchResponse, createV2SearchResponse } from './support/test_support';
-import { PackageService } from '../../../../../ingest_manager/server/services';
+import { PackageService } from '../../../../../fleet/server/services';
 import { metadataTransformPrefix } from '../../../../common/endpoint/constants';
 
 describe('test endpoint route', () => {

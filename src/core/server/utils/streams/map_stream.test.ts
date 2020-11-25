@@ -58,4 +58,19 @@ describe('createMapStream()', () => {
 
     expect(result).toEqual([0, 2, 6]);
   });
+
+  test('handles errors in async mappers', async () => {
+    await expect(
+      createPromiseFromStreams([
+        createListStream([1, 2, 3]),
+        createMapStream(async (n: number, i: number) => {
+          if (n === 2) {
+            await Promise.reject(new Error('that went bad'));
+          }
+          return n;
+        }),
+        createConcatStream([]),
+      ])
+    ).rejects.toMatchInlineSnapshot(`[Error: that went bad]`);
+  });
 });

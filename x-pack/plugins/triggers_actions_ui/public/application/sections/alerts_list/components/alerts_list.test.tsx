@@ -5,7 +5,7 @@
  */
 import * as React from 'react';
 
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -17,7 +17,10 @@ import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
-import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import {
+  AlertExecutionStatusErrorReasons,
+  ALERTS_FEATURE_ID,
+} from '../../../../../../alerts/common';
 import { featuresPluginMock } from '../../../../../../features/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
@@ -42,7 +45,9 @@ const alertTypeRegistry = alertTypeRegistryMock.create();
 const alertType = {
   id: 'test_alert_type',
   name: 'some alert type',
+  description: 'test',
   iconClass: 'test',
+  documentationUrl: null,
   validate: (): ValidationResult => {
     return { errors: {} };
   },
@@ -243,7 +248,7 @@ describe('alerts_list component with items', () => {
             status: 'error',
             lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
             error: {
-              reason: 'unknown',
+              reason: AlertExecutionStatusErrorReasons.Unknown,
               message: 'test',
             },
           },

@@ -154,7 +154,7 @@ export const buildSignalFromEvent = (
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, event._source)
     : buildRuleWithoutOverrides(ruleSO);
-  const signal = {
+  const signal: Signal = {
     ...buildSignal([event], rule),
     ...additionalSignalFields(event),
   };

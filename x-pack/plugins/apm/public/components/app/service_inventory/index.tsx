@@ -4,24 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPage,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import url from 'url';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/useFetcher';
-import { NoServicesMessage } from './no_services_message';
-import { ServiceList } from './ServiceList';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { MLCallout } from './ServiceList/MLCallout';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useAnomalyDetectionJobs } from '../../../hooks/useAnomalyDetectionJobs';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { SearchBar } from '../../shared/search_bar';
 import { Correlations } from '../Correlations';
+import { NoServicesMessage } from './no_services_message';
+import { ServiceList } from './ServiceList';
+import { MLCallout } from './ServiceList/MLCallout';
 
 const initialData = {
   items: [],
@@ -121,37 +127,39 @@ export function ServiceInventory() {
 
   return (
     <>
-      <EuiSpacer />
-
-      <Correlations />
-
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localFiltersConfig} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <EuiFlexGroup direction="column">
-            {displayMlCallout ? (
+      <SearchBar />
+      <EuiPage>
+        <Correlations />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localFiltersConfig} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            <EuiFlexGroup direction="column">
+              {displayMlCallout ? (
+                <EuiFlexItem>
+                  <MLCallout
+                    onDismiss={() => setUserHasDismissedCallout(true)}
+                  />
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem>
-                <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
+                <EuiPanel>
+                  <ServiceList
+                    items={data.items}
+                    noItemsMessage={
+                      <NoServicesMessage
+                        historicalDataFound={data.hasHistoricalData}
+                        status={status}
+                      />
+                    }
+                  />
+                </EuiPanel>
               </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem>
-              <EuiPanel>
-                <ServiceList
-                  items={data.items}
-                  noItemsMessage={
-                    <NoServicesMessage
-                      historicalDataFound={data.hasHistoricalData}
-                      status={status}
-                    />
-                  }
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
     </>
   );
 }

@@ -21,7 +21,7 @@ import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 import { setInsertTimeline } from '../../../store/timeline/actions';
-export { nextTick } from '../../../../../../../test_utils';
+export { nextTick } from '@kbn/test/jest';
 import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../../common/components/link_to');

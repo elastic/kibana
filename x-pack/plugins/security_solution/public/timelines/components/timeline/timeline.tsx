@@ -112,6 +112,7 @@ export interface Props {
   start: string;
   status: TimelineStatusLiteral;
   timelineType: TimelineType;
+  timerangeKind: 'absolute' | 'relative';
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
 }
@@ -143,6 +144,7 @@ export const TimelineComponent: React.FC<Props> = ({
   status,
   sort,
   timelineType,
+  timerangeKind,
   toggleColumn,
   usersViewing,
 }) => {
@@ -164,20 +166,8 @@ export const TimelineComponent: React.FC<Props> = ({
         filters,
         kqlQuery,
         kqlMode,
-        start,
-        end,
       }),
-    [
-      browserFields,
-      dataProviders,
-      esQueryConfig,
-      start,
-      end,
-      filters,
-      indexPattern,
-      kqlMode,
-      kqlQuery,
-    ]
+    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
   );
 
   const canQueryTimeline = useMemo(
@@ -224,6 +214,7 @@ export const TimelineComponent: React.FC<Props> = ({
     startDate: start,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
+    timerangeKind,
   });
 
   useEffect(() => {

@@ -5,7 +5,8 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { SeriesType, visualizationTypes, LayerConfig, YConfig } from './types';
+import { FramePublicAPI } from '../types';
+import { SeriesType, visualizationTypes, LayerConfig, YConfig, ValidLayer } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -37,3 +38,23 @@ export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
     layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
   );
 };
+
+export function hasHistogramSeries(
+  layers: ValidLayer[] = [],
+  datasourceLayers?: FramePublicAPI['datasourceLayers']
+) {
+  if (!datasourceLayers) {
+    return false;
+  }
+  const validLayers = layers.filter(({ accessors }) => accessors.length);
+
+  return validLayers.some(({ layerId, xAccessor }: ValidLayer) => {
+    const xAxisOperation = datasourceLayers[layerId].getOperationForColumnId(xAccessor);
+    return (
+      xAxisOperation &&
+      xAxisOperation.isBucketed &&
+      xAxisOperation.scale &&
+      xAxisOperation.scale !== 'ordinal'
+    );
+  });
+}

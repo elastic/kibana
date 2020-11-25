@@ -26,13 +26,13 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 
-import { Loading } from '../../../components/shared/loading';
+import { Loading } from '../../../../shared/loading';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { SourceIcon } from '../../../components/shared/source_icon';
 
 import { GroupLogic } from '../group_logic';
 
-import { IContentSource } from '../../../types';
+import { ContentSource } from '../../../types';
 
 const HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerTitle',
@@ -140,7 +140,7 @@ export const GroupSourcePrioritization: React.FC = () => {
         <EuiTableHeaderCell align="right">{PRIORITY_TABLE_HEADER}</EuiTableHeaderCell>
       </EuiTableHeader>
       <EuiTableBody>
-        {contentSources.map(({ id, name, serviceType }: IContentSource) => (
+        {contentSources.map(({ id, name, serviceType }: ContentSource) => (
           <EuiTableRow key={id} data-test-subj="GroupsRow">
             <EuiTableRowCell>
               <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>

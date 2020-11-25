@@ -14,7 +14,7 @@ import { EuiButton as EuiLinkButton } from '../../../shared/react_router_helpers
 
 import { AppLogic } from '../../app_logic';
 
-import { Loading } from '../../components/shared/loading';
+import { Loading } from '../../../shared/loading';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { getGroupPath, USERS_PATH } from '../../routes';

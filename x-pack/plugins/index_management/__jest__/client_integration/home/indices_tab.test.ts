@@ -17,7 +17,8 @@ import { createDataStreamPayload } from './data_streams_tab.helpers';
       Could not load worker ReferenceError: Worker is not defined
           at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
  */
-import { stubWebWorker } from '../../../../../test_utils/stub_web_worker';
+import { stubWebWorker } from '@kbn/test/jest';
+import { createMemoryHistory } from 'history';
 stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
@@ -75,7 +76,9 @@ describe('<IndexManagementHome />', () => {
 
       httpRequestsMockHelpers.setLoadDataStreamResponse(createDataStreamPayload('dataStream1'));
 
-      testBed = await setup();
+      testBed = await setup({
+        history: createMemoryHistory(),
+      });
 
       await act(async () => {
         const { component } = testBed;

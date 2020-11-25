@@ -8,7 +8,7 @@ import { ReactWrapper } from 'enzyme';
 
 import { EuiCheckbox, EuiCheckboxProps, EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 import { EuiAccordion } from '@elastic/eui';
 import { SubFeatureForm } from '../sub_feature_form';
 

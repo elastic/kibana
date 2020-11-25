@@ -48,7 +48,7 @@ const wrapWithLastRefreshArg = <T extends (...a: any[]) => any>(func: T, context
   };
 };
 const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
-  return memoizeOne(wrapWithLastRefreshArg<T>(func, context), memoizeIsEqual);
+  return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual);
 };
 
 const memoizedAnomalyDataChange = memoize<typeof anomalyDataChange>(anomalyDataChange);
@@ -261,11 +261,11 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
         ): Partial<ExplorerState> => {
           return {
             annotations: annotationsData,
-            influencers,
+            influencers: influencers as any,
             loading: false,
             viewBySwimlaneDataLoading: false,
             overallSwimlaneData: overallState,
-            viewBySwimlaneData: viewBySwimlaneState,
+            viewBySwimlaneData: viewBySwimlaneState as any,
             tableData,
             swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
               ? viewBySwimlaneState.cardinality

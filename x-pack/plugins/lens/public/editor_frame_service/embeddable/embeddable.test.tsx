@@ -47,7 +47,6 @@ const savedVis: Document = {
   visualizationType: '',
 };
 const defaultSaveMethod = (
-  type: string,
   testAttributes: LensSavedObjectAttributes,
   savedObjectId?: string
 ): Promise<{ id: string }> => {
@@ -138,6 +137,44 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
     expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(`my
 | expression`);
+  });
+
+  it('should initialize output with deduped list of index patterns', async () => {
+    attributeService = attributeServiceMockFromSavedVis({
+      ...savedVis,
+      references: [
+        { type: 'index-pattern', id: '123', name: 'abc' },
+        { type: 'index-pattern', id: '123', name: 'def' },
+        { type: 'index-pattern', id: '456', name: 'ghi' },
+      ],
+    });
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: ({
+          get: (id: string) => Promise.resolve({ id }),
+        } as unknown) as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
+      },
+      {} as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+    const outputIndexPatterns = embeddable.getOutput().indexPatterns!;
+    expect(outputIndexPatterns.length).toEqual(2);
+    expect(outputIndexPatterns[0].id).toEqual('123');
+    expect(outputIndexPatterns[1].id).toEqual('456');
   });
 
   it('should re-render if new input is pushed', async () => {

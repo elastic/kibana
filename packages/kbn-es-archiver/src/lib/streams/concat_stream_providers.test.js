@@ -44,7 +44,7 @@ describe('concatStreamProviders() helper', () => {
       () =>
         new Readable({
           read() {
-            this.emit('error', new Error('foo'));
+            this.destroy(new Error('foo'));
           },
         }),
     ]);

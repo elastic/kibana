@@ -8,6 +8,8 @@ import { SpacesPlugin } from './plugin';
 
 export { Space } from '../common/model/space';
 
+export { GetSpaceResult } from '../common/model/types';
+
 export { SpaceAvatar, getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_avatar';
 
 export { SpacesPluginSetup, SpacesPluginStart } from './plugin';

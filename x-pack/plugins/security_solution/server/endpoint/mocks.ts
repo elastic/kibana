@@ -14,8 +14,8 @@ import {
   IngestManagerStartContract,
   ExternalCallback,
   PackageService,
-} from '../../../ingest_manager/server';
-import { createPackagePolicyServiceMock } from '../../../ingest_manager/server/mocks';
+} from '../../../fleet/server';
+import { createPackagePolicyServiceMock } from '../../../fleet/server/mocks';
 import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {

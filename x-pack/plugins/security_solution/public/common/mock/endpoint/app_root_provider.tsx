@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Router } from 'react-router-dom';
 import { History } from 'history';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { Store } from 'redux';
 import { EuiThemeProvider } from '../../../../../xpack_legacy/common';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
