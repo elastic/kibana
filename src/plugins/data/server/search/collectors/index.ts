@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { usageProvider, SearchUsage } from './usage';
+export type { SearchUsage } from './usage';
+export { usageProvider, searchUsageObserver } from './usage';
