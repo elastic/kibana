@@ -15,13 +15,38 @@ import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
   let newPolicyConfig = obj;
-  for (let i = 0; i < path.length - 1; i++) {
-    if (!newPolicyConfig[path[i]]) {
-      newPolicyConfig[path[i]] = {} as Record<string, unknown>;
+
+  if (value === '' || value === undefined) {
+    for (let k = path.length; k >= 0; k--) {
+      const nextPath = path.slice(0, k);
+      for (let i = 0; i < nextPath.length - 1; i++) {
+        newPolicyConfig = newPolicyConfig[nextPath[i]] as Record<string, unknown>;
+      }
+      if (
+        newPolicyConfig[nextPath[nextPath.length - 1]] === undefined ||
+        newPolicyConfig[nextPath[nextPath.length - 1]] === '' ||
+        Object.keys(newPolicyConfig[nextPath[nextPath.length - 1]]).length === 0 ||
+        k === path.length
+      ) {
+        if (nextPath[nextPath.length - 1] === 'advanced') {
+          newPolicyConfig[nextPath[nextPath.length - 1]] = undefined;
+        } else {
+          delete newPolicyConfig[nextPath[nextPath.length - 1]];
+        }
+        newPolicyConfig = obj;
+      } else {
+        break;
+      }
     }
-    newPolicyConfig = newPolicyConfig[path[i]] as Record<string, unknown>;
+  } else {
+    for (let i = 0; i < path.length - 1; i++) {
+      if (!newPolicyConfig[path[i]]) {
+        newPolicyConfig[path[i]] = {} as Record<string, unknown>;
+      }
+      newPolicyConfig = newPolicyConfig[path[i]] as Record<string, unknown>;
+    }
+    newPolicyConfig[path[path.length - 1]] = value;
   }
-  newPolicyConfig[path[path.length - 1]] = value;
 }
 
 function getValue(obj: Record<string, unknown>, path: string[]) {
