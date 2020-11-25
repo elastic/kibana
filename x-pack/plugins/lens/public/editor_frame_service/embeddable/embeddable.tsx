@@ -20,6 +20,7 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
+import { RenderMode } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -56,6 +57,7 @@ export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
 export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
   palette?: PaletteOutput;
   activeData?: TableInspectorAdapter;
+  renderMode?: RenderMode;
 };
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
@@ -207,6 +209,7 @@ export class Embeddable
         searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
+        renderMode={input.renderMode}
       />,
       domNode
     );

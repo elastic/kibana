@@ -9,7 +9,7 @@ Alerts and actions are enabled by default in {kib}, but require you configure th
 
 . <<using-kibana-with-security,Set up {kib} to work with {stack} {security-features}>>.
 . <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.
-. <<general-alert-action-settings,Specify a value for `xpack.encryptedSavedObjects.encryptionKey`>>.
+. If you are using an *on-premises* Elastic Stack deployment, <<general-alert-action-settings,specify a value for `xpack.encryptedSavedObjects.encryptionKey`>>.
 
 You can configure the following settings in the `kibana.yml` file.
 

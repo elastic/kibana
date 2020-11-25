@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const security = getService('security');
+  const deployment = getService('deployment');
   const PageObjects = getPageObjects(['security', 'common']);
 
   describe('Authentication provider hint', function () {
@@ -39,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await browser.get(`${PageObjects.common.getHostPort()}/login`);
+      await browser.get(`${deployment.getHostPort()}/login`);
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
     });
 

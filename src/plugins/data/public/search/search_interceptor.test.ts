@@ -65,20 +65,17 @@ describe('SearchInterceptor', () => {
 
     test('Renders a PainlessError', async () => {
       searchInterceptor.showError(
-        new PainlessError(
-          {
-            body: {
-              attributes: {
-                error: {
-                  failed_shards: {
-                    reason: 'bananas',
-                  },
+        new PainlessError({
+          body: {
+            attributes: {
+              error: {
+                failed_shards: {
+                  reason: 'bananas',
                 },
               },
-            } as any,
-          },
-          {} as any
-        )
+            },
+          } as any,
+        })
       );
       expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
       expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();

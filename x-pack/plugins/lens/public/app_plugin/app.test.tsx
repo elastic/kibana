@@ -308,6 +308,9 @@ describe('Lens App', () => {
     const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
     const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
+      return [];
+    });
+    services.data.query.filterManager.getGlobalFilters = jest.fn().mockImplementation(() => {
       return [pinnedFilter];
     });
     const { component, frame } = mountWith({ services });
@@ -322,6 +325,7 @@ describe('Lens App', () => {
         filters: [pinnedFilter],
       })
     );
+    expect(services.data.query.filterManager.getFilters).not.toHaveBeenCalled();
   });
 
   it('displays errors from the frame in a toast', () => {
