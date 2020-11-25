@@ -487,8 +487,14 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return {};
     }
 
+    const { docValueFields } = getDocValueAndSourceFields(
+      indexPattern,
+      this._getTooltipPropertyNames()
+    );
+
+    const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
     const searchService = getSearchService();
-    const searchSource = searchService.searchSource.createEmpty();
+    const searchSource = await searchService.searchSource.create(initialSearchContext);
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
