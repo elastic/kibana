@@ -17,9 +17,7 @@
  * under the License.
  */
 
-// TODO: Remove bus when action/triggers are available with LegacyPluginApi or metric is converted to Embeddable
-import $ from 'jquery';
+import { Subject } from 'rxjs';
+import { PointerEvent } from '@elastic/charts';
 
-export const ACTIVE_CURSOR = 'ACTIVE_CURSOR';
-
-export const eventBus = $({});
+export const activeCursor$ = new Subject<PointerEvent>();
