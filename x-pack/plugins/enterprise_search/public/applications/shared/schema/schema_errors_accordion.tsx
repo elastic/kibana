@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 import {
   EuiAccordion,
@@ -18,6 +17,8 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+
+import { EuiLinkTo } from '../react_router_helpers';
 
 import { TruncatedContent } from '../truncate';
 
@@ -85,14 +86,14 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
 
                 const viewButton = showViewButton && (
                   <EuiTableRowCell className="field-error-document__actions">
-                    <Link
+                    <EuiLinkTo
                       className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
                       to={documentPath}
                     >
                       <span className="euiButtonEmpty__content">
                         <span className="euiButtonEmpty__text">View</span>
                       </span>
-                    </Link>
+                    </EuiLinkTo>
                   </EuiTableRowCell>
                 );
 
