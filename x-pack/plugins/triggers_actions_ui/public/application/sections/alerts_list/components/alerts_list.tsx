@@ -31,7 +31,6 @@ import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
 import { AlertsContextProvider } from '../../../context/alerts_context';
-import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -58,6 +57,7 @@ import {
 } from '../../../../../../alerts/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping } from '../translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const ENTER_KEY = 13;
 
@@ -76,8 +76,8 @@ export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
   const {
     http,
-    toastNotifications,
-    capabilities,
+    notifications: { toasts },
+    application: { capabilities },
     alertTypeRegistry,
     actionTypeRegistry,
     uiSettings,
@@ -85,7 +85,7 @@ export const AlertsList: React.FunctionComponent = () => {
     charts,
     data,
     kibanaFeatures,
-  } = useAppDependencies();
+  } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
@@ -143,7 +143,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }
         setAlertTypesState({ isLoading: false, data: index, isInitialized: true });
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertTypesMessage',
             { defaultMessage: 'Unable to load alert types' }
@@ -160,7 +160,7 @@ export const AlertsList: React.FunctionComponent = () => {
         const result = await loadActionTypes({ http });
         setActionTypes(result.filter((actionType) => actionTypeRegistry.has(actionType.id)));
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage',
             { defaultMessage: 'Unable to load action types' }
@@ -194,7 +194,7 @@ export const AlertsList: React.FunctionComponent = () => {
           setPage({ ...page, index: 0 });
         }
       } catch (e) {
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage',
             {
@@ -220,7 +220,7 @@ export const AlertsList: React.FunctionComponent = () => {
         setAlertsStatusesTotal(alertsAggs.alertExecutionStatus);
       }
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
           {
@@ -664,7 +664,7 @@ export const AlertsList: React.FunctionComponent = () => {
           http,
           actionTypeRegistry,
           alertTypeRegistry,
-          toastNotifications,
+          toastNotifications: toasts,
           uiSettings,
           docLinks,
           charts,
