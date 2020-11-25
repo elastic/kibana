@@ -35,6 +35,13 @@ export const registerFetchRoute = ({ router, license }: RouteDependencies) => {
         };
         return response.ok({ body: repos });
       } catch (e) {
+        // If ES responds with 404 when looking up all snapshots we return an empty array
+        if (e?.statusCode === 404) {
+          const repos: ListSnapshotReposResponse = {
+            repositories: [],
+          };
+          return response.ok({ body: repos });
+        }
         return handleEsError({ error: e, response });
       }
     }
