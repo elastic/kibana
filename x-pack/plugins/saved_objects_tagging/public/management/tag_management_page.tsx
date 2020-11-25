@@ -25,6 +25,7 @@ interface TagManagementPageParams {
   tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
   capabilities: TagsCapabilities;
+  assignableTypes: string[];
 }
 
 export const TagManagementPage: FC<TagManagementPageParams> = ({
@@ -34,6 +35,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   tagCache,
   assignmentService,
   capabilities,
+  assignableTypes,
 }) => {
   const { overlays, notifications, application, http } = core;
   const [loading, setLoading] = useState<boolean>(false);
@@ -63,9 +65,10 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       tagCache,
       assignmentService,
       setLoading,
+      assignableTypes,
       clearSelection: () => setSelectedTags([]),
     });
-  }, [core, capabilities, tagClient, tagCache, assignmentService]);
+  }, [core, capabilities, tagClient, tagCache, assignmentService, assignableTypes]);
 
   const createModalOpener = useMemo(() => getCreateModalOpener({ overlays, tagClient }), [
     overlays,

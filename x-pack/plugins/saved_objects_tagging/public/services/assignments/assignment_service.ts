@@ -14,6 +14,10 @@ import {
 export interface ITagAssignmentService {
   findAssignableObject(options: FindAssignableObjectOptions): Promise<AssignableObject[]>;
   updateTagAssignments(options: UpdateTagAssignmentsOptions): Promise<void>;
+  /**
+   * Return the list of saved object types the user can assign tags to.
+   */
+  getAssignableTypes(): Promise<string[]>;
 }
 
 export interface TagAssignmentServiceOptions {
@@ -54,5 +58,12 @@ export class TagAssignmentService implements ITagAssignmentService {
         unassign,
       }),
     });
+  }
+
+  public async getAssignableTypes() {
+    const { types } = await this.http.get<{ types: string[] }>(
+      '/internal/saved_objects_tagging/assignments/_assignable_types'
+    );
+    return types;
   }
 }

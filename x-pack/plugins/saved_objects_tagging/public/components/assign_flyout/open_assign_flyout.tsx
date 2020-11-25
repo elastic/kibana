@@ -7,7 +7,6 @@
 import React from 'react';
 import { NotificationsStart, OverlayStart, OverlayRef } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
-import { taggableTypes } from '../../../common/constants';
 import { ITagAssignmentService, ITagsCache } from '../../services';
 
 export interface GetAssignFlyoutOpenerOptions {
@@ -15,6 +14,7 @@ export interface GetAssignFlyoutOpenerOptions {
   notifications: NotificationsStart;
   tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
+  assignableTypes: string[];
 }
 
 export interface OpenAssignFlyoutOptions {
@@ -28,6 +28,7 @@ export const getAssignFlyoutOpener = ({
   notifications,
   tagCache,
   assignmentService,
+  assignableTypes,
 }: GetAssignFlyoutOpenerOptions): AssignFlyoutOpener => async ({ tagIds }) => {
   const { AssignFlyout } = await import('./assign_flyout');
   const flyout = overlays.openFlyout(
@@ -36,7 +37,7 @@ export const getAssignFlyoutOpener = ({
         tagIds={tagIds}
         tagCache={tagCache}
         notifications={notifications}
-        allowedTypes={taggableTypes}
+        allowedTypes={assignableTypes}
         assignmentService={assignmentService}
         onClose={() => flyout.close()}
       />

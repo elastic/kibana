@@ -15,6 +15,7 @@ import {
 import {
   registerFindAssignableObjectsRoute,
   registerUpdateTagsAssignmentsRoute,
+  registerGetAssignableTypesRoute,
 } from './assignments';
 import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
 
@@ -28,6 +29,7 @@ export const registerRoutes = ({ router }: { router: IRouter }) => {
   // assignment API
   registerFindAssignableObjectsRoute(router);
   registerUpdateTagsAssignmentsRoute(router);
+  registerGetAssignableTypesRoute(router);
   // internal API
   registerInternalFindTagsRoute(router);
   registerInternalBulkDeleteRoute(router);

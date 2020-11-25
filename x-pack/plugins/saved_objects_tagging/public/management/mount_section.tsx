@@ -43,6 +43,7 @@ export const mountSection = async ({
   const [coreStart] = await core.getStartServices();
   const { element, setBreadcrumbs } = mountParams;
   const capabilities = getTagsCapabilities(coreStart.application.capabilities);
+  const assignableTypes = await assignmentService.getAssignableTypes();
 
   ReactDOM.render(
     <I18nProvider>
@@ -54,6 +55,7 @@ export const mountSection = async ({
           tagCache={tagCache}
           assignmentService={assignmentService}
           capabilities={capabilities}
+          assignableTypes={assignableTypes}
         />
       </RedirectToHomeIfUnauthorized>
     </I18nProvider>,

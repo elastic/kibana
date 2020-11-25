@@ -31,7 +31,10 @@ describe('getBulkActions', () => {
     setLoading = jest.fn();
   });
 
-  const getActions = (caps: Partial<TagsCapabilities>) =>
+  const getActions = (
+    caps: Partial<TagsCapabilities>,
+    { assignableTypes = ['foo', 'bar'] }: { assignableTypes?: string[] } = {}
+  ) =>
     getBulkActions({
       core,
       tagClient,
@@ -39,6 +42,7 @@ describe('getBulkActions', () => {
       assignmentService,
       clearSelection,
       setLoading,
+      assignableTypes,
       capabilities: createTagCapabilities(caps),
     });
 
@@ -54,12 +58,16 @@ describe('getBulkActions', () => {
     expect(getIds(actions)).not.toContain('delete');
   });
 
-  it('only returns the `assign` action if user got `assign` permission', () => {
-    let actions = getActions({ assign: true });
+  it('only returns the `assign` action if user got `assign` permission and there is at least one assignable type', () => {
+    let actions = getActions({ assign: true }, { assignableTypes: ['foo'] });
 
     expect(getIds(actions)).toContain('assign');
 
-    actions = getActions({ assign: false });
+    actions = getActions({ assign: false }, { assignableTypes: ['foo'] });
+
+    expect(getIds(actions)).not.toContain('assign');
+
+    actions = getActions({ assign: true }, { assignableTypes: [] });
 
     expect(getIds(actions)).not.toContain('assign');
   });

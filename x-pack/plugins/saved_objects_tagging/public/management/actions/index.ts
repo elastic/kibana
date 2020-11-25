@@ -20,6 +20,7 @@ interface GetBulkActionOptions {
   assignmentService: ITagAssignmentService;
   clearSelection: () => void;
   setLoading: (loading: boolean) => void;
+  assignableTypes: string[];
 }
 
 export const getBulkActions = ({
@@ -30,10 +31,11 @@ export const getBulkActions = ({
   assignmentService,
   clearSelection,
   setLoading,
+  assignableTypes,
 }: GetBulkActionOptions): TagBulkAction[] => {
   const actions: TagBulkAction[] = [];
 
-  if (capabilities.assign) {
+  if (capabilities.assign && assignableTypes.length > 0) {
     actions.push(
       getBulkAssignAction({ notifications, overlays, tagCache, assignmentService, setLoading })
     );

@@ -58,11 +58,7 @@ export class AssignmentService {
     const searchedTypes = types
       ? types.filter((type) => taggableTypes.includes(type))
       : taggableTypes;
-    const assignableTypes = await getUpdatableSavedObjectTypes({
-      request: this.request,
-      types: searchedTypes,
-      authorization: this.authorization,
-    });
+    const assignableTypes = await this.getAssignableTypes(searchedTypes);
     const searchFields = uniq(
       assignableTypes.map(
         (name) => this.typeRegistry.getType(name)?.management!.defaultSearchField!
@@ -82,6 +78,14 @@ export class AssignmentService {
     );
   }
 
+  public async getAssignableTypes(types?: string[]) {
+    return getUpdatableSavedObjectTypes({
+      request: this.request,
+      types: types ?? taggableTypes,
+      authorization: this.authorization,
+    });
+  }
+
   public async updateTagAssignments({ tags, assign, unassign }: UpdateTagAssignmentsOptions) {
     const updatedTypes = uniq([...assign, ...unassign].map(({ type }) => type));
 
@@ -90,11 +94,7 @@ export class AssignmentService {
       throw new AssignmentError(`Unsupported type [${untaggableTypes.join(', ')}]`, 400);
     }
 
-    const assignableTypes = await getUpdatableSavedObjectTypes({
-      request: this.request,
-      types: taggableTypes,
-      authorization: this.authorization,
-    });
+    const assignableTypes = await this.getAssignableTypes();
     const forbiddenTypes = difference(updatedTypes, assignableTypes);
     if (forbiddenTypes.length) {
       throw new AssignmentError(`Forbidden type [${forbiddenTypes.join(', ')}]`, 403);

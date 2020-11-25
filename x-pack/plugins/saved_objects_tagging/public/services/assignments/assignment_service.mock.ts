@@ -10,6 +10,7 @@ const createAssignmentServiceMock = () => {
   const mock: jest.Mocked<ITagAssignmentService> = {
     findAssignableObject: jest.fn(),
     updateTagAssignments: jest.fn(),
+    getAssignableTypes: jest.fn(),
   };
 
   return mock;

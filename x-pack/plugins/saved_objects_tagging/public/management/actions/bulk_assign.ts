@@ -17,6 +17,7 @@ interface GetBulkAssignActionOptions {
   notifications: NotificationsStart;
   tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
+  assignableTypes: string[];
   setLoading: (loading: boolean) => void;
 }
 
@@ -26,12 +27,14 @@ export const getBulkAssignAction = ({
   tagCache,
   assignmentService,
   setLoading,
+  assignableTypes,
 }: GetBulkAssignActionOptions): TagBulkAction => {
   const openFlyout = getAssignFlyoutOpener({
     overlays,
     notifications,
     tagCache,
     assignmentService,
+    assignableTypes,
   });
 
   return {
