@@ -10,7 +10,7 @@ import { EuiDescribedFormGroup, EuiDescribedFormGroupProps } from '@elastic/eui'
 import { ToggleableField, Props as ToggleableFieldProps } from './toggleable_field';
 
 type Props = EuiDescribedFormGroupProps & {
-  children: (() => JSX.Element) | JSX.Element;
+  children: (() => JSX.Element) | JSX.Element | JSX.Element[];
   switchProps: Omit<ToggleableFieldProps, 'children'>;
 };
 
