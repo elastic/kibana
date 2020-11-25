@@ -94,8 +94,7 @@ export const renderAllSeries = (
   data: DatatableRow[],
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
   getSeriesColor: SeriesColorAccessorFn,
-  timeZone: string,
-  hasNonStackedBars: boolean
+  timeZone: string
 ) => {
   const xAccessor = getXAccessor(aspects.x);
 
@@ -135,7 +134,10 @@ export const renderAllSeries = (
               name={getSeriesName}
               color={getSeriesColor}
               tickFormat={yAspect.formatter}
-              groupId={groupId}
+              // needed to seperate stacked and non-stacked bars into unique pseudo groups
+              groupId={isStacked ? `__pseudo_stacked_group-${groupId}__` : groupId}
+              // set domain of stacked groups to use actual groupId not pseudo groupdId
+              useDefaultGroupDomain={isStacked ? groupId : undefined}
               xScaleType={xAxis.scale.type}
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
@@ -144,7 +146,7 @@ export const renderAllSeries = (
               data={data}
               timeZone={timeZone}
               stackAccessors={isStacked ? ['__any_value__'] : undefined}
-              enableHistogramMode={!isStacked && hasNonStackedBars ? false : enableHistogramMode}
+              enableHistogramMode={enableHistogramMode}
               stackMode={stackMode}
               minBarHeight={2}
               displayValueSettings={{

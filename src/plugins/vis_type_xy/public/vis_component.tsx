@@ -205,21 +205,6 @@ const VisComponent = (props: VisComponentProps) => {
   ]);
   const isDarkMode = getThemeService().useDarkMode();
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
-  const nonStackedBars = visParams.seriesParams.filter(
-    ({ type, data: { id: paramId }, valueAxis: groupId, mode }) => {
-      const barAspect =
-        type === ChartType.Histogram && config.aspects.y.find(({ aggId }) => aggId === paramId);
-
-      if (!barAspect) {
-        return false;
-      }
-
-      const yAxisScale = config.yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)
-        ?.scale;
-      return !(mode === 'stacked' || yAxisScale?.mode === 'percentage');
-    }
-  );
-  const hasNonStackedBars = nonStackedBars.length > 1;
 
   const getSeriesColor = useCallback(
     (series: XYChartSeriesIdentifier) => {
@@ -270,7 +255,7 @@ const VisComponent = (props: VisComponentProps) => {
         <XYThresholdLine {...config.thresholdLine} />
         <XYCurrentTime enabled={config.showCurrentTime} isDarkMode={isDarkMode} domain={xDomain} />
         <XYEndzones
-          isFullBin={hasNonStackedBars}
+          isFullBin={!config.enableHistogramMode}
           enabled={config.isTimeChart}
           isDarkMode={isDarkMode}
           domain={xDomain}
@@ -287,8 +272,7 @@ const VisComponent = (props: VisComponentProps) => {
           visData.rows,
           getSeriesName,
           getSeriesColor,
-          timeZone,
-          hasNonStackedBars
+          timeZone
         )}
       </Chart>
     </div>
