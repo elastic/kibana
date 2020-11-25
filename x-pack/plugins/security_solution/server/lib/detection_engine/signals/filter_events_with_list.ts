@@ -28,10 +28,8 @@ const isStringableArray = (val: SearchTypes): val is Array<string | number | boo
   }
   // TS does not allow .every to be called on val as-is, even though every type in the union
   // is an array. https://github.com/microsoft/TypeScript/issues/36390
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (val as any[]).every((subVal: string | number | boolean | object) =>
-    isStringableType(subVal)
-  );
+  // @ts-expect-error
+  return val.every((subVal) => isStringableType(subVal));
 };
 
 export const createSetToFilterAgainst = async <T>({
@@ -57,7 +55,7 @@ export const createSetToFilterAgainst = async <T>({
       if (isStringableType(valueField)) {
         acc.add(valueField.toString());
       } else if (isStringableArray(valueField)) {
-        valueField.forEach((subVal: string | number | boolean) => acc.add(subVal.toString()));
+        valueField.forEach((subVal) => acc.add(subVal.toString()));
       }
     }
     return acc;
