@@ -43,7 +43,7 @@ export const mapIncident = async (
     throw new Error(`Invalid service`);
   }
   const thirdPartyName = service.thirdPartyName;
-  let incident: Partial<PushToServiceApiParams['incident']> = service.incident; // : Incident;
+  let incident: Partial<PushToServiceApiParams['incident']> = service.incident;
   if (externalId) {
     try {
       currentIncident = ((await actionsClient.execute({

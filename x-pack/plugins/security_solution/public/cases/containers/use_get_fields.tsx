@@ -68,8 +68,7 @@ export const useGetFields = (connectorId: string, connectorType: string): UseGet
       didCancel = true;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fieldsState]);
+  }, [connectorId, connectorType, dispatchToaster, fieldsState]);
 
   useEffect(() => {
     fetchFields();
