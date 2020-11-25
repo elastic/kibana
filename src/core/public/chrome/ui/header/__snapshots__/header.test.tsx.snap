@@ -4753,45 +4753,54 @@ exports[`Header renders 1`] = `
                         hasArrow={true}
                         id="headerHelpMenu"
                         isOpen={false}
-                        ownFocus={true}
+                        ownFocus={false}
                         panelPaddingSize="m"
                         repositionOnScroll={true}
                       >
-                        <div
-                          className="euiPopover euiPopover--anchorDownRight"
-                          data-test-subj="helpMenuButton"
-                          id="headerHelpMenu"
+                        <EuiOutsideClickDetector
+                          onOutsideClick={[Function]}
                         >
                           <div
-                            className="euiPopover__anchor"
+                            className="euiPopover euiPopover--anchorDownRight"
+                            data-test-subj="helpMenuButton"
+                            id="headerHelpMenu"
+                            onKeyDown={[Function]}
+                            onMouseDown={[Function]}
+                            onMouseUp={[Function]}
+                            onTouchEnd={[Function]}
+                            onTouchStart={[Function]}
                           >
-                            <EuiHeaderSectionItemButton
-                              aria-expanded={false}
-                              aria-haspopup="true"
-                              aria-label="Help menu"
-                              onClick={[Function]}
+                            <div
+                              className="euiPopover__anchor"
                             >
-                              <button
+                              <EuiHeaderSectionItemButton
                                 aria-expanded={false}
                                 aria-haspopup="true"
                                 aria-label="Help menu"
-                                className="euiHeaderSectionItem__button"
                                 onClick={[Function]}
-                                type="button"
                               >
-                                <EuiIcon
-                                  size="m"
-                                  type="help"
+                                <button
+                                  aria-expanded={false}
+                                  aria-haspopup="true"
+                                  aria-label="Help menu"
+                                  className="euiHeaderSectionItem__button"
+                                  onClick={[Function]}
+                                  type="button"
                                 >
-                                  <span
-                                    data-euiicon-type="help"
+                                  <EuiIcon
                                     size="m"
-                                  />
-                                </EuiIcon>
-                              </button>
-                            </EuiHeaderSectionItemButton>
+                                    type="help"
+                                  >
+                                    <span
+                                      data-euiicon-type="help"
+                                      size="m"
+                                    />
+                                  </EuiIcon>
+                                </button>
+                              </EuiHeaderSectionItemButton>
+                            </div>
                           </div>
-                        </div>
+                        </EuiOutsideClickDetector>
                       </EuiPopover>
                     </HeaderHelpMenuUI>
                   </InjectIntl(HeaderHelpMenuUI)>

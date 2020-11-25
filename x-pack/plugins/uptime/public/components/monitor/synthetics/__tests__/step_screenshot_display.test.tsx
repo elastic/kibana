@@ -52,33 +52,42 @@ describe('StepScreenshotDisplayProps', () => {
         display="inlineBlock"
         hasArrow={true}
         isOpen={false}
-        ownFocus={true}
+        ownFocus={false}
         panelPaddingSize="m"
       >
-        <div
-          className="euiPopover euiPopover--anchorRightCenter"
+        <EuiOutsideClickDetector
+          onOutsideClick={[Function]}
         >
           <div
-            className="euiPopover__anchor"
+            className="euiPopover euiPopover--anchorRightCenter"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
           >
-            <input
-              alt="Screenshot for step with name \\"STEP_NAME\\""
-              onClick={[Function]}
-              onMouseEnter={[Function]}
-              onMouseLeave={[Function]}
-              src="/api/uptime/journey/screenshot/check_group/1"
-              style={
-                Object {
-                  "height": 180,
-                  "objectFit": "cover",
-                  "objectPosition": "center top",
-                  "width": 320,
+            <div
+              className="euiPopover__anchor"
+            >
+              <input
+                alt="Screenshot for step with name \\"STEP_NAME\\""
+                onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
+                src="/api/uptime/journey/screenshot/check_group/1"
+                style={
+                  Object {
+                    "height": 180,
+                    "objectFit": "cover",
+                    "objectPosition": "center top",
+                    "width": 320,
+                  }
                 }
-              }
-              type="image"
-            />
+                type="image"
+              />
+            </div>
           </div>
-        </div>
+        </EuiOutsideClickDetector>
       </EuiPopover>
     `);
   });
@@ -115,33 +124,42 @@ describe('StepScreenshotDisplayProps', () => {
         display="inlineBlock"
         hasArrow={true}
         isOpen={false}
-        ownFocus={true}
+        ownFocus={false}
         panelPaddingSize="m"
       >
-        <div
-          className="euiPopover euiPopover--anchorRightCenter"
+        <EuiOutsideClickDetector
+          onOutsideClick={[Function]}
         >
           <div
-            className="euiPopover__anchor"
+            className="euiPopover euiPopover--anchorRightCenter"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
           >
-            <input
-              alt="Screenshot"
-              onClick={[Function]}
-              onMouseEnter={[Function]}
-              onMouseLeave={[Function]}
-              src="/api/uptime/journey/screenshot/check_group/1"
-              style={
-                Object {
-                  "height": 180,
-                  "objectFit": "cover",
-                  "objectPosition": "center top",
-                  "width": 320,
+            <div
+              className="euiPopover__anchor"
+            >
+              <input
+                alt="Screenshot"
+                onClick={[Function]}
+                onMouseEnter={[Function]}
+                onMouseLeave={[Function]}
+                src="/api/uptime/journey/screenshot/check_group/1"
+                style={
+                  Object {
+                    "height": 180,
+                    "objectFit": "cover",
+                    "objectPosition": "center top",
+                    "width": 320,
+                  }
                 }
-              }
-              type="image"
-            />
+                type="image"
+              />
+            </div>
           </div>
-        </div>
+        </EuiOutsideClickDetector>
       </EuiPopover>
     `);
   });
