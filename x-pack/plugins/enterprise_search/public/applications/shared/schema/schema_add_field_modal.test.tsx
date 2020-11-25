@@ -69,7 +69,9 @@ describe('SchemaAddFieldModal', () => {
 
     expect(wrapper.find('[data-test-subj="SchemaAddFieldNameRow"]').prop('helpText')).toEqual(
       <React.Fragment>
-        The field will be named <strong>foo_bar</strong>
+        The field will be named
+        {' '}
+        <strong>foo_bar</strong>
       </React.Fragment>
     );
   });

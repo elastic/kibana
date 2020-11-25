@@ -12,6 +12,8 @@ import { EuiSelect } from '@elastic/eui';
 
 import { fieldTypeSelectOptions } from '../constants/field_types';
 
+import { RECENTY_ADDED } from './constants';
+
 interface ISchemaExistingFieldProps {
   disabled?: boolean;
   fieldName: string;
@@ -36,7 +38,7 @@ export const SchemaExistingField: React.FC<ISchemaExistingFieldProps> = ({
   return (
     <div className={fieldCssClass} id={`field_${fieldName}`}>
       <div className="c-stui-engine-schema-field__name">{!hideName ? fieldName : ''}</div>
-      {unconfirmed && <div className="c-stui-engine-schema-field__status">Recently Added</div>}
+      {unconfirmed && <div className="c-stui-engine-schema-field__status">{RECENTY_ADDED}</div>}
       {fieldType && updateExistingFieldType && (
         <div className="o-stui-select-container o-stui-select-container--align-right">
           <EuiSelect

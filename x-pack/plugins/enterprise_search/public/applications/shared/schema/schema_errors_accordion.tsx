@@ -22,6 +22,13 @@ import { EuiLinkTo } from '../react_router_helpers';
 
 import { TruncatedContent } from '../truncate';
 
+import {
+  ERROR_TABLE_ID_HEADER,
+  ERROR_TABLE_ERROR_HEADER,
+  ERROR_TABLE_REVIEW_CONTROL,
+  ERROR_TABLE_VIEW_LINK,
+} from './constants';
+
 interface IFieldCoercionError {
   external_id: string;
   error: string;
@@ -59,7 +66,7 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <span className="field-error__control button">Review</span>
+            <span className="field-error__control button">{ERROR_TABLE_REVIEW_CONTROL}</span>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -75,8 +82,8 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
         >
           <EuiTable>
             <EuiTableHeader>
-              <EuiTableHeaderCell>id</EuiTableHeaderCell>
-              <EuiTableHeaderCell>Error</EuiTableHeaderCell>
+              <EuiTableHeaderCell>{ERROR_TABLE_ID_HEADER}</EuiTableHeaderCell>
+              <EuiTableHeaderCell>{ERROR_TABLE_ERROR_HEADER}</EuiTableHeaderCell>
               <EuiTableHeaderCell />
             </EuiTableHeader>
             <EuiTableBody>
@@ -91,7 +98,7 @@ export const SchemaErrorsAccordion: React.FC<ISchemaErrorsAccordionProps> = ({
                       to={documentPath}
                     >
                       <span className="euiButtonEmpty__content">
-                        <span className="euiButtonEmpty__text">View</span>
+                        <span className="euiButtonEmpty__text">{ERROR_TABLE_VIEW_LINK}</span>
                       </span>
                     </EuiLinkTo>
                   </EuiTableRowCell>

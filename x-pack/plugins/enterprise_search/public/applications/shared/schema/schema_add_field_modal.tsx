@@ -26,6 +26,15 @@ import {
 
 import { TEXT, fieldTypeSelectOptions } from '../constants/field_types';
 
+import {
+  FIELD_NAME_CORRECT_NOTE,
+  FIELD_NAME_CORRECTED_PREFIX,
+  FIELD_NAME_MODAL_TITLE,
+  FIELD_NAME_MODAL_DESCRIPTION,
+  FIELD_NAME_MODAL_CANCEL,
+  FIELD_NAME_MODAL_ADD_FIELD,
+} from './constants';
+
 interface ISchemaAddFieldModalProps {
   disableForm?: boolean;
   addFieldFormErrors?: string[] | null;
@@ -62,10 +71,10 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
   const fieldNameNote =
     rawFieldName !== formattedFieldName ? (
       <>
-        The field will be named <strong>{formattedFieldName}</strong>
+        {FIELD_NAME_CORRECTED_PREFIX} <strong>{formattedFieldName}</strong>
       </>
     ) : (
-      'Field names can only contain lowercase letters, numbers, and underscores'
+      FIELD_NAME_CORRECT_NOTE
     );
 
   return (
@@ -73,10 +82,10 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
       <form onSubmit={submitForm}>
         <EuiModal onClose={closeAddFieldModal} maxWidth={500}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>Add a New Field</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>{FIELD_NAME_MODAL_TITLE}</EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <p>Once added, a field cannot be removed from your schema.</p>
+            <p>{FIELD_NAME_MODAL_DESCRIPTION}</p>
             <EuiForm>
               <EuiSpacer />
               <EuiFlexGroup gutterSize="m">
@@ -119,7 +128,7 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
             </EuiForm>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeAddFieldModal}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={closeAddFieldModal}>{FIELD_NAME_MODAL_CANCEL}</EuiButtonEmpty>
             <EuiButton
               color="primary"
               fill={true}
@@ -128,7 +137,7 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
               isLoading={loading}
               data-test-subj="SchemaAddFieldAddFieldButton"
             >
-              Add Field
+              {FIELD_NAME_MODAL_ADD_FIELD}
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
