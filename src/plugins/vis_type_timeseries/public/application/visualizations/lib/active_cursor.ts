@@ -17,19 +17,7 @@
  * under the License.
  */
 
-import moment from 'moment';
+import { Subject } from 'rxjs';
+import { PointerEvent } from '@elastic/charts';
 
-export const getTimerange = (req) => {
-  const { min, max } = req.payload.timerange;
-
-  return {
-    from: moment.utc(min),
-    to: moment.utc(max),
-  };
-};
-
-export const getTimerangeDuration = (req) => {
-  const { from, to } = getTimerange(req);
-
-  return moment.duration(to.valueOf() - from.valueOf(), 'ms');
-};
+export const activeCursor$ = new Subject<PointerEvent>();

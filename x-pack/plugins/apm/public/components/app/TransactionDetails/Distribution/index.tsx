@@ -22,7 +22,7 @@ import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { isEmpty } from 'lodash';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { ValuesType } from 'utility-types';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { useTheme } from '../../../../../../observability/public';
@@ -70,44 +70,27 @@ export function getFormattedBuckets(
   );
 }
 
-const getFormatYShort = (transactionType: string | undefined) => (
-  t: number
-) => {
+const formatYShort = (t: number) => {
   return i18n.translate(
     'xpack.apm.transactionDetails.transactionsDurationDistributionChart.unitShortLabel',
     {
-      defaultMessage:
-        '{transCount} {transType, select, request {req.} other {trans.}}',
-      values: {
-        transCount: t,
-        transType: transactionType,
-      },
+      defaultMessage: '{transCount} trans.',
+      values: { transCount: t },
     }
   );
 };
 
-const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
-  return transactionType === 'request'
-    ? i18n.translate(
-        'xpack.apm.transactionDetails.transactionsDurationDistributionChart.requestTypeUnitLongLabel',
-        {
-          defaultMessage:
-            '{transCount, plural, =0 {request} one {request} other {requests}}',
-          values: {
-            transCount: t,
-          },
-        }
-      )
-    : i18n.translate(
-        'xpack.apm.transactionDetails.transactionsDurationDistributionChart.transactionTypeUnitLongLabel',
-        {
-          defaultMessage:
-            '{transCount, plural, =0 {transaction} one {transaction} other {transactions}}',
-          values: {
-            transCount: t,
-          },
-        }
-      );
+const formatYLong = (t: number) => {
+  return i18n.translate(
+    'xpack.apm.transactionDetails.transactionsDurationDistributionChart.transactionTypeUnitLongLabel',
+    {
+      defaultMessage:
+        '{transCount, plural, =0 {transactions} one {transaction} other {transactions}}',
+      values: {
+        transCount: t,
+      },
+    }
+  );
 };
 
 interface Props {
@@ -128,16 +111,6 @@ export function TransactionDistribution({
   onBucketClick,
 }: Props) {
   const theme = useTheme();
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const formatYShort = useCallback(getFormatYShort(transactionType), [
-    transactionType,
-  ]);
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const formatYLong = useCallback(getFormatYLong(transactionType), [
-    transactionType,
-  ]);
 
   // no data in response
   if (

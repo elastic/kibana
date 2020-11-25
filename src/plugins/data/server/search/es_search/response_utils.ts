@@ -17,9 +17,28 @@
  * under the License.
  */
 
-// TODO: Remove bus when action/triggers are available with LegacyPluginApi or metric is converted to Embeddable
-import $ from 'jquery';
+import { SearchResponse } from 'elasticsearch';
 
-export const ACTIVE_CURSOR = 'ACTIVE_CURSOR';
+/**
+ * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
+ * not included as it is already included in `successful`.
+ * @internal
+ */
+export function getTotalLoaded(response: SearchResponse<unknown>) {
+  const { total, failed, successful } = response._shards;
+  const loaded = failed + successful;
+  return { total, loaded };
+}
 
-export const eventBus = $({});
+/**
+ * Get the Kibana representation of this response (see `IKibanaSearchResponse`).
+ * @internal
+ */
+export function toKibanaSearchResponse(rawResponse: SearchResponse<unknown>) {
+  return {
+    rawResponse,
+    isPartial: false,
+    isRunning: false,
+    ...getTotalLoaded(rawResponse),
+  };
+}

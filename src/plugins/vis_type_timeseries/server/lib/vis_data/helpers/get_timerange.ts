@@ -17,32 +17,14 @@
  * under the License.
  */
 
-/**
- * @internal
- * TransportRequestPromise extends base Promise with an "abort" method
- */
-export interface TransportRequestPromise<T> extends Promise<T> {
-  abort?: () => void;
-}
+import { utc } from 'moment';
+import { ReqFacade, VisPayload } from '../../..';
 
-/**
- *
- * @internal
- * NOTE: Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
- * is resolved
- *
- * @param promise a TransportRequestPromise
- * @param signal optional AbortSignal
- *
- * @returns a TransportRequestPromise that will be aborted if the signal is aborted
- */
+export const getTimerange = (req: ReqFacade<VisPayload>) => {
+  const { min, max } = req.payload.timerange;
 
-export const shimAbortSignal = <T extends TransportRequestPromise<unknown>>(
-  promise: T,
-  signal: AbortSignal | undefined
-): T => {
-  if (signal) {
-    signal.addEventListener('abort', () => promise.abort && promise.abort());
-  }
-  return promise;
+  return {
+    from: utc(min),
+    to: utc(max),
+  };
 };
