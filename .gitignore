@@ -78,3 +78,6 @@ report.asciidoc
 
 # Ignore code owners to avoid pings on backports
 .github/CODEOWNERS
+
+# Yarn local mirror content
+.yarn-local-mirror
