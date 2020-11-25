@@ -23,7 +23,7 @@ import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { getState, splitState } from './discover_state';
+import { getState, splitState, createSearchSessionRestorationDataProvider } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
 import {
@@ -287,30 +287,13 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     }
   });
 
-  data.search.session.setSearchSessionRestorationInfoProvider({
-    getName: async () => 'Discover',
-    getUrlGeneratorData: async () => {
-      const appState = appStateContainer.getState();
-      const state = {
-        filters: filterManager.getFilters(),
-        indexPatternId: appState.index,
-        query: appState.query,
-        savedSearchId: savedSearch.id,
-        timeRange: timefilter.getTime(), // TODO: handle relative time range
-        searchSessionId: data.search.session.getSessionId(),
-        columns: appState.columns,
-        sort: appState.sort,
-        savedQuery: appState.savedQuery,
-        interval: appState.interval,
-        useHash: false,
-      };
-      return {
-        urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
-        initialState: state,
-        restoreState: state, // TODO: handle relative time range
-      };
-    },
-  });
+  data.search.session.setSearchSessionRestorationInfoProvider(
+    createSearchSessionRestorationDataProvider({
+      appStateContainer,
+      data,
+      getSavedSearchId: () => savedSearch.id,
+    })
+  );
 
   $scope.setIndexPattern = async (id) => {
     const nextIndexPattern = await indexPatterns.get(id);

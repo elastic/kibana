@@ -20,15 +20,23 @@ import { isEqual } from 'lodash';
 import { History } from 'history';
 import { NotificationsStart } from 'kibana/public';
 import {
-  createStateContainer,
   createKbnUrlStateStorage,
-  syncState,
-  ReduxLikeStateContainer,
+  createStateContainer,
   IKbnUrlStateStorage,
+  ReduxLikeStateContainer,
+  StateContainer,
+  syncState,
   withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
-import { esFilters, Filter, Query } from '../../../../data/public';
+import {
+  DataPublicPluginStart,
+  esFilters,
+  Filter,
+  Query,
+  SearchSessionRestorationInfoProvider,
+} from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
+import { DISCOVER_APP_URL_GENERATOR } from '../../url_generator';
 
 export interface AppState {
   /**
@@ -246,4 +254,39 @@ export function isEqualState(stateA: AppState, stateB: AppState) {
   const { filters: stateAFilters = [], ...stateAPartial } = stateA;
   const { filters: stateBFilters = [], ...stateBPartial } = stateB;
   return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
+}
+
+export function createSearchSessionRestorationDataProvider({
+  appStateContainer,
+  data,
+  getSavedSearchId,
+}: {
+  appStateContainer: StateContainer<AppState>;
+  data: DataPublicPluginStart;
+  getSavedSearchId: () => string | undefined;
+}): SearchSessionRestorationInfoProvider {
+  return {
+    getName: async () => 'Discover',
+    getUrlGeneratorData: async () => {
+      const appState = appStateContainer.get();
+      const state = {
+        filters: data.query.filterManager.getFilters(),
+        indexPatternId: appState.index,
+        query: appState.query,
+        savedSearchId: getSavedSearchId(),
+        timeRange: data.query.timefilter.timefilter.getTime(), // TODO: handle relative time range
+        searchSessionId: data.search.session.getSessionId(),
+        columns: appState.columns,
+        sort: appState.sort,
+        savedQuery: appState.savedQuery,
+        interval: appState.interval,
+        useHash: false,
+      };
+      return {
+        urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
+        initialState: state,
+        restoreState: state, // TODO: handle relative time range
+      };
+    },
+  };
 }
