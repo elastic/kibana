@@ -21,7 +21,7 @@ export function transformActionVariables(actionVariables: ActionVariables): Acti
 
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
   return actionVariables.map((actionVariable) => {
-    return { name: `${prefix}${actionVariable.name}`, description: actionVariable.description };
+    return { ...actionVariable, name: `${prefix}${actionVariable.name}` };
   });
 }
 

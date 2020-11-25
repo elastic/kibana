@@ -18,7 +18,7 @@ import { ActionVariable } from '../../types';
 interface Props {
   messageVariables?: ActionVariable[];
   paramsProperty: string;
-  onSelectEventHandler: (variable: string) => void;
+  onSelectEventHandler: (variable: ActionVariable) => void;
 }
 
 export const AddMessageVariables: React.FunctionComponent<Props> = ({
@@ -35,12 +35,14 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         data-test-subj={`variableMenuButton-${i}`}
         icon="empty"
         onClick={() => {
-          onSelectEventHandler(variable.name);
+          onSelectEventHandler(variable);
           setIsVariablesPopoverOpen(false);
         }}
       >
         <>
-          <EuiText size="m">{`{{${variable.name}}}`}</EuiText>
+          <EuiText size="m">
+            {variable.noEscape ? `{{{${variable.name}}}}` : `{{${variable.name}}}`}
+          </EuiText>
           <EuiText size="m" color="subdued">
             <div className="euiTextColor--subdued">{variable.description}</div>
           </EuiText>

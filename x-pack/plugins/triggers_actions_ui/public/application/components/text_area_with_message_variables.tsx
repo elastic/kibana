@@ -30,8 +30,9 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
-  const onSelectMessageVariable = (variable: string) => {
-    const templatedVar = `{{${variable}}}`;
+
+  const onSelectMessageVariable = ({ name, noEscape }: ActionVariable) => {
+    const templatedVar = noEscape ? `{{{${name}}}}` : `{{${name}}}`;
     const startPosition = currentTextElement?.selectionStart ?? 0;
     const endPosition = currentTextElement?.selectionEnd ?? 0;
     const newValue =
@@ -54,7 +55,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
       labelAppend={
         <AddMessageVariables
           messageVariables={messageVariables}
-          onSelectEventHandler={(variable: string) => onSelectMessageVariable(variable)}
+          onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}
         />
       }

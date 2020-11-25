@@ -43,8 +43,8 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
-  const onSelectMessageVariable = (variable: string) => {
-    const templatedVar = `{{${variable}}}`;
+  const onSelectMessageVariable = ({ name, noEscape }: ActionVariable) => {
+    const templatedVar = noEscape ? `{{{${name}}}}` : `{{${name}}}`;
     let newValue = '';
     if (cursorPosition) {
       const cursor = cursorPosition.getCursor();
@@ -71,7 +71,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
       labelAppend={
         <AddMessageVariables
           messageVariables={messageVariables}
-          onSelectEventHandler={(variable: string) => onSelectMessageVariable(variable)}
+          onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}
         />
       }

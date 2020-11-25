@@ -125,6 +125,7 @@ export type ActionConnectorTableItem = ActionConnector & {
 export interface ActionVariable {
   name: string;
   description: string;
+  noEscape?: boolean;
 }
 
 export interface ActionVariables {
