@@ -15,6 +15,7 @@ const alwaysImportedTests = [
   require.resolve('../test/security_functional/oidc.config.ts'),
   require.resolve('../test/security_functional/saml.config.ts'),
   require.resolve('../test/functional_embedded/config.ts'),
+  require.resolve('../test/functional_cors/config.ts'),
   require.resolve('../test/functional_enterprise_search/without_host_configured.config.ts'),
 ];
 const onlyNotInCoverageTests = [
