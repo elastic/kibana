@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchableSnapshotField as ViewComponent } from './searchable_snapshot_field';
-
-import { withLicenseCheck } from './with_license_check';
-
-export const SearchableSnapshotField = withLicenseCheck(ViewComponent);
+export { SearchableSnapshotField } from './searchable_snapshot_field';

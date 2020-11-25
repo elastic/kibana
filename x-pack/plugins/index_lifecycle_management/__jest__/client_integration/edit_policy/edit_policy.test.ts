@@ -6,10 +6,11 @@
 
 import { act } from 'react-dom/test-utils';
 
+import { licensingMock } from '../../../../licensing/public/mocks';
+import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../helpers/setup_environment';
 import { EditPolicyTestBed, setup } from './edit_policy.helpers';
 
-import { API_BASE_PATH } from '../../../common/constants';
 import {
   DELETE_PHASE_POLICY,
   NEW_SNAPSHOT_POLICY_NAME,
@@ -697,6 +698,42 @@ describe('<EditPolicy />', () => {
         expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
           'found-snapshots'
         );
+      });
+    });
+    describe('on non-enterprise license', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+        httpRequestsMockHelpers.setListNodes({
+          isUsingDeprecatedDataRoleConfig: false,
+          nodesByAttributes: { test: ['123'] },
+          nodesByRoles: { data: ['123'] },
+        });
+        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+        await act(async () => {
+          testBed = await setup({
+            appServicesContext: {
+              license: licensingMock.createLicense({ license: { type: 'basic' } }),
+            },
+          });
+        });
+
+        const { component } = testBed;
+        component.update();
+      });
+      test('disable setting searchable snapshots', async () => {
+        const { actions } = testBed;
+
+        expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();
+        expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
+
+        await actions.cold.enable(true);
+
+        expect(actions.hot.searchableSnapshotDisabled()).toBeTruthy();
+        expect(actions.hot.findSearchableSnapshotToggle().props().disabled).toBeTruthy();
+
+        expect(actions.cold.searchableSnapshotDisabled()).toBeTruthy();
+        expect(actions.cold.findSearchableSnapshotToggle().props().disabled).toBeTruthy();
       });
     });
   });

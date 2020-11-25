@@ -9,6 +9,8 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 
+import { licensingMock } from '../../../../licensing/public/mocks';
+
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
 import { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
 
@@ -56,7 +58,13 @@ const breadcrumbService = createBreadcrumbsMock();
 
 const MyComponent = ({ appServicesContext, ...rest }: any) => {
   return (
-    <KibanaContextProvider services={{ breadcrumbService, ...appServicesContext }}>
+    <KibanaContextProvider
+      services={{
+        breadcrumbService,
+        license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+        ...appServicesContext,
+      }}
+    >
       <EditPolicy {...rest} />
     </KibanaContextProvider>
   );
@@ -191,10 +199,14 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
 
   const createSearchableSnapshotActions = (phase: Phases) => {
     const fieldSelector = `searchableSnapshotField-${phase}`;
+    const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
     const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;
+
     const toggleSearchableSnapshot = createFormToggleAction(toggleSelector);
     return {
+      searchableSnapshotDisabled: () => exists(licenseCalloutSelector),
       searchableSnapshotsExists: () => exists(fieldSelector),
+      findSearchableSnapshotToggle: () => find(toggleSelector),
       toggleSearchableSnapshot,
       setSearchableSnapshot: async (value: string) => {
         await toggleSearchableSnapshot(true);
