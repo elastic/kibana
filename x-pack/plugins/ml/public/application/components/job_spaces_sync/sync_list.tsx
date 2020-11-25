@@ -168,13 +168,11 @@ const SyncItem: FC<{ id: string; title: JSX.Element; items: string[] }> = ({
 }) => (
   <EuiAccordion id={id} buttonContent={title} paddingSize="l">
     <EuiText size="s">
-      {items.length && (
-        <ul>
-          {items.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      )}
+      <ul>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
     </EuiText>
   </EuiAccordion>
 );
