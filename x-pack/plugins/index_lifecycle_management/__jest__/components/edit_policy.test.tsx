@@ -25,6 +25,8 @@ import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_coll
 
 import { CloudSetup } from '../../../cloud/public';
 
+import { licensingMock } from '../../../licensing/public/mocks';
+
 import { EditPolicy } from '../../public/application/sections/edit_policy/edit_policy';
 import {
   EditPolicyContextProvider,
@@ -172,6 +174,9 @@ const MyComponent = ({
           existingPolicies,
           policyName,
           getUrlForApp,
+          license: {
+            canUseSearchableSnapshot: () => true,
+          },
         }}
       >
         <EditPolicy history={history} />
@@ -209,6 +214,7 @@ describe('edit policy', () => {
         getUrlForApp={jest.fn()}
         policyName="test"
         isCloudEnabled={false}
+        license={{ canUseSearchableSnapshot: () => true }}
       />
     );
 
@@ -247,6 +253,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={false}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
       const rendered = mountWithIntl(component);
@@ -283,6 +290,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={false}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
 
@@ -827,6 +835,7 @@ describe('edit policy', () => {
           existingPolicies={policies}
           getUrlForApp={jest.fn()}
           isCloudEnabled={true}
+          license={{ canUseSearchableSnapshot: () => true }}
         />
       );
       ({ http } = editPolicyHelpers.setup());
