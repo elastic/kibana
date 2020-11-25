@@ -1195,7 +1195,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   class="euiLink euiLink--text c4"
                   type="button"
                 >
-
+                   
                   <span
                     color="subbdued"
                     data-euiicon-type="popout"
@@ -1418,7 +1418,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   class="euiLink euiLink--text c4"
                   type="button"
                 >
-
+                   
                   <span
                     color="subbdued"
                     data-euiicon-type="popout"
