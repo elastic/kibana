@@ -60,19 +60,18 @@ export function createAggDescriptor(
   });
   const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey as keyof typeof AGG_TYPE] : undefined;
 
-  if (!aggType || aggType === AGG_TYPE.COUNT || !metricFieldName) {
+  if (
+    !aggType ||
+    aggType === AGG_TYPE.COUNT ||
+    !metricFieldName ||
+    (isHeatmap(mapType) && !isMetricCountable(aggType))
+  ) {
     return { type: AGG_TYPE.COUNT };
   }
 
-  if (isHeatmap(mapType)) {
-    return isMetricCountable(aggType)
-      ? { type: aggType, field: metricFieldName }
-      : { type: AGG_TYPE.COUNT };
-  } else {
-    return aggType === AGG_TYPE.PERCENTILE
-      ? { type: aggType, field: metricFieldName, percentile: DEFAULT_PERCENTILE }
-      : { type: aggType, field: metricFieldName };
-  }
+  return aggType === AGG_TYPE.PERCENTILE
+    ? { type: aggType, field: metricFieldName, percentile: DEFAULT_PERCENTILE }
+    : { type: aggType, field: metricFieldName };
 }
 
 export function createTileMapLayerDescriptor({
