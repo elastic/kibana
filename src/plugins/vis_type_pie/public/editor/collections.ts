@@ -66,7 +66,7 @@ export const getLabelPositions = () => [
 export const getValuesFormats = () => [
   {
     text: i18n.translate('visTypePie.valuesFormats.percent', {
-      defaultMessage: 'Show Percent',
+      defaultMessage: 'Show percent',
     }),
     value: ValueFormats.PERCENT,
   },

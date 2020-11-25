@@ -18,6 +18,7 @@
  */
 import { Position } from '@elastic/charts';
 import { DatatableColumn } from '../../../expressions/public';
+import { PaletteOutput } from '../../../charts/public';
 
 export interface Dimension {
   accessor: number;
@@ -42,6 +43,8 @@ export interface PieVisParams {
   nestedLegend: boolean;
   dimensions: Dimensions;
   isDonut: boolean;
+  palette: PaletteOutput;
+  legacyPalette: boolean;
   labels: {
     show: boolean;
     position: LabelPositions;

@@ -266,11 +266,14 @@ const PieComponent = (props: PieComponentProps) => {
     });
   }
 
+  const palette = visParams.legacyPalette ? 'kibana_palette' : visParams.palette.name;
+
   const layers = getLayers(
     layersColumns,
     visParams,
     props.uiState?.get('vis.colors', {}),
-    visData.rows.length
+    visData.rows.length,
+    palette
   );
 
   const tooltip: TooltipProps = {
@@ -294,7 +297,14 @@ const PieComponent = (props: PieComponentProps) => {
             showLegend={showLegend}
             legendPosition={legendPosition}
             legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-            legendColorPicker={getColorPicker(legendPosition, setColor, layersColumns.length)}
+            legendColorPicker={getColorPicker(
+              legendPosition,
+              setColor,
+              layersColumns.length,
+              visParams.legacyPalette,
+              bucketColumns[0],
+              visData.rows
+            )}
             tooltip={tooltip}
             onElementClick={(args) => {
               handleFilterClick(args[0][0] as LayerValue[], bucketColumns, visData);

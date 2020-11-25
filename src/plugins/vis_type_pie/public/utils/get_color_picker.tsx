@@ -21,7 +21,8 @@ import React, { BaseSyntheticEvent } from 'react';
 import Color from 'color';
 import { LegendColorPicker, Position } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
-
+import { DatatableRow } from '../../../expressions/public';
+import { BucketColumns } from '../types';
 import { ColorPicker } from '../temp';
 
 function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
@@ -37,6 +38,14 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
   }
 }
 
+function isOnInnerLayer(
+  firstBucket: BucketColumns,
+  data: DatatableRow[],
+  seriesKey: string
+): DatatableRow | undefined {
+  return data.find((d) => d[firstBucket.id] === seriesKey);
+}
+
 export const getColorPicker = (
   legendPosition: Position,
   setColor: (
@@ -44,7 +53,10 @@ export const getColorPicker = (
     seriesKey: string | number,
     event: BaseSyntheticEvent
   ) => void,
-  maxDepth: number
+  maxDepth: number,
+  isLegacyPaletteEnabled: boolean,
+  firstBucket: BucketColumns,
+  data: DatatableRow[]
 ): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
   const seriesName = seriesIdentifier.key;
   const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
@@ -54,6 +66,12 @@ export const getColorPicker = (
     }
     setColor(newColor, seriesName, event);
   };
+
+  // For the EuiPalette we want the user to be able to change only the colors of the inner layer
+  if (!isLegacyPaletteEnabled) {
+    const enablePicker = isOnInnerLayer(firstBucket, data, seriesIdentifier.key);
+    if (!enablePicker) return null;
+  }
   const hexColor = new Color(color).hex();
   return (
     <EuiWrappingPopover

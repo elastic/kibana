@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { TruncateLabelsOption } from './truncate_labels';
+import { PalettePicker } from './palette_picker';
 import { BasicOptions, SwitchOption, SelectOption } from '../../../../charts/public';
 import { PieVisParams } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
@@ -58,11 +59,25 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
         <BasicOptions {...props} />
         <SwitchOption
           label={i18n.translate('visTypePie.editors.pie.nestedLegendLabel', {
-            defaultMessage: 'Nested Legend',
+            defaultMessage: 'Nested legend',
           })}
           paramName="nestedLegend"
           value={stateParams.nestedLegend}
           setValue={setValue}
+        />
+        <SwitchOption
+          label={i18n.translate('visTypePie.editors.pie.legacyPaletteLabel', {
+            defaultMessage: 'Legacy palette',
+          })}
+          paramName="legacyPalette"
+          value={stateParams.legacyPalette}
+          setValue={setValue}
+        />
+        <PalettePicker
+          disabled={stateParams.legacyPalette}
+          activePalette={stateParams.palette}
+          paramName="palette"
+          setPalette={setValue}
         />
       </EuiPanel>
 

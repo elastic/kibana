@@ -49,6 +49,11 @@ export const getPieVisTypeDefinition = (
       legendPosition: Position.Right,
       nestedLegend: false,
       isDonut: true,
+      legacyPalette: false,
+      palette: {
+        type: 'palette',
+        name: 'default',
+      },
       labels: {
         show: true,
         values: true,
@@ -67,7 +72,7 @@ export const getPieVisTypeDefinition = (
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('visTypeVislib.pie.metricTitle', {
+        title: i18n.translate('visTypePie.pie.metricTitle', {
           defaultMessage: 'Slice size',
         }),
         min: 1,
@@ -78,7 +83,7 @@ export const getPieVisTypeDefinition = (
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('visTypeVislib.pie.segmentTitle', {
+        title: i18n.translate('visTypePie.pie.segmentTitle', {
           defaultMessage: 'Split slices',
         }),
         min: 0,
@@ -88,7 +93,7 @@ export const getPieVisTypeDefinition = (
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('visTypeVislib.pie.splitTitle', {
+        title: i18n.translate('visTypePie.pie.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         mustBeFirst: true,
@@ -99,5 +104,4 @@ export const getPieVisTypeDefinition = (
     ]),
   },
   hierarchicalData: true,
-  responseHandler: 'vislib_slices',
 });

@@ -28,7 +28,8 @@ export const getLayers = (
   columns: Array<Partial<BucketColumns>>,
   visParams: PieVisParams,
   overwriteColors: { [key: string]: string },
-  totalSeries: number
+  totalSeries: number,
+  palette: string
 ): PartitionLayer[] => {
   const fillLabel: Partial<PartitionFillLabel> = {
     textInvertible: true,
@@ -36,7 +37,7 @@ export const getLayers = (
       fontWeight: 700,
     },
   };
-  const defaultPalette = getColorsService().get('kibana_palette');
+  const defaultPalette = getColorsService().get(palette);
 
   if (!visParams.labels.values) {
     fillLabel.valueFormatter = () => '';

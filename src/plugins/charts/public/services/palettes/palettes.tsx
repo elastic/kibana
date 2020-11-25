@@ -43,11 +43,17 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
   const behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 });
   function getColor(
     series: SeriesLayer[],
-    chartConfiguration: ChartColorConfiguration = { behindText: false }
+    chartConfiguration: ChartColorConfiguration = { behindText: false },
+    state?: unknown
   ) {
-    const outputColor = chartConfiguration.behindText
-      ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
-      : colors[series[0].rankAtDepth % colors.length];
+    let outputColor = '';
+    if (state) {
+      outputColor = state as string;
+    } else {
+      outputColor = chartConfiguration.behindText
+        ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
+        : colors[series[0].rankAtDepth % colors.length];
+    }
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
@@ -80,12 +86,13 @@ function buildGradient(
 ): Omit<PaletteDefinition, 'title'> {
   function getColor(
     series: SeriesLayer[],
-    chartConfiguration: ChartColorConfiguration = { behindText: false }
+    chartConfiguration: ChartColorConfiguration = { behindText: false },
+    state?: unknown
   ) {
     const totalSeriesAtDepth = series[0].totalSeriesAtDepth;
     const rankAtDepth = series[0].rankAtDepth;
     const actualColors = colors(totalSeriesAtDepth);
-    const outputColor = actualColors[rankAtDepth];
+    const outputColor = (state as string) ?? actualColors[rankAtDepth];
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
