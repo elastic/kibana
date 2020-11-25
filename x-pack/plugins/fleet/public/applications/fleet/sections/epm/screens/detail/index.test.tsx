@@ -6,13 +6,19 @@
 
 import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../../mock';
 import { Detail } from './index';
-import React from 'react';
+import React, { lazy, memo } from 'react';
 import { PAGE_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import { Route } from 'react-router-dom';
-import { GetInfoResponse } from '../../../../../../../common/types/rest_spec';
+import {
+  GetFleetStatusResponse,
+  GetInfoResponse,
+} from '../../../../../../../common/types/rest_spec';
 import { DetailViewPanelName, KibanaAssetType } from '../../../../../../../common/types/models';
+import { epmRouteService, fleetSetupRouteService } from '../../../../../../../common/services';
+import { act, fireEvent } from '@testing-library/react';
 
 describe('when on integration detail', () => {
+  const detailPageUrlPath = pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7' });
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = () =>
@@ -25,7 +31,7 @@ describe('when on integration detail', () => {
   beforeEach(() => {
     testRenderer = createTestRendererMock();
     mockApiCalls(testRenderer.startServices.http);
-    testRenderer.history.push(`${pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7' })}`);
+    testRenderer.history.push(detailPageUrlPath);
   });
 
   describe('and a custom UI extension is NOT registered', () => {
@@ -42,13 +48,61 @@ describe('when on integration detail', () => {
       expect(renderResult.queryByTestId('tab-custom')).toBeNull();
     });
 
-    it.todo('should redirect if custom url is accessed');
+    it('should redirect if custom url is accessed', () => {
+      act(() => {
+        testRenderer.history.push(
+          pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7', panel: 'custom' })
+        );
+      });
+      expect(testRenderer.history.location.pathname).toEqual(detailPageUrlPath);
+    });
   });
 
   describe('and a custom UI extension is registered', () => {
-    it.todo('should display "custom" tab in navigation');
+    let lazyComponentWasRendered: Promise<void>;
 
-    it.todo('should display custom content when tab is clicked');
+    beforeEach(() => {
+      let setWasRendered: () => void;
+      lazyComponentWasRendered = new Promise((resolve) => {
+        setWasRendered = resolve;
+      });
+
+      const CustomComponent = lazy(async () => {
+        return {
+          default: memo(() => {
+            setWasRendered();
+            return <div data-test-subj="custom-hello">hello</div>;
+          }),
+        };
+      });
+
+      testRenderer.startInterface.registerExtension({
+        package: 'nginx',
+        view: 'package-detail-custom',
+        component: CustomComponent,
+      });
+
+      render();
+    });
+
+    afterEach(() => {
+      // @ts-ignore
+      lazyComponentWasRendered = undefined;
+    });
+
+    it('should display "custom" tab in navigation', () => {
+      expect(renderResult.getByTestId('tab-custom'));
+    });
+
+    it.skip('should display custom content when tab is clicked', async () => {
+      const customTab = renderResult.getByTestId('tab-custom');
+      act(() => {
+        fireEvent.click(customTab, { button: 1 });
+      });
+      // testRenderer.history;
+      await lazyComponentWasRendered;
+      expect(renderResult.getByTestId('custom-hello'));
+    });
   });
 });
 
@@ -299,15 +353,26 @@ The logs were tested with version 1.10.
 On Windows, the module was tested with Nginx installed from the Chocolatey repository.
 `;
 
+  const agentsSetupResponse: GetFleetStatusResponse = { isReady: true, missing_requirements: [] };
+
   http.get.mockImplementation(async (path) => {
     if (typeof path === 'string') {
-      if (path === '/api/fleet/epm/packages/nginx-0.3.7') {
+      if (path === epmRouteService.getInfoPath(`nginx-0.3.7`)) {
         return epmPackageResponse;
       }
 
-      if (path === '/api/fleet/epm/packages/nginx/0.3.7/docs/README.md') {
+      if (path === epmRouteService.getFilePath('/package/nginx/0.3.7/docs/README.md')) {
         return packageReadMe;
       }
+
+      if (path === fleetSetupRouteService.getFleetSetupPath()) {
+        return agentsSetupResponse;
+      }
+
+      const err = new Error(`API [GET ${path}] is not MOCKED!`);
+      // eslint-disable-next-line no-console
+      console.log(err);
+      throw err;
     }
   });
 };
