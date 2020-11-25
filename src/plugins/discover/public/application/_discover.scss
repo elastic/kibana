@@ -27,23 +27,6 @@ discover-app {
   flex-grow: 0;
 }
 
-.dscApp {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
-.dscApp__header {
-  border-bottom: $euiBorderThin;
-  margin-bottom: $euiSize;
-}
-
 .dscApp__frame {
   position: relative;
   flex-grow: 1;
@@ -56,14 +39,6 @@ discover-app {
     margin-right: 0;
     overflow-y: auto;
   }
-}
-
-.dscApp__content {
-  flex-grow: 1;
-  flex-direction: column;
-  display: flex;
-  overflow: hidden;
-  padding-right: $euiSizeS;
 }
 
 .dscHistogram {
@@ -121,13 +96,6 @@ discover-app {
   padding: 0 $euiSizeS;
 }
 
-.dscTimechart__header {
-  display: flex;
-  justify-content: center;
-  min-height: $euiSizeXXL;
-  padding: $euiSizeXS 0;
-}
-
 .dscLoading {
   text-align: center;
   padding: $euiSizeL 0;
@@ -135,7 +103,6 @@ discover-app {
 
 .dscTable {
   overflow: auto;
-  //will-change: transform;
 
   // SASSTODO: add a monospace modifier to the doc-table component
   .kbnDocTable__row {
@@ -155,28 +122,6 @@ discover-app {
   flex-direction: column;
   display: flex;
   overflow: hidden;
-}
-
-.dscResults__interval {
-  display: inline-block;
-  width: auto;
-}
-
-.dscApp .dscFormatSource {
-  word-break: break-word;
-}
-
-.dscFormatSource__title {
-  background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
-  border-radius: $euiBorderRadius / 2;
-  color: $euiTextColor;
-  padding: ($euiSizeXS / 2) $euiSizeXS;
-  margin-right: $euiSizeXS;
-  word-break: normal;
-  display: inline;
-}
-.dscFormatSource__description {
-  display: inline;
 }
 
 .dscCollapsibleSidebar__collapseButton {
