@@ -26,10 +26,13 @@ import { CasesConfigurationMapping, FieldMapping, createDefaultMapping } from '.
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { connectorConfiguration } from './config';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, docLinks }) => {
+> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
+  const { docLinks } = useKibana().services;
+
   // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
   const { apiUrl, incidentConfiguration, isCaseOwned } = action.config;
   const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];

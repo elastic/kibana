@@ -18,10 +18,8 @@
  */
 
 import { resolve } from 'path';
-import { format as formatUrl } from 'url';
 import Fs from 'fs';
 
-import opn from 'opn';
 import { REPO_ROOT } from '@kbn/utils';
 import { FSWatcher } from 'chokidar';
 import * as Rx from 'rxjs';
@@ -35,15 +33,12 @@ import { BasePathProxyServer } from '../../core/server/http';
 import { Log } from './log';
 import { Worker } from './worker';
 
-process.env.kbnWorkerType = 'managr';
-
 export type SomeCliArgs = Pick<
   CliArgs,
   | 'quiet'
   | 'silent'
   | 'repl'
   | 'disableOptimizer'
-  | 'open'
   | 'watch'
   | 'oss'
   | 'runExamples'
@@ -52,7 +47,7 @@ export type SomeCliArgs = Pick<
 >;
 
 const firstAllTrue = (...sources: Array<Rx.Observable<boolean>>) =>
-  Rx.combineLatest(...sources).pipe(
+  Rx.combineLatest(sources).pipe(
     filter((values) => values.every((v) => v === true)),
     take(1),
     mapTo(undefined)
@@ -146,17 +141,6 @@ export class ClusterManager {
       });
     });
 
-    if (opts.open) {
-      this.setupOpen(
-        formatUrl({
-          protocol: config.get('server.ssl.enabled') ? 'https' : 'http',
-          hostname: config.get('server.host'),
-          port: config.get('server.port'),
-          pathname: this.basePathProxy ? this.basePathProxy.basePath : '',
-        })
-      );
-    }
-
     if (opts.watch) {
       const pluginPaths = config.get<string[]>('plugins.paths');
       const scanDirs = [
@@ -206,14 +190,6 @@ export class ClusterManager {
         },
       });
     }
-  }
-
-  setupOpen(openUrl: string) {
-    firstAllTrue(this.serverReady$, this.kbnOptimizerReady$)
-      .toPromise()
-      .then(() => {
-        opn(openUrl);
-      });
   }
 
   setupWatching(extraPaths: string[], pluginInternalDirsIgnore: string[]) {
