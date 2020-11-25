@@ -37,7 +37,7 @@ export function PageLoadDistribution() {
 
       if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/page-load-distribution',
+          endpoint: 'GET /api/apm/rum-client/page-load-distribution',
           params: {
             query: {
               start,

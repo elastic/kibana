@@ -24,7 +24,7 @@ import { readFileSync } from 'fs';
 import del from 'del';
 import execa from 'execa';
 import xml2js from 'xml2js';
-import { getUniqueJunitReportPath } from '@kbn/test';
+import { getUniqueJunitReportPath } from '../../report_path';
 import { REPO_ROOT } from '@kbn/utils';
 
 const MINUTE = 1000 * 60;

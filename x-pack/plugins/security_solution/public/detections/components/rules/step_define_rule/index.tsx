@@ -88,6 +88,17 @@ const stepDefineDefaultValue: DefineStepRule = {
   },
 };
 
+/**
+ * This default query will be used for threat query/indicator matches
+ * as the default when the user swaps to using it by changing their
+ * rule type from any rule type to the "threatMatchRule" type. Only
+ * difference is that "*:*" is used instead of '' for its query.
+ */
+const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
+  ...stepDefineDefaultValue.queryBar,
+  query: { ...stepDefineDefaultValue.queryBar.query, query: '*:*' },
+};
+
 const MyLabelButton = styled(EuiButtonEmpty)`
   height: 18px;
   font-size: 12px;
@@ -170,6 +181,38 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   useEffect(() => {
     setIndexModified(!isEqual(index, indicesConfig));
   }, [index, indicesConfig]);
+
+  /**
+   * When a rule type is changed to or from a threat match this will modify the
+   * default query string to either:
+   *   * from the empty string '' to '*:*' if the rule type is "threatMatchRule"
+   *   * from '*:*' back to the empty string '' if the rule type is not "threatMatchRule"
+   * This calls queryBar.reset() in both cases to not trigger validation errors as
+   * the user has not entered data into those areas yet.
+   * If the user has entered data then through reference compares we can detect reliably if
+   * the user has changed data.
+   *   * queryBar.value === defaultQueryBar (Has the user changed the input of '' yet?)
+   *   * queryBar.value === threatQueryBarDefaultValue (Has the user changed the input of '*:*' yet?)
+   * This is a stronger guarantee than "isPristine" off of the forms as that value can be reset
+   * if you go to step 2) and then back to step 1) or the form is reset in another way. Using
+   * the reference compare we know factually if the data is changed as the references must change
+   * in the form libraries form the initial defaults.
+   */
+  useEffect(() => {
+    const { queryBar } = getFields();
+    if (queryBar != null) {
+      const { queryBar: defaultQueryBar } = stepDefineDefaultValue;
+      if (isThreatMatchRule(ruleType) && queryBar.value === defaultQueryBar) {
+        queryBar.reset({
+          defaultValue: threatQueryBarDefaultValue,
+        });
+      } else if (queryBar.value === threatQueryBarDefaultValue) {
+        queryBar.reset({
+          defaultValue: defaultQueryBar,
+        });
+      }
+    }
+  }, [ruleType, getFields]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {

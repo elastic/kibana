@@ -11,6 +11,7 @@ import { EuiIconLegend } from '../assets/legend';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
+  labels: 'visText',
   values: 'number',
 };
 

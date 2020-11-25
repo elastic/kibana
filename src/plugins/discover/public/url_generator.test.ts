@@ -212,6 +212,15 @@ describe('Discover url generator', () => {
     });
   });
 
+  test('can specify a search session id', async () => {
+    const { generator } = await setup();
+    const url = await generator.createUrl({
+      searchSessionId: '__test__',
+    });
+    expect(url).toMatchInlineSnapshot(`"xyz/app/discover#/?_g=()&_a=()&searchSessionId=__test__"`);
+    expect(url).toContain('__test__');
+  });
+
   describe('useHash property', () => {
     describe('when default useHash is set to false', () => {
       test('when using default, sets index pattern ID in the generated URL', async () => {

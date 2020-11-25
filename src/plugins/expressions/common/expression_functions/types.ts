@@ -24,8 +24,6 @@ import { ExecutionContext } from '../execution/types';
 import {
   ExpressionFunctionClog,
   ExpressionFunctionFont,
-  ExpressionFunctionKibanaContext,
-  ExpressionFunctionKibana,
   ExpressionFunctionVarSet,
   ExpressionFunctionVar,
   ExpressionFunctionTheme,
@@ -129,8 +127,6 @@ export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
 export interface ExpressionFunctionDefinitions {
   clog: ExpressionFunctionClog;
   font: ExpressionFunctionFont;
-  kibana_context: ExpressionFunctionKibanaContext;
-  kibana: ExpressionFunctionKibana;
   var_set: ExpressionFunctionVarSet;
   var: ExpressionFunctionVar;
   theme: ExpressionFunctionTheme;

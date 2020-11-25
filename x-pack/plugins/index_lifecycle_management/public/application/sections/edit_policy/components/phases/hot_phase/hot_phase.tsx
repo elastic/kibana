@@ -19,7 +19,6 @@ import {
 import { Phases } from '../../../../../../../common/types';
 
 import {
-  useFormContext,
   useFormData,
   UseField,
   SelectField,
@@ -29,26 +28,24 @@ import {
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION } from '../../../form_validations';
+import { ROLLOVER_EMPTY_VALIDATION } from '../../../form';
 
 import { ROLLOVER_FORM_PATHS } from '../../../constants';
 
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../';
+import { LearnMoreLink, ActiveBadge } from '../../';
 
-import { Forcemerge, SetPriorityInput, useRolloverPath } from '../shared';
+import { Forcemerge, SetPriorityInput, useRolloverPath } from '../shared_fields';
 
 import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
 const hotProperty: keyof Phases = 'hot';
 
 export const HotPhase: FunctionComponent = () => {
-  const form = useFormContext();
   const [formData] = useFormData({
     watch: useRolloverPath,
   });
   const isRolloverEnabled = get(formData, useRolloverPath);
 
-  const isShowingErrors = form.isValid === false;
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
 
   return (
@@ -62,8 +59,7 @@ export const HotPhase: FunctionComponent = () => {
                 defaultMessage="Hot phase"
               />
             </h2>{' '}
-            {isShowingErrors ? null : <ActiveBadge />}
-            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
+            <ActiveBadge />
           </div>
         }
         titleSize="s"

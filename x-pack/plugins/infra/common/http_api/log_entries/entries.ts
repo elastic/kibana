@@ -7,6 +7,7 @@
 import * as rt from 'io-ts';
 import { jsonArrayRT } from '../../typed_json';
 import { logEntriesCursorRT } from './common';
+import { logSourceColumnConfigurationRT } from '../log_sources';
 
 export const LOG_ENTRIES_PATH = '/api/log_entries/entries';
 
@@ -19,6 +20,7 @@ export const logEntriesBaseRequestRT = rt.intersection([
   rt.partial({
     query: rt.union([rt.string, rt.null]),
     size: rt.number,
+    columns: rt.array(logSourceColumnConfigurationRT),
   }),
 ]);
 
@@ -99,11 +101,17 @@ export type LogEntryContext = rt.TypeOf<typeof logEntryContextRT>;
 export type LogEntry = rt.TypeOf<typeof logEntryRT>;
 
 export const logEntriesResponseRT = rt.type({
-  data: rt.type({
-    entries: rt.array(logEntryRT),
-    topCursor: rt.union([logEntriesCursorRT, rt.null]),
-    bottomCursor: rt.union([logEntriesCursorRT, rt.null]),
-  }),
+  data: rt.intersection([
+    rt.type({
+      entries: rt.array(logEntryRT),
+      topCursor: rt.union([logEntriesCursorRT, rt.null]),
+      bottomCursor: rt.union([logEntriesCursorRT, rt.null]),
+    }),
+    rt.partial({
+      hasMoreBefore: rt.boolean,
+      hasMoreAfter: rt.boolean,
+    }),
+  ]),
 });
 
 export type LogEntriesResponse = rt.TypeOf<typeof logEntriesResponseRT>;

@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { ShardFailureModal } from './shard_failure_modal';
 import { shardFailureRequest } from './__mocks__/shard_failure_request';
 import { shardFailureResponse } from './__mocks__/shard_failure_response';

@@ -8,8 +8,8 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { EuiLoadingContent } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { AccessAgreementPage } from './access_agreement_page';
 

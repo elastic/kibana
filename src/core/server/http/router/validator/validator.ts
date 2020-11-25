@@ -143,8 +143,8 @@ export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> &
  * @internal
  */
 export class RouteValidator<P = {}, Q = {}, B = {}> {
-  public static from<P = {}, Q = {}, B = {}>(
-    opts: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>
+  public static from<_P = {}, _Q = {}, _B = {}>(
+    opts: RouteValidator<_P, _Q, _B> | RouteValidatorFullConfig<_P, _Q, _B>
   ) {
     if (opts instanceof RouteValidator) {
       return opts;

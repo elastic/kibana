@@ -27,12 +27,9 @@ import {
 import {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
-} from '../../../ingest_manager/common/types/rest_spec';
-import {
-  EsAssetReference,
-  KibanaAssetReference,
-} from '../../../ingest_manager/common/types/models';
-import { agentPolicyStatuses } from '../../../ingest_manager/common/constants';
+} from '../../../fleet/common/types/rest_spec';
+import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/types/models';
+import { agentPolicyStatuses } from '../../../fleet/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 
 export type Event = AlertEvent | SafeEndpointEvent;
@@ -121,21 +118,29 @@ const APPLIED_POLICIES: Array<{
   name: string;
   id: string;
   status: HostPolicyResponseActionStatus;
+  endpoint_policy_version: number;
+  version: number;
 }> = [
   {
     name: 'Default',
     id: '00000000-0000-0000-0000-000000000000',
     status: HostPolicyResponseActionStatus.success,
+    endpoint_policy_version: 1,
+    version: 3,
   },
   {
     name: 'With Eventing',
     id: 'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
     status: HostPolicyResponseActionStatus.success,
+    endpoint_policy_version: 3,
+    version: 5,
   },
   {
     name: 'Detect Malware Only',
     id: '47d7965d-6869-478b-bd9c-fb0d2bb3959f',
     status: HostPolicyResponseActionStatus.success,
+    endpoint_policy_version: 4,
+    version: 9,
   },
 ];
 
@@ -254,6 +259,8 @@ interface HostInfo {
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        endpoint_policy_version: number;
+        version: number;
       };
     };
   };
@@ -310,6 +317,8 @@ export interface Tree {
    * All events from children, ancestry, origin, and the alert in a single array
    */
   allEvents: Event[];
+  startTime: Date;
+  endTime: Date;
 }
 
 export interface TreeOptions {
@@ -711,6 +720,35 @@ export class EndpointDocGenerator {
     };
   }
 
+  private static getStartEndTimes(events: Event[]): { startTime: Date; endTime: Date } {
+    let startTime: number;
+    let endTime: number;
+    if (events.length > 0) {
+      startTime = timestampSafeVersion(events[0]) ?? new Date().getTime();
+      endTime = startTime;
+    } else {
+      startTime = new Date().getTime();
+      endTime = startTime;
+    }
+
+    for (const event of events) {
+      const eventTimestamp = timestampSafeVersion(event);
+      if (eventTimestamp !== undefined) {
+        if (eventTimestamp < startTime) {
+          startTime = eventTimestamp;
+        }
+
+        if (eventTimestamp > endTime) {
+          endTime = eventTimestamp;
+        }
+      }
+    }
+    return {
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+    };
+  }
+
   /**
    * This generates a full resolver tree and keeps the entire tree in memory. This is useful for tests that want
    * to compare results from elasticsearch with the actual events created by this generator. Because all the events
@@ -808,12 +846,17 @@ export class EndpointDocGenerator {
     const childrenByParent = groupNodesByParent(childrenNodes);
     const levels = createLevels(childrenByParent, [], childrenByParent.get(origin.id));
 
+    const allEvents = [...ancestry, ...children];
+    const { startTime, endTime } = EndpointDocGenerator.getStartEndTimes(allEvents);
+
     return {
       children: childrenNodes,
       ancestry: ancestryNodes,
-      allEvents: [...ancestry, ...children],
+      allEvents,
       origin,
       childrenLevels: levels,
+      startTime,
+      endTime,
     };
   }
 
@@ -1335,7 +1378,7 @@ export class EndpointDocGenerator {
     allStatus?: HostPolicyResponseActionStatus;
     policyDataStream?: DataStream;
   } = {}): HostPolicyResponse {
-    const policyVersion = this.seededUUIDv4();
+    const policyVersion = this.randomN(10);
     const status = () => {
       return allStatus || this.randomHostPolicyResponseActionStatus();
     };
@@ -1504,6 +1547,8 @@ export class EndpointDocGenerator {
             status: this.commonInfo.Endpoint.policy.applied.status,
             version: policyVersion,
             name: this.commonInfo.Endpoint.policy.applied.name,
+            endpoint_policy_version: this.commonInfo.Endpoint.policy.applied
+              .endpoint_policy_version,
           },
         },
       },

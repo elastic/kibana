@@ -4,125 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/kea.mock';
-import '../../../__mocks__/react_router_history.mock';
+import '../../../__mocks__/shallow_useeffect.mock';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { shallow, ReactWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
-import { mountAsync, mockHttpValues, setMockValues } from '../../../__mocks__';
-
-import { LoadingState, EmptyState } from './components';
-import { EngineTable } from './engine_table';
-
+import { Loading } from '../../../shared/loading';
+import { EmptyEngineOverview } from './engine_overview_empty';
+import { EngineOverviewMetrics } from './engine_overview_metrics';
 import { EngineOverview } from './';
 
 describe('EngineOverview', () => {
-  describe('non-happy-path states', () => {
-    it('isLoading', () => {
+  const values = {
+    dataLoading: false,
+    documentCount: 0,
+    myRole: {},
+    isMetaEngine: false,
+  };
+  const actions = {
+    pollForOverviewMetrics: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setMockValues(values);
+    setMockActions(actions);
+  });
+
+  it('renders', () => {
+    const wrapper = shallow(<EngineOverview />);
+    expect(wrapper.find('[data-test-subj="EngineOverview"]')).toHaveLength(1);
+  });
+
+  it('initializes data on mount', () => {
+    shallow(<EngineOverview />);
+    expect(actions.pollForOverviewMetrics).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders a loading component if async data is still loading', () => {
+    setMockValues({ ...values, dataLoading: true });
+    const wrapper = shallow(<EngineOverview />);
+    expect(wrapper.find(Loading)).toHaveLength(1);
+  });
+
+  describe('EmptyEngineOverview', () => {
+    it('renders when the engine has no documents & the user can add documents', () => {
+      const myRole = { canManageEngineDocuments: true, canViewEngineCredentials: true };
+      setMockValues({ ...values, myRole, documentCount: 0 });
       const wrapper = shallow(<EngineOverview />);
-
-      expect(wrapper.find(LoadingState)).toHaveLength(1);
-    });
-
-    it('isEmpty', async () => {
-      setMockValues({
-        http: {
-          ...mockHttpValues.http,
-          get: () => ({
-            results: [],
-            meta: { page: { total_results: 0 } },
-          }),
-        },
-      });
-      const wrapper = await mountAsync(<EngineOverview />, { i18n: true });
-
-      expect(wrapper.find(EmptyState)).toHaveLength(1);
+      expect(wrapper.find(EmptyEngineOverview)).toHaveLength(1);
     });
   });
 
-  describe('happy-path states', () => {
-    const mockedApiResponse = {
-      results: [
-        {
-          name: 'hello-world',
-          created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
-          document_count: 50,
-          field_count: 10,
-        },
-      ],
-      meta: {
-        page: {
-          current: 1,
-          total_pages: 10,
-          total_results: 100,
-          size: 10,
-        },
-      },
-    };
-    const mockApi = jest.fn(() => mockedApiResponse);
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      setMockValues({ http: { ...mockHttpValues.http, get: mockApi } });
+  describe('EngineOverviewMetrics', () => {
+    it('renders when the engine has documents', () => {
+      setMockValues({ ...values, documentCount: 1 });
+      const wrapper = shallow(<EngineOverview />);
+      expect(wrapper.find(EngineOverviewMetrics)).toHaveLength(1);
     });
 
-    it('renders and calls the engines API', async () => {
-      const wrapper = await mountAsync(<EngineOverview />, { i18n: true });
-
-      expect(wrapper.find(EngineTable)).toHaveLength(1);
-      expect(mockApi).toHaveBeenNthCalledWith(1, '/api/app_search/engines', {
-        query: {
-          type: 'indexed',
-          pageIndex: 1,
-        },
-      });
+    it('renders when the user does not have the ability to add documents', () => {
+      const myRole = { canManageEngineDocuments: false, canViewEngineCredentials: false };
+      setMockValues({ ...values, myRole });
+      const wrapper = shallow(<EngineOverview />);
+      expect(wrapper.find(EngineOverviewMetrics)).toHaveLength(1);
     });
 
-    describe('when on a platinum license', () => {
-      it('renders a 2nd meta engines table & makes a 2nd meta engines API call', async () => {
-        setMockValues({
-          hasPlatinumLicense: true,
-          http: { ...mockHttpValues.http, get: mockApi },
-        });
-        const wrapper = await mountAsync(<EngineOverview />, { i18n: true });
-
-        expect(wrapper.find(EngineTable)).toHaveLength(2);
-        expect(mockApi).toHaveBeenNthCalledWith(2, '/api/app_search/engines', {
-          query: {
-            type: 'meta',
-            pageIndex: 1,
-          },
-        });
-      });
-    });
-
-    describe('pagination', () => {
-      const getTablePagination = (wrapper: ReactWrapper) =>
-        wrapper.find(EngineTable).prop('pagination');
-
-      it('passes down page data from the API', async () => {
-        const wrapper = await mountAsync(<EngineOverview />, { i18n: true });
-        const pagination = getTablePagination(wrapper);
-
-        expect(pagination.totalEngines).toEqual(100);
-        expect(pagination.pageIndex).toEqual(0);
-      });
-
-      it('re-polls the API on page change', async () => {
-        const wrapper = await mountAsync(<EngineOverview />, { i18n: true });
-        await act(async () => getTablePagination(wrapper).onPaginate(5));
-        wrapper.update();
-
-        expect(mockApi).toHaveBeenLastCalledWith('/api/app_search/engines', {
-          query: {
-            type: 'indexed',
-            pageIndex: 5,
-          },
-        });
-        expect(getTablePagination(wrapper).pageIndex).toEqual(4);
-      });
+    it('always renders for meta engines', () => {
+      setMockValues({ ...values, isMetaEngine: true });
+      const wrapper = shallow(<EngineOverview />);
+      expect(wrapper.find(EngineOverviewMetrics)).toHaveLength(1);
     });
   });
 });

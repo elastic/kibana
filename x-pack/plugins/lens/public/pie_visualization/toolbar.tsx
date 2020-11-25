@@ -6,7 +6,7 @@
 
 import './toolbar.scss';
 import React, { useState } from 'react';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -125,7 +125,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
         })}
-        type="values"
+        type="labels"
         groupPosition="left"
         buttonDataTestSubj="lnsLabelsButton"
       >

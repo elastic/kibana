@@ -118,7 +118,7 @@ describe('When showing the Trusted App Create Form', () => {
         '.euiSuperSelect__listbox button.euiSuperSelect__item'
       )
     ).map((button) => button.textContent);
-    expect(options).toEqual(['Mac OS', 'Windows', 'Linux']);
+    expect(options).toEqual(['Mac', 'Windows', 'Linux']);
   });
 
   it('should show Description as optional', () => {

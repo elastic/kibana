@@ -14,6 +14,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { HeaderMenuPortal } from '../../../../../observability/public';
+import { ActionMenu } from '../../../application/action_menu';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { HomeLink } from '../../shared/Links/apm/HomeLink';
@@ -23,7 +25,7 @@ interface SettingsProps extends RouteComponentProps<{}> {
 }
 
 export function Settings({ children, location }: SettingsProps) {
-  const { core } = useApmPluginContext();
+  const { appMountParameters, core } = useApmPluginContext();
   const { basePath } = core.http;
   const canAccessML = !!core.application.capabilities.ml?.canAccessML;
   const { search, pathname } = location;
@@ -34,6 +36,11 @@ export function Settings({ children, location }: SettingsProps) {
 
   return (
     <>
+      <HeaderMenuPortal
+        setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+      >
+        <ActionMenu />
+      </HeaderMenuPortal>
       <HomeLink>
         <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
           {i18n.translate('xpack.apm.settings.returnLinkLabel', {

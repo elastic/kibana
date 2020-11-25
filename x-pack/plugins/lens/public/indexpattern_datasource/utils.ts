@@ -42,11 +42,11 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
   );
 }
 
-export function hasInvalidReference(state: IndexPatternPrivateState) {
-  return getInvalidReferences(state).length > 0;
+export function hasInvalidFields(state: IndexPatternPrivateState) {
+  return getInvalidLayers(state).length > 0;
 }
 
-export function getInvalidReferences(state: IndexPatternPrivateState) {
+export function getInvalidLayers(state: IndexPatternPrivateState) {
   return Object.values(state.layers).filter((layer) => {
     return layer.columnOrder.some((columnId) => {
       const column = layer.columns[columnId];
@@ -62,7 +62,7 @@ export function getInvalidReferences(state: IndexPatternPrivateState) {
   });
 }
 
-export function getInvalidFieldReferencesForLayer(
+export function getInvalidFieldsForLayer(
   layers: IndexPatternLayer[],
   indexPatternMap: Record<string, IndexPattern>
 ) {
@@ -87,15 +87,15 @@ export function fieldIsInvalid(
   indexPattern: IndexPattern
 ) {
   const operationDefinition = operationType && operationDefinitionMap[operationType];
+  const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
 
   return Boolean(
     sourceField &&
       operationDefinition &&
-      !indexPattern.fields.some(
-        (field) =>
-          field.name === sourceField &&
-          operationDefinition?.input === 'field' &&
-          operationDefinition.getPossibleOperationForField(field) !== undefined
+      !(
+        field &&
+        operationDefinition?.input === 'field' &&
+        operationDefinition.getPossibleOperationForField(field) !== undefined
       )
   );
 }

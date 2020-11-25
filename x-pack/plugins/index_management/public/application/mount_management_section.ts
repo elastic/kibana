@@ -9,7 +9,7 @@ import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public/';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-import { IngestManagerSetup } from '../../../ingest_manager/public';
+import { FleetSetup } from '../../../fleet/public';
 import { PLUGIN } from '../../common/constants';
 import { ExtensionsService } from '../services';
 import { IndexMgmtMetricsType, StartDependencies } from '../types';
@@ -32,7 +32,7 @@ export async function mountManagementSection(
   usageCollection: UsageCollectionSetup,
   services: InternalServices,
   params: ManagementAppMountParams,
-  ingestManager?: IngestManagerSetup
+  fleet?: FleetSetup
 ) {
   const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
@@ -57,7 +57,7 @@ export async function mountManagementSection(
     },
     plugins: {
       usageCollection,
-      ingestManager,
+      fleet,
     },
     services,
     history,

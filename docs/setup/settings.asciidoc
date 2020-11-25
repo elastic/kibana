@@ -512,8 +512,8 @@ In addition to this setting, trusted certificates may be specified via <<server-
 
 | `server.ssl.cipherSuites:`
  | Details on the format, and the valid options, are available via the
-https://www.openssl.org/docs/man1.0.2/apps/ciphers.html#CIPHER-LIST-FORMAT[OpenSSL cipher list format documentation].
-*Default: `ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA`*.
+https://www.openssl.org/docs/man1.1.1/man1/ciphers.html#CIPHER-LIST-FORMAT[OpenSSL cipher list format documentation].
+*Default: `TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_AES_128_GCM_SHA256 ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA`*.
 
 | `server.ssl.clientAuthentication:`
  | Controls the behavior in {kib} for requesting a certificate from client
@@ -571,7 +571,7 @@ all http requests to https over the port configured as <<server-port, `server.po
 
 | `server.ssl.supportedProtocols:`
  | An array of supported protocols with versions.
-Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`. *Default: TLSv1.1, TLSv1.2*
+Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.1, TLSv1.2, TLSv1.3*
 
 | [[settings-xsrf-whitelist]] `server.xsrf.whitelist:`
  | It is not recommended to disable protections for

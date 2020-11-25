@@ -10,16 +10,24 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import { Visualization, OperationMetadata, VisualizationType } from '../types';
+import {
+  Visualization,
+  OperationMetadata,
+  VisualizationType,
+  AccessorConfig,
+  FramePublicAPI,
+} from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
-import { isHorizontalChart } from './state_helpers';
+import { getColumnToLabelMap, isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
+import { ColorAssignments, getColorAssignments } from './color_assignment';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -76,8 +84,10 @@ function getDescription(state?: State) {
 
 export const getXyVisualization = ({
   paletteService,
+  data,
 }: {
   paletteService: PaletteRegistry;
+  data: DataPublicPluginStart;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -168,7 +178,25 @@ export const getXyVisualization = ({
 
     const datasource = frame.datasourceLayers[layer.layerId];
 
-    const sortedAccessors = getSortedAccessors(datasource, layer);
+    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+    let mappedAccessors: AccessorConfig[] = sortedAccessors.map((accessor) => ({
+      columnId: accessor,
+    }));
+
+    if (frame.activeData) {
+      const colorAssignments = getColorAssignments(
+        state.layers,
+        { tables: frame.activeData },
+        data.fieldFormats.deserialize
+      );
+      mappedAccessors = getAccessorColorConfig(
+        colorAssignments,
+        frame,
+        layer,
+        sortedAccessors,
+        paletteService
+      );
+    }
 
     const isHorizontal = isHorizontalChart(state.layers);
     return {
@@ -176,16 +204,15 @@ export const getXyVisualization = ({
         {
           groupId: 'x',
           groupLabel: getAxisName('x', { isHorizontal }),
-          accessors: layer.xAccessor ? [layer.xAccessor] : [],
+          accessors: layer.xAccessor ? [{ columnId: layer.xAccessor }] : [],
           filterOperations: isBucketed,
-          suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
           groupId: 'y',
           groupLabel: getAxisName('y', { isHorizontal }),
-          accessors: sortedAccessors,
+          accessors: mappedAccessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
           required: true,
@@ -197,9 +224,18 @@ export const getXyVisualization = ({
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Break down by',
           }),
-          accessors: layer.splitAccessor ? [layer.splitAccessor] : [],
+          accessors: layer.splitAccessor
+            ? [
+                {
+                  columnId: layer.splitAccessor,
+                  triggerIcon: 'colorBy',
+                  palette: paletteService
+                    .get(layer.palette?.name || 'default')
+                    .getColors(10, layer.palette?.params),
+                },
+              ]
+            : [],
           filterOperations: isBucketed,
-          suggestedPriority: 0,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           required: layer.seriesType.includes('percentage'),
@@ -334,6 +370,51 @@ export const getXyVisualization = ({
     return errors.length ? errors : undefined;
   },
 });
+
+function getAccessorColorConfig(
+  colorAssignments: ColorAssignments,
+  frame: FramePublicAPI,
+  layer: LayerConfig,
+  sortedAccessors: string[],
+  paletteService: PaletteRegistry
+): AccessorConfig[] {
+  const layerContainsSplits = Boolean(layer.splitAccessor);
+  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
+  const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
+  return sortedAccessors.map((accessor) => {
+    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+    if (layerContainsSplits) {
+      return {
+        columnId: accessor as string,
+        triggerIcon: 'disabled',
+      };
+    }
+    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
+    const rank = colorAssignments[currentPalette.name].getRank(
+      layer,
+      columnToLabel[accessor] || accessor,
+      accessor
+    );
+    const customColor =
+      currentYConfig?.color ||
+      paletteService.get(currentPalette.name).getColor(
+        [
+          {
+            name: columnToLabel[accessor] || accessor,
+            rankAtDepth: rank,
+            totalSeriesAtDepth: totalSeriesCount,
+          },
+        ],
+        { maxDepth: 1, totalSeries: totalSeriesCount },
+        currentPalette.params
+      );
+    return {
+      columnId: accessor as string,
+      triggerIcon: customColor ? 'color' : 'disabled',
+      color: customColor ? customColor : undefined,
+    };
+  });
+}
 
 function validateLayersForDimension(
   dimension: string,

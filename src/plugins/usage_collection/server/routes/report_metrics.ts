@@ -18,7 +18,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, ISavedObjectsRepository } from 'kibana/server';
+import { IRouter, ISavedObjectsRepository } from 'src/core/server';
 import { storeReport, reportSchema } from '../report';
 
 export function registerUiMetricRoute(

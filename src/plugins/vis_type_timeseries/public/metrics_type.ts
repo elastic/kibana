@@ -19,13 +19,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
-import { metricsRequestHandler } from './request_handler';
 import { EditorController } from './application';
-// @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
-import { VisEditor } from './application/components/vis_editor_lazy';
-import { VIS_EVENT_TO_TRIGGER, VisGroups } from '../../visualizations/public';
+import { toExpressionAst } from './to_ast';
+import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
+import { getDataStart } from './services';
+import { INDEXES_SEPARATOR } from '../common/constants';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -71,7 +70,6 @@ export const metricsVisDefinition = {
       show_grid: 1,
       tooltip_mode: 'show_all',
     },
-    component: VisEditor,
   },
   editor: EditorController,
   options: {
@@ -79,10 +77,25 @@ export const metricsVisDefinition = {
     showFilterBar: false,
     showIndexSelection: false,
   },
-  requestHandler: metricsRequestHandler,
+  toExpressionAst,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },
   inspectorAdapters: {},
-  responseHandler: 'none',
+  getUsedIndexPattern: async (params: VisParams) => {
+    const { indexPatterns } = getDataStart();
+    const indexes: string = params.index_pattern;
+
+    if (indexes) {
+      const cachedIndexes = await indexPatterns.getIdsWithTitle();
+      const ids = indexes
+        .split(INDEXES_SEPARATOR)
+        .map((title) => cachedIndexes.find((i) => i.title === title)?.id)
+        .filter((id) => id);
+
+      return Promise.all(ids.map((id) => indexPatterns.get(id!)));
+    }
+
+    return [];
+  },
 };

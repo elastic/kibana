@@ -83,3 +83,8 @@ export const revertModelSnapshotSchema = schema.object({
     )
   ),
 });
+
+export const jobsExistSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  allSpaces: schema.maybe(schema.boolean()),
+});

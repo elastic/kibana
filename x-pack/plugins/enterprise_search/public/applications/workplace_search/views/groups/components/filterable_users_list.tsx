@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { IUser } from '../../../types';
+import { User } from '../../../types';
 
 import { UserOptionItem } from './user_option_item';
 
@@ -36,8 +36,8 @@ const NO_USERS_FOUND = i18n.translate(
   }
 );
 
-interface IFilterableUsersListProps {
-  users: IUser[];
+interface FilterableUsersListProps {
+  users: User[];
   selectedOptions?: string[];
   itemsClickable?: boolean;
   isPopover?: boolean;
@@ -46,7 +46,7 @@ interface IFilterableUsersListProps {
   removeFilteredUser(userId: string): void;
 }
 
-export const FilterableUsersList: React.FC<IFilterableUsersListProps> = ({
+export const FilterableUsersList: React.FC<FilterableUsersListProps> = ({
   users,
   selectedOptions = [],
   itemsClickable,
@@ -59,7 +59,7 @@ export const FilterableUsersList: React.FC<IFilterableUsersListProps> = ({
 
   const filterUsers = (userId: string): boolean => {
     if (!filterValue) return true;
-    const filterUser = users.find(({ id }) => id === userId) as IUser;
+    const filterUser = users.find(({ id }) => id === userId) as User;
     const filteredName = filterUser.name || filterUser.email;
     return filteredName.toLowerCase().indexOf(filterValue.toLowerCase()) > -1;
   };

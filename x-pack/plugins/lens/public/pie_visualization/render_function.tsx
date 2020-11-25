@@ -253,7 +253,12 @@ export function PieComponent(
 
             onClickValue(desanitizeFilterContext(context));
           }}
-          theme={chartTheme}
+          theme={{
+            ...chartTheme,
+            background: {
+              color: undefined, // removes background for embeddables
+            },
+          }}
           baseTheme={chartBaseTheme}
         />
         <Partition

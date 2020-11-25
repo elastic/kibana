@@ -22,6 +22,10 @@ exports.EcsKibanaExtensionsMappings = {
           type: 'keyword',
           ignore_above: 1024,
         },
+        status: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
       },
     },
     // array of saved object references, for "linking" via search
@@ -63,11 +67,13 @@ exports.EcsEventLogProperties = [
   'event.duration',
   'event.end',
   'event.outcome', // optional, but one of failure, success, unknown
+  'event.reason',
   'error.message',
   'user.name',
   'kibana.server_uuid',
   'kibana.alerting.instance_id',
   'kibana.alerting.action_group_id',
+  'kibana.alerting.status',
   'kibana.saved_objects.rel',
   'kibana.saved_objects.namespace',
   'kibana.saved_objects.id',

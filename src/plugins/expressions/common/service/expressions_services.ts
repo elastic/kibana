@@ -26,7 +26,6 @@ import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
 import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
-import { ExecutionContextSearch } from '../execution';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -48,7 +47,7 @@ export type ExpressionsServiceSetup = Pick<
 >;
 
 export interface ExpressionExecutionParams {
-  searchContext?: ExecutionContextSearch;
+  searchContext?: SerializableState;
 
   variables?: Record<string, any>;
 

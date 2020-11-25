@@ -14,7 +14,7 @@ import {
 } from '../../mocks';
 import { ChildDragDropProvider, DroppableEvent } from '../../../drag_drop';
 import { EuiFormRow } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from 'src/core/public/mocks';
@@ -137,7 +137,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['x'],
+            accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -177,7 +177,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['x'],
+            accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -209,7 +209,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
@@ -257,7 +257,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -302,7 +302,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -371,6 +371,43 @@ describe('LayerPanel', () => {
       );
     });
 
+    it('should determine if the datasource supports dropping of a field onto a pre-filled dimension', () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      mockDatasource.canHandleDrop.mockImplementation(({ columnId }) => columnId !== 'a');
+
+      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1' };
+
+      const component = mountWithIntl(
+        <ChildDragDropProvider dragging={draggingField} setDragging={jest.fn()}>
+          <LayerPanel {...getDefaultProps()} />
+        </ChildDragDropProvider>
+      );
+
+      expect(mockDatasource.canHandleDrop).toHaveBeenCalledWith(
+        expect.objectContaining({ columnId: 'a' })
+      );
+
+      expect(
+        component.find('DragDrop[data-test-subj="lnsGroup"]').first().prop('droppable')
+      ).toEqual(false);
+
+      component.find('DragDrop[data-test-subj="lnsGroup"]').first().simulate('drop');
+
+      expect(mockDatasource.onDrop).not.toHaveBeenCalled();
+    });
+
     it('should allow drag to move between groups', () => {
       (generateId as jest.Mock).mockReturnValue(`newid`);
 
@@ -379,7 +416,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['a'],
+            accessors: [{ columnId: 'a' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroupA',
@@ -387,7 +424,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'B',
             groupId: 'b',
-            accessors: ['b'],
+            accessors: [{ columnId: 'b' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroupB',
@@ -443,7 +480,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['a', 'b'],
+            accessors: [{ columnId: 'a' }, { columnId: 'b' }],
             filterOperations: () => true,
             supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',

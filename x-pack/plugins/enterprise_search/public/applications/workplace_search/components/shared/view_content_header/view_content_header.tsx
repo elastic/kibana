@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiSpacer } from '@elasti
 
 import { FlexGroupAlignItems } from '@elastic/eui/src/components/flex/flex_group';
 
-interface IViewContentHeaderProps {
+interface ViewContentHeaderProps {
   title: React.ReactNode;
   description?: React.ReactNode;
   action?: React.ReactNode;
@@ -18,7 +18,7 @@ interface IViewContentHeaderProps {
   titleSize?: 's' | 'm' | 'l';
 }
 
-export const ViewContentHeader: React.FC<IViewContentHeaderProps> = ({
+export const ViewContentHeader: React.FC<ViewContentHeaderProps> = ({
   title,
   titleSize = 'm',
   description,

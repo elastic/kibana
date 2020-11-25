@@ -18,12 +18,15 @@
  */
 
 export {
+  AbortError,
+  abortSignalToPromise,
   calculateObjectHash,
   defer,
   Defer,
   fieldWildcardFilter,
   fieldWildcardMatcher,
   Get,
+  getCombinedAbortSignal,
   JsonArray,
   JsonObject,
   JsonValue,

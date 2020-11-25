@@ -15,7 +15,7 @@ import {
   GetPackagePoliciesResponse,
   GetFullAgentPolicyResponse,
   GetPackagesResponse,
-} from '../../../plugins/ingest_manager/common';
+} from '../../../plugins/fleet/common';
 import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
 import { Immutable } from '../../../plugins/security_solution/common/endpoint/types';
 

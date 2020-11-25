@@ -20,7 +20,7 @@ import {
   loggingSystemMock,
 } from '../../../../../src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 
 describe('ElasticsearchService', () => {
   let service: ElasticsearchService;

@@ -14,7 +14,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
-  const PageObjects = getPageObjects(['dashboard', 'common', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'dashboard',
+    'common',
+    'header',
+    'timePicker',
+    'settings',
+    'copySavedObjectsToSpace',
+  ]);
   const pieChart = getService('pieChart');
   const log = getService('log');
   const browser = getService('browser');
@@ -22,120 +29,188 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const security = getService('security');
+  const spaces = getService('spaces');
 
   describe('Dashboard to dashboard drilldown', function () {
-    before(async () => {
-      log.debug('Dashboard Drilldowns:initTests');
-      await security.testUser.setRoles(['test_logstash_reader', 'global_dashboard_all']);
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.preserveCrossAppState();
+    describe('Create & use drilldowns', () => {
+      before(async () => {
+        log.debug('Dashboard Drilldowns:initTests');
+        await security.testUser.setRoles(['test_logstash_reader', 'global_dashboard_all']);
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.preserveCrossAppState();
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
+      it('should create dashboard to dashboard drilldown, use it, and then delete it', async () => {
+        await PageObjects.dashboard.gotoDashboardEditMode(
+          dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
+        );
+
+        // create drilldown
+        await dashboardPanelActions.openContextMenu();
+        await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
+        await dashboardDrilldownPanelActions.clickCreateDrilldown();
+        await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
+        await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
+          drilldownName: DRILLDOWN_TO_AREA_CHART_NAME,
+          destinationDashboardTitle: dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
+        });
+        await dashboardDrilldownsManage.saveChanges();
+        await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutClose();
+
+        // check that drilldown notification badge is shown
+        expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(1);
+
+        // save dashboard, navigate to view mode
+        await PageObjects.dashboard.saveDashboard(
+          dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME,
+          {
+            saveAsNew: false,
+            waitDialogIsClosed: true,
+          }
+        );
+
+        // trigger drilldown action by clicking on a pie and picking drilldown action by it's name
+        await pieChart.clickOnPieSlice('40,000');
+        await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
+
+        const href = await dashboardDrilldownPanelActions.getActionHrefByText(
+          DRILLDOWN_TO_AREA_CHART_NAME
+        );
+        expect(typeof href).to.be('string'); // checking that action has a href
+        const dashboardIdFromHref = PageObjects.dashboard.getDashboardIdFromUrl(href);
+
+        await navigateWithinDashboard(async () => {
+          await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_AREA_CHART_NAME);
+        });
+        // checking that href is at least pointing to the same dashboard that we are navigated to by regular click
+        expect(dashboardIdFromHref).to.be(
+          await PageObjects.dashboard.getDashboardIdFromCurrentUrl()
+        );
+
+        // check that we drilled-down with filter from pie chart
+        expect(await filterBar.getFilterCount()).to.be(1);
+
+        const originalTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+
+        // brush area chart and drilldown back to pie chat dashboard
+        await brushAreaChart();
+        await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
+
+        await navigateWithinDashboard(async () => {
+          await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_PIE_CHART_NAME);
+        });
+
+        // because filters are preserved during navigation, we expect that only one slice is displayed (filter is still applied)
+        expect(await filterBar.getFilterCount()).to.be(1);
+        await pieChart.expectPieSliceCount(1);
+
+        // check that new time range duration was applied
+        const newTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+        expect(newTimeRangeDurationHours).to.be.lessThan(originalTimeRangeDurationHours);
+
+        // delete drilldown
+        await PageObjects.dashboard.switchToEditMode();
+        await dashboardPanelActions.openContextMenu();
+        await dashboardDrilldownPanelActions.expectExistsManageDrilldownsAction();
+        await dashboardDrilldownPanelActions.clickManageDrilldowns();
+        await dashboardDrilldownsManage.expectsManageDrilldownsFlyoutOpen();
+
+        await dashboardDrilldownsManage.deleteDrilldownsByTitles([DRILLDOWN_TO_AREA_CHART_NAME]);
+        await dashboardDrilldownsManage.closeFlyout();
+
+        // check that drilldown notification badge is shown
+        expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(0);
+      });
+
+      it('browser back/forward navigation works after drilldown navigation', async () => {
+        await PageObjects.dashboard.loadSavedDashboard(
+          dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
+        );
+        const originalTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+        await brushAreaChart();
+        await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
+        await navigateWithinDashboard(async () => {
+          await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_PIE_CHART_NAME);
+        });
+        // check that new time range duration was applied
+        const newTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+        expect(newTimeRangeDurationHours).to.be.lessThan(originalTimeRangeDurationHours);
+
+        await navigateWithinDashboard(async () => {
+          await browser.goBack();
+        });
+
+        expect(await PageObjects.timePicker.getTimeDurationInHours()).to.be(
+          originalTimeRangeDurationHours
+        );
+      });
     });
 
-    after(async () => {
-      await security.testUser.restoreDefaults();
-    });
-
-    it('should create dashboard to dashboard drilldown, use it, and then delete it', async () => {
-      await PageObjects.dashboard.gotoDashboardEditMode(
-        dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
-      );
-
-      // create drilldown
-      await dashboardPanelActions.openContextMenu();
-      await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
-      await dashboardDrilldownPanelActions.clickCreateDrilldown();
-      await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
-      await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
-        drilldownName: DRILLDOWN_TO_AREA_CHART_NAME,
-        destinationDashboardTitle: dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
-      });
-      await dashboardDrilldownsManage.saveChanges();
-      await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutClose();
-
-      // check that drilldown notification badge is shown
-      expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(1);
-
-      // save dashboard, navigate to view mode
-      await PageObjects.dashboard.saveDashboard(
-        dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME,
-        {
-          saveAsNew: false,
-          waitDialogIsClosed: true,
-        }
-      );
-
-      // trigger drilldown action by clicking on a pie and picking drilldown action by it's name
-      await pieChart.clickOnPieSlice('40,000');
-      await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
-
-      const href = await dashboardDrilldownPanelActions.getActionHrefByText(
-        DRILLDOWN_TO_AREA_CHART_NAME
-      );
-      expect(typeof href).to.be('string'); // checking that action has a href
-      const dashboardIdFromHref = PageObjects.dashboard.getDashboardIdFromUrl(href);
-
-      await navigateWithinDashboard(async () => {
-        await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_AREA_CHART_NAME);
-      });
-      // checking that href is at least pointing to the same dashboard that we are navigated to by regular click
-      expect(dashboardIdFromHref).to.be(await PageObjects.dashboard.getDashboardIdFromCurrentUrl());
-
-      // check that we drilled-down with filter from pie chart
-      expect(await filterBar.getFilterCount()).to.be(1);
-
-      const originalTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-
-      // brush area chart and drilldown back to pie chat dashboard
-      await brushAreaChart();
-      await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
-
-      await navigateWithinDashboard(async () => {
-        await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_PIE_CHART_NAME);
+    describe('Copy to space', () => {
+      const destinationSpaceId = 'custom_space';
+      before(async () => {
+        await spaces.create({
+          id: destinationSpaceId,
+          name: 'custom_space',
+          disabledFeatures: [],
+        });
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaSavedObjects();
       });
 
-      // because filters are preserved during navigation, we expect that only one slice is displayed (filter is still applied)
-      expect(await filterBar.getFilterCount()).to.be(1);
-      await pieChart.expectPieSliceCount(1);
-
-      // check that new time range duration was applied
-      const newTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-      expect(newTimeRangeDurationHours).to.be.lessThan(originalTimeRangeDurationHours);
-
-      // delete drilldown
-      await PageObjects.dashboard.switchToEditMode();
-      await dashboardPanelActions.openContextMenu();
-      await dashboardDrilldownPanelActions.expectExistsManageDrilldownsAction();
-      await dashboardDrilldownPanelActions.clickManageDrilldowns();
-      await dashboardDrilldownsManage.expectsManageDrilldownsFlyoutOpen();
-
-      await dashboardDrilldownsManage.deleteDrilldownsByTitles([DRILLDOWN_TO_AREA_CHART_NAME]);
-      await dashboardDrilldownsManage.closeFlyout();
-
-      // check that drilldown notification badge is shown
-      expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(0);
-    });
-
-    it('browser back/forward navigation works after drilldown navigation', async () => {
-      await PageObjects.dashboard.loadSavedDashboard(
-        dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
-      );
-      const originalTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-      await brushAreaChart();
-      await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
-      await navigateWithinDashboard(async () => {
-        await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_PIE_CHART_NAME);
-      });
-      // check that new time range duration was applied
-      const newTimeRangeDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
-      expect(newTimeRangeDurationHours).to.be.lessThan(originalTimeRangeDurationHours);
-
-      await navigateWithinDashboard(async () => {
-        await browser.goBack();
+      after(async () => {
+        await spaces.delete(destinationSpaceId);
       });
 
-      expect(await PageObjects.timePicker.getTimeDurationInHours()).to.be(
-        originalTimeRangeDurationHours
-      );
+      it.skip('Dashboards linked by a drilldown are both copied to a space', async () => {
+        await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject(
+          dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
+        );
+        await PageObjects.copySavedObjectsToSpace.setupForm({
+          destinationSpaceId,
+        });
+        await PageObjects.copySavedObjectsToSpace.startCopy();
+
+        // Wait for successful copy
+        await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
+        await testSubjects.existOrFail(`cts-summary-indicator-success-${destinationSpaceId}`);
+
+        const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
+
+        expect(summaryCounts).to.eql({
+          success: 5, // 2 dashboards (linked by a drilldown) + 2 visualizations + 1 index pattern
+          pending: 0,
+          skipped: 0,
+          errors: 0,
+        });
+
+        await PageObjects.copySavedObjectsToSpace.finishCopy();
+
+        // Actually use copied dashboards in a new space:
+
+        await PageObjects.common.navigateToApp('dashboard', {
+          basePath: `/s/${destinationSpaceId}`,
+        });
+        await PageObjects.dashboard.preserveCrossAppState();
+        await PageObjects.dashboard.loadSavedDashboard(
+          dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
+        );
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        // brush area chart and drilldown back to pie chat dashboard
+        await brushAreaChart();
+        await dashboardDrilldownPanelActions.expectMultipleActionsMenuOpened();
+
+        await navigateWithinDashboard(async () => {
+          await dashboardDrilldownPanelActions.clickActionByText(DRILLDOWN_TO_PIE_CHART_NAME);
+        });
+        await pieChart.expectPieSliceCount(10);
+      });
     });
   });
 

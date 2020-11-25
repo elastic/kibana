@@ -261,7 +261,6 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
 
   // Verify the brotli variant matches
   expect(
-    // @ts-expect-error @types/node is missing the brotli functions
     Zlib.brotliDecompressSync(
       Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
     ).toString()

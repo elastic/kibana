@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { MonitorSummary, makePing } from '../../../../../../common/runtime_types';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { IntegrationGroup, extractSummaryValues } from '../actions_popover/integration_group';
 
 describe('IntegrationGroup', () => {

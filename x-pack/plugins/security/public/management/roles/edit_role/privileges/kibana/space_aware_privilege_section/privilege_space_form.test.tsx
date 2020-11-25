@@ -7,13 +7,13 @@
 import { Role } from '../../../../../../../common/model';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import React from 'react';
 import { Space } from '../../../../../../../../spaces/public';
 import { FeatureTable } from '../feature_table';
 import { getDisplayedFeaturePrivileges } from '../feature_table/__fixtures__';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 import { SpaceSelector } from './space_selector';
 import { EuiButtonGroup } from '@elastic/eui';
 

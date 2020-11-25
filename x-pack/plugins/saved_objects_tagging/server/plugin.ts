@@ -4,22 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core/server';
+import { Observable } from 'rxjs';
+import {
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Plugin,
+  SharedGlobalConfig,
+} from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { savedObjectsTaggingFeature } from './features';
 import { tagType } from './saved_objects';
 import { ITagsRequestHandlerContext } from './types';
-import { registerRoutes } from './routes';
 import { TagsRequestHandlerContext } from './request_handler_context';
+import { registerRoutes } from './routes';
+import { createTagUsageCollector } from './usage';
 
 interface SetupDeps {
   features: FeaturesPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
-  constructor(context: PluginInitializerContext) {}
+  private readonly legacyConfig$: Observable<SharedGlobalConfig>;
 
-  public setup({ savedObjects, http }: CoreSetup, { features }: SetupDeps) {
+  constructor(context: PluginInitializerContext) {
+    this.legacyConfig$ = context.config.legacy.globalConfig$;
+  }
+
+  public setup({ savedObjects, http }: CoreSetup, { features, usageCollection }: SetupDeps) {
     savedObjects.registerType(tagType);
 
     const router = http.createRouter();
@@ -33,6 +47,15 @@ export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
     );
 
     features.registerKibanaFeature(savedObjectsTaggingFeature);
+
+    if (usageCollection) {
+      usageCollection.registerCollector(
+        createTagUsageCollector({
+          usageCollection,
+          legacyConfig$: this.legacyConfig$,
+        })
+      );
+    }
 
     return {};
   }

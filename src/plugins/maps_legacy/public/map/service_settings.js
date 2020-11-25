@@ -128,7 +128,7 @@ export class ServiceSettings {
       allServices.push(tmsService);
     }
 
-    if (this._mapConfig.includeElasticMapsService) {
+    if (this._mapConfig.includeElasticMapsService && !this._mapConfig.emsUrl) {
       const servicesFromManifest = await this._emsClient.getTMSServices();
       const strippedServiceFromManifest = await Promise.all(
         servicesFromManifest

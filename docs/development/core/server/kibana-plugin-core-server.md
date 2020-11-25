@@ -89,6 +89,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpServerInfo](./kibana-plugin-core-server.httpserverinfo.md) |  |
 |  [HttpServiceSetup](./kibana-plugin-core-server.httpservicesetup.md) | Kibana HTTP Service provides own abstraction for work with HTTP stack. Plugins don't have direct access to <code>hapi</code> server and its primitives anymore. Moreover, plugins shouldn't rely on the fact that HTTP Service uses one or another library under the hood. This gives the platform flexibility to upgrade or changing our internal HTTP stack without breaking plugins. If the HTTP Service lacks functionality you need, we are happy to discuss and support your needs. |
 |  [HttpServiceStart](./kibana-plugin-core-server.httpservicestart.md) |  |
+|  [I18nServiceSetup](./kibana-plugin-core-server.i18nservicesetup.md) |  |
 |  [IClusterClient](./kibana-plugin-core-server.iclusterclient.md) | Represents an Elasticsearch cluster API client created by the platform. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>). |
 |  [IContextContainer](./kibana-plugin-core-server.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [ICspConfig](./kibana-plugin-core-server.icspconfig.md) | CSP configuration for use in Kibana. |

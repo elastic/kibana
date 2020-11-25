@@ -30,8 +30,12 @@ const validateConnector = (action: ServiceNowActionConnector): ValidationResult 
     errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRED];
   }
 
-  if (action.config.apiUrl && !isValidUrl(action.config.apiUrl, 'https:')) {
-    errors.apiUrl = [...errors.apiUrl, i18n.API_URL_INVALID];
+  if (action.config.apiUrl) {
+    if (!isValidUrl(action.config.apiUrl)) {
+      errors.apiUrl = [...errors.apiUrl, i18n.API_URL_INVALID];
+    } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
+      errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRE_HTTPS];
+    }
   }
 
   if (!action.secrets.username) {

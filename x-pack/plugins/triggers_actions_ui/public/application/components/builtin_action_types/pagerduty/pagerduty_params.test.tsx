@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { EventActionOptions, SeverityActionOptions } from '.././types';
 import PagerDutyParamsFields from './pagerduty_params';
-import { DocLinksStart } from 'kibana/public';
-import { coreMock } from 'src/core/public/mocks';
 
 describe('PagerDutyParamsFields renders', () => {
   test('all params fields is rendered', () => {
-    const mocks = coreMock.createSetup();
     const actionParams = {
       eventAction: EventActionOptions.TRIGGER,
       dedupKey: 'test',
@@ -31,9 +28,6 @@ describe('PagerDutyParamsFields renders', () => {
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
         editAction={() => {}}
         index={0}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
-        toastNotifications={mocks.notifications.toasts}
-        http={mocks.http}
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();

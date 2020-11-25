@@ -150,6 +150,27 @@ describe('AggConfigs', () => {
       );
       expect(ac.aggs).toHaveLength(1);
     });
+
+    it(`throws if trying to add an agg which doesn't have a type in the registry`, () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'histogram',
+          params: {},
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      expect(() =>
+        ac.createAggConfig({
+          enabled: true,
+          type: 'oops',
+          params: {},
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Unable to find a registered agg type for \\"oops\\"."`
+      );
+    });
   });
 
   describe('#getRequestAggs', () => {

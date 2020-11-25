@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiNotificationBadge } from '@elastic/eui';
 import { coreMock } from 'src/core/public/mocks';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { IndexPattern } from './types';

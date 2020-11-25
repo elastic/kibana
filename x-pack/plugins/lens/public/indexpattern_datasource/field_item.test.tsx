@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { IndexPattern } from './types';

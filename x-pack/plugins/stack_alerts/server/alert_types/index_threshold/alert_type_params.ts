@@ -7,7 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ComparatorFnNames, getInvalidComparatorMessage } from './alert_type';
-import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './lib/core_query_types';
+import {
+  CoreQueryParamsSchemaProperties,
+  validateCoreQueryBody,
+} from '../../../../triggers_actions_ui/server';
 
 // alert type parameters
 

@@ -121,7 +121,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -373,7 +373,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -412,7 +412,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -625,7 +625,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -877,7 +877,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1129,7 +1129,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1168,7 +1168,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -1381,7 +1381,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1633,7 +1633,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1885,7 +1885,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1924,7 +1924,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -2137,7 +2137,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2389,7 +2389,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2931,7 +2931,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3183,7 +3183,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3222,7 +3222,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -3435,7 +3435,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3687,7 +3687,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3939,7 +3939,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3978,7 +3978,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -4191,7 +4191,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4443,7 +4443,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4695,7 +4695,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4734,7 +4734,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -4947,7 +4947,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5199,7 +5199,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5699,7 +5699,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5951,7 +5951,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5990,7 +5990,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -6203,7 +6203,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6455,7 +6455,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6707,7 +6707,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6746,7 +6746,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -6959,7 +6959,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7211,7 +7211,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7463,7 +7463,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7502,7 +7502,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                       class="euiToolTipAnchor"
                     >
                       <span>
-                        Mac OS
+                        Mac
                       </span>
                     </span>
                   </dd>
@@ -7715,7 +7715,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7967,7 +7967,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"

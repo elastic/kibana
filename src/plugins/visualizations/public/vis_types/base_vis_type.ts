@@ -44,6 +44,7 @@ interface CommonBaseVisTypeOptions<TVisParams>
       | 'editorConfig'
       | 'hidden'
       | 'stage'
+      | 'getUsedIndexPattern'
       | 'useCustomNoDataScreen'
       | 'visConfig'
       | 'group'
@@ -96,6 +97,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly responseHandler;
   public readonly hierarchicalData;
   public readonly setup;
+  public readonly getUsedIndexPattern;
   public readonly useCustomNoDataScreen;
   public readonly inspectorAdapters;
   public readonly toExpressionAst;
@@ -126,6 +128,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.responseHandler = opts.responseHandler ?? 'none';
     this.setup = opts.setup;
     this.hierarchicalData = opts.hierarchicalData ?? false;
+    this.getUsedIndexPattern = opts.getUsedIndexPattern;
     this.useCustomNoDataScreen = opts.useCustomNoDataScreen ?? false;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;

@@ -42,7 +42,7 @@ export function ServiceStatsFetcher({
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          pathname: '/api/apm/service-map/service/{serviceName}',
+          endpoint: 'GET /api/apm/service-map/service/{serviceName}',
           params: {
             path: { serviceName },
             query: { start, end, uiFilters: JSON.stringify(uiFilters) },

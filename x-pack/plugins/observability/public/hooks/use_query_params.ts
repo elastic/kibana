@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom';
 import { useMemo } from 'react';
 import { parse } from 'query-string';
 import { UI_SETTINGS, useKibanaUISettings } from './use_kibana_ui_settings';
-import { TimePickerTime } from '../components/shared/data_picker';
+import { TimePickerTime } from '../components/shared/date_picker';
 import { getAbsoluteTime } from '../utils/date';
 
 const getParsedParams = (search: string) => {

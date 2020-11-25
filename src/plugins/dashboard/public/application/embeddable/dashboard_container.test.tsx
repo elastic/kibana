@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { isErrorEmbeddable, ViewMode } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';

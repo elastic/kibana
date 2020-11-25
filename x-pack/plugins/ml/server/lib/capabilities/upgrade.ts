@@ -5,7 +5,7 @@
  */
 
 import type { MlClient } from '../../lib/ml_client';
-import { mlLog } from '../../client/log';
+import { mlLog } from '../../lib/log';
 
 export function upgradeCheckProvider(mlClient: MlClient) {
   async function isUpgradeInProgress(): Promise<boolean> {

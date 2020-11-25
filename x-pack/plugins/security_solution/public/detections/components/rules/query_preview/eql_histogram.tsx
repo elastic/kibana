@@ -66,7 +66,7 @@ export const PreviewEqlQueryHistogram = ({
       subtitle={subtitle}
       disclaimer={i18n.QUERY_PREVIEW_DISCLAIMER_EQL}
       isLoading={isLoading}
-      data-test-subj="queryPreviewEqlHistogram"
+      dataTestSubj="queryPreviewEqlHistogram"
     />
   );
 };

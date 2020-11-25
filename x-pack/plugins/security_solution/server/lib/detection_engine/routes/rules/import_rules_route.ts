@@ -7,6 +7,7 @@
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '../../../../../common/validate';
 import {
@@ -20,7 +21,6 @@ import {
 } from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { IRouter } from '../../../../../../../../src/core/server';
-import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils/';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
@@ -169,6 +169,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                   threat_query: threatQuery,
                   threat_mapping: threatMapping,
                   threat_language: threatLanguage,
+                  concurrent_searches: concurrentSearches,
+                  items_per_search: itemsPerSearch,
                   threshold,
                   timestamp_override: timestampOverride,
                   to,
@@ -235,6 +237,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       threatQuery,
                       threatMapping,
                       threatLanguage,
+                      concurrentSearches,
+                      itemsPerSearch,
                       timestampOverride,
                       references,
                       note,
@@ -284,6 +288,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       threatQuery,
                       threatMapping,
                       threatLanguage,
+                      concurrentSearches,
+                      itemsPerSearch,
                       references,
                       note,
                       version,

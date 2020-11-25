@@ -7,20 +7,29 @@
 import mockAnnotations from '../components/annotations/annotations_table/__mocks__/mock_annotations.json';
 
 import { Annotation } from '../../../common/types/annotations';
-import { annotation$, annotationsRefresh$, annotationsRefreshed } from './annotations_service';
-
+import {
+  annotationsRefresh$,
+  annotationsRefreshed,
+  AnnotationUpdatesService,
+} from './annotations_service';
 describe('annotations_service', () => {
-  test('annotation$', () => {
+  let annotationUpdatesService: AnnotationUpdatesService | null = null;
+
+  beforeEach(() => {
+    annotationUpdatesService = new AnnotationUpdatesService();
+  });
+
+  test('annotationUpdatesService', () => {
     const subscriber = jest.fn();
 
-    annotation$.subscribe(subscriber);
+    annotationUpdatesService!.update$().subscribe(subscriber);
 
     // the subscriber should have been triggered with the initial value of null
     expect(subscriber.mock.calls).toHaveLength(1);
     expect(subscriber.mock.calls[0][0]).toBe(null);
 
     const annotation = mockAnnotations[0] as Annotation;
-    annotation$.next(annotation);
+    annotationUpdatesService!.setValue(annotation);
 
     // the subscriber should have been triggered with the updated annotation value
     expect(subscriber.mock.calls).toHaveLength(2);

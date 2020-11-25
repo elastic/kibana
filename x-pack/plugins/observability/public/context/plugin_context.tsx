@@ -5,10 +5,11 @@
  */
 
 import { createContext } from 'react';
-import { CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 import { ObservabilityPluginSetupDeps } from '../plugin';
 
 export interface PluginContextValue {
+  appMountParameters: AppMountParameters;
   core: CoreStart;
   plugins: ObservabilityPluginSetupDeps;
 }

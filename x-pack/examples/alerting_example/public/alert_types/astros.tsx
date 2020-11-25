@@ -127,9 +127,9 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
   });
 
   const errorsCallout = flatten(
-    Object.entries(errors).map(([field, errs]: [string, string[]]) =>
-      errs.map((e) => (
-        <p>
+    Object.entries(errors).map(([field, errs]: [string, string[]], fieldIndex) =>
+      errs.map((e, index) => (
+        <p key={`astros-error-${fieldIndex}-${index}`}>
           <EuiTextColor color="accent">{field}:</EuiTextColor>`: ${errs}`
         </p>
       ))

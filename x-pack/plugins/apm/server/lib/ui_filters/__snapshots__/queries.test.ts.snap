@@ -15,6 +15,7 @@ Object {
         "terms": Object {
           "field": "service.environment",
           "missing": "ENVIRONMENT_NOT_DEFINED",
+          "size": 100,
         },
       },
     },
@@ -58,6 +59,7 @@ Object {
         "terms": Object {
           "field": "service.environment",
           "missing": "ENVIRONMENT_NOT_DEFINED",
+          "size": 100,
         },
       },
     },

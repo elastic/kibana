@@ -271,12 +271,12 @@ const DragDropInner = React.memo(function DragDropInner(
         dropTo={dropTo}
         label={label}
         className={className}
+        dataTestSubj={props['data-test-subj'] || 'lnsDragDrop'}
         draggingProps={{
           className: classNames(children.props.className, classes),
           draggable,
           onDragEnd: dragEnd,
           onDragStart: dragStart,
-          dataTestSubj: props['data-test-subj'] || 'lnsDragDrop',
           isReorderDragging,
         }}
         dropProps={{
@@ -338,13 +338,13 @@ export const ReorderableDragDrop = ({
   label,
   dropTo,
   className,
+  dataTestSubj,
 }: {
   draggingProps: {
     className: string;
     draggable: Props['draggable'];
     onDragEnd: (e: DroppableEvent) => void;
     onDragStart: (e: DroppableEvent) => void;
-    dataTestSubj: string;
     isReorderDragging: boolean;
   };
   dropProps: {
@@ -361,6 +361,7 @@ export const ReorderableDragDrop = ({
   label: string;
   dropTo: DropToHandler;
   className?: string;
+  dataTestSubj: string;
 }) => {
   const { itemsInGroup, dragging, id, droppable } = dropProps;
   const { reorderState, setReorderState } = useContext(ReorderContext);
@@ -378,7 +379,10 @@ export const ReorderableDragDrop = ({
   );
 
   return (
-    <div className={classNames('lnsDragDrop__reorderableContainer', className)}>
+    <div
+      className={classNames('lnsDragDrop__reorderableContainer', className)}
+      data-test-subj={dataTestSubj}
+    >
       <EuiScreenReaderOnly showOnFocus>
         <button
           aria-label={label}
@@ -442,6 +446,7 @@ export const ReorderableDragDrop = ({
         />
       </EuiScreenReaderOnly>
       {React.cloneElement(children, {
+        ['data-test-subj']: 'lnsDragDrop-reorderableDrag',
         draggable: draggingProps.draggable,
         onDragEnd: draggingProps.onDragEnd,
         onDragStart: (e: DroppableEvent) => {
@@ -452,7 +457,6 @@ export const ReorderableDragDrop = ({
           }));
           draggingProps.onDragStart(e);
         },
-        ['data-test-subj']: draggingProps.dataTestSubj,
         className: classNames(
           draggingProps.className,
           {

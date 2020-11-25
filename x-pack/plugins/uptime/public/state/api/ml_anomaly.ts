@@ -41,6 +41,7 @@ export const createMLJob = async ({
     startDatafeed: true,
     start: moment().subtract(2, 'w').valueOf(),
     indexPatternName: heartbeatIndices,
+    applyToAllSpaces: true,
     query: {
       bool: {
         filter: [

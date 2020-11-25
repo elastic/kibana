@@ -8,14 +8,14 @@ import React from 'react';
 
 import { EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 
-import { IUser } from '../../../types';
+import { User } from '../../../types';
 
-interface IUserRowProps {
-  user: IUser;
+interface UserRowProps {
+  user: User;
   showEmail?: boolean;
 }
 
-export const UserRow: React.FC<IUserRowProps> = ({ user: { name, email }, showEmail }) => (
+export const UserRow: React.FC<UserRowProps> = ({ user: { name, email }, showEmail }) => (
   <EuiTableRow>
     <EuiTableRowCell>{name}</EuiTableRowCell>
     <EuiTableRowCell>{showEmail && <span>{email}</span>}</EuiTableRowCell>

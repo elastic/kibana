@@ -20,8 +20,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { getLastValue } from '../../../../../../plugins/vis_type_timeseries/common/get_last_value';
 import reactcss from 'reactcss';
+
+import { getLastValue } from '../../../../common/get_last_value';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 
 export class Metric extends Component {

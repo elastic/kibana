@@ -8,7 +8,7 @@ import { PolicyListState } from '../../types';
 import { Store, applyMiddleware, createStore } from 'redux';
 
 import { coreMock } from '../../../../../../../../../src/core/public/mocks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../ingest_manager/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../fleet/common';
 
 import { policyListReducer } from './reducer';
 import { policyListMiddlewareFactory } from './middleware';

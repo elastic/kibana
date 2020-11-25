@@ -5,7 +5,7 @@
  */
 
 import { ExtensionsSetup } from './services';
-import { IngestManagerSetup } from '../../ingest_manager/public';
+import { FleetSetup } from '../../fleet/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';
@@ -17,7 +17,7 @@ export interface IndexManagementPluginSetup {
 }
 
 export interface SetupDependencies {
-  ingestManager?: IngestManagerSetup;
+  fleet?: FleetSetup;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
 }

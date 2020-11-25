@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { InspectorPanel } from './inspector_panel';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';

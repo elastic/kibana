@@ -97,11 +97,15 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start({ core: coreStart, licenseChecker });
-        find('foobar', { preference: 'pref' }, request);
+        find(
+          { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
+          { preference: 'pref' },
+          request
+        );
 
         expect(provider.find).toHaveBeenCalledTimes(1);
         expect(provider.find).toHaveBeenCalledWith(
-          'foobar',
+          { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
           expect.objectContaining({ preference: 'pref' }),
           expect.objectContaining({ core: expect.any(Object) })
         );
@@ -121,7 +125,7 @@ describe('SearchService', () => {
           registerResultProvider(createProvider('A', providerResults));
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', {}, request);
+          const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('a-b-|', {
             a: expectedBatch('1'),
@@ -157,7 +161,7 @@ describe('SearchService', () => {
           );
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', {}, request);
+          const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('ab-cd-|', {
             a: expectedBatch('A1', 'A2'),
@@ -184,7 +188,7 @@ describe('SearchService', () => {
           const aborted$ = hot('----a--|', { a: undefined });
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', { aborted$ }, request);
+          const results = find({ term: 'foobar' }, { aborted$ }, request);
 
           expectObservable(results).toBe('--a-|', {
             a: expectedBatch('1'),
@@ -207,7 +211,7 @@ describe('SearchService', () => {
           registerResultProvider(createProvider('A', providerResults));
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', {}, request);
+          const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('a 24ms b 74ms |', {
             a: expectedBatch('1'),
@@ -244,7 +248,7 @@ describe('SearchService', () => {
           );
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', {}, request);
+          const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('ab-(c|)', {
             a: expectedBatch('A1', 'A2'),
@@ -278,7 +282,7 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start({ core: coreStart, licenseChecker });
-        const batch = await find('foo', {}, request).pipe(take(1)).toPromise();
+        const batch = await find({ term: 'foobar' }, {}, request).pipe(take(1)).toPromise();
 
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({
@@ -307,7 +311,7 @@ describe('SearchService', () => {
           registerResultProvider(createProvider('A', providerResults));
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', {}, request);
+          const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe(
             '#',

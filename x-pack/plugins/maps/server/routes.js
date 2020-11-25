@@ -33,38 +33,45 @@ import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
 
-export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
+const EMPTY_EMS_CLIENT = {
+  async getFileLayers() {
+    return [];
+  },
+  async getTMSServices() {
+    return [];
+  },
+  async getMainManifest() {
+    return null;
+  },
+  async getDefaultFileManifest() {
+    return null;
+  },
+  async getDefaultTMSManifest() {
+    return null;
+  },
+  addQueryParams() {},
+};
+
+export function initRoutes(router, licenseUid, emsSettings, kbnVersion, logger) {
   let emsClient;
-  if (mapConfig.includeElasticMapsService) {
+
+  if (emsSettings.isIncludeElasticMapsService()) {
     emsClient = new EMSClient({
       language: i18n.getLocale(),
       appVersion: kbnVersion,
       appName: EMS_APP_NAME,
-      fileApiUrl: mapConfig.emsFileApiUrl,
-      tileApiUrl: mapConfig.emsTileApiUrl,
-      landingPageUrl: mapConfig.emsLandingPageUrl,
+      fileApiUrl: emsSettings.getEMSFileApiUrl(),
+      tileApiUrl: emsSettings.getEMSTileApiUrl(),
+      landingPageUrl: emsSettings.getEMSLandingPageUrl(),
       fetchFunction: fetch,
     });
     emsClient.addQueryParams({ license: licenseUid });
   } else {
-    emsClient = {
-      async getFileLayers() {
-        return [];
-      },
-      async getTMSServices() {
-        return [];
-      },
-      async getMainManifest() {
-        return null;
-      },
-      async getDefaultFileManifest() {
-        return null;
-      },
-      async getDefaultTMSManifest() {
-        return null;
-      },
-      addQueryParams() {},
-    };
+    emsClient = EMPTY_EMS_CLIENT;
+  }
+
+  function getEMSClient() {
+    return emsSettings.isEMSEnabled() ? emsClient : EMPTY_EMS_CLIENT;
   }
 
   router.get(
@@ -90,7 +97,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return null;
       }
 
-      const fileLayers = await emsClient.getFileLayers();
+      const fileLayers = await getEMSClient().getFileLayers();
       const layer = fileLayers.find((layer) => layer.getId() === request.query.id);
       if (!layer) {
         return null;
@@ -127,7 +134,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return null;
       }
 
-      const tmsServices = await emsClient.getTMSServices();
+      const tmsServices = await getEMSClient().getTMSServices();
       const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
@@ -153,7 +160,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
-      const main = await emsClient.getMainManifest();
+      const main = await getEMSClient().getMainManifest();
       const proxiedManifest = {
         services: [],
       };
@@ -189,8 +196,8 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
-      const file = await emsClient.getDefaultFileManifest(); //need raw manifest
-      const fileLayers = await emsClient.getFileLayers();
+      const file = await getEMSClient().getDefaultFileManifest(); //need raw manifest
+      const fileLayers = await getEMSClient().getFileLayers();
 
       const layers = file.layers.map((layerJson) => {
         const newLayerJson = { ...layerJson };
@@ -231,7 +238,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
-      const tilesManifest = await emsClient.getDefaultTMSManifest();
+      const tilesManifest = await getEMSClient().getDefaultTMSManifest();
       const newServices = tilesManifest.services.map((service) => {
         const newService = {
           ...service,
@@ -284,7 +291,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return null;
       }
 
-      const tmsServices = await emsClient.getTMSServices();
+      const tmsServices = await getEMSClient().getTMSServices();
       const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
@@ -319,7 +326,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
-      const tmsServices = await emsClient.getTMSServices();
+      const tmsServices = await getEMSClient().getTMSServices();
       const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
@@ -368,7 +375,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
-      const tmsServices = await emsClient.getTMSServices();
+      const tmsServices = await getEMSClient().getTMSServices();
       const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
@@ -409,7 +416,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return response.badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
-      const tmsServices = await emsClient.getTMSServices();
+      const tmsServices = await getEMSClient().getTMSServices();
       const tmsService = tmsServices.find((layer) => layer.getId() === request.query.id);
       if (!tmsService) {
         return null;
@@ -439,7 +446,8 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       if (!checkEMSProxyEnabled()) {
         return response.badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
-      const url = mapConfig.emsFontLibraryUrl
+      const url = emsSettings
+        .getEMSFontLibraryUrl()
         .replace('{fontstack}', request.params.fontstack)
         .replace('{range}', request.params.range);
 
@@ -469,7 +477,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return response.badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
-      const tmsServices = await emsClient.getTMSServices();
+      const tmsServices = await getEMSClient().getTMSServices();
       const tmsService = tmsServices.find((layer) => layer.getId() === request.params.id);
       if (!tmsService) {
         return null;
@@ -573,7 +581,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   );
 
   function checkEMSProxyEnabled() {
-    const proxyEMSInMaps = mapConfig.proxyElasticMapsServiceInMaps;
+    const proxyEMSInMaps = emsSettings.isProxyElasticMapsServiceInMaps();
     if (!proxyEMSInMaps) {
       logger.warn(
         `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`

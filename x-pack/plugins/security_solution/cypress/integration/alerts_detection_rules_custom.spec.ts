@@ -49,6 +49,7 @@ import {
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
   getDetails,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
@@ -174,9 +175,13 @@ describe('Custom detection rules creation', () => {
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', newRule.severity);
       getDetails(RISK_SCORE_DETAILS).should('have.text', newRule.riskScore);
-      getDetails(REFERENCE_URLS_DETAILS).should('have.text', expectedUrls);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
       getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-      getDetails(MITRE_ATTACK_DETAILS).should('have.text', expectedMitre);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
       getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
@@ -210,7 +215,8 @@ describe('Custom detection rules creation', () => {
   });
 });
 
-describe('Custom detection rules deletion and edition', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/83772
+describe.skip('Custom detection rules deletion and edition', () => {
   beforeEach(() => {
     esArchiverLoad('custom_rules');
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);

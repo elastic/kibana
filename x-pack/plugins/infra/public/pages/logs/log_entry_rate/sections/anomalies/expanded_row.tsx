@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 import { euiStyled } from '../../../../../../../observability/public';
 import { LogEntryAnomaly } from '../../../../../../common/http_api';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';

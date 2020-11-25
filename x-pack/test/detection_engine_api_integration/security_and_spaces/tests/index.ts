@@ -19,6 +19,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./create_exceptions'));
     loadTestFile(require.resolve('./delete_rules'));
     loadTestFile(require.resolve('./delete_rules_bulk'));
+    loadTestFile(require.resolve('./exception_operators_data_types/index'));
     loadTestFile(require.resolve('./export_rules'));
     loadTestFile(require.resolve('./find_rules'));
     loadTestFile(require.resolve('./find_statuses'));

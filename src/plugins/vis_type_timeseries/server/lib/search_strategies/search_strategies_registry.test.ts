@@ -27,10 +27,10 @@ import { DefaultSearchCapabilities } from './default_search_capabilities';
 
 class MockSearchStrategy extends AbstractSearchStrategy {
   checkForViability() {
-    return {
+    return Promise.resolve({
       isViable: true,
       capabilities: {},
-    };
+    });
   }
 }
 
@@ -65,7 +65,7 @@ describe('SearchStrategyRegister', () => {
   });
 
   test('should add a strategy if it is an instance of AbstractSearchStrategy', () => {
-    const anotherSearchStrategy = new MockSearchStrategy('es');
+    const anotherSearchStrategy = new MockSearchStrategy();
     const addedStrategies = registry.addStrategy(anotherSearchStrategy);
 
     expect(addedStrategies.length).toEqual(2);
@@ -75,7 +75,7 @@ describe('SearchStrategyRegister', () => {
   test('should return a MockSearchStrategy instance', async () => {
     const req = {};
     const indexPattern = '*';
-    const anotherSearchStrategy = new MockSearchStrategy('es');
+    const anotherSearchStrategy = new MockSearchStrategy();
     registry.addStrategy(anotherSearchStrategy);
 
     const { searchStrategy, capabilities } = (await registry.getViableStrategy(req, indexPattern))!;

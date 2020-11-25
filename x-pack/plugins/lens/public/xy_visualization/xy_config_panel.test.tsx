@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
 import { EuiButtonGroupProps, EuiSuperSelect, EuiButtonGroup } from '@elastic/eui';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { ToolbarPopover } from '../shared_components';

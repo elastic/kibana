@@ -21,7 +21,9 @@ import './visualize_listing.scss';
 
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useUnmount, useMount } from 'react-use';
+import useUnmount from 'react-use/lib/useUnmount';
+import useMount from 'react-use/lib/useMount';
+
 import { useLocation } from 'react-router-dom';
 
 import { SavedObjectsFindOptionsReference } from '../../../../../core/public';

@@ -67,7 +67,7 @@ export function KueryBar({
   let currentRequestCheck: string;
 
   const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { search: kuery, dateRangeStart, dateRangeEnd } = getUrlParams();
+  const { search: kuery } = getUrlParams();
 
   useEffect(() => {
     updateSearchText(kuery);
@@ -105,16 +105,7 @@ export function KueryBar({
           query: inputValue,
           selectionStart: selectionStart || 0,
           selectionEnd: selectionStart || 0,
-          boolFilter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: dateRangeStart,
-                  lte: dateRangeEnd,
-                },
-              },
-            },
-          ],
+          useTimeRange: true,
         })) || []
       ).filter((suggestion: QuerySuggestion) => !suggestion.text.startsWith('span.'));
       if (currentRequest !== currentRequestCheck) {

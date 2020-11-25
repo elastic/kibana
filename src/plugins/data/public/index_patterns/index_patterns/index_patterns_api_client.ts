@@ -19,7 +19,11 @@
 
 import { HttpSetup } from 'src/core/public';
 import { IndexPatternMissingIndices } from '../../../common/index_patterns/lib';
-import { GetFieldsOptions, IIndexPatternsApiClient } from '../../../common/index_patterns/types';
+import {
+  GetFieldsOptions,
+  IIndexPatternsApiClient,
+  GetFieldsOptionsTimePattern,
+} from '../../../common/index_patterns/types';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
@@ -53,7 +57,7 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
   }
 
-  getFieldsForTimePattern(options: GetFieldsOptions = {}) {
+  getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
     const { pattern, lookBack, metaFields } = options;
 
     const url = this._getUrl(['_fields_for_time_pattern']);
@@ -65,43 +69,12 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     }).then((resp: any) => resp.fields);
   }
 
-  getFieldsForWildcard(options: GetFieldsOptions = {}) {
-    const { pattern, metaFields, type, params } = options;
-
-    let url;
-    let query;
-
-    if (type) {
-      url = this._getUrl([type, '_fields_for_wildcard']);
-      query = {
-        pattern,
-        meta_fields: metaFields,
-        params: JSON.stringify(params),
-      };
-    } else {
-      url = this._getUrl(['_fields_for_wildcard']);
-      query = {
-        pattern,
-        meta_fields: metaFields,
-      };
-    }
-    // eslint-disable-next-line no-console
-    console.log('API client url', url);
-    // eslint-disable-next-line no-console
-    console.log('API client query', JSON.stringify(query));
-
-    return this._request(url, query)
-      .then((resp: any) => {
-        // eslint-disable-next-line no-console
-        console.log('API client url response', JSON.stringify(resp));
-        return resp.fields;
-      })
-      .catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error('API client Error Message', e.message);
-        // eslint-disable-next-line no-console
-        console.error('API client Error', JSON.stringify(e));
-        throw new Error('API client ERROR');
-      });
+  getFieldsForWildcard({ pattern, metaFields, type, rollupIndex }: GetFieldsOptions) {
+    return this._request(this._getUrl(['_fields_for_wildcard']), {
+      pattern,
+      meta_fields: metaFields,
+      type,
+      rollup_index: rollupIndex,
+    }).then((resp: any) => resp.fields);
   }
 }

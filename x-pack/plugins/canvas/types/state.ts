@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaContext } from 'src/plugins/data/common';
 import {
   Datatable,
   ExpressionValueFilter,
   ExpressionImage,
   ExpressionFunction,
-  KibanaContext,
   PointSeries,
   Render,
   Style,

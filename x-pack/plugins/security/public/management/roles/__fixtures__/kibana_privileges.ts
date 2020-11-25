@@ -23,6 +23,7 @@ export const createRawKibanaPrivileges = (
 
   const licensingService = {
     getFeatures: () => ({ allowSubFeaturePrivileges } as SecurityLicenseFeatures),
+    getType: () => 'basic' as const,
   };
 
   return privilegesFactory(

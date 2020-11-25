@@ -12,7 +12,7 @@ import {
   mockSupportedTriggers,
   mockActionFactories,
 } from '../../../components/action_wizard/test_data';
-import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { mockDynamicActionManager } from './test_data';
 import { TEST_SUBJ_DRILLDOWN_ITEM } from '../list_manage_drilldowns';
