@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useMemo, useState, useCallback } from 'react';
+import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import url from 'url';
 import { encode } from 'rison-node';
@@ -25,6 +25,7 @@ import { TimeRange, esKuery } from '../../../../../../../../../../../src/plugins
 import { LogStream } from '../../../../../../../../../infra/public';
 import { Agent } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
+import { DEFAULT_DATE_RANGE } from './constants';
 import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
@@ -64,8 +65,8 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
       const { min, max } = data.query.timefilter.timefilter.calculateBounds(timeRange);
       return min && max
         ? {
-            startTimestamp: min.valueOf(),
-            endTimestamp: max.valueOf(),
+            start: min.valueOf(),
+            end: max.valueOf(),
           }
         : undefined;
     },
@@ -85,14 +86,34 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
     [getDateRangeTimestamps, updateState]
   );
 
-  const dateRangeTimestamps = useMemo(
-    () =>
+  const [dateRangeTimestamps, setDateRangeTimestamps] = useState<{ start: number; end: number }>(
+    getDateRangeTimestamps({
+      from: state.start,
+      to: state.end,
+    }) ||
       getDateRangeTimestamps({
-        from: state.start,
-        to: state.end,
-      }),
-    [getDateRangeTimestamps, state.end, state.start]
+        from: DEFAULT_DATE_RANGE.start,
+        to: DEFAULT_DATE_RANGE.end,
+      })!
   );
+
+  // Attempts to parse for timestamps when start/end date expressions change
+  // If invalid date expressions, set expressions back to default
+  // Otherwise set the new timestamps
+  useEffect(() => {
+    const timestampsFromDateRange = getDateRangeTimestamps({
+      from: state.start,
+      to: state.end,
+    });
+    if (!timestampsFromDateRange) {
+      tryUpdateDateRange({
+        from: DEFAULT_DATE_RANGE.start,
+        to: DEFAULT_DATE_RANGE.end,
+      });
+    } else {
+      setDateRangeTimestamps(timestampsFromDateRange);
+    }
+  }, [state.start, state.end, getDateRangeTimestamps, tryUpdateDateRange]);
 
   // Query validation helper
   const isQueryValid = useCallback((testQuery: string) => {
@@ -241,8 +262,8 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
         <EuiPanel paddingSize="none">
           <LogStream
             height="100%"
-            startTimestamp={dateRangeTimestamps!.startTimestamp}
-            endTimestamp={dateRangeTimestamps!.endTimestamp}
+            startTimestamp={dateRangeTimestamps.start}
+            endTimestamp={dateRangeTimestamps.end}
             query={logStreamQuery}
           />
         </EuiPanel>

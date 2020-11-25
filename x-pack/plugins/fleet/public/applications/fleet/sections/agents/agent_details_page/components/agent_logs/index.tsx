@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import {
   createStateContainer,
   syncState,
@@ -38,6 +38,8 @@ const AgentLogsConnected = AgentLogsUrlStateHelper.connect<AgentLogsProps, 'stat
 
 export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> = memo(
   ({ agent }) => {
+    const [isSyncReady, setIsSyncReady] = useState<boolean>(false);
+
     useEffect(() => {
       const stateStorage = createKbnUrlStateStorage();
       const { start, stop } = syncState({
@@ -46,6 +48,7 @@ export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> =
         stateStorage,
       });
       start();
+      setIsSyncReady(true);
 
       return () => {
         stop();
@@ -55,7 +58,7 @@ export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> =
 
     return (
       <AgentLogsUrlStateHelper.Provider value={stateContainer}>
-        <AgentLogsConnected agent={agent} />
+        {isSyncReady ? <AgentLogsConnected agent={agent} /> : null}
       </AgentLogsUrlStateHelper.Provider>
     );
   }
