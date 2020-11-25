@@ -23,6 +23,7 @@ import {
   removeColumn,
   removeProvider,
   setEventsDeleted,
+  setActiveTabTimeline,
   setEventsLoading,
   setExcludedRowRendererIds,
   setFilters,
@@ -516,6 +517,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         indexNames,
+      },
+    },
+  }))
+  .case(setActiveTabTimeline, (state, { id, activeTab }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        activeTab,
       },
     },
   }))

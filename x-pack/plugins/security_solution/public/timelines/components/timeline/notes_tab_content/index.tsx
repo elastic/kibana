@@ -91,4 +91,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
 
 NotesTabContentComponent.displayName = 'NotesTabContentComponent';
 
-export const NotesTabContent = React.memo(NotesTabContentComponent);
+const NotesTabContent = React.memo(NotesTabContentComponent);
+
+// eslint-disable-next-line import/no-default-export
+export { NotesTabContent as default };

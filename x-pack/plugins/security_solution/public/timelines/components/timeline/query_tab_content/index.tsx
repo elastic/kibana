@@ -427,7 +427,7 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const QueryTabContent = connector(
+const QueryTabContent = connector(
   React.memo(
     QueryTabContentComponent,
     (prevProps, nextProps) =>
@@ -453,3 +453,6 @@ export const QueryTabContent = connector(
       deepEqual(prevProps.sort, nextProps.sort)
   )
 );
+
+// eslint-disable-next-line import/no-default-export
+export { QueryTabContent as default };

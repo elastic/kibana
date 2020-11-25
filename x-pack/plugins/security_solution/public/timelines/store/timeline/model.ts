@@ -43,7 +43,16 @@ export interface ColumnHeaderOptions {
   width: number;
 }
 
+export enum TimelineTabs {
+  query = 'query',
+  graph = 'graph',
+  notes = 'notes',
+  pinned = 'pinned',
+}
+
 export interface TimelineModel {
+  /** The selected tab to displayed in the timeline */
+  activeTab: TimelineTabs;
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
   /** The sources of the event data shown in the timeline */

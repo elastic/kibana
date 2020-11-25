@@ -37,4 +37,7 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
 
 GraphTabContentComponent.displayName = 'GraphTabContentComponent';
 
-export const GraphTabContent = React.memo(GraphTabContentComponent);
+const GraphTabContent = React.memo(GraphTabContentComponent);
+
+// eslint-disable-next-line import/no-default-export
+export { GraphTabContent as default };
