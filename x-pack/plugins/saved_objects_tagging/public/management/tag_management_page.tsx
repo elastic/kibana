@@ -15,7 +15,7 @@ import { getCreateModalOpener, getEditModalOpener } from '../components/edition_
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
 import { TagBulkAction } from './types';
 import { Header, TagTable, ActionBar } from './components';
-import { getBulkActions } from './actions';
+import { getBulkActions } from './bulk_actions';
 import { getTagConnectionsUrl } from './utils';
 
 interface TagManagementPageParams {
