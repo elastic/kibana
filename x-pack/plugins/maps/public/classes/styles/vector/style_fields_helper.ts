@@ -69,6 +69,11 @@ export class StyleFieldsHelper {
     this._ordinalFields = ordinalFields;
   }
 
+  isFieldDataTypeCompatibleWithStyleType(field: IField, styleName: VECTOR_STYLES): boolean {
+    const fieldList = this.getFieldsForStyle(styleName);
+    return !!fieldList.find((styleField) => field.getName() === styleField.name);
+  }
+
   getFieldsForStyle(styleName: VECTOR_STYLES): StyleField[] {
     switch (styleName) {
       case VECTOR_STYLES.ICON_ORIENTATION:
