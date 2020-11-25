@@ -37,7 +37,14 @@ export const getBulkActions = ({
 
   if (capabilities.assign && assignableTypes.length > 0) {
     actions.push(
-      getBulkAssignAction({ notifications, overlays, tagCache, assignmentService, setLoading })
+      getBulkAssignAction({
+        notifications,
+        overlays,
+        tagCache,
+        assignmentService,
+        assignableTypes,
+        setLoading,
+      })
     );
   }
   if (capabilities.delete) {
