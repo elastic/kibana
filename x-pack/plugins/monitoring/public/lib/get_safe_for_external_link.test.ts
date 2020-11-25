@@ -51,7 +51,7 @@ describe('getSafeForExternalLink', () => {
         location
       )
     ).toBe(
-      `#/overview?_g=(cluster_uuid:NDKg6VXAT6-TaGzEK2Zy7g,filters:!(),refreshInterval:(pause:!t,value:10000),time:(from:'2017-09-07T20:12:04.011Z',to:'2017-09-07T20:18:55.733Z'))`
+      `#/overview?_g=(cluster_uuid:'NDKg6VXAT6-TaGzEK2Zy7g',filters:!(),refreshInterval:(pause:!t,value:10000),time:(from:'2017-09-07T20:12:04.011Z',to:'2017-09-07T20:18:55.733Z'))`
     );
   });
 
@@ -68,7 +68,7 @@ describe('getSafeForExternalLink', () => {
         location
       )
     ).toBe(
-      `#/overview?_g=(filters:!(),refreshInterval:(pause:!t,value:10000),time:(from:'2017-09-07T20:12:04.011Z',to:'2017-09-07T20:18:55.733Z'),cluster_uuid:NDKg6VXAT6-TaGzEK2Zy7g)`
+      `#/overview?_g=(filters:!(),refreshInterval:(pause:!t,value:10000),time:(from:'2017-09-07T20:12:04.011Z',to:'2017-09-07T20:18:55.733Z'),cluster_uuid:'NDKg6VXAT6-TaGzEK2Zy7g')`
     );
   });
 });
