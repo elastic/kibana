@@ -619,7 +619,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       if (indexOfSource !== -1 && columns.splice(indexOfSource, 1).length > 0) {
         return columns.splice(indexOfSource, 1).length > 0;
       }
-      return [];
+      return ['fields'];
     } else if (columns.length > 0) {
       return columns;
     }
@@ -949,14 +949,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         counts[fieldName] = (counts[fieldName] || 0) + 1;
       });
     });
-
-    if ($scope.useNewFieldsApi) {
-      // get some columns to display
-      if ($scope.state.columns.length === 0) {
-        const columns = ['fields'];
-        setAppState({ columns });
-      }
-    }
 
     $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
