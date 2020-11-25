@@ -5,7 +5,8 @@
  */
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer, EuiButtonEmpty, EuiText, EuiLink } from '@elastic/eui';
 
 import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import {
@@ -105,6 +106,22 @@ export const RuntimeFieldsList = () => {
     <EmptyPrompt createField={createField} runtimeFieldsDocsUri={runtimeFieldsDocsUri} />
   ) : (
     <>
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.runtimeFieldsDescription"
+          defaultMessage="Define the runtime fields accessible at query time. {docsLink}"
+          values={{
+            docsLink: (
+              <EuiLink href={runtimeFieldsDocsUri} target="_blank" external>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeFieldsDocumentationLink', {
+                  defaultMessage: 'Learn more.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+      <EuiSpacer />
       <ul>
         {fieldsToArray.map(([fieldId]) => (
           <RuntimeFieldsListItemContainer key={fieldId} fieldId={fieldId} />
