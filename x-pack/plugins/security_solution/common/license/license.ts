@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable, Subscription } from 'rxjs';
-import { ILicense } from '../../../licensing/common/types';
+import { ILicense, LicenseType } from '../../../licensing/common/types';
 
 // Generic license service class that works with the license observable
 // Both server and client plugins instancates a singleton version of this class
@@ -36,28 +36,20 @@ export class LicenseService {
     return this.observable;
   }
 
+  public isAtLeast(level: LicenseType): boolean {
+    return this.licenseInformation ? isAtLeast(this.licenseInformation, level) : false;
+  }
   public isGoldPlus(): boolean {
-    return (
-      (this.licenseInformation?.isAvailable &&
-        this.licenseInformation?.isActive &&
-        this.licenseInformation?.hasAtLeast('gold')) ||
-      false
-    );
+    return this.isAtLeast('gold');
   }
   public isPlatinumPlus(): boolean {
-    return (
-      (this.licenseInformation?.isAvailable &&
-        this.licenseInformation?.isActive &&
-        this.licenseInformation?.hasAtLeast('platinum')) ||
-      false
-    );
+    return this.isAtLeast('platinum');
   }
   public isEnterprise(): boolean {
-    return (
-      (this.licenseInformation?.isAvailable &&
-        this.licenseInformation?.isActive &&
-        this.licenseInformation?.hasAtLeast('enterprise')) ||
-      false
-    );
+    return this.isAtLeast('enterprise');
   }
 }
+
+export const isAtLeast = (license: ILicense, level: LicenseType): boolean => {
+  return license.isAvailable && license.isActive && license.hasAtLeast(level);
+};
