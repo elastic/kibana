@@ -94,6 +94,7 @@ export function Detail() {
     pkgkey
   );
 
+  const packageInstallStatus = packageInfoData?.response.status;
   const showCustomTab =
     useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
 
@@ -243,10 +244,7 @@ export function Detail() {
     return (entries(PanelDisplayNames)
       .filter(([panelId]) => {
         // Don't show `Policies` tab if package is not installed
-        if (
-          panelId === 'policies' &&
-          packageInfoData?.response.status !== InstallStatus.installed
-        ) {
+        if (panelId === 'policies' && packageInstallStatus !== InstallStatus.installed) {
           return false;
         }
 
@@ -269,7 +267,7 @@ export function Detail() {
           }),
         };
       }) as unknown) as WithHeaderLayoutProps['tabs'];
-  }, [getHref, packageInfo, panel, showCustomTab]);
+  }, [getHref, packageInfo, panel, showCustomTab, packageInstallStatus]);
 
   return (
     <WithHeaderLayout
