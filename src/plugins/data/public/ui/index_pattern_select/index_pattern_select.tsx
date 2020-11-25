@@ -23,8 +23,7 @@ import React, { Component } from 'react';
 import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
-import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
-import { getTitle } from '../../../common/index_patterns/lib';
+import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
 
 export type IndexPatternSelectProps = Required<
   Omit<
@@ -40,7 +39,7 @@ export type IndexPatternSelectProps = Required<
 };
 
 export type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
-  savedObjectsClient: SavedObjectsClientContract;
+  indexPatternService: IndexPatternsContract;
 };
 
 interface IndexPatternSelectState {
@@ -109,7 +108,8 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
     let indexPatternTitle;
     try {
-      indexPatternTitle = await getTitle(this.props.savedObjectsClient, indexPatternId);
+      const indexPattern = await this.props.indexPatternService.get(indexPatternId);
+      indexPatternTitle = indexPattern.title;
     } catch (err) {
       // index pattern no longer exists
       return;
@@ -128,49 +128,36 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
   };
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
-    const { fieldTypes, onNoIndexPatterns, savedObjectsClient } = this.props;
-
-    const savedObjectFields = ['title'];
-    if (fieldTypes) {
-      savedObjectFields.push('fields');
-    }
-    let savedObjects = await getIndexPatterns(savedObjectsClient, searchValue, savedObjectFields);
-
-    if (fieldTypes) {
-      savedObjects = savedObjects.filter((savedObject: SimpleSavedObject<any>) => {
-        try {
-          const indexPatternFields = JSON.parse(savedObject.attributes.fields as any);
-          return indexPatternFields.some((field: any) => {
-            return fieldTypes?.includes(field.type);
-          });
-        } catch (err) {
-          // Unable to parse fields JSON, invalid index pattern
-          return false;
-        }
-      });
-    }
-
-    if (!this.isMounted) {
-      return;
-    }
+    const { fieldTypes, onNoIndexPatterns, indexPatternService } = this.props;
+    const indexPatterns = await indexPatternService.find(searchValue, 100);
 
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.
-    if (searchValue === this.state.searchValue) {
-      const options = savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
+    if (searchValue !== this.state.searchValue || !this.isMounted) {
+      return;
+    }
+
+    const options = indexPatterns
+      .filter((indexPattern) => {
+        return fieldTypes
+          ? indexPattern.fields.some((field) => {
+              return fieldTypes.includes(field.type);
+            })
+          : true;
+      })
+      .map((indexPattern) => {
         return {
-          label: indexPatternSavedObject.attributes.title,
-          value: indexPatternSavedObject.id,
+          label: indexPattern.title,
+          value: indexPattern.id,
         };
       });
-      this.setState({
-        isLoading: false,
-        options,
-      });
+    this.setState({
+      isLoading: false,
+      options,
+    });
 
-      if (onNoIndexPatterns && searchValue === '' && options.length === 0) {
-        onNoIndexPatterns();
-      }
+    if (onNoIndexPatterns && searchValue === '' && options.length === 0) {
+      onNoIndexPatterns();
     }
   }, 300);
 
@@ -195,7 +182,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
       indexPatternId,
       placeholder,
       onNoIndexPatterns,
-      savedObjectsClient,
+      indexPatternService,
       ...rest
     } = this.props;
 
