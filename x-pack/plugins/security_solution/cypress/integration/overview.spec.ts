@@ -38,6 +38,7 @@ describe('Overview Page', () => {
   describe('with no data', () => {
     it('Splash screen should be here', () => {
       cy.stubSearchStrategyApi(emptyInstance, undefined, 'securitySolutionIndexFields');
+      loginAndWaitForPage(OVERVIEW_URL);
       cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
     });
   });
