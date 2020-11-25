@@ -123,7 +123,7 @@ function TimelionVisComponent({
   // temp solution, will be changed after fix https://github.com/elastic/elastic-charts/issues/878
   const getLegendPosition = useCallback(() => {
     const chartGlobal = chart[0]._global;
-    switch (chartGlobal?.legend.position) {
+    switch (chartGlobal?.legend?.position) {
       case 'ne':
         return Position.Right;
       case 'nw':
@@ -132,8 +132,9 @@ function TimelionVisComponent({
         return Position.Right;
       case 'sw':
         return Position.Left;
+      default:
+        return Position.Left;
     }
-    return Position.Left;
   }, [chart]);
 
   const brushEndListener = useCallback<BrushEndListener>(

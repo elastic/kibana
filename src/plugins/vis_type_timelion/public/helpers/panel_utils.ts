@@ -42,7 +42,7 @@ export interface Axis {
   tickDecimals?: number;
   tickFormatter: (val: number) => string;
   tickGenerator?(axis: Axis): number[];
-  units?: { type: string };
+  units?: { type: string; prefix: string; suffix: string };
   domain?: {
     min?: number;
     max?: number;

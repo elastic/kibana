@@ -65,12 +65,11 @@ export function tickFormatters(axis: Axis) {
     currency(val: number) {
       return val.toLocaleString('en', {
         style: 'currency',
-        currency: (axis && axis.options && axis.options.units.prefix) || 'USD',
+        currency: (axis && axis.units && axis.units.prefix) || 'USD',
       });
     },
     percent(val: number) {
-      let precision =
-        get(axis, 'tickDecimals', 0) - get(axis, 'options.units.tickDecimalsShift', 0);
+      let precision = get(axis, 'tickDecimals', 0) - get(axis, 'units.tickDecimalsShift', 0);
       // toFixed only accepts values between 0 and 20
       if (precision < 0) {
         precision = 0;
@@ -82,8 +81,8 @@ export function tickFormatters(axis: Axis) {
     },
     custom(val: number) {
       const formattedVal = baseTickFormatter(val, axis);
-      const prefix = axis && axis.options && axis.options.units.prefix;
-      const suffix = axis && axis.options && axis.options.units.suffix;
+      const prefix = axis && axis.units && axis.units.prefix;
+      const suffix = axis && axis.units && axis.units.suffix;
       return prefix + formattedVal + suffix;
     },
   };

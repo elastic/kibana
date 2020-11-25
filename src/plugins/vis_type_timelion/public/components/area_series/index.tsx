@@ -41,7 +41,7 @@ export function AreaSeriesComponent({ data, index }: { data: any; index: number 
         radius: points.radius || 3,
         stroke: data.color,
         strokeWidth: points.lineWidth || 2,
-        visible: points.show ?? true,
+        visible: points.show ?? false,
       },
     },
     curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
