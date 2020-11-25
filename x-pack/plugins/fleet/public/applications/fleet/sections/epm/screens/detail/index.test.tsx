@@ -15,7 +15,7 @@ import {
 } from '../../../../../../../common/types/rest_spec';
 import { DetailViewPanelName, KibanaAssetType } from '../../../../../../../common/types/models';
 import { epmRouteService, fleetSetupRouteService } from '../../../../../../../common/services';
-import { act, fireEvent } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 describe('when on integration detail', () => {
   const detailPageUrlPath = pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7' });
@@ -59,6 +59,8 @@ describe('when on integration detail', () => {
   });
 
   describe('and a custom UI extension is registered', () => {
+    // Because React Lazy components are loaded async (Promise), we setup this "watcher" Promise
+    // that is `resolved` once the lazy components actually renders.
     let lazyComponentWasRendered: Promise<void>;
 
     beforeEach(() => {
@@ -94,12 +96,12 @@ describe('when on integration detail', () => {
       expect(renderResult.getByTestId('tab-custom'));
     });
 
-    it.skip('should display custom content when tab is clicked', async () => {
-      const customTab = renderResult.getByTestId('tab-custom');
+    it('should display custom content when tab is clicked', async () => {
       act(() => {
-        fireEvent.click(customTab, { button: 1 });
+        testRenderer.history.push(
+          pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7', panel: 'custom' })
+        );
       });
-      // testRenderer.history;
       await lazyComponentWasRendered;
       expect(renderResult.getByTestId('custom-hello'));
     });
