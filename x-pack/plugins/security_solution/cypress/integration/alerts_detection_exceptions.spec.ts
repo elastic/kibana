@@ -25,7 +25,6 @@ import {
   activatesRule,
   addsException,
   addsExceptionFromRuleSettings,
-  deactivatesRule,
   goToAlertsTab,
   goToExceptionsTab,
   removeException,
@@ -51,7 +50,6 @@ describe('Exceptions', () => {
     activatesRule();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
-    deactivatesRule();
     refreshPage();
 
     cy.scrollTo('bottom');
@@ -76,8 +74,6 @@ describe('Exceptions', () => {
     it('Creates an exception and deletes it', () => {
       goToExceptionsTab();
       addsExceptionFromRuleSettings(exception);
-      activatesRule();
-
       esArchiverLoad('auditbeat_for_exceptions2');
       refreshPage();
       waitForTheRuleToBeExecuted();
@@ -139,7 +135,6 @@ describe('Exceptions', () => {
     it('Creates an exception and deletes it', () => {
       addExceptionFromFirstAlert();
       addsException(exception);
-      activatesRule();
       esArchiverLoad('auditbeat_for_exceptions2');
 
       cy.scrollTo('bottom');
