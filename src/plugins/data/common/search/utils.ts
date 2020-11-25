@@ -17,14 +17,25 @@
  * under the License.
  */
 
-import type { ShardsResponse } from 'elasticsearch';
+import type { IKibanaSearchResponse } from './types';
 
 /**
- * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
- * not included as it is already included in `successful`.
- * @internal
+ * @returns true if response had an error while executing in ES
  */
-export function getTotalLoaded({ total, failed, successful }: ShardsResponse) {
-  const loaded = failed + successful;
-  return { total, loaded };
-}
+export const isErrorResponse = (response?: IKibanaSearchResponse) => {
+  return !response || (!response.isRunning && response.isPartial);
+};
+
+/**
+ * @returns true if response is completed successfully
+ */
+export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
+  return Boolean(response && !response.isRunning && !response.isPartial);
+};
+
+/**
+ * @returns true if request is still running an/d response contains partial results
+ */
+export const isPartialResponse = (response?: IKibanaSearchResponse) => {
+  return Boolean(response && response.isRunning && response.isPartial);
+};
