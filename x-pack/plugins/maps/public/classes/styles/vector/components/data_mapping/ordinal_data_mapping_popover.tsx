@@ -80,6 +80,7 @@ interface Props<DynamicOptions> {
   onChange: (updatedOptions: DynamicOptions) => void;
   switchDisabled: boolean;
   stepFunction: STEP_FUNCTION;
+  supportedStepFunctions: STEP_FUNCTION[];
 }
 
 export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOptions>) {
@@ -220,6 +221,10 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
     );
   }
 
+  const stepFunctionOptions = STEP_FUNCTION_OPTIONS.filter((option) => {
+    return props.supportedStepFunctions.includes(option.value);
+  });
+
   return (
     <DataMappingPopover>
       <Fragment>
@@ -235,7 +240,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
           )}
         >
           <EuiSuperSelect
-            options={STEP_FUNCTION_OPTIONS}
+            options={stepFunctionOptions}
             valueOfSelected={props.stepFunction}
             onChange={onStepFunctionChange}
             itemLayoutAlign="top"

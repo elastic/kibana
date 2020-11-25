@@ -129,6 +129,10 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     return colors ? colors.length : 0;
   }
 
+  _getSupportedStepFunctions(): STEP_FUNCTION[] {
+    return [STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX, STEP_FUNCTION.PERCENTILES];
+  }
+
   _getMbColor() {
     if (!this.getFieldName()) {
       return null;

@@ -393,6 +393,10 @@ export class DynamicStyleProperty<T>
     }
   }
 
+  _getSupportedStepFunctions(): STEP_FUNCTION[] {
+    return [STEP_FUNCTION.EASING_BETWEEN_MIN_AND_MAX];
+  }
+
   renderDataMappingPopover(onChange: (updatedOptions: Partial<T>) => void) {
     if (!this.supportsFieldMeta()) {
       return null;
@@ -413,6 +417,7 @@ export class DynamicStyleProperty<T>
         onChange={onChange}
         switchDisabled={switchDisabled}
         stepFunction={this.getStepFunction()}
+        supportedStepFunctions={this._getSupportedStepFunctions()}
       />
     );
   }
