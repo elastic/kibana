@@ -257,9 +257,9 @@ export function DiscoverLegacy({
                           >
                             {toggleOn ? 'Hide chart' : 'Show chart'}
                           </EuiButtonEmpty>
-                          <SkipBottomButton onClick={onSkipBottomButtonClick} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
+                      <SkipBottomButton onClick={onSkipBottomButtonClick} />
                     </EuiFlexItem>
                     {toggleOn && opts.timefield && (
                       <EuiFlexItem grow={false}>

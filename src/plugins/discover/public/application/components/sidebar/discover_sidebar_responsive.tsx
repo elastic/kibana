@@ -22,16 +22,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UiStatsMetricType } from '@kbn/analytics';
 import {
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiTitle,
   EuiHideFor,
   EuiShowFor,
   EuiButton,
   EuiBadge,
   EuiFlyoutHeader,
-  EuiButtonIcon,
-  EuiFlyoutBody,
   EuiFlyout,
   EuiSpacer,
   EuiIcon,
