@@ -34,7 +34,7 @@ import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = 2;
+const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = 1;
 
 describe('Exceptions', () => {
   beforeEach(() => {
@@ -66,7 +66,6 @@ describe('Exceptions', () => {
   afterEach(() => {
     esArchiverUnload('auditbeat_for_exceptions');
     esArchiverUnload('auditbeat_for_exceptions2');
-    esArchiverUnload('auditbeat_for_exceptions3');
     removeSignalsIndex();
     deleteCustomRule();
   });
@@ -75,9 +74,9 @@ describe('Exceptions', () => {
       goToExceptionsTab();
       addsExceptionFromRuleSettings(exception);
       esArchiverLoad('auditbeat_for_exceptions2');
-      refreshPage();
       waitForTheRuleToBeExecuted();
       goToAlertsTab();
+      refreshPage();
 
       cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT)
