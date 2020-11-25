@@ -77,8 +77,14 @@ export class ClusterManager {
 
     if (!this.basePathProxy) {
       this.log.warn(
+        '===================================================================================================='
+      );
+      this.log.warn(
         'no-base-path',
         'Running Kibana in dev mode with --no-base-path disables several useful features and is not recommended'
+      );
+      this.log.warn(
+        '===================================================================================================='
       );
     }
 
