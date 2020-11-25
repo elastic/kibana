@@ -450,7 +450,6 @@ export class AlertsClient {
       type: 'alert',
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const authorizedData = data.map(({ id, attributes, references }) => {
       try {
         ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
@@ -534,9 +533,11 @@ export class AlertsClient {
     let attributes: RawAlert;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        RawAlert
-      >('alert', id, { namespace: this.namespace });
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+        'alert',
+        id,
+        { namespace: this.namespace }
+      );
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
       attributes = decryptedAlert.attributes;
@@ -604,9 +605,11 @@ export class AlertsClient {
     let alertSavedObject: SavedObject<RawAlert>;
 
     try {
-      alertSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        RawAlert
-      >('alert', id, { namespace: this.namespace });
+      alertSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+        'alert',
+        id,
+        { namespace: this.namespace }
+      );
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
       this.logger.error(
@@ -755,9 +758,11 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        RawAlert
-      >('alert', id, { namespace: this.namespace });
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+        'alert',
+        id,
+        { namespace: this.namespace }
+      );
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -849,9 +854,11 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        RawAlert
-      >('alert', id, { namespace: this.namespace });
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+        'alert',
+        id,
+        { namespace: this.namespace }
+      );
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
@@ -950,9 +957,11 @@ export class AlertsClient {
     let version: string | undefined;
 
     try {
-      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<
-        RawAlert
-      >('alert', id, { namespace: this.namespace });
+      const decryptedAlert = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+        'alert',
+        id,
+        { namespace: this.namespace }
+      );
       apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
