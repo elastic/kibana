@@ -17,23 +17,25 @@
  * under the License.
  */
 
-import { getTimerange } from './get_timerange';
-import moment from 'moment';
+import type { IKibanaSearchResponse } from './types';
 
-describe('getTimerange(req)', () => {
-  test('should return a moment object for to and from', () => {
-    const req = {
-      payload: {
-        timerange: {
-          min: '2017-01-01T00:00:00Z',
-          max: '2017-01-01T01:00:00Z',
-        },
-      },
-    };
-    const { from, to } = getTimerange(req);
-    expect(moment.isMoment(from)).toEqual(true);
-    expect(moment.isMoment(to)).toEqual(true);
-    expect(moment.utc('2017-01-01T00:00:00Z').isSame(from)).toEqual(true);
-    expect(moment.utc('2017-01-01T01:00:00Z').isSame(to)).toEqual(true);
-  });
-});
+/**
+ * @returns true if response had an error while executing in ES
+ */
+export const isErrorResponse = (response?: IKibanaSearchResponse) => {
+  return !response || (!response.isRunning && response.isPartial);
+};
+
+/**
+ * @returns true if response is completed successfully
+ */
+export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
+  return Boolean(response && !response.isRunning && !response.isPartial);
+};
+
+/**
+ * @returns true if request is still running an/d response contains partial results
+ */
+export const isPartialResponse = (response?: IKibanaSearchResponse) => {
+  return Boolean(response && response.isRunning && response.isPartial);
+};

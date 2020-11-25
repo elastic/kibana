@@ -17,32 +17,28 @@
  * under the License.
  */
 
+import { SearchResponse } from 'elasticsearch';
+
 /**
+ * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
+ * not included as it is already included in `successful`.
  * @internal
- * TransportRequestPromise extends base Promise with an "abort" method
  */
-export interface TransportRequestPromise<T> extends Promise<T> {
-  abort?: () => void;
+export function getTotalLoaded(response: SearchResponse<unknown>) {
+  const { total, failed, successful } = response._shards;
+  const loaded = failed + successful;
+  return { total, loaded };
 }
 
 /**
- *
+ * Get the Kibana representation of this response (see `IKibanaSearchResponse`).
  * @internal
- * NOTE: Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
- * is resolved
- *
- * @param promise a TransportRequestPromise
- * @param signal optional AbortSignal
- *
- * @returns a TransportRequestPromise that will be aborted if the signal is aborted
  */
-
-export const shimAbortSignal = <T extends TransportRequestPromise<unknown>>(
-  promise: T,
-  signal: AbortSignal | undefined
-): T => {
-  if (signal) {
-    signal.addEventListener('abort', () => promise.abort && promise.abort());
-  }
-  return promise;
-};
+export function toKibanaSearchResponse(rawResponse: SearchResponse<unknown>) {
+  return {
+    rawResponse,
+    isPartial: false,
+    isRunning: false,
+    ...getTotalLoaded(rawResponse),
+  };
+}

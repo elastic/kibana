@@ -4,31 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { getNameField } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils/fetch';
+import { Schema } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils';
+import { ResolverNode } from '../../../../plugins/security_solution/common/endpoint/types';
 import {
-  SafeResolverAncestry,
-  SafeResolverChildren,
-  SafeResolverTree,
-  SafeLegacyEndpointEvent,
-} from '../../../../plugins/security_solution/common/endpoint/types';
-import { parentEntityIDSafeVersion } from '../../../../plugins/security_solution/common/endpoint/models/event';
+  parentEntityIDSafeVersion,
+  timestampSafeVersion,
+} from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   Tree,
   RelatedEventCategory,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
 import { Options, GeneratedTrees } from '../../services/resolver';
-import {
-  compareArrays,
-  verifyAncestry,
-  retrieveDistantAncestor,
-  verifyChildren,
-  verifyLifecycleStats,
-  verifyStats,
-} from './common';
+import { verifyTree } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const resolver = getService('resolverGenerator');
 
   const relatedEventsToGen = [
@@ -52,322 +44,641 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
+  const schemaWithAncestry: Schema = {
+    ancestry: 'process.Ext.ancestry',
+    id: 'process.entity_id',
+    parent: 'process.parent.entity_id',
+  };
+
+  const schemaWithoutAncestry: Schema = {
+    id: 'process.entity_id',
+    parent: 'process.parent.entity_id',
+  };
+
+  const schemaWithName: Schema = {
+    id: 'process.entity_id',
+    parent: 'process.parent.entity_id',
+    name: 'process.name',
+  };
+
   describe('Resolver tree', () => {
     before(async () => {
-      await esArchiver.load('endpoint/resolver/api_feature');
       resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree
       tree = resolverTrees.trees[0];
     });
     after(async () => {
       await resolver.deleteData(resolverTrees);
-      // this unload is for an endgame-* index so it does not use data streams
-      await esArchiver.unload('endpoint/resolver/api_feature');
     });
 
-    describe('ancestry events route', () => {
-      describe('legacy events', () => {
-        const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
-        const entityID = '94042';
-
-        it('should return details for the root node', async () => {
-          const { body }: { body: SafeResolverAncestry } = await supertest
-            .get(
-              `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=5`
-            )
-            .expect(200);
-          expect(body.ancestors[0].lifecycle.length).to.eql(2);
-          expect(body.ancestors.length).to.eql(2);
-          expect(body.nextAncestor).to.eql(null);
-        });
-
-        it('should have a populated next parameter', async () => {
-          const { body }: { body: SafeResolverAncestry } = await supertest
-            .get(
-              `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=0`
-            )
-            .expect(200);
-          expect(body.nextAncestor).to.eql('94041');
-        });
-
-        it('should handle an ancestors param request', async () => {
-          let { body }: { body: SafeResolverAncestry } = await supertest
-            .get(
-              `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=0`
-            )
-            .expect(200);
-          const next = body.nextAncestor;
-
-          ({ body } = await supertest
-            .get(
-              `/api/endpoint/resolver/${next}/ancestry?legacyEndpointID=${endpointID}&ancestors=1`
-            )
-            .expect(200));
-          expect(body.ancestors[0].lifecycle.length).to.eql(1);
-          expect(body.nextAncestor).to.eql(null);
+    describe('ancestry events', () => {
+      it('should return the correct ancestor nodes for the tree', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 9,
+            schema: schemaWithAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [{ origin: tree.origin.id, nodeExpectations: { ancestors: 5 } }],
+          response: body,
+          schema: schemaWithAncestry,
+          genTree: tree,
         });
       });
 
-      describe('endpoint events', () => {
-        it('should return the origin node at the front of the array', async () => {
-          const { body }: { body: SafeResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=9`)
-            .expect(200);
-          expect(body.ancestors[0].entityID).to.eql(tree.origin.id);
-        });
-
-        it('should return details for the root node', async () => {
-          const { body }: { body: SafeResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=9`)
-            .expect(200);
-          // the tree we generated had 5 ancestors + 1 origin node
-          expect(body.ancestors.length).to.eql(6);
-          expect(body.ancestors[0].entityID).to.eql(tree.origin.id);
-          verifyAncestry(body.ancestors, tree, true);
-          expect(body.nextAncestor).to.eql(null);
-        });
-
-        it('should handle an invalid id', async () => {
-          const { body }: { body: SafeResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/alskdjflasj/ancestry`)
-            .expect(200);
-          expect(body.ancestors).to.be.empty();
-          expect(body.nextAncestor).to.eql(null);
-        });
-
-        it('should have a populated next parameter', async () => {
-          const { body }: { body: SafeResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=2`)
-            .expect(200);
-          // it should have 2 ancestors + 1 origin
-          expect(body.ancestors.length).to.eql(3);
-          verifyAncestry(body.ancestors, tree, false);
-          const distantGrandparent = retrieveDistantAncestor(body.ancestors);
-          expect(body.nextAncestor).to.eql(
-            parentEntityIDSafeVersion(distantGrandparent.lifecycle[0])
-          );
-        });
-
-        it('should handle multiple ancestor requests', async () => {
-          let { body }: { body: SafeResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=3`)
-            .expect(200);
-          expect(body.ancestors.length).to.eql(4);
-          const next = body.nextAncestor;
-
-          ({ body } = await supertest
-            .get(`/api/endpoint/resolver/${next}/ancestry?ancestors=1`)
-            .expect(200));
-          expect(body.ancestors.length).to.eql(2);
-          verifyAncestry(body.ancestors, tree, true);
-          // the highest node in the generated tree will not have a parent ID which causes the server to return
-          // without setting the pagination so nextAncestor will be null
-          expect(body.nextAncestor).to.eql(null);
-        });
+      it('should handle an invalid id', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 9,
+            schema: schemaWithAncestry,
+            nodes: ['bogus id'],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        expect(body).to.be.empty();
       });
-    });
 
-    describe('children route', () => {
-      describe('legacy events', () => {
-        const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
-        const entityID = '94041';
-
-        it('returns child process lifecycle events', async () => {
-          const { body }: { body: SafeResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}`)
-            .expect(200);
-          expect(body.childNodes.length).to.eql(1);
-          expect(body.childNodes[0].lifecycle.length).to.eql(2);
-          expect(
-            // for some reason the ts server doesn't think `endgame` exists even though we're using ResolverEvent
-            // here, so to avoid it complaining we'll just force it
-            (body.childNodes[0].lifecycle[0] as SafeLegacyEndpointEvent).endgame.unique_pid
-          ).to.eql(94042);
-        });
-
-        it('returns multiple levels of child process lifecycle events', async () => {
-          const { body }: { body: SafeResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/93802/children?legacyEndpointID=${endpointID}&children=10`)
-            .expect(200);
-          expect(body.childNodes.length).to.eql(10);
-          expect(body.nextChild).to.be(null);
-          expect(body.childNodes[0].lifecycle.length).to.eql(1);
-          expect(
-            // for some reason the ts server doesn't think `endgame` exists even though we're using ResolverEvent
-            // here, so to avoid it complaining we'll just force it
-            (body.childNodes[0].lifecycle[0] as SafeLegacyEndpointEvent).endgame.unique_pid
-          ).to.eql(93932);
-        });
-
-        it('returns no values when there is no more data', async () => {
-          let { body }: { body: SafeResolverChildren } = await supertest
-            .get(
-              // there should only be a single child for this node
-              `/api/endpoint/resolver/94041/children?legacyEndpointID=${endpointID}&children=1`
-            )
-            .expect(200);
-          expect(body.nextChild).to.not.be(null);
-
-          ({ body } = await supertest
-            .get(
-              `/api/endpoint/resolver/94041/children?legacyEndpointID=${endpointID}&afterChild=${body.nextChild}`
-            )
-            .expect(200));
-          expect(body.childNodes).be.empty();
-          expect(body.nextChild).to.eql(null);
-        });
-
-        it('returns the first page of information when the cursor is invalid', async () => {
-          const { body }: { body: SafeResolverChildren } = await supertest
-            .get(
-              `/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}&afterChild=blah`
-            )
-            .expect(200);
-          expect(body.childNodes.length).to.eql(1);
-          expect(body.nextChild).to.be(null);
-        });
-
-        it('errors on invalid pagination values', async () => {
-          await supertest.get(`/api/endpoint/resolver/${entityID}/children?children=0`).expect(400);
-          await supertest
-            .get(`/api/endpoint/resolver/${entityID}/children?children=20000`)
-            .expect(400);
-          await supertest
-            .get(`/api/endpoint/resolver/${entityID}/children?children=-1`)
-            .expect(400);
-        });
-
-        it('returns empty events without a matching entity id', async () => {
-          const { body }: { body: SafeResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/5555/children`)
-            .expect(200);
-          expect(body.nextChild).to.eql(null);
-          expect(body.childNodes).to.be.empty();
-        });
-
-        it('returns empty events with an invalid endpoint id', async () => {
-          const { body }: { body: SafeResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${entityID}/children?legacyEndpointID=foo`)
-            .expect(200);
-          expect(body.nextChild).to.eql(null);
-          expect(body.childNodes).to.be.empty();
+      it('should return a subset of the ancestors', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            // 3 ancestors means 1 origin and 2 ancestors of the origin
+            ancestors: 3,
+            schema: schemaWithAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [{ origin: tree.origin.id, nodeExpectations: { ancestors: 2 } }],
+          response: body,
+          schema: schemaWithAncestry,
+          genTree: tree,
         });
       });
 
-      describe('endpoint events', () => {
-        it('returns all children for the origin', async () => {
-          const { body }: { body: SafeResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=100`)
-            .expect(200);
-          // there are 2 levels in the children part of the tree and 3 nodes for each =
-          // 3 children for the origin + 3 children for each of the origin's children = 12
-          expect(body.childNodes.length).to.eql(12);
-          // there will be 4 parents, the origin of the tree, and it's 3 children
-          verifyChildren(body.childNodes, tree, 4, 3);
-          expect(body.nextChild).to.eql(null);
+      it('should return ancestors without the ancestry array', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 50,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [{ origin: tree.origin.id, nodeExpectations: { ancestors: 5 } }],
+          response: body,
+          schema: schemaWithoutAncestry,
+          genTree: tree,
         });
+      });
 
-        it('returns a single generation of children', async () => {
-          // this gets a node should have 3 children which were created in succession so that the timestamps
-          // are ordered correctly to be retrieved in a single call
-          const distantChildEntityID = Array.from(tree.childrenLevels[0].values())[0].id;
-          const { body }: { body: SafeResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=3`)
-            .expect(200);
-          expect(body.childNodes.length).to.eql(3);
-          verifyChildren(body.childNodes, tree, 1, 3);
-          expect(body.nextChild).to.not.eql(null);
+      it('should respect the time range specified and only return the origin node', async () => {
+        const from = new Date(
+          timestampSafeVersion(tree.origin.lifecycle[0]) ?? new Date()
+        ).toISOString();
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 50,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from,
+              to: from,
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [{ origin: tree.origin.id, nodeExpectations: { ancestors: 0 } }],
+          response: body,
+          schema: schemaWithoutAncestry,
+          genTree: tree,
         });
+      });
 
-        it('paginates the children', async () => {
-          // this gets a node should have 3 children which were created in succession so that the timestamps
-          // are ordered correctly to be retrieved in a single call
-          const distantChildEntityID = Array.from(tree.childrenLevels[0].values())[0].id;
-          let { body }: { body: SafeResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=1`)
-            .expect(200);
-          expect(body.childNodes.length).to.eql(1);
-          verifyChildren(body.childNodes, tree, 1, 1);
-          expect(body.nextChild).to.not.be(null);
-
-          ({ body } = await supertest
-            .get(
-              `/api/endpoint/resolver/${distantChildEntityID}/children?children=2&afterChild=${body.nextChild}`
-            )
-            .expect(200));
-          expect(body.childNodes.length).to.eql(2);
-          verifyChildren(body.childNodes, tree, 1, 2);
-          expect(body.nextChild).to.not.be(null);
-
-          ({ body } = await supertest
-            .get(
-              `/api/endpoint/resolver/${distantChildEntityID}/children?children=2&afterChild=${body.nextChild}`
-            )
-            .expect(200));
-          expect(body.childNodes.length).to.eql(0);
-          expect(body.nextChild).to.be(null);
+      it('should support returning multiple ancestor trees when multiple nodes are requested', async () => {
+        // There should be 2 levels of descendants under the origin, grab the bottom one, and the first node's id
+        const bottomMostDescendant = Array.from(tree.childrenLevels[1].values())[0].id;
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 50,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id, bottomMostDescendant],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            // there are 5 ancestors above the origin
+            { origin: tree.origin.id, nodeExpectations: { ancestors: 5 } },
+            // there are 2 levels below the origin so the bottom node's ancestry should be
+            // all the ancestors (5) + one level + the origin = 7
+            { origin: bottomMostDescendant, nodeExpectations: { ancestors: 7 } },
+          ],
+          response: body,
+          schema: schemaWithoutAncestry,
+          genTree: tree,
         });
+      });
 
-        it('gets all children in two queries', async () => {
-          // should get all the children of the origin
-          let { body }: { body: SafeResolverChildren } = await supertest
-            .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=3`)
-            .expect(200);
-          expect(body.childNodes.length).to.eql(3);
-          verifyChildren(body.childNodes, tree);
-          expect(body.nextChild).to.not.be(null);
-          const firstNodes = [...body.childNodes];
-
-          ({ body } = await supertest
-            .get(
-              `/api/endpoint/resolver/${tree.origin.id}/children?children=10&afterChild=${body.nextChild}`
-            )
-            .expect(200));
-          expect(body.childNodes.length).to.eql(9);
-          // put all the results together and we should have all the children
-          verifyChildren([...firstNodes, ...body.childNodes], tree, 4, 3);
-          expect(body.nextChild).to.be(null);
+      it('should return a single ancestry when two nodes a the same level and from same parent are requested', async () => {
+        // there are 2 levels after the origin, let's get the first level, there will be three
+        // children so get the left and right most ones
+        const level0Nodes = Array.from(tree.childrenLevels[0].values());
+        const leftNode = level0Nodes[0].id;
+        const rightNode = level0Nodes[2].id;
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 50,
+            schema: schemaWithoutAncestry,
+            nodes: [leftNode, rightNode],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            // We should be 1 level below the origin so the node's ancestry should be
+            // all the ancestors (5) + the origin = 6
+            { origin: leftNode, nodeExpectations: { ancestors: 6 } },
+            // these nodes should be at the same level so the ancestors should be the same number
+            { origin: rightNode, nodeExpectations: { ancestors: 6 } },
+          ],
+          response: body,
+          schema: schemaWithoutAncestry,
+          genTree: tree,
         });
+      });
+
+      it('should not return any nodes when the search index does not have any data', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 50,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['metrics-*'],
+          })
+          .expect(200);
+        expect(body).to.be.empty();
       });
     });
 
-    describe('tree api', () => {
-      describe('legacy events', () => {
-        const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
-
-        it('returns ancestors, events, children, and current process lifecycle', async () => {
-          const { body }: { body: SafeResolverTree } = await supertest
-            .get(`/api/endpoint/resolver/93933?legacyEndpointID=${endpointID}`)
-            .expect(200);
-          expect(body.ancestry.nextAncestor).to.equal(null);
-          expect(body.children.nextChild).to.equal(null);
-          expect(body.children.childNodes.length).to.equal(0);
-          expect(body.lifecycle.length).to.equal(2);
+    describe('descendant events', () => {
+      it('returns all descendants for the origin without using the ancestry field', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 100,
+            descendantLevels: 2,
+            ancestors: 0,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            // there are 2 levels in the descendant part of the tree and 3 nodes for each
+            // descendant = 3 children for the origin + 3 children for each of the origin's children = 12
+            { origin: tree.origin.id, nodeExpectations: { descendants: 12, descendantLevels: 2 } },
+          ],
+          response: body,
+          schema: schemaWithoutAncestry,
+          genTree: tree,
         });
       });
 
-      describe('endpoint events', () => {
-        it('returns a tree', async () => {
-          const { body }: { body: SafeResolverTree } = await supertest
-            .get(
-              `/api/endpoint/resolver/${tree.origin.id}?children=100&ancestors=5&events=5&alerts=5`
-            )
-            .expect(200);
+      it('returns all descendants for the origin using the ancestry field', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 100,
+            // should be ignored when using the ancestry array
+            descendantLevels: 0,
+            ancestors: 0,
+            schema: schemaWithAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            // there are 2 levels in the descendant part of the tree and 3 nodes for each
+            // descendant = 3 children for the origin + 3 children for each of the origin's children = 12
+            { origin: tree.origin.id, nodeExpectations: { descendants: 12, descendantLevels: 2 } },
+          ],
+          response: body,
+          schema: schemaWithAncestry,
+          genTree: tree,
+        });
+      });
 
-          expect(body.children.nextChild).to.equal(null);
-          expect(body.children.childNodes.length).to.equal(12);
-          verifyChildren(body.children.childNodes, tree, 4, 3);
-          verifyLifecycleStats(body.children.childNodes, relatedEventsToGen, relatedAlerts);
+      it('should handle an invalid id', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 100,
+            descendantLevels: 100,
+            ancestors: 0,
+            schema: schemaWithAncestry,
+            nodes: ['bogus id'],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        expect(body).to.be.empty();
+      });
 
-          expect(body.ancestry.nextAncestor).to.equal(null);
-          verifyAncestry(body.ancestry.ancestors, tree, true);
-          verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen, relatedAlerts);
+      it('returns a single generation of children', async () => {
+        // this gets a node should have 3 children which were created in succession so that the timestamps
+        // are ordered correctly to be retrieved in a single call
+        const childID = Array.from(tree.childrenLevels[0].values())[0].id;
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 100,
+            descendantLevels: 1,
+            ancestors: 0,
+            schema: schemaWithoutAncestry,
+            nodes: [childID],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            // a single generation should be three nodes
+            { origin: childID, nodeExpectations: { descendants: 3, descendantLevels: 1 } },
+          ],
+          response: body,
+          schema: schemaWithoutAncestry,
+          genTree: tree,
+        });
+      });
 
-          expect(body.relatedAlerts.nextAlert).to.equal(null);
-          compareArrays(tree.origin.relatedAlerts, body.relatedAlerts.alerts, true);
+      it('should support returning multiple descendant trees when multiple nodes are requested', async () => {
+        // there are 2 levels after the origin, let's get the first level, there will be three
+        // children so get the left and right most ones
+        const level0Nodes = Array.from(tree.childrenLevels[0].values());
+        const leftNodeID = level0Nodes[0].id;
+        const rightNodeID = level0Nodes[2].id;
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 6,
+            descendantLevels: 0,
+            ancestors: 0,
+            schema: schemaWithAncestry,
+            nodes: [leftNodeID, rightNodeID],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            { origin: leftNodeID, nodeExpectations: { descendantLevels: 1, descendants: 3 } },
+            { origin: rightNodeID, nodeExpectations: { descendantLevels: 1, descendants: 3 } },
+          ],
+          response: body,
+          schema: schemaWithAncestry,
+          genTree: tree,
+        });
+      });
 
-          compareArrays(tree.origin.lifecycle, body.lifecycle, true);
-          verifyStats(body.stats, relatedEventsToGen, relatedAlerts);
+      it('should support returning multiple descendant trees when multiple nodes are requested at different levels', async () => {
+        const originParent = parentEntityIDSafeVersion(tree.origin.lifecycle[0]) ?? '';
+        expect(originParent).to.not.be('');
+        const originGrandparent =
+          parentEntityIDSafeVersion(tree.ancestry.get(originParent)!.lifecycle[0]) ?? '';
+        expect(originGrandparent).to.not.be('');
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 2,
+            descendantLevels: 0,
+            ancestors: 0,
+            schema: schemaWithAncestry,
+            nodes: [tree.origin.id, originGrandparent],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            { origin: tree.origin.id, nodeExpectations: { descendantLevels: 1, descendants: 1 } },
+            // the origin's grandparent should only have the origin's parent as a descendant
+            {
+              origin: originGrandparent,
+              nodeExpectations: { descendantLevels: 1, descendants: 1 },
+            },
+          ],
+          response: body,
+          schema: schemaWithAncestry,
+          genTree: tree,
+        });
+      });
+
+      it('should support returning multiple descendant trees when multiple nodes are requested at different levels without ancestry field', async () => {
+        const originParent = parentEntityIDSafeVersion(tree.origin.lifecycle[0]) ?? '';
+        expect(originParent).to.not.be('');
+        const originGrandparent =
+          parentEntityIDSafeVersion(tree.ancestry.get(originParent)!.lifecycle[0]) ?? '';
+        expect(originGrandparent).to.not.be('');
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 6,
+            descendantLevels: 1,
+            ancestors: 0,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id, originGrandparent],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            { origin: tree.origin.id, nodeExpectations: { descendantLevels: 1, descendants: 3 } },
+            // the origin's grandparent should only have the origin's parent as a descendant
+            {
+              origin: originGrandparent,
+              nodeExpectations: { descendantLevels: 1, descendants: 1 },
+            },
+          ],
+          response: body,
+          schema: schemaWithoutAncestry,
+          genTree: tree,
+        });
+      });
+
+      it('should respect the time range specified and only return one descendant', async () => {
+        const level0Node = Array.from(tree.childrenLevels[0].values())[0];
+        const end = new Date(
+          timestampSafeVersion(level0Node.lifecycle[0]) ?? new Date()
+        ).toISOString();
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 100,
+            descendantLevels: 5,
+            ancestors: 0,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: end,
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            { origin: tree.origin.id, nodeExpectations: { descendantLevels: 1, descendants: 1 } },
+          ],
+          response: body,
+          schema: schemaWithoutAncestry,
+          genTree: tree,
+        });
+      });
+    });
+
+    describe('ancestry and descendants', () => {
+      it('returns all descendants and ancestors without the ancestry field and they should have the name field', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 100,
+            descendantLevels: 10,
+            ancestors: 50,
+            schema: schemaWithName,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            // there are 2 levels in the descendant part of the tree and 3 nodes for each
+            // descendant = 3 children for the origin + 3 children for each of the origin's children = 12
+            {
+              origin: tree.origin.id,
+              nodeExpectations: { descendants: 12, descendantLevels: 2, ancestors: 5 },
+            },
+          ],
+          response: body,
+          schema: schemaWithName,
+          genTree: tree,
+          relatedEventsCategories: relatedEventsToGen,
+        });
+
+        for (const node of body) {
+          expect(node.name).to.be(getNameField(node.data, schemaWithName));
+          expect(node.name).to.not.be(undefined);
+        }
+      });
+
+      it('returns all descendants and ancestors without the ancestry field', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 100,
+            descendantLevels: 10,
+            ancestors: 50,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            // there are 2 levels in the descendant part of the tree and 3 nodes for each
+            // descendant = 3 children for the origin + 3 children for each of the origin's children = 12
+            {
+              origin: tree.origin.id,
+              nodeExpectations: { descendants: 12, descendantLevels: 2, ancestors: 5 },
+            },
+          ],
+          response: body,
+          schema: schemaWithoutAncestry,
+          genTree: tree,
+          relatedEventsCategories: relatedEventsToGen,
+        });
+
+        for (const node of body) {
+          expect(node.name).to.be(getNameField(node.data, schemaWithoutAncestry));
+          expect(node.name).to.be(undefined);
+        }
+      });
+
+      it('returns all descendants and ancestors with the ancestry field', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 100,
+            descendantLevels: 10,
+            ancestors: 50,
+            schema: schemaWithAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            // there are 2 levels in the descendant part of the tree and 3 nodes for each
+            // descendant = 3 children for the origin + 3 children for each of the origin's children = 12
+            {
+              origin: tree.origin.id,
+              nodeExpectations: { descendants: 12, descendantLevels: 2, ancestors: 5 },
+            },
+          ],
+          response: body,
+          schema: schemaWithAncestry,
+          genTree: tree,
+          relatedEventsCategories: relatedEventsToGen,
+        });
+
+        for (const node of body) {
+          expect(node.name).to.be(getNameField(node.data, schemaWithAncestry));
+          expect(node.name).to.be(undefined);
+        }
+      });
+
+      it('returns an empty response when limits are zero', async () => {
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 0,
+            schema: schemaWithAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        expect(body).to.be.empty();
+        verifyTree({
+          expectations: [
+            {
+              origin: tree.origin.id,
+              nodeExpectations: { descendants: 0, descendantLevels: 0, ancestors: 0 },
+            },
+          ],
+          response: body,
+          schema: schemaWithAncestry,
+          genTree: tree,
         });
       });
     });
