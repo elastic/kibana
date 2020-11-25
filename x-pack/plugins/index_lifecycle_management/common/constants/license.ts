@@ -8,5 +8,4 @@ import { LicenseType } from '../../../licensing/common/types';
 
 export const MIN_PLUGIN_LICENSE: LicenseType = 'basic';
 
-// TODO: change to enterprise
-export const MIN_SEARCHABLE_SNAPSHOT_LICENSE: LicenseType = 'platinum';
+export const MIN_SEARCHABLE_SNAPSHOT_LICENSE: LicenseType = 'enterprise';
