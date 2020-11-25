@@ -101,7 +101,7 @@ export const MonitorListComponent: ({
       align: 'left' as const,
       field: 'state.url.full',
       name: URL_LABEL,
-      truncate: true,
+      width: '40%',
       render: (url: string) => (
         <EuiLink href={url} target="_blank" color="text" external>
           {url}
@@ -143,7 +143,7 @@ export const MonitorListComponent: ({
       name: '',
       sortable: true,
       isExpander: true,
-      width: '24px',
+      width: '40px',
       render: (id: string) => {
         return (
           <EuiButtonIcon
