@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LicenseService } from './license';
+import { ILicense } from '../../../licensing/common/types';
+import { isAtLeast } from './license';
 import { PolicyConfig } from '../endpoint/types';
 import { DefaultMalwareMessage, factory } from '../endpoint/models/policy_config';
 
@@ -14,9 +15,9 @@ import { DefaultMalwareMessage, factory } from '../endpoint/models/policy_config
  */
 export const isEndpointPolicyValidForLicense = (
   policy: PolicyConfig,
-  license: LicenseService
+  license: ILicense | null
 ): boolean => {
-  if (license.isPlatinumPlus()) {
+  if (isAtLeast(license, 'platinum')) {
     return true; // currently, platinum allows all features
   }
 
@@ -48,9 +49,9 @@ export const isEndpointPolicyValidForLicense = (
  */
 export const unsetPolicyFeaturesAboveLicenseLevel = (
   policy: PolicyConfig,
-  license: LicenseService
+  license: ILicense | null
 ): PolicyConfig => {
-  if (license.isPlatinumPlus()) {
+  if (isAtLeast(license, 'platinum')) {
     return policy;
   }
 
