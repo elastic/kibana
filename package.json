@@ -677,7 +677,7 @@
     "has-ansi": "^3.0.0",
     "hdr-histogram-js": "^1.2.0",
     "he": "^1.2.0",
-    "highlight.js": "9.15.10",
+    "highlight.js": "10.1.2",
     "history-extra": "^5.0.1",
     "hoist-non-react-statics": "^3.3.2",
     "html": "1.0.0",
