@@ -1515,11 +1515,44 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
+   * Increments all the specified counter fields by one. Creates the document
+   * if one doesn't exist for the given id.
+   *
+   * @remarks
+   * When using incrementCounter for collecting usage data, you need to ensure
+   * that usage collection happens on a best-effort basis and doesn't
+   * negatively affect your plugin or users (see the example):
+   *  - Swallow any exceptions thrown from the incrementCounter method and log
+   *    a message in development.
+   *  - Don't block your application on the incrementCounter method (e.g.
+   *    don't use `await`)
+   *
+   * When supplying a field name like `stats.api.counter` the field name will
+   * be used as-is to create a document like:
+   *   `{attributes: {'stats.api.counter': 1}}`
+   * It will not create a nested structure like:
+   *   `{attributes: {stats: {api: {counter: 1}}}}`
+   *
+   * @example
+   * Collecting usage data
+   * ```ts
+   * const repository = coreStart.savedObjects.createInternalRepository();
+   *
+   * // NOTE: Usage collection happens on a best-effort basis, so we don't
+   * // `await` the promise returned by `incrementCounter` and we swallow any
+   * // exceptions in production.
+   * repository
+   *   .incrementCounter('test_counter_type', 'counter_2', [
+   *     'stats.api.count',
+   *     'stats.api.count2',
+   *     'stats.total',
+   *   ])
+   *   .catch((e) => (coreContext.env.cliArgs.dev ? logger.error(e) : e));
+   * ```
    *
    * @param {string} type
    * @param {string} id
-   * @param {string} counterFieldName
+   * @param {string} counterFieldNames
    * @param {object} [options={}]
    * @property {object} [options.migrationVersion=undefined]
    * @returns {promise}
@@ -1527,14 +1560,17 @@ export class SavedObjectsRepository {
   async incrementCounter(
     type: string,
     id: string,
-    counterFieldName: string,
+    counterFieldNames: string[],
     options: SavedObjectsIncrementCounterOptions = {}
   ): Promise<SavedObject> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }
-    if (typeof counterFieldName !== 'string') {
-      throw new Error('"counterFieldName" argument must be a string');
+    const isArrayOfStrings =
+      Array.isArray(counterFieldNames) &&
+      !counterFieldNames.some((field) => typeof field !== 'string');
+    if (!isArrayOfStrings) {
+      throw new Error('"counterFieldNames" argument must be an array of strings');
     }
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -1558,7 +1594,10 @@ export class SavedObjectsRepository {
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: { [counterFieldName]: 1 },
+      attributes: counterFieldNames.reduce((acc, counterFieldName) => {
+        acc[counterFieldName] = 1;
+        return acc;
+      }, {} as Record<string, number>),
       migrationVersion,
       updated_at: time,
     });
@@ -1573,11 +1612,13 @@ export class SavedObjectsRepository {
       body: {
         script: {
           source: `
-              if (ctx._source[params.type][params.counterFieldName] == null) {
-                ctx._source[params.type][params.counterFieldName] = params.count;
-              }
-              else {
-                ctx._source[params.type][params.counterFieldName] += params.count;
+              for (counterFieldName in params.counterFieldNames) {
+                if (ctx._source[params.type][counterFieldName] == null) {
+                  ctx._source[params.type][counterFieldName] = params.count;
+                }
+                else {
+                  ctx._source[params.type][counterFieldName] += params.count;
+                }
               }
               ctx._source.updated_at = params.time;
             `,
@@ -1586,7 +1627,7 @@ export class SavedObjectsRepository {
             count: 1,
             time,
             type,
-            counterFieldName,
+            counterFieldNames,
           },
         },
         upsert: raw._source,

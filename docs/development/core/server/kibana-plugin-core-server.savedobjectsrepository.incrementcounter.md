@@ -4,12 +4,12 @@
 
 ## SavedObjectsRepository.incrementCounter() method
 
-Increases a counter field by one. Creates the document if one doesn't exist for the given id.
+Increments all the specified counter fields by one. Creates the document if one doesn't exist for the given id.
 
 <b>Signature:</b>
 
 ```typescript
-incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
+incrementCounter(type: string, id: string, counterFieldNames: string[], options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ incrementCounter(type: string, id: string, counterFieldName: string, options?: S
 |  --- | --- | --- |
 |  type | <code>string</code> |  |
 |  id | <code>string</code> |  |
-|  counterFieldName | <code>string</code> |  |
+|  counterFieldNames | <code>string[]</code> |  |
 |  options | <code>SavedObjectsIncrementCounterOptions</code> |  |
 
 <b>Returns:</b>
@@ -26,4 +26,28 @@ incrementCounter(type: string, id: string, counterFieldName: string, options?: S
 `Promise<SavedObject>`
 
 {<!-- -->promise<!-- -->}
+
+## Remarks
+
+When using incrementCounter for collecting usage data, you need to ensure that usage collection happens on a best-effort basis and doesn't negatively affect your plugin or users (see the example): - Swallow any exceptions thrown from the incrementCounter method and log a message in development. - Don't block your application on the incrementCounter method (e.g. don't use `await`<!-- -->)
+
+## Example
+
+Collecting usage data
+
+```ts
+const repository = coreStart.savedObjects.createInternalRepository();
+
+// NOTE: Usage collection happens on a best-effort basis, so we don't
+// `await` the promise returned by `incrementCounter` and we swallow any
+// exceptions in production.
+repository
+  .incrementCounter('test_counter_type', 'counter_2', [
+    'stats.api.count',
+    'stats.api.count2',
+    'stats.total',
+  ])
+  .catch((e) => (coreContext.env.cliArgs.dev ? logger.error(e) : e));
+
+```
 
