@@ -41,6 +41,8 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
+import { StatusActionButton } from '../status/button';
+
 import * as i18n from './translations';
 
 interface Props {
@@ -258,32 +260,6 @@ export const CaseComponent = React.memo<CaseProps>(
 
     const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
 
-    const caseStatusData = useMemo(
-      () =>
-        caseData.status === 'open'
-          ? {
-              'data-test-subj': 'case-view-createdAt',
-              value: caseData.createdAt,
-              title: i18n.CASE_OPENED,
-              buttonLabel: i18n.CLOSE_CASE,
-              status: caseData.status,
-              icon: 'folderCheck',
-              badgeColor: 'secondary',
-              isSelected: false,
-            }
-          : {
-              'data-test-subj': 'case-view-closedAt',
-              value: caseData.closedAt ?? '',
-              title: i18n.CASE_CLOSED,
-              buttonLabel: i18n.REOPEN_CASE,
-              status: caseData.status,
-              icon: 'folderExclamation',
-              badgeColor: 'danger',
-              isSelected: true,
-            },
-      [caseData.closedAt, caseData.createdAt, caseData.status]
-    );
-
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
@@ -307,8 +283,6 @@ export const CaseComponent = React.memo<CaseProps>(
       }),
       [allCasesLink]
     );
-
-    const isSelected = useMemo(() => caseStatusData.isSelected, [caseStatusData]);
 
     return (
       <>
@@ -334,7 +308,6 @@ export const CaseComponent = React.memo<CaseProps>(
               isLoading={isLoading && updateKey === 'status'}
               onRefresh={handleRefresh}
               onStatusChanged={changeStatus}
-              {...caseStatusData}
             />
           </HeaderPage>
         </HeaderWrapper>
@@ -361,16 +334,12 @@ export const CaseComponent = React.memo<CaseProps>(
                     <MyEuiHorizontalRule margin="s" />
                     <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
                       <EuiFlexItem grow={false}>
-                        <EuiButton
-                          data-test-subj={caseStatusData['data-test-subj']}
-                          iconType={caseStatusData.icon}
-                          isDisabled={!userCanCrud}
+                        <StatusActionButton
+                          status={caseData.status}
+                          onStatusChanged={changeStatus}
+                          disabled={!userCanCrud}
                           isLoading={isLoading && updateKey === 'status'}
-                          fill={caseStatusData.isSelected}
-                          onClick={() => {}}
-                        >
-                          {caseStatusData.buttonLabel}
-                        </EuiButton>
+                        />
                       </EuiFlexItem>
                       {hasDataToPush && (
                         <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>

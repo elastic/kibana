@@ -9,6 +9,7 @@ import { noop } from 'lodash/fp';
 import { EuiBadge } from '@elastic/eui';
 
 import { CaseStatus } from '../../../../../case/common/api';
+import { statuses } from './config';
 import * as i18n from './translations';
 
 interface Props {
@@ -16,29 +17,6 @@ interface Props {
   withArrow?: boolean;
   onClick?: () => void;
 }
-
-type Statuses = Record<
-  CaseStatus,
-  {
-    color: string;
-    label: string;
-  }
->;
-
-export const statuses: Statuses = {
-  open: {
-    color: 'primary',
-    label: i18n.OPEN,
-  },
-  'in-progress': {
-    color: 'warning',
-    label: i18n.IN_PROGRESS,
-  },
-  closed: {
-    color: 'default',
-    label: i18n.CLOSED,
-  },
-};
 
 const StatusComponent: React.FC<Props> = ({ type, withArrow = false, onClick = noop }) => {
   const props = useMemo(

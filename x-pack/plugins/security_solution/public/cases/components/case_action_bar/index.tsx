@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiButtonEmpty,
@@ -21,6 +21,7 @@ import { CaseViewActions } from '../case_view/actions';
 import { Case } from '../../containers/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
+import { getStatusDate, getStatusTitle } from './helpers';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -32,33 +33,24 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 `;
 
 interface CaseActionBarProps {
-  'data-test-subj': string;
-  badgeColor: string;
   caseData: Case;
   currentExternalIncident: CaseService | null;
   disabled?: boolean;
   isLoading: boolean;
-  isSelected: boolean;
   onRefresh: () => void;
-  status: CaseStatus;
-  title: string;
   onStatusChanged: (status: CaseStatus) => void;
-  value: string | null;
 }
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
-  'data-test-subj': dataTestSubj,
-  badgeColor,
   caseData,
   currentExternalIncident,
   disabled = false,
   isLoading,
-  isSelected,
   onRefresh,
-  status,
-  title,
   onStatusChanged,
-  value,
 }) => {
+  const date = useMemo(() => getStatusDate(caseData), [caseData]);
+  const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
+
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
@@ -67,13 +59,19 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             <EuiFlexItem grow={false}>
               <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                <StatusContextMenu currentStatus={status} onStatusChanged={onStatusChanged} />
+                <StatusContextMenu
+                  currentStatus={caseData.status}
+                  onStatusChanged={onStatusChanged}
+                />
               </EuiDescriptionListDescription>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                <FormattedRelativePreferenceDate data-test-subj={dataTestSubj} value={value} />
+                <FormattedRelativePreferenceDate
+                  data-test-subj={'case-action-bar-status-date'}
+                  value={date}
+                />
               </EuiDescriptionListDescription>
             </EuiFlexItem>
           </EuiFlexGroup>

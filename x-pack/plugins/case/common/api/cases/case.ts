@@ -22,6 +22,11 @@ const CaseStatusRt = rt.union([
 ]);
 
 export const caseStatuses = CaseStatusRt.types.map((type) => type.value);
+export enum CaseStatuses {
+  open = 'open',
+  'in-progress' = 'in-progress',
+  closed = 'closed',
+}
 
 const CaseBasicRt = rt.type({
   connector: CaseConnectorRt,

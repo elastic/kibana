@@ -123,6 +123,13 @@ export const CLOSE_CASE = i18n.translate('xpack.securitySolution.case.caseView.c
   defaultMessage: 'Close case',
 });
 
+export const MARK_CASE_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.case.caseView.markInProgress',
+  {
+    defaultMessage: 'Mark in progress',
+  }
+);
+
 export const REOPEN_CASE = i18n.translate('xpack.securitySolution.case.caseView.reopenCase', {
   defaultMessage: 'Reopen case',
 });

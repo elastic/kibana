@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+export * from '../../translations';
 
 export const OPEN = i18n.translate('xpack.securitySolution.case.status.open', {
   defaultMessage: 'Open',
@@ -20,4 +21,19 @@ export const CLOSED = i18n.translate('xpack.securitySolution.case.status.closed'
 
 export const STATUS_ICON_ARIA = i18n.translate('xpack.securitySolution.case.status.iconAria', {
   defaultMessage: 'Change status',
+});
+
+export const CASE_OPENED = i18n.translate('xpack.securitySolution.case.caseView.caseOpened', {
+  defaultMessage: 'Case opened',
+});
+
+export const CASE_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.case.caseView.caseInProgress',
+  {
+    defaultMessage: 'Case in progress',
+  }
+);
+
+export const CASE_CLOSED = i18n.translate('xpack.securitySolution.case.caseView.caseClosed', {
+  defaultMessage: 'Case closed',
 });

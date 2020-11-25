@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { memo, useCallback, useState, useMemo, useEffect } from 'react';
+import { EuiButton } from '@elastic/eui';
+
+import { CaseStatus, caseStatuses } from '../../../../../case/common/api';
+import { statuses } from './config';
+
+interface Props {
+  status: CaseStatus;
+  disabled: boolean;
+  isLoading: boolean;
+  onStatusChanged: (status: CaseStatus) => void;
+}
+
+const getNextItem = (item: number) => (item + 1) % caseStatuses.length;
+
+const StatusActionButtonComponent: React.FC<Props> = ({
+  status,
+  onStatusChanged,
+  disabled,
+  isLoading,
+}) => {
+  // Rotate over the array of statuses. open -> in-progress -> closes -> open...
+  const indexOfCurrentStatus = useMemo(
+    () => caseStatuses.findIndex((caseStatus) => caseStatus === status),
+    [status]
+  );
+  const [nextStatusIndex, setNextStatusIndex] = useState(getNextItem(indexOfCurrentStatus));
+
+  // The useEffect is needed to update status updates from the context menu.
+  useEffect(() => setNextStatusIndex(getNextItem(indexOfCurrentStatus)), [indexOfCurrentStatus]);
+
+  const onClick = useCallback(() => {
+    onStatusChanged(caseStatuses[nextStatusIndex]);
+    setNextStatusIndex(getNextItem(nextStatusIndex));
+  }, [nextStatusIndex, onStatusChanged]);
+
+  return (
+    <EuiButton
+      data-test-subj={'case-view-status-action-button'}
+      iconType={statuses[caseStatuses[nextStatusIndex]].button.icon}
+      isDisabled={disabled}
+      isLoading={isLoading}
+      onClick={onClick}
+    >
+      {statuses[caseStatuses[nextStatusIndex]].button.label}
+    </EuiButton>
+  );
+};
+export const StatusActionButton = memo(StatusActionButtonComponent);

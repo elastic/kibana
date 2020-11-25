@@ -7,8 +7,8 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { memoize } from 'lodash/fp';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { CaseStatus, caseStatuses } from '../../../../../case/common/api';
-import { Status } from '../status';
+import { CaseStatus } from '../../../../../case/common/api';
+import { Status, statuses } from '../status';
 
 interface Props {
   currentStatus: CaseStatus;
@@ -33,6 +33,7 @@ const StatusContextMenuComponent: React.FC<Props> = ({ currentStatus, onStatusCh
     [closePopover, onStatusChanged]
   );
 
+  const caseStatuses = Object.keys(statuses) as CaseStatus[];
   const panelItems = caseStatuses.map((status: CaseStatus) => (
     <EuiContextMenuItem
       key={status}
