@@ -10,16 +10,19 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { DataProviders } from '.';
-import { mockDataProviders } from './mock/mock_data_providers';
 import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public/query/filter_manager';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
-jest.mock('../../../../common/hooks/use_selector', () => ({
-  useDeepEqualSelector: jest.fn().mockReturnValue(getNotesByIds),
-}));
+jest.mock('../../../../common/hooks/use_selector', () => {
+  const actual = jest.requireActual('../../../../common/hooks/use_selector');
+  return {
+    ...actual,
+    useDeepEqualSelector: jest.fn().mockReturnValue([]),
+  };
+});
 
 const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 describe('DataProviders', () => {
@@ -63,10 +66,8 @@ describe('DataProviders', () => {
         </TestProviders>
       );
 
-      mockDataProviders.forEach((dataProvider) =>
-        expect(wrapper.text()).toContain(
-          dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
-        )
+      expect(wrapper.find('[data-test-subj="empty"]').last().text()).toEqual(
+        'Drop anythinghighlightedhere to build anORquery+ Add field'
       );
     });
   });

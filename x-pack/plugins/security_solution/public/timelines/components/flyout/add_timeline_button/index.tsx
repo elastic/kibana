@@ -32,11 +32,12 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
   const PopoverButtonIcon = useMemo(
     () => (
       <EuiButtonIcon
-        data-test-subj="settings-gear"
+        data-test-subj="settings-plus-in-circle"
         iconType="plusInCircle"
         color="primary"
         size="m"
         onClick={onButtonClick}
+        aria-label={i18n.ADD_TIMELINE}
       />
     ),
     [onButtonClick]

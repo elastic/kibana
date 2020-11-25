@@ -6,10 +6,11 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 
 import { AddTimelineButton } from './';
 import { useKibana } from '../../../../common/lib/kibana';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -36,88 +37,97 @@ jest.mock('../../../../common/components/inspect', () => ({
 describe('AddTimelineButton', () => {
   let wrapper: ReactWrapper;
   const props = {
-    onButtonClick: jest.fn(),
-    onClosePopover: jest.fn(),
-    showActions: true,
-    createTimeline: jest.fn(),
-    timelineId: 'timelineId',
-    isDataInTimeline: false,
-    showNotes: false,
-    showDescription: false,
-    showUsersView: false,
-    description: 'desc',
-    updateDescription: jest.fn(),
-    associateNote: jest.fn(),
-    noteIds: [],
-    onToggleShowNotes: jest.fn(),
-    onCloseTimelineModal: jest.fn(),
-    onOpenCaseModal: jest.fn(),
-    onOpenTimelineModal: jest.fn(),
-    status: TimelineStatus.active,
-    showTimelineModal: false,
-    timelineType: TimelineType.default,
-    title: 'title',
-    updateNote: jest.fn(),
+    timelineId: TimelineId.active,
   };
 
   describe('with crud', () => {
-    describe('render', () => {
-      beforeAll(() => {
-        (useKibana as jest.Mock).mockReturnValue({
-          services: {
-            application: {
-              capabilities: {
-                siem: {
-                  crud: true,
-                },
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              siem: {
+                crud: true,
               },
             },
           },
-        });
-        wrapper = mount(<AddTimelineButton {...props} />);
+        },
       });
+      wrapper = mount(<AddTimelineButton {...props} />);
+    });
 
-      afterAll(() => {
-        (useKibana as jest.Mock).mockReset();
-      });
+    afterEach(() => {
+      (useKibana as jest.Mock).mockReset();
+    });
 
-      test('it renders settings-gear', () => {
-        expect(wrapper.find('[data-test-subj="settings-gear"]').exists()).toBeTruthy();
-      });
+    test('it renders settings-plus-in-circle', () => {
+      expect(wrapper.find('[data-test-subj="settings-plus-in-circle"]').exists()).toBeTruthy();
+    });
 
-      test('it renders create timeline btn', () => {
+    test('it renders create timeline btn', async () => {
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
         expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
+      });
+    });
+
+    test('it renders create timeline template btn', async () => {
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
+        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeTruthy();
+      });
+    });
+
+    test('it renders Open timeline btn', async () => {
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
+        expect(wrapper.find('[data-test-subj="open-timeline-button"]').exists()).toBeTruthy();
       });
     });
   });
 
   describe('with no crud', () => {
-    describe('render', () => {
-      beforeAll(() => {
-        (useKibana as jest.Mock).mockReturnValue({
-          services: {
-            application: {
-              capabilities: {
-                siem: {
-                  crud: false,
-                },
+    beforeEach(async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              siem: {
+                crud: false,
               },
             },
           },
-        });
-        wrapper = mount(<AddTimelineButton {...props} />);
+        },
       });
+      wrapper = mount(<AddTimelineButton {...props} />);
+    });
 
-      afterAll(() => {
-        (useKibana as jest.Mock).mockReset();
+    afterEach(() => {
+      (useKibana as jest.Mock).mockReset();
+    });
+
+    test('it renders settings-plus-in-circle', () => {
+      expect(wrapper.find('[data-test-subj="settings-plus-in-circle"]').exists()).toBeTruthy();
+    });
+
+    test('it renders create timeline btn', async () => {
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
+        expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
       });
+    });
 
-      test('it renders settings-gear', () => {
-        expect(wrapper.find('[data-test-subj="settings-gear"]').exists()).toBeTruthy();
+    test('it renders create timeline template btn', async () => {
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
+        expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeTruthy();
       });
+    });
 
-      test('it renders create timeline template btn', () => {
-        expect(wrapper.find('[data-test-subj="create-template"]').exists()).toEqual(true);
+    test('it renders Open timeline btn', async () => {
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="settings-plus-in-circle"]').last().simulate('click');
+        expect(wrapper.find('[data-test-subj="open-timeline-button"]').exists()).toBeTruthy();
       });
     });
   });

@@ -123,6 +123,13 @@ export const NEW_TEMPLATE_TIMELINE = i18n.translate(
   }
 );
 
+export const ADD_TIMELINE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.addTimelineButtonLabel',
+  {
+    defaultMessage: 'Add new timeline or template',
+  }
+);
+
 export const ATTACH_TIMELINE_TO_NEW_CASE = i18n.translate(
   'xpack.securitySolution.timeline.properties.newCaseButtonLabel',
   {
