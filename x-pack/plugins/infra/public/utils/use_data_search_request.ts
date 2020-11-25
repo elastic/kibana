@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Observable, OperatorFunction, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, OperatorFunction, Subject } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import {
   IKibanaSearchRequest,
@@ -142,6 +142,8 @@ export const useLatestDataSearchRequest = <
     DataSearchRequest<RequestParams, ProcessedResponse, Request>
   >
 ) => {
+  // const [latestResponse$, setLatestResponse$] = useObservable((inputs$) => inputs$.pipe(), []);
+
   const [latestResponse$, setLatestResponse$] = useState<
     Observable<DataSearchResponse<RequestParams, ProcessedResponse, Request>>
   >(() =>
@@ -173,8 +175,42 @@ export const useLatestDataSearchRequest = <
   }, [latestValue]);
 
   return {
-    data: latestValue?.response,
+    latestResponse: latestValue?.response.rawResponse,
     isRunning: latestValue?.response.isRunning ?? false,
+    isPartial: latestValue?.response.isPartial ?? false,
+    total: latestValue?.response.total ?? 0,
+    loaded: latestValue?.response.loaded ?? 0,
     cancel,
   };
 };
+
+export const useObservable = <OutputValue, InputValues extends Readonly<any[]>>(
+  createObservableOnce: (inputValues: Observable<InputValues>) => Observable<OutputValue>,
+  inputValues: InputValues
+) => {
+  const [inputValues$] = useState(() => new BehaviorSubject<InputValues>(inputValues));
+  const [output$] = useState(() => createObservableOnce(inputValues$));
+
+  useEffect(() => {
+    inputValues$.next(inputValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, inputValues);
+
+  return output$;
+};
+
+export const mapRawResponse = <RequestParams, RawResponse, Response>(
+  mapper: (rawResponse: RawResponse) => Response
+) =>
+  map<
+    DataSearchRequest<RequestParams, RawResponse, IKibanaSearchRequest<RequestParams>>,
+    DataSearchRequest<RequestParams, Response, IKibanaSearchRequest<RequestParams>>
+  >((request) => ({
+    ...request,
+    response$: request.response$.pipe(
+      map((response) => ({
+        ...response,
+        rawResponse: mapper(response.rawResponse),
+      }))
+    ),
+  }));

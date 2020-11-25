@@ -11,7 +11,13 @@ import { pipe } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { UrlStateContainer } from '../../utils/url_state';
-import { useDataSearch, usePipe, useSubscription } from '../../utils/use_data_search_request';
+import {
+  mapRawResponse,
+  useDataSearch,
+  useLatestDataSearchRequest,
+  // usePipe,
+  useSubscription,
+} from '../../utils/use_data_search_request';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 // import { fetchLogEntry } from './log_entries/api/fetch_log_entry';
 import { useLogSourceContext } from './log_source';
@@ -59,16 +65,40 @@ export const useLogFlyout = () => {
   //   return loadFlyoutItemRequest.state === 'pending';
   // }, [loadFlyoutItemRequest.state]);
 
-  const { search: fetchLogEntry, requests$: logEntryRequests$ } = useDataSearch({
+  const { search: fetchLogEntry, requests$: logEntrySearchRequests$ } = useDataSearch({
     getRequest: useCallback(() => {
       return flyoutId
         ? {
-            params: logEntrySearchRequestParamsRT.encode({ sourceId, logEntryId: flyoutId }),
+            request: {
+              params: logEntrySearchRequestParamsRT.encode({ sourceId, logEntryId: flyoutId }),
+            },
             options: { strategy: LOG_ENTRY_SEARCH_STRATEGY },
           }
         : null;
     }, [sourceId, flyoutId]),
   });
+
+  const { latestResponse, isRunning } = useLatestDataSearchRequest(
+    logEntrySearchRequests$,
+    decodeLogEntrySearchRequest
+  );
+
+  // const { latestResponse, isRunning } = useLatestDataSearchRequest(
+  //   logEntryRequests$,
+  //   useMemo(
+  //     () =>
+  //       map((request) => ({
+  //         ...request,
+  //         response$: request.response$.pipe(
+  //           map((response) => ({
+  //             ...response,
+  //             rawResponse: decodeOrThrow(logEntrySearchResponsePayloadRT)(response.rawResponse),
+  //           }))
+  //         ),
+  //       })),
+  //     []
+  //   )
+  // );
 
   // const logEntrySearchResponse$ = usePipe(
   //   rawLogEntrySearchResponse$,
@@ -95,9 +125,9 @@ export const useLogFlyout = () => {
     setFlyoutId,
     surroundingLogsId,
     setSurroundingLogsId,
-    isLoading: latestValue?.isRunning ?? false,
-    flyoutItem: latestValue?.response.data ?? null,
-    flyoutError: `${latestError}`,
+    isLoading: isRunning,
+    flyoutItem: latestResponse?.data ?? null,
+    flyoutError: 'todo: error',
     // isLoading,
     // flyoutItem:
     //   loadFlyoutItemRequest.state === 'resolved' ? loadFlyoutItemRequest.value.data : null,
@@ -107,6 +137,18 @@ export const useLogFlyout = () => {
 };
 
 export const LogFlyout = createContainer(useLogFlyout);
+
+const decodeLogEntrySearchRequest = mapRawResponse(decodeOrThrow(logEntrySearchResponsePayloadRT));
+
+// const decodeLogEntrySearchRequest = map<{}>((request) => ({
+//   ...request,
+//   response$: request.response$.pipe(
+//     map((response) => ({
+//       ...response,
+//       rawResponse: decodeOrThrow(logEntrySearchResponsePayloadRT)(response.rawResponse),
+//     }))
+//   ),
+// }));
 
 export const WithFlyoutOptionsUrlState = () => {
   const {
