@@ -115,20 +115,12 @@ export const CREATE_CASE = i18n.translate('xpack.securitySolution.case.caseView.
   defaultMessage: 'Create case',
 });
 
-export const CLOSED_CASE = i18n.translate('xpack.securitySolution.case.caseView.closedCase', {
-  defaultMessage: 'Closed case',
-});
-
 export const CLOSE_CASE = i18n.translate('xpack.securitySolution.case.caseView.closeCase', {
   defaultMessage: 'Close case',
 });
 
 export const REOPEN_CASE = i18n.translate('xpack.securitySolution.case.caseView.reopenCase', {
   defaultMessage: 'Reopen case',
-});
-
-export const REOPENED_CASE = i18n.translate('xpack.securitySolution.case.caseView.reopenedCase', {
-  defaultMessage: 'Reopened case',
 });
 
 export const CASE_NAME = i18n.translate('xpack.securitySolution.case.caseView.caseName', {
