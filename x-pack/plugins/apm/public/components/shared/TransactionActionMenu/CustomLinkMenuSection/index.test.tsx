@@ -7,11 +7,11 @@
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CustomLink } from '.';
+import { CustomLinkMenuSection } from '.';
 import { CustomLink as CustomLinkType } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import * as useFetcher from '../../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
@@ -25,16 +25,27 @@ function Wrapper({ children }: { children?: ReactNode }) {
   );
 }
 
+const transaction = ({
+  service: {
+    name: 'name',
+    environment: 'env',
+  },
+  transaction: {
+    name: 'tx name',
+    type: 'tx type',
+  },
+} as unknown) as Transaction;
+
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {
+    jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+      data: [],
+      status: useFetcher.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+
     const component = render(
-      <CustomLink
-        customLinks={[]}
-        transaction={({} as unknown) as Transaction}
-        onCreateCustomLinkClick={jest.fn()}
-        onSeeMoreClick={jest.fn()}
-        status={FETCH_STATUS.SUCCESS}
-      />,
+      <CustomLinkMenuSection transaction={transaction} />,
       { wrapper: Wrapper }
     );
 
@@ -45,14 +56,14 @@ describe('Custom links', () => {
   });
 
   it('shows loading while custom links are fetched', () => {
+    jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+      data: [],
+      status: useFetcher.FETCH_STATUS.LOADING,
+      refetch: jest.fn(),
+    });
+
     const { getByTestId } = render(
-      <CustomLink
-        customLinks={[]}
-        transaction={({} as unknown) as Transaction}
-        onCreateCustomLinkClick={jest.fn()}
-        onSeeMoreClick={jest.fn()}
-        status={FETCH_STATUS.LOADING}
-      />,
+      <CustomLinkMenuSection transaction={transaction} />,
       { wrapper: Wrapper }
     );
     expect(getByTestId('loading-spinner')).toBeInTheDocument();
@@ -65,61 +76,68 @@ describe('Custom links', () => {
       { id: '3', label: 'baz', url: 'baz' },
       { id: '4', label: 'qux', url: 'qux' },
     ] as CustomLinkType[];
+
+    jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+      data: customLinks,
+      status: useFetcher.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+
     const component = render(
-      <CustomLink
-        customLinks={customLinks}
-        transaction={({} as unknown) as Transaction}
-        onCreateCustomLinkClick={jest.fn()}
-        onSeeMoreClick={jest.fn()}
-        status={FETCH_STATUS.SUCCESS}
-      />,
+      <CustomLinkMenuSection transaction={transaction} />,
       { wrapper: Wrapper }
     );
     expectTextsInDocument(component, ['foo', 'bar', 'baz']);
     expectTextsNotInDocument(component, ['qux']);
   });
 
-  it('clicks on See more button', () => {
+  it('clicks "show all" and "show fewer"', () => {
     const customLinks = [
       { id: '1', label: 'foo', url: 'foo' },
       { id: '2', label: 'bar', url: 'bar' },
       { id: '3', label: 'baz', url: 'baz' },
       { id: '4', label: 'qux', url: 'qux' },
     ] as CustomLinkType[];
-    const onSeeMoreClickMock = jest.fn();
+
+    jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+      data: customLinks,
+      status: useFetcher.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+
     const component = render(
-      <CustomLink
-        customLinks={customLinks}
-        transaction={({} as unknown) as Transaction}
-        onCreateCustomLinkClick={jest.fn()}
-        onSeeMoreClick={onSeeMoreClickMock}
-        status={FETCH_STATUS.SUCCESS}
-      />,
+      <CustomLinkMenuSection transaction={transaction} />,
       { wrapper: Wrapper }
     );
-    expect(onSeeMoreClickMock).not.toHaveBeenCalled();
+
+    expect(component.getAllByRole('listitem').length).toEqual(3);
     act(() => {
-      fireEvent.click(component.getByText('See more'));
+      fireEvent.click(component.getByText('Show all'));
     });
-    expect(onSeeMoreClickMock).toHaveBeenCalled();
+    expect(component.getAllByRole('listitem').length).toEqual(4);
+    act(() => {
+      fireEvent.click(component.getByText('Show fewer'));
+    });
+    expect(component.getAllByRole('listitem').length).toEqual(3);
   });
 
   describe('create custom link buttons', () => {
     it('shows create button below empty message', () => {
+      jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+        data: [],
+        status: useFetcher.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
+      });
+
       const component = render(
-        <CustomLink
-          customLinks={[]}
-          transaction={({} as unknown) as Transaction}
-          onCreateCustomLinkClick={jest.fn()}
-          onSeeMoreClick={jest.fn()}
-          status={FETCH_STATUS.SUCCESS}
-        />,
+        <CustomLinkMenuSection transaction={transaction} />,
         { wrapper: Wrapper }
       );
 
       expectTextsInDocument(component, ['Create custom link']);
       expectTextsNotInDocument(component, ['Create']);
     });
+
     it('shows create button besides the title', () => {
       const customLinks = [
         { id: '1', label: 'foo', url: 'foo' },
@@ -127,14 +145,15 @@ describe('Custom links', () => {
         { id: '3', label: 'baz', url: 'baz' },
         { id: '4', label: 'qux', url: 'qux' },
       ] as CustomLinkType[];
+
+      jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+        data: customLinks,
+        status: useFetcher.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
+      });
+
       const component = render(
-        <CustomLink
-          customLinks={customLinks}
-          transaction={({} as unknown) as Transaction}
-          onCreateCustomLinkClick={jest.fn()}
-          onSeeMoreClick={jest.fn()}
-          status={FETCH_STATUS.SUCCESS}
-        />,
+        <CustomLinkMenuSection transaction={transaction} />,
         { wrapper: Wrapper }
       );
       expectTextsInDocument(component, ['Create']);

@@ -37,7 +37,7 @@ interface Props {
 
 const filtersEmptyState: Filter[] = [{ key: '', value: '' }];
 
-export function CustomLinkFlyout({
+export function CreateEditCustomLinkFlyout({
   onClose,
   onSave,
   onDelete,

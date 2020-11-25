@@ -22,14 +22,15 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const deployment = getService('deployment');
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'visualize']);
+  const PageObjects = getPageObjects(['visualize']);
   let isOss = true;
 
   describe('chart types', function () {
     before(async function () {
       log.debug('navigateToApp visualize');
-      isOss = await PageObjects.common.isOss();
+      isOss = await deployment.isOss();
       await PageObjects.visualize.navigateToNewVisualization();
     });
 

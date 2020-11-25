@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const fieldName = 'clientip';
+  const deployment = getService('deployment');
 
   const clickFieldAndCheckUrl = async (fieldLink: WebElementWrapper) => {
     const fieldValue = await fieldLink.getVisibleText();
@@ -42,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(windowHandlers.length).to.equal(2);
     await browser.switchToWindow(windowHandlers[1]);
     const currentUrl = await browser.getCurrentUrl();
-    const fieldUrl = common.getHostPort() + '/app/' + fieldValue;
+    const fieldUrl = deployment.getHostPort() + '/app/' + fieldValue;
     expect(currentUrl).to.equal(fieldUrl);
   };
 

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { CustomLinkSection } from './CustomLinkSection';
+import { CustomLinkList } from './CustomLinkList';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
@@ -13,7 +13,7 @@ import {
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 
-describe('CustomLinkSection', () => {
+describe('CustomLinkList', () => {
   const customLinks = [
     { id: '1', label: 'foo', url: 'http://elastic.co' },
     {
@@ -27,14 +27,14 @@ describe('CustomLinkSection', () => {
   } as unknown) as Transaction;
   it('shows links', () => {
     const component = render(
-      <CustomLinkSection customLinks={customLinks} transaction={transaction} />
+      <CustomLinkList customLinks={customLinks} transaction={transaction} />
     );
     expectTextsInDocument(component, ['foo', 'bar']);
   });
 
   it('doesnt show any links', () => {
     const component = render(
-      <CustomLinkSection customLinks={[]} transaction={transaction} />
+      <CustomLinkList customLinks={[]} transaction={transaction} />
     );
     expectTextsNotInDocument(component, ['foo', 'bar']);
   });

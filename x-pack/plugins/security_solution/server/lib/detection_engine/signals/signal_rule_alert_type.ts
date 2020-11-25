@@ -58,7 +58,7 @@ import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects
 import { getNotificationResultsLink } from '../notifications/utils';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
-import { bulkInsertSignals } from './single_bulk_create';
+import { bulkInsertSignals, filterDuplicateSignals } from './single_bulk_create';
 import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk_body';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import { getIndexVersion } from '../routes/index/get_index_version';
@@ -489,16 +489,17 @@ export const signalRulesAlertType = ({
               []
             );
           } else if (response.hits.events !== undefined) {
-            newSignals = response.hits.events.map((event) =>
-              wrapSignal(buildSignalFromEvent(event, savedObject, true), outputIndex)
+            newSignals = filterDuplicateSignals(
+              savedObject.id,
+              response.hits.events.map((event) =>
+                wrapSignal(buildSignalFromEvent(event, savedObject, true), outputIndex)
+              )
             );
           } else {
             throw new Error(
               'eql query response should have either `sequences` or `events` but had neither'
             );
           }
-          // TODO: replace with code that filters out recursive rule signals while allowing sequences and their building blocks
-          // const filteredSignals = filterDuplicateSignals(alertId, newSignals);
           if (newSignals.length > 0) {
             const insertResult = await bulkInsertSignals(newSignals, logger, services, refresh);
             result.bulkCreateTimes.push(insertResult.bulkCreateDuration);

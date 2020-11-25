@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { LinkPreview } from '../CustomLinkFlyout/LinkPreview';
+import { LinkPreview } from '../CreateEditCustomLinkFlyout/LinkPreview';
 import {
   render,
   getNodeText,
