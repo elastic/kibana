@@ -93,12 +93,7 @@ export class SearchInterceptor {
    * @returns `Error` a search service specific error or the original error, if a specific error can't be recognized.
    * @internal
    */
-  protected handleSearchError(
-    e: any,
-    request: IKibanaSearchRequest,
-    timeoutSignal: AbortSignal,
-    options?: ISearchOptions
-  ): Error {
+  protected handleSearchError(e: any, timeoutSignal: AbortSignal, options?: ISearchOptions): Error {
     if (timeoutSignal.aborted || get(e, 'body.message') === 'Request timed out') {
       // Handle a client or a server side timeout
       const err = new SearchTimeoutError(e, this.getTimeoutMode());
@@ -112,7 +107,7 @@ export class SearchInterceptor {
       return e;
     } else if (isEsError(e)) {
       if (isPainlessError(e)) {
-        return new PainlessError(e, request);
+        return new PainlessError(e);
       } else {
         return new EsError(e);
       }
@@ -244,7 +239,7 @@ export class SearchInterceptor {
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
       return from(this.runSearch(request, { ...options, abortSignal: combinedSignal })).pipe(
         catchError((e: Error) => {
-          return throwError(this.handleSearchError(e, request, timeoutSignal, options));
+          return throwError(this.handleSearchError(e, timeoutSignal, options));
         }),
         finalize(() => {
           this.pendingCount$.next(this.pendingCount$.getValue() - 1);

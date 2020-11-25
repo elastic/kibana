@@ -22,6 +22,8 @@ describe('positiveRate(req, panel, series)', () => {
   let panel;
   let series;
   let req;
+  let uiSettings;
+
   beforeEach(() => {
     panel = {
       time_field: 'timestamp',
@@ -48,17 +50,20 @@ describe('positiveRate(req, panel, series)', () => {
         },
       },
     };
+    uiSettings = {
+      barTargetUiSettings: 50,
+    };
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    positiveRate(req, panel, series)(next)({});
+    positiveRate(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns positive rate aggs', () => {
     const next = (doc) => doc;
-    const doc = positiveRate(req, panel, series)(next)({});
+    const doc = positiveRate(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {

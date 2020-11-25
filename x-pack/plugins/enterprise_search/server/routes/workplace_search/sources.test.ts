@@ -328,10 +328,8 @@ describe('sources routes', () => {
       const mockRequest = {
         params: { id: '123' },
         body: {
-          query: {
-            content_source: {
-              name: 'foo',
-            },
+          content_source: {
+            name: 'foo',
           },
         },
       };
@@ -406,7 +404,7 @@ describe('sources routes', () => {
       mockRouter.callRoute(mockRequest);
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/pre_content_sources/zendesk',
+        path: '/ws/sources/zendesk/prepare',
       });
     });
   });
@@ -732,10 +730,8 @@ describe('sources routes', () => {
       const mockRequest = {
         params: { id: '123' },
         body: {
-          query: {
-            content_source: {
-              name: 'foo',
-            },
+          content_source: {
+            name: 'foo',
           },
         },
       };
@@ -810,7 +806,7 @@ describe('sources routes', () => {
       mockRouter.callRoute(mockRequest);
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/pre_content_sources/zendesk',
+        path: '/ws/org/sources/zendesk/prepare',
       });
     });
   });

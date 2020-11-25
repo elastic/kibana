@@ -20,7 +20,7 @@
 import moment from 'moment';
 
 import { attachMetaData } from './metadata';
-import { createListStream, createPromiseFromStreams } from './test_utils';
+import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 import { KbnLoggerStringFormat } from './log_format_string';
 
 const time = +moment('2010-01-01T05:15:59Z', moment.ISO_8601);
