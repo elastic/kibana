@@ -5,22 +5,14 @@
  */
 
 import { UserConfiguredActionConnector } from '../../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/jira/types';
 
 export type JiraActionConnector = UserConfiguredActionConnector<JiraConfig, JiraSecrets>;
 
 export interface JiraActionParams {
   subAction: string;
-  subActionParams: {
-    savedObjectId: string;
-    title: string;
-    description: string;
-    comments: Array<{ commentId: string; comment: string }>;
-    externalId: string | null;
-    issueType: string;
-    priority: string;
-    labels: string[];
-    parent: string | null;
-  };
+  subActionParams: ExecutorSubActionPushParams;
 }
 
 export interface JiraConfig {

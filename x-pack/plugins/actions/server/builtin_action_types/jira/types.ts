@@ -51,10 +51,7 @@ export interface ExternalServiceIncidentResponse {
 
 export type ExternalServiceParams = Record<string, unknown>;
 
-export type Incident = Pick<
-  ExecutorSubActionPushParams['incident'],
-  'description' | 'priority' | 'labels' | 'issueType' | 'parent'
-> & { summary: string };
+export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
 export interface CreateIncidentParams {
   incident: Incident;

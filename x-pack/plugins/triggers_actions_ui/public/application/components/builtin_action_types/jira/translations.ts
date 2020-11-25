@@ -130,7 +130,7 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
 export const TITLE_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredTitleTextField',
   {
-    defaultMessage: 'Title is required.',
+    defaultMessage: 'Summary is required.',
   }
 );
 
