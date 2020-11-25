@@ -52,7 +52,6 @@ describe('Exceptions', () => {
     waitForAlertsToPopulate();
     refreshPage();
 
-    cy.scrollTo('bottom');
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
       .then((numberOfInitialAlertsText) => {
@@ -78,7 +77,6 @@ describe('Exceptions', () => {
       goToAlertsTab();
       refreshPage();
 
-      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfAlertsAfterCreatingExceptionText) => {
@@ -88,7 +86,6 @@ describe('Exceptions', () => {
       goToClosedAlerts();
       refreshPage();
 
-      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
@@ -102,7 +99,6 @@ describe('Exceptions', () => {
       waitForTheRuleToBeExecuted();
       refreshPage();
 
-      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfOpenedAlertsAfterCreatingExceptionText) => {
@@ -117,7 +113,6 @@ describe('Exceptions', () => {
       waitForAlertsToPopulate();
       refreshPage();
 
-      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfAlertsAfterRemovingExceptionsText) => {
@@ -135,7 +130,6 @@ describe('Exceptions', () => {
       addsException(exception);
       esArchiverLoad('auditbeat_for_exceptions2');
 
-      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfAlertsAfterCreatingExceptionText) => {
@@ -145,7 +139,6 @@ describe('Exceptions', () => {
       goToClosedAlerts();
       refreshPage();
 
-      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
@@ -159,7 +152,6 @@ describe('Exceptions', () => {
       waitForTheRuleToBeExecuted();
       refreshPage();
 
-      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfOpenedAlertsAfterCreatingExceptionText) => {
@@ -173,7 +165,6 @@ describe('Exceptions', () => {
       waitForAlertsToPopulate();
       refreshPage();
 
-      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfAlertsAfterRemovingExceptionsText) => {

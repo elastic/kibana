@@ -12,6 +12,6 @@ export interface Exception {
 
 export const exception: Exception = {
   field: 'host.name',
-  operator: 'is one of',
-  values: ['siem-kibana', 'suricata-iowa', 'siem-es', 'jessie', 'siem'],
+  operator: 'is',
+  values: ['suricata-iowa'],
 };
