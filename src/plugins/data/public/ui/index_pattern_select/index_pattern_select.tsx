@@ -23,7 +23,7 @@ import React, { Component } from 'react';
 import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
-import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 
 export type IndexPatternSelectProps = Required<
   Omit<

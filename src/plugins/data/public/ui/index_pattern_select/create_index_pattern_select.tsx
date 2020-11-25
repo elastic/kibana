@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { IndexPatternSelect, IndexPatternSelectProps } from './';
 
