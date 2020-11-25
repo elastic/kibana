@@ -142,14 +142,10 @@ export class Collector<TFetchReturn, ExtraOptions extends object = {}> {
   public readonly init?: CollectorOptions<TFetchReturn, any>['init'];
   public readonly fetch: CollectorFetchMethod<any, TFetchReturn, ExtraOptions>;
   public readonly isReady: CollectorOptions<TFetchReturn, any>['isReady'];
-  /*
-   * @param {Object} logger - logger object
-   * @param {String} options.type - property name as the key for the data
-   * @param {Function} options.init (optional) - initialization function
-   * @param {Function} options.fetch - function to query data
-   * @param {Function} options.formatForBulkUpload - optional
-   * @param {Function} options.isReady - method that returns a boolean or Promise of a boolean to indicate the collector is ready to report data
-   * @param {Function} options.rest - optional other properties
+  /**
+   * @private Constructor of a Collector. It should be called via the CollectorSet factory methods: `makeStatsCollector` and `makeUsageCollector`
+   * @param log {@link Logger}
+   * @param collectorDefinition {@link CollectorOptions}
    */
   constructor(
     public readonly log: Logger,
