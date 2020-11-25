@@ -25,7 +25,7 @@ const waitForRender = async (
   wrapper: ReactWrapper<any>,
   condition: (wrapper: ReactWrapper<any>) => boolean
 ) => {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const interval = setInterval(async () => {
       await Promise.resolve();
       wrapper.update();
