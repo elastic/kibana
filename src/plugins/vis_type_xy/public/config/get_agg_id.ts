@@ -17,5 +17,9 @@
  * under the License.
  */
 
-export { getConfig } from './get_config';
-export { getAggId } from './get_agg_id';
+/**
+ * Get agg id from accessor
+ *
+ * For now this is determined by the esaggs column name. Could be cleaned up in the future.
+ */
+export const getAggId = (accessor: string) => (accessor ?? '').split('-').pop() ?? '';

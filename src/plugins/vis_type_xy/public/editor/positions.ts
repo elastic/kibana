@@ -17,5 +17,32 @@
  * under the License.
  */
 
-export { getConfig } from './get_config';
-export { getAggId } from './get_agg_id';
+import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
+
+export const getPositions = () => [
+  {
+    text: i18n.translate('visTypeXy.legendPositions.topText', {
+      defaultMessage: 'Top',
+    }),
+    value: Position.Top,
+  },
+  {
+    text: i18n.translate('visTypeXy.legendPositions.leftText', {
+      defaultMessage: 'Left',
+    }),
+    value: Position.Left,
+  },
+  {
+    text: i18n.translate('visTypeXy.legendPositions.rightText', {
+      defaultMessage: 'Right',
+    }),
+    value: Position.Right,
+  },
+  {
+    text: i18n.translate('visTypeXy.legendPositions.bottomText', {
+      defaultMessage: 'Bottom',
+    }),
+    value: Position.Bottom,
+  },
+];

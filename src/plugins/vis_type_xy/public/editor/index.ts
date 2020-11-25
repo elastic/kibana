@@ -19,4 +19,3 @@
 
 export * from './common_config';
 export * from './collections';
-export * from './components';

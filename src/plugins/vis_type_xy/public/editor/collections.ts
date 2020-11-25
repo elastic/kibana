@@ -24,32 +24,9 @@ import { AxisMode, ChartMode, InterpolationMode, ThresholdLineStyle, ScaleType }
 import { ChartType } from '../../common';
 import { LabelRotation } from '../../../charts/public';
 
-export const getPositions = () => [
-  {
-    text: i18n.translate('visTypeXy.legendPositions.topText', {
-      defaultMessage: 'Top',
-    }),
-    value: Position.Top,
-  },
-  {
-    text: i18n.translate('visTypeXy.legendPositions.leftText', {
-      defaultMessage: 'Left',
-    }),
-    value: Position.Left,
-  },
-  {
-    text: i18n.translate('visTypeXy.legendPositions.rightText', {
-      defaultMessage: 'Right',
-    }),
-    value: Position.Right,
-  },
-  {
-    text: i18n.translate('visTypeXy.legendPositions.bottomText', {
-      defaultMessage: 'Bottom',
-    }),
-    value: Position.Bottom,
-  },
-];
+export { getScaleTypes } from './scale_types';
+
+export { getPositions } from './positions';
 
 export const getChartTypes = () => [
   {
@@ -105,27 +82,6 @@ export const getInterpolationModes = () => [
       defaultMessage: 'Stepped',
     }),
     value: InterpolationMode.StepAfter,
-  },
-];
-
-export const getScaleTypes = () => [
-  {
-    text: i18n.translate('visTypeXy.scaleTypes.linearText', {
-      defaultMessage: 'Linear',
-    }),
-    value: ScaleType.Linear,
-  },
-  {
-    text: i18n.translate('visTypeXy.scaleTypes.logText', {
-      defaultMessage: 'Log',
-    }),
-    value: ScaleType.Log,
-  },
-  {
-    text: i18n.translate('visTypeXy.scaleTypes.squareRootText', {
-      defaultMessage: 'Square root',
-    }),
-    value: ScaleType.SquareRoot,
   },
 ];
 

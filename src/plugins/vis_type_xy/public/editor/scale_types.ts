@@ -17,5 +17,27 @@
  * under the License.
  */
 
-export { getConfig } from './get_config';
-export { getAggId } from './get_agg_id';
+import { i18n } from '@kbn/i18n';
+
+import { ScaleType } from '../types';
+
+export const getScaleTypes = () => [
+  {
+    text: i18n.translate('visTypeXy.scaleTypes.linearText', {
+      defaultMessage: 'Linear',
+    }),
+    value: ScaleType.Linear,
+  },
+  {
+    text: i18n.translate('visTypeXy.scaleTypes.logText', {
+      defaultMessage: 'Log',
+    }),
+    value: ScaleType.Log,
+  },
+  {
+    text: i18n.translate('visTypeXy.scaleTypes.squareRootText', {
+      defaultMessage: 'Square root',
+    }),
+    value: ScaleType.SquareRoot,
+  },
+];

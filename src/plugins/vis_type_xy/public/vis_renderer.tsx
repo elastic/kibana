@@ -26,7 +26,7 @@ import { ExpressionRenderDefinition } from '../../expressions/public';
 import { VisualizationContainer } from '../../visualizations/public';
 
 import { XyVisType } from '../common';
-import { SplitChartWarning } from './components';
+import { SplitChartWarning } from './components/split_chart_warning';
 import { VisComponentType } from './vis_component';
 import { RenderValue, visName } from './xy_vis_fn';
 

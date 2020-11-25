@@ -36,14 +36,12 @@ export {
   HistogramParams,
   DateHistogramParams,
 } from './types';
-export {
-  getPositions,
-  getScaleTypes,
-  TruncateLabelsOption,
-  ValidationVisOptionsProps,
-} from './editor';
+export type { ValidationVisOptionsProps } from './editor/components/common/validation_wrapper';
+export { TruncateLabelsOption } from './editor/components/common/truncate_labels';
+export { getPositions } from './editor/positions';
+export { getScaleTypes } from './editor/scale_types';
 export { xyVisTypes } from './vis_types';
-export { getAggId } from './config';
+export { getAggId } from './config/get_agg_id';
 
 // Export common types
 export * from '../common';

@@ -25,6 +25,7 @@ import { DatatableColumn } from '../../../expressions/public';
 
 import { Aspect, Dimension, Aspects, Dimensions } from '../types';
 import { getFormatService } from '../services';
+import { getAggId } from './get_agg_id';
 
 export function getEmptyAspect(): Aspect {
   return {
@@ -78,13 +79,6 @@ function getAspectsFromDimension(
   const column = columns[dimensions.accessor];
   return column && getAspect(column, dimensions);
 }
-
-/**
- * Get agg id from accessor
- *
- * For now this is determined by the esaggs column name. Could be cleaned up in the future.
- */
-export const getAggId = (accessor: string) => (accessor ?? '').split('-').pop() ?? '';
 
 const getAspect = (
   { id: accessor, name: title }: DatatableColumn,
