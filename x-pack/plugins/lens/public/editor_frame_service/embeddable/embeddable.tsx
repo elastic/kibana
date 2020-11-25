@@ -21,6 +21,8 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
 import { RenderMode } from 'src/plugins/expressions';
+import { map, distinctUntilChanged, skip } from 'rxjs/operators';
+import isEqual from 'fast-deep-equal';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -112,7 +114,18 @@ export class Embeddable
 
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput).then(() => this.onContainerStateChanged(initialInput));
-    this.subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+
+    const input$ = this.getInput$();
+    this.subscription = input$.subscribe((input) => this.onContainerStateChanged(input));
+    input$
+      .pipe(
+        map((input) => input.enhancements?.dynamicActions),
+        distinctUntilChanged((a, b) => isEqual(a, b)),
+        skip(1)
+      )
+      .subscribe((input) => {
+        this.reload();
+      });
 
     this.autoRefreshFetchSubscription = deps.timefilter
       .getAutoRefreshFetch$()
