@@ -1014,6 +1014,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               data-test-subj="tableHeaderCell_state.url.full_2"
               role="columnheader"
               scope="col"
+              style="width:40%"
             >
               <div
                 class="euiTableCellContent"
@@ -1079,7 +1080,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               data-test-subj="tableHeaderCell_monitor_id_6"
               role="columnheader"
               scope="col"
-              style="width:24px"
+              style="width:40px"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight"
@@ -1211,6 +1212,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
+              style="width:40%"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1311,7 +1313,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell euiTableRowCell--isExpander"
-              style="width:24px"
+              style="width:40px"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -1450,6 +1452,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell"
+              style="width:40%"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1550,7 +1553,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </td>
             <td
               class="euiTableRowCell euiTableRowCell--isExpander"
-              style="width:24px"
+              style="width:40px"
             >
               <div
                 class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
