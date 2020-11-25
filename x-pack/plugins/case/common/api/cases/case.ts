@@ -10,10 +10,7 @@ import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
-import { CaseConnectorRt, ESCaseConnector, ConnectorPartialFieldsRt } from '../connectors';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { ActionTypeExecutorResult } from '../../../../actions/server/types';
+import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 
 const StatusRt = rt.union([rt.literal('open'), rt.literal('closed')]);
 
@@ -110,65 +107,6 @@ export const CasePatchRequestRt = rt.intersection([
 export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
 export const CasesResponseRt = rt.array(CaseResponseRt);
 
-/*
- * This type are related to this file below
- * x-pack/plugins/actions/server/builtin_action_types/servicenow/schema.ts
- * why because this schema is not share in a common folder
- * so we redefine then so we can use/validate types
- */
-
-// TODO: Refactor to support multiple connectors with various fields
-
-export const ServiceConnectorUserParams = rt.type({
-  fullName: rt.union([rt.string, rt.null]),
-  username: rt.string,
-});
-
-export const ServiceConnectorCommentParamsRt = rt.type({
-  commentId: rt.string,
-  comment: rt.string,
-  createdAt: rt.string,
-  createdBy: ServiceConnectorUserParams,
-  updatedAt: rt.union([rt.string, rt.null]),
-  updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
-});
-export const ServiceConnectorBasicCaseParamsRt = rt.type({
-  comments: rt.union([rt.array(ServiceConnectorCommentParamsRt), rt.null]),
-  createdAt: rt.string,
-  createdBy: ServiceConnectorUserParams,
-  description: rt.union([rt.string, rt.null]),
-  externalId: rt.union([rt.string, rt.null]),
-  savedObjectId: rt.string,
-  title: rt.string,
-  updatedAt: rt.union([rt.string, rt.null]),
-  updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
-});
-
-export const ServiceConnectorCaseParamsRt = rt.intersection([
-  ServiceConnectorBasicCaseParamsRt,
-  ConnectorPartialFieldsRt,
-]);
-
-export const ServiceConnectorCaseResponseRt = rt.intersection([
-  rt.type({
-    title: rt.string,
-    id: rt.string,
-    pushedDate: rt.string,
-    url: rt.string,
-  }),
-  rt.partial({
-    comments: rt.array(
-      rt.intersection([
-        rt.type({
-          commentId: rt.string,
-          pushedDate: rt.string,
-        }),
-        rt.partial({ externalCommentId: rt.string }),
-      ])
-    ),
-  }),
-]);
-
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
@@ -178,8 +116,6 @@ export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type Status = rt.TypeOf<typeof StatusRt>;
 export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
-export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCaseParamsRt>;
-export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };

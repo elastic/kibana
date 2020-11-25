@@ -6,8 +6,8 @@
 import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
-  ConnectorBasicCaseParams,
-  ConnectorCommentParams,
+  ServiceConnectorCaseParams,
+  ServiceConnectorCommentParams,
   ConnectorMappingsAttributes,
   ConnectorTypes,
   EntityInformation,
@@ -33,7 +33,7 @@ export const mapIncident = async (
   connectorId: string,
   connectorType: string,
   mappings: ConnectorMappingsAttributes[],
-  params: ConnectorBasicCaseParams
+  params: ServiceConnectorCaseParams
 ): Promise<MapIncident> => {
   const { comments: caseComments, externalId } = params;
   const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
@@ -67,7 +67,7 @@ export const mapIncident = async (
   });
 
   const transformedFields = transformFields<
-    ConnectorBasicCaseParams,
+    ServiceConnectorCaseParams,
     ExternalServiceParams,
     Incident
   >({
@@ -137,22 +137,22 @@ export const FIELD_INFORMATION = (
 ) => {
   switch (mode) {
     case 'create':
-      return i18n.translate('xpack.actions.builtin.case.common.externalIncidentCreated', {
+      return i18n.translate('xpack.case.connectors.case.externalIncidentCreated', {
         values: { date, user },
         defaultMessage: '(created at {date} by {user})',
       });
     case 'update':
-      return i18n.translate('xpack.actions.builtin.case.common.externalIncidentUpdated', {
+      return i18n.translate('xpack.case.connectors.case.externalIncidentUpdated', {
         values: { date, user },
         defaultMessage: '(updated at {date} by {user})',
       });
     case 'add':
-      return i18n.translate('xpack.actions.builtin.case.common.externalIncidentAdded', {
+      return i18n.translate('xpack.case.connectors.case.externalIncidentAdded', {
         values: { date, user },
         defaultMessage: '(added at {date} by {user})',
       });
     default:
-      return i18n.translate('xpack.actions.builtin.case.common.externalIncidentDefault', {
+      return i18n.translate('xpack.case.connectors.case.externalIncidentDefault', {
         values: { date, user },
         defaultMessage: '(created at {date} by {user})',
       });
@@ -224,7 +224,7 @@ export const transformFields = <
 };
 
 export const transformComments = (
-  comments: ConnectorCommentParams[],
+  comments: ServiceConnectorCommentParams[],
   pipes: string[]
 ): SimpleComment[] =>
   comments.map((c) => ({

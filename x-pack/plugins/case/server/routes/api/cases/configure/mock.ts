@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  ConnectorBasicCaseParams,
-  ConnectorCommentParams,
+  ServiceConnectorCaseParams,
+  ServiceConnectorCommentParams,
   ConnectorMappingsAttributes,
 } from '../../../../../common/api/connectors';
 
@@ -18,7 +18,7 @@ const entity = {
     username: 'anotherUser',
   },
 };
-export const comment: ConnectorCommentParams = {
+export const comment: ServiceConnectorCommentParams = {
   comment: 'first comment',
   commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
   ...entity,
@@ -33,7 +33,7 @@ export const params = {
   title: 'a title',
   urgency: '2',
   ...entity,
-} as ConnectorBasicCaseParams;
+} as ServiceConnectorCaseParams;
 export const mappings: ConnectorMappingsAttributes[] = [
   {
     source: 'title',

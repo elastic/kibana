@@ -22,8 +22,7 @@ import {
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
 
-import { IncidentConfigurationSchema } from '../case/schema';
-import { SimpleComment } from '../case/types';
+import { ExternalServiceCommentResponse, SimpleComment } from '../case/types';
 
 export type ResilientPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
@@ -38,8 +37,6 @@ export type ExecutorSubActionCommonFieldsParams = TypeOf<
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
-
-export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
 
 export interface ExternalServiceCredentials {
   config: Record<string, unknown>;
@@ -56,12 +53,6 @@ export interface ExternalServiceIncidentResponse {
   title: string;
   url: string;
   pushedDate: string;
-}
-
-export interface ExternalServiceCommentResponse {
-  commentId: string;
-  pushedDate: string;
-  externalCommentId?: string;
 }
 
 export type ExternalServiceParams = Record<string, unknown>;

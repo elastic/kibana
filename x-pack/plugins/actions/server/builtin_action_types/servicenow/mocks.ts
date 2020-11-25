@@ -5,7 +5,6 @@
  */
 
 import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
-import { MapRecord } from '../case/types';
 
 export const serviceNowCommonFields = [
   {
@@ -69,28 +68,6 @@ const externalServiceMock = {
   create: createMock,
 };
 
-const mapping: Map<string, Partial<MapRecord>> = new Map();
-
-mapping.set('title', {
-  target: 'short_description',
-  actionType: 'overwrite',
-});
-
-mapping.set('description', {
-  target: 'description',
-  actionType: 'overwrite',
-});
-
-mapping.set('comments', {
-  target: 'comments',
-  actionType: 'append',
-});
-
-mapping.set('short_description', {
-  target: 'title',
-  actionType: 'overwrite',
-});
-
 const executorParams: ExecutorSubActionPushParams = {
   incident: {
     externalId: 'incident-3',
@@ -116,4 +93,4 @@ const apiParams: PushToServiceApiParams = {
   ...executorParams,
 };
 
-export { externalServiceMock, mapping, executorParams, apiParams };
+export { externalServiceMock, executorParams, apiParams };

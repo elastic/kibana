@@ -6,8 +6,6 @@
 
 import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
 
-import { MapRecord } from '../case/types';
-
 export const resilientFields = [
   {
     id: 17,
@@ -348,28 +346,6 @@ const externalServiceMock = {
   create: createMock,
 };
 
-const mapping: Map<string, Partial<MapRecord>> = new Map();
-
-mapping.set('title', {
-  target: 'name',
-  actionType: 'overwrite',
-});
-
-mapping.set('description', {
-  target: 'description',
-  actionType: 'overwrite',
-});
-
-mapping.set('comments', {
-  target: 'comments',
-  actionType: 'append',
-});
-
-mapping.set('name', {
-  target: 'title',
-  actionType: 'overwrite',
-});
-
 const executorParams: ExecutorSubActionPushParams = {
   incident: {
     externalId: 'incident-3',
@@ -445,4 +421,4 @@ const severity = [
   },
 ];
 
-export { externalServiceMock, mapping, executorParams, apiParams, incidentTypes, severity };
+export { externalServiceMock, executorParams, apiParams, incidentTypes, severity };

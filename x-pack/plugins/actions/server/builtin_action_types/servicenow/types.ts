@@ -18,7 +18,6 @@ import {
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ExternalServiceCommentResponse } from '../case/types';
-import { IncidentConfigurationSchema } from '../case/schema';
 import { Logger } from '../../../../../../src/core/server';
 
 export type ServiceNowPublicConfigurationType = TypeOf<
@@ -40,8 +39,6 @@ export interface CreateCommentRequest {
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
-
-export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
 
 export interface ExternalServiceCredentials {
   config: Record<string, unknown>;

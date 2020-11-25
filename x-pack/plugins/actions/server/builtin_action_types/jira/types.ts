@@ -21,8 +21,7 @@ import {
   ExecutorSubActionGetIssueParamsSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { IncidentConfigurationSchema } from '../case/schema';
-import { SimpleComment } from '../case/types';
+import { ExternalServiceCommentResponse, SimpleComment } from '../case/types';
 import { Logger } from '../../../../../../src/core/server';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
@@ -32,8 +31,6 @@ export type JiraSecretConfigurationType = TypeOf<
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
-
-export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
 
 export interface ExternalServiceCredentials {
   config: Record<string, unknown>;
@@ -50,12 +47,6 @@ export interface ExternalServiceIncidentResponse {
   title: string;
   url: string;
   pushedDate: string;
-}
-
-export interface ExternalServiceCommentResponse {
-  commentId: string;
-  pushedDate: string;
-  externalCommentId?: string;
 }
 
 export type ExternalServiceParams = Record<string, unknown>;
@@ -82,18 +73,6 @@ export interface CreateCommentParams {
 export interface FieldsSchema {
   type: string;
   [key: string]: string;
-}
-
-export interface ExternalServiceFields {
-  clauseNames: string[];
-  custom: boolean;
-  id: string;
-  key: string;
-  name: string;
-  navigatable: boolean;
-  orderable: boolean;
-  schema: FieldsSchema;
-  searchable: boolean;
 }
 
 export type GetIssueTypesResponse = Array<{ id: string; name: string }>;

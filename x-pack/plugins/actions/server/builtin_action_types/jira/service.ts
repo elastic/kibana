@@ -11,7 +11,6 @@ import {
   CreateCommentParams,
   CreateIncidentParams,
   ExternalService,
-  ExternalServiceCommentResponse,
   ExternalServiceCredentials,
   ExternalServiceIncidentResponse,
   Fields,
@@ -27,6 +26,7 @@ import {
 import * as i18n from './translations';
 import { request, getErrorMessage } from '../lib/axios_utils';
 import { ProxySettings } from '../../types';
+import { ExternalServiceCommentResponse } from '../case/types';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;

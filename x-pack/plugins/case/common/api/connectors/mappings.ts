@@ -82,10 +82,7 @@ const GetFieldsResponseRt = rt.type({
 });
 export type GetFieldsResponse = rt.TypeOf<typeof GetFieldsResponseRt>;
 
-///////////////////////////////////////////////////////////////////////
-
 export type ExternalServiceParams = Record<string, unknown>;
-export type ExternalServiceStringParams = Record<string, string>;
 
 export interface PipedField {
   actionType: string;
@@ -96,11 +93,11 @@ export interface PipedField {
 export interface PrepareFieldsForTransformArgs {
   defaultPipes: string[];
   mappings: ConnectorMappingsAttributes[];
-  params: ConnectorBasicCaseParams;
+  params: ServiceConnectorCaseParams;
 }
 export interface EntityInformation {
-  createdAt: string | null;
-  createdBy: ElasticUser | null;
+  createdAt: string;
+  createdBy: ElasticUser;
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
 }
@@ -117,46 +114,70 @@ export interface TransformFieldsArgs<P, S> {
   fields: PipedField[];
   params: P;
 }
-export const ConnectorUserParams = rt.type({
+
+export const ServiceConnectorUserParams = rt.type({
   fullName: rt.union([rt.string, rt.null]),
   username: rt.string,
 });
 
-export const ConnectorCommentParamsRt = rt.type({
+export const ServiceConnectorCommentParamsRt = rt.type({
   commentId: rt.string,
   comment: rt.string,
   createdAt: rt.string,
-  createdBy: ConnectorUserParams,
+  createdBy: ServiceConnectorUserParams,
   updatedAt: rt.union([rt.string, rt.null]),
-  updatedBy: rt.union([ConnectorUserParams, rt.null]),
+  updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
 });
-
-export type ConnectorCommentParams = rt.TypeOf<typeof ConnectorCommentParamsRt>;
-
-export const ConnectorBasicCaseParamsRt = rt.type({
-  comments: rt.union([rt.array(ConnectorCommentParamsRt), rt.null]),
+export const ServiceConnectorBasicCaseParamsRt = rt.type({
+  comments: rt.union([rt.array(ServiceConnectorCommentParamsRt), rt.null]),
   createdAt: rt.string,
-  createdBy: ConnectorUserParams,
+  createdBy: ServiceConnectorUserParams,
   description: rt.union([rt.string, rt.null]),
   externalId: rt.union([rt.string, rt.null]),
   savedObjectId: rt.string,
   title: rt.string,
   updatedAt: rt.union([rt.string, rt.null]),
-  updatedBy: rt.union([ConnectorUserParams, rt.null]),
-  // third party fields
-  incidentTypes: rt.union([ResilientFieldsRT.props.incidentTypes, rt.undefined]),
-  severityCode: rt.union([ResilientFieldsRT.props.severityCode, rt.undefined]),
-  severity: rt.union([ServiceNowFieldsRT.props.severity, rt.undefined]),
-  urgency: rt.union([ServiceNowFieldsRT.props.urgency, rt.undefined]),
-  impact: rt.union([ServiceNowFieldsRT.props.impact, rt.undefined]),
-  issueType: rt.union([JiraFieldsRT.props.issueType, rt.undefined]),
-  priority: rt.union([JiraFieldsRT.props.priority, rt.undefined]),
-  parent: rt.union([JiraFieldsRT.props.parent, rt.undefined]),
+  updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
 });
-export type ConnectorBasicCaseParams = rt.TypeOf<typeof ConnectorBasicCaseParamsRt>;
+
+export const ConnectorPartialFieldsRt = rt.partial({
+  ...JiraFieldsRT.props,
+  ...ResilientFieldsRT.props,
+  ...ServiceNowFieldsRT.props,
+});
+
+export const ServiceConnectorCaseParamsRt = rt.intersection([
+  ServiceConnectorBasicCaseParamsRt,
+  ConnectorPartialFieldsRt,
+]);
+
+export const ServiceConnectorCaseResponseRt = rt.intersection([
+  rt.type({
+    title: rt.string,
+    id: rt.string,
+    pushedDate: rt.string,
+    url: rt.string,
+  }),
+  rt.partial({
+    comments: rt.array(
+      rt.intersection([
+        rt.type({
+          commentId: rt.string,
+          pushedDate: rt.string,
+        }),
+        rt.partial({ externalCommentId: rt.string }),
+      ])
+    ),
+  }),
+]);
+export type ServiceConnectorBasicCaseParams = rt.TypeOf<typeof ServiceConnectorBasicCaseParamsRt>;
+export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCaseParamsRt>;
+export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;
+export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;
+
 export const PostPushRequestRt = rt.type({
   connector_type: rt.string,
-  params: ConnectorBasicCaseParamsRt,
+  params: ServiceConnectorCaseParamsRt,
 });
 
 export interface SimpleComment {
