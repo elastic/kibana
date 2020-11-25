@@ -294,6 +294,19 @@ export function deleteColumn({
   layer: IndexPatternLayer;
   columnId: string;
 }): IndexPatternLayer {
+  const column = layer.columns[columnId];
+  if (!column) {
+    const newIncomplete = { ...(layer.incompleteColumns || {}) };
+    delete newIncomplete[columnId];
+    return {
+      ...layer,
+      columnOrder: layer.columnOrder.filter((id) => id !== columnId),
+      incompleteColumns: newIncomplete,
+    };
+  }
+
+  const extraDeletions: string[] = 'references' in column ? column.references : [];
+
   const hypotheticalColumns = { ...layer.columns };
   delete hypotheticalColumns[columnId];
 
@@ -309,6 +322,18 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     Object.entries(layer.columns),
     ([id, col]) => col.isBucketed
   );
+
+  // If a reference has another reference as input, put it last in sort order
+  referenceBased.sort(([idA, a], [idB, b]) => {
+    if ('references' in a && a.references.includes(idB)) {
+      return 1;
+    }
+    if ('references' in b && b.references.includes(idA)) {
+      return -1;
+    }
+    return 0;
+  });
+  const [aggregations, metrics] = _.partition(direct, ([, col]) => col.isBucketed);
 
   return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
@@ -341,4 +366,111 @@ export function updateLayerIndexPattern(
     columns: newColumns,
     columnOrder: newColumnOrder,
   };
+}
+
+/**
+ * Collects all errors from the columns in the layer, for display in the workspace. This includes:
+ *
+ * - All columns have complete references
+ * - All column references are valid
+ * - All prerequisites are met
+ */
+export function getErrorMessages(layer: IndexPatternLayer): string[] | undefined {
+  const errors: string[] = [];
+
+  Object.entries(layer.columns).forEach(([columnId, column]) => {
+    const def = operationDefinitionMap[column.operationType];
+    if (def.input === 'fullReference' && def.getErrorMessage) {
+      errors.push(...(def.getErrorMessage(layer, columnId) ?? []));
+    }
+
+    if ('references' in column) {
+      column.references.forEach((referenceId, index) => {
+        if (!layer.columns[referenceId]) {
+          errors.push(
+            i18n.translate('xpack.lens.indexPattern.missingReferenceError', {
+              defaultMessage: 'Dimension {dimensionLabel} is incomplete',
+              values: {
+                dimensionLabel: column.label,
+              },
+            })
+          );
+        } else {
+          const referenceColumn = layer.columns[referenceId]!;
+          const requirements =
+            // @ts-expect-error not statically analyzed
+            operationDefinitionMap[column.operationType].requiredReferences[index];
+          const isValid = isColumnValidAsReference({
+            validation: requirements,
+            column: referenceColumn,
+          });
+
+          if (!isValid) {
+            errors.push(
+              i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
+                defaultMessage: 'Dimension {dimensionLabel} does not have a valid configuration',
+                values: {
+                  dimensionLabel: column.label,
+                },
+              })
+            );
+          }
+        }
+      });
+    }
+  });
+
+  return errors.length ? errors : undefined;
+}
+
+export function isReferenced(layer: IndexPatternLayer, columnId: string): boolean {
+  const allReferences = Object.values(layer.columns).flatMap((col) =>
+    'references' in col ? col.references : []
+  );
+  return allReferences.includes(columnId);
+}
+
+function isColumnValidAsReference({
+  column,
+  validation,
+}: {
+  column: IndexPatternColumn;
+  validation: RequiredReference;
+}): boolean {
+  if (!column) return false;
+  const operationType = column.operationType;
+  const operationDefinition = operationDefinitionMap[operationType];
+  return (
+    validation.input.includes(operationDefinition.input) &&
+    (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
+    validation.validateMetadata(column)
+  );
+}
+
+function isOperationAllowedAsReference({
+  operationType,
+  validation,
+  field,
+}: {
+  operationType: OperationType;
+  validation: RequiredReference;
+  field?: IndexPatternField;
+}): boolean {
+  const operationDefinition = operationDefinitionMap[operationType];
+
+  let hasValidMetadata = true;
+  if (field && operationDefinition.input === 'field') {
+    const metadata = operationDefinition.getPossibleOperationForField(field);
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+  } else if (operationDefinition.input !== 'field') {
+    const metadata = operationDefinition.getPossibleOperation();
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+  } else {
+    // TODO: How can we validate the metadata without a specific field?
+  }
+  return (
+    validation.input.includes(operationDefinition.input) &&
+    (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
+    hasValidMetadata
+  );
 }

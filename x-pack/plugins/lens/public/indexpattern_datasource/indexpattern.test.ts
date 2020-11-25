@@ -599,9 +599,39 @@ describe('IndexPattern Data Source', () => {
 
     describe('getTableSpec', () => {
       it('should include col1', () => {
-        expect(publicAPI.getTableSpec()).toEqual([
-          {
-            columnId: 'col1',
+        expect(publicAPI.getTableSpec()).toEqual([{ columnId: 'col1' }]);
+      });
+
+      it('should skip columns that are being referenced', () => {
+        publicAPI = indexPatternDatasource.getPublicAPI({
+          state: {
+            ...enrichBaseState(baseState),
+            layers: {
+              first: {
+                indexPatternId: '1',
+                columnOrder: ['col1', 'col2'],
+                columns: {
+                  col1: {
+                    label: 'Sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                  } as IndexPatternColumn,
+                  col2: {
+                    label: 'Cumulative sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'cumulative_sum',
+                    references: ['col1'],
+                    params: {},
+                  } as IndexPatternColumn,
+                },
+              },
+            },
           },
         ]);
       });
