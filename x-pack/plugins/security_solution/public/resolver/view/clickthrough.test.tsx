@@ -212,17 +212,10 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
 
 describe('Resolver, when using a generated tree with 20 generations, 4 children per child, and 10 ancestors', () => {
   beforeEach(async () => {
-    // create a mock data access layer with related events
-    // const { metadata: dataAccessLayerMetadata, dataAccessLayer } = usingGenerator({
-    //   generations: 5,
-    //   children: 4,
-    //   ancestors: 10,
-    // });
-
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } = usingGenerator({
       ancestors: 3,
       children: 3,
-      generations: 7,
+      generations: 4,
     });
     // save a reference to the `_id` supported by the mock data layer
     databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
@@ -237,6 +230,7 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
 
   describe('when clicking on a node in the panel whose node data has not yet been loaded', () => {
     let nodeToTest: ReactWrapper | undefined;
+    let other: ReactWrapper | undefined;
     beforeEach(async () => {
       nodeToTest = (
         await simulator.resolveWrapper(() => simulator.testSubject('resolver:node-list:node-link'))
@@ -245,17 +239,23 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
         ?.first();
 
       if (nodeToTest) {
+        console.log('clicking node', nodeToTest.props());
         nodeToTest.simulate('click', { button: 0 });
+        console.log('id ', nodeToTest.prop('data-test-node-list-id'));
+        other = simulator.processNodeElements({
+          entityID: nodeToTest.prop('data-test-node-list-id'),
+          selected: true,
+        });
+        console.log('other ', simulator.processNodeElements().length);
       }
     });
 
-    it('should load the node data', async () => {
+    it.only('should load the node data', async () => {
       await expect(
         simulator.map(() => ({
           nodeState: nodeToTest?.prop('data-test-node-state'),
         }))
       ).not.toYieldEqualTo({
-        // it should have 1 graph element, an no error or loading elements.
         nodeState: 'loading',
       });
     });

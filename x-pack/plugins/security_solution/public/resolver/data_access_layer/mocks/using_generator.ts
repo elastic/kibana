@@ -270,17 +270,22 @@ export function usingGenerator(
           };
         };
 
-        return Array.from(allData.values()).reduce((acc: ResolverNode[], node: TreeNode) => {
-          const lifecycleEvent = node.lifecycle[0];
-          acc.push({
-            data: buildFieldsObj(lifecycleEvent),
-            id: node.id,
-            parent: eventModel.parentEntityIDSafeVersion(lifecycleEvent),
-            stats: buildStats(node),
-            name: eventModel.processNameSafeVersion(lifecycleEvent),
-          });
-          return acc;
-        }, []);
+        const builtTree = Array.from(allData.values()).reduce(
+          (acc: ResolverNode[], node: TreeNode) => {
+            const lifecycleEvent = node.lifecycle[0];
+            acc.push({
+              data: buildFieldsObj(lifecycleEvent),
+              id: node.id,
+              parent: eventModel.parentEntityIDSafeVersion(lifecycleEvent),
+              stats: buildStats(node),
+              name: eventModel.processNameSafeVersion(lifecycleEvent),
+            });
+            return acc;
+          },
+          []
+        );
+        console.log('builtTree length', builtTree.length);
+        return builtTree;
       },
 
       /**

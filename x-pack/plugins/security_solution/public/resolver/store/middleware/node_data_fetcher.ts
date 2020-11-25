@@ -118,6 +118,7 @@ export function NodeDataFetcher(
         }
       }
 
+      console.log('new data ', newData);
       /**
        * Dispatch an action including the new node data we received and the original IDs we requested. We might
        * not have received events for each node so the original IDs will help with identifying nodes that we have
