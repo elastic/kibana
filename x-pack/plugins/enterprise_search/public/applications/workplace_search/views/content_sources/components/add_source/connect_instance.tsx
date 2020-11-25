@@ -240,13 +240,13 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           gutterSize="xl"
           responsive={false}
         >
-          <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
+          <EuiFlexItem grow={2} className="adding-a-source__connect-an-instance">
             {header}
             {featureBadgeGroup()}
             {descriptionBlock}
             {formFields}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={1}>
             <SourceFeatures features={features} name={name} objTypes={objTypes} />
           </EuiFlexItem>
         </EuiFlexGroup>
