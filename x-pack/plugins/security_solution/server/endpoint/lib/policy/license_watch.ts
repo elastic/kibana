@@ -19,6 +19,7 @@ import {
   isEndpointPolicyValidForLicense,
   unsetPolicyFeaturesAboveLicenseLevel,
 } from '../../../../common/license/policy_config';
+import { isAtLeast } from '../../../../common/license/license';
 import { licenseService } from '../../../lib/license/license';
 
 export class PolicyWatcher {
@@ -66,6 +67,10 @@ export class PolicyWatcher {
   }
 
   public async watch(license: ILicense) {
+    if (isAtLeast(license, 'platinum')) {
+      return;
+    }
+
     let page = 1;
     let response: {
       items: PackagePolicy[];
@@ -86,14 +91,25 @@ export class PolicyWatcher {
         );
         return;
       }
-      response.items.forEach((policy) => {
+      response.items.forEach(async (policy) => {
         const policyConfig = policy.inputs[0].config?.policy.value;
-        if (!isEndpointPolicyValidForLicense(policyConfig, licenseService)) {
+        if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
           policy.inputs[0].config!.policy.value = unsetPolicyFeaturesAboveLicenseLevel(
             policyConfig,
-            licenseService
+            license
           );
-          this.policyService.update(this.soClient, policy.id, policy);
+          try {
+            await this.policyService.update(this.soClient, policy.id, policy);
+          } catch (e) {
+            // try again for transient issues
+            try {
+              await this.policyService.update(this.soClient, policy.id, policy);
+            } catch (ee) {
+              this.logger.warn(
+                `Unable to remove platinum features from policy ${policy.id}: ${ee.message}`
+              );
+            }
+          }
         }
       });
     } while (response.page * response.perPage < response.total);
