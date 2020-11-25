@@ -65,13 +65,18 @@ run(
     const circularDependenciesFullPaths = parseCircular(depTree).filter((circularDeps) => {
       const first = circularDeps[0];
       const last = circularDeps[circularDeps.length - 1];
-      const matchRegex = /((src|x-pack)\/plugins|examples|x-pack\/examples)\/([^\/]*)\/.*/;
+      const matchRegex = /(?<pluginFolder>(src|x-pack)\/plugins|examples|x-pack\/examples)\/(?<pluginName>[^\/]*)\/.*/;
       const firstMatch = first.match(matchRegex);
       const lastMatch = last.match(matchRegex);
 
-      if (firstMatch && lastMatch && firstMatch.length === 4 && lastMatch.length === 4) {
-        const firstPlugin = `${firstMatch[1]}/${firstMatch[3]}`;
-        const lastPlugin = `${lastMatch[1]}/${lastMatch[3]}`;
+      if (
+        firstMatch?.groups?.pluginFolder &&
+        firstMatch?.groups?.pluginName &&
+        lastMatch?.groups?.pluginFolder &&
+        lastMatch?.groups?.pluginName
+      ) {
+        const firstPlugin = `${firstMatch.groups.pluginFolder}/${firstMatch.groups.pluginName}`;
+        const lastPlugin = `${lastMatch.groups.pluginFolder}/${lastMatch.groups.pluginName}`;
         const sortedPlugins = [firstPlugin, lastPlugin].sort();
 
         if (firstPlugin !== lastPlugin) {
