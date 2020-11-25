@@ -25,6 +25,21 @@ const oAuthConfigSchema = schema.object({
   consumer_key: schema.string(),
 });
 
+const displayFieldSchema = schema.object({
+  fieldName: schema.string(),
+  label: schema.string(),
+});
+
+const displaySettingsSchema = schema.object({
+  titleField: schema.maybe(schema.string()),
+  subtitleField: schema.maybe(schema.string()),
+  descriptionField: schema.maybe(schema.string()),
+  urlField: schema.maybe(schema.string()),
+  color: schema.string(),
+  urlFieldIsLinkable: schema.boolean(),
+  detailFields: schema.oneOf([schema.arrayOf(displayFieldSchema), displayFieldSchema]),
+});
+
 export function registerAccountSourcesRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -279,6 +294,45 @@ export function registerAccountSourceSearchableRoute({
     async (context, request, response) => {
       return enterpriseSearchRequestHandler.createRequest({
         path: `/ws/sources/${request.params.id}/searchable`,
+        body: request.body,
+      })(context, request, response);
+    }
+  );
+}
+
+export function registerAccountSourceDisplaySettingsConfig({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/sources/${request.params.id}/display_settings/config`,
+      })(context, request, response);
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+      validate: {
+        body: displaySettingsSchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/sources/${request.params.id}/display_settings/config`,
         body: request.body,
       })(context, request, response);
     }
@@ -545,6 +599,45 @@ export function registerOrgSourceSearchableRoute({
   );
 }
 
+export function registerOrgSourceDisplaySettingsConfig({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/org/sources/${request.params.id}/display_settings/config`,
+      })(context, request, response);
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+      validate: {
+        body: displaySettingsSchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/ws/org/sources/${request.params.id}/display_settings/config`,
+        body: request.body,
+      })(context, request, response);
+    }
+  );
+}
+
 export function registerOrgSourceOauthConfigurationsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -647,6 +740,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountPreSourceRoute(dependencies);
   registerAccountPrepareSourcesRoute(dependencies);
   registerAccountSourceSearchableRoute(dependencies);
+  registerAccountSourceDisplaySettingsConfig(dependencies);
   registerOrgSourcesRoute(dependencies);
   registerOrgSourcesStatusRoute(dependencies);
   registerOrgSourceRoute(dependencies);
@@ -658,6 +752,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgPreSourceRoute(dependencies);
   registerOrgPrepareSourcesRoute(dependencies);
   registerOrgSourceSearchableRoute(dependencies);
+  registerOrgSourceDisplaySettingsConfig(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
 };
