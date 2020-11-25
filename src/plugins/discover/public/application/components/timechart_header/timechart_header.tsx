@@ -104,7 +104,8 @@ export function TimechartHeader({
       <EuiFlexGroup
         className="dscTimeChartHeader"
         gutterSize="s"
-        responsive
+        responsive={false}
+        wrap
         justifyContent="center"
         alignItems="center"
       >

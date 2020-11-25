@@ -3,7 +3,10 @@ discover-app {
 }
 
 .dscPage {
-  height: calc(100vh - #{($euiHeaderHeightCompensation * 2)});
+  @include euiBreakpoint('m', 'l', 'xl') {
+    height: calc(100vh - #{($euiHeaderHeightCompensation * 2)});
+  }
+
   flex-direction: column;
   overflow: hidden;
   padding: 0;
@@ -13,6 +16,11 @@ discover-app {
   }
 }
 
+.dscPageBody__inner {
+  overflow: hidden;
+  height: 100%;
+}
+
 .dscPageBody__contents {
   overflow: hidden;
   padding-top: $euiSizeXS / 2; // A little breathing room for the index pattern button
@@ -20,6 +28,10 @@ discover-app {
 
 .dscPageContent__wrapper {
   padding: 0 $euiSize $euiSize 0;
+
+  @include euiBreakpoint('xs', 's') {
+    padding: 0 $euiSize $euiSize;
+  }
 }
 
 .dscPageContent,
@@ -28,13 +40,11 @@ discover-app {
 }
 
 .dscResultCount {
-  padding-left: $euiSizeS;
-  padding-right: $euiSizeS;
+  padding: $euiSizeS;
 
   @include euiBreakpoint('xs', 's') {
     .dscResultCount__toggle {
       align-items: flex-end;
-      margin-top: 0 !important;
     }
 
     .dscResuntCount__title,

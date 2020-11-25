@@ -171,15 +171,11 @@ export function DiscoverLegacy({
           showSearchBar={true}
           useDefaultBehaviors={true}
         />
-        <EuiPageBody
-          className="dscPageBody"
-          ref={scrollableMobile}
-          aria-describedby="savedSearchTitle"
-        >
+        <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
             {savedSearch.title}
           </h1>
-          <EuiFlexGroup className="dscPageBody__contents" gutterSize="none" responsive={false}>
+          <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
             <EuiFlexItem grow={false}>
               <DiscoverSidebarResponsive
                 columns={state.columns || []}
@@ -253,6 +249,7 @@ export function DiscoverLegacy({
                         </EuiFlexItem>
                         <EuiFlexItem className="dscResultCount__toggle" grow={false}>
                           <EuiButtonEmpty
+                            size="xs"
                             iconType={toggleOn ? 'eyeClosed' : 'eye'}
                             onClick={() => {
                               toggleChart(!toggleOn);

@@ -4,6 +4,12 @@
   padding-left: $euiSize;
   width: $euiSize * 19;
   height: 100%;
+
+  @include euiBreakpoint('xs', 's') {
+    width: 100%;
+    padding: $euiSize;
+    background-color: $euiPageBackgroundColor;
+  }
 }
 
 .dscSidebar__group {
@@ -12,15 +18,11 @@
 
 .dscSidebar__mobile {
   width: 100%;
-  padding: 0 $euiSizeS $euiSizeS;
-  .dscSidebar__sectionStatic {
-    padding: 0;
-  }
-  .dscSidebar__mobileButton {
-    justify-content: space-between;
-  }
+  padding: $euiSize $euiSize 0;
+
   .dscSidebar__mobileBadge {
-    margin-left: $euiSizeXS;
+    margin-left: $euiSizeS;
+    vertical-align: text-bottom;
   }
 }
 
@@ -28,11 +30,7 @@
   align-items: center;
 }
 
-/// MOVE
-
 .dscFieldList {
-  list-style: none;
-  margin-bottom: 0;
   padding: 0 $euiSizeXS $euiSizeXS;
 }
 
@@ -42,6 +40,7 @@
 }
 
 .dscFieldList--popular {
+  padding-bottom: $euiSizeS;
   background-color: lightOrDarkTheme(tint($euiColorPrimary, 90%), $euiColorLightShade);
 }
 
@@ -61,7 +60,6 @@
  */
 .dscSidebarItem__action {
   opacity: 0; /* 1 */
-  transition: none;
 
   &.dscSidebarItem__mobile {
     opacity: 1;
@@ -69,12 +67,5 @@
 
   &:focus {
     opacity: 1; /* 2 */
-  }
-  font-size: $euiFontSizeXS;
-  padding: 2px 6px !important;
-  height: 22px !important;
-  min-width: auto !important;
-  .euiButton__content {
-    padding: 0 4px;
   }
 }

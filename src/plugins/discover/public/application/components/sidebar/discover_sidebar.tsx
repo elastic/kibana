@@ -187,13 +187,11 @@ export function DiscoverSidebar({
           defaultMessage: 'Index and fields',
         })}
       >
-        <div className="dscSidebar__sectionStatic">
-          <DiscoverIndexPattern
-            selectedIndexPattern={selectedIndexPattern}
-            setIndexPattern={setIndexPattern}
-            indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-          />
-        </div>
+        <DiscoverIndexPattern
+          selectedIndexPattern={selectedIndexPattern}
+          setIndexPattern={setIndexPattern}
+          indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+        />
       </section>
     );
   }
@@ -261,9 +259,9 @@ export function DiscoverSidebar({
                           </EuiNotificationBadge>
                         }
                       >
-                        <EuiSpacer size="s" />
+                        <EuiSpacer size="m" />
                         <ul
-                          className="dscFieldList dscFieldList--selected"
+                          className="dscFieldList"
                           aria-labelledby="selected_fields"
                           data-test-subj={`fieldList-selected`}
                         >
@@ -290,7 +288,7 @@ export function DiscoverSidebar({
                           })}
                         </ul>
                       </EuiAccordion>
-                      <EuiSpacer size="xs" />{' '}
+                      <EuiSpacer size="s" />{' '}
                     </>
                   ) : null}
                   <EuiAccordion
@@ -316,7 +314,7 @@ export function DiscoverSidebar({
                     {popularFields.length > 0 && (
                       <>
                         <EuiTitle size="xxxs" className="dscFieldListHeader">
-                          <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
+                          <h4 id="available_fields_popular">
                             <FormattedMessage
                               id="discover.fieldChooser.filter.popularTitle"
                               defaultMessage="Popular"
