@@ -14,18 +14,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { asTransactionRate } from '../../../../../common/utils/formatters';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
   TRANSACTION_ROUTE_CHANGE,
 } from '../../../../../common/transaction_types';
-import { ChartsSyncContextProvider } from '../../../../context/charts_sync_context';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event_context';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITransactionChartData } from '../../../../selectors/chart_selectors';
-import { TransactionBreakdown } from '../../TransactionBreakdown';
-import { getTPMTooltipFormatter } from '../helper/helper';
+import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TimeseriesChart } from '../timeseries_chart';
 import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 import { getResponseTimeTickFormatter } from './helper';
@@ -93,7 +93,7 @@ export function TransactionCharts({
                 fetchStatus={fetchStatus}
                 id="requestPerMinutes"
                 timeseries={tpmSeries || []}
-                yLabelFormat={getTPMTooltipFormatter(transactionType)}
+                yLabelFormat={asTransactionRate}
               />
             </EuiPanel>
           </EuiFlexItem>

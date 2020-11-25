@@ -8,11 +8,11 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { asTransactionRate } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useTheme } from '../../../hooks/useTheme';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
-import { getTPMTooltipFormatter } from '../../shared/charts/helper/helper';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 
 export function ServiceOverviewThroughputChart({
@@ -74,7 +74,7 @@ export function ServiceOverviewThroughputChart({
             ),
           },
         ]}
-        yLabelFormat={getTPMTooltipFormatter(transactionType)}
+        yLabelFormat={asTransactionRate}
       />
     </EuiPanel>
   );
