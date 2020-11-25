@@ -117,7 +117,7 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            isPartial: false,
+            isPartial: true,
             isRunning: true,
             id: 1,
             rawResponse: {
@@ -175,8 +175,6 @@ describe('EnhancedSearchInterceptor', () => {
 
       await timeTravel(10);
 
-      expect(next).toHaveBeenCalled();
-      expect(next.mock.calls[0][0]).toStrictEqual(responses[0].value);
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
     });
@@ -212,7 +210,7 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            isPartial: false,
+            isPartial: true,
             isRunning: true,
             id: 1,
           },
@@ -280,7 +278,7 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            isPartial: false,
+            isPartial: true,
             isRunning: true,
             id: 1,
           },
@@ -320,7 +318,7 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            isPartial: false,
+            isPartial: true,
             isRunning: true,
             id: 1,
           },

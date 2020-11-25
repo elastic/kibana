@@ -148,7 +148,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
     case 'UPDATE_ACTIVE_DATA':
       return {
         ...state,
-        activeData: action.tables,
+        activeData: { ...action.tables },
       };
     case 'UPDATE_LAYER':
       return {
