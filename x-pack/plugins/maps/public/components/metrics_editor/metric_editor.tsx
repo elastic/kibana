@@ -106,7 +106,7 @@ export function MetricEditor({
     }
     onChange({
       ...metric,
-      percentile: parseInt(e.target.value, 10),
+      percentile: parseInt((e.target as HTMLInputElement).value, 10),
     });
   };
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>) => {
