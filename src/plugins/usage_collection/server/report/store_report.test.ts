@@ -40,12 +40,19 @@ describe('store_report', () => {
         },
       },
       uiCounter: {
-        appId: {
+        eventOneId: {
+          key: 'test-key',
+          type: METRIC_TYPE.LOADED,
+          appName: 'test-app-name',
+          eventName: 'test-event-name',
+          total: 1,
+        },
+        eventTwoId: {
           key: 'test-key',
           type: METRIC_TYPE.CLICK,
           appName: 'test-app-name',
           eventName: 'test-event-name',
-          total: 3,
+          total: 2,
         },
       },
       application_usage: {
@@ -69,14 +76,22 @@ describe('store_report', () => {
       1,
       'ui-metric',
       'test-app-name:test-event-name',
-      'count'
+      'count',
+      { incrementBy: 3 }
     );
     expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
       2,
       'ui-counter',
-      `test-app-name:${date}:test-event-name`,
-      'click',
-      { incrementBy: 3 }
+      `test-app-name:${date}:${METRIC_TYPE.LOADED}:test-event-name`,
+      'count',
+      { incrementBy: 1 }
+    );
+    expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
+      3,
+      'ui-counter',
+      `test-app-name:${date}:${METRIC_TYPE.CLICK}:test-event-name`,
+      'count',
+      { incrementBy: 2 }
     );
     expect(savedObjectClient.bulkCreate).toHaveBeenNthCalledWith(1, [
       {

@@ -20,9 +20,7 @@
 import { SavedObject, SavedObjectAttributes, SavedObjectsServiceSetup } from 'kibana/server';
 
 export interface UICounterSavedObjectAttributes extends SavedObjectAttributes {
-  loaded?: number;
-  click?: number;
-  count?: number;
+  count: number;
 }
 
 export type UICounterSavedObject = SavedObject<UICounterSavedObjectAttributes>;
@@ -36,8 +34,6 @@ export function registerUiCounterSavedObjectType(savedObjectsSetup: SavedObjects
     namespaceType: 'agnostic',
     mappings: {
       properties: {
-        click: { type: 'integer' },
-        loaded: { type: 'integer' },
         count: { type: 'integer' },
       },
     },

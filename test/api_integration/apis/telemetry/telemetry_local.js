@@ -72,6 +72,7 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.plugins.telemetry.usage_fetcher).to.be.a('string');
       expect(stats.stack_stats.kibana.plugins.stack_management).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.ui_metric).to.be.an('object');
+      expect(stats.stack_stats.kibana.plugins.ui_counters).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.application_usage).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.kql.defaultQueryLanguage).to.be.a('string');
       expect(stats.stack_stats.kibana.plugins['tsvb-validation']).to.be.an('object');

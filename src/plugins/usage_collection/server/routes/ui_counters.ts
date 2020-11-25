@@ -21,13 +21,13 @@ import { schema } from '@kbn/config-schema';
 import { IRouter, ISavedObjectsRepository } from 'src/core/server';
 import { storeReport, reportSchema } from '../report';
 
-export function registerUiMetricRoute(
+export function registerUiCountersRoute(
   router: IRouter,
   getSavedObjects: () => ISavedObjectsRepository | undefined
 ) {
   router.post(
     {
-      path: '/api/ui_metric/report',
+      path: '/api/ui_counters/report',
       validate: {
         body: schema.object({
           report: reportSchema,

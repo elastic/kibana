@@ -1560,7 +1560,7 @@ export class SavedObjectsRepository {
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: { [counterFieldName]: 1 },
+      attributes: { [counterFieldName]: incrementBy },
       migrationVersion,
       updated_at: time,
     });

@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository, SavedObject } from 'src/core/server';
+import { ISavedObjectsRepository } from 'src/core/server';
 import moment from 'moment';
+import { chain, head, sumBy } from 'lodash';
 import { ReportSchemaType } from './schema';
 
 export async function storeReport(
@@ -33,50 +34,59 @@ export async function storeReport(
   const timestamp = momentTimestamp.toDate();
   const date = momentTimestamp.format('DDMMYYYY');
 
-  return Promise.all<{ saved_objects: Array<SavedObject<any>> }>([
+  return Promise.allSettled([
+    // User Agent
     ...userAgents.map(async ([key, metric]) => {
       const { userAgent } = metric;
       const savedObjectId = `${key}:${userAgent}`;
-      return {
-        saved_objects: [
-          await internalRepository.create(
-            'ui-metric',
-            { count: 1 },
-            {
-              id: savedObjectId,
-              overwrite: true,
-            }
-          ),
-        ],
-      };
+      return await internalRepository.create(
+        'ui-metric',
+        { count: 1 },
+        {
+          id: savedObjectId,
+          overwrite: true,
+        }
+      );
     }),
-    ...uiCounters.map(async ([key, metric]) => {
-      const { appName, eventName } = metric;
-      const savedObjectId = `${appName}:${eventName}`;
-      return {
-        saved_objects: [
-          await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count'),
-        ],
-      };
-    }),
+    // Deprecated UI metrics, Use data from UI Counters.
+    ...chain(report.uiCounter)
+      .groupBy((e) => `${e.appName}:${e.eventName}`)
+      .entries()
+      .map(([savedObjectId, metric]) => {
+        return {
+          savedObjectId,
+          incrementBy: sumBy(metric, 'total'),
+        };
+      })
+      .map(async ({ savedObjectId, incrementBy }) => {
+        return await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count', {
+          incrementBy,
+        });
+      })
+      .value(),
+    // UI Counters
     ...uiCounters.map(async ([key, metric]) => {
       const { appName, eventName, total, type } = metric;
-      const savedObjectId = `${appName}:${date}:${eventName}`;
-      return {
-        saved_objects: [
-          await internalRepository.incrementCounter('ui-counter', savedObjectId, type, {
-            incrementBy: total,
-          }),
-        ],
-      };
+      const savedObjectId = `${appName}:${date}:${type}:${eventName}`;
+      return [
+        await internalRepository.incrementCounter('ui-counter', savedObjectId, 'count', {
+          incrementBy: total,
+        }),
+      ];
     }),
-    appUsage.length
-      ? internalRepository.bulkCreate(
+    // Application Usage
+    ...[
+      (async () => {
+        if (!appUsage.length) return [];
+        const { saved_objects: savedObjects } = await internalRepository.bulkCreate(
           appUsage.map(([appId, metric]) => ({
             type: 'application_usage_transactional',
             attributes: { ...metric, appId, timestamp },
           }))
-        )
-      : { saved_objects: [] },
+        );
+
+        return savedObjects;
+      })(),
+    ],
   ]);
 }

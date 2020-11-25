@@ -3505,6 +3505,24 @@ describe('SavedObjectsRepository', () => {
           originId,
         });
       });
+
+      it('increments counter by incrementBy config', async () => {
+        await incrementCounterSuccess(type, id, field, { incrementBy: 3 });
+
+        expect(client.update).toBeCalledTimes(1);
+        expect(client.update).toBeCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              script: expect.objectContaining({
+                params: expect.objectContaining({
+                  count: 3,
+                }),
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
     });
   });
 

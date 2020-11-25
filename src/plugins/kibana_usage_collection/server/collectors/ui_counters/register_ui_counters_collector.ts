@@ -18,7 +18,6 @@
  */
 
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { isObject } from 'lodash/fp';
 import {
   UICounterSavedObject,
   UICounterSavedObjectAttributes,
@@ -39,25 +38,18 @@ export interface UiCountersUsage {
 
 export function transformRawCounter(rawUiCounter: UICounterSavedObject) {
   const { id, attributes, updated_at: lastUpdatedAt } = rawUiCounter;
-  if (typeof id !== 'string' || !isObject(attributes)) {
-    return [];
-  }
-  const [appName, , ...restId] = id.split(':');
+  const [appName, , counterType, ...restId] = id.split(':');
   const eventName = restId.join(':');
-  const counterTypes = Object.keys(attributes);
+  const counterTotal: unknown = attributes.count;
+  const total = typeof counterTotal === 'number' ? counterTotal : 0;
 
-  return counterTypes.map((counterType) => {
-    const counterTotal: unknown = attributes[counterType];
-    const total = typeof counterTotal === 'number' ? counterTotal : 0;
-
-    return {
-      appName,
-      eventName,
-      lastUpdatedAt,
-      counterType,
-      total,
-    };
-  });
+  return {
+    appName,
+    eventName,
+    lastUpdatedAt,
+    counterType,
+    total,
+  };
 }
 
 export function registerUiCountersUsageCollector(usageCollection: UsageCollectionSetup) {
@@ -78,12 +70,20 @@ export function registerUiCountersUsageCollector(usageCollection: UsageCollectio
     fetch: async ({ soClient }: CollectorFetchContext) => {
       const { saved_objects: rawUiCounters } = await soClient.find<UICounterSavedObjectAttributes>({
         type: UI_COUNTER_SAVED_OBJECT_TYPE,
-        fields: ['count', 'click', 'loaded'],
+        fields: ['count'],
         perPage: 10000,
       });
 
       return {
-        dailyEvents: rawUiCounters.flatMap(transformRawCounter),
+        dailyEvents: rawUiCounters.reduce((acc, raw) => {
+          try {
+            const aggEvent = transformRawCounter(raw);
+            acc.push(aggEvent);
+          } catch (_) {
+            // swallow error; allows sending successfully transformed objects.
+          }
+          return acc;
+        }, [] as UiCounterEvent[]),
       };
     },
     isReady: () => true,
