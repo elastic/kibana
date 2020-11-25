@@ -51,7 +51,7 @@ export function TransactionCharts({
 
   return (
     <>
-      <ChartsSyncContextProvider>
+      <ChartPointerEventContextProvider>
         <EuiFlexGrid columns={2} gutterSize="s">
           <EuiFlexItem data-cy={`transaction-duration-charts`}>
             <EuiPanel>
@@ -106,10 +106,10 @@ export function TransactionCharts({
             <TransactionErrorRateChart />
           </EuiFlexItem>
           <EuiFlexItem>
-            <TransactionBreakdown />
+            <TransactionBreakdownChart />
           </EuiFlexItem>
         </EuiFlexGrid>
-      </ChartsSyncContextProvider>
+      </ChartPointerEventContextProvider>
     </>
   );
 }
