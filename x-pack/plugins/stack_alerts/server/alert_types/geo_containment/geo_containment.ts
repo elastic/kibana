@@ -188,7 +188,7 @@ export const getGeoContainmentExecutor = (log: Logger) =>
         entityDateTime: new Date(dateInShape),
         entityDocumentId: docId,
         detectionDateTime: new Date(currIntervalEndTime),
-        entityLocation: location,
+        entityLocation: `POINT (${location[0]} ${location[1]})`,
         containingBoundaryId: shapeLocationId,
         containingBoundaryName,
       };
