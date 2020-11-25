@@ -41,7 +41,7 @@ describe('SchemaExistingField', () => {
   it('doesn`t render fieldName when hidden', () => {
     const wrapper = shallow(<SchemaExistingField {...props} hideName />);
 
-    expect(wrapper.find('.c-stui-engine-schema-field__name').exists()).toBeTruthy();
+    expect(wrapper.find('.c-stui-engine-schema-field__name').contains(props.fieldName)).toBeFalsy();
   });
 
   it('renders unconfirmed message', () => {
