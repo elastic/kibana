@@ -22,7 +22,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const globalNav = getService('globalNav');
-  const PageObjects = getPageObjects(['common', 'newsfeed']);
+  const deployment = getService('deployment');
+  const PageObjects = getPageObjects(['newsfeed']);
 
   describe('Newsfeed', () => {
     before(async () => {
@@ -48,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('shows all news from newsfeed', async () => {
       const objects = await PageObjects.newsfeed.getNewsfeedList();
 
-      if (await PageObjects.common.isOss()) {
+      if (await deployment.isOss()) {
         expect(objects).to.eql([
           '21 June 2019\nYou are functionally testing the newsfeed widget with fixtures!\nSee test/common/fixtures/plugins/newsfeed/newsfeed_simulation\nGeneric feed-viewer could go here',
           '21 June 2019\nStaging too!\nHello world\nGeneric feed-viewer could go here',

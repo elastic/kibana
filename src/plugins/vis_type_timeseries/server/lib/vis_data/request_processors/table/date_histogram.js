@@ -26,7 +26,14 @@ import { calculateAggRoot } from './calculate_agg_root';
 import { search } from '../../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
 
-export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, capabilities) {
+export function dateHistogram(
+  req,
+  panel,
+  esQueryConfig,
+  indexPatternObject,
+  capabilities,
+  { barTargetUiSettings }
+) {
   return (next) => (doc) => {
     const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const meta = {
@@ -34,7 +41,12 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
     };
 
     const getDateHistogramForLastBucketMode = () => {
-      const { bucketSize, intervalString } = getBucketSize(req, interval, capabilities);
+      const { bucketSize, intervalString } = getBucketSize(
+        req,
+        interval,
+        capabilities,
+        barTargetUiSettings
+      );
       const { from, to } = getTimerange(req);
       const timezone = capabilities.searchTimezone;
 
