@@ -12,7 +12,6 @@ export const mockLayerList = [
     minZoom: 0,
     maxZoom: 24,
     alpha: 1,
-    areLabelsOnTop: true,
     visible: true,
     style: { type: 'TILE' },
     type: 'VECTOR_TILE',
