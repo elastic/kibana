@@ -8,12 +8,14 @@ import React, { FC, useEffect, useState } from 'react';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Cytoscape, Controls, JobMapLegend } from './components';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator } from '../../../contexts/kibana';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
+import { JobMapTitle } from './job_map_title';
 
 const cytoscapeDivStyle = {
   background: `linear-gradient(
@@ -35,25 +37,6 @@ ${theme.euiColorLightShade}`,
   marginTop: 0,
 };
 
-export const JobMapTitle: React.FC<{ analyticsId?: string; modelId?: string }> = ({
-  analyticsId,
-  modelId,
-}) => (
-  <EuiTitle size="xs">
-    <span>
-      {analyticsId
-        ? i18n.translate('xpack.ml.dataframe.analyticsMap.analyticsIdTitle', {
-            defaultMessage: 'Map for analytics ID {analyticsId}',
-            values: { analyticsId },
-          })
-        : i18n.translate('xpack.ml.dataframe.analyticsMap.modelIdTitle', {
-            defaultMessage: 'Map for trained model ID {modelId}',
-            values: { modelId },
-          })}
-    </span>
-  </EuiTitle>
-);
-
 interface Props {
   analyticsId?: string;
   modelId?: string;
@@ -74,39 +57,54 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   } = useFetchAnalyticsMapData();
 
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      application: { navigateToUrl },
+    },
   } = useMlKibana();
+  const urlGenerator = useMlUrlGenerator();
+
+  const redirectToAnalyticsManagementPage = async () => {
+    const url = await urlGenerator.createUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
+    await navigateToUrl(url);
+  };
 
   if (message !== undefined) {
     notifications.toasts.add(message);
   }
 
   const updateElements = (nodeId: string, nodeLabel: string, destIndexNode?: string) => {
-    // Remove job element
-    const filteredElements = elements.filter((e: any) => {
-      // Filter out job node and related edges, including trained model node.
-      let condition = e.data.id !== nodeId && e.data.target !== nodeId && e.data.source !== nodeId;
+    // If removing the root job just go back to the jobs list
+    if (nodeLabel === analyticsId) {
+      redirectToAnalyticsManagementPage();
+    } else {
+      // Remove job element
+      const filteredElements = elements.filter((e: any) => {
+        // Filter out job node and related edges, including trained model node.
+        let condition =
+          e.data.id !== nodeId && e.data.target !== nodeId && e.data.source !== nodeId;
 
-      if (e.data.type === JOB_MAP_NODE_TYPES.TRAINED_MODEL) {
-        // remove training model node related to that job
-        condition =
-          condition && nodeDetails[e.data.id]?.metadata?.analytics_config?.id !== nodeLabel;
-      }
+        if (e.data.type === JOB_MAP_NODE_TYPES.TRAINED_MODEL) {
+          // remove training model node related to that job
+          condition =
+            condition && nodeDetails[e.data.id]?.metadata?.analytics_config?.id !== nodeLabel;
+        }
 
-      if (destIndexNode !== undefined) {
-        // Filter out destination index node for that job
-        return (
-          condition &&
-          e.data.id !== destIndexNode &&
-          e.data.target !== destIndexNode &&
-          e.data.source !== destIndexNode
-        );
-      }
+        if (destIndexNode !== undefined) {
+          // Filter out destination index node for that job
+          return (
+            condition &&
+            e.data.id !== destIndexNode &&
+            e.data.target !== destIndexNode &&
+            e.data.source !== destIndexNode
+          );
+        }
 
-      return condition;
-    });
-    setItemsDeleted(true);
-    setElements(filteredElements);
+        return condition;
+      });
+      setItemsDeleted(true);
+      setElements(filteredElements);
+    }
   };
 
   useEffect(() => {
