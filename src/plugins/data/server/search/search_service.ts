@@ -29,7 +29,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { catchError, first, switchMap } from 'rxjs/operators';
+import { catchError, first, map, switchMap } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import {
@@ -44,7 +44,7 @@ import { AggsService } from './aggs';
 
 import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
-import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
+import { getCallMsearch, registerMsearchRoute, registerSearchRoute, shimHitsTotal } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
@@ -152,35 +152,43 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       )
     );
 
-    bfetch.addBatchProcessingRoute<{ request: any; options?: ISearchOptions }, any>(
-      '/internal/bsearch',
-      (request) => {
-        const search = this.asScopedProvider(this.coreStart!)(request);
+    bfetch.addBatchProcessingRoute<
+      { request: IKibanaSearchResponse; options?: ISearchOptions },
+      any
+    >('/internal/bsearch', (request) => {
+      const search = this.asScopedProvider(this.coreStart!)(request);
 
-        return {
-          onBatchItem: async ({ request: requestData, options }) => {
-            return search
-              .search(requestData, options)
-              .pipe(
-                first(),
-                catchError((err) => {
-                  // eslint-disable-next-line no-throw-literal
-                  throw {
-                    statusCode: err.statusCode || 500,
-                    body: {
-                      message: err.message,
-                      attributes: {
-                        error: err.body?.error || err.message,
-                      },
+      return {
+        onBatchItem: async ({ request: requestData, options }) => {
+          return search
+            .search(requestData, options)
+            .pipe(
+              first(),
+              map((response) => {
+                return {
+                  ...response,
+                  ...{
+                    rawResponse: shimHitsTotal(response.rawResponse),
+                  },
+                };
+              }),
+              catchError((err) => {
+                // eslint-disable-next-line no-throw-literal
+                throw {
+                  statusCode: err.statusCode || 500,
+                  body: {
+                    message: err.message,
+                    attributes: {
+                      error: err.body?.error || err.message,
                     },
-                  };
-                })
-              )
-              .toPromise();
-          },
-        };
-      }
-    );
+                  },
+                };
+              })
+            )
+            .toPromise();
+        },
+      };
+    });
 
     core.savedObjects.registerType(searchTelemetry);
     if (usageCollection) {
