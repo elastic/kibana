@@ -166,7 +166,7 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
       for (const tagName of tagNames) {
         await this.page.selectTagByName(tagName);
       }
-      await this.page.clickOnAction('assign');
+      await this.page.clickOnBulkAction('assign');
       await this.waitUntilResultsAreLoaded();
     }
 
@@ -260,17 +260,28 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
-     * Return true if the `Delete tag` action button in the tag rows is visible, false otherwise.
+     * Returns true if given action is available from the table action column
      */
-    async isDeleteButtonVisible() {
-      return await testSubjects.exists('tagsTableAction-delete');
-    }
-
-    /**
-     * Return true if the `Edit tag` action button in the tag rows is visible, false otherwise.
-     */
-    async isEditButtonVisible() {
-      return await testSubjects.exists('tagsTableAction-edit');
+    async isActionAvailable(action: string) {
+      const rows = await testSubjects.findAll('tagsTableRow');
+      const firstRow = rows[0];
+      // if there is more than 2 actions, they are wrapped in a popover that opens from a new action.
+      const menuActionPresent = await testSubjects.descendantExists(
+        'euiCollapsedItemActionsButton',
+        firstRow
+      );
+      if (menuActionPresent) {
+        const actionButton = await testSubjects.findDescendant(
+          'euiCollapsedItemActionsButton',
+          firstRow
+        );
+        await actionButton.click();
+        const actionPresent = await testSubjects.exists(`tagsTableAction-${action}`);
+        await actionButton.click();
+        return actionPresent;
+      } else {
+        return await testSubjects.exists(`tagsTableAction-${action}`);
+      }
     }
 
     /**
@@ -370,7 +381,7 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
      * The menu will automatically be opened if not already, but the test must still
      * select tags to make the action menu button appear.
      */
-    async isActionPresent(actionId: string) {
+    async isBulkActionPresent(actionId: string) {
       if (!(await this.isActionMenuButtonDisplayed())) {
         return false;
       }
@@ -391,7 +402,7 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     /**
      * Click on given bulk action button
      */
-    async clickOnAction(actionId: string) {
+    async clickOnBulkAction(actionId: string) {
       await this.openActionMenu();
       await testSubjects.click(`actionBar-button-${actionId}`);
     }

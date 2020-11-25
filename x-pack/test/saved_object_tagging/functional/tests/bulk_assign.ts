@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'security', 'savedObjects', 'tagManagement']);
   const tagManagementPage = PageObjects.tagManagement;
 
-  describe('TOTO bulk assign', () => {
+  describe('bulk assign', () => {
     let assignFlyout: typeof tagManagementPage['assignFlyout'];
 
     beforeEach(async () => {

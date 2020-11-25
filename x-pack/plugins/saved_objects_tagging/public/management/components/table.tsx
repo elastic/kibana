@@ -105,7 +105,7 @@ export const TagTable: FC<TagTableProps> = ({
       type: 'icon',
       icon: 'tag',
       onClick: (object: TagWithRelations) => onAssign(object),
-      'data-test-subj': 'tagsTableAction-delete',
+      'data-test-subj': 'tagsTableAction-assign',
     });
   }
   if (capabilities.delete) {
