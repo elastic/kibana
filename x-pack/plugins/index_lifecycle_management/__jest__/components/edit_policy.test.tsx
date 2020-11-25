@@ -25,8 +25,6 @@ import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_coll
 
 import { CloudSetup } from '../../../cloud/public';
 
-import { licensingMock } from '../../../licensing/public/mocks';
-
 import { EditPolicy } from '../../public/application/sections/edit_policy/edit_policy';
 import {
   EditPolicyContextProvider,
