@@ -5,10 +5,10 @@
  */
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
-  createMockAgentService,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
+import { createMockAgentService } from '../../../../../fleet/server/mocks';
 import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
 import {
   ILegacyScopedClusterClient,

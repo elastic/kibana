@@ -10,9 +10,25 @@ import { isEmpty } from 'lodash';
 import { tint } from 'polished';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { Suggestion } from './suggestion';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { units, px, unit } from '../../../../../../apm/public/style/variables';
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
+
+export const unit = 16;
+
+export const units = {
+  unit,
+  eighth: unit / 8,
+  quarter: unit / 4,
+  half: unit / 2,
+  minus: unit * 0.75,
+  plus: unit * 1.5,
+  double: unit * 2,
+  triple: unit * 3,
+  quadruple: unit * 4,
+};
+
+export function px(value: number): string {
+  return `${value}px`;
+}
 
 const List = styled.ul`
   width: 100%;

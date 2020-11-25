@@ -71,7 +71,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
         const { transactionUrl, ...restFilters } = uiFilters;
 
         return callApmApi({
-          pathname: '/api/apm/rum-client/url-search',
+          endpoint: 'GET /api/apm/rum-client/url-search',
           params: {
             query: {
               ...uxQuery,

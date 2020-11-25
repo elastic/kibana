@@ -8,21 +8,13 @@ import { AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
 import { PinnedEvent } from '../../lib/pinned_event/saved_object';
 
-export type QueryAllPinnedEventsByTimelineIdResolver = AppResolverOf<
-  QueryResolvers.GetAllPinnedEventsByTimelineIdResolver
->;
+export type QueryAllPinnedEventsByTimelineIdResolver = AppResolverOf<QueryResolvers.GetAllPinnedEventsByTimelineIdResolver>;
 
-export type MutationPinnedEventResolver = AppResolverOf<
-  MutationResolvers.PersistPinnedEventOnTimelineResolver
->;
+export type MutationPinnedEventResolver = AppResolverOf<MutationResolvers.PersistPinnedEventOnTimelineResolver>;
 
-export type MutationDeletePinnedEventOnTimelineResolver = AppResolverOf<
-  MutationResolvers.DeletePinnedEventOnTimelineResolver
->;
+export type MutationDeletePinnedEventOnTimelineResolver = AppResolverOf<MutationResolvers.DeletePinnedEventOnTimelineResolver>;
 
-export type MutationDeleteAllPinnedEventsOnTimelineResolver = AppResolverOf<
-  MutationResolvers.DeleteAllPinnedEventsOnTimelineResolver
->;
+export type MutationDeleteAllPinnedEventsOnTimelineResolver = AppResolverOf<MutationResolvers.DeleteAllPinnedEventsOnTimelineResolver>;
 
 interface TimelineResolversDeps {
   pinnedEvent: PinnedEvent;

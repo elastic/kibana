@@ -7,7 +7,7 @@ import { installationStatuses } from '../constants';
 import { PackageInfo } from '../types';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
 
-describe('Ingest Manager - packageToPackagePolicy', () => {
+describe('Fleet - packageToPackagePolicy', () => {
   const mockPackage: PackageInfo = {
     name: 'mock-package',
     title: 'Mock package',

@@ -132,9 +132,9 @@ export function createExplorerUrl(
     { useHash: false, storeInHashQuery: false },
     url
   );
-  url = setStateToKbnUrl<Partial<ExplorerAppState>>(
+  url = setStateToKbnUrl<AppPageState<Partial<ExplorerAppState>>>(
     '_a',
-    appState,
+    { [ML_PAGES.ANOMALY_EXPLORER]: appState },
     { useHash: false, storeInHashQuery: false },
     url
   );
@@ -157,12 +157,12 @@ export function createSingleMetricViewerUrl(
     timeRange,
     jobIds,
     refreshInterval,
-    zoom,
     query,
     detectorIndex,
     forecastId,
     entities,
     globalState,
+    functionDescription,
   } = params;
 
   let queryState: Partial<TimeSeriesExplorerGlobalState> = {};
@@ -189,9 +189,12 @@ export function createSingleMetricViewerUrl(
   if (entities !== undefined) {
     mlTimeSeriesExplorer.entities = entities;
   }
+  if (functionDescription !== undefined) {
+    mlTimeSeriesExplorer.functionDescription = functionDescription;
+  }
+
   appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
-  if (zoom) appState.zoom = zoom;
   if (query)
     appState.query = {
       query_string: query,
@@ -202,9 +205,9 @@ export function createSingleMetricViewerUrl(
     { useHash: false, storeInHashQuery: false },
     url
   );
-  url = setStateToKbnUrl<TimeSeriesExplorerAppState>(
+  url = setStateToKbnUrl<AppPageState<Partial<TimeSeriesExplorerAppState>>>(
     '_a',
-    appState,
+    { [ML_PAGES.SINGLE_METRIC_VIEWER]: appState },
     { useHash: false, storeInHashQuery: false },
     url
   );

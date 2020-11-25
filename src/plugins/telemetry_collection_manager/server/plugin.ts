@@ -144,7 +144,7 @@ export class TelemetryCollectionManagerPlugin
     collectionSoService: SavedObjectsServiceStart,
     usageCollection: UsageCollectionSetup
   ): StatsCollectionConfig {
-    const { timestamp, request } = config;
+    const { request } = config;
 
     const callCluster = config.unencrypted
       ? collection.esCluster.asScoped(request).callAsCurrentUser
@@ -160,7 +160,7 @@ export class TelemetryCollectionManagerPlugin
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
     const kibanaRequest = config.unencrypted ? request : void 0;
 
-    return { callCluster, timestamp, usageCollection, esClient, soClient, kibanaRequest };
+    return { callCluster, usageCollection, esClient, soClient, kibanaRequest };
   }
 
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {
@@ -289,9 +289,9 @@ export class TelemetryCollectionManagerPlugin
     return stats.map((stat) => {
       const license = licenses[stat.cluster_uuid];
       return {
+        collectionSource: collection.title,
         ...(license ? { license } : {}),
         ...stat,
-        collectionSource: collection.title,
       };
     });
   }

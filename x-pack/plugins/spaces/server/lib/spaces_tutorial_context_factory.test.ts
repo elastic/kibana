@@ -4,31 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../spaces_service';
-import { SpacesAuditLogger } from './audit_logger';
-import { coreMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { spacesConfig } from './__fixtures__';
-import { securityMock } from '../../../security/server/mocks';
+import { spacesClientServiceMock } from '../spaces_client/spaces_client_service.mock';
 
-const log = loggingSystemMock.createLogger();
-
-const service = new SpacesService(log);
+const service = new SpacesService();
 
 describe('createSpacesTutorialContextFactory', () => {
   it('should create a valid context factory', async () => {
-    const spacesService = spacesServiceMock.createSetupContract();
-    expect(typeof createSpacesTutorialContextFactory(spacesService)).toEqual('function');
+    const spacesService = spacesServiceMock.createStartContract();
+    expect(typeof createSpacesTutorialContextFactory(() => spacesService)).toEqual('function');
   });
 
   it('should create context with the current space id for space my-space-id', async () => {
-    const spacesService = spacesServiceMock.createSetupContract('my-space-id');
-    const contextFactory = createSpacesTutorialContextFactory(spacesService);
+    const spacesService = spacesServiceMock.createStartContract('my-space-id');
+    const contextFactory = createSpacesTutorialContextFactory(() => spacesService);
 
-    const request = {};
+    const request = httpServerMock.createKibanaRequest();
 
     expect(contextFactory(request)).toEqual({
       spaceId: 'my-space-id',
@@ -37,16 +32,17 @@ describe('createSpacesTutorialContextFactory', () => {
   });
 
   it('should create context with the current space id for the default space', async () => {
-    const spacesService = await service.setup({
-      http: coreMock.createSetup().http,
-      getStartServices: async () => [coreMock.createStart(), {}, {}],
-      authorization: securityMock.createSetup().authz,
-      auditLogger: {} as SpacesAuditLogger,
-      config$: Rx.of(spacesConfig),
+    service.setup({
+      basePath: coreMock.createSetup().http.basePath,
     });
-    const contextFactory = createSpacesTutorialContextFactory(spacesService);
+    const contextFactory = createSpacesTutorialContextFactory(() =>
+      service.start({
+        basePath: coreMock.createStart().http.basePath,
+        spacesClientService: spacesClientServiceMock.createStart(),
+      })
+    );
 
-    const request = {};
+    const request = httpServerMock.createKibanaRequest();
 
     expect(contextFactory(request)).toEqual({
       spaceId: DEFAULT_SPACE_ID,

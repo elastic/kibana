@@ -14,7 +14,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
-import { sendPostAgentUpgrade, sendPostBulkAgentUpgrade, useCore } from '../../../../hooks';
+import {
+  sendPostAgentUpgrade,
+  sendPostBulkAgentUpgrade,
+  useStartServices,
+} from '../../../../hooks';
 
 interface Props {
   onClose: () => void;
@@ -29,7 +33,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   agentCount,
   version,
 }) => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
   async function onSubmit() {
