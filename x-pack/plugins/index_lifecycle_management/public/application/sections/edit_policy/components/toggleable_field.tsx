@@ -8,6 +8,7 @@ import React, { FunctionComponent, useState } from 'react';
 import { EuiSpacer, EuiSwitch, EuiSwitchProps } from '@elastic/eui';
 
 export interface Props extends Omit<EuiSwitchProps, 'checked' | 'onChange'> {
+  children: (() => JSX.Element) | JSX.Element;
   initialValue: boolean;
   onChange?: (nextValue: boolean) => void;
 }
@@ -34,7 +35,7 @@ export const ToggleableField: FunctionComponent<Props> = ({
         }}
       />
       <EuiSpacer size="m" />
-      {isContentVisible ? children : null}
+      {isContentVisible ? (typeof children === 'function' ? children() : children) : null}
     </>
   );
 };

@@ -31,6 +31,8 @@ import { i18nTexts } from '../../../../i18n_texts';
 
 import { FieldLoadingError, DescribedFormField, LearnMoreLink } from '../../../index';
 
+import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
+
 import './_searchable_snapshot_field.scss';
 
 const { emptyField } = fieldValidators;
@@ -52,76 +54,141 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const { getUrlForApp, policy } = useEditPolicyContext();
   const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
-  const { isLoading, error, data, resendRequest } = useLoadSnapshotRepositories();
 
-  const repos = data?.repositories ?? [];
+  const renderField = () => (
+    <SearchableSnapshotDataProvider>
+      {({ error, isLoading, resendRequest, data }) => {
+        const repos = data?.repositories ?? [];
 
-  let calloutContent: React.ReactNode | undefined;
+        let calloutContent: React.ReactNode | undefined;
 
-  if (!isLoading) {
-    if (error) {
-      calloutContent = (
-        <FieldLoadingError
-          resendRequest={resendRequest}
-          data-test-subj="repositoriesErrorCallout"
-          aria-label={i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.reloadSnapshotRepositoriesLabel',
-            {
-              defaultMessage: 'Reload snapshot repositories',
-            }
-          )}
-          title={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.loadSnapshotRepositoriesErrorTitle"
-              defaultMessage="Unable to load snapshot repositories"
-            />
+        if (!isLoading) {
+          if (error) {
+            calloutContent = (
+              <FieldLoadingError
+                resendRequest={resendRequest}
+                data-test-subj="repositoriesErrorCallout"
+                aria-label={i18n.translate(
+                  'xpack.indexLifecycleMgmt.editPolicy.reloadSnapshotRepositoriesLabel',
+                  {
+                    defaultMessage: 'Reload snapshot repositories',
+                  }
+                )}
+                title={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.loadSnapshotRepositoriesErrorTitle"
+                    defaultMessage="Unable to load snapshot repositories"
+                  />
+                }
+                body={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.loadSnapshotRepositoriesErrorBody"
+                    defaultMessage="Refresh this field and enter the name of an existing snapshot repository."
+                  />
+                }
+              />
+            );
+          } else if (repos.length === 0) {
+            calloutContent = (
+              <EuiCallOut
+                data-test-subj="noSnapshotRepositoriesCallout"
+                iconType="help"
+                color="warning"
+                title={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundTitle"
+                    defaultMessage="No snapshot repositories found"
+                  />
+                }
+              >
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundMessage"
+                  defaultMessage="{link} to use searchable snapshots."
+                  values={{
+                    link: (
+                      <EuiLink
+                        href={getUrlForApp('management', {
+                          path: `data/snapshot_restore/add_repository`,
+                        })}
+                        target="_blank"
+                      >
+                        {i18n.translate(
+                          'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
+                          {
+                            defaultMessage: 'Create a snapshot repository',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiCallOut>
+            );
           }
-          body={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.loadSnapshotRepositoriesErrorBody"
-              defaultMessage="Refresh this field and enter the name of an existing snapshot repository."
-            />
-          }
-        />
-      );
-    } else if (repos.length === 0) {
-      calloutContent = (
-        <EuiCallOut
-          data-test-subj="noSnapshotRepositoriesCallout"
-          iconType="help"
-          color="warning"
-          title={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundTitle"
-              defaultMessage="No snapshot repositories found"
-            />
-          }
-        >
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesFoundMessage"
-            defaultMessage="{link} to use searchable snapshots."
-            values={{
-              link: (
-                <EuiLink
-                  href={getUrlForApp('management', {
-                    path: `data/snapshot_restore/add_repository`,
-                  })}
-                  target="_blank"
-                >
-                  {i18n.translate(
-                    'xpack.indexLifecycleMgmt.editPolicy.createSearchableSnapshotLink',
-                    {
-                      defaultMessage: 'Create a snapshot repository',
+        }
+
+        return (
+          <div className="ilmSearchableSnapshotField">
+            <UseField<string>
+              config={{
+                defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
+                label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
+                validations: [
+                  {
+                    validator: emptyField(
+                      i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired
+                    ),
+                  },
+                ],
+              }}
+              path={searchableSnapshotPath}
+            >
+              {(field) => {
+                const singleSelectionArray: [selectedSnapshot?: string] = field.value
+                  ? [field.value]
+                  : [];
+
+                return (
+                  <ComboBoxField
+                    field={
+                      {
+                        ...field,
+                        value: singleSelectionArray,
+                      } as any
                     }
-                  )}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
-      );
-    }
-  }
+                    fullWidth={false}
+                    euiFieldProps={{
+                      'data-test-subj': 'searchableSnapshotCombobox',
+                      options: repos.map((repo) => ({ label: repo, value: repo })),
+                      singleSelection: { asPlainText: true },
+                      isLoading,
+                      noSuggestions: !!(error || repos.length === 0),
+                      onCreateOption: (newOption: string) => {
+                        field.setValue(newOption);
+                      },
+                      onChange: (options: EuiComboBoxOptionOption[]) => {
+                        if (options.length > 0) {
+                          field.setValue(options[0].label);
+                        } else {
+                          field.setValue('');
+                        }
+                      },
+                    }}
+                  />
+                );
+              }}
+            </UseField>
+            {calloutContent && (
+              <>
+                <EuiSpacer size="s" />
+                {calloutContent}
+              </>
+            )}
+          </div>
+        );
+      }}
+    </SearchableSnapshotDataProvider>
+  );
 
   return (
     <DescribedFormField
@@ -180,59 +247,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
       }
       fullWidth
     >
-      <div className="ilmSearchableSnapshotField">
-        <UseField<string>
-          config={{
-            defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
-            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
-            validations: [
-              { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
-            ],
-          }}
-          path={searchableSnapshotPath}
-        >
-          {(field) => {
-            const singleSelectionArray: [selectedSnapshot?: string] = field.value
-              ? [field.value]
-              : [];
-
-            return (
-              <ComboBoxField
-                field={
-                  {
-                    ...field,
-                    value: singleSelectionArray,
-                  } as any
-                }
-                fullWidth={false}
-                euiFieldProps={{
-                  'data-test-subj': 'searchableSnapshotCombobox',
-                  options: repos.map((repo) => ({ label: repo, value: repo })),
-                  singleSelection: { asPlainText: true },
-                  isLoading,
-                  noSuggestions: !!(error || repos.length === 0),
-                  onCreateOption: (newOption: string) => {
-                    field.setValue(newOption);
-                  },
-                  onChange: (options: EuiComboBoxOptionOption[]) => {
-                    if (options.length > 0) {
-                      field.setValue(options[0].label);
-                    } else {
-                      field.setValue('');
-                    }
-                  },
-                }}
-              />
-            );
-          }}
-        </UseField>
-        {calloutContent && (
-          <>
-            <EuiSpacer size="s" />
-            {calloutContent}
-          </>
-        )}
-      </div>
+      {renderField}
     </DescribedFormField>
   );
 };

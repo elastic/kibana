@@ -8,7 +8,9 @@ import React, { FunctionComponent } from 'react';
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 
-export const withLicenseCheck = <P,>(Component: FunctionComponent<P>) => (props: P) => {
+export const withLicenseCheck = <P,>(Component: FunctionComponent<P>): FunctionComponent<P> => (
+  props
+) => {
   const { license } = useEditPolicyContext();
   return license.canUseSearchableSnapshot() ? <Component {...props} /> : null;
 };
