@@ -126,6 +126,15 @@ export class Embeddable
       .subscribe((input) => {
         this.reload();
       });
+    input$
+      .pipe(
+        map((input) => input.viewMode),
+        distinctUntilChanged(),
+        skip(1)
+      )
+      .subscribe((input) => {
+        this.reload();
+      });
 
     this.autoRefreshFetchSubscription = deps.timefilter
       .getAutoRefreshFetch$()
