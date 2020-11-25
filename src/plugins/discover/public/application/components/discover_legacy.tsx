@@ -39,7 +39,7 @@ import { getServices, IndexPattern } from '../../kibana_services';
 import { DiscoverUninitialized, DiscoverHistogram } from '../angular/directives';
 import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
+import { DocTableLegacy, DocTableLegacyProps } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
 import {
   search,
@@ -54,10 +54,12 @@ import {
 import { Chart } from '../angular/helpers/point_series';
 import { AppState } from '../angular/discover_state';
 import { SavedSearch } from '../../saved_searches';
-
 import { SavedObject } from '../../../../../core/types';
 import { TopNavMenuData } from '../../../../navigation/public';
-import { DiscoverSidebarResponsive } from './sidebar';
+import {
+  DiscoverSidebarResponsive,
+  DiscoverSidebarResponsiveProps,
+} from './sidebar/discover_sidebar_responsive';
 import { DocViewFilterFn, ElasticSearchHit } from '../doc_views/doc_views_types';
 
 export interface DiscoverProps {
@@ -104,6 +106,13 @@ export interface DiscoverProps {
   updateSavedQueryId: (savedQueryId?: string) => void;
 }
 
+export const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
+  <DocTableLegacy {...props} />
+));
+export const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps) => (
+  <DiscoverSidebarResponsive {...props} />
+));
+
 export function DiscoverLegacy({
   addColumn,
   fetch,
@@ -135,7 +144,6 @@ export function DiscoverLegacy({
   updateSavedQueryId,
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
-  const scrollableMobile = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const isMobile = () => {
     // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
@@ -179,7 +187,7 @@ export function DiscoverLegacy({
           </h1>
           <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
             <EuiFlexItem grow={false}>
-              <DiscoverSidebarResponsive
+              <SidebarMemoized
                 columns={state.columns || []}
                 fieldCounts={fieldCounts}
                 hits={rows}
@@ -307,7 +315,7 @@ export function DiscoverLegacy({
                         </h2>
                         {rows && rows.length && (
                           <div>
-                            <DocTableLegacy
+                            <DocTableLegacyMemoized
                               columns={state.columns || []}
                               indexPattern={indexPattern}
                               minimumVisibleRows={minimumVisibleRows}
@@ -344,12 +352,9 @@ export function DiscoverLegacy({
                                     if (skipToBottomBtn) {
                                       skipToBottomBtn.focus();
                                     }
-                                    // depending on screen size there are different elements to scroll
+                                    // Only the desktop one needs to target a specific container
                                     if (!isMobile() && scrollableDesktop.current) {
                                       scrollableDesktop.current.scrollTo(0, 0);
-                                    }
-                                    if (isMobile() && scrollableMobile.current) {
-                                      scrollableMobile.current.scrollTo(0, 0);
                                     }
                                   }}
                                 >

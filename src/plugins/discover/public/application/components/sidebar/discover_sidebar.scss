@@ -7,7 +7,7 @@
 
   @include euiBreakpoint('xs', 's') {
     width: 100%;
-    padding: $euiSize;
+    padding: $euiSize $euiSize 0 $euiSize;
     background-color: $euiPageBackgroundColor;
   }
 }

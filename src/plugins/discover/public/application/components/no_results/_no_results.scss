@@ -1,6 +1,3 @@
 .dscNoResults {
-  @include euiBreakpoint('xs', 's') {
-    padding: 0 $euiSizeS;
-  }
-  padding: 0 $euiSize;
+  padding: $euiSize;
 }

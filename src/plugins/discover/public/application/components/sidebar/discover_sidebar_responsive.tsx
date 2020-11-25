@@ -184,13 +184,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   </h2>
                 </EuiTitle>
               </EuiFlyoutHeader>
-              {/* No flyout body because the list has its own background and scroll */}
-              <DiscoverSidebar
-                {...props}
-                fieldFilter={fieldFilter}
-                setFieldFilter={setFieldFilter}
-                mobile={true}
-              />
+              {/* Using only the direct flyout body class because we maintain scroll in a lower sidebar component. Needs a fix on the EUI side */}
+              <div className="euiFlyoutBody">
+                <DiscoverSidebar
+                  {...props}
+                  fieldFilter={fieldFilter}
+                  setFieldFilter={setFieldFilter}
+                  mobile={true}
+                />
+              </div>
             </EuiFlyout>
           </EuiPortal>
         )}
