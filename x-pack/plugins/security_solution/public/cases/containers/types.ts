@@ -76,7 +76,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  status: string;
+  status: CaseStatus;
   tags: string[];
   reporters: User[];
 }
@@ -97,6 +97,7 @@ export interface AllCases extends CasesStatus {
 export enum SortFieldCase {
   createdAt = 'createdAt',
   closedAt = 'closedAt',
+  updatedAt = 'updatedAt',
 }
 
 export interface ElasticUser {

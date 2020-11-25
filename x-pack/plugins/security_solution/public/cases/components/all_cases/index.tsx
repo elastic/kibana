@@ -19,6 +19,7 @@ import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
+import { CaseStatuses } from '../../../../../case/common/api';
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
@@ -292,10 +293,15 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
-        if (newFilterOptions.status && newFilterOptions.status === 'closed') {
+        if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.closed) {
           setQueryParams({ sortField: SortFieldCase.closedAt });
-        } else if (newFilterOptions.status && newFilterOptions.status === 'open') {
+        } else if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.open) {
           setQueryParams({ sortField: SortFieldCase.createdAt });
+        } else if (
+          newFilterOptions.status &&
+          newFilterOptions.status === CaseStatuses['in-progress']
+        ) {
+          setQueryParams({ sortField: SortFieldCase.updatedAt });
         }
         setFilters(newFilterOptions);
         refreshCases(false);

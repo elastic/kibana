@@ -59,7 +59,7 @@ export const getCasesColumns = (
           ) : (
             <span>{theCase.title}</span>
           );
-          return theCase.status === 'open' ? (
+          return theCase.status !== 'closed' ? (
             caseDetailsLinkComponent
           ) : (
             <>

@@ -30,7 +30,7 @@ interface LabelTitle {
 
 const getStatusTitle = (status: CaseStatus) => {
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" alignItems={'center'}>
       <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Status type={status} />

@@ -4,22 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { isEqual } from 'lodash/fp';
-import {
-  EuiFieldSearch,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-import * as i18n from './translations';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
 
+import { CaseStatus, CaseStatuses } from '../../../../../case/common/api';
 import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
+import { StatusFilter } from './status_filter';
 
+import * as i18n from './translations';
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
@@ -36,7 +32,7 @@ interface CasesTableFiltersProps {
  * @param onFilterChanged change listener to be notified on filter changes
  */
 
-const defaultInitial = { search: '', reporters: [], status: 'open', tags: [] };
+const defaultInitial = { search: '', reporters: [], status: CaseStatuses.open, tags: [] };
 
 const CasesTableFiltersComponent = ({
   countClosedCases,
@@ -51,18 +47,20 @@ const CasesTableFiltersComponent = ({
   );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const [showOpenCases, setShowOpenCases] = useState(initial.status === 'open');
   const { tags, fetchTags } = useGetTags();
   const { reporters, respReporters, fetchReporters } = useGetReporters();
+
   const refetch = useCallback(() => {
     fetchTags();
     fetchReporters();
   }, [fetchReporters, fetchTags]);
+
   useEffect(() => {
     if (setFilterRefetch != null) {
       setFilterRefetch(refetch);
     }
   }, [refetch, setFilterRefetch]);
+
   useEffect(() => {
     if (selectedReporters.length) {
       const newReporters = selectedReporters.filter((r) => reporters.includes(r));
@@ -70,6 +68,7 @@ const CasesTableFiltersComponent = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reporters]);
+
   useEffect(() => {
     if (selectedTags.length) {
       const newTags = selectedTags.filter((t) => tags.includes(t));
@@ -102,6 +101,7 @@ const CasesTableFiltersComponent = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedTags]
   );
+
   const handleOnSearch = useCallback(
     (newSearch) => {
       const trimSearch = newSearch.trim();
@@ -113,19 +113,26 @@ const CasesTableFiltersComponent = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [search]
   );
-  const handleToggleFilter = useCallback(
-    (showOpen) => {
-      if (showOpen !== showOpenCases) {
-        setShowOpenCases(showOpen);
-        onFilterChanged({ status: showOpen ? 'open' : 'closed' });
-      }
+
+  const onStatusChanged = useCallback(
+    (status: CaseStatus) => {
+      onFilterChanged({ status });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [showOpenCases]
+    [onFilterChanged]
   );
+
+  const stats = useMemo(
+    () => ({
+      open: countOpenCases ?? 0,
+      'in-progress': countInProgressCases ?? 0,
+      closed: countClosedCases ?? 0,
+    }),
+    [countClosedCases, countInProgressCases, countOpenCases]
+  );
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={8}>
         <EuiFieldSearch
           aria-label={i18n.SEARCH_CASES}
           data-test-subj="search-cases"
@@ -135,26 +142,15 @@ const CasesTableFiltersComponent = ({
           onSearch={handleOnSearch}
         />
       </EuiFlexItem>
-
+      <EuiFlexItem grow={2}>
+        <StatusFilter
+          selectedStatus={initial.status}
+          onStatusChanged={onStatusChanged}
+          stats={stats}
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <EuiFilterButton
-            data-test-subj="open-case-count"
-            withNext
-            hasActiveFilters={showOpenCases}
-            onClick={handleToggleFilter.bind(null, true)}
-          >
-            {i18n.OPEN_CASES}
-            {countOpenCases != null ? ` (${countOpenCases})` : ''}
-          </EuiFilterButton>
-          <EuiFilterButton
-            data-test-subj="closed-case-count"
-            hasActiveFilters={!showOpenCases}
-            onClick={handleToggleFilter.bind(null, false)}
-          >
-            {i18n.CLOSED_CASES}
-            {countClosedCases != null ? ` (${countClosedCases})` : ''}
-          </EuiFilterButton>
           <FilterPopover
             buttonLabel={i18n.REPORTER}
             onSelectedOptionsChanged={handleSelectedReporters}
