@@ -14,21 +14,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
   TRANSACTION_ROUTE_CHANGE,
 } from '../../../../../common/transaction_types';
-import { asDecimal, tpmUnit } from '../../../../../common/utils/formatters';
-import { Coordinate } from '../../../../../typings/timeseries';
+import { asTransactionRate } from '../../../../../common/utils/formatters';
 import { ChartsSyncContextProvider } from '../../../../context/charts_sync_context';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITransactionChartData } from '../../../../selectors/chart_selectors';
-import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { TransactionBreakdown } from '../../TransactionBreakdown';
+import { TransactionBreakdownChart } from '../transaction_breakdown_chart';
 import { TimeseriesChart } from '../timeseries_chart';
 import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 import { getResponseTimeTickFormatter } from './helper';
@@ -46,14 +43,6 @@ export function TransactionCharts({
   urlParams,
   fetchStatus,
 }: TransactionChartProps) {
-  const getTPMFormatter = (t: number) => {
-    return `${asDecimal(t)} ${tpmUnit(urlParams.transactionType)}`;
-  };
-
-  const getTPMTooltipFormatter = (y: Coordinate['y']) => {
-    return isValidCoordinateValue(y) ? getTPMFormatter(y) : NOT_AVAILABLE_LABEL;
-  };
-
   const { transactionType } = urlParams;
 
   const { responseTimeSeries, tpmSeries } = charts;
@@ -104,7 +93,7 @@ export function TransactionCharts({
                 fetchStatus={fetchStatus}
                 id="requestPerMinutes"
                 timeseries={tpmSeries || []}
-                yLabelFormat={getTPMTooltipFormatter}
+                yLabelFormat={asTransactionRate}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -117,7 +106,7 @@ export function TransactionCharts({
             <TransactionErrorRateChart />
           </EuiFlexItem>
           <EuiFlexItem>
-            <TransactionBreakdown />
+            <TransactionBreakdownChart />
           </EuiFlexItem>
         </EuiFlexGrid>
       </ChartsSyncContextProvider>

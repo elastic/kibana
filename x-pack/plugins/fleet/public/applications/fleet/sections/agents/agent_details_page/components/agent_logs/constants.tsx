@@ -24,3 +24,14 @@ export const DEFAULT_DATE_RANGE = {
   start: 'now-1d',
   end: 'now',
 };
+
+export const AGENT_LOG_LEVELS = {
+  ERROR: 'error',
+  WARNING: 'warning',
+  INFO: 'info',
+  DEBUG: 'debug',
+};
+
+export const ORDERED_FILTER_LOG_LEVELS = ['error', 'warning', 'warn', 'notice', 'info', 'debug'];
+
+export const DEFAULT_LOG_LEVEL = AGENT_LOG_LEVELS.INFO;
