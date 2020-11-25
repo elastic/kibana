@@ -31,6 +31,7 @@ import { TimeSeries } from '../../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useTheme } from '../../../../hooks/useTheme';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useAnnotations } from '../../../../hooks/use_annotations';
 import { useChartsSync } from '../../../../hooks/use_charts_sync';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../charts/chart_container';
@@ -51,7 +52,8 @@ export function TransactionBreakdownChartContents({
 }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
-  const { event, setEvent, annotations } = useChartsSync();
+  const { event, setEvent } = useChartsSync();
+  const { annotations } = useAnnotations();
   const chartTheme = useChartTheme();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
@@ -93,6 +95,7 @@ export function TransactionBreakdownChartContents({
           position={Position.Bottom}
           showOverlappingTicks
           tickFormat={xFormatter}
+          gridLine={{ visible: false }}
         />
         <Axis
           id="y-axis"

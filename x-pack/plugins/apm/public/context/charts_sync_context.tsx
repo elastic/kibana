@@ -11,13 +11,10 @@ import React, {
   SetStateAction,
   useState,
 } from 'react';
-import { Annotation } from '../../common/annotations';
-import { useAnnotations } from '../hooks/use_annotations';
 
 export const ChartsSyncContext = createContext<{
   event: any;
   setEvent: Dispatch<SetStateAction<{}>>;
-  annotations: Annotation[];
 } | null>(null);
 
 export function ChartsSyncContextProvider({
@@ -26,11 +23,10 @@ export function ChartsSyncContextProvider({
   children: ReactNode;
 }) {
   const [event, setEvent] = useState({});
-  const { annotations } = useAnnotations();
 
   return (
     <ChartsSyncContext.Provider
-      value={{ event, setEvent, annotations }}
+      value={{ event, setEvent }}
       children={children}
     />
   );
