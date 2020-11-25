@@ -22,6 +22,7 @@ import { FilterPopover } from '../filter_popover';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
+  countInProgressCases: number | null;
   countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
@@ -40,6 +41,7 @@ const defaultInitial = { search: '', reporters: [], status: 'open', tags: [] };
 const CasesTableFiltersComponent = ({
   countClosedCases,
   countOpenCases,
+  countInProgressCases,
   onFilterChanged,
   initial = defaultInitial,
   setFilterRefetch,

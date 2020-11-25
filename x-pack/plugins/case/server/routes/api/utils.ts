@@ -103,6 +103,7 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
 export const transformCases = (
   cases: SavedObjectsFindResponse<ESCaseAttributes>,
   countOpenCases: number,
+  countInProgressCases: number,
   countClosedCases: number,
   totalCommentByCase: TotalCommentByCase[]
 ): CasesFindResponse => ({
@@ -111,6 +112,7 @@ export const transformCases = (
   total: cases.total,
   cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase),
   count_open_cases: countOpenCases,
+  count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,
 });
 

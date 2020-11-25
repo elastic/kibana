@@ -108,6 +108,7 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
 export const initialData: AllCases = {
   cases: [],
   countClosedCases: null,
+  countInProgressCases: null,
   countOpenCases: null,
   page: 0,
   perPage: 0,

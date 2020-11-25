@@ -18,6 +18,9 @@ type Statuses = Record<
       label: string;
       icon: string;
     };
+    stats: {
+      title: string;
+    };
   }
 >;
 
@@ -32,6 +35,9 @@ export const statuses: Statuses = {
       label: i18n.REOPEN_CASE,
       icon: 'folderCheck',
     },
+    stats: {
+      title: i18n.OPEN_CASES,
+    },
   },
   'in-progress': {
     color: 'warning',
@@ -43,6 +49,9 @@ export const statuses: Statuses = {
       label: i18n.MARK_CASE_IN_PROGRESS,
       icon: 'folderExclamation',
     },
+    stats: {
+      title: i18n.IN_PROGRESS_CASES,
+    },
   },
   closed: {
     color: 'default',
@@ -53,6 +62,9 @@ export const statuses: Statuses = {
     button: {
       label: i18n.CLOSE_CASE,
       icon: 'folderCheck',
+    },
+    stats: {
+      title: i18n.CLOSED_CASES,
     },
   },
 };

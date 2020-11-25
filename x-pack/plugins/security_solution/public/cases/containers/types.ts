@@ -84,6 +84,7 @@ export interface FilterOptions {
 export interface CasesStatus {
   countClosedCases: number | null;
   countOpenCases: number | null;
+  countInProgressCases: number | null;
 }
 
 export interface AllCases extends CasesStatus {

@@ -241,3 +241,18 @@ export const UNKNOWN = i18n.translate('xpack.securitySolution.case.caseView.unkn
 export const MARKED_CASE_AS = i18n.translate('xpack.securitySolution.case.caseView.markedCaseAs', {
   defaultMessage: 'marked case as',
 });
+
+export const OPEN_CASES = i18n.translate('xpack.securitySolution.case.caseTable.openCases', {
+  defaultMessage: 'Open cases',
+});
+
+export const CLOSED_CASES = i18n.translate('xpack.securitySolution.case.caseTable.closedCases', {
+  defaultMessage: 'Closed cases',
+});
+
+export const IN_PROGRESS_CASES = i18n.translate(
+  'xpack.securitySolution.case.caseTable.inProgressCases',
+  {
+    defaultMessage: 'In progress cases',
+  }
+);

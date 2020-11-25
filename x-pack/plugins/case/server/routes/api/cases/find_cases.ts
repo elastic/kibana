@@ -16,6 +16,7 @@ import {
   CasesFindRequestRt,
   throwErrors,
   CaseStatus,
+  caseStatuses,
 } from '../../../../common/api';
 import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
 import { RouteDeps, TotalCommentByCase } from '../types';
@@ -80,30 +81,21 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
               client,
             };
 
-        const argsOpenCases = {
+        const statusArgs = caseStatuses.map((caseStatus) => ({
           client,
           options: {
             fields: [],
             page: 1,
             perPage: 1,
-            filter: getStatusFilter('open', myFilters),
+            filter: getStatusFilter(caseStatus, myFilters),
           },
-        };
+        }));
 
-        const argsClosedCases = {
-          client,
-          options: {
-            fields: [],
-            page: 1,
-            perPage: 1,
-            filter: getStatusFilter('closed', myFilters),
-          },
-        };
-        const [cases, openCases, closesCases] = await Promise.all([
+        const [cases, openCases, inProgressCases, closedCases] = await Promise.all([
           caseService.findCases(args),
-          caseService.findCases(argsOpenCases),
-          caseService.findCases(argsClosedCases),
+          ...statusArgs.map((arg) => caseService.findCases(arg)),
         ]);
+
         const totalCommentsFindByCases = await Promise.all(
           cases.saved_objects.map((c) =>
             caseService.getAllCaseComments({
@@ -138,7 +130,8 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
             transformCases(
               cases,
               openCases.total ?? 0,
-              closesCases.total ?? 0,
+              inProgressCases.total ?? 0,
+              closedCases.total ?? 0,
               totalCommentsByCases
             )
           ),
