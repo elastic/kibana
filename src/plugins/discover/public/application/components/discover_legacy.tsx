@@ -295,7 +295,7 @@ export function DiscoverLegacy({
 
                     <EuiFlexItem className="eui-yScroll">
                       <section
-                        className="dscTable"
+                        className="dscTable eui-yScroll"
                         aria-labelledby="documentsAriaLabel"
                         ref={scrollableDesktop}
                       >
