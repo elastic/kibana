@@ -571,7 +571,7 @@
     "@typescript-eslint/parser": "^4.8.1",
     "@welldone-software/why-did-you-render": "^5.0.0",
     "@yarnpkg/lockfile": "^1.1.0",
-    "abab": "^1.0.4",
+    "abab": "^2.0.4",
     "angular-aria": "^1.8.0",
     "angular-mocks": "^1.7.9",
     "angular-recursion": "^1.0.5",
