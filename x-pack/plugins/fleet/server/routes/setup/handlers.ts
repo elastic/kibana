@@ -72,7 +72,7 @@ export const createFleetSetupHandler: RequestHandler<
   }
 };
 
-export const ingestManagerSetupHandler: RequestHandler = async (context, request, response) => {
+export const FleetSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
 

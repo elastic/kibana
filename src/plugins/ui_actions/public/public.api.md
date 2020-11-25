@@ -8,6 +8,7 @@ import { CoreSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EventEmitter } from 'events';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { Plugin } from 'src/core/public';

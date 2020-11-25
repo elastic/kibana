@@ -35,6 +35,7 @@ function getMockIndexPattern() {
       if (name === 'test1') {
         return {
           name,
+          displayName: name,
           type: 'string',
           aggregatable: false,
           searchable: true,
@@ -43,6 +44,7 @@ function getMockIndexPattern() {
       } else {
         return {
           name,
+          displayName: name,
           type: 'string',
           aggregatable: false,
           searchable: true,

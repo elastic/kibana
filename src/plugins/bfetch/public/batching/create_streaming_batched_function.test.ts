@@ -30,7 +30,7 @@ const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejec
         () => resolve('rejected')
       )
     ),
-    new Promise<'pending'>((resolve) => resolve()).then(() => 'pending'),
+    new Promise<'pending'>((resolve) => resolve('pending')).then(() => 'pending'),
   ]);
 
 const isPending = (promise: Promise<unknown>): Promise<boolean> =>

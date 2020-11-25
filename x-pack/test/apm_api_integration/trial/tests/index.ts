@@ -5,13 +5,10 @@
  */
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { registerMochaHooksForSnapshots } from '../../common/match_snapshot';
 
 export default function observabilityApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('APM specs (trial)', function () {
     this.tags('ciGroup1');
-
-    registerMochaHooksForSnapshots();
 
     describe('Services', function () {
       loadTestFile(require.resolve('./services/annotations'));
@@ -40,6 +37,7 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
       loadTestFile(require.resolve('./csm/page_views.ts'));
       loadTestFile(require.resolve('./csm/js_errors.ts'));
       loadTestFile(require.resolve('./csm/has_rum_data.ts'));
+      loadTestFile(require.resolve('./csm/page_load_dist.ts'));
     });
   });
 }

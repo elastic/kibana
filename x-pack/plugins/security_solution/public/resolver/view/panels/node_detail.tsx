@@ -220,9 +220,9 @@ const NodeDetailView = memo(function ({
           } as HTMLAttributes<HTMLElement>
         }
         descriptionProps={
-          { 'data-test-subj': 'resolver:node-detail:entry-description' } as HTMLAttributes<
-            HTMLElement
-          >
+          {
+            'data-test-subj': 'resolver:node-detail:entry-description',
+          } as HTMLAttributes<HTMLElement>
         }
         compressed
         listItems={processInfoEntry}

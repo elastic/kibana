@@ -210,6 +210,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         ) {
           return (
             <EuiCallOut
+              data-test-subj="mlTotalFeatureImportanceNotCalculatedCallout"
               size="s"
               title={
                 <FormattedMessage
@@ -223,6 +224,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
           // or is it because the data is uniform
           return (
             <EuiCallOut
+              data-test-subj="mlNoTotalFeatureImportanceCallout"
               size="s"
               title={
                 <FormattedMessage
@@ -272,34 +274,36 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
           noDataCallOut ? (
             noDataCallOut
           ) : (
-            <Chart
-              size={{
-                width: '100%',
-                height: chartHeight,
-              }}
-            >
-              <Settings rotation={90} theme={theme} showLegend={showLegend} />
+            <div data-test-subj="mlTotalFeatureImportanceChart">
+              <Chart
+                size={{
+                  width: '100%',
+                  height: chartHeight,
+                }}
+              >
+                <Settings rotation={90} theme={theme} showLegend={showLegend} />
 
-              <Axis
-                id="x-axis"
-                title={i18n.translate(
-                  'xpack.ml.dataframe.analytics.exploration.featureImportanceXAxisTitle',
-                  {
-                    defaultMessage: 'Feature importance average magnitude',
-                  }
-                )}
-                position={Position.Bottom}
-                tickFormat={tickFormatter}
-              />
-              <Axis id="y-axis" title="" position={Position.Left} />
-              <BarSeries
-                id="magnitude"
-                xScaleType={ScaleType.Ordinal}
-                yScaleType={ScaleType.Linear}
-                data={plotData}
-                {...barSeriesSpec}
-              />
-            </Chart>
+                <Axis
+                  id="x-axis"
+                  title={i18n.translate(
+                    'xpack.ml.dataframe.analytics.exploration.featureImportanceXAxisTitle',
+                    {
+                      defaultMessage: 'Feature importance average magnitude',
+                    }
+                  )}
+                  position={Position.Bottom}
+                  tickFormat={tickFormatter}
+                />
+                <Axis id="y-axis" title="" position={Position.Left} />
+                <BarSeries
+                  id="magnitude"
+                  xScaleType={ScaleType.Ordinal}
+                  yScaleType={ScaleType.Linear}
+                  data={plotData}
+                  {...barSeriesSpec}
+                />
+              </Chart>
+            </div>
           )
         }
       />

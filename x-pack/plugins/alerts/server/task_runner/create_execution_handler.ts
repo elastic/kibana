@@ -75,6 +75,7 @@ export function createExecutionHandler({
             spaceId,
             tags,
             alertInstanceId,
+            alertActionGroup: actionGroup,
             context,
             actionParams: action.params,
             state,

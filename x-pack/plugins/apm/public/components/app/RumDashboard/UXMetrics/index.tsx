@@ -33,7 +33,7 @@ export function UXMetrics() {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/web-core-vitals',
+          endpoint: 'GET /api/apm/rum-client/web-core-vitals',
           params: {
             query: uxQuery,
           },

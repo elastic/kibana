@@ -176,17 +176,18 @@ export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
 }))<{
   className?: string;
   eventType: Omit<TimelineEventsType, 'all'>;
+  isExpanded: boolean;
   isBuildingBlockType: boolean;
   showLeftBorder: boolean;
 }>`
   border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorLightShade};
-  ${({ theme, eventType, isBuildingBlockType, showLeftBorder }) =>
+  ${({ theme, eventType, showLeftBorder }) =>
     showLeftBorder
       ? `border-left: 4px solid
     ${eventType === 'raw' ? theme.eui.euiColorLightShade : theme.eui.euiColorWarning}`
       : ''};
-  ${({ isBuildingBlockType, showLeftBorder }) =>
+  ${({ isBuildingBlockType }) =>
     isBuildingBlockType
       ? `background: repeating-linear-gradient(127deg, rgba(245, 167, 0, 0.2), rgba(245, 167, 0, 0.2) 1px, rgba(245, 167, 0, 0.05) 2px, rgba(245, 167, 0, 0.05) 10px);`
       : ''};
@@ -194,6 +195,16 @@ export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
   &:hover {
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
   }
+
+  ${({ isExpanded, theme }) =>
+    isExpanded &&
+    `
+    background: ${theme.eui.euiTableSelectedColor};
+
+    &:hover {
+      ${theme.eui.euiTableHoverSelectedColor}
+    }
+  `}
 `;
 
 export const EventsTrData = styled.div.attrs(({ className = '' }) => ({

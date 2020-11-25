@@ -17,6 +17,7 @@ import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
 import { ObservabilityPluginSetupDeps } from '../plugin';
+import { HasDataContextProvider } from '../context/has_data_context';
 import { Breadcrumbs, routes } from '../routes';
 
 const observabilityLabelBreadcrumb = {
@@ -39,14 +40,15 @@ function App() {
           const Wrapper = () => {
             const { core } = usePluginContext();
 
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             const breadcrumb = [observabilityLabelBreadcrumb, ...route.breadcrumb];
             useEffect(() => {
               core.chrome.setBreadcrumbs(breadcrumb);
               core.chrome.docTitle.change(getTitleFromBreadCrumbs(breadcrumb));
             }, [core, breadcrumb]);
 
-            const { query, path: pathParams } = useRouteParams(route.params);
-            return route.handler({ query, path: pathParams });
+            const params = useRouteParams(path);
+            return route.handler(params);
           };
           return <Route key={path} path={path} exact={true} component={Wrapper} />;
         })}
@@ -78,7 +80,9 @@ export const renderApp = (
           <EuiThemeProvider darkMode={isDarkMode}>
             <i18nCore.Context>
               <RedirectAppLinks application={core.application}>
-                <App />
+                <HasDataContextProvider>
+                  <App />
+                </HasDataContextProvider>
               </RedirectAppLinks>
             </i18nCore.Context>
           </EuiThemeProvider>

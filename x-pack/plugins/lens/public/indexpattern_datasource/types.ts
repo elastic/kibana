@@ -5,7 +5,7 @@
  */
 
 import { IFieldType } from 'src/plugins/data/common';
-import { IndexPatternColumn } from './operations';
+import { IndexPatternColumn, IncompleteColumn } from './operations';
 import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
 
 export interface IndexPattern {
@@ -35,6 +35,8 @@ export interface IndexPatternLayer {
   columns: Record<string, IndexPatternColumn>;
   // Each layer is tied to the index pattern that created it
   indexPatternId: string;
+  // Partial columns represent the temporary invalid states
+  incompleteColumns?: Record<string, IncompleteColumn>;
 }
 
 export interface IndexPatternPersistedState {

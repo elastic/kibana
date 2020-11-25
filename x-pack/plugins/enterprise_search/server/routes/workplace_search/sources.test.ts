@@ -328,10 +328,8 @@ describe('sources routes', () => {
       const mockRequest = {
         params: { id: '123' },
         body: {
-          query: {
-            content_source: {
-              name: 'foo',
-            },
+          content_source: {
+            name: 'foo',
           },
         },
       };
@@ -406,12 +404,12 @@ describe('sources routes', () => {
       mockRouter.callRoute(mockRequest);
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/pre_content_sources/zendesk',
+        path: '/ws/sources/zendesk/prepare',
       });
     });
   });
 
-  describe('PUT /api/workplace_search/sources/{id}/searchable', () => {
+  describe('PUT /api/workplace_search/account/sources/{id}/searchable', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -421,7 +419,7 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/sources/{id}/searchable',
+        path: '/api/workplace_search/account/sources/{id}/searchable',
         payload: 'body',
       });
 
@@ -732,10 +730,8 @@ describe('sources routes', () => {
       const mockRequest = {
         params: { id: '123' },
         body: {
-          query: {
-            content_source: {
-              name: 'foo',
-            },
+          content_source: {
+            name: 'foo',
           },
         },
       };
@@ -810,7 +806,7 @@ describe('sources routes', () => {
       mockRouter.callRoute(mockRequest);
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/pre_content_sources/zendesk',
+        path: '/ws/org/sources/zendesk/prepare',
       });
     });
   });
