@@ -24,7 +24,13 @@ import type { IndexPattern } from '../../../data/public';
 
 export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
   const { indexPatterns } = getData();
-  const data: Data[] = Array.isArray(spec.data) ? spec.data : [spec.data];
+  let data: Data[] = [];
+
+  if (Array.isArray(spec.data)) {
+    data = spec.data;
+  } else if (spec.data) {
+    data = [spec.data];
+  }
 
   return (
     await Promise.all(
