@@ -19,15 +19,14 @@
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
-export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common']);
-
+export default function ({ getService }: PluginFunctionalProviderContext) {
   const browser = getService('browser');
+  const deployment = getService('deployment');
   const testSubjects = getService('testSubjects');
 
   describe.skip('top nav', function describeIndexTests() {
     before(async () => {
-      const url = `${PageObjects.common.getHostPort()}/app/kbn_tp_top_nav/`;
+      const url = `${deployment.getHostPort()}/app/kbn_tp_top_nav/`;
       await browser.get(url);
     });
 
