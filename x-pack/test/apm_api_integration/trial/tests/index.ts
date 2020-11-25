@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { registerMochaHooksForSnapshots } from '../../common/match_snapshot';
 
