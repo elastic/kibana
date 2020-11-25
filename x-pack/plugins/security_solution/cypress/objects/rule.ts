@@ -265,4 +265,5 @@ export const editedRule = {
   ...existingRule,
   severity: 'Medium',
   description: 'Edited Rule description',
+  tags: [...existingRule.tags, 'edited'],
 };

@@ -54,9 +54,9 @@ describe('<UseField />', () => {
 
     setup();
 
-    const [{ data }] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-      OnUpdateHandler
-    >;
+    const [{ data }] = onFormData.mock.calls[
+      onFormData.mock.calls.length - 1
+    ] as Parameters<OnUpdateHandler>;
 
     expect(data.internal).toEqual({
       name: 'John',
