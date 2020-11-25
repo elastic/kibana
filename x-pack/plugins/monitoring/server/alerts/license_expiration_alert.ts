@@ -16,8 +16,14 @@ import {
   AlertMessageLinkToken,
   AlertInstanceState,
   LegacyAlert,
+<<<<<<< HEAD
 } from './types';
 import { AlertInstance } from '../../../alerts/server';
+=======
+  CommonAlertParams,
+} from '../../common/types/alerts';
+import { AlertExecutorOptions, AlertInstance } from '../../../alerts/server';
+>>>>>>> dfa9c75021f... Fix issues with show_license_expiration (#84361)
 import {
   INDEX_ALERTS,
   ALERT_LICENSE_EXPIRATION,
@@ -63,6 +69,13 @@ export class LicenseExpirationAlert extends BaseAlert {
     AlertingDefaults.ALERT_TYPE.context.action,
     AlertingDefaults.ALERT_TYPE.context.actionPlain,
   ];
+
+  protected async execute(options: AlertExecutorOptions): Promise<any> {
+    if (!this.config.ui.show_license_expiration) {
+      return;
+    }
+    return await super.execute(options);
+  }
 
   protected async fetchData(
     params: CommonAlertParams,
