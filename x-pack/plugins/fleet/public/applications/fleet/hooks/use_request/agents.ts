@@ -26,6 +26,8 @@ import {
   PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
   PostBulkAgentUpgradeResponse,
+  PostNewAgentActionRequest,
+  PostNewAgentActionResponse,
 } from '../../types';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
@@ -138,6 +140,19 @@ export function sendPostAgentUpgrade(
 ) {
   return sendRequest<PostAgentUpgradeResponse>({
     path: agentRouteService.getUpgradePath(agentId),
+    method: 'post',
+    body,
+    ...options,
+  });
+}
+
+export function sendPostAgentAction(
+  agentId: string,
+  body: PostNewAgentActionRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<PostNewAgentActionResponse>({
+    path: agentRouteService.getCreateActionPath(agentId),
     method: 'post',
     body,
     ...options,

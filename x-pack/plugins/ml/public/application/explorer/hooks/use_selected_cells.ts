@@ -5,21 +5,21 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useUrlState } from '../../util/url_state';
 import { SWIMLANE_TYPE } from '../explorer_constants';
 import { AppStateSelectedCells } from '../explorer_utils';
+import { ExplorerAppState } from '../../../../common/types/ml_url_generator';
 
 export const useSelectedCells = (
-  appState: any,
-  setAppState: ReturnType<typeof useUrlState>[1]
+  appState: ExplorerAppState,
+  setAppState: (update: Partial<ExplorerAppState>) => void
 ): [AppStateSelectedCells | undefined, (swimlaneSelectedCells: AppStateSelectedCells) => void] => {
   // keep swimlane selection, restore selectedCells from AppState
   const selectedCells = useMemo(() => {
     return appState?.mlExplorerSwimlane?.selectedType !== undefined
       ? {
           type: appState.mlExplorerSwimlane.selectedType,
-          lanes: appState.mlExplorerSwimlane.selectedLanes,
-          times: appState.mlExplorerSwimlane.selectedTimes,
+          lanes: appState.mlExplorerSwimlane.selectedLanes!,
+          times: appState.mlExplorerSwimlane.selectedTimes!,
           showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
           viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
         }
@@ -29,7 +29,9 @@ export const useSelectedCells = (
 
   const setSelectedCells = useCallback(
     (swimlaneSelectedCells: AppStateSelectedCells) => {
-      const mlExplorerSwimlane = { ...appState.mlExplorerSwimlane };
+      const mlExplorerSwimlane = {
+        ...appState.mlExplorerSwimlane,
+      } as ExplorerAppState['mlExplorerSwimlane'];
 
       if (swimlaneSelectedCells !== undefined) {
         swimlaneSelectedCells.showTopFieldValues = false;
@@ -51,13 +53,13 @@ export const useSelectedCells = (
         mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
         mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
         mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
-        setAppState('mlExplorerSwimlane', mlExplorerSwimlane);
+        setAppState({ mlExplorerSwimlane });
       } else {
         delete mlExplorerSwimlane.selectedType;
         delete mlExplorerSwimlane.selectedLanes;
         delete mlExplorerSwimlane.selectedTimes;
         delete mlExplorerSwimlane.showTopFieldValues;
-        setAppState('mlExplorerSwimlane', mlExplorerSwimlane);
+        setAppState({ mlExplorerSwimlane });
       }
     },
     [appState?.mlExplorerSwimlane, selectedCells, setAppState]
