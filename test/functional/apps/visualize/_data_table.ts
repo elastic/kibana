@@ -190,14 +190,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectField('UTC time');
       await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
-      const data = await PageObjects.visChart.getTableVisData();
-      expect(data.trim().split('\n')).to.be.eql([
-        '2015-09-20',
-        '4,757',
-        '2015-09-21',
-        '4,614',
-        '2015-09-22',
-        '4,633',
+      const data = await PageObjects.visChart.getTableVisContent();
+      expect(data).to.be.eql([
+        ['2015-09-20', '4,757'],
+        ['2015-09-21', '4,614'],
+        ['2015-09-22', '4,633'],
       ]);
       const header = await PageObjects.visChart.getTableVisHeader();
       expect(header).to.contain('UTC time');

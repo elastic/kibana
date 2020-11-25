@@ -300,6 +300,13 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return await testSubjects.find('tbvChartContainer>visNoResult');
     }
 
+    /**
+     * This function returns the text displayed in the Table Vis header
+     */
+    public async getTableVisHeader() {
+      return await testSubjects.getVisibleText('dataGridHeader');
+    }
+
     public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
       const headers = await dataGrid.getHeaders();
       const fieldColumnIndex = headers.indexOf(fieldName);
