@@ -28,6 +28,7 @@ test('skips non string parameters', () => {
     alertParams: {
       foo: 'test',
     },
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -57,6 +58,7 @@ test('missing parameters get emptied out', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -81,6 +83,7 @@ test('context parameters are passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -104,6 +107,7 @@ test('state parameters are passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -127,6 +131,7 @@ test('alertId is passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -150,6 +155,7 @@ test('alertName is passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -173,6 +179,7 @@ test('tags is passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -195,6 +202,7 @@ test('undefined tags is passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -218,6 +226,7 @@ test('empty tags is passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -241,6 +250,7 @@ test('spaceId is passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -264,6 +274,7 @@ test('alertInstanceId is passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -287,6 +298,7 @@ test('alertActionGroup is passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
@@ -311,6 +323,7 @@ test('date is passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   const dateAfter = Date.now();
   const dateVariable = new Date(`${result.message}`).valueOf();
@@ -336,6 +349,7 @@ test('works recursively', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -363,6 +377,7 @@ test('works recursively with arrays', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertParams: {},
+    actionTypeId: '.server-log',
   });
   expect(result).toMatchInlineSnapshot(`
         Object {
@@ -373,4 +388,33 @@ test('works recursively with arrays', () => {
           },
         }
     `);
+});
+
+test('injects viewInKibanaPath when actionTypeId is .email', () => {
+  const actionParams = {
+    body: {
+      message: 'State: "{{state.value}}", Context: "{{context.value}}"',
+    },
+  };
+  const result = transformActionParams({
+    actionParams,
+    state: { value: 'state' },
+    context: { value: 'context' },
+    alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertParams: {},
+    actionTypeId: '.email',
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "body": Object {
+        "message": "State: \\"state\\", Context: \\"context\\"",
+      },
+      "viewInKibanaPath": "/app/management/insightsAndAlerting/triggersActions/alert/1",
+    }
+  `);
 });

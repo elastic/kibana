@@ -80,6 +80,7 @@ export function createExecutionHandler({
             actionParams: action.params,
             state,
             alertParams,
+            actionTypeId: action.actionTypeId,
           }),
         };
       });

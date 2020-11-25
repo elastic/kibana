@@ -24,6 +24,7 @@ interface TransformActionParamsOptions {
   alertParams: AlertTypeParams;
   state: AlertInstanceState;
   context: AlertInstanceContext;
+  actionTypeId: string;
 }
 
 export function transformActionParams({
@@ -37,6 +38,7 @@ export function transformActionParams({
   actionParams,
   state,
   alertParams,
+  actionTypeId,
 }: TransformActionParamsOptions): AlertActionParams {
   const result = cloneDeepWith(actionParams, (value: unknown) => {
     if (!isString(value)) return;
@@ -58,6 +60,12 @@ export function transformActionParams({
     };
     return Mustache.render(value, variables);
   });
+
+  // Inject viewInKibanaPath if action type is email. This is used by the email action
+  // type to inject a "View in Kibana" URL in the email's footer.
+  if (actionTypeId === '.email') {
+    result.viewInKibanaPath = `/app/management/insightsAndAlerting/triggersActions/alert/${alertId}`;
+  }
 
   // The return type signature for `cloneDeep()` ends up taking the return
   // type signature for the customizer, but rather than pollute the customizer

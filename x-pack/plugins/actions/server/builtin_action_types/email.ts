@@ -15,6 +15,10 @@ import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
+// TODO: Change once https://github.com/elastic/kibana/issues/45815 is complete
+const KIBANA_ROOT = 'https://localhost:5601';
+const DEFAULT_VIEW_IN_KIBANA_PATH = '/';
+
 export type EmailActionType = ActionType<
   ActionTypeConfigType,
   ActionTypeSecretsType,
@@ -101,6 +105,7 @@ const ParamsSchema = schema.object(
     bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
     subject: schema.string(),
     message: schema.string(),
+    viewInKibanaPath: schema.string({ defaultValue: DEFAULT_VIEW_IN_KIBANA_PATH }),
   },
   {
     validate: validateParams,
@@ -183,7 +188,7 @@ async function executor(
     },
     content: {
       subject: params.subject,
-      message: params.message,
+      message: params.message + `\n\n--\n\n${getViewInKibanaMessage(params.viewInKibanaPath)}`,
     },
     proxySettings: execOptions.proxySettings,
     hasAuth: config.hasAuth,
@@ -229,4 +234,23 @@ function getSecureValue(secure: boolean | null | undefined, port: number | null)
   if (secure != null) return secure;
   if (port === 465) return true;
   return false;
+}
+
+function getViewInKibanaMessage(viewInKibanaPath: string) {
+  if (viewInKibanaPath === DEFAULT_VIEW_IN_KIBANA_PATH) {
+    return i18n.translate('xpack.actions.builtin.email.defaultViewInKibanaMessage', {
+      defaultMessage:
+        'This message was sent by a Kibana connector. [Click here]({link}) to open Kibana.',
+      values: {
+        link: KIBANA_ROOT,
+      },
+    });
+  }
+  return i18n.translate('xpack.actions.builtin.email.customViewInKibanaMessage', {
+    defaultMessage:
+      'This message was sent by a Kibana connector. [Click here]({link}) to view in Kibana.',
+    values: {
+      link: KIBANA_ROOT + viewInKibanaPath,
+    },
+  });
 }
