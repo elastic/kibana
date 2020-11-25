@@ -16,14 +16,8 @@ import {
   AlertMessageLinkToken,
   AlertInstanceState,
   LegacyAlert,
-<<<<<<< HEAD
 } from './types';
 import { AlertInstance } from '../../../alerts/server';
-=======
-  CommonAlertParams,
-} from '../../common/types/alerts';
-import { AlertExecutorOptions, AlertInstance } from '../../../alerts/server';
->>>>>>> dfa9c75021f... Fix issues with show_license_expiration (#84361)
 import {
   INDEX_ALERTS,
   ALERT_LICENSE_EXPIRATION,
