@@ -157,6 +157,52 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
   }
 
   /**
+   * Sub page object to manipulate the assign flyout.
+   */
+  class TagAssignmentFlyout {
+    constructor(private readonly page: TagManagementPage) {}
+
+    async open(tagNames: string[]) {
+      for (const tagName of tagNames) {
+        await this.page.selectTagByName(tagName);
+      }
+      await this.page.clickOnAction('assign');
+      await this.waitUntilResultsAreLoaded();
+    }
+
+    /**
+     * Click on the 'cancel' button in the assign flyout.
+     */
+    async clickCancel() {
+      await testSubjects.click('assignFlyoutCancelButton');
+      await this.page.waitUntilTableIsLoaded();
+    }
+
+    /**
+     * Click on the 'cancel' button in the assign flyout.
+     */
+    async clickConfirm() {
+      await testSubjects.click('assignFlyoutConfirmButton');
+      await this.waitForFlyoutToClose();
+      await this.page.waitUntilTableIsLoaded();
+    }
+
+    async clickOnResult(type: string, id: string) {
+      await testSubjects.click(`assign-result-${type}-${id}`);
+    }
+
+    async waitUntilResultsAreLoaded() {
+      return find.waitForDeletedByCssSelector(
+        '*[data-test-subj="assignFlyoutResultList"] .euiLoadingSpinner'
+      );
+    }
+
+    async waitForFlyoutToClose() {
+      return testSubjects.waitForDeleted('assignFlyoutResultList');
+    }
+  }
+
+  /**
    * Tag management page object.
    *
    * @remarks All the table manipulation helpers makes the assumption
@@ -165,6 +211,7 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
    */
   class TagManagementPage {
     public readonly tagModal = new TagModal(this);
+    public readonly assignFlyout = new TagAssignmentFlyout(this);
 
     /**
      * Navigate to the tag management section, by accessing the management app, then clicking
@@ -253,7 +300,7 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
       const tagRow = await this.getRowByName(tagName);
       if (tagRow) {
         const editButton = await testSubjects.findDescendant('tagsTableAction-edit', tagRow);
-        editButton?.click();
+        await editButton?.click();
       }
     }
 
@@ -369,6 +416,11 @@ export function TagManagementPageProvider({ getService, getPageObjects }: FtrPro
     async getDisplayedTagsInfo() {
       const rows = await testSubjects.findAll('tagsTableRow');
       return Promise.all([...rows.map(parseTableRow)]);
+    }
+
+    async getDisplayedTagInfo(tagName: string) {
+      const rows = await this.getDisplayedTagsInfo();
+      return rows.find((row) => row.name === tagName);
     }
 
     /**

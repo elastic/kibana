@@ -41,12 +41,17 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
     return {
       label: result.title,
       key,
+      'data-test-subj': `assign-result-${result.type}-${result.id}`,
       checked: checkedStatus,
       previously: checkedStatus,
       showIcons: false,
       prepend: (
         <>
-          <EuiIcon className="tagAssignFlyout__selectionIcon" type={statusIcon} />
+          <EuiIcon
+            className={`tagAssignFlyout__selectionIcon status-${overriddenStatus}`}
+            type={statusIcon}
+            data-test-subj="assign-result-status"
+          />
           <EuiIcon type={result.icon ?? 'empty'} title={result.type} />
         </>
       ),
@@ -57,6 +62,7 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
   return (
     <EuiSelectable<ResultInternals>
       height="full"
+      data-test-subj="assignFlyoutResultList"
       options={options}
       allowExclusions={false}
       isLoading={isLoading}
