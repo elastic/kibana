@@ -9,38 +9,36 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiText, EuiTitle, EuiAccordion, EuiTextColor, EuiHorizontalRule } from '@elastic/eui';
 
-import { RepairSavedObjectResponse } from '../../../../common/types/saved_objects';
+import { SyncSavedObjectResponse } from '../../../../common/types/saved_objects';
 
-export const RepairList: FC<{ repairItems: RepairSavedObjectResponse | null }> = ({
-  repairItems,
-}) => {
-  if (repairItems === null) {
+export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ syncItems }) => {
+  if (syncItems === null) {
     return null;
   }
 
   return (
     <>
-      <SavedObjectsCreated repairItems={repairItems} />
+      <SavedObjectsCreated syncItems={syncItems} />
 
       <EuiHorizontalRule margin="l" />
 
-      <SavedObjectsDeleted repairItems={repairItems} />
+      <SavedObjectsDeleted syncItems={syncItems} />
 
       <EuiHorizontalRule margin="l" />
 
-      <DatafeedsAdded repairItems={repairItems} />
+      <DatafeedsAdded syncItems={syncItems} />
 
       <EuiHorizontalRule margin="l" />
 
-      <DatafeedsRemoved repairItems={repairItems} />
+      <DatafeedsRemoved syncItems={syncItems} />
 
       <EuiHorizontalRule margin="l" />
     </>
   );
 };
 
-const SavedObjectsCreated: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repairItems }) => {
-  const items = Object.keys(repairItems.savedObjectsCreated);
+const SavedObjectsCreated: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
+  const items = Object.keys(syncItems.savedObjectsCreated);
 
   const title = (
     <>
@@ -48,7 +46,7 @@ const SavedObjectsCreated: FC<{ repairItems: RepairSavedObjectResponse }> = ({ r
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
-              id="xpack.ml.management.repairSavedObjectsFlyout.savedObjectsCreated.title"
+              id="xpack.ml.management.syncSavedObjectsFlyout.savedObjectsCreated.title"
               defaultMessage="Missing saved objects ({count})"
               values={{ count: items.length }}
             />
@@ -59,7 +57,7 @@ const SavedObjectsCreated: FC<{ repairItems: RepairSavedObjectResponse }> = ({ r
         <p>
           <EuiTextColor color="subdued">
             <FormattedMessage
-              id="xpack.ml.management.repairSavedObjectsFlyout.savedObjectsCreated.description"
+              id="xpack.ml.management.syncSavedObjectsFlyout.savedObjectsCreated.description"
               defaultMessage="If there are jobs that do not have accompanying saved objects, they will be created in the current space."
             />
           </EuiTextColor>
@@ -67,11 +65,11 @@ const SavedObjectsCreated: FC<{ repairItems: RepairSavedObjectResponse }> = ({ r
       </EuiText>
     </>
   );
-  return <RepairItem id="savedObjectsCreated" title={title} items={items} />;
+  return <SyncItem id="savedObjectsCreated" title={title} items={items} />;
 };
 
-const SavedObjectsDeleted: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repairItems }) => {
-  const items = Object.keys(repairItems.savedObjectsDeleted);
+const SavedObjectsDeleted: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
+  const items = Object.keys(syncItems.savedObjectsDeleted);
 
   const title = (
     <>
@@ -79,7 +77,7 @@ const SavedObjectsDeleted: FC<{ repairItems: RepairSavedObjectResponse }> = ({ r
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
-              id="xpack.ml.management.repairSavedObjectsFlyout.savedObjectsDeleted.title"
+              id="xpack.ml.management.syncSavedObjectsFlyout.savedObjectsDeleted.title"
               defaultMessage="Unmatched saved objects ({count})"
               values={{ count: items.length }}
             />
@@ -90,7 +88,7 @@ const SavedObjectsDeleted: FC<{ repairItems: RepairSavedObjectResponse }> = ({ r
         <p>
           <EuiTextColor color="subdued">
             <FormattedMessage
-              id="xpack.ml.management.repairSavedObjectsFlyout.savedObjectsDeleted.description"
+              id="xpack.ml.management.syncSavedObjectsFlyout.savedObjectsDeleted.description"
               defaultMessage="If there are saved objects that do not have an accompanying job, they will be deleted."
             />
           </EuiTextColor>
@@ -98,11 +96,11 @@ const SavedObjectsDeleted: FC<{ repairItems: RepairSavedObjectResponse }> = ({ r
       </EuiText>
     </>
   );
-  return <RepairItem id="savedObjectsDeleted" title={title} items={items} />;
+  return <SyncItem id="savedObjectsDeleted" title={title} items={items} />;
 };
 
-const DatafeedsAdded: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repairItems }) => {
-  const items = Object.keys(repairItems.datafeedsAdded);
+const DatafeedsAdded: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
+  const items = Object.keys(syncItems.datafeedsAdded);
 
   const title = (
     <>
@@ -110,7 +108,7 @@ const DatafeedsAdded: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repair
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
-              id="xpack.ml.management.repairSavedObjectsFlyout.datafeedsAdded.title"
+              id="xpack.ml.management.syncSavedObjectsFlyout.datafeedsAdded.title"
               defaultMessage="Saved objects with missing datafeeds ({count})"
               values={{ count: items.length }}
             />
@@ -121,7 +119,7 @@ const DatafeedsAdded: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repair
         <p>
           <EuiTextColor color="subdued">
             <FormattedMessage
-              id="xpack.ml.management.repairSavedObjectsFlyout.datafeedsAdded.description"
+              id="xpack.ml.management.syncSavedObjectsFlyout.datafeedsAdded.description"
               defaultMessage="If there are saved objects that are missing the datafeed ID for anomaly detection jobs, the ID will be added."
             />
           </EuiTextColor>
@@ -129,11 +127,11 @@ const DatafeedsAdded: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repair
       </EuiText>
     </>
   );
-  return <RepairItem id="datafeedsAdded" title={title} items={items} />;
+  return <SyncItem id="datafeedsAdded" title={title} items={items} />;
 };
 
-const DatafeedsRemoved: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repairItems }) => {
-  const items = Object.keys(repairItems.datafeedsRemoved);
+const DatafeedsRemoved: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
+  const items = Object.keys(syncItems.datafeedsRemoved);
 
   const title = (
     <>
@@ -141,7 +139,7 @@ const DatafeedsRemoved: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repa
         <h3>
           <EuiTextColor color={items.length ? 'default' : 'subdued'}>
             <FormattedMessage
-              id="xpack.ml.management.repairSavedObjectsFlyout.datafeedsRemoved.title"
+              id="xpack.ml.management.syncSavedObjectsFlyout.datafeedsRemoved.title"
               defaultMessage="Saved objects with unmatched datafeed IDs ({count})"
               values={{ count: items.length }}
             />
@@ -152,7 +150,7 @@ const DatafeedsRemoved: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repa
         <p>
           <EuiTextColor color="subdued">
             <FormattedMessage
-              id="xpack.ml.management.repairSavedObjectsFlyout.datafeedsRemoved.description"
+              id="xpack.ml.management.syncSavedObjectsFlyout.datafeedsRemoved.description"
               defaultMessage="If there are saved objects that use a datafeed that does not exist, they will be deleted."
             />
           </EuiTextColor>
@@ -160,10 +158,10 @@ const DatafeedsRemoved: FC<{ repairItems: RepairSavedObjectResponse }> = ({ repa
       </EuiText>
     </>
   );
-  return <RepairItem id="datafeedsRemoved" title={title} items={items} />;
+  return <SyncItem id="datafeedsRemoved" title={title} items={items} />;
 };
 
-const RepairItem: FC<{ id: string; title: JSX.Element; items: string[] }> = ({
+const SyncItem: FC<{ id: string; title: JSX.Element; items: string[] }> = ({
   id,
   title,
   items,
