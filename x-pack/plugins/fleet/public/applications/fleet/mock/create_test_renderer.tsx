@@ -71,8 +71,7 @@ export const createTestRendererMock = (): TestRenderer => {
           ...options,
         });
       });
-      // @ts-ignore
-      return renderResponse;
+      return renderResponse!;
     },
   };
 
