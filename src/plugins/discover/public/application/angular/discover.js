@@ -23,7 +23,7 @@ import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { getState, splitState, createSearchSessionRestorationDataProvider } from './discover_state';
+import { createSearchSessionRestorationDataProvider, getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../inspector/public';
 import {
@@ -59,15 +59,15 @@ import { popularizeField } from '../helpers/popularize_field';
 import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { SEARCH_SESSION_ID_QUERY_PARAM, DISCOVER_APP_URL_GENERATOR } from '../../url_generator';
-import { removeQueryParam, getQueryParams } from '../../../../kibana_utils/public';
+import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
+import { getQueryParams, removeQueryParam } from '../../../../kibana_utils/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
 } from '../../../common';
-import { resolveIndexPattern, loadIndexPattern } from '../helpers/resolve_index_pattern';
+import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
 import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
