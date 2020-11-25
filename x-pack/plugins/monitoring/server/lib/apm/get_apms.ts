@@ -5,68 +5,79 @@
  */
 
 import moment from 'moment';
-import { upperFirst, get } from 'lodash';
+import { upperFirst } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+// @ts-ignore
 import { createApmQuery } from './create_apm_query';
+// @ts-ignore
 import { calculateRate } from '../calculate_rate';
+// @ts-ignore
 import { getDiffCalculation } from './_apm_stats';
+import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../types';
 
-export function handleResponse(response, start, end) {
-  const hits = get(response, 'hits.hits', []);
+export function handleResponse(response: ElasticsearchResponse, start: number, end: number) {
   const initial = { ids: new Set(), beats: [] };
-  const { beats } = hits.reduce((accum, hit) => {
-    const stats = get(hit, '_source.beats_stats');
-    const uuid = get(stats, 'beat.uuid');
+  const { beats } = response.hits?.hits.reduce((accum: any, hit: ElasticsearchResponseHit) => {
+    const stats = hit._source.beats_stats;
+    if (!stats) {
+      return accum;
+    }
+
+    const earliestStats = hit.inner_hits.earliest.hits.hits[0]._source.beats_stats;
+    if (!earliestStats) {
+      return accum;
+    }
+
+    const uuid = stats?.beat.uuid;
 
     // skip this duplicated beat, newer one was already added
     if (accum.ids.has(uuid)) {
       return accum;
     }
-
     // add another beat summary
     accum.ids.add(uuid);
-    const earliestStats = get(hit, 'inner_hits.earliest.hits.hits[0]._source.beats_stats');
 
     //  add the beat
     const rateOptions = {
-      hitTimestamp: get(stats, 'timestamp'),
-      earliestHitTimestamp: get(earliestStats, 'timestamp'),
+      hitTimestamp: stats.timestamp,
+      earliestHitTimestamp: earliestStats.timestamp,
       timeWindowMin: start,
       timeWindowMax: end,
     };
 
     const { rate: bytesSentRate } = calculateRate({
-      latestTotal: get(stats, 'metrics.libbeat.output.write.bytes'),
-      earliestTotal: get(earliestStats, 'metrics.libbeat.output.write.bytes'),
+      latestTotal: stats.metrics.libbeat.output.write.bytes,
+      earliestTotal: earliestStats.metrics.libbeat.output.write.bytes,
       ...rateOptions,
     });
 
     const { rate: totalEventsRate } = calculateRate({
-      latestTotal: get(stats, 'metrics.libbeat.pipeline.events.total'),
-      earliestTotal: get(earliestStats, 'metrics.libbeat.pipeline.events.total'),
+      latestTotal: stats.metrics.libbeat.pipeline.events.total,
+      earliestTotal: earliestStats.metrics.libbeat.pipeline.events.total,
       ...rateOptions,
     });
 
-    const errorsWrittenLatest = get(stats, 'metrics.libbeat.output.write.errors');
-    const errorsWrittenEarliest = get(earliestStats, 'metrics.libbeat.output.write.errors');
-    const errorsReadLatest = get(stats, 'metrics.libbeat.output.read.errors');
-    const errorsReadEarliest = get(earliestStats, 'metrics.libbeat.output.read.errors');
+    const errorsWrittenLatest = stats.metrics.libbeat.output.write.errors;
+    const errorsWrittenEarliest = earliestStats.metrics.libbeat.output.write.errors;
+    const errorsReadLatest = stats.metrics.libbeat.output.read.errors;
+    const errorsReadEarliest = earliestStats.metrics.libbeat.output.read.errors;
     const errors = getDiffCalculation(
       errorsWrittenLatest + errorsReadLatest,
       errorsWrittenEarliest + errorsReadEarliest
     );
 
     accum.beats.push({
-      uuid: get(stats, 'beat.uuid'),
-      name: get(stats, 'beat.name'),
-      type: upperFirst(get(stats, 'beat.type')),
-      output: upperFirst(get(stats, 'metrics.libbeat.output.type')),
+      uuid: stats.beat.uuid,
+      name: stats.beat.name,
+      type: upperFirst(stats.beat.type),
+      output: upperFirst(stats.metrics.libbeat.output.type),
       total_events_rate: totalEventsRate,
       bytes_sent_rate: bytesSentRate,
       errors,
-      memory: get(stats, 'metrics.beat.memstats.memory_alloc'),
-      version: get(stats, 'beat.version'),
-      time_of_last_event: get(hit, '_source.timestamp'),
+      memory: stats.metrics.beat.memstats.memory_alloc,
+      version: stats.beat.version,
+      time_of_last_event: hit._source.timestamp,
     });
 
     return accum;
@@ -75,7 +86,7 @@ export function handleResponse(response, start, end) {
   return beats;
 }
 
-export async function getApms(req, apmIndexPattern, clusterUuid) {
+export async function getApms(req: any, apmIndexPattern: string, clusterUuid: string) {
   checkParam(apmIndexPattern, 'apmIndexPattern in getBeats');
 
   const config = req.server.config();

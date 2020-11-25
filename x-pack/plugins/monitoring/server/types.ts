@@ -107,3 +107,63 @@ export interface LegacyRequest {
     };
   };
 }
+
+export interface ElasticsearchResponse {
+  hits?: {
+    hits: ElasticsearchResponseHit[];
+    total: {
+      value: number;
+    };
+  };
+}
+
+export interface ElasticsearchResponseHit {
+  _source: ElasticsearchSource;
+  inner_hits: {
+    [field: string]: {
+      hits: {
+        hits: ElasticsearchResponseHit[];
+        total: {
+          value: number;
+        };
+      };
+    };
+  };
+}
+
+export interface ElasticsearchSource {
+  timestamp: string;
+  beats_stats?: {
+    timestamp: string;
+    beat: {
+      uuid: string;
+      name: string;
+      type: string;
+      version: string;
+    };
+    metrics: {
+      beat: {
+        memstats: {
+          memory_alloc: number;
+        };
+      };
+      libbeat: {
+        output: {
+          type: string;
+          write: {
+            bytes: number;
+            errors: number;
+          };
+          read: {
+            errors: number;
+          };
+        };
+        pipeline: {
+          events: {
+            total: number;
+          };
+        };
+      };
+    };
+  };
+}
