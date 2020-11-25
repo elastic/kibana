@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
+  const deployment = getService('deployment');
   const setupMode = getService('monitoringSetupMode');
   const PageObjects = getPageObjects(['common', 'console']);
 
@@ -39,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not show metricbeat migration if cloud', async () => {
-        const isCloud = await PageObjects.common.isCloud();
+        const isCloud = await deployment.isCloud();
         expect(await setupMode.doesMetricbeatMigrationTooltipAppear()).to.be(!isCloud);
       });
 
