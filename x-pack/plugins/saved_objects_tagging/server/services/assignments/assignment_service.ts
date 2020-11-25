@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
+import { uniq, difference } from 'lodash';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   SavedObjectsClientContract,
@@ -24,6 +24,7 @@ import { updateTagReferences } from '../../../common/references';
 import { tagSavedObjectTypeName } from '../../../common';
 import { taggableTypes } from '../../../common/constants';
 import { getUpdatableSavedObjectTypes } from './get_updatable_types';
+import { AssignmentError } from './errors';
 
 interface AssignmentServiceOptions {
   request: KibanaRequest;
@@ -57,20 +58,22 @@ export class AssignmentService {
     const searchedTypes = types
       ? types.filter((type) => taggableTypes.includes(type))
       : taggableTypes;
-    const updatableTypes = await getUpdatableSavedObjectTypes({
+    const assignableTypes = await getUpdatableSavedObjectTypes({
       request: this.request,
       types: searchedTypes,
       authorization: this.authorization,
     });
     const searchFields = uniq(
-      updatableTypes.map((name) => this.typeRegistry.getType(name)?.management!.defaultSearchField!)
+      assignableTypes.map(
+        (name) => this.typeRegistry.getType(name)?.management!.defaultSearchField!
+      )
     );
 
     const findResponse = await this.soClient.find({
       page: 1,
       perPage: maxResults,
       search,
-      type: updatableTypes,
+      type: assignableTypes,
       searchFields,
     });
 
@@ -80,10 +83,31 @@ export class AssignmentService {
   }
 
   public async updateTagAssignments({ tags, assign, unassign }: UpdateTagAssignmentsOptions) {
+    const updatedTypes = uniq([...assign, ...unassign].map(({ type }) => type));
+
+    const untaggableTypes = difference(updatedTypes, taggableTypes);
+    if (untaggableTypes.length) {
+      throw new AssignmentError(`Unsupported type [${untaggableTypes.join(', ')}]`, 400);
+    }
+
+    const assignableTypes = await getUpdatableSavedObjectTypes({
+      request: this.request,
+      types: taggableTypes,
+      authorization: this.authorization,
+    });
+    const forbiddenTypes = difference(updatedTypes, assignableTypes);
+    if (forbiddenTypes.length) {
+      throw new AssignmentError(`Forbidden type [${forbiddenTypes.join(', ')}]`, 403);
+    }
+
     const { saved_objects: objects } = await this.soClient.bulkGet([...assign, ...unassign]);
 
-    // TODO: filter types based on taggable status
-    // TODO: filter types based on user permissions
+    // if we failed to fetch any object, just halt and throw an error
+    const firstObjWithError = objects.find((obj) => !!obj.error);
+    if (firstObjWithError) {
+      const firstError = firstObjWithError.error!;
+      throw new AssignmentError(firstError.message, firstError.statusCode);
+    }
 
     const toAssign = new Set(assign.map(getKey));
     const toUnassign = new Set(unassign.map(getKey));

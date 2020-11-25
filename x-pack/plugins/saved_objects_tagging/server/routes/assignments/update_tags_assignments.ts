@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
-import { taggableTypes } from '../../../common/constants';
+import { AssignmentError } from '../../services';
 
 export const registerUpdateTagsAssignmentsRoute = (router: IRouter) => {
   router.post(
@@ -44,18 +44,28 @@ export const registerUpdateTagsAssignmentsRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
-      const { assignmentService } = ctx.tags!;
-      const { tags, assign, unassign } = req.body;
+      try {
+        const { assignmentService } = ctx.tags!;
+        const { tags, assign, unassign } = req.body;
 
-      await assignmentService.updateTagAssignments({
-        tags,
-        assign: assign ?? [],
-        unassign: unassign ?? [],
-      });
+        await assignmentService.updateTagAssignments({
+          tags,
+          assign: assign ?? [],
+          unassign: unassign ?? [],
+        });
 
-      return res.ok({
-        body: { taggableTypes },
-      });
+        return res.ok({
+          body: {},
+        });
+      } catch (e) {
+        if (e instanceof AssignmentError) {
+          return res.customError({
+            statusCode: e.status,
+            body: e.message,
+          });
+        }
+        throw e;
+      }
     })
   );
 };

@@ -5,4 +5,4 @@
  */
 
 export { TagsClient, savedObjectToTag, TagValidationError } from './tags';
-export { IAssignmentService, AssignmentService } from './assignments';
+export { IAssignmentService, AssignmentService, AssignmentError } from './assignments';
