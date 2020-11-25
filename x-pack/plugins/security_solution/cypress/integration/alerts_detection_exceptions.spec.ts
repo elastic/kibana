@@ -112,7 +112,6 @@ describe('Exceptions', () => {
 
       goToExceptionsTab();
       removeException();
-      esArchiverLoad('auditbeat_for_exceptions3');
       refreshPage();
       goToAlertsTab();
       waitForTheRuleToBeExecuted();
@@ -170,7 +169,6 @@ describe('Exceptions', () => {
 
       goToExceptionsTab();
       removeException();
-      esArchiverLoad('auditbeat_for_exceptions3');
       goToAlertsTab();
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
