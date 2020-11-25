@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import moment from 'moment';
+import { utc } from 'moment';
+import { ReqFacade, VisPayload } from '../../..';
 
-export const getTimerange = (req) => {
+export const getTimerange = (req: ReqFacade<VisPayload>) => {
   const { min, max } = req.payload.timerange;
 
   return {
-    from: moment.utc(min),
-    to: moment.utc(max),
+    from: utc(min),
+    to: utc(max),
   };
-};
-
-export const getTimerangeDuration = (req) => {
-  const { from, to } = getTimerange(req);
-
-  return moment.duration(to.valueOf() - from.valueOf(), 'ms');
 };
