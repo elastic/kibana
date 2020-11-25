@@ -140,6 +140,7 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   unusedFromRoot('elasticsearch.startupTimeout'),
   rename('cpu.cgroup.path.override', 'ops.cGroupOverrides.cpuPath'),
   rename('cpuacct.cgroup.path.override', 'ops.cGroupOverrides.cpuAcctPath'),
+  rename('server.cors', 'server.cors.enabled'),
   configPathDeprecation,
   dataPathDeprecation,
   rewriteBasePathDeprecation,
