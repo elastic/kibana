@@ -7856,7 +7856,7 @@ babel-plugin-react-docgen@^4.1.0:
     react-docgen "^5.0.0"
     recast "^0.14.7"
 
-babel-plugin-require-context-hook@^1.0.0, "babel-plugin-require-context-hook@npm:babel-plugin-require-context-hook-babel7@1.0.0":
+babel-plugin-require-context-hook@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-require-context-hook-babel7/-/babel-plugin-require-context-hook-babel7-1.0.0.tgz#1273d4cee7e343d0860966653759a45d727e815d"
   integrity sha512-kez0BAN/cQoyO1Yu1nre1bQSYZEF93Fg7VQiBHFfMWuaZTy7vJSTT4FY68FwHTYG53Nyt0A7vpSObSVxwweQeQ==
@@ -14287,10 +14287,10 @@ gaze@^1.0.0, gaze@^1.1.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@^1.20.0:
-  version "1.20.0"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.20.0.tgz#cd16edb177b88e31affcb54b18a238cae88950a7"
-  integrity sha512-5nVF4ixR+ZGhVsc4udnVihA9RmSlO6guPV1d2HqxYsgAOUNh0HfzxbzG7E49w4ilXq/CSu87x9yWvrsOstrADQ==
+geckodriver@^1.21.0:
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.21.0.tgz#1f04780ebfb451ffd08fa8fddc25cc26e37ac4a2"
+  integrity sha512-NamdJwGIWpPiafKQIvGman95BBi/SBqHddRXAnIEpFNFCFToTW0sEA0nUckMKCBNn1DVIcLfULfyFq/sTn9bkA==
   dependencies:
     adm-zip "0.4.16"
     bluebird "3.7.2"
@@ -18007,15 +18007,6 @@ joi@13.x.x, joi@^13.5.2:
     isemail "3.x.x"
     topo "3.x.x"
 
-joi@14.x.x:
-  version "14.3.1"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-14.3.1.tgz#164a262ec0b855466e0c35eea2a885ae8b6c703c"
-  integrity sha512-LQDdM+pkOrpAn4Lp+neNIFV3axv1Vna3j38bisbQhETPMANYRbFJFUyOZcOClYvM/hppMhGWuKSFEK9vjrB+bQ==
-  dependencies:
-    hoek "6.x.x"
-    isemail "3.x.x"
-    topo "3.x.x"
-
 joi@^17.1.1:
   version "17.2.1"
   resolved "https://registry.yarnpkg.com/joi/-/joi-17.2.1.tgz#e5140fdf07e8fecf9bc977c2832d1bdb1e3f2a0a"
@@ -20308,7 +20299,7 @@ moment-timezone@^0.5.27:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.28.0.tgz#cdfe73ce01327cee6537b0fafac2e0f21a237d75"
   integrity sha512-Z5KOjYmnHyd/ukynmFd/WwyXHd7L4J9vTI/nn5Ap9AVUgaAE15VvQ9MOGmJJygEUklupqIrFnor/tjTwRU+tQw==
 
-monaco-editor@~0.17.0:
+monaco-editor@^0.17.0:
   version "0.17.1"
   resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.17.1.tgz#8fbe96ca54bfa75262706e044f8f780e904aa45c"
   integrity sha512-JAc0mtW7NeO+0SwPRcdkfDbWLgkqL9WfP1NbpP9wNASsW6oWqgZqNIWt4teymGjZIXTElx3dnQmUYHmVrJ7HxA==
@@ -22269,14 +22260,6 @@ pnp-webpack-plugin@1.6.4:
   dependencies:
     ts-pnp "^1.1.6"
 
-podium@^3.1.2:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/podium/-/podium-3.2.0.tgz#2a7c579ddd5408f412d014c9ffac080c41d83477"
-  integrity sha512-rbwvxwVkI6gRRlxZQ1zUeafrpGxZ7QPHIheinehAvGATvGIPfWRkaTeWedc5P4YjXJXEV8ZbBxPtglNylF9hjw==
-  dependencies:
-    hoek "6.x.x"
-    joi "14.x.x"
-
 polished@^1.9.2:
   version "1.9.2"
   resolved "https://registry.yarnpkg.com/polished/-/polished-1.9.2.tgz#d705cac66f3a3ed1bd38aad863e2c1e269baf6b6"
@@ -23372,7 +23355,7 @@ react-moment-proptypes@^1.7.0:
   dependencies:
     moment ">=1.6.0"
 
-react-monaco-editor@~0.27.0:
+react-monaco-editor@^0.27.0:
   version "0.27.0"
   resolved "https://registry.yarnpkg.com/react-monaco-editor/-/react-monaco-editor-0.27.0.tgz#2dbf47b8fd4d8e4763934051f07291d9b128bb89"
   integrity sha512-Im40xO4DuFlQ6kVcSBHC+p70fD/5aErUy1uyLT9RZ4nlehn6BOPpwmcw/2IN/LfMvy8X4WmLuuvrNftBZLH+vA==
