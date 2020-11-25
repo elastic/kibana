@@ -49,21 +49,6 @@ interface IndexPatternSelectState {
   searchValue: string | undefined;
 }
 
-const getIndexPatterns = async (
-  client: SavedObjectsClientContract,
-  search: string,
-  fields: string[]
-) => {
-  const resp = await client.find({
-    type: 'index-pattern',
-    fields,
-    search: `${search}*`,
-    searchFields: ['title'],
-    perPage: 100,
-  });
-  return resp.savedObjects;
-};
-
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default class IndexPatternSelect extends Component<IndexPatternSelectInternalProps> {
