@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renderDataMappingPopover Should disable toggle when field is not backed by geojson source 1`] = `
-<OrdinalFieldMetaPopover
+<OrdinalDataMappingPopover
   fieldMetaOptions={
     Object {
       "isEnabled": true,
@@ -15,7 +15,7 @@ exports[`renderDataMappingPopover Should disable toggle when field is not backed
 `;
 
 exports[`renderDataMappingPopover Should enable toggle when field is backed by geojson-source 1`] = `
-<OrdinalFieldMetaPopover
+<OrdinalDataMappingPopover
   fieldMetaOptions={
     Object {
       "isEnabled": true,
