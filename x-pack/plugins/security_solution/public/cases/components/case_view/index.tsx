@@ -16,7 +16,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
-import * as i18n from './translations';
+import { CaseStatus } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
@@ -41,6 +41,7 @@ import {
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
+import * as i18n from './translations';
 
 interface Props {
   caseId: string;
@@ -159,7 +160,7 @@ export const CaseComponent = React.memo<CaseProps>(
             });
             break;
           case 'status':
-            const statusUpdate = getTypedPayload<string>(value);
+            const statusUpdate = getTypedPayload<CaseStatus>(value);
             if (caseData.status !== value) {
               updateCaseProperty({
                 fetchCaseUserActions,
@@ -241,11 +242,11 @@ export const CaseComponent = React.memo<CaseProps>(
       [onUpdateField]
     );
 
-    const toggleStatusCase = useCallback(
-      (nextStatus) =>
+    const changeStatus = useCallback(
+      (status: CaseStatus) =>
         onUpdateField({
           key: 'status',
-          value: nextStatus ? 'closed' : 'open',
+          value: status,
         }),
       [onUpdateField]
     );
@@ -308,9 +309,6 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const isSelected = useMemo(() => caseStatusData.isSelected, [caseStatusData]);
-    const handleToggleStatusCase = useCallback(() => {
-      toggleStatusCase(!isSelected);
-    }, [toggleStatusCase, isSelected]);
 
     return (
       <>
@@ -335,7 +333,7 @@ export const CaseComponent = React.memo<CaseProps>(
               disabled={!userCanCrud}
               isLoading={isLoading && updateKey === 'status'}
               onRefresh={handleRefresh}
-              toggleStatusCase={handleToggleStatusCase}
+              onStatusChanged={changeStatus}
               {...caseStatusData}
             />
           </HeaderPage>
@@ -369,7 +367,7 @@ export const CaseComponent = React.memo<CaseProps>(
                           isDisabled={!userCanCrud}
                           isLoading={isLoading && updateKey === 'status'}
                           fill={caseStatusData.isSelected}
-                          onClick={handleToggleStatusCase}
+                          onClick={() => {}}
                         >
                           {caseStatusData.buttonLabel}
                         </EuiButton>

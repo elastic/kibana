@@ -10,6 +10,7 @@ import {
   UserAction,
   CaseConnector,
   CommentType,
+  CaseStatus,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector } from '../../../../case/common/api';
@@ -57,7 +58,7 @@ export interface Case {
   createdBy: ElasticUser;
   description: string;
   externalService: CaseExternalService | null;
-  status: string;
+  status: CaseStatus;
   tags: string[];
   title: string;
   totalComment: number;

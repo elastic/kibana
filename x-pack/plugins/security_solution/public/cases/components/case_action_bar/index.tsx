@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import styled, { css } from 'styled-components';
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -15,11 +14,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { CaseStatus } from '../../../../../case/common/api';
 import * as i18n from '../case_view/translations';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { CaseViewActions } from '../case_view/actions';
 import { Case } from '../../containers/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
+import { StatusContextMenu } from './status_context_menu';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -39,9 +40,9 @@ interface CaseActionBarProps {
   isLoading: boolean;
   isSelected: boolean;
   onRefresh: () => void;
-  status: string;
+  status: CaseStatus;
   title: string;
-  toggleStatusCase: (status: boolean) => void;
+  onStatusChanged: (status: CaseStatus) => void;
   value: string | null;
 }
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
@@ -55,12 +56,9 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   onRefresh,
   status,
   title,
-  toggleStatusCase,
+  onStatusChanged,
   value,
 }) => {
-  const handleToggleStatusCase = useCallback(() => {
-    toggleStatusCase(!isSelected);
-  }, [toggleStatusCase, isSelected]);
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
@@ -69,9 +67,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             <EuiFlexItem grow={false}>
               <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                <EuiBadge color={badgeColor} data-test-subj="case-view-status">
-                  {status}
-                </EuiBadge>
+                <StatusContextMenu currentStatus={status} onStatusChanged={onStatusChanged} />
               </EuiDescriptionListDescription>
             </EuiFlexItem>
             <EuiFlexItem>

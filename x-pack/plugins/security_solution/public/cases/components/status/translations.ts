@@ -17,3 +17,7 @@ export const IN_PROGRESS = i18n.translate('xpack.securitySolution.case.status.in
 export const CLOSED = i18n.translate('xpack.securitySolution.case.status.closed', {
   defaultMessage: 'Closed',
 });
+
+export const STATUS_ICON_ARIA = i18n.translate('xpack.securitySolution.case.status.iconAria', {
+  defaultMessage: 'Change status',
+});

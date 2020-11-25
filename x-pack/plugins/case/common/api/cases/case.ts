@@ -21,6 +21,8 @@ const CaseStatusRt = rt.union([
   rt.literal('closed'),
 ]);
 
+export const caseStatuses = CaseStatusRt.types.map((type) => type.value);
+
 const CaseBasicRt = rt.type({
   connector: CaseConnectorRt,
   description: rt.string,
