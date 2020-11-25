@@ -40,7 +40,7 @@ export class IndexMgmtUIPlugin {
     plugins: SetupDependencies
   ): IndexManagementPluginSetup {
     const { http, notifications } = coreSetup;
-    const { ingestManager, usageCollection, management } = plugins;
+    const { fleet, usageCollection, management } = plugins;
 
     httpService.setup(http);
     notificationService.setup(notifications);
@@ -58,7 +58,7 @@ export class IndexMgmtUIPlugin {
           uiMetricService: this.uiMetricService,
           extensionsService: this.extensionsService,
         };
-        return mountManagementSection(coreSetup, usageCollection, services, params, ingestManager);
+        return mountManagementSection(coreSetup, usageCollection, services, params, fleet);
       },
     });
 

@@ -6,7 +6,7 @@
 
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { getTransactionCharts } from '../selectors/chartSelectors';
+import { getTransactionCharts } from '../selectors/chart_selectors';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
 

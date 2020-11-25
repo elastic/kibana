@@ -85,10 +85,9 @@ function validateQuery(query: Query) {
   return true;
 }
 
-export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
-  GeoThresholdAlertParams,
-  AlertsContextValue
->> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
+export const GeoThresholdAlertTypeExpression: React.FunctionComponent<
+  AlertTypeParamsExpressionProps<GeoThresholdAlertParams, AlertsContextValue>
+> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
   const {
     index,
     indexId,
@@ -326,7 +325,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
                 }
                 fullWidth
                 onChange={(e) => setAlertParams('trackingEvent', e.target.value)}
-                options={[conditionOptions[0]]} // TODO: Make all options avab. before merge
+                options={conditionOptions}
               />
             </div>
           </EuiFormRow>

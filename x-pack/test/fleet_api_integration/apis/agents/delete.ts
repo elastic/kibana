@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
     fleet_user: {
       permissions: {
         feature: {
-          ingestManager: ['read'],
+          fleet: ['read'],
         },
         spaces: ['*'],
       },
@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     fleet_admin: {
       permissions: {
         feature: {
-          ingestManager: ['all'],
+          fleet: ['all'],
         },
         spaces: ['*'],
       },

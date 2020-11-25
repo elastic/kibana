@@ -27,6 +27,7 @@ export const errorsRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;
@@ -51,6 +52,7 @@ export const errorGroupsRoute = createRoute({
     }),
     query: t.intersection([uiFiltersRt, rangeRt]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName, groupId } = context.params.path;
@@ -72,6 +74,7 @@ export const errorDistributionRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;

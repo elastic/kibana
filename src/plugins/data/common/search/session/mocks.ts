@@ -27,5 +27,12 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     restore: jest.fn(),
     getSessionId: jest.fn(),
     getSession$: jest.fn(() => new BehaviorSubject(undefined).asObservable()),
+    isStored: jest.fn(),
+    isRestore: jest.fn(),
+    save: jest.fn(),
+    get: jest.fn(),
+    find: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
   };
 }

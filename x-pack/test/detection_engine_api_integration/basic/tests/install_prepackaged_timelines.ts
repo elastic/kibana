@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
         await deleteAllTimelines(es);
       });
 
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .set('kbn-xsrf', 'true')
             .expect(200);
           return body.timelines_not_installed === 0;
-        });
+        }, `${TIMELINE_PREPACKAGED_URL}/_status`);
 
         const { body } = await supertest
           .put(TIMELINE_PREPACKAGED_URL)

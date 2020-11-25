@@ -14,6 +14,7 @@ import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_trans
 
 export const observabilityOverviewHasDataRoute = createRoute({
   endpoint: 'GET /api/apm/observability_overview/has_data',
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return await hasData({ setup });
@@ -25,6 +26,7 @@ export const observabilityOverviewRoute = createRoute({
   params: t.type({
     query: t.intersection([rangeRt, t.type({ bucketSize: t.string })]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { bucketSize } = context.params.query;

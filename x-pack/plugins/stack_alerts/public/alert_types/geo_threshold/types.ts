@@ -9,6 +9,7 @@ import { Query } from '../../../../../../src/plugins/data/common';
 export enum TrackingEvent {
   entered = 'entered',
   exited = 'exited',
+  crossed = 'crossed',
 }
 
 export interface GeoThresholdAlertParams {

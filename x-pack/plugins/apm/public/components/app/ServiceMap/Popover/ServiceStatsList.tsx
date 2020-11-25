@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import {
   asDuration,
   asPercent,
-  tpmUnit,
+  asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { ServiceNodeStats } from '../../../../../common/service_map';
 
@@ -55,31 +55,25 @@ export function ServiceStatsList({
           defaultMessage: 'Req. per minute (avg.)',
         }
       ),
-      description: isNumber(transactionStats.avgRequestsPerMinute)
-        ? `${transactionStats.avgRequestsPerMinute.toFixed(2)} ${tpmUnit(
-            'request'
-          )}`
-        : null,
+      description: asTransactionRate(transactionStats.avgRequestsPerMinute),
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {
         defaultMessage: 'Trans. error rate (avg.)',
       }),
-      description: isNumber(avgErrorRate) ? asPercent(avgErrorRate, 1) : null,
+      description: asPercent(avgErrorRate, 1, ''),
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverStat', {
         defaultMessage: 'CPU usage (avg.)',
       }),
-      description: isNumber(avgCpuUsage) ? asPercent(avgCpuUsage, 1) : null,
+      description: asPercent(avgCpuUsage, 1, ''),
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.avgMemoryUsagePopoverStat', {
         defaultMessage: 'Memory usage (avg.)',
       }),
-      description: isNumber(avgMemoryUsage)
-        ? asPercent(avgMemoryUsage, 1)
-        : null,
+      description: asPercent(avgMemoryUsage, 1, ''),
     },
   ];
 

@@ -26,7 +26,6 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useAppDependencies } from '../../../app_context';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -41,6 +40,7 @@ import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
+import { useKibana } from '../../../../common/lib/kibana';
 import { alertReducer } from '../../alert_form/alert_reducer';
 
 type AlertDetailsProps = {
@@ -63,8 +63,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const history = useHistory();
   const {
     http,
-    toastNotifications,
-    capabilities,
+    notifications: { toasts },
+    application: { capabilities },
     alertTypeRegistry,
     actionTypeRegistry,
     uiSettings,
@@ -73,10 +73,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     data,
     setBreadcrumbs,
     chrome,
-  } = useAppDependencies();
+  } = useKibana().services;
   const [{}, dispatch] = useReducer(alertReducer, { alert });
-  const setInitialAlert = (key: string, value: any) => {
-    dispatch({ command: { type: 'setAlert' }, payload: { key, value } });
+  const setInitialAlert = (value: Alert) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
   // Set breadcrumb and page title
@@ -158,7 +158,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                             http,
                             actionTypeRegistry,
                             alertTypeRegistry,
-                            toastNotifications,
+                            toastNotifications: toasts,
                             uiSettings,
                             docLinks,
                             charts,
@@ -172,7 +172,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           <AlertEdit
                             initialAlert={alert}
                             onClose={() => {
-                              setInitialAlert('alert', alert);
+                              setInitialAlert(alert);
                               setEditFlyoutVisibility(false);
                             }}
                           />

@@ -19,6 +19,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
     clickIncludeStatsSwitch: () => void;
+    clickIncludeManagedSwitch: () => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
@@ -78,6 +79,11 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
   const clickIncludeStatsSwitch = () => {
     const { find } = testBed;
     find('includeStatsSwitch').simulate('click');
+  };
+
+  const clickIncludeManagedSwitch = () => {
+    const { find } = testBed;
+    find('includeManagedSwitch').simulate('click');
   };
 
   const clickReloadButton = () => {
@@ -183,6 +189,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       goToDataStreamsList,
       clickEmptyPromptIndexTemplateLink,
       clickIncludeStatsSwitch,
+      clickIncludeManagedSwitch,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
@@ -202,8 +209,8 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
   };
 };
 
-export const createDataStreamPayload = (name: string): DataStream => ({
-  name,
+export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataStream => ({
+  name: 'my-data-stream',
   timeStampField: { name: '@timestamp' },
   indices: [
     {
@@ -216,6 +223,7 @@ export const createDataStreamPayload = (name: string): DataStream => ({
   indexTemplateName: 'indexTemplate',
   storageSize: '1b',
   maxTimeStamp: 420,
+  ...dataStream,
 });
 
 export const createDataStreamBackingIndex = (indexName: string, dataStreamName: string) => ({

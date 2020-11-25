@@ -19,12 +19,9 @@
 
 import { Injectable, IDirectiveFactory, IScope, IAttributes, IController } from 'angular';
 
-export const createTopNavDirective: Injectable<IDirectiveFactory<
-  IScope,
-  JQLite,
-  IAttributes,
-  IController
->>;
+export const createTopNavDirective: Injectable<
+  IDirectiveFactory<IScope, JQLite, IAttributes, IController>
+>;
 export const createTopNavHelper: (
   options: unknown
 ) => Injectable<IDirectiveFactory<IScope, JQLite, IAttributes, IController>>;

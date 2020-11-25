@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`encryption key generation interactive should write to disk partial keys 1`] = `
+Array [
+  Array [
+    "/foo/bar",
+    "#xpack.encryptedSavedObjects.encryptionKey
+    #Used to encrypt stored objects such as dashboards and visualizations
+    #https://www.elastic.co/guide/en/kibana/current/xpack-security-secure-saved-objects.html#xpack-security-secure-saved-objects
+
+#xpack.reporting.encryptionKey
+    #Used to encrypt saved reports
+    #https://www.elastic.co/guide/en/kibana/current/reporting-settings-kb.html#general-reporting-settings
+
+#xpack.security.encryptionKey
+    #Used to encrypt session information
+    #https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html#security-session-and-cookie-settings
+
+xpack.encryptedSavedObjects.encryptionKey: random-key
+",
+  ],
+]
+`;

@@ -70,9 +70,10 @@ export const useHostsKpiAuthentications = ({
       : null
   );
 
-  const [hostsKpiAuthenticationsResponse, setHostsKpiAuthenticationsResponse] = useState<
-    HostsKpiAuthenticationsArgs
-  >({
+  const [
+    hostsKpiAuthenticationsResponse,
+    setHostsKpiAuthenticationsResponse,
+  ] = useState<HostsKpiAuthenticationsArgs>({
     authenticationsSuccess: 0,
     authenticationsSuccessHistogram: [],
     authenticationsFailure: 0,

@@ -14,9 +14,9 @@ export interface OpenRuntimeFieldEditorProps {
   defaultValue?: RuntimeField;
 }
 
-export const getRuntimeFieldEditorLoader = (coreSetup: CoreSetup) => async (): Promise<
-  LoadEditorResponse
-> => {
+export const getRuntimeFieldEditorLoader = (
+  coreSetup: CoreSetup
+) => async (): Promise<LoadEditorResponse> => {
   const { RuntimeFieldEditorFlyoutContent } = await import('./components');
   const [core] = await coreSetup.getStartServices();
   const { uiSettings, overlays, docLinks } = core;
