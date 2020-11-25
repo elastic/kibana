@@ -37,8 +37,7 @@ export class TelemetryDiagTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              this.logger.debug('Telemetry Diagnostic task is running');
-              this.logger.debug(`Sender pointer: ${this.sender}`);
+              await this.runTask(taskInstance.id);
             },
             cancel: async () => {},
           };
@@ -66,5 +65,22 @@ export class TelemetryDiagTask {
 
   private getTaskId = (): string => {
     return `${TelemetryDiagTaskConstants.TYPE}:${TelemetryDiagTaskConstants.VERSION}`;
+  };
+
+  public runTask = async (taskId: string) => {
+    // Check that this task is current
+    if (taskId !== this.getTaskId()) {
+      // old task, return
+      this.logger.debug(`Outdated task running: ${taskId}`);
+      return;
+    }
+
+    const isOptedIn = this.sender.isTelemetryOptedIn();
+    if (!isOptedIn) {
+      this.logger.debug(`Telemetry is not opted-in.`);
+      return;
+    }
+
+    this.logger.debug(`Task for Telemetry Diagnostics is running`);
   };
 }
