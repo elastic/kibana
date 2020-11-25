@@ -36,25 +36,28 @@ export class LicenseService {
     return this.observable;
   }
 
-  public isGoldPlus(): boolean | undefined {
+  public isGoldPlus(): boolean {
     return (
-      this.licenseInformation?.isAvailable &&
-      this.licenseInformation?.isActive &&
-      this.licenseInformation?.hasAtLeast('gold')
+      (this.licenseInformation?.isAvailable &&
+        this.licenseInformation?.isActive &&
+        this.licenseInformation?.hasAtLeast('gold')) ||
+      false
     );
   }
-  public isPlatinumPlus(): boolean | undefined {
+  public isPlatinumPlus(): boolean {
     return (
-      this.licenseInformation?.isAvailable &&
-      this.licenseInformation?.isActive &&
-      this.licenseInformation?.hasAtLeast('platinum')
+      (this.licenseInformation?.isAvailable &&
+        this.licenseInformation?.isActive &&
+        this.licenseInformation?.hasAtLeast('platinum')) ||
+      false
     );
   }
-  public isEnterprise(): boolean | undefined {
+  public isEnterprise(): boolean {
     return (
-      this.licenseInformation?.isAvailable &&
-      this.licenseInformation?.isActive &&
-      this.licenseInformation?.hasAtLeast('enterprise')
+      (this.licenseInformation?.isAvailable &&
+        this.licenseInformation?.isActive &&
+        this.licenseInformation?.hasAtLeast('enterprise')) ||
+      false
     );
   }
 }
