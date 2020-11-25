@@ -35,7 +35,7 @@ import './_searchable_snapshot_field.scss';
 
 const { emptyField } = fieldValidators;
 
-interface Props {
+export interface Props {
   phase: 'hot' | 'cold';
 }
 

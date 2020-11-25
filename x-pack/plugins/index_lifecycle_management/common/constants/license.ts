@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchableSnapshotField as ViewComponent } from './searchable_snapshot_field';
+import { LicenseType } from '../../../licensing/common/types';
 
-import { withLicenseCheck } from './with_license_check';
+export const MIN_PLUGIN_LICENSE: LicenseType = 'basic';
 
-export const SearchableSnapshotField = withLicenseCheck(ViewComponent);
+// TODO: change to enterprise
+export const MIN_SEARCHABLE_SNAPSHOT_LICENSE: LicenseType = 'platinum';

@@ -7,13 +7,19 @@
 import React, { createContext, ReactChild, useContext } from 'react';
 import { ApplicationStart } from 'kibana/public';
 
+import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';
 import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
+
+import { useKibana } from '../../../shared_imports';
 
 export interface EditPolicyContextValue {
   isNewPolicy: boolean;
   policy: SerializedPolicy;
   existingPolicies: PolicyFromES[];
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  license: {
+    canUseSearchableSnapshot: () => boolean;
+  };
   policyName?: string;
 }
 
@@ -26,7 +32,22 @@ export const EditPolicyContextProvider = ({
   value: EditPolicyContextValue;
   children: ReactChild;
 }) => {
-  return <EditPolicyContext.Provider value={value}>{children}</EditPolicyContext.Provider>;
+  const {
+    services: { license },
+  } = useKibana();
+
+  return (
+    <EditPolicyContext.Provider
+      value={{
+        ...value,
+        license: {
+          canUseSearchableSnapshot: () => license.hasAtLeast(MIN_SEARCHABLE_SNAPSHOT_LICENSE),
+        },
+      }}
+    >
+      {children}
+    </EditPolicyContext.Provider>
+  );
 };
 
 export const useEditPolicyContext = () => {

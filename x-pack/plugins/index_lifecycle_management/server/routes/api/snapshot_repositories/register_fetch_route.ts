@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';
 import { ListSnapshotReposResponse } from '../../../../common/types';
 
 import { RouteDependencies } from '../../../types';
@@ -16,8 +17,7 @@ export const registerFetchRoute = ({ router, license }: RouteDependencies) => {
   router.get(
     { path: addBasePath('/snapshot_repositories'), validate: false },
     async (ctx, request, response) => {
-      // TODO: change to enterprise
-      if (!license.isCurrentLicenseAtLeast('platinum')) {
+      if (!license.isCurrentLicenseAtLeast(MIN_SEARCHABLE_SNAPSHOT_LICENSE)) {
         return response.forbidden({
           body: i18n.translate('xpack.indexLifecycleMgmt.searchSnapshotlicenseCheckErrorMessage', {
             defaultMessage:
