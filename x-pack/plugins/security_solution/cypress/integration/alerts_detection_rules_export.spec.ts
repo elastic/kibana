@@ -38,7 +38,7 @@ describe('Export rules', () => {
     exportFirstRule();
     cy.wait('@export').then(({ response }) => {
       cy.readFile(EXPECTED_EXPORTED_RULE_FILE_PATH).then(($expectedExportedJson) => {
-        cy.wrap(response.body).should('eql', $expectedExportedJson);
+        cy.wrap(response!.body).should('eql', $expectedExportedJson);
       });
     });
   });

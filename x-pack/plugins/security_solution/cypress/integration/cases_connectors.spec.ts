@@ -35,7 +35,7 @@ describe('Cases connectors', () => {
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
       cy.get(TOASTER).should('not.exist');
 
-      const bodyJSON = JSON.parse(response.body as string);
+      const bodyJSON = JSON.parse(response!.body as string);
 
       selectLastConnectorCreated(bodyJSON.id);
 

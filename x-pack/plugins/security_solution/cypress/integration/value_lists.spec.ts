@@ -169,8 +169,8 @@ describe('value lists', () => {
         cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
-            expect(response.body).to.contain(lineOne);
-            expect(response.body).to.contain(lineTwo);
+            expect(response!.body).to.contain(lineOne);
+            expect(response!.body).to.contain(lineTwo);
           });
         });
       });
@@ -184,8 +184,8 @@ describe('value lists', () => {
         cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
-            expect(response.body).to.contain(lineOne);
-            expect(response.body).to.contain(lineTwo);
+            expect(response!.body).to.contain(lineOne);
+            expect(response!.body).to.contain(lineTwo);
           });
         });
       });
@@ -199,8 +199,8 @@ describe('value lists', () => {
         cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
-            expect(response.body).to.contain(lineOne);
-            expect(response.body).to.contain(lineTwo);
+            expect(response!.body).to.contain(lineOne);
+            expect(response!.body).to.contain(lineTwo);
           });
         });
       });
@@ -214,7 +214,7 @@ describe('value lists', () => {
         cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne] = list.split('\n');
-            expect(response.body).to.contain(lineOne);
+            expect(response!.body).to.contain(lineOne);
           });
         });
       });

@@ -63,7 +63,7 @@ describe('Timelines', () => {
     addNameToTimeline(timeline.title);
 
     const { response } = await cy.wait('@timeline').promisify();
-    const timelineId = JSON.parse(response.body as string).data.persistTimeline.timeline
+    const timelineId = JSON.parse(response!.body as string).data.persistTimeline.timeline
       .savedObjectId;
 
     addDescriptionToTimeline(timeline.description);

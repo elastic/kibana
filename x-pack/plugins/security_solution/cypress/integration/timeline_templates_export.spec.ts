@@ -33,7 +33,7 @@ describe('Export timelines', () => {
 
     cy.wait('@timeline').then(({ response }) => {
       const { savedObjectId: timelineId, templateTimelineId } = JSON.parse(
-        response.body as string
+        response!.body as string
       ).data.persistTimeline.timeline;
 
       exportTimeline(timelineId);
