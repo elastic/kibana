@@ -17,14 +17,25 @@
  * under the License.
  */
 
-import type { ShardsResponse } from 'elasticsearch';
+import moment from 'moment';
+import { getTimerange } from './get_timerange';
+import { ReqFacade, VisPayload } from '../../..';
 
-/**
- * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
- * not included as it is already included in `successful`.
- * @internal
- */
-export function getTotalLoaded({ total, failed, successful }: ShardsResponse) {
-  const loaded = failed + successful;
-  return { total, loaded };
-}
+describe('getTimerange(req)', () => {
+  test('should return a moment object for to and from', () => {
+    const req = ({
+      payload: {
+        timerange: {
+          min: '2017-01-01T00:00:00Z',
+          max: '2017-01-01T01:00:00Z',
+        },
+      },
+    } as unknown) as ReqFacade<VisPayload>;
+    const { from, to } = getTimerange(req);
+
+    expect(moment.isMoment(from)).toEqual(true);
+    expect(moment.isMoment(to)).toEqual(true);
+    expect(moment.utc('2017-01-01T00:00:00Z').isSame(from)).toEqual(true);
+    expect(moment.utc('2017-01-01T01:00:00Z').isSame(to)).toEqual(true);
+  });
+});

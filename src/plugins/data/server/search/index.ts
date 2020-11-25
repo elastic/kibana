@@ -19,6 +19,6 @@
 
 export * from './types';
 export * from './es_search';
-export { usageProvider, SearchUsage } from './collectors';
+export { usageProvider, SearchUsage, searchUsageObserver } from './collectors';
 export * from './aggs';
 export { shimHitsTotal } from './routes';

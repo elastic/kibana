@@ -26,8 +26,8 @@ import {
   convertIntervalIntoUnit,
   isAutoInterval,
   isGteInterval,
-  AUTO_INTERVAL,
 } from './lib/get_interval';
+import { AUTO_INTERVAL } from '../../../common/constants';
 import { PANEL_TYPES } from '../../../common/panel_types';
 
 const MIN_CHART_HEIGHT = 300;
