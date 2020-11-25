@@ -14,6 +14,7 @@ import {
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
+  DEFAULT_PERCENTILE,
   FIELD_ORIGIN,
   GRID_RESOLUTION,
   RENDER_AS,
@@ -61,14 +62,16 @@ export function createAggDescriptor(
 
   if (!aggType || aggType === AGG_TYPE.COUNT || !metricFieldName) {
     return { type: AGG_TYPE.COUNT };
-  } else if (aggType === AGG_TYPE.PERCENTILE) {
-    return { type: aggType, field: metricFieldName, percentile: 50 };
+  }
+
+  if (isHeatmap(mapType)) {
+    return isMetricCountable(aggType)
+      ? { type: aggType, field: metricFieldName }
+      : { type: AGG_TYPE.COUNT };
   } else {
-    if (isHeatmap(mapType) && isMetricCountable(aggType)) {
-      return { type: AGG_TYPE.COUNT };
-    } else {
-      return { type: aggType, field: metricFieldName };
-    }
+    return aggType === AGG_TYPE.PERCENTILE
+      ? { type: aggType, field: metricFieldName, percentile: DEFAULT_PERCENTILE }
+      : { type: aggType, field: metricFieldName };
   }
 }
 
