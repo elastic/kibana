@@ -23,7 +23,13 @@ async function createPolicy(client: ElasticsearchClient, name: string, phases: a
   return client.ilm.putLifecycle({ policy: name, body }, options);
 }
 
-// Per https://www.elastic.co/guide/en/elasticsearch/reference/current/_actions.html
+/**
+ * We intentionally do not deeply validate the posted policy object to avoid erroring on valid ES
+ * policy configuration Kibana UI does not know or should not know about. For instance, the
+ * `force_merge_index` setting of the `searchable_snapshot` action.
+ *
+ * We only specify a rough structure based on https://www.elastic.co/guide/en/elasticsearch/reference/current/_actions.html.
+ */
 const bodySchema = schema.object({
   name: schema.string(),
   phases: schema.object({
