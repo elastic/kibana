@@ -7,6 +7,7 @@
 import { generatePath } from 'react-router-dom';
 
 import { CURRENT_MAJOR_VERSION } from '../../../common/version';
+import { ENT_SEARCH_DOCS_PREFIX } from '../shared/constants';
 
 export const SETUP_GUIDE_PATH = '/setup_guide';
 
@@ -16,7 +17,6 @@ export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
 
 export const DOCS_PREFIX = `https://www.elastic.co/guide/en/workplace-search/${CURRENT_MAJOR_VERSION}`;
-export const ENT_SEARCH_DOCS_PREFIX = `https://www.elastic.co/guide/en/enterprise-search/${CURRENT_MAJOR_VERSION}`;
 export const DOCUMENT_PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-sources-document-permissions.html`;
 export const DOCUMENT_PERMISSIONS_SYNC_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-synchronizing`;
 export const PRIVATE_SOURCES_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-org-private`;
@@ -44,21 +44,21 @@ export const CUSTOM_API_DOCS_URL = `${DOCS_PREFIX}/workplace-search-custom-sourc
 export const CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL = `${CUSTOM_SOURCE_DOCS_URL}#custom-api-source-document-level-access-control`;
 export const ENT_SEARCH_LICENSE_MANAGEMENT = `${ENT_SEARCH_DOCS_PREFIX}/license-management.html`;
 
-export const ORG_PATH = '/org';
+export const PERSONAL_PATH = '/p';
 
-export const ROLE_MAPPINGS_PATH = `${ORG_PATH}/role-mappings`;
+export const ROLE_MAPPINGS_PATH = '/role-mappings';
 export const ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/:roleId`;
 export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
 
-export const USERS_PATH = `${ORG_PATH}/users`;
-export const SECURITY_PATH = `${ORG_PATH}/security`;
+export const USERS_PATH = '/users';
+export const SECURITY_PATH = '/security';
 
 export const GROUPS_PATH = '/groups';
 export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
 export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source_prioritization`;
 
 export const SOURCES_PATH = '/sources';
-export const ORG_SOURCES_PATH = `${ORG_PATH}${SOURCES_PATH}`;
+export const PERSONAL_SOURCES_PATH = `${PERSONAL_PATH}${SOURCES_PATH}`;
 
 export const SOURCE_ADDED_PATH = `${SOURCES_PATH}/added`;
 export const ADD_SOURCE_PATH = `${SOURCES_PATH}/add`;
@@ -81,7 +81,7 @@ export const ADD_SLACK_PATH = `${SOURCES_PATH}/add/slack`;
 export const ADD_ZENDESK_PATH = `${SOURCES_PATH}/add/zendesk`;
 export const ADD_CUSTOM_PATH = `${SOURCES_PATH}/add/custom`;
 
-export const PERSONAL_SETTINGS_PATH = '/settings';
+export const PERSONAL_SETTINGS_PATH = `${PERSONAL_PATH}/settings`;
 
 export const SOURCE_DETAILS_PATH = `${SOURCES_PATH}/:sourceId`;
 export const SOURCE_CONTENT_PATH = `${SOURCES_PATH}/:sourceId/content`;
@@ -93,7 +93,7 @@ export const REINDEX_JOB_PATH = `${SOURCES_PATH}/:sourceId/schema-errors/:active
 export const DISPLAY_SETTINGS_SEARCH_RESULT_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/`;
 export const DISPLAY_SETTINGS_RESULT_DETAIL_PATH = `${SOURCE_DISPLAY_SETTINGS_PATH}/result-detail`;
 
-export const ORG_SETTINGS_PATH = `${ORG_PATH}/settings`;
+export const ORG_SETTINGS_PATH = '/settings';
 export const ORG_SETTINGS_CUSTOMIZE_PATH = `${ORG_SETTINGS_PATH}/customize`;
 export const ORG_SETTINGS_CONNECTORS_PATH = `${ORG_SETTINGS_PATH}/connectors`;
 export const ORG_SETTINGS_OAUTH_APPLICATION_PATH = `${ORG_SETTINGS_PATH}/oauth`;
@@ -120,9 +120,9 @@ export const getContentSourcePath = (
   path: string,
   sourceId: string,
   isOrganization: boolean
-): string => generatePath(isOrganization ? ORG_PATH + path : path, { sourceId });
-export const getGroupPath = (groupId: string) => generatePath(GROUP_PATH, { groupId });
-export const getGroupSourcePrioritizationPath = (groupId: string) =>
+): string => generatePath(isOrganization ? path : `${PERSONAL_PATH}${path}`, { sourceId });
+export const getGroupPath = (groupId: string): string => generatePath(GROUP_PATH, { groupId });
+export const getGroupSourcePrioritizationPath = (groupId: string): string =>
   `${GROUPS_PATH}/${groupId}/source_prioritization`;
-export const getSourcesPath = (path: string, isOrganization: boolean) =>
-  isOrganization ? `${ORG_PATH}${path}` : path;
+export const getSourcesPath = (path: string, isOrganization: boolean): string =>
+  isOrganization ? path : `${PERSONAL_PATH}${path}`;

@@ -14,7 +14,8 @@ import { CoreSetup } from 'src/core/server';
 import { CoreSetup as CoreSetup_2 } from 'kibana/server';
 import { CoreStart } from 'src/core/server';
 import { CoreStart as CoreStart_2 } from 'kibana/server';
-import { Datatable } from 'src/plugins/expressions/common';
+import { Datatable } from 'src/plugins/expressions';
+import { Datatable as Datatable_2 } from 'src/plugins/expressions/common';
 import { DatatableColumn } from 'src/plugins/expressions';
 import { Duration } from 'moment';
 import { ElasticsearchClient } from 'src/core/server';
@@ -27,11 +28,13 @@ import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { ExpressionValueBoxed } from 'src/plugins/expressions/common';
+import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
 import { ISavedObjectsRepository } from 'src/core/server';
 import { IScopedClusterClient } from 'src/core/server';
 import { ISearchOptions as ISearchOptions_2 } from 'src/plugins/data/public';
 import { ISearchSource } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'src/core/server';
+import { IUiSettingsClient as IUiSettingsClient_3 } from 'kibana/server';
 import { KibanaRequest } from 'src/core/server';
 import { LegacyAPICaller } from 'src/core/server';
 import { Logger } from 'src/core/server';
@@ -56,8 +59,9 @@ import { SavedObjectsClientContract as SavedObjectsClientContract_2 } from 'kiba
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
-import { ShardsResponse } from 'elasticsearch';
+import { SharedGlobalConfig as SharedGlobalConfig_2 } from 'kibana/server';
 import { ToastInputFields } from 'src/core/public/notifications';
+import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiStatsMetricType } from '@kbn/analytics';
@@ -299,6 +303,14 @@ export type ExecutionContextSearch = {
     timeRange?: TimeRange;
 };
 
+// Warning: (ae-missing-release-tag) "exporters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const exporters: {
+    datatableToCSV: typeof datatableToCSV;
+    CSV_MIME_TYPE: string;
+};
+
 // Warning: (ae-missing-release-tag) "ExpressionFunctionKibana" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -400,25 +412,15 @@ export function getCapabilitiesForRollupIndices(indices: {
     [key: string]: any;
 };
 
-// Warning: (ae-forgotten-export) The symbol "IUiSettingsClient" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "getDefaultSearchParams" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient_2): Promise<{
-    maxConcurrentShardRequests: number | undefined;
-    ignoreUnavailable: boolean;
-    trackTotalHits: boolean;
-}>;
+export function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient_3): Promise<Pick<Search, 'max_concurrent_shard_requests' | 'ignore_unavailable' | 'track_total_hits'>>;
 
-// Warning: (ae-forgotten-export) The symbol "SharedGlobalConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "getShardTimeout" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export function getShardTimeout(config: SharedGlobalConfig): {
-    timeout: string;
-} | {
-    timeout?: undefined;
-};
+export function getShardTimeout(config: SharedGlobalConfig_2): Pick<Search, 'timeout'>;
 
 // Warning: (ae-forgotten-export) The symbol "IIndexPattern" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "getTime" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -428,6 +430,12 @@ export function getTime(indexPattern: IIndexPattern | undefined, timeRange: Time
     forceNow?: Date;
     fieldName?: string;
 }): import("../..").RangeFilter | undefined;
+
+// @internal
+export function getTotalLoaded(response: SearchResponse<unknown>): {
+    total: number;
+    loaded: number;
+};
 
 // Warning: (ae-missing-release-tag) "IAggConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -444,18 +452,6 @@ export type IAggConfigs = AggConfigs;
 //
 // @public (undocumented)
 export type IAggType = AggType;
-
-// Warning: (ae-missing-release-tag) "IEsRawSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface IEsRawSearchResponse<Source = any> extends SearchResponse<Source> {
-    // (undocumented)
-    id?: string;
-    // (undocumented)
-    is_partial?: boolean;
-    // (undocumented)
-    is_running?: boolean;
-}
 
 // Warning: (ae-forgotten-export) The symbol "IKibanaSearchRequest" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ISearchRequestParams" needs to be exported by the entry point index.d.ts
@@ -611,9 +607,7 @@ export class IndexPattern implements IIndexPattern {
     };
     // (undocumented)
     getFieldAttrs: () => {
-        [x: string]: {
-            customLabel: string;
-        };
+        [x: string]: FieldAttrSet;
     };
     // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
@@ -1036,24 +1030,6 @@ export interface RefreshInterval {
 //
 // @public (undocumented)
 export const search: {
-    esSearch: {
-        utils: {
-            doSearch: <SearchResponse = any>(searchMethod: () => Promise<SearchResponse>, abortSignal?: AbortSignal | undefined) => import("rxjs").Observable<SearchResponse>;
-            shimAbortSignal: <T extends import("../common").TransportRequestPromise<unknown>>(promise: T, signal: AbortSignal | undefined) => T;
-            trackSearchStatus: <KibanaResponse extends import("../common").IKibanaSearchResponse<any> = import("./search").IEsSearchResponse<import("src/core/server").SearchResponse<unknown>>>(logger: import("src/core/server").Logger, usage?: import("./search").SearchUsage | undefined) => import("rxjs").UnaryFunction<import("rxjs").Observable<KibanaResponse>, import("rxjs").Observable<KibanaResponse>>;
-            includeTotalLoaded: () => import("rxjs").OperatorFunction<import("../common").IKibanaSearchResponse<import("elasticsearch").SearchResponse<unknown>>, {
-                total: number;
-                loaded: number;
-                id?: string | undefined;
-                isRunning?: boolean | undefined;
-                isPartial?: boolean | undefined;
-                rawResponse: import("elasticsearch").SearchResponse<unknown>;
-            }>;
-            toKibanaSearchResponse: <SearchResponse_1 extends import("../common").IEsRawSearchResponse<any> = import("../common").IEsRawSearchResponse<any>, KibanaResponse_1 extends import("../common").IKibanaSearchResponse<any> = import("../common").IKibanaSearchResponse<SearchResponse_1>>() => import("rxjs").OperatorFunction<import("@elastic/elasticsearch").ApiResponse<SearchResponse_1, import("@elastic/elasticsearch/lib/Transport").Context>, KibanaResponse_1>;
-            getTotalLoaded: typeof getTotalLoaded;
-            toSnakeCase: typeof toSnakeCase;
-        };
-    };
     aggs: {
         CidrMask: typeof CidrMask;
         dateHistogramInterval: typeof dateHistogramInterval;
@@ -1080,6 +1056,7 @@ export const search: {
         siblingPipelineType: string;
         termsAggFilter: string[];
         toAbsoluteDates: typeof toAbsoluteDates;
+        calcAutoIntervalLessThan: typeof calcAutoIntervalLessThan;
     };
     getRequestInspectorStats: typeof getRequestInspectorStats;
     getResponseInspectorStats: typeof getResponseInspectorStats;
@@ -1108,6 +1085,17 @@ export interface SearchUsage {
     // (undocumented)
     trackSuccess(duration: number): Promise<void>;
 }
+
+// Warning: (ae-missing-release-tag) "searchUsageObserver" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public
+export function searchUsageObserver(logger: Logger_2, usage?: SearchUsage): {
+    next(response: IEsSearchResponse): void;
+    error(): void;
+};
+
+// @internal
+export const shimAbortSignal: <T>(promise: TransportRequestPromise<T>, signal?: AbortSignal | undefined) => TransportRequestPromise<T>;
 
 // @internal
 export function shimHitsTotal(response: SearchResponse<any>): {
@@ -1171,6 +1159,15 @@ export type TimeRange = {
     mode?: 'absolute' | 'relative';
 };
 
+// @internal
+export function toKibanaSearchResponse(rawResponse: SearchResponse<unknown>): {
+    total: number;
+    loaded: number;
+    rawResponse: SearchResponse<unknown>;
+    isPartial: boolean;
+    isRunning: boolean;
+};
+
 // Warning: (ae-missing-release-tag) "UI_SETTINGS" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1219,6 +1216,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/common/es_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:58:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:135:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildCustomFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:71:21 - (ae-forgotten-export) The symbol "getEsQueryConfig" needs to be exported by the entry point index.d.ts

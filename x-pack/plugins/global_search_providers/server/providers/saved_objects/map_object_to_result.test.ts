@@ -42,6 +42,7 @@ describe('mapToResult', () => {
       name: 'dashboard',
       management: {
         defaultSearchField: 'title',
+        icon: 'dashboardApp',
         getInAppUrl: (obj) => ({ path: `/dashboard/${obj.id}`, uiCapabilitiesPath: '' }),
       },
     });
@@ -62,6 +63,7 @@ describe('mapToResult', () => {
       title: 'My dashboard',
       type: 'dashboard',
       url: '/dashboard/dash1',
+      icon: 'dashboardApp',
       score: 42,
     });
   });
