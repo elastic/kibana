@@ -78,9 +78,10 @@ export const useNetworkKpiUniquePrivateIps = ({
       : null
   );
 
-  const [networkKpiUniquePrivateIpsResponse, setNetworkKpiUniquePrivateIpsResponse] = useState<
-    NetworkKpiUniquePrivateIpsArgs
-  >({
+  const [
+    networkKpiUniquePrivateIpsResponse,
+    setNetworkKpiUniquePrivateIpsResponse,
+  ] = useState<NetworkKpiUniquePrivateIpsArgs>({
     uniqueDestinationPrivateIps: 0,
     uniqueDestinationPrivateIpsHistogram: null,
     uniqueSourcePrivateIps: 0,

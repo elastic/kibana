@@ -14,14 +14,9 @@ const { createJestConfig } = require('../../dev-tools/jest/create_jest_config');
 const { resolve } = require('path');
 
 const rootDir = resolve(__dirname, '.');
-const xPackKibanaDirectory = resolve(__dirname, '../..');
 const kibanaDirectory = resolve(__dirname, '../../..');
 
-const jestConfig = createJestConfig({
-  kibanaDirectory,
-  rootDir,
-  xPackKibanaDirectory,
-});
+const jestConfig = createJestConfig({ kibanaDirectory, rootDir });
 
 module.exports = {
   ...jestConfig,

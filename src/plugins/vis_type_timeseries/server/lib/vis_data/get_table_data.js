@@ -22,6 +22,7 @@ import { get } from 'lodash';
 import { processBucket } from './table/process_bucket';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
+import { UI_SETTINGS } from '../../../../data/common';
 
 export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
@@ -39,7 +40,12 @@ export async function getTableData(req, panel) {
   };
 
   try {
-    const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
+    const uiSettings = req.getUiSettingsService();
+    const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities, {
+      maxBarsUiSettings: await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      barTargetUiSettings: await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+    });
+
     const [resp] = await searchStrategy.search(req, [
       {
         body,

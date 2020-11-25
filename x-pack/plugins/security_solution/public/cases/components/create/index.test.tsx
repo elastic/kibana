@@ -182,7 +182,9 @@ describe('Create case', () => {
       );
     });
   });
-  describe('Step 2 - Connector Fields', () => {
+
+  // FAILED ES PROMOTION: https://github.com/elastic/kibana/issues/84145
+  describe.skip('Step 2 - Connector Fields', () => {
     const connectorTypes = [
       {
         label: 'Jira',

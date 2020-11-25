@@ -48,7 +48,7 @@ function sortSeries(visData, model) {
   }, []);
 }
 
-export function TopNVisualization(props) {
+function TopNVisualization(props) {
   const { backgroundColor, model, visData } = props;
 
   const series = sortSeries(visData, model).map((item) => {
@@ -111,3 +111,7 @@ TopNVisualization.propTypes = {
   visData: PropTypes.object,
   getConfig: PropTypes.func,
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TopNVisualization as default };

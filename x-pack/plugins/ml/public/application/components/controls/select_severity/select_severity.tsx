@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 
 import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
-import { useUrlState } from '../../../util/url_state';
+import { usePageUrlState } from '../../../util/url_state';
 
 const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',
@@ -78,15 +78,9 @@ function optionValueToThreshold(value: number) {
 }
 
 const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
-const TABLE_SEVERITY_APP_STATE_NAME = 'mlSelectSeverity';
 
-export const useTableSeverity = () => {
-  const [appState, setAppState] = useUrlState('_a');
-
-  return [
-    (appState && appState[TABLE_SEVERITY_APP_STATE_NAME]) || TABLE_SEVERITY_DEFAULT,
-    (d: TableSeverity) => setAppState(TABLE_SEVERITY_APP_STATE_NAME, d),
-  ];
+export const useTableSeverity = (): [TableSeverity, (v: TableSeverity) => void] => {
+  return usePageUrlState('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
 };
 
 const getSeverityOptions = () =>
