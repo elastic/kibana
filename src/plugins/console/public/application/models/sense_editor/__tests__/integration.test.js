@@ -41,7 +41,7 @@ describe('Integration', () => {
   });
 
   function processContextTest(data, mapping, kbSchemes, requestLine, testToRun) {
-    test(testToRun.name, function (done) {
+    test(testToRun.name, async function (done) {
       let lineOffset = 0; // add one for the extra method line
       let editorValue = data;
       if (requestLine != null) {
@@ -74,7 +74,7 @@ describe('Integration', () => {
       }
       kb.setActiveApi(testApi);
       const { cursor } = testToRun;
-      senseEditor.update(editorValue, true);
+      await senseEditor.update(editorValue, true);
       senseEditor.getCoreEditor().moveCursorToPosition(cursor);
 
       // allow ace rendering to move cursor so it will be seen during test - handy for debugging.
@@ -91,7 +91,6 @@ describe('Integration', () => {
         '',
         function (err, terms) {
           if (testToRun.assertThrows) {
-            done();
             return;
           }
 
@@ -107,7 +106,6 @@ describe('Integration', () => {
           }
 
           if (!terms || terms.length === 0) {
-            done();
             return;
           }
 
@@ -168,7 +166,6 @@ describe('Integration', () => {
           ac('addTemplate');
           ac('textBoxPosition', posCompare);
           ac('rangeToReplace', rangeCompare);
-          done();
         }
       );
     });
