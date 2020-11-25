@@ -36,6 +36,13 @@ export class PolicyWatcher {
     this.logger = logger;
   }
 
+  /**
+   * The policy watcher is not called as part of a HTTP request chain, where the
+   * request-scoped SOClient could be passed down. It is called via license observable
+   * changes. We are acting as the 'system' in response to license changes, so we are
+   * intentionally using the system user here. Be very aware of what you are using this
+   * client to do
+   */
   private makeInternalSOClient(soStart: SavedObjectsServiceStart): SavedObjectsClientContract {
     const fakeRequest = ({
       headers: {},
@@ -59,39 +66,36 @@ export class PolicyWatcher {
   }
 
   public async watch(license: ILicense) {
-    let packagePolicies: PackagePolicy[];
-    if (!this.policyService) {
-      this.logger.debug(
-        'unable to verify endpoint policies to license change: no package policy service'
-      );
-      return;
-    }
-
-    // @todo: actually page and fetch them ALL
-    try {
-      packagePolicies = (
-        await this.policyService.list(this.soClient, {
+    let page = 1;
+    let response: {
+      items: PackagePolicy[];
+      total: number;
+      page: number;
+      perPage: number;
+    };
+    do {
+      try {
+        response = await this.policyService.list(this.soClient, {
+          page: page++,
           perPage: 100,
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-        })
-      ).items;
-    } catch (e) {
-      this.logger.warn(
-        `Unable to verify endpoint policies in line with license change: failed to fetch package policies: ${e.message}`
-      );
-      return;
-    }
-
-    for (const policy of packagePolicies) {
-      const policyConfig = policy.inputs[0].config?.policy.value;
-      const valid = isEndpointPolicyValidForLicense(policyConfig, licenseService);
-      if (!valid) {
-        policy.inputs[0].config!.policy.value = unsetPolicyFeaturesAboveLicenseLevel(
-          policyConfig,
-          licenseService
+        });
+      } catch (e) {
+        this.logger.warn(
+          `Unable to verify endpoint policies in line with license change: failed to fetch package policies: ${e.message}`
         );
-        this.policyService.update(this.soClient, policy.id, policy);
+        return;
       }
-    }
+      response.items.forEach((policy) => {
+        const policyConfig = policy.inputs[0].config?.policy.value;
+        if (!isEndpointPolicyValidForLicense(policyConfig, licenseService)) {
+          policy.inputs[0].config!.policy.value = unsetPolicyFeaturesAboveLicenseLevel(
+            policyConfig,
+            licenseService
+          );
+          this.policyService.update(this.soClient, policy.id, policy);
+        }
+      });
+    } while (response.page * response.perPage < response.total);
   }
 }
