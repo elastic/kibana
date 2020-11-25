@@ -71,27 +71,43 @@ Self-hosted Elastic Maps Service reads properties from a configuration file in Y
 // TODO Configuration settings are still in flux
 [cols="2*<"]
 |===
+| `ui:`
+ | Controls if the status page and the layer list should be offered. *Default: `true`*
+
+| `logging.level:`
+  | Verbosity of the server logs. Valid values are: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, and `silent`. *Default: `info`*
+
+| `path.planet:`
+  | Path of the basemaps database. *Default: `/usr/src/app/data/planet.mbtiles`*
 
 | `elasticsearch.host:`
  | URL of the Elasticsearch instance to use for license validation.
 
 | `elasticsearch.username:` and `elasticsearch.password`
-  | Credentials of a user with at least the `monitor` role to allow license validation
+  | Credentials of a user with at least the `monitor` role.
 
-| `path.planet:`
-  | Path of the basemaps database. *Default: `/usr/src/app/data/planet.mbtiles`*
+| `elasticsearch.ssl.certificateAuthorities`
+ | Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a trusted certificate chain for the server. This chain is used by the server to establish trust when connecting to your Elasticsearch cluster.
 
-| `path.logs:`
-  | Path where the logs will be emitted. *Default: `/var/log/ems`*
+| `elasticsearch.ssl.certificate` and `elasticsearch.ssl.key`, and `elasticsearch.ssl.keyPassphrase`:
+ | Optional settings that provide the paths to the PEM-format SSL certificate and key files and the key password. These files are used to verify the identity of Elastic Maps Service to Elasticsearch and are required when `xpack.security.http.ssl.client_authentication` in Elasticsearch is set to required.
 
-| `logging.level:`
-  | Verbosity of the server logs. Valid values are: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, and `silent`. *Default: `info`*
+| `elasticsearch.ssl.verificationMode`
+ | Controls the verification of the server certificate that Kibana receives when making an outbound SSL/TLS connection to Elasticsearch. Valid values are "`full`", "`certificate`", and "`none`". Using "`full`" performs hostname verification, using "`certificate`" skips hostname verification, and using "`none`" skips verification entirely. *Default: `full`*
 
-| `ssl.key` and `ssl.certificate`:
-  | Location of yor SSL key and certificate files
+| `ssl.enabled`
+ | Enables SSL/TLS for inbound connections to the server. When set to `true`, a certificate and its corresponding private key must be provided. *Default: `false`*
+
+| `ssl.certificateAuthorities`
+ | Paths to one or more PEM-encoded X.509 certificate authority (CA) certificates which make up a trusted certificate chain for the server. This chain is used by the server to establish trust when receiving inbound SSL/TLS connections from end users.
+
+| `ssl.key`, `ssl.certificate`, and `ssl.keyPassphrase`:
+  | Location of yor SSL key and certificate files and the password that decrypts the private key that is specified via `ssl.key`. This password is optional, as the key may not be encrypted.
+
 |===
 
-All configuration settings can be overridden by environment variables that are named with the following conditions: prefixed with `EMS_`, uppercase, and replacing periods by underscores. For example `elasticsearch.username` could be overridden by the environment variable `EMS_ELASTICSEARCH_USERNAME`.
+// TODO this is still a work in progress
+All configuration settings can be overridden by environment variables that are named with the following conditions: all letters are uppercase and replace YAML periods by underscores. For example `elasticsearch.username` could be overridden by the environment variable `ELASTICSEARCH_USERNAME`.
 
 
 [float]
@@ -101,7 +117,7 @@ Boundaries:: World countries, global administrative regions, and countries regio
 
 Basemaps:: A minimal basemap is provided with the Docker image. This can be used for testing environments but won't be functional for normal operations. The full basemap (around 90GB file) needs to be mounted on the image for the server to run normally.
 
-TIP: Basemaps and boundaries available can be explored from the `/maps` endpoint in a webpage similar to https://maps.elastic.co
+TIP: Basemaps and boundaries available can be explored from the `/maps` endpoint in a web page that is your self-hosted equivalent to https://maps.elastic.co
 
 
 [float]
@@ -124,4 +140,4 @@ IMPORTANT: The server won't respond to any data request if the license validatio
 [float]
 ==== Logging
 
-Logs are generated in JSON format and emitted to the standard output and to the file set by `path.logs` setting. The instance won't rotate the logs but it has the `logrotate` linux tool installed in the image. If no output is desired, the logging path can be set up to `/dev/null`.
+Logs are generated in JSON format and emitted to the standard output and to the file set by `path.logs` setting. The instance won't rotate the logs but it has the `logrotate` linux tool installed in the image. If no logging is desired, `/dev/null` can be mounted to the default log path at `/var/log/ems/ems.log`.
