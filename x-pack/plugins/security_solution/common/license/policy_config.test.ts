@@ -20,7 +20,9 @@ describe('policy_config and licenses', () => {
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic' } });
-  // mock license service
+
+  // the license service is real, and therefore somewhat under test here
+  // the licenses themselves are what's mocked.
   beforeEach(() => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();

@@ -54,8 +54,8 @@ export const unsetPolicyFeaturesAboveLicenseLevel = (
     return policy;
   }
 
-  // set defaults
   const defaults = factory();
+  // set any license-gated features back to the defaults
   policy.windows.popup.malware.enabled = defaults.windows.popup.malware.enabled;
   policy.mac.popup.malware.enabled = defaults.mac.popup.malware.enabled;
   policy.windows.popup.malware.message = defaults.windows.popup.malware.message;
