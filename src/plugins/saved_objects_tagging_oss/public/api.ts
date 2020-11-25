@@ -84,7 +84,7 @@ export interface SavedObjectsTaggingApiUi {
   /**
    * Convert given tag name to a {@link SavedObjectsFindOptionsReference | reference }
    * to be used to search using the savedObjects `_find` API. Will return `undefined`
-   * is the given name does not match any existing tag.
+   * if the given name does not match any existing tag.
    */
   convertNameToReference(tagName: string): SavedObjectsFindOptionsReference | undefined;
 
@@ -123,6 +123,12 @@ export interface SavedObjectsTaggingApiUi {
   getTagIdsFromReferences(
     references: Array<SavedObjectReference | SavedObjectsFindOptionsReference>
   ): string[];
+
+  /**
+   * Returns the id for given tag name. Will return `undefined`
+   * if the given name does not match any existing tag.
+   */
+  getTagIdFromName(tagName: string): string | undefined;
 
   /**
    * Returns a new references array that replace the old tag references with references to the
