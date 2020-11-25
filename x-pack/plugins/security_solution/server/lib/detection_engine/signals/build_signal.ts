@@ -96,7 +96,7 @@ export const buildSignal = (docs: BaseSignalHit[], rule: RulesSchema): Signal =>
 export const additionalSignalFields = (doc: BaseSignalHit) => {
   return {
     parent: buildParent(removeClashes(doc)),
-    original_time: doc._source['@timestamp'],
+    original_time: doc._source['@timestamp'], // This field has already been replaced with timestampOverride, if provided.
     original_event: doc._source.event ?? undefined,
     threshold_result: doc._source.threshold_result,
     original_signal:

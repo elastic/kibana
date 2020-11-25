@@ -331,7 +331,7 @@ export const signalRulesAlertType = ({
                       },
                       {
                         range: {
-                          '@timestamp': {
+                          [timestampOverride ?? '@timestamp']: {
                             lte: bucket.lastSignalTimestamp.value_as_string,
                           },
                         },
