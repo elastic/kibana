@@ -368,20 +368,21 @@ export class LegacyCoreEditor implements CoreEditor {
 
     // disable standard context based autocompletion.
     // @ts-ignore
-    ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function (
-      require: any,
-      exports: any
-    ) {
-      exports.getCompletions = function (
-        innerEditor: any,
-        session: any,
-        pos: any,
-        prefix: any,
-        callback: any
-      ) {
-        callback(null, []);
-      };
-    });
+    ace.define(
+      'ace/autocomplete/text_completer',
+      ['require', 'exports', 'module'],
+      function (require: any, exports: any) {
+        exports.getCompletions = function (
+          innerEditor: any,
+          session: any,
+          pos: any,
+          prefix: any,
+          callback: any
+        ) {
+          callback(null, []);
+        };
+      }
+    );
 
     const langTools = ace.acequire('ace/ext/language_tools');
 

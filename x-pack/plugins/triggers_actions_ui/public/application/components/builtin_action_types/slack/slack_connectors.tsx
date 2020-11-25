@@ -10,9 +10,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { SlackActionConnector } from '../types';
 
-const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  SlackActionConnector
->> = ({ action, editActionSecrets, errors, readOnly, docLinks }) => {
+const SlackActionFields: React.FunctionComponent<
+  ActionConnectorFieldsProps<SlackActionConnector>
+> = ({ action, editActionSecrets, errors, readOnly, docLinks }) => {
   const { webhookUrl } = action.secrets;
 
   return (

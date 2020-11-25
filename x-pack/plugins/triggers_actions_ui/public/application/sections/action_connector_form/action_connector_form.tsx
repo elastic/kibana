@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiErrorBoundary,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -179,26 +180,28 @@ export const ActionConnectorForm = ({
             </h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <Suspense
-            fallback={
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
-            <FieldsComponent
-              action={connector}
-              errors={errors}
-              readOnly={!canSave}
-              editActionConfig={setActionConfigProperty}
-              editActionSecrets={setActionSecretsProperty}
-              http={http}
-              docLinks={docLinks}
-              consumer={consumer}
-            />
-          </Suspense>
+          <EuiErrorBoundary>
+            <Suspense
+              fallback={
+                <EuiFlexGroup justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              <FieldsComponent
+                action={connector}
+                errors={errors}
+                readOnly={!canSave}
+                editActionConfig={setActionConfigProperty}
+                editActionSecrets={setActionSecretsProperty}
+                http={http}
+                docLinks={docLinks}
+                consumer={consumer}
+              />
+            </Suspense>
+          </EuiErrorBoundary>
         </>
       ) : null}
     </EuiForm>

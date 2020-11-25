@@ -244,9 +244,10 @@ export abstract class Container<
 
   private createNewExplicitEmbeddableInput<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, EmbeddableOutput> = IEmbeddable<
-      TEmbeddableInput
-    >
+    TEmbeddable extends IEmbeddable<
+      TEmbeddableInput,
+      EmbeddableOutput
+    > = IEmbeddable<TEmbeddableInput>
   >(
     id: string,
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,

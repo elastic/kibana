@@ -5,7 +5,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { Role } from '../../../plugins/security/common/model';
+import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';
 
 export function SecurityPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -17,6 +17,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
   const comboBox = getService('comboBox');
+  const supertest = getService('supertestWithoutAuth');
   const PageObjects = getPageObjects(['common', 'header', 'error']);
 
   interface LoginOptions {
@@ -41,10 +42,14 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     });
   }
 
+  async function isLoginFormVisible() {
+    return await testSubjects.exists('loginForm');
+  }
+
   async function waitForLoginForm() {
     log.debug('Waiting for Login Form to appear.');
     await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
-      return await testSubjects.exists('loginForm');
+      return await isLoginFormVisible();
     });
   }
 
@@ -107,7 +112,9 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
   const loginPage = Object.freeze({
     async login(username?: string, password?: string, options: LoginOptions = {}) {
-      await PageObjects.common.navigateToApp('login');
+      if (!(await isLoginFormVisible())) {
+        await PageObjects.common.navigateToApp('login');
+      }
 
       // ensure welcome screen won't be shown. This is relevant for environments which don't allow
       // to use the yml setting, e.g. cloud
@@ -216,6 +223,21 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
       await userMenu.clickLogoutButton();
       await waitForLoginPage();
+    }
+
+    async getCurrentUser() {
+      const sidCookie = await browser.getCookie('sid');
+      if (!sidCookie?.value) {
+        log.debug('User is not authenticated yet.');
+        return null;
+      }
+
+      const { body: user } = await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .set('Cookie', `sid=${sidCookie.value}`)
+        .expect(200);
+      return user as AuthenticatedUser;
     }
 
     async forceLogout() {
