@@ -6,7 +6,7 @@
 
 import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
+import { SavedObject, RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
 import { IndexPatternAttributes, UI_SETTINGS } from '../../../../../src/plugins/data/server';
@@ -103,7 +103,7 @@ async function fetchFieldExistence({
     fromDate,
     toDate,
     dslQuery,
-    client: context.core.elasticsearch.legacy.client,
+    client: context.core.elasticsearch.client.asCurrentUser,
     index: indexPatternTitle,
     timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
     fields,
@@ -160,7 +160,7 @@ async function fetchIndexPatternStats({
   toDate,
   fields,
 }: {
-  client: ILegacyScopedClusterClient;
+  client: ElasticsearchClient;
   index: string;
   dslQuery: object;
   timeFieldName?: string;
@@ -190,7 +190,7 @@ async function fetchIndexPatternStats({
   };
 
   const scriptedFields = fields.filter((f) => f.isScript);
-  const result = await client.callAsCurrentUser('search', {
+  const { body: result } = await client.search({
     index,
     body: {
       size: SAMPLE_SIZE,

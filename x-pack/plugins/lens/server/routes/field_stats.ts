@@ -46,7 +46,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
       },
     },
     async (context, req, res) => {
-      const requestClient = context.core.elasticsearch.legacy.client;
+      const requestClient = context.core.elasticsearch.client.asCurrentUser;
       const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
 
       try {
@@ -70,18 +70,17 @@ export async function initFieldsRoute(setup: CoreSetup) {
           },
         };
 
-        const search = (aggs: unknown) =>
-          requestClient.callAsCurrentUser('search', {
+        const search = async (aggs: unknown) => {
+          const { body: result } = await requestClient.search({
             index: req.params.indexPatternTitle,
             body: {
               query,
               aggs,
             },
-            // The hits total changed in 7.0 from number to object, unless this flag is set
-            // this is a workaround for elasticsearch response types that are from 6.x
-            restTotalHitsAsInt: true,
             size: 0,
           });
+          return result;
+        };
 
         if (field.type === 'number') {
           return res.ok({
