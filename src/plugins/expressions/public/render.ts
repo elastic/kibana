@@ -99,14 +99,14 @@ export class ExpressionRenderHandler {
     };
   }
 
-  render = async (data: any, uiState: any = {}) => {
-    if (!data || typeof data !== 'object') {
+  render = async (value: any, uiState: any = {}, data: unknown = undefined) => {
+    if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
 
-    if (data.type !== 'render' || !data.as) {
-      if (data.type === 'error') {
-        return this.handleRenderError(data.error);
+    if (value.type !== 'render' || !value.as) {
+      if (value.type === 'error') {
+        return this.handleRenderError(value.error);
       } else {
         return this.handleRenderError(
           new Error('invalid data provided to the expression renderer')
@@ -114,17 +114,18 @@ export class ExpressionRenderHandler {
       }
     }
 
-    if (!getRenderersRegistry().get(data.as)) {
-      return this.handleRenderError(new Error(`invalid renderer id '${data.as}'`));
+    if (!getRenderersRegistry().get(value.as)) {
+      return this.handleRenderError(new Error(`invalid renderer id '${value.as}'`));
     }
 
     try {
       // Rendering is asynchronous, completed by handlers.done()
       await getRenderersRegistry()
-        .get(data.as)!
-        .render(this.element, data.value, {
+        .get(value.as)!
+        .render(this.element, value.value, {
           ...this.handlers,
           uiState,
+          data,
         } as any);
     } catch (e) {
       return this.handleRenderError(e);
