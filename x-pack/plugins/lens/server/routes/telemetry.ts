@@ -5,6 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 import { CoreSetup } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { BASE_API_URL } from '../../common';
@@ -70,7 +71,7 @@ export async function initLensUsageRoute(setup: CoreSetup) {
 
         return res.ok({ body: {} });
       } catch (e) {
-        if (e.status === 404) {
+        if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound();
         }
         if (e.isBoom) {

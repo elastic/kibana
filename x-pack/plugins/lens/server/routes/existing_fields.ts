@@ -5,6 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { SavedObject, RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
@@ -59,7 +60,7 @@ export async function existingFieldsRoute(setup: CoreSetup, logger: Logger) {
         logger.info(
           `Field existence check failed: ${isBoomError(e) ? e.output.payload.message : e.message}`
         );
-        if (e.status === 404) {
+        if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound({ body: e.message });
         }
         if (isBoomError(e)) {
