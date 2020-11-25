@@ -27,7 +27,6 @@ export FORCE_COLOR=1
 ### APM tracking
 ###
 export ELASTIC_APM_ENVIRONMENT=ci
-export ELASTIC_APM_ACTIVE=true
 
 ###
 ### check that we seem to be in a kibana project

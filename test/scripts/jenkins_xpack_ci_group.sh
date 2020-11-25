@@ -5,6 +5,7 @@ source test/scripts/jenkins_test_setup_xpack.sh
 if [[ -z "$CODE_COVERAGE" ]]; then
   echo " -> Running functional and api tests"
 
+  export ELASTIC_APM_ACTIVE=true
   checks-reporter-with-killswitch "X-Pack Chrome Functional tests / Group ${CI_GROUP}" \
     node scripts/functional_tests \
       --debug --bail \
