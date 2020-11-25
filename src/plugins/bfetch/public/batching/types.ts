@@ -17,14 +17,15 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { BfetchPublicPlugin } from './plugin';
+import { Defer } from '../../../kibana_utils/public';
 
-export { BfetchPublicSetup, BfetchPublicStart, BfetchPublicContract } from './plugin';
-export { split } from './streaming';
-
-export { BatchedFunc } from './batching/types';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new BfetchPublicPlugin(initializerContext);
+export interface BatchItem<Payload, Result> {
+  payload: Payload;
+  future: Defer<Result>;
+  signal?: AbortSignal;
 }
+
+export type BatchedFunc<Payload, Result> = (
+  payload: Payload,
+  signal?: AbortSignal
+) => Promise<Result>;
