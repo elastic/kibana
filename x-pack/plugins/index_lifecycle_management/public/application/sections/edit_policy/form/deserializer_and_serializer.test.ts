@@ -47,6 +47,10 @@ const originalPolicy: SerializedPolicy = {
         set_priority: {
           priority: 1,
         },
+        searchable_snapshot: {
+          snapshot_repository: 'my repo!',
+          force_merge_index: true,
+        },
       },
       min_age: '12ms',
     },
@@ -75,6 +79,10 @@ const originalPolicy: SerializedPolicy = {
         freeze: {},
         set_priority: {
           priority: 12,
+        },
+        searchable_snapshot: {
+          snapshot_repository: 'my repo!',
+          force_merge_index: false,
         },
       },
     },
@@ -197,5 +205,15 @@ describe('deserializer and serializer', () => {
     const result = serializer(formInternal);
 
     expect(result.phases.warm!.min_age).toBeUndefined();
+  });
+
+  it('removes snapshot_repository when it is unset', () => {
+    delete formInternal.phases.hot!.actions.searchable_snapshot;
+    delete formInternal.phases.cold!.actions.searchable_snapshot;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.searchable_snapshot).toBeUndefined();
+    expect(result.phases.cold!.actions.searchable_snapshot).toBeUndefined();
   });
 });
