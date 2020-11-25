@@ -25,6 +25,7 @@ import { REPO_ROOT, run } from '@kbn/dev-utils';
 
 interface Options {
   debug?: boolean;
+  filter?: string;
 }
 
 type CircularDepList = Set<string>;
@@ -48,7 +49,7 @@ const allowedList: CircularDepList = new Set([
 
 run(
   async ({ flags, log }) => {
-    const { debug = false } = flags as Options;
+    const { debug, filter } = flags as Options;
     const foundList: CircularDepList = new Set();
 
     const pluginSearchPathGlobs = getPluginSearchPaths({
@@ -79,6 +80,12 @@ run(
         const lastPlugin = `${lastMatch.groups.pluginFolder}/${lastMatch.groups.pluginName}`;
         const sortedPlugins = [firstPlugin, lastPlugin].sort();
 
+        // Exclude if both plugin paths involved in the circular dependency
+        // doesn't includes the provided filter
+        if (filter && !firstPlugin.includes(filter) && !lastPlugin.includes(filter)) {
+          return false;
+        }
+
         if (firstPlugin !== lastPlugin) {
           foundList.add(`${sortedPlugins[0]} -> ${sortedPlugins[1]}`);
           return true;
@@ -87,6 +94,35 @@ run(
 
       return false;
     });
+
+    if (!debug && filter) {
+      log.warning(
+        dedent(`
+      !!!!!!!!!!!!!! WARNING: FILTER WITHOUT DEBUG !!!!!!!!!!!!
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! Using the --filter flag without using --debug flag    !
+      ! will not allow you to see the filtered list of        !
+      ! the correct results.                                  !
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      `)
+      );
+    }
+
+    if (debug && filter) {
+      log.warning(
+        dedent(`
+      !!!!!!!!!!!!!!! WARNING: FILTER FLAG IS ON !!!!!!!!!!!!!!
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! Be aware the following results are not complete as    !
+      ! --filter flag has been passed. Ignore suggestions     !
+      ! to update the allowedList or any reports of failures  !
+      ! or successes.                                         !
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      The following filter has peen passed: ${filter}
+      `)
+      );
+    }
 
     // Log the full circular dependencies path if we are under debug flag
     if (debug && circularDependenciesFullPaths.length > 0) {
@@ -119,7 +155,7 @@ run(
     if (debug && !foundDifferences.size) {
       log.debug(
         dedent(`
-      !!!!!!!!!!!!!!!!! UP TO DATE ALLOWED LIST !!!!!!!!!!!!!!!!!
+      !!!!!!!!!!!!!!!!! UP TO DATE ALLOWED LIST !!!!!!!!!!!!!!!!!!
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! The declared circular dependencies allowed list is up    !
       ! to date and includes every plugin listed in above paths. !
@@ -165,11 +201,13 @@ run(
       'Searches circular dependencies between plugins located under src/plugins, x-pack/plugins, examples and x-pack/examples',
     flags: {
       boolean: ['debug'],
+      string: ['filter'],
       default: {
         debug: false,
       },
       help: `
         --debug            Run the script in debug mode which enables detailed path logs for circular dependencies
+        --filter           It will only include in the results circular deps where the plugin paths contains parts of the passed string in the filter
       `,
     },
   }
