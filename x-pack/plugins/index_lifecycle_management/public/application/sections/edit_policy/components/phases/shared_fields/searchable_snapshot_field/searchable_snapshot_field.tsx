@@ -22,8 +22,6 @@ import {
   fieldValidators,
 } from '../../../../../../../shared_imports';
 
-import { useLoadSnapshotRepositories } from '../../../../../../services/api';
-
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 import { useConfigurationIssues } from '../../../../form';
 
@@ -51,9 +49,11 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   const {
     services: { cloud },
   } = useKibana();
-  const { getUrlForApp, policy } = useEditPolicyContext();
+  const { getUrlForApp, policy, license } = useEditPolicyContext();
   const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+
+  const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
 
   const renderField = () => (
     <SearchableSnapshotDataProvider>
@@ -190,18 +190,72 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     </SearchableSnapshotDataProvider>
   );
 
+  const renderInfoCallout = (): React.ReactNode => {
+    let infoCallout: React.ReactNode;
+
+    if (isDisabledDueToLicense) {
+      infoCallout = (
+        <EuiCallOut
+          data-test-subj="searchableSnapshotDisabledDueToLicense"
+          title={i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle',
+            { defaultMessage: 'Enterprise license required' }
+          )}
+          iconType="questionInCircle"
+        >
+          {i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutBody',
+            {
+              defaultMessage: 'To create a searchable snapshot an enterprise license is required.',
+            }
+          )}
+        </EuiCallOut>
+      );
+    } else if (phase === 'hot' && isUsingSearchableSnapshotInHotPhase) {
+      infoCallout = (
+        <EuiCallOut
+          data-test-subj="searchableSnapshotFieldsDisabledCallout"
+          title={i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutTitle',
+            { defaultMessage: 'Some actions have been disabled' }
+          )}
+          iconType="questionInCircle"
+        >
+          {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody', {
+            defaultMessage:
+              'Force merge, shrink, freeze and cold phase searchable snapshots are not allowed when searchable snapshots are enabled in the hot phase.',
+          })}
+        </EuiCallOut>
+      );
+    }
+
+    if (infoCallout) {
+      return (
+        <>
+          <EuiSpacer size="s" />
+          {infoCallout}
+          <EuiSpacer size="s" />
+        </>
+      );
+    }
+
+    return;
+  };
+
   return (
     <DescribedFormField
       data-test-subj={`searchableSnapshotField-${phase}`}
       switchProps={{
+        disabled: isDisabledDueToLicense,
         'data-test-subj': 'searchableSnapshotToggle',
         label: i18n.translate(
           'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
           { defaultMessage: 'Create searchable snapshot' }
         ),
-        initialValue: Boolean(
-          policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
-        ),
+        initialValue:
+          isDisabledDueToLicense === true
+            ? false
+            : Boolean(policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository),
       }}
       title={
         <h3>
@@ -221,28 +275,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
               }}
             />
           </EuiTextColor>
-          {phase === 'hot' && isUsingSearchableSnapshotInHotPhase && (
-            <>
-              <EuiSpacer />
-              <EuiCallOut
-                data-test-subj="searchableSnapshotFieldsDisabledCallout"
-                title={i18n.translate(
-                  'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutTitle',
-                  { defaultMessage: 'Some actions have been disabled' }
-                )}
-                iconType="questionInCircle"
-              >
-                {i18n.translate(
-                  'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
-                  {
-                    defaultMessage:
-                      'Force merge, shrink, freeze and cold phase searchable snapshots are not allowed when searchable snapshots are enabled in the hot phase.',
-                  }
-                )}
-              </EuiCallOut>
-              <EuiSpacer size="s" />
-            </>
-          )}
+          {renderInfoCallout()}
         </>
       }
       fullWidth
