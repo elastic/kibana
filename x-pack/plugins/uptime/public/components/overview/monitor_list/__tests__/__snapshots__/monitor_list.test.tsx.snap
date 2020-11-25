@@ -92,7 +92,6 @@ exports[`MonitorList component MonitorListPagination component renders a no item
             "nextPagePagination": null,
             "prevPagePagination": null,
             "summaries": Array [],
-            "totalSummaryCount": 0,
           },
           "loading": false,
         }
@@ -295,7 +294,6 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
                 },
               },
             ],
-            "totalSummaryCount": 2,
           },
           "loading": false,
         }
@@ -399,7 +397,6 @@ exports[`MonitorList component renders a no items message when no data is provid
             "nextPagePagination": null,
             "prevPagePagination": null,
             "summaries": Array [],
-            "totalSummaryCount": 0,
           },
           "loading": true,
         }
@@ -603,7 +600,6 @@ exports[`MonitorList component renders error list 1`] = `
                 },
               },
             ],
-            "totalSummaryCount": 2,
           },
           "loading": false,
         }
@@ -806,7 +802,6 @@ exports[`MonitorList component renders loading state 1`] = `
                 },
               },
             ],
-            "totalSummaryCount": 2,
           },
           "loading": true,
         }
@@ -1200,7 +1195,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   class="euiLink euiLink--text c4"
                   type="button"
                 >
-                   
+
                   <span
                     color="subbdued"
                     data-euiicon-type="popout"
@@ -1423,7 +1418,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   class="euiLink euiLink--text c4"
                   type="button"
                 >
-                   
+
                   <span
                     color="subbdued"
                     data-euiicon-type="popout"
@@ -1814,7 +1809,6 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
                 },
               },
             ],
-            "totalSummaryCount": 2,
           },
           "loading": false,
         }

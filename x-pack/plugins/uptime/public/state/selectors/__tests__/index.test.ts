@@ -79,7 +79,6 @@ describe('state selectors', () => {
         prevPagePagination: null,
         nextPagePagination: null,
         summaries: [],
-        totalSummaryCount: 0,
       },
       loading: false,
     },

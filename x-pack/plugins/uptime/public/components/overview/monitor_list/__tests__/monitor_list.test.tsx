@@ -119,7 +119,6 @@ describe('MonitorList component', () => {
       nextPagePagination: null,
       prevPagePagination: null,
       summaries: [testFooSummary, testBarSummary],
-      totalSummaryCount: 2,
     };
   };
 
@@ -158,7 +157,6 @@ describe('MonitorList component', () => {
             summaries: [],
             nextPagePagination: null,
             prevPagePagination: null,
-            totalSummaryCount: 0,
           },
           loading: true,
         }}
@@ -228,7 +226,6 @@ describe('MonitorList component', () => {
           sortOrder: SortOrder.ASC,
         }),
         summaries: [testFooSummary, testBarSummary],
-        totalSummaryCount: 2,
       };
     });
 
@@ -257,7 +254,6 @@ describe('MonitorList component', () => {
               summaries: [],
               nextPagePagination: null,
               prevPagePagination: null,
-              totalSummaryCount: 0,
             },
             loading: false,
           }}
