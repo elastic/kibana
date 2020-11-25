@@ -16,22 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IndexPattern } from '../../kibana_services';
 
-import React from 'react';
-import { shallow } from 'enzyme';
+/**
+ * This function is recording stats of the available fields, for usage in sidebar and sharing
+ * Note that this values aren't displayed, but used for internal calculations
+ */
+export function calcFieldCounts(
+  counts = {} as Record<string, number>,
+  rows: Array<Record<string, any>>,
+  indexPattern: IndexPattern
+) {
+  for (const hit of rows) {
+    const fields = Object.keys(indexPattern.flattenHit(hit));
+    for (const fieldName of fields) {
+      counts[fieldName] = (counts[fieldName] || 0) + 1;
+    }
+  }
 
-jest.mock('../../../kibana_services', () => {
-  return {
-    getServices: () => ({
-      core: { uiSettings: {}, savedObjects: {} },
-      addBasePath: (path) => path,
-    }),
-  };
-});
-
-import { OpenSearchPanel } from './open_search_panel';
-
-test('render', () => {
-  const component = shallow(<OpenSearchPanel onClose={() => {}} makeUrl={() => {}} />);
-  expect(component).toMatchSnapshot();
-});
+  return counts;
+}

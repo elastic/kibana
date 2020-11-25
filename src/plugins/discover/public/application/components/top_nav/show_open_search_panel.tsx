@@ -17,23 +17,37 @@
  * under the License.
  */
 
-import { SearchSource } from '../../../data/public';
-import { SavedObjectSaveOpts } from '../../../saved_objects/public';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { I18nStart } from 'kibana/public';
+import { OpenSearchPanel } from './open_search_panel';
 
-export type SortOrder = [string, string];
-export interface SavedSearch {
-  readonly id: string;
-  title: string;
-  searchSource: SearchSource;
-  description?: string;
-  columns: string[];
-  sort: SortOrder[];
-  destroy: () => void;
-  save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
-  lastSavedTitle?: string;
-  copyOnSave?: boolean;
-}
-export interface SavedSearchLoader {
-  get: (id: string) => Promise<SavedSearch>;
-  urlFor: (id: string) => string;
+let isOpen = false;
+
+export function showOpenSearchPanel({
+  makeUrl,
+  I18nContext,
+}: {
+  makeUrl: (path: string) => string;
+  I18nContext: I18nStart['Context'];
+}) {
+  if (isOpen) {
+    return;
+  }
+
+  isOpen = true;
+  const container = document.createElement('div');
+  const onClose = () => {
+    ReactDOM.unmountComponentAtNode(container);
+    document.body.removeChild(container);
+    isOpen = false;
+  };
+
+  document.body.appendChild(container);
+  const element = (
+    <I18nContext>
+      <OpenSearchPanel onClose={onClose} makeUrl={makeUrl} />
+    </I18nContext>
+  );
+  ReactDOM.render(element, container);
 }

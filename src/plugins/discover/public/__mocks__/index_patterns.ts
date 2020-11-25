@@ -17,23 +17,16 @@
  * under the License.
  */
 
-import { SearchSource } from '../../../data/public';
-import { SavedObjectSaveOpts } from '../../../saved_objects/public';
+import { IndexPatternsService } from '../../../data/common';
+import { indexPatternMock } from './index_pattern';
 
-export type SortOrder = [string, string];
-export interface SavedSearch {
-  readonly id: string;
-  title: string;
-  searchSource: SearchSource;
-  description?: string;
-  columns: string[];
-  sort: SortOrder[];
-  destroy: () => void;
-  save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
-  lastSavedTitle?: string;
-  copyOnSave?: boolean;
-}
-export interface SavedSearchLoader {
-  get: (id: string) => Promise<SavedSearch>;
-  urlFor: (id: string) => string;
-}
+export const indexPatternsMock = ({
+  getCache: () => {
+    return [indexPatternMock];
+  },
+  get: (id: string) => {
+    if (id === 'the-index-pattern-id') {
+      return indexPatternMock;
+    }
+  },
+} as unknown) as IndexPatternsService;
