@@ -70,9 +70,9 @@ export const getAgentPoliciesHandler: RequestHandler<
   }
 };
 
-export const getOneAgentPolicyHandler: RequestHandler<TypeOf<
-  typeof GetOneAgentPolicyRequestSchema.params
->> = async (context, request, response) => {
+export const getOneAgentPolicyHandler: RequestHandler<
+  TypeOf<typeof GetOneAgentPolicyRequestSchema.params>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
     const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);

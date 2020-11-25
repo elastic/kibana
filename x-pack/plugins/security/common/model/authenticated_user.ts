@@ -42,5 +42,8 @@ export interface AuthenticatedUser extends User {
 }
 
 export function canUserChangePassword(user: AuthenticatedUser) {
-  return REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(user.authentication_realm.type);
+  return (
+    REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(user.authentication_realm.type) &&
+    user.authentication_provider.type !== 'anonymous'
+  );
 }

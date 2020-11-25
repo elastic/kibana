@@ -99,7 +99,9 @@ export function ServiceInventory() {
   useTrackPageview({ app: 'apm', path: 'services_overview' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
 
-  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
+  const localFiltersConfig: React.ComponentProps<
+    typeof LocalUIFilters
+  > = useMemo(
     () => ({
       filterNames: ['host', 'agentName'],
       projection: Projection.services,

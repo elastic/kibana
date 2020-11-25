@@ -71,6 +71,7 @@ class FieldText extends Component<
 
   public render() {
     const {
+      name,
       id,
       required,
       label,

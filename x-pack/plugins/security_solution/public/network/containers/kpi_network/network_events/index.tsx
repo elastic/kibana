@@ -74,9 +74,10 @@ export const useNetworkKpiNetworkEvents = ({
       : null
   );
 
-  const [networkKpiNetworkEventsResponse, setNetworkKpiNetworkEventsResponse] = useState<
-    NetworkKpiNetworkEventsArgs
-  >({
+  const [
+    networkKpiNetworkEventsResponse,
+    setNetworkKpiNetworkEventsResponse,
+  ] = useState<NetworkKpiNetworkEventsArgs>({
     networkEvents: 0,
     id: ID,
     inspect: {

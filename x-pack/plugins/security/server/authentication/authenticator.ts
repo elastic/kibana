@@ -10,6 +10,7 @@ import {
   ILegacyClusterClient,
   IBasePath,
 } from '../../../../../src/core/server';
+import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';
 import type { AuthenticationProvider } from '../../common/types';
@@ -20,6 +21,7 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { SessionValue, Session } from '../session_management';
 
 import {
+  AnonymousAuthenticationProvider,
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
   BaseAuthenticationProvider,
@@ -86,6 +88,7 @@ const providerMap = new Map<
   [TokenAuthenticationProvider.type, TokenAuthenticationProvider],
   [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
   [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
+  [AnonymousAuthenticationProvider.type, AnonymousAuthenticationProvider],
 ]);
 
 /**
@@ -328,19 +331,26 @@ export class Authenticator {
     assertRequest(request);
 
     const existingSessionValue = await this.getSessionValue(request);
+    const suggestedProviderName =
+      existingSessionValue?.provider.name ??
+      request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
 
     if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
       this.logger.debug('Redirecting request to Login Selector.');
       return AuthenticationResult.redirectTo(
         `${this.options.basePath.serverBasePath}/login?next=${encodeURIComponent(
           `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
-        )}`
+        )}${
+          suggestedProviderName && !existingSessionValue
+            ? `&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                suggestedProviderName
+              )}`
+            : ''
+        }`
       );
     }
 
-    for (const [providerName, provider] of this.providerIterator(
-      existingSessionValue?.provider.name
-    )) {
+    for (const [providerName, provider] of this.providerIterator(suggestedProviderName)) {
       // Check if current session has been set by this provider.
       const ownsSession =
         existingSessionValue?.provider.name === providerName &&
