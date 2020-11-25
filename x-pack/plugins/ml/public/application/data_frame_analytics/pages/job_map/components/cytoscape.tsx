@@ -86,8 +86,7 @@ export function Cytoscape({
   const dataHandler = useCallback<cytoscape.EventHandler>(
     (event) => {
       if (cy && height > 0) {
-        cy.layout(getLayoutOptions(width, height)).run();
-        // setTimeout(() => cy.layout(getLayoutOptions(width, height)).run(), 150);
+        setTimeout(() => cy.layout(getLayoutOptions(width, height)).run(), 150);
       }
     },
     [cy, height, width]

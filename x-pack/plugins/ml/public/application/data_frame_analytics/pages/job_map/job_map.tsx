@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Cytoscape, Controls, JobMapLegend } from './components';
 import { useMlKibana } from '../../../contexts/kibana';
+import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
 
@@ -80,12 +81,17 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
     notifications.toasts.add(message);
   }
 
-  const updateElements = (nodeId: string, destIndexNode?: string) => {
+  const updateElements = (nodeId: string, nodeLabel: string, destIndexNode?: string) => {
     // Remove job element
     const filteredElements = elements.filter((e: any) => {
-      // Filter out job node and related edges. If target index deleted filter that out, too.
-      const condition =
-        e.data.id !== nodeId && e.data.target !== nodeId && e.data.source !== nodeId;
+      // Filter out job node and related edges, including trained model node.
+      let condition = e.data.id !== nodeId && e.data.target !== nodeId && e.data.source !== nodeId;
+
+      if (e.data.type === JOB_MAP_NODE_TYPES.TRAINED_MODEL) {
+        // remove training model node related to that job
+        condition =
+          condition && nodeDetails[e.data.id]?.metadata?.analytics_config?.id !== nodeLabel;
+      }
 
       if (destIndexNode !== undefined) {
         // Filter out destination index node for that job
@@ -158,7 +164,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
                   onClick={() => setResetCy(!resetCy)}
                 >
                   <FormattedMessage
-                    id="xpack.ml.dataframe.analyticsList.refreshMapButtonLabel"
+                    id="xpack.ml.dataframe.analyticsList.resetMapButtonLabel"
                     defaultMessage="Reset"
                   />
                 </EuiButtonEmpty>

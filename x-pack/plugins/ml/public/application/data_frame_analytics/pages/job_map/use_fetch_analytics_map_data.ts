@@ -21,7 +21,7 @@ interface GetDataObjectParameter {
 export const useFetchAnalyticsMapData = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
-  const [nodeDetails, setNodeDetails] = useState({});
+  const [nodeDetails, setNodeDetails] = useState<Record<string, any>>({});
   const [error, setError] = useState<any>();
   const [message, setMessage] = useState<string | undefined>();
 
