@@ -4,55 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { BehaviorSubject, Observable, OperatorFunction, Subject } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { useCallback } from 'react';
+import { Observable, of, Subject } from 'rxjs';
+import { catchError, map, share, startWith, switchMap, tap } from 'rxjs/operators';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
 } from 'src/plugins/data/public';
+import { SearchStrategyError } from '../../common/search_strategies/common/errors';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
+import { tapUnsubscribe, useObservable, useObservableState } from '../utils/use_observable';
 
-interface DataSearchRequest<
-  RequestParams,
-  RawResponse,
-  Request extends IKibanaSearchRequest<RequestParams>
-> {
+interface DataSearchRequestDescriptor<Request extends IKibanaSearchRequest, RawResponse> {
   request: Request;
   options: ISearchOptions;
   response$: Observable<IKibanaSearchResponse<RawResponse>>;
   abortController: AbortController;
 }
 
-interface DataSearchResponse<
-  RequestParams,
-  Response,
-  Request extends IKibanaSearchRequest<RequestParams>
-> {
+interface NormalizedKibanaSearchResponse<ResponseData> {
+  total?: number;
+  loaded?: number;
+  isRunning: boolean;
+  isPartial: boolean;
+  data: ResponseData;
+  errors: SearchStrategyError[];
+}
+
+interface DataSearchResponseDescriptor<Request extends IKibanaSearchRequest, Response> {
   request: Request;
   options: ISearchOptions;
-  response: IKibanaSearchResponse<Response>;
+  response: NormalizedKibanaSearchResponse<Response>;
   abortController: AbortController;
 }
 
 export const useDataSearch = <
   RequestFactoryArgs extends any[],
-  RequestParams,
-  RawResponse,
-  Request extends IKibanaSearchRequest<RequestParams>
+  Request extends IKibanaSearchRequest,
+  RawResponse
 >({
   getRequest,
 }: {
-  getRequest: (...args: RequestFactoryArgs) => { request: Request; options: ISearchOptions } | null;
+  getRequest: (
+    ...args: RequestFactoryArgs
+  ) => { request: Request; options: ISearchOptions } | null | undefined;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const [request$] = useState(() => new Subject<{ request: Request; options: ISearchOptions }>());
-  const [requests$] = useState<Observable<DataSearchRequest<RequestParams, RawResponse, Request>>>(
-    () =>
-      request$.pipe(
+  const request$ = useObservable(
+    () => new Subject<{ request: Request; options: ISearchOptions }>(),
+    []
+  );
+  const requests$ = useObservable(
+    (inputs$) =>
+      inputs$.pipe(
+        switchMap(([currentRequest$]) => currentRequest$),
         map(({ request, options }) => {
           const abortController = new AbortController();
+          let isAbortable = true;
 
           return {
             abortController,
@@ -64,13 +73,26 @@ export const useDataSearch = <
                 ...options,
               })
               .pipe(
+                // avoid aborting failed or completed requests
+                tap({
+                  error: () => {
+                    isAbortable = false;
+                  },
+                  complete: () => {
+                    isAbortable = false;
+                  },
+                }),
                 tapUnsubscribe(() => {
-                  abortController.abort();
-                })
+                  if (isAbortable) {
+                    abortController.abort();
+                  }
+                }),
+                share()
               ),
           };
         })
-      )
+      ),
+    [request$]
   );
 
   const search = useCallback(
@@ -90,127 +112,95 @@ export const useDataSearch = <
   };
 };
 
-const tapUnsubscribe = (onUnsubscribe: () => void) => <T>(source$: Observable<T>) => {
-  return new Observable<T>((subscriber) => {
-    const subscription = source$.subscribe({
-      next: (value) => subscriber.next(value),
-      error: (error) => subscriber.error(error),
-      complete: () => subscriber.complete(),
-    });
-
-    return () => {
-      onUnsubscribe();
-      subscription.unsubscribe();
-    };
-  });
-};
-
-export const useSubscription = <Value, InitialValue>(
-  source$: Observable<Value>,
-  initialValue: InitialValue | (() => InitialValue)
-) => {
-  const [latestValue, setLatestValue] = useState<Value | InitialValue>(initialValue);
-  const [latestError, setLatestError] = useState<unknown>(null);
-  const [isComplete, setIsComplete] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsComplete(false);
-
-    const subscription = source$.subscribe({
-      next: setLatestValue,
-      error: setLatestError,
-      complete: () => setIsComplete(true),
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [source$]);
-
-  return { latestValue, latestError, isComplete };
-};
-
-export const useLatestDataSearchRequest = <
-  RequestParams,
+export const useLatestPartialDataSearchRequest = <
+  Request extends IKibanaSearchRequest,
   RawResponse,
-  ProcessedResponse,
-  Request extends IKibanaSearchRequest<RequestParams>
+  Response,
+  InitialResponse
 >(
-  requests$: Observable<DataSearchRequest<RequestParams, RawResponse, Request>>,
-  operator: OperatorFunction<
-    DataSearchRequest<RequestParams, RawResponse, Request>,
-    DataSearchRequest<RequestParams, ProcessedResponse, Request>
-  >
+  requests$: Observable<DataSearchRequestDescriptor<Request, RawResponse>>,
+  initialResponse: InitialResponse,
+  projectResponse: (rawResponse: RawResponse) => { data: Response; errors?: SearchStrategyError[] }
 ) => {
-  // const [latestResponse$, setLatestResponse$] = useObservable((inputs$) => inputs$.pipe(), []);
-
-  const [latestResponse$, setLatestResponse$] = useState<
-    Observable<DataSearchResponse<RequestParams, ProcessedResponse, Request>>
-  >(() =>
-    requests$.pipe(
-      operator,
-      switchMap(({ abortController, options, request, response$ }) => {
-        return response$.pipe(map((response) => ({ abortController, options, request, response })));
-      })
-    )
+  const latestResponse$: Observable<
+    DataSearchResponseDescriptor<Request, Response | InitialResponse>
+  > = useObservable(
+    (inputs$) =>
+      inputs$.pipe(
+        switchMap(([currentRequests$, currentProjectResponse, currentInitialResponse]) =>
+          currentRequests$.pipe(
+            switchMap(({ abortController, options, request, response$ }) => {
+              return response$.pipe(
+                map((response) => {
+                  const { data, errors = [] } = currentProjectResponse(response.rawResponse);
+                  return {
+                    abortController,
+                    options,
+                    request,
+                    response: {
+                      data,
+                      errors,
+                      isPartial: response.isPartial ?? false,
+                      isRunning: response.isRunning ?? false,
+                      loaded: response.loaded,
+                      total: response.total,
+                    },
+                  };
+                }),
+                startWith({
+                  abortController,
+                  options,
+                  request,
+                  response: {
+                    data: currentInitialResponse,
+                    errors: [],
+                    isPartial: true,
+                    isRunning: true,
+                    loaded: 0,
+                    total: undefined,
+                  },
+                }),
+                catchError((error) =>
+                  of({
+                    abortController,
+                    options,
+                    request,
+                    response: {
+                      data: currentInitialResponse,
+                      errors: [
+                        {
+                          type: 'generic' as const,
+                          message: `${error}`,
+                        },
+                      ],
+                      isPartial: true,
+                      isRunning: false,
+                      loaded: 0,
+                      total: undefined,
+                    },
+                  })
+                )
+              );
+            })
+          )
+        )
+      ),
+    [requests$, projectResponse, initialResponse] as const
   );
 
-  useEffect(() => {
-    setLatestResponse$(
-      requests$.pipe(
-        operator,
-        switchMap(({ abortController, options, request, response$ }) => {
-          return response$.pipe(
-            map((response) => ({ abortController, options, request, response }))
-          );
-        })
-      )
-    );
-  }, [requests$, operator]);
-
-  const { latestValue } = useSubscription(latestResponse$, null);
+  const { latestValue } = useObservableState(latestResponse$, undefined);
 
   const cancel = useCallback(() => {
     latestValue?.abortController.abort();
   }, [latestValue]);
 
   return {
-    latestResponse: latestValue?.response.rawResponse,
+    latestResponseData: latestValue?.response.data,
+    latestResponseErrors: latestValue?.response.errors,
     isRunning: latestValue?.response.isRunning ?? false,
     isPartial: latestValue?.response.isPartial ?? false,
-    total: latestValue?.response.total ?? 0,
-    loaded: latestValue?.response.loaded ?? 0,
+    total: latestValue?.response.total,
+    loaded: latestValue?.response.loaded,
     cancel,
   };
 };
-
-export const useObservable = <OutputValue, InputValues extends Readonly<any[]>>(
-  createObservableOnce: (inputValues: Observable<InputValues>) => Observable<OutputValue>,
-  inputValues: InputValues
-) => {
-  const [inputValues$] = useState(() => new BehaviorSubject<InputValues>(inputValues));
-  const [output$] = useState(() => createObservableOnce(inputValues$));
-
-  useEffect(() => {
-    inputValues$.next(inputValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, inputValues);
-
-  return output$;
-};
-
-export const mapRawResponse = <RequestParams, RawResponse, Response>(
-  mapper: (rawResponse: RawResponse) => Response
-) =>
-  map<
-    DataSearchRequest<RequestParams, RawResponse, IKibanaSearchRequest<RequestParams>>,
-    DataSearchRequest<RequestParams, Response, IKibanaSearchRequest<RequestParams>>
-  >((request) => ({
-    ...request,
-    response$: request.response$.pipe(
-      map((response) => ({
-        ...response,
-        rawResponse: mapper(response.rawResponse),
-      }))
-    ),
-  }));

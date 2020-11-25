@@ -33,8 +33,8 @@ import { FieldValue } from '../log_text_stream/field_value';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 
 export interface LogEntryFlyoutProps {
-  flyoutError: string | null;
-  flyoutItem: LogEntry | null;
+  flyoutError: string | null | undefined;
+  flyoutItem: LogEntry | null | undefined;
   setFlyoutVisibility: (visible: boolean) => void;
   setFilter: (filter: string, flyoutItemId: string, timeKey?: TimeKey) => void;
   loading: boolean;
@@ -161,7 +161,7 @@ export const LogEntryFlyout = ({
             ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {flyoutItem !== null ? <LogEntryActionsMenu logEntry={flyoutItem} /> : null}
+            {flyoutItem ? <LogEntryActionsMenu logEntry={flyoutItem} /> : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
@@ -184,7 +184,7 @@ export const LogEntryFlyout = ({
             sorting={initialSortingOptions}
           />
         ) : (
-          <InfraFlyoutLoadingPanel>{flyoutError}</InfraFlyoutLoadingPanel>
+          <div>{flyoutError}</div>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
