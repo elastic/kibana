@@ -86,6 +86,10 @@ export const MonitorType = t.intersection([
 
 export type Monitor = t.TypeOf<typeof MonitorType>;
 
+export const PingHeadersType = t.record(t.string, t.union([t.string, t.array(t.string)]));
+
+export type PingHeaders = t.TypeOf<typeof PingHeadersType>;
+
 export const PingType = t.intersection([
   t.type({
     timestamp: t.string,
@@ -135,7 +139,7 @@ export const PingType = t.intersection([
         bytes: t.number,
         redirects: t.array(t.string),
         status_code: t.number,
-        headers: t.record(t.string, t.union([t.string, t.array(t.string)])),
+        headers: PingHeadersType,
       }),
       version: t.string,
     }),
