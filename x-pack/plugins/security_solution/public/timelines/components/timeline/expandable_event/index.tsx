@@ -5,7 +5,7 @@
  */
 
 import { EuiTextColor, EuiLoadingContent, EuiTitle } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 

@@ -15,7 +15,7 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
 
-import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
+import { KqlMode, TimelineModel, ColumnHeaderOptions, TimelineTabs } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
@@ -285,3 +285,8 @@ export const updateIndexNames = actionCreator<{
   id: string;
   indexNames: string[];
 }>('UPDATE_INDEXES_NAME');
+
+export const setActiveTabTimeline = actionCreator<{
+  id: string;
+  activeTab: TimelineTabs;
+}>('SET_ACTIVE_TAB_TIMELINE');
