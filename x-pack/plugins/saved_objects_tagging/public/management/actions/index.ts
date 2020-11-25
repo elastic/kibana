@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
+import { CoreStart } from 'kibana/public';
+import { TagsCapabilities, TagWithRelations } from '../../../common';
+import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
+import { getDeleteAction } from './delete';
+import { getEditAction } from './edit';
+import { getAssignAction } from './assign';
+
+interface GetActionsOptions {
+  core: CoreStart;
+  capabilities: TagsCapabilities;
+  tagClient: ITagInternalClient;
+  tagCache: ITagsCache;
+  assignmentService: ITagAssignmentService;
+  setLoading: (loading: boolean) => void;
+  assignableTypes: string[];
+  fetchTags: () => Promise<void>;
+}
+
+export const getTableActions = ({
+  core: { notifications, overlays },
+  capabilities,
+  tagClient,
+  tagCache,
+  assignmentService,
+  setLoading,
+  assignableTypes,
+  fetchTags,
+}: GetActionsOptions): Array<EuiTableAction<TagWithRelations>> => {
+  const actions: Array<EuiTableAction<TagWithRelations>> = [];
+
+  if (capabilities.edit) {
+    actions.push(getEditAction({ notifications, overlays, tagClient, fetchTags }));
+  }
+
+  if (capabilities.assign && assignableTypes.length > 0) {
+    actions.push(
+      getAssignAction({
+        tagCache,
+        assignmentService,
+        assignableTypes,
+        fetchTags,
+        notifications,
+        overlays,
+      })
+    );
+  }
+
+  if (capabilities.delete) {
+    actions.push(getDeleteAction({ overlays, notifications, tagClient, fetchTags }));
+  }
+
+  return actions;
+};

@@ -21,11 +21,9 @@ interface TagTableProps {
   onQueryChange: (query?: Query) => void;
   selectedTags: TagWithRelations[];
   onSelectionChange: (selection: TagWithRelations[]) => void;
-  onEdit: (tag: TagWithRelations) => void;
-  onDelete: (tag: TagWithRelations) => void;
-  onAssign: (tag: TagWithRelations) => void;
   getTagRelationUrl: (tag: TagWithRelations) => string;
   onShowRelations: (tag: TagWithRelations) => void;
+  actions: Array<EuiTableAction<TagWithRelations>>;
   actionBar: ReactNode;
 }
 
@@ -53,12 +51,10 @@ export const TagTable: FC<TagTableProps> = ({
   onQueryChange,
   selectedTags,
   onSelectionChange,
-  onEdit,
-  onDelete,
-  onAssign,
   onShowRelations,
   getTagRelationUrl,
   actionBar,
+  actions,
 }) => {
   const tableRef = useRef<EuiInMemoryTable<TagWithRelations>>(null);
 
@@ -67,66 +63,6 @@ export const TagTable: FC<TagTableProps> = ({
       tableRef.current.setSelection(selectedTags);
     }
   }, [selectedTags]);
-
-  const actions: Array<EuiTableAction<TagWithRelations>> = [];
-  if (capabilities.edit) {
-    actions.push({
-      name: ({ name }) =>
-        i18n.translate('xpack.savedObjectsTagging.management.table.actions.edit.title', {
-          defaultMessage: 'Edit {name} tag',
-          values: { name },
-        }),
-      isPrimary: true,
-      description: i18n.translate(
-        'xpack.savedObjectsTagging.management.table.actions.edit.description',
-        {
-          defaultMessage: 'Edit this tag',
-        }
-      ),
-      type: 'icon',
-      icon: 'pencil',
-      onClick: (object: TagWithRelations) => onEdit(object),
-      'data-test-subj': 'tagsTableAction-edit',
-    });
-  }
-  if (capabilities.assign) {
-    actions.push({
-      name: ({ name }) =>
-        i18n.translate('xpack.savedObjectsTagging.management.table.actions.assign.title', {
-          defaultMessage: 'Manage {name} assignments',
-          values: { name },
-        }),
-      description: i18n.translate(
-        'xpack.savedObjectsTagging.management.table.actions.assign.description',
-        {
-          defaultMessage: 'Manage assignments',
-        }
-      ),
-      type: 'icon',
-      icon: 'tag',
-      onClick: (object: TagWithRelations) => onAssign(object),
-      'data-test-subj': 'tagsTableAction-assign',
-    });
-  }
-  if (capabilities.delete) {
-    actions.push({
-      name: ({ name }) =>
-        i18n.translate('xpack.savedObjectsTagging.management.table.actions.delete.title', {
-          defaultMessage: 'Delete {name} tag',
-          values: { name },
-        }),
-      description: i18n.translate(
-        'xpack.savedObjectsTagging.management.table.actions.delete.description',
-        {
-          defaultMessage: 'Delete this tag',
-        }
-      ),
-      type: 'icon',
-      icon: 'trash',
-      onClick: (object: TagWithRelations) => onDelete(object),
-      'data-test-subj': 'tagsTableAction-delete',
-    });
-  }
 
   const columns: Array<EuiBasicTableColumn<TagWithRelations>> = [
     {
