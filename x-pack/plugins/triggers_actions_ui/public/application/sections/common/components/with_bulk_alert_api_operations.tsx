@@ -13,7 +13,6 @@ import {
   AlertInstanceSummary,
   AlertingFrameworkHealth,
 } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
   disableAlerts,
@@ -32,6 +31,7 @@ import {
   loadAlertTypes,
   health,
 } from '../../../lib/alert_api';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   muteAlerts: (alerts: Alert[]) => Promise<void>;
@@ -69,7 +69,10 @@ export function withBulkAlertOperations<T>(
   WrappedComponent: React.ComponentType<T & ComponentOpts>
 ): React.FunctionComponent<PropsWithOptionalApiHandlers<T>> {
   return (props: PropsWithOptionalApiHandlers<T>) => {
-    const { http } = useAppDependencies();
+    const { http } = useKibana().services;
+    if (!http) {
+      throw new Error('KibanaContext has not been initalized correctly.');
+    }
     return (
       <WrappedComponent
         {...(props as T)}

@@ -116,11 +116,14 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start(startDeps());
-        find('foobar', { preference: 'pref' });
+        find(
+          { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
+          { preference: 'pref' }
+        );
 
         expect(provider.find).toHaveBeenCalledTimes(1);
         expect(provider.find).toHaveBeenCalledWith(
-          'foobar',
+          { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
           expect.objectContaining({ preference: 'pref' })
         );
       });
@@ -129,12 +132,15 @@ describe('SearchService', () => {
         service.setup({ config: createConfig() });
 
         const { find } = service.start(startDeps());
-        find('foobar', { preference: 'pref' });
+        find(
+          { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
+          { preference: 'pref' }
+        );
 
         expect(fetchServerResultsMock).toHaveBeenCalledTimes(1);
         expect(fetchServerResultsMock).toHaveBeenCalledWith(
           httpStart,
-          'foobar',
+          { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
           expect.objectContaining({ preference: 'pref', aborted$: expect.any(Object) })
         );
       });
@@ -148,25 +154,25 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start(startDeps());
-        find('foobar', { preference: 'pref' });
+        find({ term: 'foobar' }, { preference: 'pref' });
 
         expect(getDefaultPreferenceMock).not.toHaveBeenCalled();
 
         expect(provider.find).toHaveBeenNthCalledWith(
           1,
-          'foobar',
+          { term: 'foobar' },
           expect.objectContaining({
             preference: 'pref',
           })
         );
 
-        find('foobar', {});
+        find({ term: 'foobar' }, {});
 
         expect(getDefaultPreferenceMock).toHaveBeenCalledTimes(1);
 
         expect(provider.find).toHaveBeenNthCalledWith(
           2,
-          'foobar',
+          { term: 'foobar' },
           expect.objectContaining({
             preference: 'default_pref',
           })
@@ -186,7 +192,7 @@ describe('SearchService', () => {
           registerResultProvider(createProvider('A', providerResults));
 
           const { find } = service.start(startDeps());
-          const results = find('foo', {});
+          const results = find({ term: 'foobar' }, {});
 
           expectObservable(results).toBe('a-b-|', {
             a: expectedBatch('1'),
@@ -207,7 +213,7 @@ describe('SearchService', () => {
           fetchServerResultsMock.mockReturnValue(serverResults);
 
           const { find } = service.start(startDeps());
-          const results = find('foo', {});
+          const results = find({ term: 'foobar' }, {});
 
           expectObservable(results).toBe('a-b-|', {
             a: expectedBatch('1'),
@@ -242,7 +248,7 @@ describe('SearchService', () => {
           );
 
           const { find } = service.start(startDeps());
-          const results = find('foo', {});
+          const results = find({ term: 'foobar' }, {});
 
           expectObservable(results).toBe('ab-cd-|', {
             a: expectedBatch('A1', 'A2'),
@@ -276,7 +282,7 @@ describe('SearchService', () => {
           );
 
           const { find } = service.start(startDeps());
-          const results = find('foo', {});
+          const results = find({ term: 'foobar' }, {});
 
           expectObservable(results).toBe('a-b--(c|)', {
             a: expectedBatch('P1'),
@@ -301,7 +307,7 @@ describe('SearchService', () => {
           const aborted$ = hot('----a--|', { a: undefined });
 
           const { find } = service.start(startDeps());
-          const results = find('foo', { aborted$ });
+          const results = find({ term: 'foobar' }, { aborted$ });
 
           expectObservable(results).toBe('--a-|', {
             a: expectedBatch('1'),
@@ -323,7 +329,7 @@ describe('SearchService', () => {
           registerResultProvider(createProvider('A', providerResults));
 
           const { find } = service.start(startDeps());
-          const results = find('foo', {});
+          const results = find({ term: 'foobar' }, {});
 
           expectObservable(results).toBe('a 24ms b 74ms |', {
             a: expectedBatch('1'),
@@ -359,7 +365,7 @@ describe('SearchService', () => {
           );
 
           const { find } = service.start(startDeps());
-          const results = find('foo', {});
+          const results = find({ term: 'foobar' }, {});
 
           expectObservable(results).toBe('ab-(c|)', {
             a: expectedBatch('A1', 'A2'),
@@ -392,7 +398,7 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start(startDeps());
-        const batch = await find('foo', {}).pipe(take(1)).toPromise();
+        const batch = await find({ term: 'foobar' }, {}).pipe(take(1)).toPromise();
 
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({
@@ -420,7 +426,7 @@ describe('SearchService', () => {
           registerResultProvider(createProvider('A', providerResults));
 
           const { find } = service.start(startDeps());
-          const results = find('foo', {});
+          const results = find({ term: 'foobar' }, {});
 
           expectObservable(results).toBe(
             '#',

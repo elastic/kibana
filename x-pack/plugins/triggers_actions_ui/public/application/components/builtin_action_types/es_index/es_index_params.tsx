@@ -10,15 +10,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionParamsProps } from '../../../../types';
 import { IndexActionParams } from '.././types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const IndexParamsFields = ({
   actionParams,
   index,
   editAction,
   messageVariables,
-  docLinks,
   errors,
 }: ActionParamsProps<IndexActionParams>) => {
+  const { docLinks } = useKibana().services;
   const { documents } = actionParams;
 
   const onDocumentsChange = (updatedDocuments: string) => {

@@ -9,7 +9,7 @@ import { getDnsParsedData } from './helpers';
 
 export const dnsMatrixHistogramConfig = {
   buildDsl: buildDnsHistogramQuery,
-  aggName: 'aggregations.NetworkDns.buckets',
-  parseKey: 'dns.buckets',
+  aggName: 'aggregations.dns_name_query_count.buckets',
+  parseKey: 'dns_question_name.buckets',
   parser: getDnsParsedData,
 };

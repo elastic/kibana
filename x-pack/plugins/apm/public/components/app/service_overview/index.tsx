@@ -15,7 +15,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
-import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event_context';
+import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { SearchBar } from '../../shared/search_bar';
@@ -42,7 +43,7 @@ export function ServiceOverview({
   useTrackPageview({ app: 'apm', path: 'service_overview', delay: 15000 });
 
   return (
-    <ChartsSyncContextProvider>
+    <ChartPointerEventContextProvider>
       <SearchBar />
       <EuiPage>
         <EuiFlexGroup direction="column" gutterSize="s">
@@ -103,22 +104,7 @@ export function ServiceOverview({
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={4}>
-                <EuiPanel>
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <EuiTitle size="xs">
-                        <h2>
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.averageDurationBySpanTypeChartTitle',
-                            {
-                              defaultMessage: 'Average duration by span type',
-                            }
-                          )}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
+                <TransactionBreakdownChart showAnnotations={false} />
               </EuiFlexItem>
               <EuiFlexItem grow={6}>
                 <EuiPanel>
@@ -184,6 +170,6 @@ export function ServiceOverview({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPage>
-    </ChartsSyncContextProvider>
+    </ChartPointerEventContextProvider>
   );
 }
