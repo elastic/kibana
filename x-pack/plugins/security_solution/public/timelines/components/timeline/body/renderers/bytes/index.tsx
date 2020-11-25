@@ -23,6 +23,7 @@ export const Bytes = React.memo<{
 }>(({ contextId, eventId, fieldName, value }) => (
   <DefaultDraggable
     id={`bytes-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+    // @ts-expect-error
     name={name}
     field={fieldName}
     tooltipContent={null}

@@ -91,7 +91,7 @@ export const buildDnsQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {
@@ -102,7 +102,7 @@ export const buildDnsQuery = ({
           aggs: {
             bucket_sort: {
               bucket_sort: {
-                sort: [getQueryOrder(sort), { _key: { order: 'asc' } }],
+                sort: [getQueryOrder(sort), { _key: { order: Direction.asc } }],
                 from: cursorStart,
                 size: querySize,
               },
