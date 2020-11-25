@@ -31,10 +31,8 @@ import { DataPublicPluginStart, IndexPatternsContract } from '../../../data/publ
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { EmbeddableStart } from '../../../embeddable/public';
 import { SharePluginStart } from '../../../share/public';
-import { Storage } from '../../../kibana_utils/public';
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
@@ -72,7 +70,6 @@ export interface DashboardCapabilities {
 export interface DashboardAppServices {
   core: CoreStart;
   chrome: ChromeStart;
-  localStorage: Storage;
   share?: SharePluginStart;
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
@@ -82,7 +79,6 @@ export interface DashboardAppServices {
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
   indexPatterns: IndexPatternsContract;
-  addBasePath: (path: string) => string;
   usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardCapabilities;
@@ -91,7 +87,5 @@ export interface DashboardAppServices {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedObjectsClient: SavedObjectsClientContract;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  navigateToDefaultApp: UrlForwardingStart['navigateToDefaultApp'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
-  navigateToLegacyKibanaUrl: UrlForwardingStart['navigateToLegacyKibanaUrl'];
 }

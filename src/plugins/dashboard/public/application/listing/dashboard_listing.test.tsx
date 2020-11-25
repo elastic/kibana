@@ -1,0 +1,218 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import { mount } from 'enzyme';
+import {
+  IUiSettingsClient,
+  PluginInitializerContext,
+  ScopedHistory,
+  SimpleSavedObject,
+} from '../../../../../core/public';
+
+import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../../../saved_objects/public';
+import { IndexPatternsContract, SavedQueryService } from '../../../../data/public';
+import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
+import { DashboardListing, DashboardListingProps } from './dashboard_listing';
+import { NavigationPublicPluginStart } from '../../../../navigation/public';
+import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
+import { createKbnUrlStateStorage } from '../../../../kibana_utils/public';
+import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { DashboardAppServices, DashboardCapabilities } from '../types';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
+import { I18nProvider } from '@kbn/i18n/react';
+import React from 'react';
+
+function makeDefaultServices(): DashboardAppServices {
+  const core = coreMock.createStart();
+  const savedDashboards = {} as SavedObjectLoader;
+  savedDashboards.find = (search: string, sizeOrOptions: number | SavedObjectLoaderFindOptions) => {
+    const size = typeof sizeOrOptions === 'number' ? sizeOrOptions : sizeOrOptions.size ?? 10;
+    const hits = [];
+    for (let i = 0; i < size; i++) {
+      hits.push({
+        id: `dashboard${i}`,
+        title: `dashboard${i} - ${search} - title`,
+        description: `dashboard${i} desc`,
+      });
+    }
+    return Promise.resolve({
+      total: size,
+      hits,
+    });
+  };
+  return {
+    savedObjects: savedObjectsPluginMock.createStartContract(),
+    embeddable: embeddablePluginMock.createInstance().doStart(),
+    dashboardCapabilities: {} as DashboardCapabilities,
+    initializerContext: {} as PluginInitializerContext,
+    chrome: chromeServiceMock.createStartContract(),
+    navigation: {} as NavigationPublicPluginStart,
+    savedObjectsClient: core.savedObjects.client,
+    data: dataPluginMock.createStartContract(),
+    indexPatterns: {} as IndexPatternsContract,
+    scopedHistory: () => ({} as ScopedHistory),
+    savedQueryService: {} as SavedQueryService,
+    setHeaderActionMenu: (mountPoint) => {},
+    uiSettings: {} as IUiSettingsClient,
+    restorePreviousUrl: () => {},
+    onAppLeave: (handler) => {},
+    savedDashboards,
+    core,
+  };
+}
+
+function makeDefaultProps(): DashboardListingProps {
+  return {
+    redirectTo: jest.fn(),
+    kbnUrlStateStorage: createKbnUrlStateStorage(),
+  };
+}
+
+function mountWith({
+  props: incomingProps,
+  services: incomingServices,
+}: {
+  props?: DashboardListingProps;
+  services?: DashboardAppServices;
+}) {
+  const services = incomingServices ?? makeDefaultServices();
+  const props = incomingProps ?? makeDefaultProps();
+  const wrappingComponent: React.FC<{
+    children: React.ReactNode;
+  }> = ({ children }) => {
+    return (
+      <I18nProvider>
+        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+      </I18nProvider>
+    );
+  };
+  const component = mount(<DashboardListing {...props} />, { wrappingComponent });
+  return { component, props, services };
+}
+
+describe('after fetch', () => {
+  test('renders all table rows', async () => {
+    const { component } = mountWith({});
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  test('renders call to action when no dashboards exist', async () => {
+    const services = makeDefaultServices();
+    services.savedDashboards.find = () => {
+      return Promise.resolve({
+        total: 0,
+        hits: [],
+      });
+    };
+    const { component } = mountWith({ services });
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  test('initialFilter', async () => {
+    const props = makeDefaultProps();
+    props.initialFilter = 'testFilter';
+    const { component } = mountWith({ props });
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  test('When given a title that matches multiple dashboards, filter on the title', async () => {
+    const title = 'search by title';
+    const props = makeDefaultProps();
+    props.title = title;
+    const services = makeDefaultServices();
+    services.savedObjectsClient.find = <T extends unknown>() => {
+      return Promise.resolve({
+        perPage: 10,
+        total: 2,
+        page: 0,
+        savedObjects: [
+          { attributes: { title: `${title}_number1` }, id: 'hello there' } as SimpleSavedObject<T>,
+          { attributes: { title: `${title}_number2` }, id: 'goodbye' } as SimpleSavedObject<T>,
+        ],
+      });
+    };
+    const { component } = mountWith({ props, services });
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+    expect(component).toMatchSnapshot();
+    expect(props.redirectTo).not.toHaveBeenCalled();
+  });
+
+  test('When given a title that matches one dashboard, redirect to dashboard', async () => {
+    const title = 'search by title';
+    const props = makeDefaultProps();
+    props.title = title;
+    const services = makeDefaultServices();
+    services.savedObjectsClient.find = <T extends unknown>() => {
+      return Promise.resolve({
+        perPage: 10,
+        total: 1,
+        page: 0,
+        savedObjects: [{ attributes: { title }, id: 'you_found_me' } as SimpleSavedObject<T>],
+      });
+    };
+    const { component } = mountWith({ props, services });
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+    expect(props.redirectTo).toHaveBeenCalledWith({
+      destination: 'dashboard',
+      id: 'you_found_me',
+      useReplace: true,
+    });
+  });
+
+  test('hideWriteControls', async () => {
+    const services = makeDefaultServices();
+    services.dashboardCapabilities.hideWriteControls = true;
+    const { component } = mountWith({ services });
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  test('renders warning when listingLimit is exceeded', async () => {
+    const services = makeDefaultServices();
+    services.savedObjects.settings.getListingLimit = () => 1;
+    const { component } = mountWith({ services });
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+});

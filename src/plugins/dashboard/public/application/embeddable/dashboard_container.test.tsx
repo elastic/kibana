@@ -17,12 +17,17 @@
  * under the License.
  */
 
-import { nextTick } from '@kbn/test/jest';
+import { findTestSubject, nextTick } from '@kbn/test/jest';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
-
+import { I18nProvider } from '@kbn/i18n/react';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { isErrorEmbeddable, ViewMode } from '../../../../embeddable/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddablePanel,
+  isErrorEmbeddable,
+  ViewMode,
+} from '../../../../embeddable/public';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
@@ -30,7 +35,14 @@ import {
   ContactCardEmbeddable,
   EMPTY_EMBEDDABLE,
   ContactCardEmbeddableOutput,
+  createEditModeAction,
 } from '../../../../embeddable/public/lib/test_samples';
+import { applicationServiceMock } from '../../../../../core/public/mocks';
+import { inspectorPluginMock } from '../../../../inspector/public/mocks';
+import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
+import React from 'react';
+import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { mount } from 'enzyme';
 
 const options: DashboardContainerOptions = {
   application: {} as any,
@@ -50,6 +62,7 @@ beforeEach(() => {
     new ContactCardEmbeddableFactory((() => null) as any, {} as any)
   );
   options.embeddable = doStart();
+  options.application = applicationServiceMock.createStartContract();
 });
 
 test('DashboardContainer initializes embeddables', async (done) => {
@@ -199,4 +212,72 @@ test('searchSessionId propagates to children', async () => {
   container.updateInput({ searchSessionId: searchSessionId2 });
 
   expect(embeddable.getInput().searchSessionId).toBe(searchSessionId2);
+});
+
+test('DashboardContainer in edit mode shows edit mode actions', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  const uiActionsSetup = uiActionsPluginMock.createSetupContract();
+
+  const editModeAction = createEditModeAction();
+  uiActionsSetup.registerAction(editModeAction);
+  uiActionsSetup.addTriggerAction(CONTEXT_MENU_TRIGGER, editModeAction);
+
+  const initialInput = getSampleDashboardInput({ viewMode: ViewMode.VIEW });
+  const container = new DashboardContainer(initialInput, options);
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Bob',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <KibanaContextProvider services={options}>
+        <EmbeddablePanel
+          embeddable={embeddable}
+          getActions={() => Promise.resolve([])}
+          getAllEmbeddableFactories={(() => []) as any}
+          getEmbeddableFactory={(() => null) as any}
+          notifications={{} as any}
+          application={options.application}
+          overlays={{} as any}
+          inspector={inspector}
+          SavedObjectFinder={() => null}
+        />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+
+  const button = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
+
+  expect(button.length).toBe(1);
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+
+  expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
+
+  const editAction = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
+
+  expect(editAction.length).toBe(0);
+
+  container.updateInput({ viewMode: ViewMode.EDIT });
+  await nextTick();
+  component.update();
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  await nextTick();
+  component.update();
+  expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(0);
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  await nextTick();
+  component.update();
+  expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(1);
+
+  await nextTick();
+  component.update();
+
+  // TODO: Address this.
+  // const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
+  // expect(action.length).toBe(1);
 });

@@ -31,11 +31,7 @@ import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from './types';
 import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
 
-import {
-  createKbnUrlStateStorage,
-  Storage,
-  withNotifyOnErrors,
-} from '../../../kibana_utils/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../../kibana_utils/public';
 import { dashboardPageTitle, dashboardReadonlyBadge } from './dashboard_strings';
 import {
   AppMountParameters,
@@ -85,7 +81,6 @@ export async function mountApp({
     share: shareStart,
     embeddable: embeddableStart,
     kibanaLegacy: { dashboardConfig },
-    urlForwarding: { navigateToDefaultApp, navigateToLegacyKibanaUrl },
     savedObjectsTaggingOss,
   } = pluginsStart;
 
@@ -100,15 +95,11 @@ export async function mountApp({
     initializerContext,
     restorePreviousUrl,
     setHeaderActionMenu,
-    navigateToDefaultApp,
     chrome: coreStart.chrome,
-    navigateToLegacyKibanaUrl,
     embeddable: embeddableStart,
     uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
     indexPatterns: dataStart.indexPatterns,
-    localStorage: new Storage(localStorage),
-    addBasePath: coreStart.http.basePath.prepend,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
