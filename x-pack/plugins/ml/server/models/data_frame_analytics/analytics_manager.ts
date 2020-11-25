@@ -283,31 +283,34 @@ export class AnalyticsManager {
     details[modelNodeId] = data;
     // fetch source job data and create elements
     if (sourceJobId !== undefined) {
-      data = await this.getAnalyticsData(sourceJobId);
+      try {
+        data = await this.getAnalyticsData(sourceJobId);
+        nextLinkId = data?.source?.index[0];
+        nextType = JOB_MAP_NODE_TYPES.INDEX;
 
-      nextLinkId = data?.source?.index[0];
-      nextType = JOB_MAP_NODE_TYPES.INDEX;
+        previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
-      previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+        resultElements.push({
+          data: {
+            id: previousNodeId,
+            label: data.id,
+            type: JOB_MAP_NODE_TYPES.ANALYTICS,
+            analysisType: getAnalysisType(data?.analysis),
+          },
+        });
+        // Create edge between job and model
+        modelElements.push({
+          data: {
+            id: `${previousNodeId}~${modelNodeId}`,
+            source: previousNodeId,
+            target: modelNodeId,
+          },
+        });
 
-      resultElements.push({
-        data: {
-          id: previousNodeId,
-          label: data.id,
-          type: JOB_MAP_NODE_TYPES.ANALYTICS,
-          analysisType: getAnalysisType(data?.analysis),
-        },
-      });
-      // Create edge between job and model
-      modelElements.push({
-        data: {
-          id: `${previousNodeId}~${modelNodeId}`,
-          source: previousNodeId,
-          target: modelNodeId,
-        },
-      });
-
-      details[previousNodeId] = data;
+        details[previousNodeId] = data;
+      } catch (e) {
+        // fail silently if job doesn't exist
+      }
     }
 
     return { data, details, resultElements, modelElements, nextLinkId, nextType, previousNodeId };

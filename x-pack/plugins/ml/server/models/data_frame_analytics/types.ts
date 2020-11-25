@@ -91,8 +91,11 @@ export const isCompleteInitialReturnType = (arg: any): arg is CompleteInitialEle
   return (
     keys.length > 0 &&
     keys.includes('nextLinkId') &&
+    arg.nextLinkId !== undefined &&
     keys.includes('nextType') &&
-    keys.includes('previousNodeId')
+    arg.nextType !== undefined &&
+    keys.includes('previousNodeId') &&
+    arg.previousNodeId !== undefined
   );
 };
 export const isAnalyticsMapNodeElement = (arg: any): arg is AnalyticsMapNodeElement => {
