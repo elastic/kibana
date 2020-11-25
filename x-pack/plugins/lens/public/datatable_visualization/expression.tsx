@@ -348,36 +348,39 @@ export function DatatableComponent(props: DatatableRenderProps) {
     .filter(({ field }) => !!field);
 
   if (!!props.rowHasRowClickTriggerActions) {
-    const actions: EuiTableActionsColumnType<unknown> = {
-      name: 'Actions',
-      actions: [
-        {
-          name: i18n.translate('xpack.lens.tableRowMore', {
-            defaultMessage: 'More',
-          }),
-          description: i18n.translate('xpack.lens.tableRowMoreDescription', {
-            defaultMessage: 'Table row context menu',
-          }),
-          type: 'icon',
-          icon: ({ rowIndex }: { rowIndex: number }) => {
-            if (
-              !!props.rowHasRowClickTriggerActions &&
-              !props.rowHasRowClickTriggerActions[rowIndex]
-            )
-              return 'empty';
-            return 'boxesVertical';
+    const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions.find((x) => x);
+    if (hasAtLeastOneRowClickAction) {
+      const actions: EuiTableActionsColumnType<unknown> = {
+        name: 'Actions',
+        actions: [
+          {
+            name: i18n.translate('xpack.lens.tableRowMore', {
+              defaultMessage: 'More',
+            }),
+            description: i18n.translate('xpack.lens.tableRowMoreDescription', {
+              defaultMessage: 'Table row context menu',
+            }),
+            type: 'icon',
+            icon: ({ rowIndex }: { rowIndex: number }) => {
+              if (
+                !!props.rowHasRowClickTriggerActions &&
+                !props.rowHasRowClickTriggerActions[rowIndex]
+              )
+                return 'empty';
+              return 'boxesVertical';
+            },
+            onClick: ({ rowIndex }) => {
+              onRowContextMenuClick({
+                rowIndex,
+                table: firstTable,
+                columns: props.args.columns.columnIds,
+              });
+            },
           },
-          onClick: ({ rowIndex }) => {
-            onRowContextMenuClick({
-              rowIndex,
-              table: firstTable,
-              columns: props.args.columns.columnIds,
-            });
-          },
-        },
-      ],
-    } as EuiTableActionsColumnType<unknown>;
-    tableColumns.push(actions);
+        ],
+      } as EuiTableActionsColumnType<unknown>;
+      tableColumns.push(actions);
+    }
   }
 
   return (
