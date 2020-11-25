@@ -10,7 +10,6 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
-import 'react-vis/dist/style.css';
 import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
 import {
   KibanaContextProvider,

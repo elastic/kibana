@@ -15,6 +15,7 @@ import {
   ChromeBreadcrumb,
   CoreStart,
   ScopedHistory,
+  SavedObjectsClientContract,
 } from 'kibana/public';
 import { KibanaFeature } from '../../../features/common';
 import { Section, routeToAlertDetails } from './constants';
@@ -24,6 +25,7 @@ import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerts/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 const TriggersActionsUIHome = lazy(async () => import('./home'));
 const AlertDetailsRoute = lazy(
@@ -31,13 +33,14 @@ const AlertDetailsRoute = lazy(
 );
 
 export interface AppDeps {
-  dataPlugin: DataPublicPluginStart;
+  data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   chrome: ChromeStart;
   alerts?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;
+  storage?: Storage;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -45,6 +48,9 @@ export interface AppDeps {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertTypeRegistry: AlertTypeRegistryContract;
   history: ScopedHistory;
+  savedObjects?: {
+    client: SavedObjectsClientContract;
+  };
   kibanaFeatures: KibanaFeature[];
 }
 

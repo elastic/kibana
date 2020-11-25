@@ -9,18 +9,23 @@
 import { HttpService } from '../http_service';
 
 import { basePath } from './index';
-import { JobType } from '../../../../common/types/saved_objects';
+import {
+  JobType,
+  RepairSavedObjectResponse,
+  SavedObjectResult,
+  JobsSpacesResponse,
+} from '../../../../common/types/saved_objects';
 
 export const savedObjectsApiProvider = (httpService: HttpService) => ({
   jobsSpaces() {
-    return httpService.http<any>({
+    return httpService.http<JobsSpacesResponse>({
       path: `${basePath()}/saved_objects/jobs_spaces`,
       method: 'GET',
     });
   },
   assignJobToSpace(jobType: JobType, jobIds: string[], spaces: string[]) {
     const body = JSON.stringify({ jobType, jobIds, spaces });
-    return httpService.http<any>({
+    return httpService.http<SavedObjectResult>({
       path: `${basePath()}/saved_objects/assign_job_to_space`,
       method: 'POST',
       body,
@@ -28,10 +33,18 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
   },
   removeJobFromSpace(jobType: JobType, jobIds: string[], spaces: string[]) {
     const body = JSON.stringify({ jobType, jobIds, spaces });
-    return httpService.http<any>({
+    return httpService.http<SavedObjectResult>({
       path: `${basePath()}/saved_objects/remove_job_from_space`,
       method: 'POST',
       body,
+    });
+  },
+
+  repairSavedObjects(simulate: boolean = false) {
+    return httpService.http<RepairSavedObjectResponse>({
+      path: `${basePath()}/saved_objects/repair`,
+      method: 'GET',
+      query: { simulate },
     });
   },
 });

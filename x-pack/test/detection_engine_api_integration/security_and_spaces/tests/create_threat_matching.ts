@@ -17,7 +17,7 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
-  getAllSignals,
+  getSignalsByIds,
   removeServerGeneratedProperties,
   waitForRuleSuccess,
   waitForSignalsToBePresent,
@@ -30,7 +30,6 @@ import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
 
   /**
    * Specific api integration tests for threat matching rule type
@@ -59,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -69,7 +68,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-        const ruleResponse = await createRule(supertest, getCreateThreatMatchRulesSchemaMock());
+        const ruleResponse = await createRule(
+          supertest,
+          getCreateThreatMatchRulesSchemaMock('rule-1', true)
+        );
         await waitForRuleSuccess(supertest, ruleResponse.id);
 
         const { body: statusBody } = await supertest
@@ -79,21 +81,21 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
-        expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock());
+        expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock(true));
         expect(statusBody[ruleResponse.id].current_status.status).to.eql('succeeded');
       });
     });
 
     describe('tests with auditbeat data', () => {
       beforeEach(async () => {
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
         await createSignalsIndex(supertest);
         await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
         await esArchiver.unload('auditbeat/hosts');
       });
 
@@ -125,9 +127,10 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        await createRule(supertest, rule);
-        await waitForSignalsToBePresent(supertest, 10);
-        const signalsOpen = await getAllSignals(supertest);
+        const { id } = await createRule(supertest, rule);
+        await waitForRuleSuccess(supertest, id);
+        await waitForSignalsToBePresent(supertest, 10, [id]);
+        const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
       });
 
@@ -161,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const ruleResponse = await createRule(supertest, rule);
         await waitForRuleSuccess(supertest, ruleResponse.id);
-        const signalsOpen = await getAllSignals(supertest);
+        const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
 
@@ -199,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const ruleResponse = await createRule(supertest, rule);
         await waitForRuleSuccess(supertest, ruleResponse.id);
-        const signalsOpen = await getAllSignals(supertest);
+        const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
 
@@ -237,7 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const ruleResponse = await createRule(supertest, rule);
         await waitForRuleSuccess(supertest, ruleResponse.id);
-        const signalsOpen = await getAllSignals(supertest);
+        const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
     });

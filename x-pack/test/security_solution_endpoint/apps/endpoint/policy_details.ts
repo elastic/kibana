@@ -52,6 +52,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.packagePolicy.name
         );
       });
+
+      it('and the show advanced settings button is clicked', async () => {
+        await testSubjects.missingOrFail('advancedPolicyPanel');
+
+        let advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
+        await advancedPolicyButton.click();
+
+        await testSubjects.existOrFail('advancedPolicyPanel');
+
+        advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
+        await advancedPolicyButton.click();
+        await testSubjects.missingOrFail('advancedPolicyPanel');
+      });
     });
 
     describe('and the save button is clicked', () => {
@@ -98,7 +111,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyLinuxEvent_file'),
           pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyMacEvent_file'),
         ]);
+
+        const advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
+        await advancedPolicyButton.click();
+
+        const advancedPolicyField = await pageObjects.policy.findAdvancedPolicyField();
+        await advancedPolicyField.clearValue();
+        await advancedPolicyField.click();
+        await advancedPolicyField.type('true');
         await pageObjects.policy.confirmAndSave();
+
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
@@ -191,6 +213,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               linux: {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
+                advanced: { agent: { connection_delay: 'true' } },
               },
               mac: {
                 events: { file: false, network: true, process: true },

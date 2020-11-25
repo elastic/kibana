@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await spaces.delete(destinationSpaceId);
       });
 
-      it('Dashboards linked by a drilldown are both copied to a space', async () => {
+      it.skip('Dashboards linked by a drilldown are both copied to a space', async () => {
         await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject(
           dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
         );

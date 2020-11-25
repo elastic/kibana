@@ -70,13 +70,13 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     uiSettings,
     docLinks,
     charts,
-    dataPlugin,
+    data,
     setBreadcrumbs,
     chrome,
   } = useAppDependencies();
   const [{}, dispatch] = useReducer(alertReducer, { alert });
-  const setInitialAlert = (key: string, value: any) => {
-    dispatch({ command: { type: 'setAlert' }, payload: { key, value } });
+  const setInitialAlert = (value: Alert) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
   // Set breadcrumb and page title
@@ -162,17 +162,17 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                             uiSettings,
                             docLinks,
                             charts,
-                            dataFieldsFormats: dataPlugin.fieldFormats,
+                            dataFieldsFormats: data.fieldFormats,
                             reloadAlerts: setAlert,
                             capabilities,
-                            dataUi: dataPlugin.ui,
-                            dataIndexPatterns: dataPlugin.indexPatterns,
+                            dataUi: data.ui,
+                            dataIndexPatterns: data.indexPatterns,
                           }}
                         >
                           <AlertEdit
                             initialAlert={alert}
                             onClose={() => {
-                              setInitialAlert('alert', alert);
+                              setInitialAlert(alert);
                               setEditFlyoutVisibility(false);
                             }}
                           />

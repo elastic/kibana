@@ -82,7 +82,7 @@ describe('alert_add', () => {
       toastNotifications: mocks.notifications.toasts,
       http: mocks.http,
       uiSettings: mocks.uiSettings,
-      dataPlugin: dataPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       actionTypeRegistry,
       alertTypeRegistry,

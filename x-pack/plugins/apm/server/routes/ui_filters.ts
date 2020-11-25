@@ -40,6 +40,7 @@ export const uiFiltersEnvironmentsRoute = createRoute({
       rangeRt,
     ]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
@@ -94,6 +95,7 @@ function createLocalFiltersRoute<
     params: t.type({
       query: t.intersection([localUiBaseQueryRt, queryRt]),
     }),
+    options: { tags: ['access:apm'] },
     handler: async ({ context, request }) => {
       const setup = await setupRequest(context, request);
       const { uiFilters } = setup;

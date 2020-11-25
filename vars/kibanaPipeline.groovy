@@ -373,12 +373,7 @@ def scriptTaskDocker(description, script) {
 
 def buildDocker() {
   sh(
-    script: """
-      cp /usr/local/bin/runbld .ci/
-      cp /usr/local/bin/bash_standard_lib.sh .ci/
-      cd .ci
-      docker build -t kibana-ci -f ./Dockerfile .
-    """,
+    script: "./.ci/build_docker.sh",
     label: 'Build CI Docker image'
   )
 }

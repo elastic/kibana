@@ -108,4 +108,14 @@ module.exports = {
     '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
   ],
+
+  // An array of regexp pattern strings that are matched against all source file paths, matched files to include/exclude for code coverage
+  collectCoverageFrom: [
+    '**/*.{js,mjs,jsx,ts,tsx}',
+    '!**/{__test__,__snapshots__,__examples__,mocks,tests,test_helpers,integration_tests,types}/**/*',
+    '!**/*mock*.ts',
+    '!**/*.test.ts',
+    '!**/*.d.ts',
+    '!**/index.{js,ts}',
+  ],
 };

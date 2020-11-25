@@ -42,11 +42,8 @@ import {
   AUTO_INTERVAL,
 } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
-import {
-  TIME_RANGE_DATA_MODES,
-  TIME_RANGE_MODE_KEY,
-} from '../../../../../plugins/vis_type_timeseries/common/timerange_data_modes';
-import { PANEL_TYPES } from '../../../../../plugins/vis_type_timeseries/common/panel_types';
+import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/timerange_data_modes';
+import { PANEL_TYPES } from '../../../common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
 

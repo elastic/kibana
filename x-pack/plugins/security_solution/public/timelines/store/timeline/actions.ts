@@ -19,6 +19,7 @@ import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
+  TimelineExpandedEvent,
   TimelineTypeLiteral,
   RowRendererId,
 } from '../../../../common/types/timeline';
@@ -34,6 +35,12 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
+interface ToggleExpandedEvent {
+  timelineId: string;
+  event: TimelineExpandedEvent;
+}
+export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
+
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;
   id: string;
@@ -41,14 +48,6 @@ export const upsertColumn = actionCreator<{
 }>('UPSERT_COLUMN');
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
-
-export const applyDeltaToWidth = actionCreator<{
-  id: string;
-  delta: number;
-  bodyClientWidthPixels: number;
-  minWidthPixels: number;
-  maxWidthPercent: number;
-}>('APPLY_DELTA_TO_WIDTH');
 
 export const applyDeltaToColumnWidth = actionCreator<{
   id: string;
@@ -64,6 +63,7 @@ export interface TimelineInput {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
+  expandedEvent?: TimelineExpandedEvent;
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
   itemsPerPage?: number;
@@ -172,11 +172,6 @@ export const updateDataProviderType = actionCreator<{
   type: DataProviderType;
   providerId: string;
 }>('UPDATE_PROVIDER_TYPE');
-
-export const updateHighlightedDropAndProviderId = actionCreator<{
-  id: string;
-  providerId: string;
-}>('UPDATE_DROP_AND_PROVIDER');
 
 export const updateDescription = actionCreator<{
   id: string;

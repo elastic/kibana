@@ -16,6 +16,7 @@ export const transactionByTraceIdRoute = createRoute({
       traceId: t.string,
     }),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const { traceId } = context.params.path;
     const setup = await setupRequest(context, request);

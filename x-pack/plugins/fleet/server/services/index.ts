@@ -10,6 +10,7 @@ import * as settingsService from './settings';
 import { getAgent, listAgents } from './agents';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
+import { agentPolicyService } from './agent_policy';
 
 export { getRegistryUrl } from './epm/registry/registry_url';
 
@@ -58,6 +59,13 @@ export interface AgentService {
    * List agents
    */
   listAgents: typeof listAgents;
+}
+
+export interface AgentPolicyServiceInterface {
+  get: typeof agentPolicyService['get'];
+  list: typeof agentPolicyService['list'];
+  getDefaultAgentPolicyId: typeof agentPolicyService['getDefaultAgentPolicyId'];
+  getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
 }
 
 // Saved object services

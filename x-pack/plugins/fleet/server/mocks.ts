@@ -5,12 +5,13 @@
  */
 
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
-import { IngestManagerAppContext } from './plugin';
+import { FleetAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
 import { PackagePolicyServiceInterface } from './services/package_policy';
+import { AgentPolicyServiceInterface, AgentService } from './services';
 
-export const createAppContextStartContractMock = (): IngestManagerAppContext => {
+export const createAppContextStartContractMock = (): FleetAppContext => {
   return {
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
@@ -34,4 +35,29 @@ export const createPackagePolicyServiceMock = () => {
     list: jest.fn(),
     update: jest.fn(),
   } as jest.Mocked<PackagePolicyServiceInterface>;
+};
+
+/**
+ * Create mock AgentPolicyService
+ */
+
+export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
+  return {
+    get: jest.fn(),
+    list: jest.fn(),
+    getDefaultAgentPolicyId: jest.fn(),
+    getFullAgentPolicy: jest.fn(),
+  };
+};
+
+/**
+ * Creates a mock AgentService
+ */
+export const createMockAgentService = (): jest.Mocked<AgentService> => {
+  return {
+    getAgentStatusById: jest.fn(),
+    authenticateAgentWithAccessToken: jest.fn(),
+    getAgent: jest.fn(),
+    listAgents: jest.fn(),
+  };
 };

@@ -323,6 +323,7 @@ export class MBMap extends React.Component {
           addFilters={this.props.addFilters}
           getFilterActions={this.props.getFilterActions}
           getActionContext={this.props.getActionContext}
+          onSingleValueTrigger={this.props.onSingleValueTrigger}
           geoFields={this.props.geoFields}
           renderTooltipContent={this.props.renderTooltipContent}
         />

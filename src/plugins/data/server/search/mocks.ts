@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import type { RequestHandlerContext } from 'src/core/server';
+import { coreMock } from '../../../../core/server/mocks';
 import { ISearchSetup, ISearchStart } from './types';
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
 import { searchSourceMock } from './search_source/mocks';
@@ -38,5 +40,24 @@ export function createSearchStartMock(): jest.Mocked<ISearchStart> {
       cancel: jest.fn(),
     }),
     searchSource: searchSourceMock.createStartContract(),
+  };
+}
+
+export function createSearchRequestHandlerContext(): jest.Mocked<RequestHandlerContext> {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    search: {
+      search: jest.fn(),
+      cancel: jest.fn(),
+      session: {
+        save: jest.fn(),
+        get: jest.fn(),
+        find: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        trackId: jest.fn(),
+        getId: jest.fn(),
+      },
+    },
   };
 }

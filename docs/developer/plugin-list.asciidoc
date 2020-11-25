@@ -373,6 +373,10 @@ and actions.
 |Backend and core front-end react-components for GeoJson file upload. Only supports the Maps plugin.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
+|Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search/README.md[globalSearch]
 |The GlobalSearch plugin provides an easy way to search for various objects, such as applications
 or dashboards from the Kibana instance, from both server and client-side plugins
@@ -407,10 +411,6 @@ Index Management by running this series of requests in Console:
 |{kib-repo}blob/{branch}/x-pack/plugins/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[ingestManager]
-|Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]

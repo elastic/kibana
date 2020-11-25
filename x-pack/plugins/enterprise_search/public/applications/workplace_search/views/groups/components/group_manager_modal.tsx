@@ -26,7 +26,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { EuiButton as EuiLinkButton } from '../../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 import { Group } from '../../../types';
 import { ORG_SOURCES_PATH } from '../../../routes';
@@ -96,9 +96,9 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   const handleSelectAll = () => selectAll(allSelected ? [] : allItems);
 
   const sourcesButton = (
-    <EuiLinkButton to={ORG_SOURCES_PATH} fill color="primary">
+    <EuiButtonTo to={ORG_SOURCES_PATH} fill color="primary">
       {ADD_SOURCE_BUTTON_TEXT}
-    </EuiLinkButton>
+    </EuiButtonTo>
   );
 
   const emptyState = (

@@ -60,7 +60,8 @@ export function runFtrCli() {
             include: toArray(flags['include-tag'] as string | string[]),
             exclude: toArray(flags['exclude-tag'] as string | string[]),
           },
-          updateBaselines: flags.updateBaselines,
+          updateBaselines: flags.updateBaselines || flags.u,
+          updateSnapshots: flags.updateSnapshots || flags.u,
         }
       );
 
@@ -118,7 +119,7 @@ export function runFtrCli() {
           'exclude-tag',
           'kibana-install-dir',
         ],
-        boolean: ['bail', 'invert', 'test-stats', 'updateBaselines'],
+        boolean: ['bail', 'invert', 'test-stats', 'updateBaselines', 'updateSnapshots', 'u'],
         default: {
           config: 'test/functional/config.js',
         },
@@ -133,6 +134,8 @@ export function runFtrCli() {
         --exclude-tag=tag  a tag to be excluded, pass multiple times for multiple tags
         --test-stats       print the number of tests (included and excluded) to STDERR
         --updateBaselines  replace baseline screenshots with whatever is generated from the test
+        --updateSnapshots  replace inline and file snapshots with whatever is generated from the test
+        -u                 replace both baseline screenshots and snapshots
         --kibana-install-dir  directory where the Kibana install being tested resides
       `,
       },

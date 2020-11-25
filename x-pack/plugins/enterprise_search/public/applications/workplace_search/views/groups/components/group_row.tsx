@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
 
 import { TruncatedContent } from '../../../../shared/truncate';
-import { EuiLink } from '../../../../shared/react_router_helpers';
+import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { Group } from '../../../types';
 
@@ -64,9 +64,9 @@ export const GroupRow: React.FC<Group> = ({
     <EuiTableRow data-test-subj="GroupsRow">
       <EuiTableRowCell>
         <strong>
-          <EuiLink to={getGroupPath(id)}>
+          <EuiLinkTo to={getGroupPath(id)}>
             <TruncatedContent tooltipType="title" content={name} length={MAX_NAME_LENGTH} />
-          </EuiLink>
+          </EuiLinkTo>
         </strong>
         <br />
         <small>{GROUP_UPDATED_TEXT}</small>
@@ -93,9 +93,9 @@ export const GroupRow: React.FC<Group> = ({
       )}
       <EuiTableRowCell>
         <strong>
-          <EuiLink to={getGroupPath(id)}>
+          <EuiLinkTo to={getGroupPath(id)}>
             <EuiIcon type="pencil" />
-          </EuiLink>
+          </EuiLinkTo>
         </strong>
       </EuiTableRowCell>
     </EuiTableRow>

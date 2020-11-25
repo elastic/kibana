@@ -76,8 +76,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
     return doPartialSearch<IEsSearchResponse>(
-      () => this.runSearch(request, combinedSignal, strategy),
-      (requestId) => this.runSearch({ ...request, id: requestId }, combinedSignal, strategy),
+      () => this.runSearch(request, { ...options, strategy, abortSignal: combinedSignal }),
+      (requestId) =>
+        this.runSearch(
+          { ...request, id: requestId },
+          { ...options, strategy, abortSignal: combinedSignal }
+        ),
       (r) => !r.isRunning,
       (response) => response.id,
       id,
