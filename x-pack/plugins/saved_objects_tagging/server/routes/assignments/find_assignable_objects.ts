@@ -10,7 +10,7 @@ import { IRouter } from 'src/core/server';
 export const registerFindAssignableObjectsRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/api/saved_objects_tagging/assignments/_find_assignable_objects',
+      path: '/internal/saved_objects_tagging/assignments/_find_assignable_objects',
       validate: {
         query: schema.object({
           search: schema.maybe(schema.string()),

@@ -33,7 +33,7 @@ export class TagAssignmentService implements ITagAssignmentService {
 
   public async findAssignableObject({ search, types, maxResults }: FindAssignableObjectOptions) {
     const { objects } = await this.http.get<FindAssignableObjectResponse>(
-      '/api/saved_objects_tagging/assignments/_find_assignable_objects',
+      '/internal/saved_objects_tagging/assignments/_find_assignable_objects',
       {
         query: {
           search,
