@@ -165,18 +165,18 @@ export class SearchInterceptor {
       timeoutController.abort();
     });
 
-    const externalAbortController = new AbortController();
+    const selfAbortController = new AbortController();
 
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
     // 1. The user manually aborts (via `cancelPending`)
     // 2. The request times out
-    // 3. abort() is called on `externalAbortController` which is used by session service
+    // 3. abort() is called on `selfAbortController`. This is used by session service to abort all pending searches that it tracks.
     // to cancel searches that belong to the currently tracked session
     // 4. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
     const signals = [
       this.abortController.signal,
       timeoutSignal,
-      externalAbortController.signal,
+      selfAbortController.signal,
       ...(abortSignal ? [abortSignal] : []),
     ];
 
@@ -195,7 +195,7 @@ export class SearchInterceptor {
       combinedSignal,
       cleanup,
       abort: () => {
-        externalAbortController.abort();
+        selfAbortController.abort();
       },
     };
   }

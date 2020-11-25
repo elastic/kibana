@@ -36,7 +36,7 @@ import {
   SearchSessionRestorationInfoProvider,
 } from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
-import { DISCOVER_APP_URL_GENERATOR } from '../../url_generator';
+import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';
 
 export interface AppState {
   /**
@@ -256,11 +256,7 @@ export function isEqualState(stateA: AppState, stateB: AppState) {
   return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }
 
-export function createSearchSessionRestorationDataProvider({
-  appStateContainer,
-  data,
-  getSavedSearchId,
-}: {
+export function createSearchSessionRestorationDataProvider(deps: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
@@ -268,25 +264,38 @@ export function createSearchSessionRestorationDataProvider({
   return {
     getName: async () => 'Discover',
     getUrlGeneratorData: async () => {
-      const appState = appStateContainer.get();
-      const state = {
-        filters: data.query.filterManager.getFilters(),
-        indexPatternId: appState.index,
-        query: appState.query,
-        savedSearchId: getSavedSearchId(),
-        timeRange: data.query.timefilter.timefilter.getTime(), // TODO: handle relative time range
-        searchSessionId: data.search.session.getSessionId(),
-        columns: appState.columns,
-        sort: appState.sort,
-        savedQuery: appState.savedQuery,
-        interval: appState.interval,
-        useHash: false,
-      };
       return {
         urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
-        initialState: state,
-        restoreState: state, // TODO: handle relative time range
+        initialState: createUrlGeneratorState({ ...deps, forceAbsoluteTime: false }),
+        restoreState: createUrlGeneratorState({ ...deps, forceAbsoluteTime: true }),
       };
     },
+  };
+}
+
+function createUrlGeneratorState({
+  appStateContainer,
+  data,
+  getSavedSearchId,
+  forceAbsoluteTime, // TODO: not implemented
+}: {
+  appStateContainer: StateContainer<AppState>;
+  data: DataPublicPluginStart;
+  getSavedSearchId: () => string | undefined;
+  forceAbsoluteTime: boolean;
+}): DiscoverUrlGeneratorState {
+  const appState = appStateContainer.get();
+  return {
+    filters: data.query.filterManager.getFilters(),
+    indexPatternId: appState.index,
+    query: appState.query,
+    savedSearchId: getSavedSearchId(),
+    timeRange: data.query.timefilter.timefilter.getTime(), // TODO: handle relative time range
+    searchSessionId: data.search.session.getSessionId(),
+    columns: appState.columns,
+    sort: appState.sort,
+    savedQuery: appState.savedQuery,
+    interval: appState.interval,
+    useHash: false,
   };
 }

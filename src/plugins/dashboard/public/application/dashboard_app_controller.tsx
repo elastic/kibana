@@ -74,7 +74,7 @@ import { NavAction, SavedDashboardPanel } from '../types';
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal, SaveOptions } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
-import { saveDashboard } from './lib';
+import { createSessionRestorationDataProvider, saveDashboard } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
@@ -97,7 +97,6 @@ import {
 } from '../../../kibana_legacy/public';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 import { convertSavedDashboardPanelToPanelState } from '../../common/embeddable/embeddable_saved_object_converters';
-import { DASHBOARD_APP_URL_GENERATOR, DashboardUrlGeneratorState } from '../url_generator';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -151,7 +150,7 @@ export class DashboardAppController {
     dashboardCapabilities,
     scopedHistory,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService, search: searchService },
+    data,
     core: {
       notifications,
       overlays,
@@ -169,6 +168,8 @@ export class DashboardAppController {
     navigation,
     savedObjectsTagging,
   }: DashboardAppControllerDependencies) {
+    const queryService = data.query;
+    const searchService = data.search;
     const filterManager = queryService.filterManager;
     const timefilter = queryService.timefilter.timefilter;
     const queryStringManager = queryService.queryString;
@@ -440,30 +441,14 @@ export class DashboardAppController {
       DashboardContainer
     >(DASHBOARD_CONTAINER_TYPE);
 
-    searchService.session.setSearchSessionRestorationInfoProvider({
-      getName: async () => getDashTitle(),
-      getUrlGeneratorData: async () => {
-        const appState = dashboardStateManager.getAppState();
-        const state: DashboardUrlGeneratorState = {
-          dashboardId: dash.id,
-          timeRange: timefilter.getTime(),
-          filters: filterManager.getFilters(),
-          query: queryStringManager.formatQuery(appState.query),
-          savedQuery: appState.savedQuery,
-          useHash: false,
-          preserveSavedFilters: false,
-          viewMode: appState.viewMode,
-          panels: dash.id ? undefined : appState.panels,
-          searchSessionId: searchService.session.getSessionId(),
-        };
-
-        return {
-          urlGeneratorId: DASHBOARD_APP_URL_GENERATOR,
-          initialState: state,
-          restoreState: state, // TODO: handle relative time range
-        };
-      },
-    });
+    searchService.session.setSearchSessionRestorationInfoProvider(
+      createSessionRestorationDataProvider({
+        data,
+        getDashboardTitle: () => getDashTitle(),
+        getDashboardId: () => dash.id,
+        getAppState: () => dashboardStateManager.getAppState(),
+      })
+    );
 
     if (dashboardFactory) {
       const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
