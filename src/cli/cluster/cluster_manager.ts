@@ -75,6 +75,13 @@ export class ClusterManager {
     this.inReplMode = !!opts.repl;
     this.basePathProxy = basePathProxy;
 
+    if (!this.basePathProxy) {
+      this.log.warn(
+        'no-base-path',
+        'Running Kibana in dev mode with --no-base-path disables several useful features and is not recommended'
+      );
+    }
+
     // run @kbn/optimizer and write it's state to kbnOptimizerReady$
     if (opts.disableOptimizer) {
       this.kbnOptimizerReady$.next(true);
