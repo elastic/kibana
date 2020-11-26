@@ -84,7 +84,7 @@ export class SearchEmbeddable
   private readonly savedSearch: SavedSearch;
   private $rootScope: ng.IRootScopeService;
   private $compile: ng.ICompileService;
-  private inspectorAdaptors: Adapters;
+  private inspectorAdapters: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
   private filtersSearchSource?: ISearchSource;
@@ -131,7 +131,7 @@ export class SearchEmbeddable
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
-    this.inspectorAdaptors = {
+    this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
@@ -150,7 +150,7 @@ export class SearchEmbeddable
   }
 
   public getInspectorAdapters() {
-    return this.inspectorAdaptors;
+    return this.inspectorAdapters;
   }
 
   public getSavedSearch() {
@@ -195,7 +195,7 @@ export class SearchEmbeddable
     const searchScope: SearchScope = (this.searchScope = this.$rootScope.$new());
 
     searchScope.description = this.savedSearch.description;
-    searchScope.inspectorAdapters = this.inspectorAdaptors;
+    searchScope.inspectorAdapters = this.inspectorAdapters;
 
     const { searchSource } = this.savedSearch;
     const indexPattern = (searchScope.indexPattern = searchSource.getField('index'))!;
@@ -287,7 +287,7 @@ export class SearchEmbeddable
     );
 
     // Log request to inspector
-    this.inspectorAdaptors.requests.reset();
+    this.inspectorAdapters.requests!.reset();
     const title = i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
       defaultMessage: 'Data',
     });
@@ -295,7 +295,7 @@ export class SearchEmbeddable
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
 
-    const inspectorRequest = this.inspectorAdaptors.requests.start(title, {
+    const inspectorRequest = this.inspectorAdapters.requests!.start(title, {
       description,
       searchSessionId,
     });

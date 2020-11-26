@@ -28,13 +28,13 @@ import {
   useLink,
   useCapabilities,
 } from '../../../../hooks';
-import { WithHeaderLayout } from '../../../../layouts';
+import { WithHeaderLayout, WithHeaderLayoutProps } from '../../../../layouts';
 import { useSetPackageInstallStatus } from '../../hooks';
 import { IconPanel, LoadingIconPanel } from '../../components/icon_panel';
 import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from '../../components/release_badge';
 import { UpdateIcon } from '../../components/icons';
 import { Content } from './content';
-import { WithHeaderLayoutProps } from '../../../../layouts/with_header';
+import './index.scss';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -54,16 +54,6 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
     defaultMessage: 'Settings',
   }),
 };
-
-const DetailWrapper = styled.div`
-  // Class name here is in sync with 'PanelWrapper' in 'IconPanel' component
-  .shiftNavTabs {
-    margin-left: ${(props) =>
-      parseFloat(props.theme.eui.euiSize) * 6 +
-      parseFloat(props.theme.eui.spacerSizes.xl) * 2 +
-      parseFloat(props.theme.eui.spacerSizes.l)}px;
-  }
-`;
 
 const Divider = styled.div`
   width: 0;
@@ -247,8 +237,7 @@ export function Detail() {
     return (entries(PanelDisplayNames)
       .filter(([panelId]) => {
         return (
-          panelId !== 'policies' ||
-          (packageInfoData?.response.status === InstallStatus.installed && false) // Remove `false` when ready to implement policies tab
+          panelId !== 'policies' || packageInfoData?.response.status === InstallStatus.installed
         );
       })
       .map(([panelId, display]) => {
@@ -265,31 +254,29 @@ export function Detail() {
   }, [getHref, packageInfo, packageInfoData?.response?.status, panel]);
 
   return (
-    <DetailWrapper>
-      <WithHeaderLayout
-        leftColumn={headerLeftContent}
-        rightColumn={headerRightContent}
-        rightColumnGrow={false}
-        tabs={tabs}
-        tabsClassName={'shiftNavTabs'}
-      >
-        {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
-        {packageInfoError ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.fleet.epm.loadingIntegrationErrorTitle"
-                defaultMessage="Error loading integration details"
-              />
-            }
-            error={packageInfoError}
-          />
-        ) : isLoading || !packageInfo ? (
-          <Loading />
-        ) : (
-          <Content {...packageInfo} panel={panel} />
-        )}
-      </WithHeaderLayout>
-    </DetailWrapper>
+    <WithHeaderLayout
+      leftColumn={headerLeftContent}
+      rightColumn={headerRightContent}
+      rightColumnGrow={false}
+      tabs={tabs}
+      tabsClassName="fleet__epm__shiftNavTabs"
+    >
+      {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
+      {packageInfoError ? (
+        <Error
+          title={
+            <FormattedMessage
+              id="xpack.fleet.epm.loadingIntegrationErrorTitle"
+              defaultMessage="Error loading integration details"
+            />
+          }
+          error={packageInfoError}
+        />
+      ) : isLoading || !packageInfo ? (
+        <Loading />
+      ) : (
+        <Content {...packageInfo} panel={panel} />
+      )}
+    </WithHeaderLayout>
   );
 }

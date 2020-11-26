@@ -16,7 +16,7 @@ import { PageContent } from '../../../../components/page';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
-import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useSourceContext } from '../../../../containers/source';
 import { InfraFormatterType } from '../../../../lib/lib';
 import { euiStyled } from '../../../../../../observability/public';
@@ -62,10 +62,14 @@ export const Layout = () => {
     false
   );
 
+  const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
+  const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
+  const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
+
   const options = {
     formatter: InfraFormatterType.percent,
     formatTemplate: '{{value}}',
-    legend: createLegend(legend.palette, legend.steps, legend.reverseColors),
+    legend: createLegend(legendPalette, legendSteps, legendReverseColors),
     metric,
     sort,
     fields: source?.configuration?.fields,
@@ -120,7 +124,7 @@ export const Layout = () => {
               <>
                 <TopActionContainer ref={topActionMeasureRef}>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-                    <Toolbar nodeType={nodeType} />
+                    <Toolbar nodeType={nodeType} currentTime={currentTime} />
                     <EuiFlexItem grow={false}>
                       <IntervalLabel intervalAsString={intervalAsString} />
                     </EuiFlexItem>

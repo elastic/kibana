@@ -86,18 +86,18 @@ describe('usersManagementApp', () => {
   });
 
   it('mount() works for the `edit user` page', async () => {
-    const userName = 'someUserName';
+    const userName = 'foo@bar.com';
 
     const { setBreadcrumbs, container, unmount } = await mountApp('/', `/edit/${userName}`);
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Users' },
-      { href: `/edit/${userName}`, text: userName },
+      { href: `/edit/${encodeURIComponent(userName)}`, text: userName },
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"username":"someUserName","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/someUserName","search":"","hash":""}}}
+        User Edit Page: {"authc":{},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}}},"notifications":{"toasts":{}},"username":"foo@bar.com","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/foo@bar.com","search":"","hash":""}}}
       </div>
     `);
 
@@ -106,18 +106,23 @@ describe('usersManagementApp', () => {
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
 
-  it('mount() properly encodes user name in `edit user` page link in breadcrumbs', async () => {
-    const username = 'some 安全性 user';
+  const usernames = ['foo@bar.com', 'foo&bar.com', 'some 安全性 user'];
+  usernames.forEach((username) => {
+    it(
+      'mount() properly encodes user name in `edit user` page link in breadcrumbs for user ' +
+        username,
+      async () => {
+        const { setBreadcrumbs } = await mountApp('/', `/edit/${username}`);
 
-    const { setBreadcrumbs } = await mountApp('/', `/edit/${username}`);
-
-    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([
-      { href: `/`, text: 'Users' },
-      {
-        href: '/edit/some%20%E5%AE%89%E5%85%A8%E6%80%A7%20user',
-        text: username,
-      },
-    ]);
+        expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+        expect(setBreadcrumbs).toHaveBeenCalledWith([
+          { href: `/`, text: 'Users' },
+          {
+            href: `/edit/${encodeURIComponent(username)}`,
+            text: username,
+          },
+        ]);
+      }
+    );
   });
 });

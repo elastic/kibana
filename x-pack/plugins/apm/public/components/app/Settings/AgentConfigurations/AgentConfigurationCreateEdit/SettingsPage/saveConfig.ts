@@ -25,8 +25,7 @@ export async function saveConfig({
 }) {
   try {
     await callApmApi({
-      pathname: '/api/apm/settings/agent-configuration',
-      method: 'PUT',
+      endpoint: 'PUT /api/apm/settings/agent-configuration',
       params: {
         query: { overwrite: isEditMode },
         body: {

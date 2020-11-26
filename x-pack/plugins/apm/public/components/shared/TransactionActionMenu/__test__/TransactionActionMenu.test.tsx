@@ -245,7 +245,7 @@ describe('TransactionActionMenu component', () => {
   describe('Custom links', () => {
     beforeAll(() => {
       // Mocks callApmAPI because it's going to be used to fecth the transaction in the custom links flyout.
-      jest.spyOn(apmApi, 'callApmApi').mockReturnValue({});
+      jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({});
     });
     afterAll(() => {
       jest.resetAllMocks();

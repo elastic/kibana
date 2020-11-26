@@ -54,11 +54,12 @@ const wrapToolbarItems = (
 
 interface Props {
   nodeType: InventoryItemType;
+  currentTime: number;
 }
 
-export const Toolbar = ({ nodeType }: Props) => {
+export const Toolbar = ({ nodeType, currentTime }: Props) => {
   const { sourceId } = useSourceContext();
-  const { accounts, regions } = useInventoryMeta(sourceId, nodeType);
+  const { accounts, regions } = useInventoryMeta(sourceId, nodeType, currentTime);
   const ToolbarItems = findToolbar(nodeType);
   return wrapToolbarItems(ToolbarItems, accounts, regions);
 };

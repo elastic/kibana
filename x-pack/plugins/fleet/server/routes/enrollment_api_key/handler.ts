@@ -60,9 +60,9 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   }
 };
 
-export const deleteEnrollmentApiKeyHandler: RequestHandler<TypeOf<
-  typeof DeleteEnrollmentAPIKeyRequestSchema.params
->> = async (context, request, response) => {
+export const deleteEnrollmentApiKeyHandler: RequestHandler<
+  TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
     await APIKeyService.deleteEnrollmentApiKey(soClient, request.params.keyId);
@@ -80,9 +80,9 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<TypeOf<
   }
 };
 
-export const getOneEnrollmentApiKeyHandler: RequestHandler<TypeOf<
-  typeof GetOneEnrollmentAPIKeyRequestSchema.params
->> = async (context, request, response) => {
+export const getOneEnrollmentApiKeyHandler: RequestHandler<
+  TypeOf<typeof GetOneEnrollmentAPIKeyRequestSchema.params>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
     const apiKey = await APIKeyService.getEnrollmentAPIKey(soClient, request.params.keyId);

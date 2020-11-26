@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import {
+  ADD_BOX_PATH,
   ADD_CONFLUENCE_PATH,
   ADD_CONFLUENCE_SERVER_PATH,
   ADD_DROPBOX_PATH,
@@ -24,6 +25,7 @@ import {
   ADD_SLACK_PATH,
   ADD_ZENDESK_PATH,
   ADD_CUSTOM_PATH,
+  EDIT_BOX_PATH,
   EDIT_CONFLUENCE_PATH,
   EDIT_CONFLUENCE_SERVER_PATH,
   EDIT_DROPBOX_PATH,
@@ -41,6 +43,7 @@ import {
   EDIT_SLACK_PATH,
   EDIT_ZENDESK_PATH,
   EDIT_CUSTOM_PATH,
+  BOX_DOCS_URL,
   CONFLUENCE_DOCS_URL,
   CONFLUENCE_SERVER_DOCS_URL,
   GITHUB_ENTERPRISE_DOCS_URL,
@@ -82,6 +85,44 @@ const connectStepDescription = {
 };
 
 export const staticSourceData = [
+  {
+    name: SOURCE_NAMES.BOX,
+    serviceType: 'box',
+    addPath: ADD_BOX_PATH,
+    editPath: EDIT_BOX_PATH,
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: true,
+      needsBaseUrl: false,
+      documentationUrl: BOX_DOCS_URL,
+      applicationPortalUrl: 'https://app.box.com/developers/console',
+    },
+    sourceDescription: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.sources.sourceDescriptions.box',
+      {
+        defaultMessage:
+          '{sourceName} is a cloud-based storage service for organizations of all sizes. Create, store, share and automatically synchronize documents across your desktop and web.',
+        values: { sourceName: SOURCE_NAMES.BOX },
+      }
+    ),
+    connectStepDescription: connectStepDescription.files,
+    objTypes: [SOURCE_OBJ_TYPES.ALL_FILES],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+  },
   {
     name: SOURCE_NAMES.CONFLUENCE,
     serviceType: 'confluence_cloud',

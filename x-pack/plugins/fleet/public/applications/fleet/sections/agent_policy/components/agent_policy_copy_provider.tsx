@@ -9,7 +9,7 @@ import { EuiConfirmModal, EuiOverlayMask, EuiFormRow, EuiFieldText } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentPolicy } from '../../../types';
-import { sendCopyAgentPolicy, useCore } from '../../../hooks';
+import { sendCopyAgentPolicy, useStartServices } from '../../../hooks';
 
 interface Props {
   children: (copyAgentPolicy: CopyAgentPolicy) => React.ReactElement;
@@ -20,7 +20,7 @@ export type CopyAgentPolicy = (agentPolicy: AgentPolicy, onSuccess?: OnSuccessCa
 type OnSuccessCallback = (newAgentPolicy: AgentPolicy) => void;
 
 export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ children }) => {
-  const { notifications } = useCore();
+  const { notifications } = useStartServices();
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
   const [newAgentPolicy, setNewAgentPolicy] = useState<Pick<AgentPolicy, 'name' | 'description'>>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);

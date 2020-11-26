@@ -130,7 +130,7 @@ type BufferEncoding =
   | 'binary'
   | 'hex';
 
-/* eslint-disable  no-bitwise, no-shadow */
+/* eslint-disable  no-bitwise, @typescript-eslint/no-shadow */
 export class Sha256 {
   private _a: number;
   private _b: number;

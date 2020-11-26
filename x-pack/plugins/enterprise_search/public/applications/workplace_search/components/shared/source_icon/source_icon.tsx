@@ -6,17 +6,21 @@
 
 import React from 'react';
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import _camelCase from 'lodash/camelCase';
+import { camelCase } from 'lodash';
 
-import { images } from '../assets';
+import { EuiIcon } from '@elastic/eui';
+
+import './source_icon.scss';
+
+import { images } from '../assets/source_icons';
+import { imagesFull } from '../assets/sources_full_bleed';
 
 interface SourceIconProps {
   serviceType: string;
   name: string;
   className?: string;
   wrapped?: boolean;
+  fullBleed?: boolean;
 }
 
 export const SourceIcon: React.FC<SourceIconProps> = ({
@@ -24,10 +28,18 @@ export const SourceIcon: React.FC<SourceIconProps> = ({
   serviceType,
   className,
   wrapped,
+  fullBleed = false,
 }) => {
-  const icon = <img src={images[_camelCase(serviceType)]} alt={name} className={className} />;
+  const icon = (
+    <EuiIcon
+      type={fullBleed ? imagesFull[camelCase(serviceType)] : images[camelCase(serviceType)]}
+      title={name}
+      className={className}
+      size="xxl"
+    />
+  );
   return wrapped ? (
-    <div className="user-group-source" title={name}>
+    <div className="wrapped-icon" title={name}>
       {icon}
     </div>
   ) : (

@@ -76,6 +76,7 @@ describe('LicenseExpirationAlert', () => {
     const monitoringCluster = null;
     const config = {
       ui: {
+        show_license_expiration: true,
         ccs: { enabled: true },
         container: { elasticsearch: { enabled: false } },
         metricbeat: { index: 'metricbeat-*' },
@@ -184,6 +185,105 @@ describe('LicenseExpirationAlert', () => {
         return [];
       });
       const alert = new LicenseExpirationAlert();
+      const type = alert.getAlertType();
+      await type.executor({
+        ...executorOptions,
+        // @ts-ignore
+        params: alert.defaultParams,
+      } as any);
+      expect(replaceState).not.toHaveBeenCalledWith({});
+      expect(scheduleActions).not.toHaveBeenCalled();
+    });
+
+    it('should resolve with a resolved message', async () => {
+      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
+        return [
+          {
+            ...legacyAlert,
+            resolved_timestamp: 1,
+          },
+        ];
+      });
+      (getState as jest.Mock).mockImplementation(() => {
+        return {
+          alertStates: [
+            {
+              cluster: {
+                clusterUuid,
+                clusterName,
+              },
+              ccs: undefined,
+              ui: {
+                isFiring: true,
+                message: null,
+                severity: 'danger',
+                resolvedMS: 0,
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
+        };
+      });
+      const alert = new LicenseExpirationAlert();
+      alert.initializeAlertType(
+        getUiSettingsService as any,
+        monitoringCluster as any,
+        getLogger as any,
+        config as any,
+        kibanaUrl,
+        false
+      );
+      const type = alert.getAlertType();
+      await type.executor({
+        ...executorOptions,
+        // @ts-ignore
+        params: alert.defaultParams,
+      } as any);
+      expect(replaceState).toHaveBeenCalledWith({
+        alertStates: [
+          {
+            cluster: { clusterUuid, clusterName },
+            ccs: undefined,
+            ui: {
+              isFiring: false,
+              message: {
+                text: 'The license for this cluster is active.',
+              },
+              severity: 'danger',
+              resolvedMS: 1,
+              triggeredMS: 1,
+              lastCheckedMS: 0,
+            },
+          },
+        ],
+      });
+      expect(scheduleActions).toHaveBeenCalledWith('default', {
+        internalFullMessage: 'License expiration alert is resolved for testCluster.',
+        internalShortMessage: 'License expiration alert is resolved for testCluster.',
+        clusterName,
+        expiredDate: 'THE_DATE',
+        state: 'resolved',
+      });
+    });
+
+    it('should not fire actions if we are not showing license expiration', async () => {
+      const alert = new LicenseExpirationAlert();
+      const customConfig = {
+        ...config,
+        ui: {
+          ...config.ui,
+          show_license_expiration: false,
+        },
+      };
+      alert.initializeAlertType(
+        getUiSettingsService as any,
+        monitoringCluster as any,
+        getLogger as any,
+        customConfig as any,
+        kibanaUrl,
+        false
+      );
       const type = alert.getAlertType();
       await type.executor({
         ...executorOptions,

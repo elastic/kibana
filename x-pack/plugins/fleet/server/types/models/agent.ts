@@ -62,14 +62,26 @@ export const AgentEventSchema = schema.object({
   id: schema.string(),
 });
 
-export const NewAgentActionSchema = schema.object({
-  type: schema.oneOf([
-    schema.literal('POLICY_CHANGE'),
-    schema.literal('UNENROLL'),
-    schema.literal('UPGRADE'),
-    schema.literal('INTERNAL_POLICY_REASSIGN'),
-  ]),
-  data: schema.maybe(schema.any()),
-  ack_data: schema.maybe(schema.any()),
-  sent_at: schema.maybe(schema.string()),
-});
+export const NewAgentActionSchema = schema.oneOf([
+  schema.object({
+    type: schema.oneOf([
+      schema.literal('POLICY_CHANGE'),
+      schema.literal('UNENROLL'),
+      schema.literal('UPGRADE'),
+      schema.literal('INTERNAL_POLICY_REASSIGN'),
+    ]),
+    data: schema.maybe(schema.any()),
+    ack_data: schema.maybe(schema.any()),
+  }),
+  schema.object({
+    type: schema.oneOf([schema.literal('SETTINGS')]),
+    data: schema.object({
+      log_level: schema.oneOf([
+        schema.literal('debug'),
+        schema.literal('info'),
+        schema.literal('warning'),
+        schema.literal('error'),
+      ]),
+    }),
+  }),
+]);
