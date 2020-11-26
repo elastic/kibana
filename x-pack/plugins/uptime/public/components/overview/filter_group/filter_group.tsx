@@ -13,7 +13,7 @@ import { OverviewFilters } from '../../../../common/runtime_types/overview_filte
 import { filterLabels } from './translations';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { MONITOR_ROUTE } from '../../../../common/constants';
-import { use_selected_filters } from '../../../hooks/useSelectedFilters';
+import { use_selected_filters } from '../../../hooks/use_selected_filters';
 
 interface PresentationalComponentProps {
   loading: boolean;

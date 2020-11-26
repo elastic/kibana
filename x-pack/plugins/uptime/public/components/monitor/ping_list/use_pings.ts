@@ -13,7 +13,7 @@ import { useGetUrlParams, useMonitorId } from '../../../hooks';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { useFetcher } from '../../../../../observability/public';
 import { fetchJourneysFailedSteps } from '../../../state/api/journey';
-import { use_selected_filters } from '../../../hooks/useSelectedFilters';
+import { use_selected_filters } from '../../../hooks/use_selected_filters';
 import { MONITOR_TYPES } from '../../../../common/constants';
 
 interface Props {
