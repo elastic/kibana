@@ -362,7 +362,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
         REPO_ROOT,
         getEnvOptions({
           cliArgs: { silent: true, basePath: false },
-          isDevClusterMaster: true,
+          isDevCliParent: true,
         })
       ),
       logger,
@@ -391,7 +391,7 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
         REPO_ROOT,
         getEnvOptions({
           cliArgs: { quiet: true, basePath: true },
-          isDevClusterMaster: true,
+          isDevCliParent: true,
         })
       ),
       logger,

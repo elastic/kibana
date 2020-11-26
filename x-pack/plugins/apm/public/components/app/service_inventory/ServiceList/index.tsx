@@ -14,8 +14,8 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   asPercent,
-  asDecimal,
   asMillisecondDuration,
+  asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, px, truncate, unit } from '../../../../style/variables';
@@ -34,16 +34,6 @@ interface Props {
   noItemsMessage?: React.ReactNode;
 }
 type ServiceListItem = ValuesType<Items>;
-
-function formatNumber(value: number) {
-  if (value === 0) {
-    return '0';
-  } else if (value <= 0.1) {
-    return '< 0.1';
-  } else {
-    return asDecimal(value);
-  }
-}
 
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
@@ -154,14 +144,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
       <ServiceListMetric
         series={transactionsPerMinute?.timeseries}
         color="euiColorVis0"
-        valueLabel={`${formatNumber(
-          transactionsPerMinute?.value || 0
-        )} ${i18n.translate(
-          'xpack.apm.servicesTable.transactionsPerMinuteUnitLabel',
-          {
-            defaultMessage: 'tpm',
-          }
-        )}`}
+        valueLabel={asTransactionRate(transactionsPerMinute?.value)}
       />
     ),
     align: 'left',

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 
@@ -21,8 +21,8 @@ export const useNavigateToPath = () => {
 
   const location = useLocation();
 
-  return useMemo(() => {
-    return (path: string | undefined, preserveSearch = false) => {
+  return useCallback(
+    async (path: string | undefined, preserveSearch = false) => {
       if (path === undefined) return;
       const modifiedPath = `${path}${preserveSearch === true ? location.search : ''}`;
       /**
@@ -33,7 +33,8 @@ export const useNavigateToPath = () => {
         : getUrlForApp(PLUGIN_ID, {
             path: modifiedPath,
           });
-      navigateToUrl(url);
-    };
-  }, [location]);
+      await navigateToUrl(url);
+    },
+    [location]
+  );
 };

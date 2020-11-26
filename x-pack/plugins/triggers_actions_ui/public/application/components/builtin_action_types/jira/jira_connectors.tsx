@@ -32,7 +32,6 @@ const JiraConnectorFields: React.FC<ActionConnectorFieldsProps<JiraActionConnect
   errors,
   consumer,
   readOnly,
-  docLinks,
 }) => {
   // TODO: remove incidentConfiguration later, when Case Jira will move their fields to the level of action execution
   const { apiUrl, projectKey, incidentConfiguration, isCaseOwned } = action.config;

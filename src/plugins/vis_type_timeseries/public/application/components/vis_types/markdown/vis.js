@@ -30,7 +30,7 @@ import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
 const getMarkdownId = (id) => `markdown-${id}`;
 
-export function MarkdownVisualization(props) {
+function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
   const series = get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, dateFormat, props.getConfig);
@@ -106,3 +106,7 @@ MarkdownVisualization.propTypes = {
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func,
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { MarkdownVisualization as default };
