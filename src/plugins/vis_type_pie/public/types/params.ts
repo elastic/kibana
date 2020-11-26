@@ -44,7 +44,6 @@ export interface PieVisParams {
   dimensions: Dimensions;
   isDonut: boolean;
   palette: PaletteOutput;
-  legacyPalette: boolean;
   labels: {
     show: boolean;
     position: LabelPositions;

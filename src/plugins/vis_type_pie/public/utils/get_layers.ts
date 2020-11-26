@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 import { Datum, PartitionFillLabel, PartitionLayer } from '@elastic/charts';
 import { SeriesLayer } from '../../../charts/public';
 import { BucketColumns, PieVisParams } from '../types';
@@ -49,6 +50,11 @@ export const getLayers = (
       },
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => {
+        if (d === '') {
+          return i18n.translate('visTypePie.emptyLabelValue', {
+            defaultMessage: '(empty)',
+          });
+        }
         if (col?.meta?.params) {
           return getFormatService().deserialize(col.format).convert(d) ?? '';
         }

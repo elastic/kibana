@@ -54,7 +54,7 @@ export const getColorPicker = (
     event: BaseSyntheticEvent
   ) => void,
   maxDepth: number,
-  isLegacyPaletteEnabled: boolean,
+  palette: string,
   firstBucket: BucketColumns,
   data: DatatableRow[]
 ): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
@@ -68,7 +68,7 @@ export const getColorPicker = (
   };
 
   // For the EuiPalette we want the user to be able to change only the colors of the inner layer
-  if (!isLegacyPaletteEnabled) {
+  if (palette !== 'kibana_palette') {
     const enablePicker = isOnInnerLayer(firstBucket, data, seriesIdentifier.key);
     if (!enablePicker) return null;
   }

@@ -65,16 +65,7 @@ function PieOptions(props: VisOptionsProps<PieVisParams>) {
           value={stateParams.nestedLegend}
           setValue={setValue}
         />
-        <SwitchOption
-          label={i18n.translate('visTypePie.editors.pie.legacyPaletteLabel', {
-            defaultMessage: 'Legacy palette',
-          })}
-          paramName="legacyPalette"
-          value={stateParams.legacyPalette}
-          setValue={setValue}
-        />
         <PalettePicker
-          disabled={stateParams.legacyPalette}
           activePalette={stateParams.palette}
           paramName="palette"
           setPalette={setValue}

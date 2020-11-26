@@ -28,7 +28,8 @@ import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../../visualization
 
 import { PieVisParams, LabelPositions, ValueFormats } from '../types';
 import { toExpressionAst } from '../to_ast';
-import { getLegendPositions, PieOptions } from '../editor';
+import { getLegendPositions } from '../editor';
+import { PieOptions } from '../editor/components';
 
 export const getPieVisTypeDefinition = (
   showElasticChartsOptions = false
@@ -49,7 +50,6 @@ export const getPieVisTypeDefinition = (
       legendPosition: Position.Right,
       nestedLegend: false,
       isDonut: true,
-      legacyPalette: false,
       palette: {
         type: 'palette',
         name: 'default',

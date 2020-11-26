@@ -17,4 +17,32 @@
  * under the License.
  */
 
-export { getLegendPositions } from './positions';
+import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
+
+export const getLegendPositions = () => [
+  {
+    text: i18n.translate('visTypePie.legendPositions.topText', {
+      defaultMessage: 'Top',
+    }),
+    value: Position.Top,
+  },
+  {
+    text: i18n.translate('visTypePie.legendPositions.leftText', {
+      defaultMessage: 'Left',
+    }),
+    value: Position.Left,
+  },
+  {
+    text: i18n.translate('visTypePie.legendPositions.rightText', {
+      defaultMessage: 'Right',
+    }),
+    value: Position.Right,
+  },
+  {
+    text: i18n.translate('visTypePie.legendPositions.bottomText', {
+      defaultMessage: 'Bottom',
+    }),
+    value: Position.Bottom,
+  },
+];
