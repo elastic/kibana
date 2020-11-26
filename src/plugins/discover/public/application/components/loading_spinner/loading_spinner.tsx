@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './loading_spinner.scss';
+
 import React from 'react';
 import { EuiLoadingSpinner, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';

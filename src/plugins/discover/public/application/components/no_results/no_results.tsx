@@ -85,7 +85,6 @@ export function DiscoverNoResults({
 
   return (
     <Fragment>
-      <EuiSpacer size="xl" />
       <EuiFlexGroup justifyContent="center">{callOut}</EuiFlexGroup>
     </Fragment>
   );

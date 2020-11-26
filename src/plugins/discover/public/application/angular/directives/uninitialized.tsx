@@ -31,7 +31,6 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
     <I18nProvider>
       <EuiEmptyPrompt
         iconType="discoverApp"
-        className="dscUninitialized"
         title={
           <h2>
             <FormattedMessage id="discover.uninitializedTitle" defaultMessage="Start searching" />

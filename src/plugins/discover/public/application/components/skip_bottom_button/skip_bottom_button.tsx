@@ -42,6 +42,7 @@ export function SkipBottomButton({ onClick }: SkipBottomButtonProps) {
       id="dscSkipButton"
       destinationId=""
       data-test-subj="discoverSkipTableButton"
+      position="absolute"
     >
       <FormattedMessage
         id="discover.skipToBottomButtonLabel"

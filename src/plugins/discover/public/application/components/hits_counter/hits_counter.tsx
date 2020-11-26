@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './hits_counter.scss';
+
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
