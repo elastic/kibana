@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
