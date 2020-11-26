@@ -58,11 +58,7 @@ type ServiceNodeMetricsProps = RouteComponentProps<{
 export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, serviceNodeName } = match.params;
-  const { 
-  
-  
-  
-  } = useAgentName();
+  const { agentName } = useAgentName();
   const { data } = useServiceMetricCharts(
     urlParams,
     agentName,
