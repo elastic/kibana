@@ -42,19 +42,14 @@ exports[`MonitorListStatusColumn can handle a non-numeric timestamp value 1`] = 
       delay="regular"
       position="top"
     >
-      <EuiText
+      <Styled(EuiText)
         className="eui-textNoWrap"
         color="subdued"
         size="xs"
-        style={
-          Object {
-            "paddingRight": 5,
-          }
-        }
       >
         in 0/0 location
         ,
-      </EuiText>
+      </Styled(EuiText)>
     </EuiToolTip>
     <EuiToolTip
       content={
@@ -123,19 +118,14 @@ exports[`MonitorListStatusColumn provides expected tooltip and display times 1`]
       delay="regular"
       position="top"
     >
-      <EuiText
+      <Styled(EuiText)
         className="eui-textNoWrap"
         color="subdued"
         size="xs"
-        style={
-          Object {
-            "paddingRight": 5,
-          }
-        }
       >
         in 0/0 location
         ,
-      </EuiText>
+      </Styled(EuiText)>
     </EuiToolTip>
     <EuiToolTip
       content={
@@ -204,19 +194,14 @@ exports[`MonitorListStatusColumn will display location status 1`] = `
       delay="regular"
       position="top"
     >
-      <EuiText
+      <Styled(EuiText)
         className="eui-textNoWrap"
         color="subdued"
         size="xs"
-        style={
-          Object {
-            "paddingRight": 5,
-          }
-        }
       >
         in 1/3 locations
         ,
-      </EuiText>
+      </Styled(EuiText)>
     </EuiToolTip>
     <EuiToolTip
       content={
@@ -244,6 +229,10 @@ exports[`MonitorListStatusColumn will display location status 1`] = `
 `;
 
 exports[`MonitorListStatusColumn will render display location status 1`] = `
+.c1 {
+  padding-right: 4px;
+}
+
 @media (max-width:574px) {
   .c0 {
     min-width: 230px;
@@ -284,8 +273,7 @@ exports[`MonitorListStatusColumn will render display location status 1`] = `
       class="euiToolTipAnchor"
     >
       <div
-        class="euiText euiText--extraSmall eui-textNoWrap"
-        style="padding-right:5px"
+        class="euiText euiText--extraSmall c1 eui-textNoWrap"
       >
         <div
           class="euiTextColor euiTextColor--subdued"

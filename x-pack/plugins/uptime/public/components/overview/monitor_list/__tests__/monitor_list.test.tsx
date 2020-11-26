@@ -19,6 +19,7 @@ import * as redux from 'react-redux';
 import moment from 'moment';
 import { IHttpFetchError } from '../../../../../../../../src/core/public';
 import { mockMoment } from '../../../../lib/helper/test_helpers';
+import { EuiThemeProvider } from '../../../../../../observability/public';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -176,14 +177,16 @@ describe('MonitorList component', () => {
 
   it('renders the monitor list', () => {
     const component = renderWithRouter(
-      <MonitorListComponent
-        monitorList={{
-          list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
-          loading: false,
-        }}
-        pageSize={10}
-        setPageSize={jest.fn()}
-      />
+      <EuiThemeProvider darkMode={false}>
+        <MonitorListComponent
+          monitorList={{
+            list: getMonitorList(moment().subtract(5, 'minute').toISOString()),
+            loading: false,
+          }}
+          pageSize={10}
+          setPageSize={jest.fn()}
+        />
+      </EuiThemeProvider>
     );
 
     expect(component).toMatchSnapshot();

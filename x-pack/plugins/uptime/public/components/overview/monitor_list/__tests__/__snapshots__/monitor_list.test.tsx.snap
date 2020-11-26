@@ -832,6 +832,10 @@ exports[`MonitorList component renders loading state 1`] = `
 
 exports[`MonitorList component renders the monitor list 1`] = `
 .c3 {
+  padding-right: 4px;
+}
+
+.c4 {
   padding-top: 12px;
 }
 
@@ -1135,8 +1139,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <div
-                        class="euiText euiText--extraSmall eui-textNoWrap"
-                        style="padding-right:5px"
+                        class="euiText euiText--extraSmall c3 eui-textNoWrap"
                       >
                         <div
                           class="euiTextColor euiTextColor--subdued"
@@ -1375,8 +1378,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <div
-                        class="euiText euiText--extraSmall eui-textNoWrap"
-                        style="padding-right:5px"
+                        class="euiText euiText--extraSmall c3 eui-textNoWrap"
                       >
                         <div
                           class="euiTextColor euiTextColor--subdued"
@@ -1625,7 +1627,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         >
           <button
             aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-            class="euiButtonIcon euiButtonIcon--text c3"
+            class="euiButtonIcon euiButtonIcon--text c4"
             data-test-subj="xpack.uptime.monitorList.prevButton"
             disabled=""
             type="button"
@@ -1642,7 +1644,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         >
           <button
             aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-            class="euiButtonIcon euiButtonIcon--text c3"
+            class="euiButtonIcon euiButtonIcon--text c4"
             data-test-subj="xpack.uptime.monitorList.nextButton"
             disabled=""
             type="button"

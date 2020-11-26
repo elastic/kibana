@@ -10,6 +10,7 @@ import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { Ping } from '../../../../../../common/runtime_types';
 import { STATUS } from '../../../../../../common/constants';
 import { getLocationStatus, MonitorListStatusColumn } from '../monitor_status_column';
+import { EuiThemeProvider } from '../../../../../../../observability/public';
 
 describe('MonitorListStatusColumn', () => {
   beforeAll(() => {
@@ -253,11 +254,13 @@ describe('MonitorListStatusColumn', () => {
 
   it('will render display location status', () => {
     const component = renderWithIntl(
-      <MonitorListStatusColumn
-        status="up"
-        timestamp={new Date().toString()}
-        summaryPings={summaryPings}
-      />
+      <EuiThemeProvider darkMode={false}>
+        <MonitorListStatusColumn
+          status="up"
+          timestamp={new Date().toString()}
+          summaryPings={summaryPings}
+        />
+      </EuiThemeProvider>
     );
     expect(component).toMatchSnapshot();
   });
