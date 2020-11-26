@@ -6,6 +6,7 @@
 
 import * as t from 'io-ts';
 import { DateRangeType } from '../common';
+import { PingErrorType } from '../monitor';
 
 export const HttpResponseBodyType = t.partial({
   bytes: t.number,
@@ -85,6 +86,10 @@ export const MonitorType = t.intersection([
 
 export type Monitor = t.TypeOf<typeof MonitorType>;
 
+export const PingHeadersType = t.record(t.string, t.union([t.string, t.array(t.string)]));
+
+export type PingHeaders = t.TypeOf<typeof PingHeadersType>;
+
 export const PingType = t.intersection([
   t.type({
     timestamp: t.string,
@@ -116,18 +121,7 @@ export const PingType = t.intersection([
     ecs: t.partial({
       version: t.string,
     }),
-    error: t.intersection([
-      t.partial({
-        code: t.string,
-        id: t.string,
-        stack_trace: t.string,
-        type: t.string,
-      }),
-      t.type({
-        // this is _always_ on the error field
-        message: t.string,
-      }),
-    ]),
+    error: PingErrorType,
     http: t.partial({
       request: t.partial({
         body: t.partial({
@@ -145,7 +139,7 @@ export const PingType = t.intersection([
         bytes: t.number,
         redirects: t.array(t.string),
         status_code: t.number,
-        headers: t.record(t.string, t.string),
+        headers: PingHeadersType,
       }),
       version: t.string,
     }),

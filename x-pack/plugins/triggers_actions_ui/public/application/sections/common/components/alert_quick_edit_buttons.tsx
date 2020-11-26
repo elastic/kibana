@@ -10,12 +10,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { Alert } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
 import {
   withBulkAlertOperations,
   ComponentOpts as BulkOperationsComponentOpts,
 } from './with_bulk_alert_api_operations';
 import './alert_quick_edit_buttons.scss';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export type ComponentOpts = {
   selectedItems: Alert[];
@@ -34,7 +34,9 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   disableAlerts,
   setAlertsToDelete,
 }: ComponentOpts) => {
-  const { toastNotifications } = useAppDependencies();
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
 
   const [isMutingAlerts, setIsMutingAlerts] = useState<boolean>(false);
   const [isUnmutingAlerts, setIsUnmutingAlerts] = useState<boolean>(false);
@@ -53,7 +55,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       await muteAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToMuteAlertsMessage',
           {
@@ -73,7 +75,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       await unmuteAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToUnmuteAlertsMessage',
           {
@@ -93,7 +95,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       await enableAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToEnableAlertsMessage',
           {
@@ -113,7 +115,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       await disableAlerts(selectedItems);
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDisableAlertsMessage',
           {
@@ -133,7 +135,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     try {
       setAlertsToDelete(selectedItems.map((selected: any) => selected.id));
     } catch (e) {
-      toastNotifications.addDanger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.failedToDeleteAlertsMessage',
           {

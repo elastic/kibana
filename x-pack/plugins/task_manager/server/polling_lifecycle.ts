@@ -118,10 +118,9 @@ export class TaskPollingLifecycle {
     } = config;
 
     // the task poller that polls for work on fixed intervals and on demand
-    const poller$: Observable<Result<
-      FillPoolResult,
-      PollingError<string>
-    >> = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
+    const poller$: Observable<
+      Result<FillPoolResult, PollingError<string>>
+    > = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
       () =>
         createTaskPoller<string, FillPoolResult>({
           logger,

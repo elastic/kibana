@@ -9,7 +9,7 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiStat,
@@ -22,7 +22,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event_context';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
@@ -31,6 +31,7 @@ import { px, truncate, unit } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
+import { SearchBar } from '../../shared/search_bar';
 
 const INITIAL_DATA = {
   host: '',
@@ -40,6 +41,13 @@ const INITIAL_DATA = {
 const Truncate = styled.span`
   display: block;
   ${truncate(px(unit * 12))}
+`;
+
+const MetadataFlexGroup = styled(EuiFlexGroup)`
+  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.m};
+  padding: ${({ theme }) =>
+    `${theme.eui.paddingSizes.m} 0 0 ${theme.eui.paddingSizes.m}`};
 `;
 
 type ServiceNodeMetricsProps = RouteComponentProps<{
@@ -75,11 +83,10 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
-
   const isAggregatedData = serviceNodeName === SERVICE_NODE_NAME_MISSING;
 
   return (
-    <div>
+    <>
       <ApmHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -89,7 +96,6 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
           </EuiFlexItem>
         </EuiFlexGroup>
       </ApmHeader>
-      <EuiHorizontalRule margin="m" />
       {isAggregatedData ? (
         <EuiCallOut
           title={i18n.translate(
@@ -121,7 +127,7 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
           />
         </EuiCallOut>
       ) : (
-        <EuiFlexGroup gutterSize="xl">
+        <MetadataFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
             <EuiStat
               titleSize="s"
@@ -152,7 +158,7 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
               }
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiStat
               titleSize="s"
               isLoading={isLoading}
@@ -169,11 +175,10 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
               }
             />
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </MetadataFlexGroup>
       )}
-      <EuiHorizontalRule margin="m" />
       {agentName && (
-        <ChartsSyncContextProvider>
+        <ChartPointerEventContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
             {data.charts.map((chart) => (
               <EuiFlexItem key={chart.key}>
@@ -189,8 +194,30 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
             ))}
           </EuiFlexGrid>
           <EuiSpacer size="xxl" />
-        </ChartsSyncContextProvider>
+        </ChartPointerEventContextProvider>
       )}
-    </div>
+      <SearchBar />
+      <EuiPage>
+        {agentName && (
+          <ChartPointerEventContextProvider>
+            <EuiFlexGrid columns={2} gutterSize="s">
+              {data.charts.map((chart) => (
+                <EuiFlexItem key={chart.key}>
+                  <EuiPanel>
+                    <MetricsChart
+                      start={start}
+                      end={end}
+                      chart={chart}
+                      fetchStatus={status}
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
+            <EuiSpacer size="xxl" />
+          </ChartPointerEventContextProvider>
+        )}
+      </EuiPage>
+    </>
   );
 }

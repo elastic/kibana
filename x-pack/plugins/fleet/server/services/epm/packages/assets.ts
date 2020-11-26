@@ -21,7 +21,7 @@ export function getAssets(
 ): string[] {
   const assets: string[] = [];
   const { name, version } = packageInfo;
-  const paths = getArchiveFilelist({ name, version, installSource: 'registry' });
+  const paths = getArchiveFilelist({ name, version });
   // TODO: might be better to throw a PackageCacheError here
   if (!paths || paths.length === 0) return assets;
 

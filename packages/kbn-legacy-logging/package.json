@@ -10,6 +10,6 @@
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@kbn/std": "link:../kbn-std"
+    "@kbn/utils": "link:../kbn-utils"
   }
 }

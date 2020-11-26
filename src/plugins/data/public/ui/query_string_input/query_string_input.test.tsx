@@ -29,7 +29,7 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 
-import { EuiTextArea } from '@elastic/eui';
+import { EuiTextArea, EuiIcon } from '@elastic/eui';
 
 import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryStringInput } from './';
@@ -170,6 +170,30 @@ describe('QueryStringInput', () => {
     component.find(QueryLanguageSwitcher).props().onSelectLanguage('lucene');
     expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
     expect(mockCallback).toHaveBeenCalledWith({ query: '', language: 'lucene' });
+  });
+
+  it('Should not show the language switcher when disabled', () => {
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: luceneQuery,
+        onSubmit: noop,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableLanguageSwitcher: true,
+      })
+    );
+    expect(component.find(QueryLanguageSwitcher).exists()).toBeFalsy();
+  });
+
+  it('Should show an icon when an iconType is specified', () => {
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: luceneQuery,
+        onSubmit: noop,
+        indexPatterns: [stubIndexPatternWithFields],
+        iconType: 'search',
+      })
+    );
+    expect(component.find(EuiIcon).exists()).toBeTruthy();
   });
 
   it('Should call onSubmit when the user hits enter inside the query bar', () => {
