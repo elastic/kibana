@@ -25,7 +25,7 @@ export class UiMetricService {
       // Usage collection might have been disabled in Kibana config.
       return;
     }
-    return this.usageCollection.reportUiCounter(this.appName, type, name);
+    return this.usageCollection.reportUiCounter(this.appName, type, eventName);
   }
 }
 

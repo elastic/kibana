@@ -24,9 +24,9 @@ describe('transformRawCounter', () => {
   const mockRawUiCounters = [
     {
       type: 'ui-counter',
-      id: 'Kibana_home:24112020:ingest_data_card_home_tutorial_directory',
+      id: 'Kibana_home:24112020:click:ingest_data_card_home_tutorial_directory',
       attributes: {
-        click: 3,
+        count: 3,
       },
       references: [],
       updated_at: '2020-11-24T11:27:57.067Z',
@@ -34,10 +34,19 @@ describe('transformRawCounter', () => {
     },
     {
       type: 'ui-counter',
-      id: 'Kibana_home:24112020:home_tutorial_directory',
+      id: 'Kibana_home:24112020:click:home_tutorial_directory',
       attributes: {
-        click: 1,
-        loaded: 3,
+        count: 1,
+      },
+      references: [],
+      updated_at: '2020-11-24T11:27:57.067Z',
+      version: 'WzI5NDRd',
+    },
+    {
+      type: 'ui-counter',
+      id: 'Kibana_home:24112020:loaded:home_tutorial_directory',
+      attributes: {
+        count: 3,
       },
       references: [],
       updated_at: '2020-11-24T11:27:57.067Z',
@@ -45,8 +54,8 @@ describe('transformRawCounter', () => {
     },
   ] as UICounterSavedObject[];
 
-  it('transforms entry with 1 type', () => {
-    const result = transformRawCounter(mockRawUiCounters[0]);
+  it('transforms saved object raw entries', () => {
+    const result = mockRawUiCounters.map(transformRawCounter);
     expect(result).toEqual([
       {
         appName: 'Kibana_home',
@@ -55,12 +64,6 @@ describe('transformRawCounter', () => {
         counterType: 'click',
         total: 3,
       },
-    ]);
-  });
-
-  it('transforms entry with multiple type into seperate objects', () => {
-    const result = transformRawCounter(mockRawUiCounters[1]);
-    expect(result).toEqual([
       {
         appName: 'Kibana_home',
         eventName: 'home_tutorial_directory',

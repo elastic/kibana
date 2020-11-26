@@ -32,7 +32,7 @@ const createMockSavedObjectDoc = (updatedAt: moment.Moment, id: string) =>
     id,
     type: 'ui-counter',
     attributes: {
-      click: 3,
+      count: 3,
     },
     references: [],
     updated_at: updatedAt.format(),
