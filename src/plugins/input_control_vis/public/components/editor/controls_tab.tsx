@@ -50,12 +50,10 @@ interface ControlsTabUiState {
   type: CONTROL_TYPES;
 }
 
-type ControlsTabUiInjectedProps = InjectedIntlProps &
+export type ControlsTabUiProps = InjectedIntlProps &
   VisOptionsProps<InputControlVisParams> & {
     deps: InputControlVisDependencies;
   };
-
-export type ControlsTabUiProps = ControlsTabUiInjectedProps;
 
 class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState> {
   state = {
@@ -223,7 +221,6 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
 }
 
 export const ControlsTab = injectI18n(ControlsTabUi);
-
-export const getControlsTab = (deps: InputControlVisDependencies) => (
-  props: Omit<ControlsTabUiProps, 'core'>
-) => <ControlsTab {...props} deps={deps} />;
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { ControlsTab as default };

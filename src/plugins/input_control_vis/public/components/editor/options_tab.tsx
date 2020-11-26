@@ -89,3 +89,6 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
     );
   }
 }
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { OptionsTab as default };
