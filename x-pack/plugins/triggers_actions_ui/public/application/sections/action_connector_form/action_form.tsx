@@ -38,17 +38,21 @@ import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../..
 import { ActionGroup, AlertActionParam } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
 
+export interface ActionGroupWithMessageVariables extends ActionGroup {
+  omitOptionalMessageVariables?: boolean;
+  defaultActionMessage?: string;
+}
+
 export interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
-  actionGroups?: ActionGroup[];
+  actionGroups?: ActionGroupWithMessageVariables[];
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
-  setAlertProperty: (actions: AlertAction[]) => void;
+  setActions: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariables;
-  defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -65,11 +69,10 @@ export const ActionForm = ({
   actionGroups,
   setActionIdByIndex,
   setActionGroupIdByIndex,
-  setAlertProperty,
+  setActions,
   setActionParamsProperty,
   actionTypes,
   messageVariables,
-  defaultActionMessage,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
@@ -303,7 +306,7 @@ export const ActionForm = ({
                   const updatedActions = actions.filter(
                     (_item: AlertAction, i: number) => i !== index
                   );
-                  setAlertProperty(updatedActions);
+                  setActions(updatedActions);
                   setIsAddActionPanelOpen(
                     updatedActions.filter((item: AlertAction) => item.id !== actionItem.id)
                       .length === 0
@@ -333,7 +336,6 @@ export const ActionForm = ({
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
-              defaultActionMessage={defaultActionMessage}
               messageVariables={messageVariables}
               actionGroups={actionGroups}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
@@ -349,7 +351,7 @@ export const ActionForm = ({
                 const updatedActions = actions.filter(
                   (_item: AlertAction, i: number) => i !== index
                 );
-                setAlertProperty(updatedActions);
+                setActions(updatedActions);
                 setIsAddActionPanelOpen(
                   updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length ===
                     0

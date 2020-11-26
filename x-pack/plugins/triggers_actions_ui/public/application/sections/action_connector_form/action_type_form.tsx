@@ -26,7 +26,8 @@ import {
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { AlertActionParam, RecoveredActionGroup } from '../../../../../alerts/common';
+import { pick } from 'lodash';
+import { AlertActionParam } from '../../../../../alerts/common';
 import {
   IErrorObject,
   AlertAction,
@@ -35,12 +36,12 @@ import {
   ActionVariables,
   ActionVariable,
   ActionTypeRegistryContract,
+  REQUIRED_ACTION_VARIABLES,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionAccordionFormProps } from './action_form';
+import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
 import { transformActionVariables } from '../../lib/action_variables';
-import { recoveredActionGroupMessage } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana';
 
 export type ActionTypeFormProps = {
@@ -64,7 +65,6 @@ export type ActionTypeFormProps = {
   | 'setActionGroupIdByIndex'
   | 'setActionParamsProperty'
   | 'messageVariables'
-  | 'defaultActionMessage'
 >;
 
 const preconfiguredMessage = i18n.translate(
@@ -86,7 +86,6 @@ export const ActionTypeForm = ({
   actionTypesIndex,
   connectors,
   defaultActionGroupId,
-  defaultActionMessage,
   messageVariables,
   actionGroups,
   setActionGroupIdByIndex,
@@ -97,18 +96,13 @@ export const ActionTypeForm = ({
   } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
-  const [availableDefaultActionMessage, setAvailableDefaultActionMessage] = useState<
-    string | undefined
-  >(undefined);
+  const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
+  const selectedActionGroup =
+    actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
 
   useEffect(() => {
     setAvailableActionVariables(
-      messageVariables ? getAvailableActionVariables(messageVariables, actionItem.group) : []
-    );
-    setAvailableDefaultActionMessage(
-      actionItem.group === RecoveredActionGroup.id
-        ? recoveredActionGroupMessage
-        : defaultActionMessage
+      messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem.group]);
@@ -161,10 +155,6 @@ export const ActionTypeForm = ({
     actionTypesIndex[actionConnector.actionTypeId],
     connectors.filter((connector) => connector.isPreconfigured)
   );
-
-  const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
-  const selectedActionGroup =
-    actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <Fragment>
@@ -270,7 +260,7 @@ export const ActionTypeForm = ({
               errors={actionParamsErrors.errors}
               editAction={setActionParamsProperty}
               messageVariables={availableActionVariables}
-              defaultMessage={availableDefaultActionMessage}
+              defaultMessage={selectedActionGroup?.defaultActionMessage}
               actionConnector={actionConnector}
             />
           </Suspense>
@@ -362,10 +352,12 @@ export const ActionTypeForm = ({
 };
 
 function getAvailableActionVariables(
-  { params, state, context }: ActionVariables,
-  actionGroup: string
+  actionVariables: ActionVariables,
+  actionGroup?: ActionGroupWithMessageVariables
 ) {
   return transformActionVariables(
-    actionGroup === RecoveredActionGroup.id ? { params, state } : { params, state, context }
+    actionGroup?.omitOptionalMessageVariables
+      ? pick(actionVariables, ...REQUIRED_ACTION_VARIABLES)
+      : actionVariables
   ).sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()));
 }

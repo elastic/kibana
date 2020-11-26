@@ -122,7 +122,7 @@ describe('register()', () => {
     );
   });
 
-  test('allows an AlertType to specify a custom recovery group name', () => {
+  test('allows an AlertType to specify a custom recovery group', () => {
     const alertType = {
       id: 'test',
       name: 'Test',
@@ -133,7 +133,10 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
-      recoveryActionGroupName: 'Back To Awesome',
+      recoveryActionGroup: {
+        id: 'backToAwesome',
+        name: 'Back To Awesome',
+      },
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -146,11 +149,42 @@ describe('register()', () => {
           "name": "Default",
         },
         Object {
-          "id": "recovered",
+          "id": "backToAwesome",
           "name": "Back To Awesome",
         },
       ]
     `);
+  });
+
+  test('throws if the custom recovery group is contained in the AlertType action groups', () => {
+    const alertType = {
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+        {
+          id: 'backToAwesome',
+          name: 'Back To Awesome',
+        },
+      ],
+      recoveryActionGroup: {
+        id: 'backToAwesome',
+        name: 'Back To Awesome',
+      },
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerts',
+    };
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(
+        `Alert type [id="${alertType.id}"] cannot be registered. Action group [backToAwesome] cannot be used as both a recovery and an active action group.`
+      )
+    );
   });
 
   test('registers the executor with the task manager', () => {

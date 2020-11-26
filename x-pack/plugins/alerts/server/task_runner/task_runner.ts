@@ -20,7 +20,6 @@ import {
   ErrorWithReason,
 } from '../lib';
 import {
-  AlertType,
   RawAlert,
   IntervalSchedule,
   Services,
@@ -39,7 +38,8 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
-import { RecoveredActionGroup } from '../../common';
+import { ActionGroup } from '../../common';
+import { NormalizedAlertType } from '../alert_type_registry';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -58,10 +58,10 @@ export class TaskRunner {
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
-  private alertType: AlertType;
+  private alertType: NormalizedAlertType;
 
   constructor(
-    alertType: AlertType,
+    alertType: NormalizedAlertType,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext
   ) {
@@ -230,6 +230,7 @@ export class TaskRunner {
 
     if (!muteAll) {
       scheduleActionsForRecoveredInstances(
+        this.alertType.recoveryActionGroup,
         alertInstances,
         executionHandler,
         originalAlertInstances,
@@ -499,6 +500,7 @@ function generateNewAndRecoveredInstanceEvents(
 }
 
 function scheduleActionsForRecoveredInstances(
+  recoveryActionGroup: ActionGroup,
   alertInstancesMap: Record<string, AlertInstance>,
   executionHandler: ReturnType<typeof createExecutionHandler>,
   originalAlertInstances: Record<string, AlertInstance>,
@@ -514,15 +516,15 @@ function scheduleActionsForRecoveredInstances(
   );
   for (const id of recoveredIds) {
     const instance = alertInstancesMap[id];
-    instance.updateLastScheduledActions(RecoveredActionGroup.id);
+    instance.updateLastScheduledActions(recoveryActionGroup.id);
     instance.unscheduleActions();
     executionHandler({
-      actionGroup: RecoveredActionGroup.id,
+      actionGroup: recoveryActionGroup.id,
       context: {},
       state: {},
       alertInstanceId: id,
     });
-    instance.scheduleActions(RecoveredActionGroup.id);
+    instance.scheduleActions(recoveryActionGroup.id);
   }
 }
 

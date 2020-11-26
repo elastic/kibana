@@ -43,7 +43,10 @@ export const alertType: AlertType = {
   name: 'People In Space Right Now',
   actionGroups: [{ id: 'default', name: 'default' }],
   defaultActionGroupId: 'default',
-  recoveryActionGroupName: 'Has landed back on Earth',
+  recoveryActionGroup: {
+    id: 'hasLandedBackOnEarth',
+    name: 'Has landed back on Earth',
+  },
   async executor({ services, params }) {
     const { outerSpaceCapacity, craft: craftToTriggerBy, op } = params;
 

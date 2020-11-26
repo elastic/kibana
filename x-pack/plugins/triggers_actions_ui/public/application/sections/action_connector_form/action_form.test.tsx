@@ -10,7 +10,6 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, Alert, AlertAction } from '../../../types';
 import ActionForm from './action_form';
-import { RecoveredActionGroup } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -211,6 +210,7 @@ describe('action_form', () => {
         mutedInstanceIds: [],
       } as unknown) as Alert;
 
+      const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
       const wrapper = mountWithIntl(
         <ActionForm
           actions={initialAlert.actions}
@@ -227,19 +227,18 @@ describe('action_form', () => {
             initialAlert.actions[index].id = id;
           }}
           actionGroups={[
-            { id: 'default', name: 'Default' },
+            { id: 'default', name: 'Default', defaultActionMessage },
             { id: 'recovered', name: 'Recovered' },
           ]}
           setActionGroupIdByIndex={(group: string, index: number) => {
             initialAlert.actions[index].group = group;
           }}
-          setAlertProperty={(_updatedActions: AlertAction[]) => {}}
+          setActions={(_updatedActions: AlertAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }
           actionTypeRegistry={actionTypeRegistry}
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={[
             {
               id: actionType.id,
@@ -353,43 +352,6 @@ describe('action_form', () => {
           },
         ]
       `);
-    });
-
-    it('renders selected Recovered action group', async () => {
-      const wrapper = await setup([
-        {
-          group: RecoveredActionGroup.id,
-          id: 'test',
-          actionTypeId: actionType.id,
-          params: {
-            message: '',
-          },
-        },
-      ]);
-      const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
-      );
-      actionOption.first().simulate('click');
-      const actionGroupsSelect = wrapper.find(
-        `[data-test-subj="addNewActionConnectorActionGroup-0"]`
-      );
-      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
-            "inputDisplay": "Default",
-            "value": "default",
-          },
-          Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-recovered",
-            "inputDisplay": "Recovered",
-            "value": "recovered",
-          },
-        ]
-      `);
-      expect(actionGroupsSelect.first().text()).toEqual(
-        'Select an option: Recovered, is selectedResolved'
-      );
     });
 
     it('renders available connectors for the selected action type', async () => {

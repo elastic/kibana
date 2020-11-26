@@ -6,6 +6,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from 'kibana/public';
 import { ComponentType } from 'react';
+import { RequiredKeys } from 'utility-types';
 import { ActionGroup, AlertActionParam } from '../../alerts/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
@@ -127,16 +128,19 @@ export interface ActionVariable {
   description: string;
 }
 
-export interface ActionVariables {
-  context?: ActionVariable[];
-  state: ActionVariable[];
-  params: ActionVariable[];
-}
+type AsActionVariables<Keys extends string> = {
+  [Req in Keys]: ActionVariable[];
+};
+export const REQUIRED_ACTION_VARIABLES = ['state', 'params'] as const;
+export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
+export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
+  Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
 export interface AlertType {
   id: string;
   name: string;
   actionGroups: ActionGroup[];
+  recoveryActionGroup: ActionGroup;
   actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
