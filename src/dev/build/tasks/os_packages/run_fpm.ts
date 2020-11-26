@@ -37,7 +37,6 @@ export async function runFpm(
   const resolveWithTrailingSlash = (...paths: string[]) => `${resolve(...paths)}/`;
 
   const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(linux, ...paths);
-
   const pickLicense = () => {
     if (build.isOss()) {
       return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
@@ -60,10 +59,7 @@ export async function runFpm(
     // the filtered package version, which would have dashes replaced with
     // underscores
     '--package',
-    config.resolveFromTarget(
-      // linux uses arm64 when checking architecture, our file names use aarch64
-      `NAME-${version}-${architecture === 'arm64' ? `aarch64.${type}` : 'ARCH.TYPE'}`
-    ),
+    config.resolveFromTarget(`NAME-${version}-ARCH.TYPE`),
 
     // input type
     '-s',
