@@ -1,0 +1,94 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { EuiBasicTableColumn, EuiButtonIcon, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo } from 'react';
+import {
+  LogEntry,
+  LogEntryField,
+} from '../../../../common/search_strategies/log_entries/log_entry';
+import { TimeKey } from '../../../../common/time';
+import { FieldValue } from '../log_text_stream/field_value';
+
+export const LogEntryFieldsTable: React.FC<{
+  logEntry: LogEntry;
+  onSetFieldFilter: (filter: string, logEntryId: string, timeKey?: TimeKey) => void;
+}> = ({ logEntry, onSetFieldFilter }) => {
+  const createSetFilterHandler = useCallback(
+    (field: LogEntryField) => () => {
+      onSetFieldFilter(`${field.field}:"${field.value}"`, logEntry.id, logEntry.key);
+    },
+    [logEntry, onSetFieldFilter]
+  );
+
+  const columns = useMemo<Array<EuiBasicTableColumn<LogEntryField>>>(
+    () => [
+      {
+        field: 'field',
+        name: i18n.translate('xpack.infra.logFlyout.fieldColumnLabel', {
+          defaultMessage: 'Field',
+        }),
+        sortable: true,
+      },
+      {
+        field: 'value',
+        name: i18n.translate('xpack.infra.logFlyout.valueColumnLabel', {
+          defaultMessage: 'Value',
+        }),
+        render: (_name: string, item: LogEntryField) => (
+          <span>
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.logFlyout.setFilterTooltip', {
+                defaultMessage: 'View event with filter',
+              })}
+            >
+              <EuiButtonIcon
+                color="text"
+                iconType="filter"
+                aria-label={i18n.translate('xpack.infra.logFlyout.filterAriaLabel', {
+                  defaultMessage: 'Filter',
+                })}
+                onClick={createSetFilterHandler(item)}
+              />
+            </EuiToolTip>
+            <FieldValue
+              highlightTerms={emptyHighlightTerms}
+              isActiveHighlight={false}
+              value={item.value}
+            />
+          </span>
+        ),
+      },
+    ],
+    [createSetFilterHandler]
+  );
+
+  return (
+    <EuiInMemoryTable<LogEntryField>
+      columns={columns}
+      items={logEntry.fields}
+      search={searchOptions}
+      sorting={initialSortingOptions}
+    />
+  );
+};
+
+const emptyHighlightTerms: string[] = [];
+
+const initialSortingOptions = {
+  sort: {
+    field: 'field',
+    direction: 'asc' as const,
+  },
+};
+
+const searchOptions = {
+  box: {
+    incremental: true,
+    schema: true,
+  },
+};

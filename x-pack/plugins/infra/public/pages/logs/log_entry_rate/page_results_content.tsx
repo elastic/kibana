@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSuperDatePicker } from
 import moment from 'moment';
 import { encode, RisonValue } from 'rison-node';
 import { stringify } from 'query-string';
-import React, { useCallback, useEffect, useMemo, useState, useContext } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { euiStyled, useTrackPageview } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
@@ -32,7 +32,6 @@ import {
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
 import { LogEntryFlyout, LogEntryFlyoutProps } from '../../../components/logging/log_entry_flyout';
-import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const SORT_DEFAULTS = {
@@ -143,14 +142,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     defaultPaginationOptions: PAGINATION_DEFAULTS,
     filteredDatasets: selectedDatasets,
   });
-
-  const {
-    flyoutVisible,
-    setFlyoutVisibility,
-    flyoutError,
-    flyoutItem,
-    isLoading: isFlyoutLoading,
-  } = useContext(LogFlyout.Context);
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
@@ -305,16 +296,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </ResultsContentPage>
-
-      {flyoutVisible ? (
-        <LogEntryFlyout
-          flyoutError={flyoutError}
-          flyoutItem={flyoutItem}
-          setFlyoutVisibility={setFlyoutVisibility}
-          loading={isFlyoutLoading}
-          setFilter={linkToLogStream}
-        />
-      ) : null}
+      <LogEntryFlyout setFilter={linkToLogStream} />
     </>
   );
 };

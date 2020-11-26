@@ -13,7 +13,7 @@ import { ScrollableLogTextStreamView } from '../../../components/logging/log_tex
 import { PageContent } from '../../../components/page';
 import { LogFilterState } from '../../../containers/logs/log_filter';
 import {
-  LogFlyout as LogFlyoutState,
+  useLogEntryFlyoutContext,
   WithFlyoutOptionsUrlState,
 } from '../../../containers/logs/log_flyout';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights';
@@ -32,14 +32,10 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
-    flyoutVisible,
     setFlyoutId,
     surroundingLogsId,
     setSurroundingLogsId,
-    flyoutItem,
-    flyoutError,
-    isLoading,
-  } = useContext(LogFlyoutState.Context);
+  } = useLogEntryFlyoutContext();
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const { applyLogFilterQuery } = useContext(LogFilterState.Context);
   const {
@@ -76,15 +72,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
       <PageViewLogInContext />
-      {flyoutVisible ? (
-        <LogEntryFlyout
-          setFilter={setFilter}
-          setFlyoutVisibility={setFlyoutVisibility}
-          flyoutItem={flyoutItem}
-          flyoutError={flyoutError}
-          loading={isLoading}
-        />
-      ) : null}
+      <LogEntryFlyout setFilter={setFilter} />
       <PageContent key={`${sourceId}-${sourceConfiguration?.version}`}>
         <WithStreamItems>
           {({

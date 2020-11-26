@@ -6,10 +6,8 @@
 
 import createContainer from 'constate';
 import { isString } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { UrlStateContainer } from '../../utils/url_state';
-import { useLogEntry } from './log_entry';
-import { useLogSourceContext } from './log_source';
 
 export enum FlyoutVisibility {
   hidden = 'hidden',
@@ -23,36 +21,23 @@ export interface FlyoutOptionsUrlState {
 }
 
 export const useLogFlyout = () => {
-  const { sourceId } = useLogSourceContext();
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
   const [logEntryId, setLogEntryId] = useState<string | null>(null);
   const [surroundingLogsId, setSurroundingLogsId] = useState<string | null>(null);
 
-  const { fetchLogEntry, isRunning, logEntry, errors: logEntryErrors } = useLogEntry({
-    sourceId,
-    logEntryId,
-  });
-
-  useEffect(() => {
-    if (logEntryId) {
-      fetchLogEntry();
-    }
-  }, [fetchLogEntry, logEntryId]);
-
   return {
+    isVisible: flyoutVisible,
     flyoutVisible,
     setFlyoutVisibility,
     flyoutId: logEntryId,
     setFlyoutId: setLogEntryId,
     surroundingLogsId,
     setSurroundingLogsId,
-    isLoading: isRunning,
-    flyoutItem: logEntry,
-    flyoutError: logEntryErrors?.map((error) => `${error}`).join(','),
   };
 };
 
 export const LogFlyout = createContainer(useLogFlyout);
+export const [LogEntryFlyoutProvider, useLogEntryFlyoutContext] = LogFlyout;
 
 export const WithFlyoutOptionsUrlState = () => {
   const {
@@ -62,7 +47,7 @@ export const WithFlyoutOptionsUrlState = () => {
     setFlyoutId,
     surroundingLogsId,
     setSurroundingLogsId,
-  } = useContext(LogFlyout.Context);
+  } = useLogEntryFlyoutContext();
 
   return (
     <UrlStateContainer
