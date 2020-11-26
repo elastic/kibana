@@ -33,7 +33,7 @@ import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { DatePickerWrapper } from '../../components/navigation_menu/date_picker_wrapper';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../../../common/constants/search';
 import { isFullLicense } from '../../license';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
@@ -55,7 +55,7 @@ import { DataLoader } from './data_loader';
 interface DataVisualizerPageState {
   searchQuery: Query['query'];
   searchString: Query['query'];
-  searchQueryLanguage: SEARCH_QUERY_LANGUAGE;
+  searchQueryLanguage: SearchQueryLanguage;
   samplerShardSize: number;
   overallStats: any;
   metricConfigs: FieldVisConfig[];
@@ -252,7 +252,7 @@ export const Page: FC = () => {
     }
 
     const { query } = getQueryFromSavedSearch(savedSearch);
-    const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
+    const queryLanguage = query.language;
     const qryString = query.query;
     let qry;
     if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
