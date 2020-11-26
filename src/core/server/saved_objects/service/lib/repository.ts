@@ -1526,7 +1526,7 @@ export class SavedObjectsRepository {
    *    a message in development.
    *  - Don't block your application on the incrementCounter method (e.g.
    *    don't use `await`)
-   *
+   * @remarks
    * When supplying a field name like `stats.api.counter` the field name will
    * be used as-is to create a document like:
    *   `{attributes: {'stats.api.counter': 1}}`

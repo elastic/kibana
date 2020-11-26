@@ -29,7 +29,7 @@ incrementCounter(type: string, id: string, counterFieldNames: string[], options?
 
 ## Remarks
 
-When using incrementCounter for collecting usage data, you need to ensure that usage collection happens on a best-effort basis and doesn't negatively affect your plugin or users (see the example): - Swallow any exceptions thrown from the incrementCounter method and log a message in development. - Don't block your application on the incrementCounter method (e.g. don't use `await`<!-- -->)
+When supplying a field name like `stats.api.counter` the field name will be used as-is to create a document like: `{attributes: {'stats.api.counter': 1}}` It will not create a nested structure like: `{attributes: {stats: {api: {counter: 1}}}}`
 
 ## Example
 
