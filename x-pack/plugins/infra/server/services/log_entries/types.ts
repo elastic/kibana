@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import type { CoreSetup, CoreStart } from 'kibana/public';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
