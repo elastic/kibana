@@ -140,7 +140,7 @@ export class VegaBaseView {
       idxObj = await indexPatterns.findByTitle(index);
       if (!idxObj) {
         throw new Error(
-          i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
+          i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
             defaultMessage: 'Index {index} not found',
             values: { index: `"${index}"` },
           })
@@ -152,15 +152,17 @@ export class VegaBaseView {
       );
 
       if (!idxObj) {
-        idxObj = await indexPatterns.getDefault();
-      }
+        const defaultIdx = await indexPatterns.getDefault();
 
-      if (!idxObj) {
-        throw new Error(
-          i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
-            defaultMessage: 'Unable to find default index',
-          })
-        );
+        if (defaultIdx) {
+          idxObj = defaultIdx;
+        } else {
+          throw new Error(
+            i18n.translate('visTypeVega.vegaParser.baseView.unableToFindDefaultIndexErrorMessage', {
+              defaultMessage: 'Unable to find default index',
+            })
+          );
+        }
       }
     }
 
