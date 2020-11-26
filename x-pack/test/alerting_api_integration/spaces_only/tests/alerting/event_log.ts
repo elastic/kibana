@@ -77,7 +77,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             'execute-action',
             'new-instance',
             'active-instance',
-            'resolved-instance',
+            'recovered-instance',
           ],
         });
       });
@@ -86,7 +86,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const executeEvents = getEventsByAction(events, 'execute');
       const executeActionEvents = getEventsByAction(events, 'execute-action');
       const newInstanceEvents = getEventsByAction(events, 'new-instance');
-      const resolvedInstanceEvents = getEventsByAction(events, 'resolved-instance');
+      const resolvedInstanceEvents = getEventsByAction(events, 'recovered-instance');
 
       expect(executeEvents.length >= 4).to.be(true);
       expect(executeActionEvents.length).to.be(2);
@@ -135,8 +135,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           case 'new-instance':
             validateInstanceEvent(event, `created new instance: 'instance'`);
             break;
-          case 'resolved-instance':
-            validateInstanceEvent(event, `resolved instance: 'instance'`);
+          case 'recovered-instance':
+            validateInstanceEvent(event, `recovered instance: 'instance'`);
             break;
           case 'active-instance':
             validateInstanceEvent(event, `active instance: 'instance' in actionGroup: 'default'`);
