@@ -340,7 +340,7 @@ export const routes: APMRouteDefinition[] = [
 ];
 
 function withApmServiceContext(
-  WrappedComponent: (props: RouteComponentProps<any>) => JSX.Element | null
+  WrappedComponent: React.ComponentType<any>
 ) {
   return (props: any) => {
     return (
