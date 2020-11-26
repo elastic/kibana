@@ -43,7 +43,7 @@ describe('EmailParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    mountWithIntl(
       <EmailParamsFields
         actionParams={actionParams}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
