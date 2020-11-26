@@ -47,7 +47,6 @@ import {
   tags,
   caseUserActionsSnake,
   casesStatusSnake,
-  casePushRes,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
