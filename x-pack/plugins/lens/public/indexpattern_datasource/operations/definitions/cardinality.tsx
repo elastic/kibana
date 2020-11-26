@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
-import { fieldIsInvalid } from '.';
+import { getInvalidFieldMessage } from './helpers';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -44,7 +44,8 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
-  hasInvalidReferences: fieldIsInvalid,
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 

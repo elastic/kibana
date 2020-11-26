@@ -13,7 +13,7 @@ import {
 } from './operations/definitions/column_types';
 import { operationDefinitionMap, IndexPatternColumn } from './operations';
 
-import { fieldIsInvalid as fieldIsInvalidHelper } from './operations/definitions';
+import { getInvalidFieldMessage } from './operations/definitions/helpers';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations
@@ -50,10 +50,9 @@ export function hasInvalidColumns(state: IndexPatternPrivateState) {
 
 export function getInvalidLayers(state: IndexPatternPrivateState) {
   return Object.values(state.layers).filter((layer) => {
-    return layer.columnOrder.some((columnId) => {
-      const column = layer.columns[columnId];
-      return isColumnInvalid(column, state.indexPatterns[layer.indexPatternId]);
-    });
+    return layer.columnOrder.some((columnId) =>
+      isColumnInvalid(layer, columnId, state.indexPatterns[layer.indexPatternId])
+    );
   });
 }
 
@@ -62,18 +61,23 @@ export function getInvalidColumnsForLayer(
   indexPatternMap: Record<string, IndexPattern>
 ) {
   return layers.map((layer) => {
-    return layer.columnOrder.filter((columnId) => {
-      const column = layer.columns[columnId];
-      return isColumnInvalid(column, indexPatternMap[layer.indexPatternId]);
-    });
+    return layer.columnOrder.filter((columnId) =>
+      isColumnInvalid(layer, columnId, indexPatternMap[layer.indexPatternId])
+    );
   });
 }
 
-export function isColumnInvalid(column: IndexPatternColumn, indexPattern: IndexPattern) {
+export function isColumnInvalid(
+  layer: IndexPatternLayer,
+  columnId: string,
+  indexPattern: IndexPattern
+) {
+  const column = layer.columns[columnId];
+
   const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
   return !!(
-    operationDefinition.hasInvalidReferences &&
-    operationDefinition.hasInvalidReferences(column, indexPattern)
+    operationDefinition.getErrorMessage &&
+    operationDefinition.getErrorMessage(layer, columnId, indexPattern)
   );
 }
 
@@ -81,5 +85,5 @@ export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPatt
   if (!column || !hasField(column)) {
     return false;
   }
-  return fieldIsInvalidHelper(column, indexPattern);
+  return !!getInvalidFieldMessage(column, indexPattern)?.length;
 }

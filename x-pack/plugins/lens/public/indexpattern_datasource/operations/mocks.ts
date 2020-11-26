@@ -35,6 +35,6 @@ export const createMockedReferenceOperation = () => {
     toExpression: jest.fn().mockReturnValue([]),
     getPossibleOperation: jest.fn().mockReturnValue({ dataType: 'number', isBucketed: false }),
     getDefaultLabel: jest.fn().mockReturnValue('Default label'),
-    hasInvalidReferences: jest.fn(),
+    getErrorMessage: jest.fn(),
   };
 };

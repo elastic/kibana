@@ -45,21 +45,22 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
 ) {
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
-  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
   const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
+  const { columnId, uniqueLabel } = props;
 
-  const currentFieldIsInvalid = useMemo(
-    () => isColumnInvalid(selectedColumn, currentIndexPattern),
-    [selectedColumn, currentIndexPattern]
+  const currentColumnHasErrors = useMemo(
+    () => isColumnInvalid(layer, columnId, currentIndexPattern),
+    [layer, columnId, currentIndexPattern]
   );
 
-  const { columnId, uniqueLabel } = props;
+  const selectedColumn: IndexPatternColumn | null = layer.columns[props.columnId] || null;
+
   if (!selectedColumn) {
     return null;
   }
   const formattedLabel = wrapOnDot(uniqueLabel);
 
-  if (currentFieldIsInvalid) {
+  if (currentColumnHasErrors) {
     return (
       <EuiToolTip
         content={

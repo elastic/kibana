@@ -293,15 +293,6 @@ describe('getOperationTypesForField', () => {
                 "operationType": "median",
                 "type": "field",
               },
-            ],
-          },
-          Object {
-            "operationMetaData": Object {
-              "dataType": "number",
-              "isBucketed": false,
-              "scale": "ordinal",
-            },
-            "operations": Array [
               Object {
                 "field": "bytes",
                 "operationType": "last_value",

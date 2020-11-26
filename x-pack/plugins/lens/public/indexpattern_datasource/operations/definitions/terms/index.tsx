@@ -22,7 +22,7 @@ import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesRangeInput } from './values_range_input';
-import { fieldIsInvalid } from '..';
+import { getInvalidFieldMessage } from '../helpers';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
@@ -72,7 +72,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
     }
   },
-  hasInvalidReferences: fieldIsInvalid,
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 

@@ -175,9 +175,16 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    */
   getDisabledStatus?: (indexPattern: IndexPattern) => string | undefined;
   /**
-   * Returns true if column contains invalid references
+   * Validate that the operation has the right preconditions in the state. For example:
+   *
+   * - Requires a date histogram operation somewhere before it in order
+   * - Missing references
    */
-  hasInvalidReferences?: (column: C, indexPattern: IndexPattern) => boolean;
+  getErrorMessage?: (
+    layer: IndexPatternLayer,
+    columnId: string,
+    indexPattern?: IndexPattern
+  ) => string[] | undefined;
 }
 
 interface BaseBuildColumnArgs {
@@ -244,6 +251,17 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
    * together with the agg configs returned from other columns.
    */
   toEsAggsConfig: (column: C, columnId: string, indexPattern: IndexPattern) => unknown;
+  /**
+   * Validate that the operation has the right preconditions in the state. For example:
+   *
+   * - Requires a date histogram operation somewhere before it in order
+   * - Missing references
+   */
+  getErrorMessage: (
+    layer: IndexPatternLayer,
+    columnId: string,
+    indexPattern?: IndexPattern
+  ) => string[] | undefined;
 }
 
 export interface RequiredReference {
@@ -296,13 +314,6 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
     columnId: string,
     indexPattern: IndexPattern
   ) => ExpressionFunctionAST[];
-  /**
-   * Validate that the operation has the right preconditions in the state. For example:
-   *
-   * - Requires a date histogram operation somewhere before it in order
-   * - Missing references
-   */
-  getErrorMessage?: (layer: IndexPatternLayer, columnId: string) => string[] | undefined;
 }
 
 interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
@@ -359,19 +370,3 @@ export const operationDefinitionMap: Record<
   (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
   {}
 );
-
-export function fieldIsInvalid(column: FieldBasedIndexPatternColumn, indexPattern: IndexPattern) {
-  const { sourceField, operationType } = column;
-  const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
-  const operationDefinition = operationType && operationDefinitionMap[operationType];
-
-  return Boolean(
-    sourceField &&
-      operationDefinition &&
-      !(
-        field &&
-        operationDefinition?.input === 'field' &&
-        operationDefinition.getPossibleOperationForField(field) !== undefined
-      )
-  );
-}

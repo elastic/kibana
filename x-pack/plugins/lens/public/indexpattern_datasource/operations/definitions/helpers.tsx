@@ -6,6 +6,7 @@
 
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 import { operationDefinitionMap } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPattern } from '../../types';
@@ -32,12 +33,18 @@ export const useDebounceWithOptions = (
   );
 };
 
-export function fieldIsInvalid(column: FieldBasedIndexPatternColumn, indexPattern: IndexPattern) {
+export function getInvalidFieldMessage(
+  column: FieldBasedIndexPatternColumn,
+  indexPattern?: IndexPattern
+) {
+  if (!indexPattern) {
+    return;
+  }
   const { sourceField, operationType } = column;
   const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
   const operationDefinition = operationType && operationDefinitionMap[operationType];
 
-  return Boolean(
+  const isInvalid = Boolean(
     sourceField &&
       operationDefinition &&
       !(
@@ -46,4 +53,12 @@ export function fieldIsInvalid(column: FieldBasedIndexPatternColumn, indexPatter
         operationDefinition.getPossibleOperationForField(field) !== undefined
       )
   );
+  return isInvalid
+    ? [
+        i18n.translate('xpack.lens.indexPattern.invalidSourceField', {
+          defaultMessage: 'Field {invalidField} has an invalid reference',
+          values: { invalidField: sourceField },
+        }),
+      ]
+    : undefined;
 }

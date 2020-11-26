@@ -7,9 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
-import { fieldIsInvalid } from '.';
-
-type MetricType = 'sum' | 'avg' | 'min' | 'max' | 'median';
+import { getInvalidFieldMessage } from './helpers';
 
 type MetricColumn<T> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
@@ -84,8 +82,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         missing: 0,
       },
     }),
-    hasInvalidReferences: (column, _indexPattern) =>
-      fieldIsInvalid(column as MetricColumn<MetricType>, _indexPattern),
+    getErrorMessage: (layer, columnId, indexPattern) =>
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   } as OperationDefinition<T, 'field'>;
 }
 

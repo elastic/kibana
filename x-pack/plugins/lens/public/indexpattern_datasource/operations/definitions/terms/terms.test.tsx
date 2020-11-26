@@ -15,7 +15,7 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesRangeInput } from './values_range_input';
 import { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
-import { IndexPatternPrivateState, IndexPattern } from '../../../types';
+import { IndexPatternPrivateState, IndexPattern, IndexPatternLayer } from '../../../types';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -805,37 +805,49 @@ describe('terms', () => {
       });
     });
   });
-  describe('hasInvalidReferences', () => {
+  describe('getErrorMessage', () => {
     let indexPattern: IndexPattern;
-    let column: TermsIndexPatternColumn;
+    let layer: IndexPatternLayer;
     beforeEach(() => {
       indexPattern = createMockedIndexPattern();
-      column = {
-        dataType: 'boolean',
-        isBucketed: true,
-        label: 'Top values of bytes',
-        operationType: 'terms',
-        params: {
-          missingBucket: false,
-          orderBy: { type: 'alphabetical' },
-          orderDirection: 'asc',
-          otherBucket: true,
-          size: 5,
+      layer = {
+        columns: {
+          col1: {
+            dataType: 'boolean',
+            isBucketed: true,
+            label: 'Top values of bytes',
+            operationType: 'terms',
+            params: {
+              missingBucket: false,
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+              otherBucket: true,
+              size: 5,
+            },
+            scale: 'ordinal',
+            sourceField: 'bytes',
+          },
         },
-        scale: 'ordinal',
-        sourceField: 'bytes',
+        columnOrder: [],
+        indexPatternId: '',
       };
     });
-    it('returns false if sourceField exists in index pattern', () => {
-      expect(termsOperation.hasInvalidReferences!(column, indexPattern)).toEqual(false);
+    it('returns undefined if sourceField exists in index pattern', () => {
+      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual(undefined);
     });
-    it('returns true if the sourceField does not exist in index pattern', () => {
-      expect(
-        termsOperation.hasInvalidReferences!(
-          { ...column, sourceField: 'notExisting' },
-          indexPattern
-        )
-      ).toEqual(true);
+    it('returns error message if the sourceField does not exist in index pattern', () => {
+      layer = {
+        ...layer,
+        columns: {
+          col1: {
+            ...layer.columns.col1,
+            sourceField: 'notExisting',
+          } as TermsIndexPatternColumn,
+        },
+      };
+      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+        'Field notExisting has an invalid reference',
+      ]);
     });
   });
 });

@@ -13,7 +13,7 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { createMockedIndexPattern } from '../../mocks';
 import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from './index';
-import { IndexPatternPrivateState, IndexPattern } from '../../types';
+import { IndexPatternPrivateState, IndexPattern, IndexPatternLayer } from '../../types';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -162,7 +162,7 @@ describe('last_value', () => {
       ).toEqual({
         dataType: 'boolean',
         isBucketed: false,
-        scale: 'ordinal',
+        scale: 'ratio',
       });
 
       expect(
@@ -176,7 +176,7 @@ describe('last_value', () => {
       ).toEqual({
         dataType: 'ip',
         isBucketed: false,
-        scale: 'ordinal',
+        scale: 'ratio',
       });
     });
 
@@ -483,47 +483,77 @@ describe('last_value', () => {
     });
   });
 
-  describe('hasInvalidReferences', () => {
+  describe('getErrorMessage', () => {
     let indexPattern: IndexPattern;
-    let column: LastValueIndexPatternColumn;
+    let layer: IndexPatternLayer;
     beforeEach(() => {
       indexPattern = createMockedIndexPattern();
-      column = {
-        dataType: 'boolean',
-        isBucketed: false,
-        label: 'Last value of test',
-        operationType: 'last_value',
-        params: { sortField: 'timestamp', sortOrder: 'desc' },
-        scale: 'ratio',
-        sourceField: 'bytes',
+      layer = {
+        columns: {
+          col1: {
+            dataType: 'boolean',
+            isBucketed: false,
+            label: 'Last value of test',
+            operationType: 'last_value',
+            params: { sortField: 'timestamp', sortOrder: 'desc' },
+            scale: 'ratio',
+            sourceField: 'bytes',
+          },
+        },
+        columnOrder: [],
+        indexPatternId: '',
       };
     });
-    it('returns false if sourceField exists and sortField is of type date ', () => {
-      expect(lastValueOperation.hasInvalidReferences!(column, indexPattern)).toEqual(false);
+    it('returns undefined if sourceField exists and sortField is of type date ', () => {
+      expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual(undefined);
     });
-    it('returns true if the sourceField does not exist in index pattern', () => {
-      expect(
-        lastValueOperation.hasInvalidReferences!(
-          { ...column, sourceField: 'notExisting' },
-          indexPattern
-        )
-      ).toEqual(true);
+    it('shows error message if the sourceField does not exist in index pattern', () => {
+      layer = {
+        ...layer,
+        columns: {
+          col1: {
+            ...layer.columns.col1,
+            sourceField: 'notExisting',
+          } as LastValueIndexPatternColumn,
+        },
+      };
+      expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+        'Field notExisting has an invalid reference',
+      ]);
     });
-    it('returns true if the sortField does not exist in index pattern', () => {
-      expect(
-        lastValueOperation.hasInvalidReferences!(
-          { ...column, params: { ...column.params, sortField: 'notExisting' } },
-          indexPattern
-        )
-      ).toEqual(true);
+    it('shows error message  if the sortField does not exist in index pattern', () => {
+      layer = {
+        ...layer,
+        columns: {
+          col1: {
+            ...layer.columns.col1,
+            params: {
+              ...layer.columns.col1.params,
+              sortField: 'notExisting',
+            },
+          } as LastValueIndexPatternColumn,
+        },
+      };
+      expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+        'Field notExisting has an invalid reference',
+      ]);
     });
-    it('returns true if the sortField is not date', () => {
-      expect(
-        lastValueOperation.hasInvalidReferences!(
-          { ...column, params: { ...column.params, sortField: 'bytes' } },
-          indexPattern
-        )
-      ).toEqual(true);
+    it('shows error message if the sortField is not date', () => {
+      layer = {
+        ...layer,
+        columns: {
+          col1: {
+            ...layer.columns.col1,
+            params: {
+              ...layer.columns.col1.params,
+              sortField: 'bytes',
+            },
+          } as LastValueIndexPatternColumn,
+        },
+      };
+      expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+        'Field bytes has an invalid reference',
+      ]);
     });
   });
 });

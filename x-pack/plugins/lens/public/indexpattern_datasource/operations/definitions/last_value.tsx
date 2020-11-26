@@ -11,7 +11,7 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
-import { fieldIsInvalid } from '.';
+import { getInvalidFieldMessage } from './helpers';
 
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
@@ -22,9 +22,17 @@ function ofName(name: string) {
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
-export function sortFieldIsInvalid(sortField: string, indexPattern: IndexPattern) {
+export function getInvalidSortFieldMessage(sortField: string, indexPattern?: IndexPattern) {
+  if (!indexPattern) {
+    return;
+  }
   const field = indexPattern.getFieldByName(sortField);
-  return !(field && field.type === 'date');
+  if (!(field && field.type === 'date')) {
+    return i18n.translate('xpack.lens.indexPattern.lastValue.invalidSortField', {
+      defaultMessage: 'Field {invalidField} has an invalid reference',
+      values: { invalidField: sortField },
+    });
+  }
 }
 
 function isTimeFieldNameDateField(indexPattern: IndexPattern) {
@@ -91,7 +99,11 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   },
   getPossibleOperationForField: ({ aggregationRestrictions, type }) => {
     if (supportedTypes.has(type) && !aggregationRestrictions) {
-      return { dataType: type as DataType, isBucketed: false, scale: 'ordinal' };
+      return {
+        dataType: type as DataType,
+        isBucketed: false,
+        scale: type === 'string' ? 'ordinal' : 'ratio',
+      };
     }
   },
   getDisabledStatus(indexPattern: IndexPattern) {
@@ -102,11 +114,21 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       });
     }
   },
-  hasInvalidReferences(column, indexPattern) {
-    return (
-      fieldIsInvalid(column, indexPattern) ||
-      sortFieldIsInvalid(column.params.sortField, indexPattern)
+  getErrorMessage(layer, columnId, indexPattern) {
+    const column = layer.columns[columnId] as LastValueIndexPatternColumn;
+    let errorMessages: string[] = [];
+    const invalidSourceFieldMessage = getInvalidFieldMessage(column, indexPattern);
+    const invalidSortFieldMessage = getInvalidSortFieldMessage(
+      column.params.sortField,
+      indexPattern
     );
+    if (invalidSourceFieldMessage) {
+      errorMessages = [...invalidSourceFieldMessage];
+    }
+    if (invalidSortFieldMessage) {
+      errorMessages = [invalidSortFieldMessage];
+    }
+    return errorMessages.length ? errorMessages : undefined;
   },
   buildColumn({ field, previousColumn, indexPattern }) {
     const sortField = isTimeFieldNameDateField(indexPattern)
@@ -132,7 +154,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,
-      scale: 'ratio',
+      scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
       params: {
         sortOrder,
@@ -180,7 +202,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
         value: 'desc',
       },
     ];
-    const isSortFieldInvalid = sortFieldIsInvalid(
+    const isSortFieldInvalid = !!getInvalidSortFieldMessage(
       currentColumn.params.sortField,
       currentIndexPattern
     );
