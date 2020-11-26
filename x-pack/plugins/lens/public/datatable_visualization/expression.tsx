@@ -10,11 +10,21 @@ import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { EuiBasicTable, EuiFlexGroup, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiFlexItem,
+  EuiToolTip,
+  Direction,
+} from '@elastic/eui';
+import { orderBy } from 'lodash';
 import { IAggType } from 'src/plugins/data/public';
+import { DatatableColumnMeta } from 'src/plugins/expressions';
 import {
   FormatFactory,
   ILensInterpreterRenderHandlers,
+  LensEditEvent,
   LensFilterEvent,
   LensMultiTable,
 } from '../types';
@@ -29,6 +39,8 @@ import { LensIconChartDatatable } from '../assets/chart_datatable';
 
 export interface DatatableColumns {
   columnIds: string[];
+  sortBy: string;
+  sortDirection: string;
 }
 
 interface Args {
@@ -45,6 +57,7 @@ export interface DatatableProps {
 type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   onClickValue: (data: LensFilterEvent['data']) => void;
+  onEditAction?: (data: LensEditEvent['data']) => void;
   getType: (name: string) => IAggType;
 };
 
@@ -108,6 +121,8 @@ export const datatableColumns: ExpressionFunctionDefinition<
   help: '',
   inputTypes: ['null'],
   args: {
+    sortBy: { types: ['string'], help: '' },
+    sortDirection: { types: ['string'], help: '' },
     columnIds: {
       types: ['string'],
       multi: true,
@@ -143,12 +158,19 @@ export const getDatatableRenderer = (dependencies: {
     const onClickValue = (data: LensFilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
     };
+
+    const onEditAction = (data: LensEditEvent['data']) => {
+      if (handlers.getRenderMode() === 'edit') {
+        handlers.event({ name: 'edit', data });
+      }
+    };
     ReactDOM.render(
       <I18nProvider>
         <DatatableComponent
           {...config}
           formatFactory={resolvedFormatFactory}
           onClickValue={onClickValue}
+          onEditAction={onEditAction}
           getType={resolvedGetType}
         />
       </I18nProvider>,
@@ -161,6 +183,12 @@ export const getDatatableRenderer = (dependencies: {
   },
 });
 
+function getNextOrderValue(currentValue: LensEditEvent['data']['direction']) {
+  const states: Array<LensEditEvent['data']['direction']> = ['asc', 'desc', 'none'];
+  const newStateIndex = (1 + states.findIndex((state) => state === currentValue)) % states.length;
+  return states[newStateIndex];
+}
+
 export function DatatableComponent(props: DatatableRenderProps) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
@@ -169,7 +197,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
     formatters[column.id] = props.formatFactory(column.meta?.params);
   });
 
-  const { onClickValue } = props;
+  const { onClickValue, onEditAction } = props;
   const handleFilterClick = useMemo(
     () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
       const col = firstTable.columns[colIndex];
@@ -214,6 +242,23 @@ export function DatatableComponent(props: DatatableRenderProps) {
     return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
 
+  const visibleColumns = props.args.columns.columnIds.filter((field) => !!field);
+  const columnsReverseLookup = firstTable.columns.reduce<
+    Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
+  >((memo, { id, name, meta }, i) => {
+    memo[id] = { name, index: i, meta };
+    return memo;
+  }, {});
+
+  const { sortBy, sortDirection } = props.args.columns;
+
+  const rows = firstTable?.rows || [];
+  let sortedRows = rows;
+
+  if (sortBy && sortDirection !== 'none') {
+    sortedRows = orderBy(rows, [sortBy], sortDirection as Direction);
+  }
+
   return (
     <VisualizationContainer
       reportTitle={props.args.title}
@@ -223,89 +268,105 @@ export function DatatableComponent(props: DatatableRenderProps) {
         className="lnsDataTable"
         data-test-subj="lnsDataTable"
         tableLayout="auto"
-        columns={props.args.columns.columnIds
-          .map((field) => {
-            const col = firstTable.columns.find((c) => c.id === field);
-            const filterable = bucketColumns.includes(field);
-            const colIndex = firstTable.columns.findIndex((c) => c.id === field);
-            return {
-              field,
-              name: (col && col.name) || '',
-              render: (value: unknown) => {
-                const formattedValue = formatters[field]?.convert(value);
-                const fieldName = col?.meta?.field;
+        sorting={{
+          sort:
+            !sortBy || sortDirection === 'none'
+              ? undefined
+              : {
+                  field: sortBy,
+                  direction: sortDirection as Direction,
+                },
+          allowNeutralSort: true, // this flag enables the 3rd Neutral state on the column header
+        }}
+        onChange={(event: { sort?: { field: string } }) => {
+          if (event.sort && onEditAction) {
+            // unfortunately the neutral state is not propagated and we need to manually handle it
+            const nextDirection = getNextOrderValue(
+              sortDirection as LensEditEvent['data']['direction']
+            );
+            return onEditAction({
+              action: 'sort',
+              columnId: nextDirection !== 'none' ? event.sort.field : undefined,
+              direction: nextDirection,
+            });
+          }
+        }}
+        columns={visibleColumns.map((field) => {
+          const filterable = bucketColumns.includes(field);
+          const { name, index: colIndex, meta } = columnsReverseLookup[field];
+          const fieldName = meta?.field;
+          return {
+            field,
+            name: name || '',
+            sortable: true,
+            render: (value: unknown) => {
+              const formattedValue = formatters[field]?.convert(value);
 
-                if (filterable) {
-                  return (
-                    <EuiFlexGroup
-                      className="lnsDataTable__cell"
-                      data-test-subj="lnsDataTableCellValueFilterable"
-                      gutterSize="xs"
-                    >
-                      <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiFlexGroup
-                          responsive={false}
-                          gutterSize="none"
-                          alignItems="center"
-                          className="lnsDataTable__filter"
+              if (filterable) {
+                return (
+                  <EuiFlexGroup
+                    className="lnsDataTable__cell"
+                    data-test-subj="lnsDataTableCellValueFilterable"
+                    gutterSize="xs"
+                  >
+                    <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup
+                        responsive={false}
+                        gutterSize="none"
+                        alignItems="center"
+                        className="lnsDataTable__filter"
+                      >
+                        <EuiToolTip
+                          position="bottom"
+                          content={i18n.translate('xpack.lens.includeValueButtonTooltip', {
+                            defaultMessage: 'Include value',
+                          })}
                         >
+                          <EuiButtonIcon
+                            iconType="plusInCircle"
+                            color="text"
+                            aria-label={i18n.translate('xpack.lens.includeValueButtonAriaLabel', {
+                              defaultMessage: `Include {value}`,
+                              values: {
+                                value: `${fieldName ? `${fieldName}: ` : ''}${formattedValue}`,
+                              },
+                            })}
+                            data-test-subj="lensDatatableFilterFor"
+                            onClick={() => handleFilterClick(field, value, colIndex)}
+                          />
+                        </EuiToolTip>
+                        <EuiFlexItem grow={false}>
                           <EuiToolTip
                             position="bottom"
-                            content={i18n.translate('xpack.lens.includeValueButtonTooltip', {
-                              defaultMessage: 'Include value',
+                            content={i18n.translate('xpack.lens.excludeValueButtonTooltip', {
+                              defaultMessage: 'Exclude value',
                             })}
                           >
                             <EuiButtonIcon
-                              iconType="plusInCircle"
+                              iconType="minusInCircle"
                               color="text"
-                              aria-label={i18n.translate('xpack.lens.includeValueButtonAriaLabel', {
-                                defaultMessage: `Include {value}`,
+                              aria-label={i18n.translate('xpack.lens.excludeValueButtonAriaLabel', {
+                                defaultMessage: `Exclude {value}`,
                                 values: {
                                   value: `${fieldName ? `${fieldName}: ` : ''}${formattedValue}`,
                                 },
                               })}
-                              data-test-subj="lensDatatableFilterFor"
-                              onClick={() => handleFilterClick(field, value, colIndex)}
+                              data-test-subj="lensDatatableFilterOut"
+                              onClick={() => handleFilterClick(field, value, colIndex, true)}
                             />
                           </EuiToolTip>
-                          <EuiFlexItem grow={false}>
-                            <EuiToolTip
-                              position="bottom"
-                              content={i18n.translate('xpack.lens.excludeValueButtonTooltip', {
-                                defaultMessage: 'Exclude value',
-                              })}
-                            >
-                              <EuiButtonIcon
-                                iconType="minusInCircle"
-                                color="text"
-                                aria-label={i18n.translate(
-                                  'xpack.lens.excludeValueButtonAriaLabel',
-                                  {
-                                    defaultMessage: `Exclude {value}`,
-                                    values: {
-                                      value: `${
-                                        fieldName ? `${fieldName}: ` : ''
-                                      }${formattedValue}`,
-                                    },
-                                  }
-                                )}
-                                data-test-subj="lensDatatableFilterOut"
-                                onClick={() => handleFilterClick(field, value, colIndex, true)}
-                              />
-                            </EuiToolTip>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  );
-                }
-                return <span data-test-subj="lnsDataTableCellValue">{formattedValue}</span>;
-              },
-            };
-          })
-          .filter(({ field }) => !!field)}
-        items={firstTable ? firstTable.rows : []}
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              }
+              return <span data-test-subj="lnsDataTableCellValue">{formattedValue}</span>;
+            },
+          };
+        })}
+        items={sortedRows}
       />
     </VisualizationContainer>
   );

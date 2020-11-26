@@ -22,6 +22,10 @@ export interface LayerState {
 
 export interface DatatableVisualizationState {
   layers: LayerState[];
+  sorting?: {
+    columnId: string | undefined;
+    direction: 'asc' | 'desc';
+  };
 }
 
 function newLayerState(layerId: string): LayerState {
@@ -232,6 +236,8 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     function: 'lens_datatable_columns',
                     arguments: {
                       columnIds: operations.map((o) => o.columnId),
+                      sortBy: [state.sorting?.columnId || ''],
+                      sortDirection: [state.sorting?.direction || 'none'],
                     },
                   },
                 ],

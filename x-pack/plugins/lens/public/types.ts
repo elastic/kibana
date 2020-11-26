@@ -605,6 +605,17 @@ export interface LensBrushEvent {
   data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
 }
 
+export interface LensSortActionData {
+  action: 'sort';
+  columnId: string | undefined;
+  direction: 'asc' | 'desc' | 'none';
+}
+
+export interface LensEditEvent {
+  name: 'edit';
+  data: LensSortActionData;
+}
+
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
   return event.name === 'filter';
 }
@@ -613,11 +624,15 @@ export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensB
   return event.name === 'brush';
 }
 
+export function isLensEditEvent(event: ExpressionRendererEvent): event is LensEditEvent {
+  return event.name === 'edit';
+}
+
 /**
  * Expression renderer handlers specifically for lens renderers. This is a narrowed down
  * version of the general render handlers, specifying supported event types. If this type is
  * used, dispatched events will be handled correctly.
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
-  event: (event: LensFilterEvent | LensBrushEvent) => void;
+  event: (event: LensFilterEvent | LensBrushEvent | LensEditEvent) => void;
 }
