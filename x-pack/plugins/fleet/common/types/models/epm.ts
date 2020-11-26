@@ -122,6 +122,7 @@ export interface RegistryInput {
   title: string;
   description?: string;
   vars?: RegistryVarsEntry[];
+  template_path?: string;
 }
 
 export interface RegistryStream {
