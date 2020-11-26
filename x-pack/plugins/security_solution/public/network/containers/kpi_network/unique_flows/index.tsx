@@ -74,9 +74,10 @@ export const useNetworkKpiUniqueFlows = ({
       : null
   );
 
-  const [networkKpiUniqueFlowsResponse, setNetworkKpiUniqueFlowsResponse] = useState<
-    NetworkKpiUniqueFlowsArgs
-  >({
+  const [
+    networkKpiUniqueFlowsResponse,
+    setNetworkKpiUniqueFlowsResponse,
+  ] = useState<NetworkKpiUniqueFlowsArgs>({
     uniqueFlowId: 0,
     id: ID,
     inspect: {

@@ -27,7 +27,11 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, Alerts
     defaultActionMessage: i18n.translate(
       'xpack.stackAlerts.threshold.ui.alertType.defaultActionMessage',
       {
-        defaultMessage: `alert \\{\\{alertName\\}\\} group \\{\\{context.group\\}\\} value \\{\\{context.value\\}\\} exceeded threshold \\{\\{context.function\\}\\} over \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\} on \\{\\{context.date\\}\\}`,
+        defaultMessage: `alert '\\{\\{alertName\\}\\}' is active for group '\\{\\{context.group\\}\\}':
+
+- Value: \\{\\{context.value\\}\\}
+- Conditions Met: \\{\\{context.conditions\\}\\} over \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\}
+- Timestamp: \\{\\{context.date\\}\\}`,
       }
     ),
     requiresAppContext: false,

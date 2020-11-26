@@ -549,7 +549,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async checkPreviewIsDisabled(): Promise<void> {
       log.debug(`Check no data message is present`);
-      await testSubjects.existOrFail('noTSVBDataMessage', { timeout: 5000 });
+      await testSubjects.existOrFail('timeseriesVis > visNoResult', { timeout: 5000 });
     }
 
     public async cloneSeries(nth: number = 0): Promise<void> {

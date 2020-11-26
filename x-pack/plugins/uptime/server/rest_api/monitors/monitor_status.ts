@@ -20,11 +20,10 @@ export const createGetStatusBarRoute: UMRestApiRouteFactory = (libs: UMServerLib
       dateEnd: schema.string(),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
+  handler: async ({ uptimeEsClient }, _context, request, response): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
     const result = await libs.requests.getLatestMonitor({
-      callES,
-      dynamicSettings,
+      uptimeEsClient,
       monitorId,
       dateStart,
       dateEnd,
