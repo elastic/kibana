@@ -77,15 +77,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
   const [isLoadingSecondStep, setIsLoadingSecondStep] = useState<boolean>(false);
 
-  const agentPolicyId = agentPolicy?.id;
   // Retrieve agent count
+  const agentPolicyId = useMemo(() => agentPolicy?.id, [agentPolicy?.id]);
   useEffect(() => {
     const getAgentCount = async () => {
-      if (agentPolicyId) {
-        const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
-        if (data?.results.total) {
-          setAgentCount(data.results.total);
-        }
+      const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
+      if (data?.results.total !== undefined) {
+        setAgentCount(data.results.total);
       }
     };
 

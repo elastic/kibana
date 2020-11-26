@@ -22,9 +22,8 @@ describe('ManagementService', () => {
       managementMockSetup.sections.section.kibana = mockKibanaSection;
       const deps = {
         management: managementMockSetup,
-        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
-          PluginsStart
-        >['getStartServices'],
+        getStartServices: coreMock.createSetup()
+          .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 
@@ -43,9 +42,8 @@ describe('ManagementService', () => {
     it('will not crash if the kibana section is missing', () => {
       const deps = {
         management: managementPluginMock.createSetupContract(),
-        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
-          PluginsStart
-        >['getStartServices'],
+        getStartServices: coreMock.createSetup()
+          .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 
@@ -65,9 +63,8 @@ describe('ManagementService', () => {
 
       const deps = {
         management: managementMockSetup,
-        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
-          PluginsStart
-        >['getStartServices'],
+        getStartServices: coreMock.createSetup()
+          .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 

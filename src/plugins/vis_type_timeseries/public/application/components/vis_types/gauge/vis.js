@@ -101,4 +101,8 @@ GaugeVisualization.propTypes = {
   getConfig: PropTypes.func,
 };
 
-export const gauge = visWithSplits(GaugeVisualization);
+const gauge = visWithSplits(GaugeVisualization);
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { gauge as default };
