@@ -21,6 +21,33 @@ import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
 
+const actionI18nTexts = {
+  pause: i18n.translate(
+    'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
+    {
+      defaultMessage: 'Pause replication',
+    }
+  ),
+  resume: i18n.translate(
+    'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
+    {
+      defaultMessage: 'Resume replication',
+    }
+  ),
+  edit: i18n.translate(
+    'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
+    {
+      defaultMessage: 'Edit follower index',
+    }
+  ),
+  unfollow: i18n.translate(
+    'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
+    {
+      defaultMessage: 'Unfollow leader index',
+    }
+  ),
+};
+
 const getFilteredIndices = (followerIndices, queryText) => {
   if (queryText) {
     const normalizedSearchText = queryText.toLowerCase();
@@ -102,18 +129,8 @@ export class FollowerIndicesTable extends PureComponent {
     const actions = [
       /* Pause follower index */
       {
-        name: i18n.translate(
-          'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
-          {
-            defaultMessage: 'Pause replication',
-          }
-        ),
-        description: i18n.translate(
-          'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
-          {
-            defaultMessage: 'Pause replication',
-          }
-        ),
+        name: actionI18nTexts.pause,
+        description: actionI18nTexts.pause,
         icon: 'pause',
         onClick: (item) => actionHandlers.pauseFollowerIndex(item),
         available: (item) => !item.isPaused,
@@ -121,18 +138,8 @@ export class FollowerIndicesTable extends PureComponent {
       },
       /* Resume follower index */
       {
-        name: i18n.translate(
-          'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
-          {
-            defaultMessage: 'Resume replication',
-          }
-        ),
-        description: i18n.translate(
-          'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
-          {
-            defaultMessage: 'Resume replication',
-          }
-        ),
+        name: actionI18nTexts.resume,
+        description: actionI18nTexts.resume,
         icon: 'play',
         onClick: (item) => actionHandlers.resumeFollowerIndex(item.name),
         available: (item) => item.isPaused,
@@ -140,36 +147,16 @@ export class FollowerIndicesTable extends PureComponent {
       },
       /* Edit follower index */
       {
-        name: i18n.translate(
-          'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
-          {
-            defaultMessage: 'Edit follower index',
-          }
-        ),
-        description: i18n.translate(
-          'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
-          {
-            defaultMessage: 'Edit follower index',
-          }
-        ),
+        name: actionI18nTexts.edit,
+        description: actionI18nTexts.edit,
         onClick: (item) => this.editFollowerIndex(item.name),
         icon: 'pencil',
         'data-test-subj': 'editButton',
       },
       /* Unfollow leader index */
       {
-        name: i18n.translate(
-          'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
-          {
-            defaultMessage: 'Unfollow leader index',
-          }
-        ),
-        description: i18n.translate(
-          'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
-          {
-            defaultMessage: 'Unfollow leader index',
-          }
-        ),
+        name: actionI18nTexts.unfollow,
+        description: actionI18nTexts.unfollow,
         onClick: (item) => actionHandlers.unfollowLeaderIndex(item.name),
         icon: 'indexFlush',
         'data-test-subj': 'unfollowButton',

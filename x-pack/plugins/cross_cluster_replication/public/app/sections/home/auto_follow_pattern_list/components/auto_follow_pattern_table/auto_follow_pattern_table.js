@@ -22,6 +22,33 @@ import {
 import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 
+const actionI18nTexts = {
+  pause: i18n.translate(
+    'xpack.crossClusterReplication.autoFollowPatternList.table.actionPauseDescription',
+    {
+      defaultMessage: 'Pause replication',
+    }
+  ),
+  resume: i18n.translate(
+    'xpack.crossClusterReplication.autoFollowPatternList.table.actionResumeDescription',
+    {
+      defaultMessage: 'Resume replication',
+    }
+  ),
+  edit: i18n.translate(
+    'xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription',
+    {
+      defaultMessage: 'Edit auto-follow pattern',
+    }
+  ),
+  delete: i18n.translate(
+    'xpack.crossClusterReplication.autoFollowPatternList.table.actionDeleteDescription',
+    {
+      defaultMessage: 'Delete auto-follow pattern',
+    }
+  ),
+};
+
 const getFilteredPatterns = (autoFollowPatterns, queryText) => {
   if (queryText) {
     const normalizedSearchText = queryText.toLowerCase();
@@ -199,71 +226,31 @@ export class AutoFollowPatternTable extends PureComponent {
         ),
         actions: [
           {
-            name: i18n.translate(
-              'xpack.crossClusterReplication.autoFollowPatternList.table.actionPauseDescription',
-              {
-                defaultMessage: 'Pause replication',
-              }
-            ),
-            description: i18n.translate(
-              'xpack.crossClusterReplication.autoFollowPatternList.table.actionPauseDescription',
-              {
-                defaultMessage: 'Pause replication',
-              }
-            ),
+            name: actionI18nTexts.pause,
+            description: actionI18nTexts.pause,
             icon: 'pause',
             onClick: (item) => this.props.pauseAutoFollowPattern(item.name),
             available: (item) => item.active,
             'data-test-subj': 'contextMenuPauseButton',
           },
           {
-            name: i18n.translate(
-              'xpack.crossClusterReplication.autoFollowPatternList.table.actionResumeDescription',
-              {
-                defaultMessage: 'Resume replication',
-              }
-            ),
-            description: i18n.translate(
-              'xpack.crossClusterReplication.autoFollowPatternList.table.actionResumeDescription',
-              {
-                defaultMessage: 'Resume replication',
-              }
-            ),
+            name: actionI18nTexts.resume,
+            description: actionI18nTexts.resume,
             icon: 'play',
             onClick: (item) => this.props.resumeAutoFollowPattern(item.name),
             available: (item) => !item.active,
             'data-test-subj': 'contextMenuResumeButton',
           },
           {
-            name: i18n.translate(
-              'xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription',
-              {
-                defaultMessage: 'Edit auto-follow pattern',
-              }
-            ),
-            description: i18n.translate(
-              'xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription',
-              {
-                defaultMessage: 'Edit auto-follow pattern',
-              }
-            ),
+            name: actionI18nTexts.edit,
+            description: actionI18nTexts.edit,
             icon: 'pencil',
             onClick: (item) => routing.navigate(routing.getAutoFollowPatternPath(item.name)),
             'data-test-subj': 'contextMenuEditButton',
           },
           {
-            name: i18n.translate(
-              'xpack.crossClusterReplication.autoFollowPatternList.table.actionDeleteDescription',
-              {
-                defaultMessage: 'Delete auto-follow pattern',
-              }
-            ),
-            description: i18n.translate(
-              'xpack.crossClusterReplication.autoFollowPatternList.table.actionDeleteDescription',
-              {
-                defaultMessage: 'Delete auto-follow pattern',
-              }
-            ),
+            name: actionI18nTexts.delete,
+            description: actionI18nTexts.delete,
             icon: 'trash',
             onClick: (item) => deleteAutoFollowPattern(item.name),
             'data-test-subj': 'contextMenuDeleteButton',
