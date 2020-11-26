@@ -96,7 +96,7 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
     fields: null,
   },
   closureType: 'close-by-pushing',
-  mappings,
+  mappings: [],
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',

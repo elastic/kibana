@@ -38,7 +38,7 @@ const MappingComponent: React.FC<MappingProps> = ({
     connectorActionTypeId,
   ]);
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" className={'poop'}>
+    <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
           <h4>{i18n.FIELD_MAPPING_TITLE(selectedConnector.name)}</h4>

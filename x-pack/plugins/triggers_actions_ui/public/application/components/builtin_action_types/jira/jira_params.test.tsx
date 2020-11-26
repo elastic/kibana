@@ -20,15 +20,16 @@ const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const actionParams = {
   subAction: 'pushToService',
   subActionParams: {
-    title: 'sn title',
-    description: 'some description',
+    incident: {
+      summary: 'sn title',
+      description: 'some description',
+      issueType: '10006',
+      labels: ['kibana'],
+      priority: 'High',
+      externalId: null,
+      parent: null,
+    },
     comments: [{ commentId: '1', comment: 'comment for jira' }],
-    issueType: '10006',
-    labels: ['kibana'],
-    priority: 'High',
-    savedObjectId: '123',
-    externalId: null,
-    parent: null,
   },
 };
 
@@ -83,7 +84,7 @@ describe('JiraParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <JiraParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ summary: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[{ name: 'alertId', description: '' }]}
@@ -96,28 +97,10 @@ describe('JiraParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="prioritySelect"]').first().prop('value')).toStrictEqual(
       'High'
     );
-    expect(wrapper.find('[data-test-subj="titleInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="labelsComboBox"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
-
-    // ensure savedObjectIdInput isnt rendered
-    expect(wrapper.find('[data-test-subj="savedObjectIdInput"]').length === 0).toBeTruthy();
-  });
-
-  test('the savedObjectId fields is rendered if we cant find an alertId in the messageVariables', () => {
-    const wrapper = mountWithIntl(
-      <JiraParamsFields
-        actionParams={actionParams}
-        errors={{ title: [] }}
-        editAction={() => {}}
-        index={0}
-        messageVariables={[]}
-        actionConnector={connector}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="savedObjectIdInput"]').length > 0).toBeTruthy();
   });
 
   test('it shows loading when loading issue types', () => {
@@ -125,7 +108,7 @@ describe('JiraParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <JiraParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ summary: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[]}
@@ -147,7 +130,7 @@ describe('JiraParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <JiraParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ summary: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[]}
@@ -169,7 +152,7 @@ describe('JiraParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <JiraParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ summary: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[]}
@@ -195,7 +178,7 @@ describe('JiraParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <JiraParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ summary: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[]}
@@ -221,7 +204,7 @@ describe('JiraParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <JiraParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ summary: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[]}
@@ -230,7 +213,7 @@ describe('JiraParamsFields renders', () => {
     );
 
     expect(wrapper.find('[data-test-subj="issueTypeSelect"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="titleInput"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="summaryInput"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').exists()).toBeTruthy();
 
     expect(wrapper.find('[data-test-subj="prioritySelect"]').exists()).toBeFalsy();

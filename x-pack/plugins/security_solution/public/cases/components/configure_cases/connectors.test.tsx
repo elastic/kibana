@@ -54,7 +54,7 @@ describe('Connectors', () => {
       disabled: false,
       isLoading: false,
       connectors,
-      selectedConnector: { id: 'none', type: ConnectorTypes.none },
+      selectedConnector: 'none',
       onChange: props.onChangeConnector,
     });
   });
@@ -83,7 +83,7 @@ describe('Connectors', () => {
     newWrapper.find('button[data-test-subj="dropdown-connector-no-connector"]').simulate('click');
 
     expect(onChangeConnector).toHaveBeenCalled();
-    expect(onChangeConnector).toHaveBeenCalledWith({ id: 'none', type: ConnectorTypes.none });
+    expect(onChangeConnector).toHaveBeenCalledWith('none');
   });
 
   test('it shows the add connector button', () => {

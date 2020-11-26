@@ -75,22 +75,22 @@ describe('servicenow connector validation', () => {
 describe('servicenow action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      subActionParams: { title: 'some title {{test}}' },
+      subActionParams: { incident: { short_description: 'some title {{test}}' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { title: [] },
+      errors: { short_description: [] },
     });
   });
 
   test('params validation fails when body is not valid', () => {
     const actionParams = {
-      subActionParams: { title: '' },
+      subActionParams: { incident: { short_description: '' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        title: ['Title is required.'],
+        short_description: ['Short description is required.'],
       },
     });
   });

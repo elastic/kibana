@@ -69,6 +69,7 @@ export function getActionType(): ActionTypeModel<
       validationResult.errors = errors;
       if (
         actionParams.subActionParams &&
+        actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.short_description?.length
       ) {
         errors.short_description.push(i18n.TITLE_REQUIRED);

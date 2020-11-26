@@ -61,7 +61,8 @@ import {
   decodeCaseUserActionsResponse,
   decodeServiceConnectorCaseResponse,
 } from './utils';
-
+import * as i18n from './translations';
+import { ActionTypeExecutorResult } from '../../../../actions/common';
 export const getCase = async (
   caseId: string,
   includeComments: boolean = true,
@@ -247,17 +248,20 @@ export const pushToService = async (
   casePushParams: ServiceConnectorCaseParams,
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
-  const response = await KibanaServices.get().http.fetch<{ data: ServiceConnectorCaseResponse }>(
-    `${getCaseConfigurePushUrl(connectorId)}`,
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        connector_type: connectorType,
-        params: casePushParams,
-      }),
-      signal,
-    }
-  );
+  const response = await KibanaServices.get().http.fetch<
+    ActionTypeExecutorResult<ReturnType<typeof decodeServiceConnectorCaseResponse>>
+  >(`${getCaseConfigurePushUrl(connectorId)}`, {
+    method: 'POST',
+    body: JSON.stringify({
+      connector_type: connectorType,
+      params: casePushParams,
+    }),
+    signal,
+  });
+
+  if (response.status === 'error') {
+    throw new Error(response.serviceMessage ?? response.message ?? i18n.ERROR_PUSH_TO_SERVICE);
+  }
   return decodeServiceConnectorCaseResponse(response.data);
 };
 

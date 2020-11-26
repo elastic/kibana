@@ -19,13 +19,14 @@ const useGetSeverityMock = useGetSeverity as jest.Mock;
 const actionParams = {
   subAction: 'pushToService',
   subActionParams: {
-    title: 'title',
-    description: 'some description',
+    incident: {
+      name: 'title',
+      description: 'some description',
+      incidentTypes: [1001],
+      severityCode: 6,
+      externalId: null,
+    },
     comments: [{ commentId: '1', comment: 'comment for resilient' }],
-    incidentTypes: [1001],
-    severityCode: 6,
-    savedObjectId: '123',
-    externalId: null,
   },
 };
 const connector = {
@@ -79,7 +80,7 @@ describe('ResilientParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <ResilientParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ name: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[{ name: 'alertId', description: '' }]}
@@ -90,35 +91,16 @@ describe('ResilientParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
       6
     );
-    expect(wrapper.find('[data-test-subj="titleInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="nameInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
-
-    // ensure savedObjectIdInput isnt rendered
-    expect(wrapper.find('[data-test-subj="savedObjectIdInput"]').length === 0).toBeTruthy();
   });
-
-  test('the savedObjectId fields is rendered if we cant find an alertId in the messageVariables', () => {
-    const wrapper = mountWithIntl(
-      <ResilientParamsFields
-        actionParams={actionParams}
-        errors={{ title: [] }}
-        editAction={() => {}}
-        index={0}
-        messageVariables={[]}
-        actionConnector={connector}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="savedObjectIdInput"]').length > 0).toBeTruthy();
-  });
-
   test('it shows loading when loading incident types', () => {
     useGetIncidentTypesMock.mockReturnValue({ ...useGetIncidentTypesResponse, isLoading: true });
     const wrapper = mountWithIntl(
       <ResilientParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ name: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[]}
@@ -140,7 +122,7 @@ describe('ResilientParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <ResilientParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ name: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[]}
@@ -159,7 +141,7 @@ describe('ResilientParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <ResilientParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ name: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[]}
@@ -181,7 +163,7 @@ describe('ResilientParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <ResilientParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ name: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[]}

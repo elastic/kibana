@@ -61,7 +61,7 @@ describe('api', () => {
     });
 
     test('it calls createIncident correctly', async () => {
-      const params = { ...apiParams, externalId: null };
+      const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
       await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.createIncident).toHaveBeenCalledWith({
@@ -70,15 +70,15 @@ describe('api', () => {
           priority: 'High',
           issueType: '10006',
           parent: null,
-          description: 'Incident description (created at 2020-04-27T10:59:46.202Z by Elastic User)',
-          summary: 'Incident title (created at 2020-04-27T10:59:46.202Z by Elastic User)',
+          description: 'Incident description',
+          summary: 'Incident title',
         },
       });
       expect(externalService.updateIncident).not.toHaveBeenCalled();
     });
 
     test('it calls createIncident correctly without mapping', async () => {
-      const params = { ...apiParams, externalId: null };
+      const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
       await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.createIncident).toHaveBeenCalledWith({
@@ -95,48 +95,7 @@ describe('api', () => {
     });
 
     test('it calls createComment correctly', async () => {
-      const params = { ...apiParams, externalId: null };
-      await api.pushToService({ externalService, params, logger: mockedLogger });
-      expect(externalService.createComment).toHaveBeenCalledTimes(2);
-      expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
-        incidentId: 'incident-1',
-        comment: {
-          commentId: 'case-comment-1',
-          comment: 'A comment (added at 2020-04-27T10:59:46.202Z by Elastic User)',
-          createdAt: '2020-04-27T10:59:46.202Z',
-          createdBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
-          updatedAt: '2020-04-27T10:59:46.202Z',
-          updatedBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
-        },
-      });
-
-      expect(externalService.createComment).toHaveBeenNthCalledWith(2, {
-        incidentId: 'incident-1',
-        comment: {
-          commentId: 'case-comment-2',
-          comment: 'Another comment (added at 2020-04-27T10:59:46.202Z by Elastic User)',
-          createdAt: '2020-04-27T10:59:46.202Z',
-          createdBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
-          updatedAt: '2020-04-27T10:59:46.202Z',
-          updatedBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
-        },
-      });
-    });
-
-    test('it calls createComment correctly without mapping', async () => {
-      const params = { ...apiParams, externalId: null };
+      const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
       await api.pushToService({ externalService, params, logger: mockedLogger });
       expect(externalService.createComment).toHaveBeenCalledTimes(2);
       expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
@@ -144,16 +103,6 @@ describe('api', () => {
         comment: {
           commentId: 'case-comment-1',
           comment: 'A comment',
-          createdAt: '2020-04-27T10:59:46.202Z',
-          createdBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
-          updatedAt: '2020-04-27T10:59:46.202Z',
-          updatedBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
         },
       });
 
@@ -162,16 +111,27 @@ describe('api', () => {
         comment: {
           commentId: 'case-comment-2',
           comment: 'Another comment',
-          createdAt: '2020-04-27T10:59:46.202Z',
-          createdBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
-          updatedAt: '2020-04-27T10:59:46.202Z',
-          updatedBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
+        },
+      });
+    });
+
+    test('it calls createComment correctly without mapping', async () => {
+      const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
+      await api.pushToService({ externalService, params, logger: mockedLogger });
+      expect(externalService.createComment).toHaveBeenCalledTimes(2);
+      expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
+        incidentId: 'incident-1',
+        comment: {
+          commentId: 'case-comment-1',
+          comment: 'A comment',
+        },
+      });
+
+      expect(externalService.createComment).toHaveBeenNthCalledWith(2, {
+        incidentId: 'incident-1',
+        comment: {
+          commentId: 'case-comment-2',
+          comment: 'Another comment',
         },
       });
     });
@@ -230,8 +190,8 @@ describe('api', () => {
           priority: 'High',
           issueType: '10006',
           parent: null,
-          description: 'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-          summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+          description: 'Incident description',
+          summary: 'Incident title',
         },
       });
       expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -263,17 +223,7 @@ describe('api', () => {
         incidentId: 'incident-1',
         comment: {
           commentId: 'case-comment-1',
-          comment: 'A comment (added at 2020-04-27T10:59:46.202Z by Elastic User)',
-          createdAt: '2020-04-27T10:59:46.202Z',
-          createdBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
-          updatedAt: '2020-04-27T10:59:46.202Z',
-          updatedBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
+          comment: 'A comment',
         },
       });
 
@@ -281,17 +231,7 @@ describe('api', () => {
         incidentId: 'incident-1',
         comment: {
           commentId: 'case-comment-2',
-          comment: 'Another comment (added at 2020-04-27T10:59:46.202Z by Elastic User)',
-          createdAt: '2020-04-27T10:59:46.202Z',
-          createdBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
-          updatedAt: '2020-04-27T10:59:46.202Z',
-          updatedBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
+          comment: 'Another comment',
         },
       });
     });
@@ -305,16 +245,6 @@ describe('api', () => {
         comment: {
           commentId: 'case-comment-1',
           comment: 'A comment',
-          createdAt: '2020-04-27T10:59:46.202Z',
-          createdBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
-          updatedAt: '2020-04-27T10:59:46.202Z',
-          updatedBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
         },
       });
 
@@ -323,16 +253,6 @@ describe('api', () => {
         comment: {
           commentId: 'case-comment-2',
           comment: 'Another comment',
-          createdAt: '2020-04-27T10:59:46.202Z',
-          createdBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
-          updatedAt: '2020-04-27T10:59:46.202Z',
-          updatedBy: {
-            fullName: 'Elastic User',
-            username: 'elastic',
-          },
         },
       });
     });
@@ -407,386 +327,4 @@ describe('api', () => {
       });
     });
   });
-
-  // describe('mapping variations', () => {
-  //   test('overwrite & append', async () => {
-  //     mapping.set('title', {
-  //       target: 'summary',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     mapping.set('description', {
-  //       target: 'description',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('comments', {
-  //       target: 'comments',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('summary', {
-  //       target: 'title',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     await api.pushToService({
-  //       externalService,
-  //       params: apiParams,
-  //       logger: mockedLogger,
-  //     });
-  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
-  //       incidentId: 'incident-3',
-  //       incident: {
-  //         labels: ['kibana', 'elastic'],
-  //         priority: 'High',
-  //         issueType: '10006',
-  //         parent: null,
-  //         summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //         description:
-  //           'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //       },
-  //     });
-  //   });
-  //
-  //   test('nothing & append', async () => {
-  //     mapping.set('title', {
-  //       target: 'summary',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     mapping.set('description', {
-  //       target: 'description',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('comments', {
-  //       target: 'comments',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('summary', {
-  //       target: 'title',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     await api.pushToService({
-  //       externalService,
-  //       params: apiParams,
-  //       logger: mockedLogger,
-  //     });
-  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
-  //       incidentId: 'incident-3',
-  //       incident: {
-  //         labels: ['kibana', 'elastic'],
-  //         priority: 'High',
-  //         issueType: '10006',
-  //         parent: null,
-  //         description:
-  //           'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //       },
-  //     });
-  //   });
-  //
-  //   test('append & append', async () => {
-  //     mapping.set('title', {
-  //       target: 'summary',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('description', {
-  //       target: 'description',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('comments', {
-  //       target: 'comments',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('summary', {
-  //       target: 'title',
-  //       actionType: 'append',
-  //     });
-  //
-  //     await api.pushToService({
-  //       externalService,
-  //       params: apiParams,
-  //       logger: mockedLogger,
-  //     });
-  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
-  //       incidentId: 'incident-3',
-  //       incident: {
-  //         labels: ['kibana', 'elastic'],
-  //         priority: 'High',
-  //         issueType: '10006',
-  //         parent: null,
-  //         summary:
-  //           'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //         description:
-  //           'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //       },
-  //     });
-  //   });
-  //
-  //   test('nothing & nothing', async () => {
-  //     mapping.set('title', {
-  //       target: 'summary',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     mapping.set('description', {
-  //       target: 'description',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     mapping.set('comments', {
-  //       target: 'comments',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('summary', {
-  //       target: 'title',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     await api.pushToService({
-  //       externalService,
-  //       params: apiParams,
-  //       logger: mockedLogger,
-  //     });
-  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
-  //       incidentId: 'incident-3',
-  //       incident: {
-  //         labels: ['kibana', 'elastic'],
-  //         priority: 'High',
-  //         issueType: '10006',
-  //         parent: null,
-  //       },
-  //     });
-  //   });
-  //
-  //   test('overwrite & nothing', async () => {
-  //     mapping.set('title', {
-  //       target: 'summary',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     mapping.set('description', {
-  //       target: 'description',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     mapping.set('comments', {
-  //       target: 'comments',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('summary', {
-  //       target: 'title',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     await api.pushToService({
-  //       externalService,
-  //       params: apiParams,
-  //       logger: mockedLogger,
-  //     });
-  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
-  //       incidentId: 'incident-3',
-  //       incident: {
-  //         labels: ['kibana', 'elastic'],
-  //         priority: 'High',
-  //         issueType: '10006',
-  //         parent: null,
-  //         summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //       },
-  //     });
-  //   });
-  //
-  //   test('overwrite & overwrite', async () => {
-  //     mapping.set('title', {
-  //       target: 'summary',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     mapping.set('description', {
-  //       target: 'description',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     mapping.set('comments', {
-  //       target: 'comments',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('summary', {
-  //       target: 'title',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     await api.pushToService({
-  //       externalService,
-  //       params: apiParams,
-  //       logger: mockedLogger,
-  //     });
-  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
-  //       incidentId: 'incident-3',
-  //       incident: {
-  //         labels: ['kibana', 'elastic'],
-  //         priority: 'High',
-  //         issueType: '10006',
-  //         parent: null,
-  //         summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //         description: 'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //       },
-  //     });
-  //   });
-  //
-  //   test('nothing & overwrite', async () => {
-  //     mapping.set('title', {
-  //       target: 'summary',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     mapping.set('description', {
-  //       target: 'description',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     mapping.set('comments', {
-  //       target: 'comments',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('summary', {
-  //       target: 'title',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     await api.pushToService({
-  //       externalService,
-  //       params: apiParams,
-  //       logger: mockedLogger,
-  //     });
-  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
-  //       incidentId: 'incident-3',
-  //       incident: {
-  //         labels: ['kibana', 'elastic'],
-  //         priority: 'High',
-  //         issueType: '10006',
-  //         parent: null,
-  //         description: 'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //       },
-  //     });
-  //   });
-  //
-  //   test('append & overwrite', async () => {
-  //     mapping.set('title', {
-  //       target: 'summary',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('description', {
-  //       target: 'description',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     mapping.set('comments', {
-  //       target: 'comments',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('summary', {
-  //       target: 'title',
-  //       actionType: 'append',
-  //     });
-  //
-  //     await api.pushToService({
-  //       externalService,
-  //       params: apiParams,
-  //       logger: mockedLogger,
-  //     });
-  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
-  //       incidentId: 'incident-3',
-  //       incident: {
-  //         labels: ['kibana', 'elastic'],
-  //         priority: 'High',
-  //         issueType: '10006',
-  //         parent: null,
-  //         summary:
-  //           'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //         description: 'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //       },
-  //     });
-  //   });
-  //
-  //   test('append & nothing', async () => {
-  //     mapping.set('title', {
-  //       target: 'summary',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('description', {
-  //       target: 'description',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     mapping.set('comments', {
-  //       target: 'comments',
-  //       actionType: 'append',
-  //     });
-  //
-  //     mapping.set('summary', {
-  //       target: 'title',
-  //       actionType: 'append',
-  //     });
-  //
-  //     await api.pushToService({
-  //       externalService,
-  //       params: apiParams,
-  //       logger: mockedLogger,
-  //     });
-  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
-  //       incidentId: 'incident-3',
-  //       incident: {
-  //         labels: ['kibana', 'elastic'],
-  //         priority: 'High',
-  //         issueType: '10006',
-  //         parent: null,
-  //         summary:
-  //           'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-  //       },
-  //     });
-  //   });
-  //
-  //   test('comment nothing', async () => {
-  //     mapping.set('title', {
-  //       target: 'summary',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     mapping.set('description', {
-  //       target: 'description',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     mapping.set('comments', {
-  //       target: 'comments',
-  //       actionType: 'nothing',
-  //     });
-  //
-  //     mapping.set('summary', {
-  //       target: 'title',
-  //       actionType: 'overwrite',
-  //     });
-  //
-  //     await api.pushToService({
-  //       externalService,
-  //       params: apiParams,
-  //       logger: mockedLogger,
-  //     });
-  //     expect(externalService.createComment).not.toHaveBeenCalled();
-  //   });
-  // });
 });

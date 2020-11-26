@@ -140,7 +140,6 @@ const basicAction = {
 };
 
 export const casePushParams = {
-  actionBy: elasticUser,
   savedObjectId: basicCaseId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
@@ -152,6 +151,7 @@ export const casePushParams = {
   description: 'nice',
   comments: null,
 };
+
 export const actionTypeExecutorResult = {
   actionId: 'string',
   status: 'ok',

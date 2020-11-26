@@ -34,7 +34,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
     () => connectorsConfiguration[connectorActionTypeId] ?? { fields: {} },
     [connectorActionTypeId]
   );
-  return (
+  return mappings.length ? (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         {' '}
@@ -66,7 +66,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
         </FieldRowWrapper>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
+  ) : null;
 };
 
 export const FieldMapping = React.memo(FieldMappingComponent);

@@ -169,7 +169,7 @@ describe('ConfigureCases', () => {
     beforeEach(() => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: null,
+        mappings: [],
         closureType: 'close-by-user',
         connector: {
           id: 'servicenow-1',
@@ -198,7 +198,7 @@ describe('ConfigureCases', () => {
       expect(wrapper.find(Connectors).prop('connectors')).toEqual(connectors);
       expect(wrapper.find(Connectors).prop('disabled')).toBe(false);
       expect(wrapper.find(Connectors).prop('isLoading')).toBe(false);
-      expect(wrapper.find(Connectors).prop('selectedConnector')).toBe('servicenow-1');
+      expect(wrapper.find(Connectors).prop('selectedConnector').id).toBe('servicenow-1');
 
       // ClosureOptions
       expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(false);

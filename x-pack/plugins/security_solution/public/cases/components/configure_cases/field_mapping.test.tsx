@@ -9,8 +9,8 @@ import { mount, ReactWrapper } from 'enzyme';
 
 import { FieldMapping, FieldMappingProps } from './field_mapping';
 import { mappings } from './__mock__';
-import { FieldMappingRow } from './field_mapping_row';
 import { TestProviders } from '../../../common/mock';
+import { FieldMappingRowStatic } from './field_mapping_row_static';
 
 describe('FieldMappingRow', () => {
   let wrapper: ReactWrapper;
@@ -23,41 +23,32 @@ describe('FieldMappingRow', () => {
   beforeAll(() => {
     wrapper = mount(<FieldMapping {...props} />, { wrappingComponent: TestProviders });
   });
-
   test('it renders', () => {
     expect(
-      wrapper.find('[data-test-subj="case-configure-field-mapping-cols"]').first().exists()
+      wrapper.find('[data-test-subj="case-configure-field-mappings-row-wrapper"]').first().exists()
     ).toBe(true);
 
-    expect(
-      wrapper.find('[data-test-subj="case-configure-field-mapping-row-wrapper"]').first().exists()
-    ).toBe(true);
-
-    expect(wrapper.find(FieldMappingRow).length).toEqual(3);
+    expect(wrapper.find(FieldMappingRowStatic).length).toEqual(3);
   });
 
-  test('it shows the correct number of FieldMappingRow with default mapping', () => {
+  test('it does not render without mappings', () => {
     const newWrapper = mount(<FieldMapping {...props} mappings={[]} />, {
       wrappingComponent: TestProviders,
     });
-
-    expect(newWrapper.find(FieldMappingRow).length).toEqual(3);
+    expect(
+      newWrapper
+        .find('[data-test-subj="case-configure-field-mappings-row-wrapper"]')
+        .first()
+        .exists()
+    ).toBe(false);
   });
 
   test('it pass the corrects props to mapping row', () => {
-    const rows = wrapper.find(FieldMappingRow);
+    const rows = wrapper.find(FieldMappingRowStatic);
     rows.forEach((row, index) => {
       expect(row.prop('securitySolutionField')).toEqual(mappings[index].source);
       expect(row.prop('selectedActionType')).toEqual(mappings[index].actionType);
       expect(row.prop('selectedThirdParty')).toEqual(mappings[index].target);
     });
-  });
-
-  test('it should show zero rows on empty array', () => {
-    const newWrapper = mount(<FieldMapping {...props} mappings={[]} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(newWrapper.find(FieldMappingRow).length).toEqual(0);
   });
 });

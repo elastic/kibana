@@ -12,21 +12,23 @@ describe('ServiceNowParamsFields renders', () => {
     const actionParams = {
       subAction: 'pushToService',
       subActionParams: {
-        title: 'sn title',
-        description: 'some description',
-        comment: 'comment for sn',
-        severity: '1',
-        urgency: '2',
-        impact: '3',
-        savedObjectId: '123',
-        externalId: null,
+        incident: {
+          short_description: 'sn title',
+          description: 'some description',
+          severity: '1',
+          urgency: '2',
+          impact: '3',
+          savedObjectId: '123',
+          externalId: null,
+        },
+        comments: [{ commentId: '1', comment: 'comment for sn' }],
       },
     };
 
     const wrapper = mountWithIntl(
       <ServiceNowParamsFields
         actionParams={actionParams}
-        errors={{ title: [] }}
+        errors={{ short_description: [] }}
         editAction={() => {}}
         index={0}
         messageVariables={[{ name: 'alertId', description: '' }]}
@@ -37,40 +39,8 @@ describe('ServiceNowParamsFields renders', () => {
       '1'
     );
     expect(wrapper.find('[data-test-subj="impactSelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="titleInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="short_descriptionInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="commentTextArea"]').length > 0).toBeTruthy();
-
-    // ensure savedObjectIdInput isnt rendered
-    expect(wrapper.find('[data-test-subj="savedObjectIdInput"]').length === 0).toBeTruthy();
-  });
-
-  test('the savedObjectId fields is rendered if we cant find an alertId in the messageVariables', () => {
-    const actionParams = {
-      subAction: 'pushToService',
-      subActionParams: {
-        title: 'sn title',
-        description: 'some description',
-        comment: 'comment for sn',
-        severity: '1',
-        urgency: '2',
-        impact: '3',
-        savedObjectId: '123',
-        externalId: null,
-      },
-    };
-
-    const wrapper = mountWithIntl(
-      <ServiceNowParamsFields
-        actionParams={actionParams}
-        errors={{ title: [] }}
-        editAction={() => {}}
-        index={0}
-        messageVariables={[]}
-      />
-    );
-
-    // ensure savedObjectIdInput isnt rendered
-    expect(wrapper.find('[data-test-subj="savedObjectIdInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
   });
 });

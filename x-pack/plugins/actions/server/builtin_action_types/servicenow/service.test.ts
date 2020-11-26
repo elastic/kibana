@@ -247,7 +247,7 @@ describe('ServiceNow service', () => {
         axios,
         logger,
         url:
-          'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^internal_type=string&active=true&read_only=false&sysparm_fields=max_length,element,column_label',
+          'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
       });
     });
     test('it returns common fields correctly', async () => {
@@ -263,7 +263,7 @@ describe('ServiceNow service', () => {
         throw new Error('An error has occurred');
       });
       await expect(service.getFields()).rejects.toThrow(
-        'Unable to get common fields. Error: An error has occurred'
+        '[Action][ServiceNow]: Unable to get fields. Error: An error has occurred'
       );
     });
   });

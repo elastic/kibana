@@ -43,7 +43,7 @@ export const mappings: ConnectorMappingsAttributes[] = [
   {
     source: 'description',
     target: 'description',
-    action_type: 'overwrite',
+    action_type: 'append',
   },
   {
     source: 'comments',
