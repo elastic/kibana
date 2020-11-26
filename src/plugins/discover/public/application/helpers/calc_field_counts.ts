@@ -16,10 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IndexPattern } from '../../kibana_services';
 
-// TODO: Remove bus when action/triggers are available with LegacyPluginApi or metric is converted to Embeddable
-import $ from 'jquery';
+/**
+ * This function is recording stats of the available fields, for usage in sidebar and sharing
+ * Note that this values aren't displayed, but used for internal calculations
+ */
+export function calcFieldCounts(
+  counts = {} as Record<string, number>,
+  rows: Array<Record<string, any>>,
+  indexPattern: IndexPattern
+) {
+  for (const hit of rows) {
+    const fields = Object.keys(indexPattern.flattenHit(hit));
+    for (const fieldName of fields) {
+      counts[fieldName] = (counts[fieldName] || 0) + 1;
+    }
+  }
 
-export const ACTIVE_CURSOR = 'ACTIVE_CURSOR';
-
-export const eventBus = $({});
+  return counts;
+}
