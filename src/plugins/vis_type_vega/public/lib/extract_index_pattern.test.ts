@@ -42,7 +42,7 @@ describe('extractIndexPatternsFromSpec', () => {
     expect(indexes).toMatchInlineSnapshot(`Array []`);
   });
 
-  test('should extract sing index pattern', async () => {
+  test('should extract single index pattern', async () => {
     const spec = getMockedSpec({
       data: {
         url: {
