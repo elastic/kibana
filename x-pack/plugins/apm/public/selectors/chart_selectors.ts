@@ -34,6 +34,7 @@ export interface ITransactionChartData {
   tpmSeries?: ITpmBucket[];
   responseTimeSeries?: TimeSeries[];
   mlJobId: string | undefined;
+  anomalySeries?: TimeSeries[];
 }
 
 const INITIAL_DATA: Partial<TimeSeriesAPIResponse> = {
@@ -58,16 +59,33 @@ export function getTransactionCharts(
 
     transactionCharts.responseTimeSeries = getResponseTimeSeries({
       apmTimeseries,
+    });
+
+    transactionCharts.anomalySeries = getResponseTimeAnnomalySeries({
       anomalyTimeseries,
     });
   }
   return transactionCharts;
 }
 
+function getResponseTimeAnnomalySeries({
+  anomalyTimeseries,
+}: {
+  anomalyTimeseries: TimeSeriesAPIResponse['anomalyTimeseries'];
+}): TimeSeries[] | undefined {
+  if (anomalyTimeseries) {
+    return [
+      getAnomalyBoundariesSeries(anomalyTimeseries?.anomalyBoundaries),
+      getAnomalyScoreSeries(anomalyTimeseries?.anomalyScore),
+    ];
+  }
+}
+
 export function getResponseTimeSeries({
   apmTimeseries,
-  anomalyTimeseries,
-}: TimeSeriesAPIResponse) {
+}: {
+  apmTimeseries: TimeSeriesAPIResponse['apmTimeseries'];
+}) {
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
 
@@ -107,16 +125,6 @@ export function getResponseTimeSeries({
     },
   ];
 
-  if (anomalyTimeseries) {
-    // insert after Avg. series
-    series.splice(
-      1,
-      0,
-      getAnomalyBoundariesSeries(anomalyTimeseries.anomalyBoundaries),
-      getAnomalyScoreSeries(anomalyTimeseries.anomalyScore)
-    );
-  }
-
   return series;
 }
 
@@ -125,12 +133,9 @@ export function getAnomalyScoreSeries(data: RectCoordinate[]) {
     title: i18n.translate('xpack.apm.transactions.chart.anomalyScoreLabel', {
       defaultMessage: 'Anomaly score',
     }),
-    hideLegend: true,
-    hideTooltipValue: true,
     data,
-    type: 'areaMaxHeight',
-    color: 'none',
-    areaColor: rgba(theme.euiColorVis9, 0.1),
+    type: 'rectAnnotation',
+    color: theme.euiColorVis9,
   };
 }
 
@@ -142,12 +147,9 @@ function getAnomalyBoundariesSeries(data: Coordinate[]) {
         defaultMessage: 'Anomaly Boundaries',
       }
     ),
-    hideLegend: true,
-    hideTooltipValue: true,
     data,
     type: 'area',
-    color: 'none',
-    areaColor: rgba(theme.euiColorVis1, 0.1),
+    color: rgba(theme.euiColorVis1, 0.5),
   };
 }
 

@@ -16,6 +16,7 @@ import {
   niceTimeFormatter,
   Placement,
   Position,
+  RectAnnotation,
   ScaleType,
   Settings,
   YDomainRange,
@@ -27,7 +28,7 @@ import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import { TimeSeries } from '../../../../typings/timeseries';
+import { RectCoordinate, TimeSeries } from '../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useTheme } from '../../../hooks/useTheme';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -53,6 +54,7 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
+  anomalySeries?: TimeSeries[];
 }
 
 export function TimeseriesChart({
@@ -65,6 +67,7 @@ export function TimeseriesChart({
   yTickFormat,
   showAnnotations = true,
   yDomain,
+  anomalySeries,
 }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
@@ -102,7 +105,12 @@ export function TimeseriesChart({
       <Chart ref={chartRef} id={id}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-          theme={chartTheme}
+          theme={{
+            ...chartTheme,
+            areaSeriesStyle: {
+              line: { visible: false },
+            },
+          }}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true, placement: Placement.Bottom },
@@ -169,6 +177,45 @@ export function TimeseriesChart({
             />
           );
         })}
+
+        {anomalySeries &&
+          anomalySeries.map((anomalySerie) => {
+            if (anomalySerie.type === 'area') {
+              return (
+                <AreaSeries
+                  key={anomalySerie.title}
+                  id={anomalySerie.title}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor="x"
+                  yAccessors={['y']}
+                  y0Accessors={['y0']}
+                  data={isEmpty ? [] : anomalySerie.data}
+                  color={anomalySerie.color}
+                  curve={CurveType.CURVE_MONOTONE_X}
+                  hideInLegend
+                  filterSeriesInTooltip={() => false}
+                />
+              );
+            }
+            return (
+              <RectAnnotation
+                key={anomalySerie.title}
+                id="score_anomalies"
+                dataValues={(anomalySerie.data as RectCoordinate[]).map(
+                  ({ x0, x: x1 }) => ({
+                    coordinates: {
+                      x0,
+                      x1,
+                    },
+                  })
+                )}
+                style={{
+                  fill: anomalySerie.color,
+                }}
+              />
+            );
+          })}
       </Chart>
     </ChartContainer>
   );
