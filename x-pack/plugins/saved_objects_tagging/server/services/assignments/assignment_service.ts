@@ -9,9 +9,8 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   SavedObjectsClientContract,
   ISavedObjectTypeRegistry,
-  SavedObject,
-  SavedObjectsType,
   KibanaRequest,
+  SavedObjectsBulkGetObject,
 } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../../security/server';
 import {
@@ -19,12 +18,13 @@ import {
   UpdateTagAssignmentsOptions,
   FindAssignableObjectOptions,
   getKey,
+  ObjectReference,
 } from '../../../common/assignments';
 import { updateTagReferences } from '../../../common/references';
-import { tagSavedObjectTypeName } from '../../../common';
 import { taggableTypes } from '../../../common/constants';
 import { getUpdatableSavedObjectTypes } from './get_updatable_types';
 import { AssignmentError } from './errors';
+import { toAssignableObject } from './utils';
 
 interface AssignmentServiceOptions {
   request: KibanaRequest;
@@ -32,8 +32,6 @@ interface AssignmentServiceOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   authorization?: SecurityPluginSetup['authz'];
 }
-
-// TODO: rename to scoped
 
 export type IAssignmentService = PublicMethodsOf<AssignmentService>;
 
@@ -59,6 +57,12 @@ export class AssignmentService {
       ? types.filter((type) => taggableTypes.includes(type))
       : taggableTypes;
     const assignableTypes = await this.getAssignableTypes(searchedTypes);
+
+    // if no provided type was assignable, return an empty list instead of throwing an error
+    if (assignableTypes.length === 0) {
+      return [];
+    }
+
     const searchFields = uniq(
       assignableTypes.map(
         (name) => this.typeRegistry.getType(name)?.management!.defaultSearchField!
@@ -100,7 +104,10 @@ export class AssignmentService {
       throw new AssignmentError(`Forbidden type [${forbiddenTypes.join(', ')}]`, 403);
     }
 
-    const { saved_objects: objects } = await this.soClient.bulkGet([...assign, ...unassign]);
+    const { saved_objects: objects } = await this.soClient.bulkGet([
+      ...assign.map(referenceToBulkGet),
+      ...unassign.map(referenceToBulkGet),
+    ]);
 
     // if we failed to fetch any object, just halt and throw an error
     const firstObjWithError = objects.find((obj) => !!obj.error);
@@ -130,15 +137,9 @@ export class AssignmentService {
   }
 }
 
-// TODO: move to util + test
-const toAssignableObject = (object: SavedObject, typeDef: SavedObjectsType): AssignableObject => {
-  return {
-    id: object.id,
-    type: object.type,
-    title: typeDef.management?.getTitle ? typeDef.management.getTitle(object) : object.id,
-    icon: typeDef.management?.icon,
-    tags: object.references
-      .filter(({ type }) => type === tagSavedObjectTypeName)
-      .map(({ id }) => id),
-  };
-};
+const referenceToBulkGet = ({ type, id }: ObjectReference): SavedObjectsBulkGetObject => ({
+  type,
+  id,
+  // we only need `type`, `id` and `references` that are included by default.
+  fields: [],
+});

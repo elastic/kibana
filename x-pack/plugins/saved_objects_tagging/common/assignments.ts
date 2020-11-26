@@ -5,7 +5,7 @@
  */
 
 /**
- * `type`+`id` tuple of a saved object.
+ * `type`+`id` tuple of a saved object
  */
 export interface ObjectReference {
   type: string;
@@ -33,4 +33,7 @@ export interface FindAssignableObjectOptions {
   types?: string[];
 }
 
+/**
+ * Return a string that can be used as an unique identifier for given saved object
+ */
 export const getKey = ({ id, type }: ObjectReference) => `${type}|${id}`;

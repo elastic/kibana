@@ -8,11 +8,13 @@ import { SavedObject, SavedObjectReference } from 'src/core/types';
 import { Tag, TagAttributes } from '../types';
 import { TagsCapabilities } from '../capabilities';
 
-export const createTagReference = (id: string): SavedObjectReference => ({
-  type: 'tag',
+export const createReference = (type: string, id: string): SavedObjectReference => ({
+  type,
   id,
-  name: `tag-ref-${id}`,
+  name: `${type}-ref-${id}`,
 });
+
+export const createTagReference = (id: string) => createReference('tag', id);
 
 export const createSavedObject = (parts: Partial<SavedObject>): SavedObject => ({
   type: 'tag',

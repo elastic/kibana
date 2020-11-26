@@ -69,5 +69,22 @@ export default function ({ getService }: FtrProviderContext) {
       const [visualization] = bulkResponse.body.saved_objects;
       expect(visualization.references.map((ref: any) => ref.id)).to.eql(['tag-1']);
     });
+
+    it('returns an error when both `assign` and `unassign` are unspecified', async () => {
+      const { body } = await supertest
+        .post(`/api/saved_objects_tagging/assignments/update_by_tags`)
+        .send({
+          tags: ['tag-1', 'tag-2'],
+          assign: undefined,
+          unassign: undefined,
+        })
+        .expect(400);
+
+      expect(body).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: '[request body]: either `assign` or `unassign` must be specified',
+      });
+    });
   });
 }
