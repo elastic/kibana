@@ -24,7 +24,7 @@ import { PLUGIN } from '../common';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';
-import { isEsError, parseEsError } from './shared_imports';
+import { isEsError, handleEsError, parseEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch';
 
 export interface DataManagementContext {
@@ -111,6 +111,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       lib: {
         isEsError,
         parseEsError,
+        handleEsError,
       },
     });
 

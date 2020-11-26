@@ -55,6 +55,7 @@ describe('GET privileges', () => {
       lib: {
         isEsError: jest.fn(),
         parseEsError: jest.fn(),
+        handleEsError: jest.fn(),
       },
     });
 
@@ -125,6 +126,7 @@ describe('GET privileges', () => {
         lib: {
           isEsError: jest.fn(),
           parseEsError: jest.fn(),
+          handleEsError: jest.fn(),
         },
       });
 
