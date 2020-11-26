@@ -242,7 +242,7 @@ migration is complete:
 ----
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'kibana/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 export class DemoPlugin {
   public setup(core: CoreSetup) {
@@ -902,8 +902,9 @@ The most significant changes on the Kibana side for the consumers are the follow
 ===== User client accessor
 Internal /current user client accessors has been renamed and are now
 properties instead of functions:
-** `callAsInternalUser('ping')` -> `asInternalUser.ping()`
-** `callAsCurrentUser('ping')` -> `asCurrentUser.ping()`
+
+* `callAsInternalUser('ping')` -> `asInternalUser.ping()`
+* `callAsCurrentUser('ping')` -> `asCurrentUser.ping()`
 * the API now reflects the `Client`’s instead of leveraging the
 string-based endpoint names the `LegacyAPICaller` was using.
 
