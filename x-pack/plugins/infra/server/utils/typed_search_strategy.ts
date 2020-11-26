@@ -27,22 +27,22 @@ export const createAsyncRequestRTs = <StateCodec extends rt.Mixed, ParamsCodec e
   stateCodec: StateCodec,
   paramsCodec: ParamsCodec
 ) => {
-  const asyncGetRequestRT = rt.type({
+  const asyncRecoveredRequestRT = rt.type({
     id: stateCodec,
     params: paramsCodec,
   });
 
-  const asyncSubmitRequestRT = rt.type({
+  const asyncInitialRequestRT = rt.type({
     id: rt.undefined,
     params: paramsCodec,
   });
 
-  const asyncRequestRT = rt.union([asyncGetRequestRT, asyncSubmitRequestRT]);
+  const asyncRequestRT = rt.union([asyncRecoveredRequestRT, asyncInitialRequestRT]);
 
   return {
-    asyncGetRequestRT,
+    asyncInitialRequestRT,
+    asyncRecoveredRequestRT,
     asyncRequestRT,
-    asyncSubmitRequestRT,
   };
 };
 

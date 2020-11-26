@@ -54,12 +54,12 @@ export const logEntrySearchStrategyProvider = ({
         ).pipe(shareReplay(1));
 
         const recoveredRequest$ = of(request).pipe(
-          filter(asyncGetRequestRT.is),
+          filter(asyncRecoveredRequestRT.is),
           map(({ id: { esRequestId } }) => ({ id: esRequestId }))
         );
 
         const initialRequest$ = of(request).pipe(
-          filter(asyncSubmitRequestRT.is),
+          filter(asyncInitialRequestRT.is),
           concatMap(({ params }) =>
             sourceConfiguration$.pipe(
               map(
@@ -111,7 +111,7 @@ export const logEntrySearchRequestStateRT = rt.string.pipe(jsonFromBase64StringR
   })
 );
 
-const { asyncGetRequestRT, asyncRequestRT, asyncSubmitRequestRT } = createAsyncRequestRTs(
+const { asyncInitialRequestRT, asyncRecoveredRequestRT, asyncRequestRT } = createAsyncRequestRTs(
   logEntrySearchRequestStateRT,
   logEntrySearchRequestParamsRT
 );
