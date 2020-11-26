@@ -68,7 +68,7 @@ interface TransactionOverviewProps {
 export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
   const location = useLocation();
   const { urlParams } = useUrlParams();
-  const { transactionType, transactionTypes, agentName } = useApmService();
+  const { transactionType, transactionTypes } = useApmService();
 
   // redirect to first transaction type
   useRedirect(getRedirectLocation({ location, transactionType, urlParams }));

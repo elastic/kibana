@@ -27,7 +27,7 @@ export function ServiceOverviewThroughputChart({
   const { transactionType } = useApmService();
   const { start, end } = urlParams;
 
-  const { data, status } = useFetcher(() => {
+  const { data = { throughput: [] }, status } = useFetcher(() => {
     if (serviceName && transactionType && start && end) {
       return callApmApi({
         endpoint: 'GET /api/apm/services/{serviceName}/throughput',
@@ -45,7 +45,7 @@ export function ServiceOverviewThroughputChart({
       });
     }
   }, [serviceName, start, end, uiFilters, transactionType]);
-  const { throughput } = data ?? { throughput: [] };
+  const { throughput } = data;
 
   return (
     <EuiPanel>
@@ -66,7 +66,6 @@ export function ServiceOverviewThroughputChart({
             data: throughput,
             type: 'linemark',
             color: theme.eui.euiColorVis0,
-            hideLegend: true,
             title: i18n.translate(
               'xpack.apm.serviceOverview.throughputChart.currentPeriodLabel',
               {
