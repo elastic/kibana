@@ -144,7 +144,7 @@ export class LegacyService implements CoreService {
     this.log.debug('starting legacy service');
 
     // Receive initial config and create kbnServer/ClusterManager.
-    if (this.coreContext.env.isDevClusterMaster) {
+    if (this.coreContext.env.isDevCliParent) {
       await this.createClusterManager(this.legacyRawConfig!);
     } else {
       this.kbnServer = await this.createKbnServer(
@@ -310,10 +310,8 @@ export class LegacyService implements CoreService {
       logger: this.coreContext.logger,
     });
 
-    // The kbnWorkerType check is necessary to prevent the repl
-    // from being started multiple times in different processes.
-    // We only want one REPL.
-    if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+    // Prevent the repl from being started multiple times in different processes.
+    if (this.coreContext.env.cliArgs.repl && process.env.isDevCliChild) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('./cli').startRepl(kbnServer);
     }

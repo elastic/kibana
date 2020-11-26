@@ -27,6 +27,7 @@ export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatt
 
 export const [getDataSearch, setDataSearch] = createGetterSetter<ISearchStart>('Search');
 
-export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<
-  SavedObjectsClientContract
->('SavedObjectsClient');
+export const [
+  getSavedObjectsClient,
+  setSavedObjectsClient,
+] = createGetterSetter<SavedObjectsClientContract>('SavedObjectsClient');
