@@ -14,9 +14,9 @@ import {
 import {
   IEsSearchRequest,
   IEsSearchResponse,
+  ISearchStrategy,
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
-import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
   logEntrySearchRequestStateRT,
@@ -35,8 +35,8 @@ describe('LogEntry search strategy', () => {
         hits: { total: 0, max_score: 0, hits: [] },
       },
     });
-    const dataMock = dataPluginMock.createStartContract();
-    dataMock.search.getSearchStrategy.mockReturnValue(esSearchStrategyMock);
+
+    const dataMock = createDataPluginMock(esSearchStrategyMock);
     const sourcesMock = createInfraSourcesMock();
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
@@ -90,8 +90,7 @@ describe('LogEntry search strategy', () => {
         },
       },
     });
-    const dataMock = dataPluginMock.createStartContract();
-    dataMock.search.getSearchStrategy.mockReturnValue(esSearchStrategyMock);
+    const dataMock = createDataPluginMock(esSearchStrategyMock);
     const sourcesMock = createInfraSourcesMock();
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
@@ -144,8 +143,7 @@ describe('LogEntry search strategy', () => {
         hits: { total: 0, max_score: 0, hits: [] },
       },
     });
-    const dataMock = dataPluginMock.createStartContract();
-    dataMock.search.getSearchStrategy.mockReturnValue(esSearchStrategyMock);
+    const dataMock = createDataPluginMock(esSearchStrategyMock);
     const sourcesMock = createInfraSourcesMock();
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
@@ -216,4 +214,12 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   uiSettingsClient: uiSettingsServiceMock.createClient(),
   esClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
+});
+
+// using the official data mock from within x-pack doesn't type-check successfully,
+// because the `licensing` plugin modifies the `RequestHandlerContext` core type.
+const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
+  search: {
+    getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
+  },
 });
