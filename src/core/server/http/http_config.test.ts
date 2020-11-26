@@ -277,13 +277,21 @@ describe('cors', () => {
           `);
     });
 
-    it('consist of list of valid URLs', () => {
+    it('list of valid URLs', () => {
       const origin = ['http://127.0.0.1:3000', 'https://elastic.co'];
       expect(
         config.schema.validate({
           cors: { origin },
         }).cors.origin
       ).toStrictEqual(origin);
+
+      expect(() =>
+        config.schema.validate({
+          cors: {
+            origin: ['*://elastic.co/*'],
+          },
+        })
+      ).toThrow();
     });
 
     it('can be configures as "*" wildcard', () => {
