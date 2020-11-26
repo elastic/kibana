@@ -37,6 +37,7 @@ export async function runFpm(
   const resolveWithTrailingSlash = (...paths: string[]) => `${resolve(...paths)}/`;
 
   const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(linux, ...paths);
+
   const pickLicense = () => {
     if (build.isOss()) {
       return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
