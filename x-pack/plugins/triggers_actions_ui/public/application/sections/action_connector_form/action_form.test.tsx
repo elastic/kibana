@@ -12,6 +12,7 @@ import { ValidationResult, Alert, AlertAction } from '../../../types';
 import ActionForm from './action_form';
 import { RecoveredActionGroup } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -387,9 +388,11 @@ describe('action_form', () => {
           },
         ]
       `);
-      expect(actionGroupsSelect.first().text()).toEqual(
-        'Select an option: Recovered, is selectedResolved'
+
+      expect(actionGroupsSelect.first().find(EuiScreenReaderOnly).text()).toEqual(
+        'Select an option: Recovered, is selected'
       );
+      expect(actionGroupsSelect.first().find('button').first().text()).toEqual('Recovered');
     });
 
     it('renders available connectors for the selected action type', async () => {
