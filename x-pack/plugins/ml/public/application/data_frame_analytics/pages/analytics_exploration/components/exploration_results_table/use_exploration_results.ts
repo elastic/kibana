@@ -11,6 +11,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { MlApiServices } from '../../../../../services/ml_api_service';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
@@ -38,6 +39,10 @@ import { isRegressionAnalysis } from '../../../../common/analytics';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
 import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
+import {
+  getDefaultExplorationPageUrlState,
+  useExplorationUrlState,
+} from '../../hooks/use_exploration_url_state';
 
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
@@ -47,6 +52,7 @@ export const useExplorationResults = (
   mlApiServices: MlApiServices
 ): UseIndexDataReturnType => {
   const [baseline, setBaseLine] = useState<FeatureImportanceBaseline | undefined>();
+  const [pageUrlState, setPageUrlState] = useExplorationUrlState();
 
   const trainedModelsApiService = useTrainedModelsApiService();
 
@@ -74,9 +80,43 @@ export const useExplorationResults = (
       !d.includes(`.${FEATURE_IMPORTANCE}.`) && !d.includes(`.${TOP_CLASSES}.`) && d !== ML__ID_COPY
   );
 
-  useEffect(() => {
-    dataGrid.resetPagination();
-  }, [JSON.stringify(searchQuery)]);
+  // Override dataGrid config to use URL state.
+  dataGrid.pagination = useMemo(
+    () => ({
+      pageSize: pageUrlState.pageSize,
+      pageIndex: pageUrlState.pageIndex,
+    }),
+    [pageUrlState.pageSize, pageUrlState.pageIndex]
+  );
+  dataGrid.setPagination = useCallback(
+    (u) => {
+      setPageUrlState({ ...u });
+    },
+    [setPageUrlState]
+  );
+  dataGrid.onChangePage = useCallback(
+    (pageIndex) => {
+      setPageUrlState({ pageIndex });
+    },
+    [setPageUrlState]
+  );
+  dataGrid.onChangeItemsPerPage = useCallback(
+    (pageSize) => {
+      setPageUrlState({ pageSize });
+    },
+    [setPageUrlState]
+  );
+  dataGrid.resetPagination = useCallback(() => {
+    const a = getDefaultExplorationPageUrlState();
+    setPageUrlState({ pageSize: a.pageSize, pageIndex: a.pageIndex });
+  }, [setPageUrlState]);
+
+  useUpdateEffect(
+    function resetPaginationOnQueryChange() {
+      dataGrid.resetPagination();
+    },
+    [pageUrlState.queryText]
+  );
 
   // The pattern using `didCancel` allows us to abort out of date remote request.
   // We wrap `didCancel` in a object so we can mutate the value as it's being

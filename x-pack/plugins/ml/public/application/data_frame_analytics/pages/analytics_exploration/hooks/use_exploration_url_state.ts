@@ -15,9 +15,9 @@ import {
 export type ExplorationPageUrlState = {
   queryText: string;
   queryLanguage: SearchQueryLanguage;
-} & Partial<ListingPageUrlState>;
+} & Pick<ListingPageUrlState, 'pageIndex' | 'pageSize'>;
 
-function getDefaultExplorationPageUrlState(): ExplorationPageUrlState {
+export function getDefaultExplorationPageUrlState(): ExplorationPageUrlState {
   return {
     queryText: '',
     queryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
