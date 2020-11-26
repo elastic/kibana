@@ -213,6 +213,8 @@ describe('params validation', () => {
         "to": Array [
           "bob@example.com",
         ],
+        "viewInKibanaPath": "/",
+        "viewInKibanaText": "View in Kibana",
       }
     `);
   });
@@ -247,6 +249,8 @@ describe('execute()', () => {
       bcc: ['jimmy@example.com'],
       subject: 'the subject',
       message: 'a message to you',
+      viewInKibanaPath: '/',
+      viewInKibanaText: 'View in Kibana',
     };
 
     const actionId = 'some-id';
@@ -267,31 +271,35 @@ describe('execute()', () => {
       }
     `);
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
-          Object {
-            "content": Object {
-              "message": "a message to you",
-              "subject": "the subject",
-            },
-            "hasAuth": true,
-            "proxySettings": undefined,
-            "routing": Object {
-              "bcc": Array [
-                "jimmy@example.com",
-              ],
-              "cc": Array [
-                "james@example.com",
-              ],
-              "from": "bob@example.com",
-              "to": Array [
-                "jim@example.com",
-              ],
-            },
-            "transport": Object {
-              "password": "supersecret",
-              "service": "__json",
-              "user": "bob",
-            },
-          }
+      Object {
+        "content": Object {
+          "message": "a message to you
+
+      --
+
+      This message was sent by a Kibana connector. [Open Kibana](https://localhost:5601).",
+          "subject": "the subject",
+        },
+        "hasAuth": true,
+        "proxySettings": undefined,
+        "routing": Object {
+          "bcc": Array [
+            "jimmy@example.com",
+          ],
+          "cc": Array [
+            "james@example.com",
+          ],
+          "from": "bob@example.com",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+        "transport": Object {
+          "password": "supersecret",
+          "service": "__json",
+          "user": "bob",
+        },
+      }
     `);
   });
 
@@ -314,6 +322,8 @@ describe('execute()', () => {
       bcc: ['jimmy@example.com'],
       subject: 'the subject',
       message: 'a message to you',
+      viewInKibanaPath: '/',
+      viewInKibanaText: 'View in Kibana',
     };
 
     const actionId = 'some-id';
@@ -329,7 +339,11 @@ describe('execute()', () => {
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
-          "message": "a message to you",
+          "message": "a message to you
+
+      --
+
+      This message was sent by a Kibana connector. [Open Kibana](https://localhost:5601).",
           "subject": "the subject",
         },
         "hasAuth": false,
@@ -374,6 +388,8 @@ describe('execute()', () => {
       bcc: ['jimmy@example.com'],
       subject: 'the subject',
       message: 'a message to you',
+      viewInKibanaPath: '/',
+      viewInKibanaText: 'View in Kibana',
     };
 
     const actionId = 'some-id';
