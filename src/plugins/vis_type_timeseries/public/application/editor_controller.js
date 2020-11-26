@@ -70,7 +70,6 @@ export class EditorController {
           visParams={this.state.vis.params}
           timeRange={params.timeRange}
           renderComplete={() => {}}
-          isEditorMode={true}
           appState={params.appState}
           embeddableHandler={this.embeddableHandler}
           eventEmitter={this.eventEmitter}
