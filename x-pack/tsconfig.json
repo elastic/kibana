@@ -14,7 +14,6 @@
     "paths": {
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
-      "test_utils/*": ["x-pack/test_utils/*"],
       "fixtures/*": ["src/fixtures/*"]
     },
     // overhead is too significant
