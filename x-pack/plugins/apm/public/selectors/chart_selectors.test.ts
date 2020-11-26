@@ -25,8 +25,6 @@ describe('chart selectors', () => {
       expect(getAnomalyScoreSeries(data)).toEqual({
         color: '#e7664c',
         data: [{ x0: 0, x: 10 }],
-        hideLegend: true,
-        hideTooltipValue: true,
         title: 'Anomaly score',
         type: 'rectAnnotation',
       });
