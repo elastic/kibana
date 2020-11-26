@@ -8,7 +8,10 @@ import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { asMillisecondDuration } from '../../../../common/utils/formatters';
+import {
+  asMillisecondDuration,
+  asTransactionRate,
+} from '../../../../common/utils/formatters';
 import { fontSizes, truncate } from '../../../style/variables';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
@@ -78,13 +81,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) =>
-      `${value.toLocaleString()} ${i18n.translate(
-        'xpack.apm.tracesTable.tracesPerMinuteUnitLabel',
-        {
-          defaultMessage: 'tpm',
-        }
-      )}`,
+    render: (value: number) => asTransactionRate(value),
   },
   {
     field: 'impact',
