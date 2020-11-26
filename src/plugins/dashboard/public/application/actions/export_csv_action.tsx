@@ -62,65 +62,20 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
     });
 
   public async isCompatible(context: ExportContext): Promise<boolean> {
-    return Boolean(
-      context.embeddable &&
-        'getInspectorAdapters' in context.embeddable &&
-        this.hasDatatableContent(context.embeddable.getInspectorAdapters())
-    );
+    return this.hasDatatableContent(context.embeddable?.getInspectorAdapters?.());
   }
 
   private hasDatatableContent = (adapters: Adapters | undefined) => {
-    return adapters && (adapters.data || adapters[Object.keys(adapters)[0]]?.columns);
+    return adapters && adapters[Object.keys(adapters)[0]]?.columns;
   };
 
-  private getFormatter = (
-    type: string | undefined,
-    adapters: Adapters | undefined
-  ): FormatFactory | undefined => {
-    if (type === 'lens') {
+  private getFormatter = (): FormatFactory | undefined => {
+    if (this.params.data) {
       return this.params.data.fieldFormats.deserialize;
     }
-
-    if (type === 'visualization') {
-      return (() => ({
-        convert: (item: { raw: string; formatted: string }) => item.formatted,
-      })) as FormatFactory;
-    }
-
-    if (this.hasDatatableContent(adapters)) {
-      // if of unknown type, return an identity
-      return (() => ({
-        convert: (item) => item,
-      })) as FormatFactory;
-    }
   };
 
-  private getDataTableContent = async (
-    type: string | undefined,
-    adapters: Adapters | undefined
-  ) => {
-    if (!adapters || !type) {
-      return;
-    }
-    // Visualize
-    if (type === 'visualization') {
-      const tabularData = (await adapters.data?.getTabular()!).data!;
-      const datatable = {
-        columns: tabularData.columns.map(({ field, ...rest }: { field: string }) => ({
-          id: field,
-          field,
-          ...rest,
-        })),
-        rows: tabularData.rows,
-      };
-      return { layer1: datatable };
-    }
-    // Lens
-    if (type === 'lens') {
-      return adapters;
-    }
-
-    // Make a last attempt to duck type the adapter (useful for testing)
+  private getDataTableContent = (adapters: Adapters | undefined) => {
     if (this.hasDatatableContent(adapters)) {
       return adapters;
     }
@@ -128,18 +83,14 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
   };
 
   private exportCSV = async (context: ExportContext) => {
-    const formatFactory = this.getFormatter(
-      context?.embeddable?.type,
-      context?.embeddable?.getInspectorAdapters()
-    );
+    const formatFactory = this.getFormatter();
     // early exit if not formatter is available
     if (!formatFactory) {
       return;
     }
-    const adapters = (await this.getDataTableContent(
-      context?.embeddable?.type,
+    const adapters = this.getDataTableContent(
       context?.embeddable?.getInspectorAdapters()
-    )) as Record<string, Datatable>;
+    ) as Record<string, Datatable>;
 
     if (adapters) {
       const datatables = Object.values(adapters);
@@ -163,8 +114,9 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
         {}
       );
 
+      // useful for testing
       if (context.asString) {
-        return content;
+        return (content as unknown) as Promise<void>;
       }
 
       if (content) {
@@ -175,6 +127,6 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
 
   public async execute(context: ExportContext): Promise<void> {
     // make it testable: type here will be forced
-    return ((await this.exportCSV(context)) as unknown) as Promise<void>;
+    return await this.exportCSV(context);
   }
 }
