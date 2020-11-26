@@ -14,6 +14,7 @@ import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
   IndexPatternDatasource,
@@ -42,6 +43,7 @@ import { visualizeFieldAction } from './trigger_actions/visualize_field_actions'
 import { getSearchProvider } from './search_provider';
 
 import { LensAttributeService } from './lens_attribute_service';
+import { LensEmbeddableInput } from './editor_frame_service/embeddable';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -171,7 +173,8 @@ export class LensPlugin {
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
-    this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    const frameStart = this.editorFrameService.start(core, startDependencies);
+    this.createEditorFrame = frameStart.createInstance;
     // unregisters the OSS alias
     startDependencies.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
     // unregisters the Visualize action and registers the lens one
@@ -182,6 +185,22 @@ export class LensPlugin {
       VISUALIZE_FIELD_TRIGGER,
       visualizeFieldAction(core.application)
     );
+
+    return {
+      EmbeddableComponent: frameStart.EmbeddableComponent,
+      navigateToPrefilledEditor: (input: LensEmbeddableInput) => {
+        if (input.timeRange) {
+          startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
+        }
+        const transfer = new EmbeddableStateTransfer(core.application.navigateToApp);
+        transfer.navigateToEditor('lens', {
+          state: {
+            originatingApp: '',
+            valueInput: input,
+          },
+        });
+      },
+    };
   }
 
   stop() {

@@ -25,6 +25,7 @@ import {
   VALUE_CLICK_TRIGGER,
   VisualizeFieldContext,
 } from '../../../../src/plugins/ui_actions/public';
+import type { LensProps } from './editor_frame_service/embeddable/embeddable_component';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -71,6 +72,7 @@ export interface EditorFrameSetup {
 
 export interface EditorFrameStart {
   createInstance: () => Promise<EditorFrameInstance>;
+  EmbeddableComponent: React.ComponentType<LensProps>;
 }
 
 export interface TableSuggestionColumn {

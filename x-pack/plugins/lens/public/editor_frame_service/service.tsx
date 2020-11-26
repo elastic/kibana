@@ -28,6 +28,7 @@ import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import { LensAttributeService } from '../lens_attribute_service';
+import { getEmbeddableComponent } from './embeddable/embeddable_component_loader';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -64,6 +65,7 @@ export class EditorFrameService {
 
   private readonly datasources: Array<Datasource | (() => Promise<Datasource>)> = [];
   private readonly visualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
+  private getAttributeService: (() => Promise<LensAttributeService>) | null = null;
 
   /**
    * This method takes a Lens saved object as returned from the persistence helper,
@@ -87,6 +89,7 @@ export class EditorFrameService {
     plugins: EditorFrameSetupPlugins,
     getAttributeService: () => Promise<LensAttributeService>
   ): EditorFrameSetup {
+    this.getAttributeService = getAttributeService;
     plugins.expressions.registerFunction(() => mergeTables);
 
     const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
@@ -187,6 +190,16 @@ export class EditorFrameService {
 
     return {
       createInstance,
+      EmbeddableComponent: getEmbeddableComponent({
+        indexPatternService: plugins.data.indexPatterns,
+        timefilter: plugins.data.query.timefilter.timefilter,
+        expressionRenderer: plugins.expressions.ReactExpressionRenderer,
+        editable: false,
+        basePath: core.http.basePath,
+        getTrigger: plugins.uiActions?.getTrigger,
+        documentToExpression: this.documentToExpression.bind(this),
+        attributeService: this.getAttributeService!,
+      }),
     };
   }
 }
