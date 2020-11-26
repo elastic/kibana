@@ -14,6 +14,11 @@ import {
   TelemetryPluginStart,
   TelemetryPluginSetup,
 } from '../../../../../../src/plugins/telemetry/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../task_manager/server';
+import { TelemetryDiagTask } from './task';
 
 export type SearchTypes =
   | string
@@ -56,30 +61,74 @@ export class TelemetryEventsSender {
   private isSending = false;
   private queue: TelemetryEvent[] = [];
   private isOptedIn?: boolean = true; // Assume true until the first check
+  private wasOptedInChecked?: boolean = false; // False until the first check
+  private diagTask?: TelemetryDiagTask;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup) {
+  public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
     this.telemetrySetup = telemetrySetup;
+
+    if (taskManager) {
+      this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
+    }
   }
 
-  public start(core?: CoreStart, telemetryStart?: TelemetryPluginStart) {
+  public start(
+    core?: CoreStart,
+    telemetryStart?: TelemetryPluginStart,
+    taskManager?: TaskManagerStartContract
+  ) {
     this.telemetryStart = telemetryStart;
     this.core = core;
 
-    this.logger.debug(`Starting task`);
+    this.logger.debug(`Starting local task`);
     setTimeout(() => {
       this.sendIfDue();
       this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
     }, this.initialCheckDelayMs);
+
+    if (taskManager && this.diagTask) {
+      this.logger.debug(`Starting diag task`);
+      this.diagTask.start(taskManager);
+    }
   }
 
   public stop() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
+  }
+
+  public async fetchDiagnosticAlerts(fromTimestamp: string, toTimestamp: string) {
+    const query = {
+      index: 'pete-hampton-test-index*',
+      ignore_unavailable: true,
+      size: 100,
+      body: {
+        query: {
+          match_all: {},
+        },
+        /*
+        query: {
+          range: {
+            '@timestamp': {
+              gt: fromTimestamp,
+              lte: toTimestamp,
+            },
+          },
+        },
+        */
+      },
+    };
+
+    if (!this.core) {
+      throw Error('could not fetch diagnostic alerts. core is not available');
+    }
+    const callCluster = this.core.elasticsearch.legacy.client.callAsInternalUser;
+    return callCluster('search', query);
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
@@ -109,6 +158,17 @@ export class TelemetryEventsSender {
     });
   }
 
+  // this returns a cached version of the telemetry opt-in. The cache is updated
+  // in the periodically executed sendIfDue function. This function returns false
+  // until the first execution of that function.
+  public isTelemetryOptedIn(): boolean {
+    if (!this.wasOptedInChecked) {
+      return false;
+    } else {
+      return this.isOptedIn === true;
+    }
+  }
+
   private async sendIfDue() {
     if (this.isSending) {
       return;
@@ -121,9 +181,8 @@ export class TelemetryEventsSender {
     try {
       this.isSending = true;
 
-      // Checking opt-in status is relatively expensive (calls a saved-object), so
-      // we only check it when we have things to send.
       this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+      this.wasOptedInChecked = true;
       if (!this.isOptedIn) {
         this.logger.debug(`Telemetry is not opted-in.`);
         this.queue = [];
@@ -150,6 +209,7 @@ export class TelemetryEventsSender {
       }));
       this.queue = [];
 
+      /*
       await this.sendEvents(
         toSend,
         telemetryUrl,
@@ -157,6 +217,7 @@ export class TelemetryEventsSender {
         clusterInfo.version?.number,
         licenseInfo?.uid
       );
+      */
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
       this.queue = [];
@@ -245,6 +306,8 @@ const allowlistEventFields: AllowlistFields = {
   '@timestamp': true,
   agent: true,
   Endpoint: true,
+  Ransomware: true,
+  data_stream: true,
   ecs: true,
   elastic: true,
   event: true,
