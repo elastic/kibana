@@ -39,13 +39,9 @@ function setup({
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
 }) {
-  const defaultLocation = {
+  history.replace({
     pathname: '/services/foo/transactions',
     search: fromQuery(urlParams),
-  } as any;
-
-  history.replace({
-    ...defaultLocation,
   });
 
   // mock transaction types
