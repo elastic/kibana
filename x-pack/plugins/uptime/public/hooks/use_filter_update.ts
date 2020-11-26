@@ -6,25 +6,13 @@
 
 import { useEffect } from 'react';
 import { useUrlParams } from './use_url_params';
-
-/**
- * Handle an added or removed value to filter against for an uptime field.
- * @param fieldName the name of the field to filter against
- * @param values the list of values to use when filter a field
- */
-interface SelectedFilters {
-  selectedTags: string[];
-  selectedPorts: string[];
-  selectedSchemes: string[];
-  selectedLocations: string[];
-  selectedFilters: Map<string, string[]>;
-}
+import { use_selected_filters } from './useSelectedFilters';
 
 export const useFilterUpdate = (
   fieldName?: string,
   values?: string[],
   shouldUpdateUrl: boolean = true
-): SelectedFilters => {
+) => {
   const [getUrlParams, updateUrl] = useUrlParams();
 
   const { filters: currentFilters } = getUrlParams();
@@ -62,12 +50,4 @@ export const useFilterUpdate = (
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldName, values]);
-
-  return {
-    selectedTags: filterKueries.get('tags') || [],
-    selectedPorts: filterKueries.get('url.port') || [],
-    selectedSchemes: filterKueries.get('monitor.type') || [],
-    selectedLocations: filterKueries.get('observer.geo.name') || [],
-    selectedFilters: filterKueries,
-  };
 };

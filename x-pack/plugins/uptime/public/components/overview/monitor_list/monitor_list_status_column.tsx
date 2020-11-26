@@ -18,7 +18,7 @@ import {
   SHORT_TS_LOCALE,
 } from '../../../../common/constants';
 
-import * as labels from './translations';
+import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../common/translations';
 
 interface MonitorListStatusColumnProps {
   status: string;
@@ -50,9 +50,9 @@ const getHealthColor = (status: string): string => {
 const getHealthMessage = (status: string): string | null => {
   switch (status) {
     case STATUS.UP:
-      return labels.UP;
+      return STATUS_UP_LABEL;
     case STATUS.DOWN:
-      return labels.DOWN;
+      return STATUS_DOWN_LABEL;
     default:
       return null;
   }

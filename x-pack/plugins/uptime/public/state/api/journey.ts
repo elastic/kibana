@@ -20,3 +20,15 @@ export async function fetchJourneySteps(
     SyntheticsJourneyApiResponseType
   )) as SyntheticsJourneyApiResponse;
 }
+
+export async function fetchJourneysFailedSteps({
+  checkGroups,
+}: {
+  checkGroups: string[];
+}): Promise<SyntheticsJourneyApiResponse> {
+  return (await apiService.get(
+    `/api/uptime/journeys/failed_steps`,
+    { checkGroups },
+    SyntheticsJourneyApiResponseType
+  )) as SyntheticsJourneyApiResponse;
+}
