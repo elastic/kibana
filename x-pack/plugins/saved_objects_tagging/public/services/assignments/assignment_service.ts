@@ -24,8 +24,14 @@ export interface TagAssignmentServiceOptions {
   http: HttpSetup;
 }
 
+// TODO: move to common and use on server-side
+
 export interface FindAssignableObjectResponse {
   objects: AssignableObject[];
+}
+
+export interface GetAssignableTypesResponse {
+  types: string[];
 }
 
 export class TagAssignmentService implements ITagAssignmentService {
@@ -50,7 +56,6 @@ export class TagAssignmentService implements ITagAssignmentService {
   }
 
   public async updateTagAssignments({ tags, assign, unassign }: UpdateTagAssignmentsOptions) {
-    // TODO: type response
     await this.http.post<{}>('/api/saved_objects_tagging/assignments/update_by_tags', {
       body: JSON.stringify({
         tags,
@@ -61,7 +66,7 @@ export class TagAssignmentService implements ITagAssignmentService {
   }
 
   public async getAssignableTypes() {
-    const { types } = await this.http.get<{ types: string[] }>(
+    const { types } = await this.http.get<GetAssignableTypesResponse>(
       '/internal/saved_objects_tagging/assignments/_assignable_types'
     );
     return types;

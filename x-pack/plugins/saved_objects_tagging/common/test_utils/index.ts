@@ -7,6 +7,7 @@
 import { SavedObject, SavedObjectReference } from 'src/core/types';
 import { Tag, TagAttributes } from '../types';
 import { TagsCapabilities } from '../capabilities';
+import { AssignableObject } from '../assignments';
 
 export const createReference = (type: string, id: string): SavedObjectReference => ({
   type,
@@ -46,5 +47,15 @@ export const createTagCapabilities = (parts: Partial<TagsCapabilities> = {}): Ta
   delete: true,
   assign: true,
   viewConnections: true,
+  ...parts,
+});
+
+export const createAssignableObject = (
+  parts: Partial<AssignableObject> = {}
+): AssignableObject => ({
+  type: 'type',
+  id: 'id',
+  title: 'title',
+  tags: [],
   ...parts,
 });
