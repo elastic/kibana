@@ -23,7 +23,7 @@ import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
 import {
   MinAgeInputField,
   DataTierAllocationField,
-  SetPriorityInput,
+  SetPriorityInputField,
   SearchableSnapshotField,
 } from '../shared_fields';
 
@@ -186,7 +186,7 @@ export const ColdPhase: FunctionComponent = () => {
                 />
               </EuiDescribedFormGroup>
             )}
-            <SetPriorityInput phase={coldProperty} />
+            <SetPriorityInputField phase={coldProperty} />
           </>
         )}
       </>

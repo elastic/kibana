@@ -35,8 +35,8 @@ import { ROLLOVER_FORM_PATHS } from '../../../constants';
 import { LearnMoreLink, ActiveBadge } from '../../';
 
 import {
-  Forcemerge,
-  SetPriorityInput,
+  ForcemergeField,
+  SetPriorityInputField,
   SearchableSnapshotField,
   useRolloverPath,
 } from '../shared_fields';
@@ -225,9 +225,9 @@ export const HotPhase: FunctionComponent = () => {
           </>
         )}
       </EuiDescribedFormGroup>
-      {isRolloverEnabled && <Forcemerge phase="hot" />}
+      {isRolloverEnabled && <ForcemergeField phase="hot" />}
       {isRolloverEnabled && <SearchableSnapshotField phase="hot" />}
-      <SetPriorityInput phase={hotProperty} />
+      <SetPriorityInputField phase={hotProperty} />
     </>
   );
 };

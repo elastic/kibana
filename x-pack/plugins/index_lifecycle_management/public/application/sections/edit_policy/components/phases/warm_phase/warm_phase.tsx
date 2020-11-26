@@ -29,8 +29,8 @@ import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
 import {
   useRolloverPath,
   MinAgeInputField,
-  Forcemerge,
-  SetPriorityInput,
+  ForcemergeField,
+  SetPriorityInputField,
   DataTierAllocationField,
 } from '../shared_fields';
 
@@ -224,9 +224,9 @@ export const WarmPhase: FunctionComponent = () => {
               </DescribedFormField>
             )}
 
-            {!isUsingSearchableSnapshotInHotPhase && <Forcemerge phase="warm" />}
+            {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
 
-            <SetPriorityInput phase="warm" />
+            <SetPriorityInputField phase="warm" />
           </Fragment>
         )}
       </>
