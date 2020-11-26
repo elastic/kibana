@@ -115,7 +115,7 @@ describe('Description', () => {
       false
     );
 
-    expect(component.find('[data-test-subj="timeline-description"]').exists()).toEqual(true);
+    expect(component.find('[data-test-subj="timeline-description-input"]').exists()).toEqual(true);
   });
 
   test('should render textarea if isTextArea is true', () => {
@@ -163,9 +163,9 @@ describe('Name', () => {
         <Name {...props} />
       </TestProviders>
     );
-    expect(component.find('[data-test-subj="timeline-title"]').first().prop('placeholder')).toEqual(
-      i18n.UNTITLED_TIMELINE
-    );
+    expect(
+      component.find('[data-test-subj="timeline-title-input"]').first().prop('placeholder')
+    ).toEqual(i18n.UNTITLED_TIMELINE);
   });
 
   test('should render placeholder by timelineType - timeline template', () => {
@@ -178,8 +178,8 @@ describe('Name', () => {
         <Name {...props} />
       </TestProviders>
     );
-    expect(component.find('[data-test-subj="timeline-title"]').first().prop('placeholder')).toEqual(
-      i18n.UNTITLED_TEMPLATE
-    );
+    expect(
+      component.find('[data-test-subj="timeline-title-input"]').first().prop('placeholder')
+    ).toEqual(i18n.UNTITLED_TEMPLATE);
   });
 });

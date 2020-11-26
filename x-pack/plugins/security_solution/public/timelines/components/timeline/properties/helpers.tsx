@@ -141,7 +141,7 @@ export const Description = React.memo<DescriptionProps>(
         ) : (
           <EuiFieldText
             aria-label={i18n.TIMELINE_DESCRIPTION}
-            data-test-subj="timeline-description"
+            data-test-subj="timeline-description-input"
             onChange={onDescriptionChanged}
             placeholder={i18n.DESCRIPTION}
             spellCheck={true}
@@ -210,7 +210,7 @@ export const Name = React.memo<NameProps>(
       () => (
         <NameField
           aria-label={i18n.TIMELINE_TITLE}
-          data-test-subj="timeline-title"
+          data-test-subj="timeline-title-input"
           disabled={disabled}
           onChange={handleChange}
           placeholder={

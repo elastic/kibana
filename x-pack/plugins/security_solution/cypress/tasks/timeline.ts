@@ -41,12 +41,14 @@ import {
   TIMELINE_FILTER_VALUE,
   TIMELINE_INSPECT_BUTTON,
   TIMELINE_SETTINGS_ICON,
-  TIMELINE_TITLE,
+  TIMELINE_TITLE_INPUT,
   TIMELINE_TITLE_BY_ID,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
   CREATE_NEW_TIMELINE_TEMPLATE,
   OPEN_TIMELINE_TEMPLATE_ICON,
+  TIMELINE_EDIT_MODAL_OPEN_BUTTON,
+  TIMELINE_EDIT_MODAL_SAVE_BUTTON,
 } from '../screens/timeline';
 import { TIMELINES_TABLE } from '../screens/timelines';
 
@@ -60,8 +62,10 @@ export const addDescriptionToTimeline = (description: string) => {
 };
 
 export const addNameToTimeline = (name: string) => {
-  cy.get(TIMELINE_TITLE).type(`${name}{enter}`);
-  cy.get(TIMELINE_TITLE).should('have.attr', 'value', name);
+  cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
 };
 
 export const addNotesToTimeline = (notes: string) => {
@@ -113,6 +117,7 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(CREATE_NEW_TIMELINE).click();
   cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
 };

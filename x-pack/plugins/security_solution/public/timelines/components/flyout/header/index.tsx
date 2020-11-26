@@ -35,7 +35,7 @@ import * as commonI18n from '../../timeline/properties/translations';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
-  margin: 0 -1px;
+  margin: -1px -1px 0;
 `;
 
 interface FlyoutHeaderProps {
@@ -135,7 +135,7 @@ const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   return (
     <>
       <EuiText>
-        <h3>{content}</h3>
+        <h3 data-test-subj="timeline-title">{content}</h3>
       </EuiText>
       <SaveTimelineButton timelineId={timelineId} />
     </>
@@ -156,7 +156,9 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
 
   return (
     <>
-      <EuiText size="s">{content}</EuiText>
+      <EuiText size="s" data-test-subj="timeline-description">
+        {content}
+      </EuiText>
       <SaveTimelineButton timelineId={timelineId} />
     </>
   );
@@ -166,6 +168,7 @@ const TimelineDescription = React.memo(TimelineDescriptionComponent);
 
 const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  // @ts-expect-error
   const { status: timelineStatus, updated } = useDeepEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
@@ -175,7 +178,9 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
   if (isUnsaved) {
     return (
       <EuiText size="xs">
-        <EuiTextColor color="warning">{'Unsaved'}</EuiTextColor>
+        <EuiTextColor color="warning" data-test-subj="timeline-status">
+          {'Unsaved'}
+        </EuiTextColor>
       </EuiText>
     );
   }
@@ -184,7 +189,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
     <EuiText size="xs">
       <EuiTextColor color="default">
         <FormattedRelative
-          data-test-subj="last-updated-at-date"
+          data-test-subj="timeline-status"
           key="timeline-status-autosaved"
           value={new Date(updated)}
         />

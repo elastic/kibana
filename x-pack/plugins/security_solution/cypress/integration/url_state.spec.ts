@@ -220,7 +220,7 @@ describe('url state', () => {
     cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
   });
 
-  it('sets and reads the url state for timeline by id', () => {
+  it.only('sets and reads the url state for timeline by id', () => {
     loginAndWaitForPage(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
@@ -242,7 +242,7 @@ describe('url state', () => {
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');
       cy.get(TIMELINE_TITLE).should('be.visible');
-      cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
+      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
     });
   });
 });

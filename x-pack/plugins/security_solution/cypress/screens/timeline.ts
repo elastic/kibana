@@ -92,6 +92,8 @@ export const TIMELINE_DATA_PROVIDERS_EMPTY =
 
 export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
+export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="timeline-description-input"]';
+
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
 
 export const TIMELINE_FIELDS_BUTTON =
@@ -120,12 +122,18 @@ export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="insp
 
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
-export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-gear"]';
+export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-plus-in-circle"]';
 
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
+
+export const TIMELINE_TITLE_INPUT = '[data-test-subj="timeline-title-input"]';
 
 export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]';
 
 export const TIMESTAMP_TOGGLE_FIELD = '[data-test-subj="toggle-field-@timestamp"]';
 
 export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
+
+export const TIMELINE_EDIT_MODAL_OPEN_BUTTON = '[data-test-subj="save-timeline-button-icon"]';
+
+export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
