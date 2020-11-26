@@ -20,6 +20,7 @@ import {
 
 import * as labels from '../translations';
 import { UptimeThemeContext } from '../../../../contexts';
+import { euiStyled } from '../../../../../../observability/public';
 
 interface MonitorListStatusColumnProps {
   status: string;
@@ -169,9 +170,9 @@ export const MonitorListStatusColumn = ({
             </EuiText>
           }
         >
-          <EuiText size="xs" color="subdued" className="eui-textNoWrap" style={{ paddingRight: 5 }}>
+          <PaddedText size="xs" color="subdued" className="eui-textNoWrap">
             {statusMessage},
-          </EuiText>
+          </PaddedText>
         </EuiToolTip>
         <EuiToolTip
           content={
@@ -188,3 +189,7 @@ export const MonitorListStatusColumn = ({
     </div>
   );
 };
+
+const PaddedText = euiStyled(EuiText)`
+  padding-right: ${(props) => props.theme.eui.paddingSizes.xs};
+`;
