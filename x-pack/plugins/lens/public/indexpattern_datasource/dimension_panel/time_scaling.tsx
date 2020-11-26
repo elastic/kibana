@@ -112,7 +112,7 @@ export function TimeScaling({
               }}
             >
               {i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
-                defaultMessage: 'Show with normalized units',
+                defaultMessage: 'Normalize by time unit',
               })}
             </EuiLink>
           </EuiText>
@@ -129,7 +129,7 @@ export function TimeScaling({
         <EuiToolTip
           content={i18n.translate('xpack.lens.indexPattern.timeScale.tooltip', {
             defaultMessage:
-              'Normalized values are displayed as a rate, calculated from the date histogram interval. Values can scale down from a larger interval or scale up from a smaller interval. Partial intervals are handled correctly.',
+              'Normalize values to be always shown as rate per specified time unit, regardless of the interval of the x axis.',
           })}
         >
           <span>
