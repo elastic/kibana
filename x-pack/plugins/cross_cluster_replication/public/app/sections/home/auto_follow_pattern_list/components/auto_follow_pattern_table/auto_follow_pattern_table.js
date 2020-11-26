@@ -214,6 +214,7 @@ export class AutoFollowPatternTable extends PureComponent {
             icon: 'pause',
             onClick: (item) => this.props.pauseAutoFollowPattern(item.name),
             available: (item) => item.active,
+            'data-test-subj': 'contextMenuPauseButton',
           },
           {
             name: i18n.translate(
@@ -231,6 +232,7 @@ export class AutoFollowPatternTable extends PureComponent {
             icon: 'play',
             onClick: (item) => this.props.resumeAutoFollowPattern(item.name),
             available: (item) => !item.active,
+            'data-test-subj': 'contextMenuResumeButton',
           },
           {
             name: i18n.translate(
@@ -247,6 +249,7 @@ export class AutoFollowPatternTable extends PureComponent {
             ),
             icon: 'pencil',
             onClick: (item) => routing.navigate(routing.getAutoFollowPatternPath(item.name)),
+            'data-test-subj': 'contextMenuEditButton',
           },
           {
             name: i18n.translate(
@@ -263,6 +266,7 @@ export class AutoFollowPatternTable extends PureComponent {
             ),
             icon: 'trash',
             onClick: (item) => deleteAutoFollowPattern(item.name),
+            'data-test-subj': 'contextMenuDeleteButton',
           },
         ],
         width: '100px',

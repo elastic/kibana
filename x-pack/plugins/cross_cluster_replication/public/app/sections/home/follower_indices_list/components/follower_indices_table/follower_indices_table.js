@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiIcon,
   EuiHealth,
   EuiInMemoryTable,
   EuiLink,
@@ -17,11 +16,7 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 import { API_STATUS, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK } from '../../../../../constants';
-import {
-  FollowerIndexPauseProvider,
-  FollowerIndexResumeProvider,
-  FollowerIndexUnfollowProvider,
-} from '../../../../../components';
+import { FollowerIndexActionsProvider } from '../../../../../components';
 import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
@@ -101,91 +96,83 @@ export class FollowerIndicesTable extends PureComponent {
     routing.navigate(uri);
   };
 
-  getTableColumns() {
+  getTableColumns(actionHandlers) {
     const { selectFollowerIndex } = this.props;
 
     const actions = [
-      /* Pause or resume follower index */
+      /* Pause follower index */
       {
-        render: (followerIndex) => {
-          const { name, isPaused } = followerIndex;
-          const label = isPaused
-            ? i18n.translate(
-                'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
-                {
-                  defaultMessage: 'Resume replication',
-                }
-              )
-            : i18n.translate(
-                'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
-                {
-                  defaultMessage: 'Pause replication',
-                }
-              );
-
-          return isPaused ? (
-            <FollowerIndexResumeProvider>
-              {(resumeFollowerIndex) => (
-                <span onClick={() => resumeFollowerIndex(name)} data-test-subj="resumeButton">
-                  <EuiIcon aria-label={label} type="play" className="euiContextMenu__icon" />
-                  <span>{label}</span>
-                </span>
-              )}
-            </FollowerIndexResumeProvider>
-          ) : (
-            <FollowerIndexPauseProvider>
-              {(pauseFollowerIndex) => (
-                <span
-                  onClick={() => pauseFollowerIndex(followerIndex)}
-                  data-test-subj="pauseButton"
-                >
-                  <EuiIcon aria-label={label} type="pause" className="euiContextMenu__icon" />
-                  <span>{label}</span>
-                </span>
-              )}
-            </FollowerIndexPauseProvider>
-          );
-        },
+        name: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
+          {
+            defaultMessage: 'Pause replication',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.actionPauseDescription',
+          {
+            defaultMessage: 'Pause replication',
+          }
+        ),
+        icon: 'pause',
+        onClick: (item) => actionHandlers.pauseFollowerIndex(item),
+        available: (item) => !item.isPaused,
+        'data-test-subj': 'pauseButton',
+      },
+      /* Resume follower index */
+      {
+        name: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
+          {
+            defaultMessage: 'Resume replication',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
+          {
+            defaultMessage: 'Resume replication',
+          }
+        ),
+        icon: 'play',
+        onClick: (item) => actionHandlers.resumeFollowerIndex(item.name),
+        available: (item) => item.isPaused,
+        'data-test-subj': 'resumeButton',
       },
       /* Edit follower index */
       {
-        render: ({ name }) => {
-          const label = i18n.translate(
-            'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
-            {
-              defaultMessage: 'Edit follower index',
-            }
-          );
-
-          return (
-            <span onClick={() => this.editFollowerIndex(name)} data-test-subj="editButton">
-              <EuiIcon aria-label={label} type="pencil" className="euiContextMenu__icon" />
-              <span>{label}</span>
-            </span>
-          );
-        },
+        name: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
+          {
+            defaultMessage: 'Edit follower index',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
+          {
+            defaultMessage: 'Edit follower index',
+          }
+        ),
+        onClick: (item) => this.editFollowerIndex(item.name),
+        icon: 'pencil',
+        'data-test-subj': 'editButton',
       },
       /* Unfollow leader index */
       {
-        render: ({ name }) => {
-          const label = i18n.translate(
-            'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
-            {
-              defaultMessage: 'Unfollow leader index',
-            }
-          );
-
-          return (
-            <FollowerIndexUnfollowProvider>
-              {(unfollowLeaderIndex) => (
-                <span onClick={() => unfollowLeaderIndex(name)} data-test-subj="unfollowButton">
-                  <EuiIcon aria-label={label} type="indexFlush" className="euiContextMenu__icon" />
-                  <span>{label}</span>
-                </span>
-              )}
-            </FollowerIndexUnfollowProvider>
-          );
-        },
+        name: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
+          {
+            defaultMessage: 'Unfollow leader index',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.crossClusterReplication.followerIndexList.table.actionUnfollowDescription',
+          {
+            defaultMessage: 'Unfollow leader index',
+          }
+        ),
+        onClick: (item) => actionHandlers.unfollowLeaderIndex(item.name),
+        icon: 'indexFlush',
+        'data-test-subj': 'unfollowButton',
       },
     ];
 
@@ -321,26 +308,33 @@ export class FollowerIndicesTable extends PureComponent {
     };
 
     return (
-      <Fragment>
-        <EuiInMemoryTable
-          items={filteredIndices}
-          itemId="name"
-          columns={this.getTableColumns()}
-          search={search}
-          pagination={pagination}
-          sorting={sorting}
-          selection={selection}
-          isSelectable={true}
-          rowProps={() => ({
-            'data-test-subj': 'row',
-          })}
-          cellProps={(item, column) => ({
-            'data-test-subj': `cell-${column.field}`,
-          })}
-          data-test-subj="followerIndexListTable"
-        />
-        {this.renderLoading()}
-      </Fragment>
+      <FollowerIndexActionsProvider>
+        {(getActionHandlers) => {
+          const actionHandlers = getActionHandlers();
+          return (
+            <>
+              <EuiInMemoryTable
+                items={filteredIndices}
+                itemId="name"
+                columns={this.getTableColumns(actionHandlers)}
+                search={search}
+                pagination={pagination}
+                sorting={sorting}
+                selection={selection}
+                isSelectable={true}
+                rowProps={() => ({
+                  'data-test-subj': 'row',
+                })}
+                cellProps={(item, column) => ({
+                  'data-test-subj': `cell-${column.field}`,
+                })}
+                data-test-subj="followerIndexListTable"
+              />
+              {this.renderLoading()}
+            </>
+          );
+        }}
+      </FollowerIndexActionsProvider>
     );
   }
 }
