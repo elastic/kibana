@@ -12,7 +12,7 @@ import abab from 'abab';
 import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/server';
 import type { ConfigSchema } from './config';
 
-const apiToken = abab.btoa(kbnTestConfig.getUrlParts().auth);
+const apiToken = abab.btoa(kbnTestConfig.getUrlParts().auth!);
 
 function renderBody(kibanaUrl: string) {
   const url = Url.resolve(kibanaUrl, '/core-test');
