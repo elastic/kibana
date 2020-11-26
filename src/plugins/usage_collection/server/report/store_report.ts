@@ -19,7 +19,7 @@
 
 import { ISavedObjectsRepository } from 'src/core/server';
 import moment from 'moment';
-import { chain, head, sumBy } from 'lodash';
+import { chain, sumBy } from 'lodash';
 import { ReportSchemaType } from './schema';
 
 export async function storeReport(
