@@ -5,13 +5,14 @@
  */
 
 import {
-  EuiBasicTable,
+  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiInMemoryTable,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -38,6 +39,20 @@ export interface LogEntryFlyoutProps {
 }
 
 const emptyHighlightTerms: string[] = [];
+
+const initialSortingOptions = {
+  sort: {
+    field: 'field',
+    direction: 'asc' as const,
+  },
+};
+
+const searchOptions = {
+  box: {
+    incremental: true,
+    schema: true,
+  },
+};
 
 export const LogEntryFlyout = ({
   flyoutError,
@@ -70,7 +85,7 @@ export const LogEntryFlyout = ({
 
   const closeFlyout = useCallback(() => setFlyoutVisibility(false), [setFlyoutVisibility]);
 
-  const columns = useMemo(
+  const columns = useMemo<Array<EuiBasicTableColumn<LogEntryField>>>(
     () => [
       {
         field: 'field',
@@ -84,7 +99,6 @@ export const LogEntryFlyout = ({
         name: i18n.translate('xpack.infra.logFlyout.valueColumnLabel', {
           defaultMessage: 'Value',
         }),
-        sortable: true,
         render: (_name: string, item: LogEntryField) => (
           <span>
             <EuiToolTip
@@ -144,7 +158,12 @@ export const LogEntryFlyout = ({
             />
           </InfraFlyoutLoadingPanel>
         ) : flyoutItem ? (
-          <EuiBasicTable columns={columns} items={flyoutItem.fields} />
+          <EuiInMemoryTable<LogEntryField>
+            columns={columns}
+            items={flyoutItem.fields}
+            search={searchOptions}
+            sorting={initialSortingOptions}
+          />
         ) : (
           <InfraFlyoutLoadingPanel>{flyoutError}</InfraFlyoutLoadingPanel>
         )}
