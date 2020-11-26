@@ -191,8 +191,8 @@ export const elasticUserSnake = {
   email: 'leslie.knope@elastic.co',
 };
 export const basicCommentSnake: CommentResponse = {
-  ...basicComment,
   comment: 'Solve this fast!',
+  type: CommentType.user,
   id: basicCommentId,
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
@@ -200,6 +200,7 @@ export const basicCommentSnake: CommentResponse = {
   pushed_by: null,
   updated_at: null,
   updated_by: null,
+  version: 'WzQ3LDFc',
 };
 
 export const basicCaseSnake: CaseResponse = {

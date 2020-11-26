@@ -10,9 +10,10 @@ import React from 'react';
 import {
   CaseFullExternalService,
   ActionConnector,
+  CommentType,
   CaseStatuses,
 } from '../../../../../case/common/api';
-import { CaseUserActions } from '../../containers/types';
+import { CaseUserActions, Comment } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { Tags } from '../tag_list/tags';
@@ -181,4 +182,26 @@ export const getUpdateAction = ({
       )}
     </EuiFlexGroup>
   ),
+});
+
+export const getRuleIdsFromComments = (comments: Comment[]) =>
+  comments.reduce<string[]>((ruleIds, comment: Comment) => {
+    if (comment.type === CommentType.alert) {
+      return [...ruleIds, comment.alertId];
+    }
+
+    return ruleIds;
+  }, []);
+
+export const buildAlertsQuery = (ruleIds: string[]) => ({
+  query: {
+    bool: {
+      filter: {
+        bool: {
+          should: ruleIds.map((_id) => ({ match: { _id } })),
+          minimum_should_match: 1,
+        },
+      },
+    },
+  },
 });

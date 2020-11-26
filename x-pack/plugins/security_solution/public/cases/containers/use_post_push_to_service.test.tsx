@@ -20,7 +20,7 @@ import {
 } from './mock';
 import * as api from './api';
 import { CaseServices } from './use_get_case_user_actions';
-import { CaseConnector, ConnectorTypes } from '../../../../case/common/api/connectors';
+import { CaseConnector, ConnectorTypes, CommentType } from '../../../../case/common/api';
 
 jest.mock('./api');
 
@@ -53,7 +53,7 @@ describe('usePostPushToService', () => {
     comments: [
       {
         commentId: basicComment.id,
-        comment: basicComment.comment,
+        comment: basicComment.type === CommentType.user ? basicComment.comment : '',
         createdAt: basicComment.createdAt,
         createdBy: serviceConnectorUser,
         updatedAt: null,

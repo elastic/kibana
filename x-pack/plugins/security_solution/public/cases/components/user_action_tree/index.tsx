@@ -22,7 +22,7 @@ import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
-import { ActionConnector } from '../../../../../case/common/api/cases';
+import { ActionConnector, CommentType } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { OnUpdateFields } from '../case_view';
@@ -32,12 +32,17 @@ import {
   getPushedServiceLabelTitle,
   getPushInfo,
   getUpdateAction,
+  buildAlertsQuery,
+  getRuleIdsFromComments,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { BaseSignalHit } from '../../../../server/lib/detection_engine/signals/types';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -105,6 +110,25 @@ export const UserActionTree = React.memo(
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+    const alertsQuery = useMemo(() => buildAlertsQuery(getRuleIdsFromComments(caseData.comments)), [
+      caseData.comments,
+    ]);
+
+    const { loading: isLoadingSignalIndex, signalIndexName } = useSignalIndex();
+    const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<BaseSignalHit, unknown>(
+      alertsQuery,
+      signalIndexName
+    );
+    const alerts = useMemo(
+      () =>
+        alertsData?.hits.hits.map(({ _id, _index, _source }) => ({
+          id: _id,
+          index: _index,
+          ..._source,
+        })) ?? [],
+      [alertsData?.hits.hits]
+    );
+
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
         if (!manageMarkdownEditIds.includes(id)) {
@@ -264,7 +288,7 @@ export const UserActionTree = React.memo(
             // Comment creation
             if (action.commentId != null && action.action === 'create') {
               const comment = caseData.comments.find((c) => c.id === action.commentId);
-              if (comment != null) {
+              if (comment != null && comment.type === CommentType.user) {
                 return [
                   ...comments,
                   {
@@ -316,6 +340,8 @@ export const UserActionTree = React.memo(
                     ),
                   },
                 ];
+              } else if (comment != null && comment.type === CommentType.alert) {
+                return comments;
               }
             }
 
@@ -380,7 +406,7 @@ export const UserActionTree = React.memo(
               ];
             }
 
-            // title, description, comments, tags, status
+            // title, description, comment updates, tags
             if (
               action.actionField.length === 1 &&
               ['title', 'description', 'comment', 'tags', 'status'].includes(action.actionField[0])
