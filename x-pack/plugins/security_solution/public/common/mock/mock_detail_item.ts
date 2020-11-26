@@ -109,4 +109,8 @@ export const mockDetailItemData: TimelineEventsDetailsItem[] = [
     originalValue: 902,
     values: ['902'],
   },
+  {
+    field: 'event.kind',
+    values: ['event'],
+  },
 ];

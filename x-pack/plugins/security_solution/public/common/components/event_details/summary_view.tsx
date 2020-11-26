@@ -127,7 +127,7 @@ const getDescription = ({
   );
 };
 
-const SummaryViewComponent: React.FC<{
+export const SummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
@@ -199,11 +199,16 @@ const SummaryViewComponent: React.FC<{
   return (
     <>
       <EuiSpacer />
-      <EuiDescriptionList type="responsiveColumn" listItems={summaryList} compressed />
+      <EuiDescriptionList
+        data-test-subj="summary-view"
+        type="responsiveColumn"
+        listItems={summaryList}
+        compressed
+      />
       {message != null && (
         <>
           <EuiSpacer />
-          <EuiDescriptionList compressed>
+          <EuiDescriptionList data-test-subj="summary-view-message" compressed>
             <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
             <StyledDescription>
               {isExpanded ? (
@@ -214,7 +219,7 @@ const SummaryViewComponent: React.FC<{
             </StyledDescription>
           </EuiDescriptionList>
           {isOverflow && (
-            <ReadMore onClick={toggleReadMore} size="s">
+            <ReadMore onClick={toggleReadMore} size="s" data-test-subj="summary-view-readmore">
               {readMoreButtonText}
             </ReadMore>
           )}

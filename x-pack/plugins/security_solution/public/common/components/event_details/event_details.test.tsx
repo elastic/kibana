@@ -19,6 +19,8 @@ import {
 import { EventDetails, View } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { mockAlertDetailsData } from './__mocks__';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
@@ -34,9 +36,21 @@ describe('EventDetails', () => {
     timelineId: 'test',
     toggleColumn: jest.fn(),
   };
+
+  const alertsProps = {
+    ...defaultProps,
+    data: mockAlertDetailsData as TimelineEventsDetailsItem[],
+  };
+
   const wrapper = mount(
     <TestProviders>
       <EventDetails {...defaultProps} />
+    </TestProviders>
+  );
+
+  const alertsWrapper = mount(
+    <TestProviders>
+      <EventDetails {...alertsProps} />
     </TestProviders>
   );
 
@@ -63,6 +77,29 @@ describe('EventDetails', () => {
       expect(
         wrapper.find('[data-test-subj="eventDetails"]').find('.euiTab-isSelected').first().text()
       ).toEqual('Table');
+    });
+  });
+
+  describe('alerts tabs', () => {
+    ['Summary', 'Table', 'JSON View'].forEach((tab) => {
+      test(`it renders the ${tab} tab`, () => {
+        expect(
+          alertsWrapper
+            .find('[data-test-subj="eventDetails"]')
+            .find('[role="tablist"]')
+            .containsMatchingElement(<span>{tab}</span>)
+        ).toBeTruthy();
+      });
+    });
+
+    test('the Summary tab is selected by default', () => {
+      expect(
+        alertsWrapper
+          .find('[data-test-subj="eventDetails"]')
+          .find('.euiTab-isSelected')
+          .first()
+          .text()
+      ).toEqual('Summary');
     });
   });
 });

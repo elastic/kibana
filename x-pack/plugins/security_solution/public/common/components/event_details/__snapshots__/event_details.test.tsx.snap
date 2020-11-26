@@ -688,6 +688,12 @@ In other use cases the message field can be used to concatenate different values
                   "902",
                 ],
               },
+              Object {
+                "field": "event.kind",
+                "values": Array [
+                  "event",
+                ],
+              },
             ]
           }
           eventId="Y-6TfmcB0WOhS6qyMv3s"
@@ -1381,6 +1387,12 @@ In other use cases the message field can be used to concatenate different values
                     "902",
                   ],
                 },
+                Object {
+                  "field": "event.kind",
+                  "values": Array [
+                    "event",
+                  ],
+                },
               ]
             }
             eventId="Y-6TfmcB0WOhS6qyMv3s"
@@ -1533,6 +1545,12 @@ In other use cases the message field can be used to concatenate different values
                   "originalValue": 902,
                   "values": Array [
                     "902",
+                  ],
+                },
+                Object {
+                  "field": "event.kind",
+                  "values": Array [
+                    "event",
                   ],
                 },
               ]
