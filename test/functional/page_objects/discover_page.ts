@@ -251,11 +251,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         .map((field) => $(field).text());
     }
 
-    public async getSidebarWidth() {
-      const sidebar = await testSubjects.find('discover-sidebar');
-      return await sidebar.getAttribute('clientWidth');
-    }
-
     public async hasNoResults() {
       return await testSubjects.exists('discoverNoResults');
     }

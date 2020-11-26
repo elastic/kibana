@@ -17,31 +17,23 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
-  const log = getService('log');
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const testSubjects = getService('testSubjects');
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
-      // delete .kibana index and update configDoc
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('discover');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
-
-      log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
-
-      log.debug('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
-
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('field filtering', function () {
@@ -53,26 +45,17 @@ export default function ({ getService, getPageObjects }) {
 
     describe('collapse expand', function () {
       it('should initially be expanded', async function () {
-        const width = await PageObjects.discover.getSidebarWidth();
-        log.debug('expanded sidebar width = ' + width);
-        expect(width > 20).to.be(true);
+        await testSubjects.existOrFail('discover-sidebar');
       });
 
       it('should collapse when clicked', async function () {
         await PageObjects.discover.toggleSidebarCollapse();
-        log.debug('PageObjects.discover.getSidebarWidth()');
-        const width = await PageObjects.discover.getSidebarWidth();
-        log.debug('collapsed sidebar width = ' + width);
-        expect(width < 20).to.be(true);
+        await testSubjects.missingOrFail('discover-sidebar');
       });
 
       it('should expand when clicked', async function () {
         await PageObjects.discover.toggleSidebarCollapse();
-
-        log.debug('PageObjects.discover.getSidebarWidth()');
-        const width = await PageObjects.discover.getSidebarWidth();
-        log.debug('expanded sidebar width = ' + width);
-        expect(width > 20).to.be(true);
+        await testSubjects.existOrFail('discover-sidebar');
       });
     });
   });

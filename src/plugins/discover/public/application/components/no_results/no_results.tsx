@@ -19,7 +19,7 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getServices } from '../../../kibana_services';
 import { DataPublicPluginStart } from '../../../../../data/public';
 import { getLuceneQueryMessage, getTimeFieldMessage } from './no_results_helper';
