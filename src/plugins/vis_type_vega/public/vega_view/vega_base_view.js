@@ -128,7 +128,7 @@ export class VegaBaseView {
   }
 
   /**
-   * Find index pattern by its title, of if not given, gets default
+   * Find index pattern by its title, if not given, gets it from spec or a defaults one
    * @param {string} [index]
    * @returns {Promise<string>} index id
    */
