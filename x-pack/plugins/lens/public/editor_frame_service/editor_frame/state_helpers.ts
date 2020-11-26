@@ -134,7 +134,7 @@ export const validateDatasourceAndVisualization = (
     ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI)
     : undefined;
 
-  if (datasourceValidationErrors || visualizationValidationErrors) {
+  if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
     return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
   }
   return undefined;

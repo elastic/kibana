@@ -59,6 +59,8 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
+  getDefaultLabel: (column, indexPattern) =>
+    indexPattern.getFieldByName(column.sourceField)!.displayName,
   buildColumn({ field }) {
     let interval = autoInterval;
     let timeZone: string | undefined;
