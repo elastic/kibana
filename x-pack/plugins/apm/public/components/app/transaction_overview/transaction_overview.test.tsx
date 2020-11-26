@@ -11,10 +11,12 @@ import React from 'react';
 import { Router } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { ApmServiceContextProvider } from '../../../context/apm_service_context';
 import { UrlParamsProvider } from '../../../context/UrlParamsContext';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import * as useFetcherHook from '../../../hooks/useFetcher';
-import * as useServiceTransactionTypesHook from '../../../hooks/useServiceTransactionTypes';
+import * as useServiceTransactionTypesHook from '../../../hooks/use_service_transaction_types';
+import * as useServiceAgentNameHook from '../../../hooks/use_service_agent_name';
 import {
   disableConsoleWarning,
   renderWithTheme,
@@ -46,9 +48,17 @@ function setup({
     ...defaultLocation,
   });
 
+  // mock transaction types
   jest
     .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypes')
     .mockReturnValue(serviceTransactionTypes);
+
+  // mock agent
+  jest.spyOn(useServiceAgentNameHook, 'useServiceAgentName').mockReturnValue({
+    agentName: 'nodejs',
+    error: undefined,
+    status: useFetcherHook.FETCH_STATUS.SUCCESS,
+  });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
@@ -57,7 +67,9 @@ function setup({
       <MockApmPluginContextWrapper>
         <Router history={history}>
           <UrlParamsProvider>
-            <TransactionOverview serviceName="opbeans-python" />
+            <ApmServiceContextProvider>
+              <TransactionOverview serviceName="opbeans-python" />
+            </ApmServiceContextProvider>
           </UrlParamsProvider>
         </Router>
       </MockApmPluginContextWrapper>
@@ -80,7 +92,7 @@ describe('TransactionOverview', () => {
     jest.clearAllMocks();
   });
 
-  describe('when no transaction type is given', () => {
+  describe('when no transaction type is given in urlParams', () => {
     it('should redirect to first type', () => {
       setup({
         serviceTransactionTypes: ['firstType', 'secondType'],
