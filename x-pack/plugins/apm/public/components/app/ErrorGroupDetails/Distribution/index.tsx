@@ -90,7 +90,12 @@ export function ErrorDistribution({ distribution, title }: Props) {
             showOverlappingTicks
             tickFormat={xFormatter}
           />
-          <Axis id="y-axis" position={Position.Left} ticks={2} showGridLines />
+          <Axis
+            id="y-axis"
+            position={Position.Left}
+            ticks={2}
+            gridLine={{ visible: true }}
+          />
           <HistogramBarSeries
             minBarHeight={2}
             id="errorOccurrences"
