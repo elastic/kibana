@@ -23,18 +23,18 @@ import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../embeddable
 import { DashboardContainer } from '../../application/embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../application/test_helpers';
 import {
-  CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-  ContactCardExportableEmbeddableFactory,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
+  ContactCardExportableEmbeddableFactory,
+  CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
 } from '../../embeddable_plugin_test_samples';
 import { coreMock } from '../../../../../core/public/mocks';
 import { ExportCSVAction } from './export_csv_action';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { DataPublicPluginStart } from '../../../../data/public/types';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { LINE_FEED_CHARACTER } from '../../../../data/public/exports/export_csv';
+import { LINE_FEED_CHARACTER } from 'src/plugins/data/common/exports/export_csv';
 
 describe('Export CSV action', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();

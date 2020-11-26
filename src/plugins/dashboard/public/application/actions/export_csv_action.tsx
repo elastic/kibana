@@ -62,7 +62,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
     });
 
   public async isCompatible(context: ExportContext): Promise<boolean> {
-    return this.hasDatatableContent(context.embeddable?.getInspectorAdapters?.());
+    return !!this.hasDatatableContent(context.embeddable?.getInspectorAdapters?.());
   }
 
   private hasDatatableContent = (adapters: Adapters | undefined) => {
