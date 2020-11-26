@@ -225,7 +225,7 @@ describe('Custom detection rules deletion and edition', () => {
     goToManageAlertsDetectionRules();
   });
 
-  after(() => {
+  afterEach(() => {
     esArchiverUnload('custom_rules');
   });
 
