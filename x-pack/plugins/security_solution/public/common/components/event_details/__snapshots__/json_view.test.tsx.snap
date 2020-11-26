@@ -44,6 +44,9 @@ exports[`JSON View rendering should match snapshot 1`] = `
     \\"ip\\": \\"10.47.8.200\\",
     \\"packets\\": 4,
     \\"port\\": 902
+  },
+  \\"event\\": {
+    \\"kind\\": \\"event\\"
   }
 }"
     width="100%"

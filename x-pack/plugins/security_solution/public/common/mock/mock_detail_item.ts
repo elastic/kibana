@@ -111,6 +111,7 @@ export const mockDetailItemData: TimelineEventsDetailsItem[] = [
   },
   {
     field: 'event.kind',
+    originalValue: 'event',
     values: ['event'],
   },
 ];
