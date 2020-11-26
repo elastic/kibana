@@ -12,6 +12,7 @@ import { asTransactionRate } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useTheme } from '../../../hooks/useTheme';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useApmService } from '../../../hooks/use_apm_service';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
 
@@ -23,11 +24,11 @@ export function ServiceOverviewThroughputChart({
   const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
-  const transactionType = 'request';
+  const { transactionType } = useApmService();
   const { start, end } = urlParams;
 
   const { data, status } = useFetcher(() => {
-    if (serviceName && start && end) {
+    if (serviceName && transactionType && start && end) {
       return callApmApi({
         endpoint: 'GET /api/apm/services/{serviceName}/throughput',
         params: {
