@@ -415,6 +415,7 @@ test('injects viewInKibanaPath when actionTypeId is .email', () => {
         "message": "State: \\"state\\", Context: \\"context\\"",
       },
       "viewInKibanaPath": "/app/management/insightsAndAlerting/triggersActions/alert/1",
+      "viewInKibanaText": "View alert in Kibana",
     }
   `);
 });
