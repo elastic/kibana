@@ -102,12 +102,14 @@ export const ActionTypeForm = ({
   >(undefined);
 
   useEffect(() => {
-    setAvailableActionVariables(getAvailableActionVariables(messageVariables, actionItem.group));
-    const res =
+    setAvailableActionVariables(
+      messageVariables ? getAvailableActionVariables(messageVariables, actionItem.group) : []
+    );
+    setAvailableDefaultActionMessage(
       actionItem.group === RecoveredActionGroup.id
         ? recoveredActionGroupMessage
-        : defaultActionMessage;
-    setAvailableDefaultActionMessage(res);
+        : defaultActionMessage
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem.group]);
 
@@ -360,18 +362,10 @@ export const ActionTypeForm = ({
 };
 
 function getAvailableActionVariables(
-  actionVariables: ActionVariables | undefined,
+  { params, state, context }: ActionVariables,
   actionGroup: string
 ) {
-  if (!actionVariables) {
-    return [];
-  }
-  const filteredActionVariables =
-    actionGroup === RecoveredActionGroup.id
-      ? { params: actionVariables.params, state: actionVariables.state }
-      : actionVariables;
-
-  return transformActionVariables(filteredActionVariables).sort((a, b) =>
-    a.name.toUpperCase().localeCompare(b.name.toUpperCase())
-  );
+  return transformActionVariables(
+    actionGroup === RecoveredActionGroup.id ? { params, state } : { params, state, context }
+  ).sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()));
 }

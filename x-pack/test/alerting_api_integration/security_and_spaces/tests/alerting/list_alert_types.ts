@@ -33,7 +33,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
   const expectedRestrictedNoOpType = {
     actionGroups: [
       { id: 'default', name: 'Default' },
-      { id: 'recovered', name: 'Recovered' },
+      { id: 'recovered', name: 'Restricted Recovery' },
     ],
     defaultActionGroupId: 'default',
     id: 'test.restricted-noop',

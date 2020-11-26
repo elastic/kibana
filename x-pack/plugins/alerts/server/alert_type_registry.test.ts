@@ -122,6 +122,37 @@ describe('register()', () => {
     );
   });
 
+  test('allows an AlertType to specify a custom recovery group name', () => {
+    const alertType = {
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      recoveryActionGroupName: 'Back To Awesome',
+      executor: jest.fn(),
+      producer: 'alerts',
+    };
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    registry.register(alertType);
+    expect(registry.get('test').actionGroups).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "default",
+          "name": "Default",
+        },
+        Object {
+          "id": "recovered",
+          "name": "Back To Awesome",
+        },
+      ]
+    `);
+  });
+
   test('registers the executor with the task manager', () => {
     const alertType = {
       id: 'test',

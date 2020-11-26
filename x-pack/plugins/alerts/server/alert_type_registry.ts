@@ -8,8 +8,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
-import { intersection } from 'lodash';
-import _ from 'lodash';
+import { intersection, defaults } from 'lodash';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
@@ -20,7 +19,7 @@ import {
   AlertInstanceContext,
   ActionGroup,
 } from './types';
-import { getBuiltinActionGroups } from '../common';
+import { RecoveredActionGroup, getBuiltinActionGroups } from '../common';
 
 interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
@@ -86,8 +85,15 @@ export class AlertTypeRegistry {
       );
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
-    validateActionGroups(alertType.id, alertType.actionGroups);
-    alertType.actionGroups = [...alertType.actionGroups, ..._.cloneDeep(getBuiltinActionGroups())];
+
+    alertType.actionGroups = validateActionGroups(
+      alertType.id,
+      alertType.actionGroups,
+      getBuiltinActionGroups(
+        defaults({ name: alertType.recoveryActionGroupName }, RecoveredActionGroup)
+      )
+    );
+
     this.alertTypes.set(alertIdSchema.validate(alertType.id), { ...alertType } as AlertType);
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
@@ -144,21 +150,27 @@ function normalizedActionVariables(actionVariables: AlertType['actionVariables']
   };
 }
 
-function validateActionGroups(alertTypeId: string, actionGroups: ActionGroup[]) {
-  const reservedActionGroups = intersection(
+function validateActionGroups(
+  alertTypeId: string,
+  actionGroups: ActionGroup[],
+  reservedActionGroups: ActionGroup[]
+) {
+  const intersectingReservedActionGroups = intersection(
     actionGroups.map((item) => item.id),
-    getBuiltinActionGroups().map((item) => item.id)
+    reservedActionGroups.map((item) => item.id)
   );
-  if (reservedActionGroups.length > 0) {
+  if (intersectingReservedActionGroups.length > 0) {
     throw new Error(
       i18n.translate('xpack.alerts.alertTypeRegistry.register.reservedActionGroupUsageError', {
         defaultMessage:
           'Alert type [id="{alertTypeId}"] cannot be registered. Action groups [{actionGroups}] are reserved by the framework.',
         values: {
-          actionGroups: reservedActionGroups.join(', '),
+          actionGroups: intersectingReservedActionGroups.join(', '),
           alertTypeId,
         },
       })
     );
   }
+
+  return [...actionGroups, ...reservedActionGroups];
 }

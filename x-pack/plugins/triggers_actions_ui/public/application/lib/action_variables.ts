@@ -79,5 +79,16 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     }),
   });
 
+  result.push({
+    name: 'alertActionGroupName',
+    description: i18n.translate(
+      'xpack.triggersActionsUI.actionVariables.alertActionGroupNameLabel',
+      {
+        defaultMessage:
+          'The human readable name of the alert action group that was used to scheduled actions for the alert.',
+      }
+    ),
+  });
+
   return result;
 }

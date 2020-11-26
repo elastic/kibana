@@ -41,6 +41,7 @@ export const alertType: AlertType<AlwaysFiringParams> = {
   name: 'Always firing',
   actionGroups: ACTION_GROUPS,
   defaultActionGroupId: DEFAULT_ACTION_GROUP,
+  recoveryActionGroupName: 'Has landed back on Earth',
   async executor({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
