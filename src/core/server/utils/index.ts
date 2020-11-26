@@ -20,4 +20,3 @@
 export * from './crypto';
 export * from './from_root';
 export * from './package_json';
-export * from './streams';

@@ -146,6 +146,9 @@ export const TAGS_FIELD =
 export const TAGS_INPUT =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxSearchInput"]';
 
+export const TAGS_CLEAR_BUTTON =
+  '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxClearButton"]';
+
 export const THRESHOLD_FIELD_SELECTION = '.euiFilterSelectItem';
 
 export const THRESHOLD_INPUT_AREA = '[data-test-subj="thresholdInput"]';

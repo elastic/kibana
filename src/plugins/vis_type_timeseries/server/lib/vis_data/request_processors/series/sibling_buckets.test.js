@@ -23,6 +23,8 @@ describe('siblingBuckets(req, panel, series)', () => {
   let panel;
   let series;
   let req;
+  let uiSettings;
+
   beforeEach(() => {
     panel = {
       time_field: 'timestamp',
@@ -53,17 +55,21 @@ describe('siblingBuckets(req, panel, series)', () => {
         },
       },
     };
+    uiSettings = {
+      barTargetUiSettings: 50,
+    };
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    siblingBuckets(req, panel, series)(next)({});
+    siblingBuckets(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns sibling aggs', () => {
     const next = (doc) => doc;
-    const doc = siblingBuckets(req, panel, series)(next)({});
+    const doc = siblingBuckets(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+
     expect(doc).toEqual({
       aggs: {
         test: {

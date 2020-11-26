@@ -48,9 +48,7 @@ const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
 
-type ErrorGroupListAPIResponse = APIReturnType<
-  'GET /api/apm/services/{serviceName}/errors'
->;
+type ErrorGroupListAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors'>;
 
 interface Props {
   items: ErrorGroupListAPIResponse;
