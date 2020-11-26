@@ -13,7 +13,7 @@ import { OverviewFilters } from '../../../../common/runtime_types/overview_filte
 import { filterLabels } from './translations';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { MONITOR_ROUTE } from '../../../../common/constants';
-import { use_selected_filters } from '../../../hooks/use_selected_filters';
+import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 
 interface PresentationalComponentProps {
   loading: boolean;
@@ -37,12 +37,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
 
   useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
 
-  const {
-    selectedLocations,
-    selectedPorts,
-    selectedSchemes,
-    selectedTags,
-  } = use_selected_filters();
+  const { selectedLocations, selectedPorts, selectedSchemes, selectedTags } = useSelectedFilters();
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
     setUpdatedFieldValues({ fieldName, values });

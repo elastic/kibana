@@ -13,7 +13,7 @@ import { useGetUrlParams, useMonitorId } from '../../../hooks';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { useFetcher } from '../../../../../observability/public';
 import { fetchJourneysFailedSteps } from '../../../state/api/journey';
-import { use_selected_filters } from '../../../hooks/use_selected_filters';
+import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { MONITOR_TYPES } from '../../../../common/constants';
 
 interface Props {
@@ -34,7 +34,7 @@ export const usePingsList = ({ pageSize, pageIndex }: Props) => {
 
   const { statusFilter } = useGetUrlParams();
 
-  const { selectedLocations } = use_selected_filters();
+  const { selectedLocations } = useSelectedFilters();
 
   const dispatch = useDispatch();
 

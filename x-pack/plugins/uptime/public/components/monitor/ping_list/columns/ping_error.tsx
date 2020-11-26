@@ -9,7 +9,6 @@ import styled from 'styled-components';
 import { Ping } from '../../../../../common/runtime_types/ping';
 
 const StyledSpan = styled.span`
-  margin: 0 24px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;

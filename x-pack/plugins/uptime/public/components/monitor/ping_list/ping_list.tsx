@@ -86,7 +86,7 @@ export const PingList = () => {
     {
       field: 'monitor.status',
       name: I18LABELS.STATUS_LABEL,
-      width: '150px',
+      width: '15%',
       render: (pingStatus: string, item: Ping) => (
         <PingStatusColumn pingStatus={pingStatus} item={item} />
       ),
@@ -94,7 +94,7 @@ export const PingList = () => {
     {
       align: 'left',
       field: 'observer.geo.name',
-      width: '150px',
+      width: '10%',
       name: LOCATION_LABEL,
       render: (location: string) => <LocationName location={location} />,
     },
@@ -126,12 +126,12 @@ export const PingList = () => {
         ]
       : []),
     {
-      align: 'right',
+      align: 'center',
       field: 'monitor.duration.us',
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      width: '100px',
+      width: '8%',
       render: (duration: number) =>
         i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
           values: { millis: microsToMillis(duration) },
@@ -139,7 +139,6 @@ export const PingList = () => {
         }),
     },
     {
-      align: hasStatus ? 'right' : 'center',
       field: 'error.type',
       name: ERROR_LABEL,
       width: '35%',
