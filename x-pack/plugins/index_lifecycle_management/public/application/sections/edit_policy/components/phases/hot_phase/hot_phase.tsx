@@ -49,7 +49,7 @@ import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 const hotProperty: keyof Phases = 'hot';
 
 export const HotPhase: FunctionComponent = () => {
-  const { license } = useEditPolicyContext();
+  const { license, policy } = useEditPolicyContext();
   const [formData] = useFormData({
     watch: useRolloverPath,
   });
@@ -235,8 +235,12 @@ export const HotPhase: FunctionComponent = () => {
 
       {license.canUseSearchableSnapshot() && (
         <EuiAccordion
+          initialIsOpen={Boolean(policy.phases.hot?.actions.searchable_snapshot)}
           id="ilmHotPhaseAdvancedSettings"
-          buttonContent="Advanced settings"
+          buttonContent={i18n.translate(
+            'xpack.indexLifecycleMgmt.hotPhase.advancedSettingsButton',
+            { defaultMessage: 'Advanced settings' }
+          )}
           paddingSize="m"
         >
           <SearchableSnapshotField phase="hot" />

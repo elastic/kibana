@@ -207,6 +207,8 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       searchableSnapshotDisabled: () => exists(licenseCalloutSelector),
       searchableSnapshotsExists: () => exists(fieldSelector),
       findSearchableSnapshotToggle: () => find(toggleSelector),
+      searchableSnapshotDisabledDueToLicense: () =>
+        exists(`${fieldSelector}.searchableSnapshotDisabledDueToLicense`),
       toggleSearchableSnapshot,
       setSearchableSnapshot: async (value: string) => {
         await toggleSearchableSnapshot(true);

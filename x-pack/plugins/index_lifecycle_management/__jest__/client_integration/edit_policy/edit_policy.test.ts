@@ -124,7 +124,6 @@ describe('<EditPolicy />', () => {
         await actions.hot.setMaxAge('123', 'h');
         await actions.hot.toggleForceMerge(true);
         await actions.hot.setForcemergeSegmentsCount('123');
-        await actions.hot.setSearchableSnapshot('my-repo');
         await actions.hot.setBestCompression(true);
         await actions.hot.setIndexPriority('123');
 
@@ -146,9 +145,6 @@ describe('<EditPolicy />', () => {
                     "max_docs": 123,
                     "max_size": "123mb",
                   },
-                  "searchable_snapshot": Object {
-                    "snapshot_repository": "my-repo",
-                  },
                   "set_priority": Object {
                     "priority": 123,
                   },
@@ -158,6 +154,19 @@ describe('<EditPolicy />', () => {
             },
           }
         `);
+      });
+
+      test('setting searchable snapshot', async () => {
+        const { actions } = testBed;
+
+        await actions.hot.setSearchableSnapshot('my-repo');
+
+        await actions.savePolicy();
+        const latestRequest = server.requests[server.requests.length - 1];
+        const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        expect(entirePolicy.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe(
+          'my-repo'
+        );
       });
 
       test('disabling rollover', async () => {
@@ -178,7 +187,7 @@ describe('<EditPolicy />', () => {
         `);
       });
 
-      test('enabling searchable snapshot should hide force merge, freeze, shrink and searchable snapshot in subsequent phases', async () => {
+      test('enabling searchable snapshot should hide force merge, freeze and shrink in subsequent phases', async () => {
         const { actions } = testBed;
 
         await actions.warm.enable(true);
@@ -193,7 +202,8 @@ describe('<EditPolicy />', () => {
 
         expect(actions.warm.forceMergeFieldExists()).toBeFalsy();
         expect(actions.warm.shrinkExists()).toBeFalsy();
-        expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();
+        // searchable snapshot in cold is still visible
+        expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
         expect(actions.cold.freezeExists()).toBeFalsy();
       });
     });
@@ -725,15 +735,15 @@ describe('<EditPolicy />', () => {
         const { actions } = testBed;
 
         expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();
-        expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
+        expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
 
         await actions.cold.enable(true);
 
-        expect(actions.hot.searchableSnapshotDisabled()).toBeTruthy();
-        expect(actions.hot.findSearchableSnapshotToggle().props().disabled).toBeTruthy();
+        // Still hidden in hot
+        expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
 
-        expect(actions.cold.searchableSnapshotDisabled()).toBeTruthy();
-        expect(actions.cold.findSearchableSnapshotToggle().props().disabled).toBeTruthy();
+        expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
+        expect(actions.cold.searchableSnapshotDisabledDueToLicense()).toBeTruthy();
       });
     });
   });

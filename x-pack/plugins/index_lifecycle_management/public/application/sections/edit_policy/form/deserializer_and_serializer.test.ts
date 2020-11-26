@@ -47,10 +47,6 @@ const originalPolicy: SerializedPolicy = {
         set_priority: {
           priority: 1,
         },
-        searchable_snapshot: {
-          snapshot_repository: 'my repo!',
-          force_merge_index: true,
-        },
       },
       min_age: '12ms',
     },
