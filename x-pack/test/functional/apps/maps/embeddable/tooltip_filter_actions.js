@@ -15,17 +15,14 @@ export default function ({ getPageObjects, getService }) {
 
   describe('tooltip filter actions', () => {
     before(async () => {
-      await security.testUser.setRoles(
-        [
-          'test_logstash_reader',
-          'global_maps_all',
-          'geoshape_data_reader',
-          'global_dashboard_all',
-          'meta_for_geoshape_data_reader',
-          'global_discover_read',
-        ],
-        false
-      );
+      await security.testUser.setRoles([
+        'test_logstash_reader',
+        'global_maps_all',
+        'geoshape_data_reader',
+        'global_dashboard_all',
+        'meta_for_geoshape_data_reader',
+        'global_discover_read',
+      ]);
     });
     async function loadDashboardAndOpenTooltip() {
       await kibanaServer.uiSettings.replace({
