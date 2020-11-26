@@ -741,19 +741,30 @@ describe('IndexPattern Data Source', () => {
       it('should skip columns that are being referenced', () => {
         publicAPI = indexPatternDatasource.getPublicAPI({
           state: {
+            ...enrichBaseState(baseState),
             layers: {
               first: {
                 indexPatternId: '1',
                 columnOrder: ['col1', 'col2'],
                 columns: {
-                  // @ts-ignore this is too little information for a real column
                   col1: {
+                    label: 'Sum',
                     dataType: 'number',
-                  },
+                    isBucketed: false,
+
+                    operationType: 'sum',
+                    sourceField: 'test',
+                    params: {},
+                  } as IndexPatternColumn,
                   col2: {
-                    // @ts-expect-error update once we have a reference operation outside tests
+                    label: 'Cumulative sum',
+                    dataType: 'number',
+                    isBucketed: false,
+
+                    operationType: 'cumulative_sum',
                     references: ['col1'],
-                  },
+                    params: {},
+                  } as IndexPatternColumn,
                 },
               },
             },

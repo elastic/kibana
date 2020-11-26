@@ -69,7 +69,7 @@ describe('Bulk Operation Buffer', () => {
       const task3 = createTask();
       const task4 = createTask();
 
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
         Promise.all([bufferedUpdate(task1), bufferedUpdate(task2)]).then((_) => {
           expect(bulkUpdate).toHaveBeenCalledTimes(1);
           expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
@@ -146,7 +146,7 @@ describe('Bulk Operation Buffer', () => {
         expect(bulkUpdate).toHaveBeenCalledTimes(1);
         expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
 
-        return new Promise((resolve) => {
+        return new Promise<void>((resolve) => {
           const futureUpdates = Promise.all([bufferedUpdate(task3), bufferedUpdate(task4)]);
 
           setTimeout(() => {
