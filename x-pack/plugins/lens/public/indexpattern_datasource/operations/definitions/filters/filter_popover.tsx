@@ -110,10 +110,6 @@ export const QueryInput = ({
 }) => {
   const [inputValue, setInputValue] = useState(value);
 
-  React.useEffect(() => {
-    setInputValue(value);
-  }, [value, setInputValue]);
-
   useDebounce(() => onChange(inputValue), 256, [inputValue]);
 
   const handleInputChange = (input: Query) => {
