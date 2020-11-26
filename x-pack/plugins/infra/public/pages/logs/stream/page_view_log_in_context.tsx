@@ -84,6 +84,7 @@ const LogInContextWrapper = euiStyled.div<{ width: number | string; height: numb
   padding: 16px;
   width: ${(props) => (typeof props.width === 'number' ? `${props.width}px` : props.width)};
   height: ${(props) => (typeof props.height === 'number' ? `${props.height}px` : props.height)};
+  max-height: 75vh; // Same as EuiModal
 `;
 
 const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }) => {
