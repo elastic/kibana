@@ -137,7 +137,7 @@ describe('Runtime field editor', () => {
         ctx: { namesNotAllowed: existingRuntimeFieldNames },
       });
 
-      const { form, component } = testBed;
+      const { form } = testBed;
 
       await act(async () => {
         await lastOnChangeCall()[0].submit();

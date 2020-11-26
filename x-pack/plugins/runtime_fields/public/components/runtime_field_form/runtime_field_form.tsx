@@ -133,6 +133,13 @@ const RuntimeFieldFormComp = ({
             config={nameFieldConfig}
             component={TextField}
             data-test-subj="nameField"
+            componentProps={{
+              euiFieldProps: {
+                'aria-label': i18n.translate('xpack.runtimeFields.form.nameAriaLabel', {
+                  defaultMessage: 'Name field',
+                }),
+              },
+            }}
           />
         </EuiFlexItem>
 
@@ -165,6 +172,9 @@ const RuntimeFieldFormComp = ({
                       }}
                       isClearable={false}
                       data-test-subj="typeField"
+                      aria-label={i18n.translate('xpack.runtimeFields.form.typeSelectAriaLabel', {
+                        defaultMessage: 'Type select',
+                      })}
                       fullWidth
                     />
                   </EuiFormRow>
@@ -241,6 +251,9 @@ const RuntimeFieldFormComp = ({
                   automaticLayout: true,
                 }}
                 data-test-subj="scriptField"
+                aria-label={i18n.translate('xpack.runtimeFields.form.scriptEditorAriaLabel', {
+                  defaultMessage: 'Script editor',
+                })}
               />
             </EuiFormRow>
           );
