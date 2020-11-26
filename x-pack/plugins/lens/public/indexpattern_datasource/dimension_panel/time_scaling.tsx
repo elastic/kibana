@@ -5,6 +5,7 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import {
   EuiLink,
   EuiFormRow,
@@ -106,6 +107,7 @@ export function TimeScaling({
               data-test-subj="indexPattern-time-scaling-enable"
               color="text"
               onClick={() => {
+                setPopoverOpen(false);
                 updateLayer(setTimeScaling(columnId, layer, DEFAULT_TIME_SCALE));
               }}
             >
@@ -134,6 +136,7 @@ export function TimeScaling({
             {i18n.translate('xpack.lens.indexPattern.timeScale.label', {
               defaultMessage: 'Normalize by time unit',
             })}
+            <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       }

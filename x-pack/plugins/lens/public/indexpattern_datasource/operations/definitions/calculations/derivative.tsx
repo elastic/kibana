@@ -7,10 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
-import { checkForDateHistogram, dateBasedOperationToExpression, hasDateField } from './utils';
+import {
+  buildLabelFunction,
+  checkForDateHistogram,
+  dateBasedOperationToExpression,
+  hasDateField,
+} from './utils';
 import { OperationDefinition } from '..';
 
-const ofName = (name?: string) => {
+const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.derivativeOf', {
     defaultMessage: 'Differences of {name}',
     values: {
@@ -21,7 +26,7 @@ const ofName = (name?: string) => {
         }),
     },
   });
-};
+});
 
 export type DerivativeIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -53,7 +58,7 @@ export const derivativeOperation: OperationDefinition<
     };
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label);
+    return ofName(columns[column.references[0]]?.label, column.timeScale);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
@@ -61,12 +66,13 @@ export const derivativeOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const metric = layer.columns[referenceIds[0]];
     return {
-      label: ofName(metric?.label),
+      label: ofName(metric?.label, previousColumn?.timeScale),
       dataType: 'number',
       operationType: 'derivative',
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
+      timeScale: previousColumn?.timeScale,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
@@ -87,4 +93,5 @@ export const derivativeOperation: OperationDefinition<
       })
     );
   },
+  timeScalingMode: 'optional',
 };

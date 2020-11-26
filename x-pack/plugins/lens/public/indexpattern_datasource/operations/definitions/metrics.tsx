@@ -5,8 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDefinition, TimeScalingMode } from './index';
-import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+import { OperationDefinition } from './index';
+import {
+  FormattedIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  BaseIndexPatternColumn,
+} from './column_types';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 
 type MetricColumn<T> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
@@ -18,20 +23,28 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   displayName,
   ofName,
   priority,
-  timeScalingMode,
+  optionalTimeScaling,
 }: {
   type: T['operationType'];
   displayName: string;
   ofName: (name: string) => string;
   priority?: number;
-  timeScalingMode?: TimeScalingMode;
+  optionalTimeScaling?: boolean;
 }) {
+  const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
+    const rawLabel = ofName(name);
+    if (!optionalTimeScaling) {
+      return rawLabel;
+    }
+    return adjustTimeScaleLabelSuffix(rawLabel, undefined, column?.timeScale);
+  };
+
   return {
     type,
     priority,
     displayName,
     input: 'field',
-    timeScalingMode,
+    timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         fieldType === 'number' &&
@@ -56,21 +69,22 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       );
     },
     getDefaultLabel: (column, indexPattern, columns) =>
-      ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
+      labelLookup(indexPattern.getFieldByName(column.sourceField)!.displayName, column),
     buildColumn: ({ field, previousColumn }) => ({
-      label: ofName(field.displayName),
+      label: labelLookup(field.displayName, previousColumn),
       dataType: 'number',
       operationType: type,
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
+      timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
       params:
         previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
     }),
     onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,
-        label: ofName(field.displayName),
+        label: labelLookup(field.displayName, oldColumn),
         sourceField: field.name,
       };
     },
@@ -141,7 +155,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
       defaultMessage: 'Sum of {name}',
       values: { name },
     }),
-  timeScalingMode: 'optional',
+  optionalTimeScaling: true,
 });
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({

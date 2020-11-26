@@ -22,8 +22,7 @@ import type {
 import { getSortScoreByPriority } from './operations';
 import { mergeLayer } from '../state_helpers';
 import { generateId } from '../../id_generator';
-import { TimeScaleUnit } from '../time_scale';
-import { unitSuffixesLong } from '../suffix_formatter';
+import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 
 interface ColumnChange {
   op: OperationType;
@@ -210,8 +209,7 @@ export function replaceColumn({
     let tempLayer = { ...layer };
 
     if (previousDefinition.input === 'fullReference') {
-      // @ts-expect-error references are not statically analyzed
-      previousColumn.references.forEach((id: string) => {
+      (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
         tempLayer = deleteColumn({ layer: tempLayer, columnId: id });
       });
     }
@@ -240,7 +238,7 @@ export function replaceColumn({
 
     if (operationDefinition.input === 'none') {
       let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
-      newColumn = adjustLabelAndTimeScale(newColumn, previousColumn);
+      newColumn = adjustLabel(newColumn, previousColumn);
 
       const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
       return {
@@ -255,7 +253,7 @@ export function replaceColumn({
     }
 
     let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
-    newColumn = adjustLabelAndTimeScale(newColumn, previousColumn);
+    newColumn = adjustLabel(newColumn, previousColumn);
 
     const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
     return {
@@ -272,14 +270,7 @@ export function replaceColumn({
     // Same operation, new field
     const newColumn = operationDefinition.onFieldChange(previousColumn, field);
 
-    if (previousColumn.customLabel) {
-      newColumn.customLabel = true;
-      newColumn.label = previousColumn.label;
-    } else {
-      newColumn.label = adjustTimeScaleLabelSuffix(newColumn.label, undefined, newColumn.timeScale);
-    }
-
-    const newColumns = { ...layer.columns, [columnId]: newColumn };
+    const newColumns = { ...layer.columns, [columnId]: adjustLabel(newColumn, previousColumn) };
     return {
       ...layer,
       columnOrder: getColumnOrder({ ...layer, columns: newColumns }),
@@ -290,30 +281,11 @@ export function replaceColumn({
   }
 }
 
-function adjustLabelAndTimeScale(
-  newColumn: IndexPatternColumn,
-  previousColumn: IndexPatternColumn
-) {
+function adjustLabel(newColumn: IndexPatternColumn, previousColumn: IndexPatternColumn) {
   const adjustedColumn = { ...newColumn };
   if (previousColumn.customLabel) {
     adjustedColumn.customLabel = true;
     adjustedColumn.label = previousColumn.label;
-  }
-  const newOperationTimeScaleMode =
-    operationDefinitionMap[newColumn.operationType].timeScalingMode || 'disabled';
-
-  if (
-    (previousColumn.timeScale && newOperationTimeScaleMode !== 'disabled') ||
-    newOperationTimeScaleMode === 'mandatory'
-  ) {
-    adjustedColumn.timeScale = previousColumn.timeScale || DEFAULT_TIME_SCALE;
-    if (!adjustedColumn.customLabel) {
-      adjustedColumn.label = adjustTimeScaleLabelSuffix(
-        adjustedColumn.label,
-        undefined,
-        previousColumn.timeScale
-      );
-    }
   }
 
   return adjustedColumn;
@@ -356,16 +328,6 @@ function addMetric(
   column: IndexPatternColumn,
   addedColumnId: string
 ): IndexPatternLayer {
-  const timeScaledColumn = { ...column };
-  const operationDefinition = operationDefinitionMap[column.operationType];
-  if (operationDefinition.timeScalingMode === 'mandatory') {
-    timeScaledColumn.timeScale = DEFAULT_TIME_SCALE;
-    timeScaledColumn.label = adjustTimeScaleLabelSuffix(
-      timeScaledColumn.label,
-      undefined,
-      DEFAULT_TIME_SCALE
-    );
-  }
   return {
     ...layer,
     columns: {
@@ -638,26 +600,4 @@ function isOperationAllowedAsReference({
     (!validation.specificOperations || validation.specificOperations.includes(operationType)) &&
     hasValidMetadata
   );
-}
-
-export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
-
-export function adjustTimeScaleLabelSuffix(
-  oldLabel: string,
-  previousTimeScale: TimeScaleUnit | undefined,
-  newTimeScale: TimeScaleUnit | undefined
-) {
-  let cleanedLabel = oldLabel;
-  // remove added suffix if column had a time scale previously
-  if (previousTimeScale) {
-    const suffixPosition = oldLabel.lastIndexOf(` ${unitSuffixesLong[previousTimeScale]}`);
-    if (suffixPosition !== -1) {
-      cleanedLabel = oldLabel.substring(0, suffixPosition);
-    }
-  }
-  if (!newTimeScale) {
-    return cleanedLabel;
-  }
-  // add new suffix if column has a time scale now
-  return `${cleanedLabel} ${unitSuffixesLong[newTimeScale]}`;
 }
