@@ -6,7 +6,7 @@
 
 import './dimension_editor.scss';
 import _ from 'lodash';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -45,10 +45,6 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
 
 const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const [inputValue, setInputValue] = useState(value);
-
-  useEffect(() => {
-    setInputValue(value);
-  }, [value, setInputValue]);
 
   const onChangeDebounced = useMemo(() => _.debounce(onChange, 256), [onChange]);
 
