@@ -718,6 +718,25 @@ describe('IndexPattern Data Panel', () => {
       ]);
     });
 
+    it('should announce filter in live region', () => {
+      const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
+      act(() => {
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').prop('onChange')!({
+          target: { value: 'me' },
+        } as ChangeEvent<HTMLInputElement>);
+      });
+
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
+
+      expect(wrapper.find('[aria-live="polite"]').text()).toEqual(
+        '1 available field. 1 empty field. 0 meta fields.'
+      );
+    });
+
     it('should filter down by type', () => {
       const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
 
