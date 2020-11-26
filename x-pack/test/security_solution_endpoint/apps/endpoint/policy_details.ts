@@ -249,7 +249,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
               },
             },
-            streams: [],
             type: 'endpoint',
             use_output: 'default',
           },
