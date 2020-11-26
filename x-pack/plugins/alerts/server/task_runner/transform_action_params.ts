@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
 import { isString, cloneDeepWith } from 'lodash';
 import {
@@ -65,6 +66,12 @@ export function transformActionParams({
   // type to inject a "View in Kibana" URL in the email's footer.
   if (actionTypeId === '.email') {
     result.viewInKibanaPath = `/app/management/insightsAndAlerting/triggersActions/alert/${alertId}`;
+    result.viewInKibanaText = i18n.translate(
+      'xpack.alerts.transformActionParams.emailViewInKibanaText',
+      {
+        defaultMessage: 'View alert in Kibana',
+      }
+    );
   }
 
   // The return type signature for `cloneDeep()` ends up taking the return

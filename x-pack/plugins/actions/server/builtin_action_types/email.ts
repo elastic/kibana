@@ -106,6 +106,11 @@ const ParamsSchema = schema.object(
     subject: schema.string(),
     message: schema.string(),
     viewInKibanaPath: schema.string({ defaultValue: DEFAULT_VIEW_IN_KIBANA_PATH }),
+    viewInKibanaText: schema.string({
+      defaultValue: i18n.translate('xpack.actions.builtin.email.viewInKibanaText', {
+        defaultMessage: 'View in Kibana',
+      }),
+    }),
   },
   {
     validate: validateParams,
@@ -188,7 +193,9 @@ async function executor(
     },
     content: {
       subject: params.subject,
-      message: params.message + `\n\n--\n\n${getViewInKibanaMessage(params.viewInKibanaPath)}`,
+      message:
+        params.message +
+        `\n\n--\n\n${getViewInKibanaMessage(params.viewInKibanaPath, params.viewInKibanaText)}`,
     },
     proxySettings: execOptions.proxySettings,
     hasAuth: config.hasAuth,
@@ -236,20 +243,19 @@ function getSecureValue(secure: boolean | null | undefined, port: number | null)
   return false;
 }
 
-function getViewInKibanaMessage(viewInKibanaPath: string) {
+function getViewInKibanaMessage(viewInKibanaPath: string, viewInKibanaText: string) {
   if (viewInKibanaPath === DEFAULT_VIEW_IN_KIBANA_PATH) {
     return i18n.translate('xpack.actions.builtin.email.defaultViewInKibanaMessage', {
-      defaultMessage:
-        'This message was sent by a Kibana connector. [Click here]({link}) to open Kibana.',
+      defaultMessage: 'This message was sent by a Kibana connector. [Open Kibana]({link}).',
       values: {
         link: KIBANA_ROOT,
       },
     });
   }
   return i18n.translate('xpack.actions.builtin.email.customViewInKibanaMessage', {
-    defaultMessage:
-      'This message was sent by a Kibana connector. [Click here]({link}) to view in Kibana.',
+    defaultMessage: 'This message was sent by a Kibana connector. [{viewInKibanaText}]({link}).',
     values: {
+      viewInKibanaText,
       link: KIBANA_ROOT + viewInKibanaPath,
     },
   });
