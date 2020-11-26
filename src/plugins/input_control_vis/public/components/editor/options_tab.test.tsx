@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { Vis } from '../../../../visualizations/public';
-import { OptionsTab, OptionsTabProps } from './options_tab';
+import OptionsTab, { OptionsTabProps } from './options_tab';
 
 describe('OptionsTab', () => {
   let props: OptionsTabProps;

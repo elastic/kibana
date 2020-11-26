@@ -220,7 +220,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
   }
 }
 
-export const ControlsTab = injectI18n(ControlsTabUi);
+const ControlsTab = injectI18n(ControlsTabUi);
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
 export { ControlsTab as default };

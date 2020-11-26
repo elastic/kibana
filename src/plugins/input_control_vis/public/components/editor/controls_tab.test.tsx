@@ -21,7 +21,7 @@ import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
-import { ControlsTab, ControlsTabUiProps } from './controls_tab';
+import ControlsTab, { ControlsTabUiProps } from './controls_tab';
 import { Vis } from '../../../../visualizations/public';
 
 const indexPatternsMock = {
@@ -30,7 +30,7 @@ const indexPatternsMock = {
 let props: ControlsTabUiProps;
 
 beforeEach(() => {
-  props = {
+  props = ({
     deps: getDepsMock(),
     vis: ({
       API: {
@@ -78,7 +78,7 @@ beforeEach(() => {
     },
     setValue: jest.fn(),
     intl: null as any,
-  };
+  } as unknown) as ControlsTabUiProps;
 });
 
 test('renders ControlsTab', () => {

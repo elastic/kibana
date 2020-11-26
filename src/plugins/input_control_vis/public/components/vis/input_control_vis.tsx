@@ -167,9 +167,11 @@ export class InputControlVis extends Component<InputControlVisProps> {
     }
 
     return (
-      <div className="icvContainer">
-        <EuiFlexGroup wrap>{this.renderControls()}</EuiFlexGroup>
-        {stagingButtons}
+      <div className="icvContainer__wrapper">
+        <div className="icvContainer">
+          <EuiFlexGroup wrap>{this.renderControls()}</EuiFlexGroup>
+          {stagingButtons}
+        </div>
       </div>
     );
   }

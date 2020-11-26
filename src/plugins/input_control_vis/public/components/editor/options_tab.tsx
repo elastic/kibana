@@ -28,7 +28,7 @@ import { InputControlVisParams } from '../../types';
 
 export type OptionsTabProps = VisOptionsProps<InputControlVisParams>;
 
-export class OptionsTab extends PureComponent<OptionsTabProps> {
+class OptionsTab extends PureComponent<OptionsTabProps> {
   handleUpdateFiltersChange = (event: EuiSwitchEvent) => {
     this.props.setValue('updateFiltersOnChange', event.target.checked);
   };
