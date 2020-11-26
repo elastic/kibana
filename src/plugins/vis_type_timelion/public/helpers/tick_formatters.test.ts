@@ -139,9 +139,7 @@ describe('Tick Formatters', function () {
 
     it('formats with $ by default', function () {
       const axis = {
-        options: {
-          units: {},
-        },
+        units: {},
       };
       formatters = tickFormatters(axis as Axis);
       currencyFormatter = formatters.currency;
@@ -150,10 +148,8 @@ describe('Tick Formatters', function () {
 
     it('accepts currency in ISO 4217', function () {
       const axis = {
-        options: {
-          units: {
-            prefix: 'CNY',
-          },
+        units: {
+          prefix: 'CNY',
         },
       };
       formatters = tickFormatters(axis as Axis);
@@ -174,9 +170,7 @@ describe('Tick Formatters', function () {
 
     it('formats with %', function () {
       const axis = {
-        options: {
-          units: {},
-        },
+        units: {},
       };
       formatters = tickFormatters(axis as Axis);
       percentFormatter = formatters.percent;
@@ -188,10 +182,8 @@ describe('Tick Formatters', function () {
       const tickDecimalShift = 2;
       const axis = {
         tickDecimals: tickDecimals + tickDecimalShift,
-        options: {
-          units: {
-            tickDecimalsShift: tickDecimalShift,
-          },
+        units: {
+          tickDecimalsShift: tickDecimalShift,
         },
       } as unknown;
       formatters = tickFormatters(axis as Axis);
@@ -212,11 +204,9 @@ describe('Tick Formatters', function () {
 
     it('accepts prefix and suffix', function () {
       const axis = {
-        options: {
-          units: {
-            prefix: 'prefix',
-            suffix: 'suffix',
-          },
+        units: {
+          prefix: 'prefix',
+          suffix: 'suffix',
         },
         tickDecimals: 1,
       };
@@ -227,11 +217,9 @@ describe('Tick Formatters', function () {
 
     it('correctly renders small values', function () {
       const axis = {
-        options: {
-          units: {
-            prefix: 'prefix',
-            suffix: 'suffix',
-          },
+        units: {
+          prefix: 'prefix',
+          suffix: 'suffix',
         },
         tickDecimals: 3,
       };
