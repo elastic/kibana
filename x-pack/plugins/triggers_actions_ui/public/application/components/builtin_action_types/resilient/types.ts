@@ -5,6 +5,8 @@
  */
 
 import { UserConfiguredActionConnector } from '../../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/resilient/types';
 
 export type ResilientActionConnector = UserConfiguredActionConnector<
   ResilientConfig,
@@ -13,15 +15,7 @@ export type ResilientActionConnector = UserConfiguredActionConnector<
 
 export interface ResilientActionParams {
   subAction: string;
-  subActionParams: {
-    savedObjectId: string;
-    title: string;
-    description: string;
-    externalId: string | null;
-    incidentTypes: number[];
-    severityCode: number;
-    comments: Array<{ commentId: string; comment: string }>;
-  };
+  subActionParams: ExecutorSubActionPushParams;
 }
 
 export interface ResilientConfig {

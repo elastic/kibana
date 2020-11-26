@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiFormRow,
   EuiComboBox,
@@ -13,11 +13,8 @@ import {
   EuiTitle,
   EuiComboBoxOptionOption,
   EuiSelectOption,
-  EuiFormControlLayout,
-  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isSome } from 'fp-ts/lib/Option';
 
 import { ActionParamsProps } from '../../../../types';
 import { ResilientActionParams } from './types';
@@ -26,43 +23,26 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
-import { extractActionVariable } from '../extract_action_variable';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
+  actionConnector,
   actionParams,
   editAction,
-  index,
   errors,
+  index,
   messageVariables,
-  actionConnector,
 }) => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const [firstLoad, setFirstLoad] = useState(false);
-  const { title, description, comments, incidentTypes, severityCode, savedObjectId } =
-    actionParams.subActionParams || {};
-
-  const isActionBeingConfiguredByAnAlert = messageVariables
-    ? isSome(extractActionVariable(messageVariables, 'alertId'))
-    : false;
-
-  const [incidentTypesComboBoxOptions, setIncidentTypesComboBoxOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
-
-  const [selectedIncidentTypesComboBoxOptions, setSelectedIncidentTypesComboBoxOptions] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
-
-  const [severitySelectOptions, setSeveritySelectOptions] = useState<EuiSelectOption[]>([]);
-
-  useEffect(() => {
-    setFirstLoad(true);
-  }, []);
-
+  const {
+    incident: { name, description, incidentTypes, severityCode },
+    comments,
+  } = useMemo(() => actionParams.subActionParams ?? { incident: {}, comments: [] }, [
+    actionParams.subActionParams,
+  ]);
   const {
     isLoading: isLoadingIncidentTypes,
     incidentTypes: allIncidentTypes,
@@ -77,71 +57,88 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     toastNotifications: toasts,
     actionConnector,
   });
-
-  const editSubActionProperty = (key: string, value: {}) => {
-    const newProps = { ...actionParams.subActionParams, [key]: value };
-    editAction('subActionParams', newProps, index);
-  };
-
-  useEffect(() => {
-    const options = severity.map((s) => ({
+  const severitySelectOptions: EuiSelectOption[] = useMemo(() => {
+    return severity.map((s) => ({
       value: s.id.toString(),
       text: s.name,
     }));
+  }, [severity]);
 
-    setSeveritySelectOptions(options);
-  }, [actionConnector, severity]);
-
-  // Reset parameters when changing connector
-  useEffect(() => {
-    if (!firstLoad) {
-      return;
-    }
-
-    setIncidentTypesComboBoxOptions([]);
-    setSelectedIncidentTypesComboBoxOptions([]);
-    setSeveritySelectOptions([]);
-    editAction('subActionParams', { title, comments, description: '', savedObjectId }, index);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionConnector]);
-
-  useEffect(() => {
-    if (!actionParams.subAction) {
-      editAction('subAction', 'pushToService', index);
-    }
-    if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
-      editSubActionProperty('savedObjectId', '{{alertId}}');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionConnector, savedObjectId]);
-
-  useEffect(() => {
-    setIncidentTypesComboBoxOptions(
+  const incidentTypesComboBoxOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    () =>
       allIncidentTypes
         ? allIncidentTypes.map((type: { id: number; name: string }) => ({
             label: type.name,
             value: type.id.toString(),
           }))
-        : []
-    );
-
+        : [],
+    [allIncidentTypes]
+  );
+  const selectedIncidentTypesComboBoxOptions: Array<
+    EuiComboBoxOptionOption<string>
+  > = useMemo(() => {
     const allIncidentTypesAsObject = allIncidentTypes.reduce(
       (acc, type) => ({ ...acc, [type.id.toString()]: type.name }),
       {} as Record<string, string>
     );
+    return incidentTypes
+      ? incidentTypes
+          .map((type) => ({
+            label: allIncidentTypesAsObject[type.toString()],
+            value: type.toString(),
+          }))
+          .filter((type) => type.label != null)
+      : [];
+  }, [allIncidentTypes, incidentTypes]);
 
-    setSelectedIncidentTypesComboBoxOptions(
-      incidentTypes
-        ? incidentTypes
-            .map((type) => ({
-              label: allIncidentTypesAsObject[type.toString()],
-              value: type.toString(),
-            }))
-            .filter((type) => type.label != null)
-        : []
-    );
+  const editSubActionProperty = useCallback(
+    (key: string, value: any) => {
+      const newProps =
+        key !== 'comments'
+          ? {
+              ...actionParams.subActionParams,
+              incident: {
+                ...(actionParams.subActionParams ? actionParams.subActionParams.incident : {}),
+                [key]: value,
+              },
+            }
+          : { ...actionParams.subActionParams, [key]: value };
+      editAction('subActionParams', newProps, index);
+    },
+    [actionParams.subActionParams, editAction, index]
+  );
+
+  const incidentTypesOnChange = useCallback(
+    (selectedOptions: Array<{ label: string; value?: string }>) => {
+      editSubActionProperty(
+        'incidentTypes',
+        selectedOptions.map((selectedOption) => selectedOption.value ?? selectedOption.label)
+      );
+    },
+    [editSubActionProperty]
+  );
+  const incidentTypesOnBlur = useCallback(() => {
+    if (!incidentTypes) {
+      editSubActionProperty('incidentTypes', []);
+    }
+  }, [editSubActionProperty, incidentTypes]);
+
+  useEffect(() => {
+    if (!actionParams.subAction) {
+      editAction('subAction', 'pushToService', index);
+    }
+    return () => {
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionConnector, allIncidentTypes]);
+  }, []);
 
   return (
     <Fragment>
@@ -153,9 +150,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         fullWidth
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.urgencySelectFieldLabel',
-          {
-            defaultMessage: 'Incident Type',
-          }
+          { defaultMessage: 'Incident Type' }
         )}
       >
         <EuiComboBox
@@ -165,24 +160,8 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           data-test-subj="incidentTypeComboBox"
           options={incidentTypesComboBoxOptions}
           selectedOptions={selectedIncidentTypesComboBoxOptions}
-          onChange={(selectedOptions: Array<{ label: string; value?: string }>) => {
-            setSelectedIncidentTypesComboBoxOptions(
-              selectedOptions.map((selectedOption) => ({
-                label: selectedOption.label,
-                value: selectedOption.value,
-              }))
-            );
-
-            editSubActionProperty(
-              'incidentTypes',
-              selectedOptions.map((selectedOption) => selectedOption.value ?? selectedOption.label)
-            );
-          }}
-          onBlur={() => {
-            if (!incidentTypes) {
-              editSubActionProperty('incidentTypes', []);
-            }
-          }}
+          onChange={incidentTypesOnChange}
+          onBlur={incidentTypesOnBlur}
           isClearable={true}
         />
       </EuiFormRow>
@@ -191,92 +170,48 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         fullWidth
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.severity',
-          {
-            defaultMessage: 'Severity',
-          }
+          { defaultMessage: 'Severity' }
         )}
       >
         <EuiSelect
-          isLoading={isLoadingSeverity}
+          data-test-subj="severitySelect"
           disabled={isLoadingSeverity}
           fullWidth
-          data-test-subj="severitySelect"
+          hasNoInitialSelection
+          isLoading={isLoadingSeverity}
+          onChange={(e) => editSubActionProperty('severityCode', e.target.value)}
           options={severitySelectOptions}
-          value={severityCode}
-          onChange={(e) => {
-            editSubActionProperty('severityCode', e.target.value);
-          }}
+          value={severityCode ?? undefined}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        error={errors.title}
-        isInvalid={errors.title.length > 0 && title !== undefined}
+        error={errors.name}
+        isInvalid={errors.name.length > 0 && name !== undefined}
         label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.resilient.titleFieldLabel',
-          {
-            defaultMessage: 'Name',
-          }
+          'xpack.triggersActionsUI.components.builtinActionTypes.resilient.nameFieldLabel',
+          { defaultMessage: 'Name (required)' }
         )}
       >
         <TextFieldWithMessageVariables
           index={index}
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
-          paramsProperty={'title'}
-          inputTargetValue={title}
-          errors={errors.title as string[]}
+          paramsProperty={'name'}
+          inputTargetValue={name}
+          errors={errors.name as string[]}
         />
       </EuiFormRow>
-      {!isActionBeingConfiguredByAnAlert && (
-        <Fragment>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.resilient.savedObjectIdFieldLabel',
-              {
-                defaultMessage: 'Object ID (optional)',
-              }
-            )}
-          >
-            <EuiFormControlLayout
-              fullWidth
-              append={
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.triggersActionsUI.components.builtinActionTypes.resilient.savedObjectIdFieldHelp',
-                    {
-                      defaultMessage:
-                        'IBM Resilient will associate this action with the ID of a Kibana saved object.',
-                    }
-                  )}
-                />
-              }
-            >
-              <TextFieldWithMessageVariables
-                index={index}
-                editAction={editSubActionProperty}
-                messageVariables={messageVariables}
-                paramsProperty={'savedObjectId'}
-                inputTargetValue={savedObjectId}
-              />
-            </EuiFormControlLayout>
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-        </Fragment>
-      )}
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}
         messageVariables={messageVariables}
         paramsProperty={'description'}
-        inputTargetValue={description}
+        inputTargetValue={description ?? undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.descriptionTextAreaFieldLabel',
-          {
-            defaultMessage: 'Description (optional)',
-          }
+          { defaultMessage: 'Description' }
         )}
         errors={errors.description as string[]}
       />
@@ -287,12 +222,10 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         }}
         messageVariables={messageVariables}
         paramsProperty={'comments'}
-        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : ''}
+        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.resilient.commentsTextAreaFieldLabel',
-          {
-            defaultMessage: 'Additional comments (optional)',
-          }
+          { defaultMessage: 'Additional comments' }
         )}
         errors={errors.comments as string[]}
       />

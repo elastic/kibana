@@ -66,12 +66,7 @@ export interface ExternalServiceFields {
 }
 export type GetCommonFieldsResponse = ExternalServiceFields[];
 
-export type Incident = Pick<
-  ExecutorSubActionPushParams['incident'],
-  'description' | 'incidentTypes' | 'severityCode'
-> & {
-  name: string;
-};
+export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
 export interface CreateIncidentParams {
   incident: Incident;

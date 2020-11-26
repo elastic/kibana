@@ -84,12 +84,7 @@ export type ExecutorSubActionHandshakeParams = TypeOf<
   typeof ExecutorSubActionHandshakeParamsSchema
 >;
 
-export type Incident = Pick<
-  ExecutorSubActionPushParams['incident'],
-  'description' | 'severity' | 'urgency' | 'impact'
-> & {
-  short_description: string;
-};
+export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;

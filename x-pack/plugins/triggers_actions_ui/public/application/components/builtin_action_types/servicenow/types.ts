@@ -6,6 +6,8 @@
 
 import { CasesConfigurationMapping } from '../case_mappings';
 import { UserConfiguredActionConnector } from '../../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/servicenow/types';
 
 export type ServiceNowActionConnector = UserConfiguredActionConnector<
   ServiceNowConfig,
@@ -13,17 +15,8 @@ export type ServiceNowActionConnector = UserConfiguredActionConnector<
 >;
 
 export interface ServiceNowActionParams {
-  subAction: string;
-  subActionParams: {
-    savedObjectId: string;
-    title: string;
-    description: string;
-    comment: string;
-    externalId: string | null;
-    severity: string;
-    urgency: string;
-    impact: string;
-  };
+  subAction: 'pushToService';
+  subActionParams: ExecutorSubActionPushParams;
 }
 
 interface IncidentConfiguration {

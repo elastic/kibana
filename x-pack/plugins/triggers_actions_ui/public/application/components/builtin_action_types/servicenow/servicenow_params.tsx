@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -13,79 +13,80 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiFormControlLayout,
-  EuiIconTip,
 } from '@elastic/eui';
-import { isSome } from 'fp-ts/lib/Option';
 import { ActionParamsProps } from '../../../../types';
 import { ServiceNowActionParams } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
-import { extractActionVariable } from '../extract_action_variable';
+
+const selectOptions = [
+  {
+    value: '1',
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectHighOptionLabel',
+      { defaultMessage: 'High' }
+    ),
+  },
+  {
+    value: '2',
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectMediumOptionLabel',
+      { defaultMessage: 'Medium' }
+    ),
+  },
+  {
+    value: '3',
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectLawOptionLabel',
+      { defaultMessage: 'Low' }
+    ),
+  },
+];
 
 const ServiceNowParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowActionParams>
 > = ({ actionParams, editAction, index, errors, messageVariables }) => {
-  const { title, description, comment, severity, urgency, impact, savedObjectId } =
-    actionParams.subActionParams || {};
-
-  const isActionBeingConfiguredByAnAlert = messageVariables
-    ? isSome(extractActionVariable(messageVariables, 'alertId'))
-    : false;
-
-  const selectOptions = [
-    {
-      value: '1',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectHighOptionLabel',
-        {
-          defaultMessage: 'High',
-        }
-      ),
+  const {
+    // short_description is a servicenow property
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    incident: { short_description, description, severity, urgency, impact },
+    comments,
+  } = useMemo(() => {
+    return actionParams.subActionParams ?? { incident: {}, comments: [] };
+  }, [actionParams.subActionParams]);
+  const editSubActionProperty = useCallback(
+    (key: string, value: any) => {
+      const newProps =
+        key !== 'comments'
+          ? {
+              ...actionParams.subActionParams,
+              incident: {
+                ...(actionParams.subActionParams ? actionParams.subActionParams.incident : {}),
+                [key]: value,
+              },
+            }
+          : { ...actionParams.subActionParams, [key]: value };
+      editAction('subActionParams', newProps, index);
     },
-    {
-      value: '2',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectMediumOptionLabel',
-        {
-          defaultMessage: 'Medium',
-        }
-      ),
-    },
-    {
-      value: '3',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severitySelectLawOptionLabel',
-        {
-          defaultMessage: 'Low',
-        }
-      ),
-    },
-  ];
-
-  const editSubActionProperty = (key: string, value: {}) => {
-    const newProps = { ...actionParams.subActionParams, [key]: value };
-    editAction('subActionParams', newProps, index);
-  };
+    [actionParams.subActionParams, editAction, index]
+  );
 
   useEffect(() => {
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
-    if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
-      editSubActionProperty('savedObjectId', '{{alertId}}');
-    }
-    if (!urgency) {
-      editSubActionProperty('urgency', '3');
-    }
-    if (!impact) {
-      editSubActionProperty('impact', '3');
-    }
-    if (!severity) {
-      editSubActionProperty('severity', '3');
-    }
+    return () => {
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, description, comment, severity, impact, urgency]);
+  }, []);
 
   return (
     <Fragment>
@@ -93,9 +94,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         <h3>
           {i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.title',
-            {
-              defaultMessage: 'Incident',
-            }
+            { defaultMessage: 'Incident' }
           )}
         </h3>
       </EuiTitle>
@@ -104,19 +103,16 @@ const ServiceNowParamsFields: React.FunctionComponent<
         fullWidth
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.urgencySelectFieldLabel',
-          {
-            defaultMessage: 'Urgency',
-          }
+          { defaultMessage: 'Urgency' }
         )}
       >
         <EuiSelect
           fullWidth
           data-test-subj="urgencySelect"
+          hasNoInitialSelection
           options={selectOptions}
-          value={urgency}
-          onChange={(e) => {
-            editSubActionProperty('urgency', e.target.value);
-          }}
+          value={urgency ?? undefined}
+          onChange={(e) => editSubActionProperty('urgency', e.target.value)}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -126,19 +122,16 @@ const ServiceNowParamsFields: React.FunctionComponent<
             fullWidth
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.severitySelectFieldLabel',
-              {
-                defaultMessage: 'Severity',
-              }
+              { defaultMessage: 'Severity' }
             )}
           >
             <EuiSelect
               fullWidth
               data-test-subj="severitySelect"
+              hasNoInitialSelection
               options={selectOptions}
-              value={severity}
-              onChange={(e) => {
-                editSubActionProperty('severity', e.target.value);
-              }}
+              value={severity ?? undefined}
+              onChange={(e) => editSubActionProperty('severity', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -147,19 +140,16 @@ const ServiceNowParamsFields: React.FunctionComponent<
             fullWidth
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.impactSelectFieldLabel',
-              {
-                defaultMessage: 'Impact',
-              }
+              { defaultMessage: 'Impact' }
             )}
           >
             <EuiSelect
               fullWidth
               data-test-subj="impactSelect"
+              hasNoInitialSelection
               options={selectOptions}
-              value={impact}
-              onChange={(e) => {
-                editSubActionProperty('impact', e.target.value);
-              }}
+              value={impact ?? undefined}
+              onChange={(e) => editSubActionProperty('impact', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -167,72 +157,31 @@ const ServiceNowParamsFields: React.FunctionComponent<
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        error={errors.title}
-        isInvalid={errors.title.length > 0 && title !== undefined}
+        error={errors.short_description}
+        isInvalid={errors.short_description.length > 0 && short_description !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.titleFieldLabel',
-          {
-            defaultMessage: 'Short description',
-          }
+          { defaultMessage: 'Short description (required)' }
         )}
       >
         <TextFieldWithMessageVariables
           index={index}
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
-          paramsProperty={'title'}
-          inputTargetValue={title}
-          errors={errors.title as string[]}
+          paramsProperty={'short_description'}
+          inputTargetValue={short_description}
+          errors={errors.short_description as string[]}
         />
       </EuiFormRow>
-      {!isActionBeingConfiguredByAnAlert && (
-        <Fragment>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.savedObjectIdFieldLabel',
-              {
-                defaultMessage: 'Object ID (optional)',
-              }
-            )}
-          >
-            <EuiFormControlLayout
-              fullWidth
-              append={
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.savedObjectIdFieldHelp',
-                    {
-                      defaultMessage:
-                        'ServiceNow will associate this action with the ID of a Kibana saved object.',
-                    }
-                  )}
-                />
-              }
-            >
-              <TextFieldWithMessageVariables
-                index={index}
-                editAction={editSubActionProperty}
-                messageVariables={messageVariables}
-                paramsProperty={'savedObjectId'}
-                inputTargetValue={savedObjectId}
-              />
-            </EuiFormControlLayout>
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-        </Fragment>
-      )}
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}
         messageVariables={messageVariables}
         paramsProperty={'description'}
-        inputTargetValue={description}
+        inputTargetValue={description ?? undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.descriptionTextAreaFieldLabel',
-          {
-            defaultMessage: 'Description (optional)',
-          }
+          { defaultMessage: 'Description' }
         )}
         errors={errors.description as string[]}
       />
@@ -240,15 +189,13 @@ const ServiceNowParamsFields: React.FunctionComponent<
         index={index}
         editAction={editSubActionProperty}
         messageVariables={messageVariables}
-        paramsProperty={'comment'}
-        inputTargetValue={comment}
+        paramsProperty={'comments'}
+        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.commentsTextAreaFieldLabel',
-          {
-            defaultMessage: 'Additional comments (optional)',
-          }
+          { defaultMessage: 'Additional comments' }
         )}
-        errors={errors.comment as string[]}
+        errors={errors.comments as string[]}
       />
     </Fragment>
   );

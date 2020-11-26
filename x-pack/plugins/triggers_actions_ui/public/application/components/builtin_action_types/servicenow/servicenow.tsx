@@ -64,11 +64,14 @@ export function getActionType(): ActionTypeModel<
     validateParams: (actionParams: ServiceNowActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
-        title: new Array<string>(),
+        short_description: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (actionParams.subActionParams && !actionParams.subActionParams.title?.length) {
-        errors.title.push(i18n.TITLE_REQUIRED);
+      if (
+        actionParams.subActionParams &&
+        !actionParams.subActionParams.incident.short_description?.length
+      ) {
+        errors.short_description.push(i18n.TITLE_REQUIRED);
       }
       return validationResult;
     },

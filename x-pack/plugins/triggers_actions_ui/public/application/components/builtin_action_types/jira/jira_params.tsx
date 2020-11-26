@@ -115,8 +115,18 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
     }
+    return () => {
+      editAction(
+        'subActionParams',
+        {
+          incident: {},
+          comments: [],
+        },
+        index
+      );
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionParams.subAction]);
+  }, []);
 
   return (
     <Fragment>
@@ -136,10 +146,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             disabled={isLoadingIssueTypes || isLoadingFields}
             data-test-subj="issueTypeSelect"
             options={issueTypesSelectOptions}
-            value={issueType ?? ''}
-            onChange={(e) => {
-              editSubActionProperty('issueType', e.target.value);
-            }}
+            value={issueType ?? undefined}
+            onChange={(e) => editSubActionProperty('issueType', e.target.value)}
           />
         </EuiFormRow>
         <EuiHorizontalRule />
@@ -191,7 +199,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                       disabled={isLoadingIssueTypes || isLoadingFields}
                       data-test-subj="prioritySelect"
                       options={prioritiesSelectOptions}
-                      value={priority ?? ''}
+                      value={priority ?? undefined}
                       onChange={(e) => {
                         editSubActionProperty('priority', e.target.value);
                       }}
@@ -209,7 +217,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.jira.summaryFieldLabel',
               {
-                defaultMessage: 'Summary',
+                defaultMessage: 'Summary (required)',
               }
             )}
           >
@@ -232,7 +240,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                     label={i18n.translate(
                       'xpack.triggersActionsUI.components.builtinActionTypes.jira.impactSelectFieldLabel',
                       {
-                        defaultMessage: 'Labels (optional)',
+                        defaultMessage: 'Labels',
                       }
                     )}
                   >
@@ -275,11 +283,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               editAction={editSubActionProperty}
               messageVariables={messageVariables}
               paramsProperty={'description'}
-              inputTargetValue={description ?? ''}
+              inputTargetValue={description ?? undefined}
               label={i18n.translate(
                 'xpack.triggersActionsUI.components.builtinActionTypes.jira.descriptionTextAreaFieldLabel',
                 {
-                  defaultMessage: 'Description (optional)',
+                  defaultMessage: 'Description',
                 }
               )}
               errors={errors.description as string[]}
@@ -292,11 +300,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             }}
             messageVariables={messageVariables}
             paramsProperty={'comments'}
-            inputTargetValue={comments && comments.length > 0 ? comments[0].comment : ''}
+            inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.jira.commentsTextAreaFieldLabel',
               {
-                defaultMessage: 'Additional comments (optional)',
+                defaultMessage: 'Additional comments',
               }
             )}
             errors={errors.comments as string[]}
