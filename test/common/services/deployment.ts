@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import fetch from 'node-fetch';
-import { getUrl } from '@kbn/test/jest';
+import { getUrl } from '@kbn/test';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 

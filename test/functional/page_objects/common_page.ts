@@ -21,7 +21,7 @@ import { delay } from 'bluebird';
 import expect from '@kbn/expect';
 // @ts-ignore
 import fetch from 'node-fetch';
-import { getUrl } from '@kbn/test/jest';
+import { getUrl } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function CommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {

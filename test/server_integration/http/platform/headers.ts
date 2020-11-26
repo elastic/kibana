@@ -18,7 +18,7 @@
  */
 import Http from 'http';
 import Url from 'url';
-import { getUrl } from '@kbn/test/jest';
+import { getUrl } from '@kbn/test';
 import { FtrProviderContext } from '../../services/types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
