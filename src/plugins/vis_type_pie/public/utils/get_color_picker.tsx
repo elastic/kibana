@@ -38,12 +38,22 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
   }
 }
 
+function getLayerIndex(
+  seriesKey: string,
+  data: DatatableRow[],
+  layers: Array<Partial<BucketColumns>>
+): number {
+  const row = data.find((d) => Object.keys(d).find((key) => d[key] === seriesKey));
+  const bucketId = row && Object.keys(row).find((key) => row[key] === seriesKey);
+  return layers.findIndex((layer) => layer.id === bucketId) + 1;
+}
+
 function isOnInnerLayer(
-  firstBucket: BucketColumns,
+  firstBucket: Partial<BucketColumns>,
   data: DatatableRow[],
   seriesKey: string
 ): DatatableRow | undefined {
-  return data.find((d) => d[firstBucket.id] === seriesKey);
+  return data.find((d) => firstBucket.id && d[firstBucket.id] === seriesKey);
 }
 
 export const getColorPicker = (
@@ -53,9 +63,8 @@ export const getColorPicker = (
     seriesKey: string | number,
     event: BaseSyntheticEvent
   ) => void,
-  maxDepth: number,
+  layerColumns: Array<Partial<BucketColumns>>,
   palette: string,
-  firstBucket: BucketColumns,
   data: DatatableRow[]
 ): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
   const seriesName = seriesIdentifier.key;
@@ -69,7 +78,7 @@ export const getColorPicker = (
 
   // For the EuiPalette we want the user to be able to change only the colors of the inner layer
   if (palette !== 'kibana_palette') {
-    const enablePicker = isOnInnerLayer(firstBucket, data, seriesIdentifier.key);
+    const enablePicker = isOnInnerLayer(layerColumns[0], data, seriesName);
     if (!enablePicker) return null;
   }
   const hexColor = new Color(color).hex();
@@ -83,7 +92,13 @@ export const getColorPicker = (
       closePopover={onClose}
       panelPaddingSize="s"
     >
-      <ColorPicker color={hexColor} onChange={handlChange} label={seriesName} maxDepth={maxDepth} />
+      <ColorPicker
+        color={hexColor}
+        onChange={handlChange}
+        label={seriesName}
+        maxDepth={layerColumns.length}
+        layerIndex={getLayerIndex(seriesName, data, layerColumns)}
+      />
     </EuiWrappingPopover>
   );
 };

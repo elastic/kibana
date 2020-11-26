@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { Datum, PartitionFillLabel, PartitionLayer } from '@elastic/charts';
 import { SeriesLayer } from '../../../charts/public';
 import { BucketColumns, PieVisParams } from '../types';
-
+import { lightenColor } from '../temp';
 import { getFormatService, getColorsService } from '../services';
 
 const EMPTY_SLICE = Symbol('empty_slice');
@@ -84,15 +84,15 @@ export const getLayers = (
             }
           });
 
-          const outputColor = defaultPalette.getColor(
-            seriesLayers,
-            {
-              behindText: visParams.labels.show,
-              maxDepth: columns.length,
-              totalSeries,
-            },
-            overwriteColor
-          );
+          if (overwriteColor) {
+            return lightenColor(overwriteColor, seriesLayers.length, columns.length);
+          }
+
+          const outputColor = defaultPalette.getColor(seriesLayers, {
+            behindText: visParams.labels.show,
+            maxDepth: columns.length,
+            totalSeries,
+          });
 
           return outputColor || 'rgba(0,0,0,0)';
         },

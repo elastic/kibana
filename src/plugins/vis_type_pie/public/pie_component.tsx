@@ -300,9 +300,8 @@ const PieComponent = (props: PieComponentProps) => {
             legendColorPicker={getColorPicker(
               legendPosition,
               setColor,
-              layersColumns.length,
+              layersColumns,
               visParams.palette.name,
-              bucketColumns[0],
               visData.rows
             )}
             tooltip={tooltip}

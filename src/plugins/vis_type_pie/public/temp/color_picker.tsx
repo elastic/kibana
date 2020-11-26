@@ -91,6 +91,7 @@ interface ColorPickerProps {
   onChange: (color: string | null, event: BaseSyntheticEvent) => void;
   color: string;
   maxDepth: number;
+  layerIndex: number;
 }
 
 export const ColorPicker = ({
@@ -99,6 +100,7 @@ export const ColorPicker = ({
   id,
   label,
   maxDepth,
+  layerIndex,
 }: ColorPickerProps) => (
   <I18nProvider>
     <div className="visColorPicker">
@@ -133,7 +135,7 @@ export const ColorPicker = ({
         ))}
       </div>
       {legendColors.some(
-        (c) => c === selectedColor || lightenColor(c, maxDepth, maxDepth) === selectedColor
+        (c) => c === selectedColor || lightenColor(c, layerIndex, maxDepth) === selectedColor
       ) && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

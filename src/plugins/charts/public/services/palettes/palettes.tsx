@@ -43,17 +43,11 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
   const behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 });
   function getColor(
     series: SeriesLayer[],
-    chartConfiguration: ChartColorConfiguration = { behindText: false },
-    state?: unknown
+    chartConfiguration: ChartColorConfiguration = { behindText: false }
   ) {
-    let outputColor = '';
-    if (state) {
-      outputColor = state as string;
-    } else {
-      outputColor = chartConfiguration.behindText
-        ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
-        : colors[series[0].rankAtDepth % colors.length];
-    }
+    const outputColor = chartConfiguration.behindText
+      ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
+      : colors[series[0].rankAtDepth % colors.length];
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
@@ -86,13 +80,12 @@ function buildGradient(
 ): Omit<PaletteDefinition, 'title'> {
   function getColor(
     series: SeriesLayer[],
-    chartConfiguration: ChartColorConfiguration = { behindText: false },
-    state?: unknown
+    chartConfiguration: ChartColorConfiguration = { behindText: false }
   ) {
     const totalSeriesAtDepth = series[0].totalSeriesAtDepth;
     const rankAtDepth = series[0].rankAtDepth;
     const actualColors = colors(totalSeriesAtDepth);
-    const outputColor = (state as string) ?? actualColors[rankAtDepth];
+    const outputColor = actualColors[rankAtDepth];
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
@@ -122,13 +115,9 @@ function buildGradient(
 function buildSyncedKibanaPalette(
   colors: ChartsPluginSetup['legacyColors']
 ): Omit<PaletteDefinition, 'title'> {
-  function getColor(
-    series: SeriesLayer[],
-    chartConfiguration: ChartColorConfiguration = {},
-    state?: unknown
-  ) {
+  function getColor(series: SeriesLayer[], chartConfiguration: ChartColorConfiguration = {}) {
     colors.mappedColors.mapKeys([series[0].name]);
-    const outputColor = state ?? colors.mappedColors.get(series[0].name);
+    const outputColor = colors.mappedColors.get(series[0].name);
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
