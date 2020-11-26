@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ResolverSchema } from '../../../../../../common/endpoint/types';
+
 /**
  * Represents a time range filter
  */
@@ -18,29 +20,6 @@ export interface Timerange {
 export type NodeID = string | number;
 
 /**
- * The fields to use to identify nodes within a resolver tree.
- */
-export interface Schema {
-  /**
-   * the ancestry field should be set to a field that contains an order array representing
-   * the ancestors of a node.
-   */
-  ancestry?: string;
-  /**
-   * id represents the field to use as the unique ID for a node.
-   */
-  id: string;
-  /**
-   * field to use for the name of the node
-   */
-  name?: string;
-  /**
-   * parent represents the field that is the edge between two nodes.
-   */
-  parent: string;
-}
-
-/**
  * Returns the doc value fields filter to use in queries to limit the number of fields returned in the
  * query response.
  *
@@ -49,7 +28,7 @@ export interface Schema {
  * @param schema is the node schema information describing how relationships are formed between nodes
  *  in the resolver graph.
  */
-export function docValueFields(schema: Schema): Array<{ field: string }> {
+export function docValueFields(schema: ResolverSchema): Array<{ field: string }> {
   const filter = [{ field: '@timestamp' }, { field: schema.id }, { field: schema.parent }];
   if (schema.ancestry) {
     filter.push({ field: schema.ancestry });

@@ -16,9 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import React from 'react';
-import PropTypes from 'prop-types';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -37,7 +35,12 @@ import { getServices } from '../../../kibana_services';
 
 const SEARCH_OBJECT_TYPE = 'search';
 
-export function OpenSearchPanel(props) {
+interface OpenSearchPanelProps {
+  onClose: () => void;
+  makeUrl: (id: string) => string;
+}
+
+export function OpenSearchPanel(props: OpenSearchPanelProps) {
   const {
     core: { uiSettings, savedObjects },
     addBasePath,
@@ -102,8 +105,3 @@ export function OpenSearchPanel(props) {
     </EuiFlyout>
   );
 }
-
-OpenSearchPanel.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  makeUrl: PropTypes.func.isRequired,
-};

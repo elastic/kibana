@@ -216,10 +216,10 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockI18nService.setup).not.toHaveBeenCalled();
 });
 
-test(`doesn't validate config if env.isDevClusterMaster is true`, async () => {
+test(`doesn't validate config if env.isDevCliParent is true`, async () => {
   const devParentEnv = Env.createDefault(REPO_ROOT, {
     ...getEnvOptions(),
-    isDevClusterMaster: true,
+    isDevCliParent: true,
   });
 
   const server = new Server(rawConfigService, devParentEnv, logger);
