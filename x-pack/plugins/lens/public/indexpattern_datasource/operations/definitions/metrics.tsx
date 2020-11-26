@@ -11,7 +11,10 @@ import {
   FieldBasedIndexPatternColumn,
   BaseIndexPatternColumn,
 } from './column_types';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import {
+  adjustTimeScaleLabelSuffix,
+  adjustTimeScaleOnOtherColumnChange,
+} from '../time_scale_utils';
 
 type MetricColumn<T> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
@@ -68,6 +71,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
+    onOtherColumnChanged: (column, otherColumns) =>
+      optionalTimeScaling ? adjustTimeScaleOnOtherColumnChange(column, otherColumns) : column,
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(indexPattern.getFieldByName(column.sourceField)!.displayName, column),
     buildColumn: ({ field, previousColumn }) => ({

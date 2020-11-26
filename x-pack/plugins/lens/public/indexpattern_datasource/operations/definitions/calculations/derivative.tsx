@@ -13,6 +13,7 @@ import {
   dateBasedOperationToExpression,
   hasDateField,
 } from './utils';
+import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
 
 const ofName = buildLabelFunction((name?: string) => {
@@ -85,6 +86,7 @@ export const derivativeOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern) => {
     return hasDateField(newIndexPattern);
   },
+  onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
   getErrorMessage: (layer: IndexPatternLayer) => {
     return checkForDateHistogram(
       layer,

@@ -878,6 +878,60 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
     });
 
+    it('should carry over time scaling to other operation if possible', () => {
+      const props = getProps({
+        timeScale: 'h',
+        sourceField: 'bytes',
+        operationType: 'sum',
+        label: 'Sum of bytes per hour',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper
+        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
+        .simulate('click');
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: 'h',
+                label: 'Count of records per hour',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should not carry over time scaling if the other operation does not support it', () => {
+      const props = getProps({
+        timeScale: 'h',
+        sourceField: 'bytes',
+        operationType: 'sum',
+        label: 'Sum of bytes per hour',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
+      expect(props.setState).toHaveBeenCalledWith({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                timeScale: undefined,
+                label: 'Average of bytes',
+              }),
+            },
+          },
+        },
+      });
+    });
+
     it('should allow to change time scaling', () => {
       const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);

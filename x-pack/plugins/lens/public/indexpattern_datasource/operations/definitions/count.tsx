@@ -8,7 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import {
+  adjustTimeScaleLabelSuffix,
+  adjustTimeScaleOnOtherColumnChange,
+} from '../time_scale_utils';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -61,6 +64,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
           : undefined,
     };
   },
+  onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
   toEsAggsConfig: (column, columnId) => ({
     id: columnId,
     enabled: true,

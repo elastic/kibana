@@ -6,7 +6,7 @@
 
 import './dimension_editor.scss';
 import _ from 'lodash';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -44,10 +44,30 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   currentIndexPattern: IndexPattern;
 }
 
+/**
+ * This component shows a debounced input for the label of a dimension. It will update on root state changes
+ * if no debounced changes are in flight because the user is currently typing into the input.
+ */
 const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const [inputValue, setInputValue] = useState(value);
+  const unflushedChanges = useRef(false);
 
-  const onChangeDebounced = useMemo(() => _.debounce(onChange, 256), [onChange]);
+  const onChangeDebounced = useMemo(() => {
+    const callback = _.debounce((val: string) => {
+      onChange(val);
+      unflushedChanges.current = false;
+    }, 256);
+    return (val: string) => {
+      unflushedChanges.current = true;
+      callback(val);
+    };
+  }, [onChange]);
+
+  useEffect(() => {
+    if (!unflushedChanges.current && value !== inputValue) {
+      setInputValue(value);
+    }
+  }, [value, inputValue]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = String(e.target.value);

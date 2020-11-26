@@ -112,7 +112,7 @@ export function TimeScaling({
               }}
             >
               {i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
-                defaultMessage: 'Show with normalized time units',
+                defaultMessage: 'Show with normalized units',
               })}
             </EuiLink>
           </EuiText>
@@ -134,8 +134,8 @@ export function TimeScaling({
         >
           <span>
             {i18n.translate('xpack.lens.indexPattern.timeScale.label', {
-              defaultMessage: 'Normalize by time unit',
-            })}
+              defaultMessage: 'Normalize by unit',
+            })}{' '}
             <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
           </span>
         </EuiToolTip>

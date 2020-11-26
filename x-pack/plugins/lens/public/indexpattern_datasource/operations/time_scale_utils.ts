@@ -6,6 +6,7 @@
 
 import { unitSuffixesLong } from '../suffix_formatter';
 import { TimeScaleUnit } from '../time_scale';
+import { BaseIndexPatternColumn } from './definitions/column_types';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
 
@@ -27,4 +28,27 @@ export function adjustTimeScaleLabelSuffix(
   }
   // add new suffix if column has a time scale now
   return `${cleanedLabel} ${unitSuffixesLong[newTimeScale]}`;
+}
+
+export function adjustTimeScaleOnOtherColumnChange<T extends BaseIndexPatternColumn>(
+  column: T,
+  columns: Partial<Record<string, BaseIndexPatternColumn>>
+) {
+  if (!column.timeScale) {
+    return column;
+  }
+  const hasDateHistogram = Object.values(columns).some(
+    (col) => col?.operationType === 'date_histogram'
+  );
+  if (hasDateHistogram) {
+    return column;
+  }
+  if (column.customLabel) {
+    return column;
+  }
+  return {
+    ...column,
+    timeScale: undefined,
+    label: adjustTimeScaleLabelSuffix(column.label, column.timeScale, undefined),
+  };
 }
