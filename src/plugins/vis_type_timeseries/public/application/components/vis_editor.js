@@ -36,6 +36,12 @@ import { Storage } from '../../../../../plugins/kibana_utils/public';
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
 
+const debouncedFetchFields = debounce(
+  (extractedIndexPatterns) => fetchFields(extractedIndexPatterns),
+  VIS_STATE_DEBOUNCE_DELAY,
+  { leading: true }
+);
+
 export class VisEditor extends Component {
   constructor(props) {
     super(props);
@@ -94,7 +100,7 @@ export class VisEditor extends Component {
 
     const extractedIndexPatterns = extractIndexPatterns(nextModel);
     if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-      fetchFields(extractedIndexPatterns).then((visFields) =>
+      debouncedFetchFields(extractedIndexPatterns).then((visFields) =>
         this.setState({
           visFields,
           extractedIndexPatterns,
