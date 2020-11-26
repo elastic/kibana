@@ -683,6 +683,10 @@ describe('create()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
       validate: {
         params: schema.object({
           param1: schema.string(),

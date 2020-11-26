@@ -52,6 +52,7 @@ describe('find()', () => {
   const listedTypes = new Set([
     {
       actionGroups: [],
+      recoveryActionGroup: { id: 'recovered', name: 'recovered' },
       actionVariables: undefined,
       defaultActionGroupId: 'default',
       id: 'myType',
@@ -108,6 +109,7 @@ describe('find()', () => {
           id: 'myType',
           name: 'Test',
           actionGroups: [{ id: 'default', name: 'Default' }],
+          recoveryActionGroup: { id: 'recovered', name: 'recovered' },
           defaultActionGroupId: 'default',
           producer: 'alerts',
           authorizedConsumers: {

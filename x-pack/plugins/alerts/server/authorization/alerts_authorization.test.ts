@@ -172,6 +172,10 @@ beforeEach(() => {
     name: 'My Alert Type',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    recoveryActionGroup: {
+      id: 'recovered',
+      name: 'Recovered',
+    },
     async executor() {},
     producer: 'myApp',
   }));
@@ -534,6 +538,10 @@ describe('AlertsAuthorization', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'alerts',
@@ -542,6 +550,10 @@ describe('AlertsAuthorization', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
@@ -550,6 +562,10 @@ describe('AlertsAuthorization', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
       id: 'mySecondAppAlertType',
       name: 'mySecondAppAlertType',
       producer: 'myApp',
@@ -824,6 +840,10 @@ describe('AlertsAuthorization', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'myOtherApp',
@@ -832,6 +852,10 @@ describe('AlertsAuthorization', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
@@ -880,6 +904,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -906,6 +934,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -972,6 +1004,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -994,6 +1030,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1055,6 +1095,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1145,6 +1189,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -1167,6 +1215,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myAppAlertType",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1241,6 +1293,10 @@ describe('AlertsAuthorization', () => {
                   "id": "myOtherAppAlertType",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);

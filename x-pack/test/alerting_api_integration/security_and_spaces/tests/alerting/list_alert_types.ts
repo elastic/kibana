@@ -28,6 +28,10 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       params: [],
     },
     producer: 'alertsFixture',
+    recoveryActionGroup: {
+      id: 'recovered',
+      name: 'Recovered',
+    },
   };
 
   const expectedRestrictedNoOpType = {

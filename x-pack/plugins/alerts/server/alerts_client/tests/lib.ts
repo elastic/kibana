@@ -82,6 +82,10 @@ export function getBeforeSetup(
     id: '123',
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    recoveryActionGroup: {
+      id: 'recovered',
+      name: 'Recovered',
+    },
     defaultActionGroupId: 'default',
     async executor() {},
     producer: 'alerts',

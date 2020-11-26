@@ -32,7 +32,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     messageVariables?.map((variable: ActionVariable, i: number) => (
       <EuiContextMenuItem
         key={variable.name}
-        data-test-subj={`variableMenuButton-${i}`}
+        data-test-subj={`variableMenuButton-${variable.name}`}
         icon="empty"
         onClick={() => {
           onSelectEventHandler(variable.name);

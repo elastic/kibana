@@ -308,6 +308,10 @@ describe('get()', () => {
         "id": "test",
         "name": "Test",
         "producer": "alerts",
+        "recoveryActionGroup": Object {
+          "id": "recovered",
+          "name": "Recovered",
+        },
       }
     `);
   });
@@ -365,6 +369,10 @@ describe('list()', () => {
           "id": "test",
           "name": "Test",
           "producer": "alerts",
+          "recoveryActionGroup": Object {
+            "id": "recovered",
+            "name": "Recovered",
+          },
         },
       }
     `);

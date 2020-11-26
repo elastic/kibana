@@ -53,6 +53,10 @@ describe('aggregate()', () => {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
       id: 'myType',
       name: 'myType',
       producer: 'myApp',
@@ -102,6 +106,10 @@ describe('aggregate()', () => {
           name: 'Test',
           actionGroups: [{ id: 'default', name: 'Default' }],
           defaultActionGroupId: 'default',
+          recoveryActionGroup: {
+            id: 'recovered',
+            name: 'Recovered',
+          },
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },

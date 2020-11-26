@@ -97,6 +97,10 @@ describe('update()', () => {
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
       async executor() {},
       producer: 'alerts',
     });
@@ -676,6 +680,10 @@ describe('update()', () => {
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      recoveryActionGroup: {
+        id: 'recovered',
+        name: 'Recovered',
+      },
       validate: {
         params: schema.object({
           param1: schema.string(),
@@ -1021,6 +1029,10 @@ describe('update()', () => {
         name: 'Test',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        recoveryActionGroup: {
+          id: 'recovered',
+          name: 'Recovered',
+        },
         async executor() {},
         producer: 'alerts',
       });

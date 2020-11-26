@@ -43,6 +43,10 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        recoveryActionGroup: {
+          id: 'recovered',
+          name: 'Recovered',
+        },
         authorizedConsumers: {},
         actionVariables: {
           context: [],
@@ -74,6 +78,10 @@ describe('listAlertTypesRoute', () => {
             "id": "1",
             "name": "name",
             "producer": "test",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
           },
         ],
       }
@@ -107,6 +115,10 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        recoveryActionGroup: {
+          id: 'recovered',
+          name: 'Recovered',
+        },
         authorizedConsumers: {},
         actionVariables: {
           context: [],
@@ -156,6 +168,10 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        recoveryActionGroup: {
+          id: 'recovered',
+          name: 'Recovered',
+        },
         authorizedConsumers: {},
         actionVariables: {
           context: [],

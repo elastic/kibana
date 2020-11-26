@@ -14,6 +14,10 @@ const mockAlertType = (id: string): AlertType => ({
   id,
   name: id,
   actionGroups: [],
+  recoveryActionGroup: {
+    id: 'recovered',
+    name: 'Recovered',
+  },
   actionVariables: [],
   defaultActionGroupId: 'default',
   producer: 'alerts',

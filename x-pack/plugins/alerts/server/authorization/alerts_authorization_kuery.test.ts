@@ -17,6 +17,10 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            recoveryActionGroup: {
+              id: 'recovered',
+              name: 'Recovered',
+            },
             id: 'myAppAlertType',
             name: 'myAppAlertType',
             producer: 'myApp',
@@ -40,6 +44,10 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            recoveryActionGroup: {
+              id: 'recovered',
+              name: 'Recovered',
+            },
             id: 'myAppAlertType',
             name: 'myAppAlertType',
             producer: 'myApp',
@@ -65,6 +73,10 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            recoveryActionGroup: {
+              id: 'recovered',
+              name: 'Recovered',
+            },
             id: 'myAppAlertType',
             name: 'myAppAlertType',
             producer: 'myApp',
@@ -78,6 +90,10 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            recoveryActionGroup: {
+              id: 'recovered',
+              name: 'Recovered',
+            },
             id: 'myOtherAppAlertType',
             name: 'myOtherAppAlertType',
             producer: 'alerts',
@@ -91,6 +107,10 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           {
             actionGroups: [],
             defaultActionGroupId: 'default',
+            recoveryActionGroup: {
+              id: 'recovered',
+              name: 'Recovered',
+            },
             id: 'mySecondAppAlertType',
             name: 'mySecondAppAlertType',
             producer: 'myApp',
