@@ -16,7 +16,7 @@ export interface BaseIndexPatternColumn extends Operation {
 // export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
 export type FormattedIndexPatternColumn = BaseIndexPatternColumn & {
   params?: {
-    format: {
+    format?: {
       id: string;
       params?: {
         decimals: number;

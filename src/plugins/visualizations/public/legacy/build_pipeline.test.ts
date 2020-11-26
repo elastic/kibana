@@ -101,12 +101,6 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       expect(actual).toMatchSnapshot();
     });
 
-    it('handles metrics/tsvb function', () => {
-      const params = { foo: 'bar' };
-      const actual = buildPipelineVisFunction.metrics(params, schemasDef, uiState);
-      expect(actual).toMatchSnapshot();
-    });
-
     describe('handles region_map function', () => {
       it('without buckets', () => {
         const params = { metric: {} };
