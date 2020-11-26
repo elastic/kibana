@@ -43,8 +43,8 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
 
-  const onSelectMessageVariable = ({ name, noEscape }: ActionVariable) => {
-    const templatedVar = noEscape ? `{{{${name}}}}` : `{{${name}}}`;
+  const onSelectMessageVariable = ({ name, useWithTripleBracesInTemplates }: ActionVariable) => {
+    const templatedVar = useWithTripleBracesInTemplates ? `{{{${name}}}}` : `{{${name}}}`;
     let newValue = '';
     if (cursorPosition) {
       const cursor = cursorPosition.getCursor();

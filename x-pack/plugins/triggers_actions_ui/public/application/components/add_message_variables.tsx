@@ -41,7 +41,9 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       >
         <>
           <EuiText size="m">
-            {variable.noEscape ? `{{{${variable.name}}}}` : `{{${variable.name}}}`}
+            {variable.useWithTripleBracesInTemplates
+              ? `{{{${variable.name}}}}`
+              : `{{${variable.name}}}`}
           </EuiText>
           <EuiText size="m" color="subdued">
             <div className="euiTextColor--subdued">{variable.description}</div>

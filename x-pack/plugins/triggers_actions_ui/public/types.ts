@@ -125,7 +125,7 @@ export type ActionConnectorTableItem = ActionConnector & {
 export interface ActionVariable {
   name: string;
   description: string;
-  noEscape?: boolean;
+  useWithTripleBracesInTemplates?: boolean;
 }
 
 export interface ActionVariables {
