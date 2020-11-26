@@ -17,7 +17,7 @@ import {
   AlertInstanceState,
   LegacyAlert,
 } from './types';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance, AlertExecutorOptions } from '../../../alerts/server';
 import {
   INDEX_ALERTS,
   ALERT_LICENSE_EXPIRATION,
