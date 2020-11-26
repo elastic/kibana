@@ -24,18 +24,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSwitchEvent } from '@elastic/eui';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { InputControlVisParams } from '../../types';
 
-interface OptionsTabParams {
-  updateFiltersOnChange: boolean;
-  useTimeFilter: boolean;
-  pinFilters: boolean;
-}
-type OptionsTabInjectedProps = Pick<
-  VisOptionsProps<OptionsTabParams>,
-  'vis' | 'setValue' | 'stateParams'
->;
-
-export type OptionsTabProps = OptionsTabInjectedProps;
+export type OptionsTabProps = VisOptionsProps<InputControlVisParams>;
 
 export class OptionsTab extends PureComponent<OptionsTabProps> {
   handleUpdateFiltersChange = (event: EuiSwitchEvent) => {

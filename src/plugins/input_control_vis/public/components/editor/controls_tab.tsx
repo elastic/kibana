@@ -44,16 +44,14 @@ import {
 } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
 import { InputControlVisDependencies } from '../../plugin';
+import { InputControlVisParams } from '../../types';
 
 interface ControlsTabUiState {
   type: CONTROL_TYPES;
 }
 
-interface ControlsTabUiParams {
-  controls: ControlParams[];
-}
 type ControlsTabUiInjectedProps = InjectedIntlProps &
-  Pick<VisOptionsProps<ControlsTabUiParams>, 'vis' | 'stateParams' | 'setValue'> & {
+  VisOptionsProps<InputControlVisParams> & {
     deps: InputControlVisDependencies;
   };
 
