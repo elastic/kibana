@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import $ from 'jquery';
+
 interface LazyScope extends ng.IScope {
   [key: string]: any;
 }
@@ -33,20 +36,20 @@ export function createInfiniteScrollDirective() {
        * and have therefore to be considered for calculation of infinite scrolling
        */
       const scrollDiv = $element.parents('.dscTable');
-      const scrollDivMobile = $element.parents('.dscPageBody');
+      const scrollDivMobile = $(window);
 
       function onScroll() {
         if (!$scope.more) return;
-        const usedScrollDiv = document.getElementsByClassName('dscSidebar__mobile').length
-          ? scrollDivMobile
-          : scrollDiv;
+        const isMobileView = document.getElementsByClassName('dscSidebar__mobile').length > 0;
+        const usedScrollDiv = isMobileView ? scrollDivMobile : scrollDiv;
+        const scrollTop = usedScrollDiv.scrollTop();
 
         const winHeight = Number(usedScrollDiv.height());
-        const winBottom = Number(winHeight) + Number(usedScrollDiv.scrollTop());
+        const winBottom = Number(winHeight) + Number(scrollTop);
         const elTop = $element.get(0).offsetTop || 0;
         const remaining = elTop - winBottom;
 
-        if (remaining <= winHeight * 0.5) {
+        if (remaining <= winHeight) {
           $scope[$scope.$$phase ? '$eval' : '$apply'](function () {
             $scope.more();
           });
@@ -62,11 +65,11 @@ export function createInfiniteScrollDirective() {
       }
 
       scrollDiv.on('scroll', scheduleCheck);
-      scrollDivMobile.on('scroll', scheduleCheck);
+      window.addEventListener('scroll', scheduleCheck);
       $scope.$on('$destroy', function () {
         clearTimeout(checkTimer);
         scrollDiv.off('scroll', scheduleCheck);
-        scrollDivMobile.off('scroll', scheduleCheck);
+        window.removeEventListener('scroll', scheduleCheck);
       });
       scheduleCheck();
     },
