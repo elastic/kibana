@@ -23,15 +23,16 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { SavedQuery, TimefilterContract } from '../../../../data/public';
+import { DashboardSavedObject } from '../..';
+import { IndexPattern, SavedQuery, TimefilterContract } from '../../../../data/public';
 
 import { ViewMode } from '../../../../embeddable/public';
 import { useKibana } from '../../../../kibana_react/public';
 import { setStateToKbnUrl, unhashUrl } from '../../../../kibana_utils/public';
 import { SavedObjectSaveOpts, SaveResult, showSaveModal } from '../../../../saved_objects/public';
 import { NavAction } from '../../types';
-import { DashboardAppComponentActiveState } from '../dashboard_app';
 import { UrlParams } from '../dashboard_router';
+import { DashboardStateManager } from '../dashboard_state_manager';
 import { leaveConfirmStrings } from '../dashboard_strings';
 import { saveDashboard } from '../lib';
 import {
@@ -45,6 +46,7 @@ import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
 import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
+import { DashboardContainer } from '..';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
@@ -62,16 +64,20 @@ export interface DashboardTopNavState {
   savedQuery?: SavedQuery;
 }
 
-export type DashboardTopNavProps = DashboardAppComponentActiveState & {
+export interface DashboardTopNavProps {
   onQuerySubmit: (_payload: unknown, isUpdate: boolean | undefined) => void;
   updateViewMode: (newViewMode: ViewMode) => void;
+  dashboardStateManager: DashboardStateManager;
+  dashboardContainer: DashboardContainer;
   embedSettings?: DashboardEmbedSettings;
+  savedDashboard: DashboardSavedObject;
   timefilter: TimefilterContract;
+  indexPatterns: IndexPattern[];
   redirectTo: DashboardRedirect;
   addFromLibrary: () => void;
   lastDashboardId?: string;
   createNew: () => void;
-};
+}
 
 export function DashboardTopNav({
   dashboardStateManager,
