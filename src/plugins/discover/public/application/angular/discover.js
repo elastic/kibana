@@ -260,7 +260,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
         if (oldStatePartial.index !== newStatePartial.index) {
-          //in case of index switch the route has currently to be reloaded, legacy
+          //in case of index pattern switch the route has currently to be reloaded, legacy
+          $route.reload();
           return;
         }
 
@@ -305,8 +306,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         $scope.state.sort,
         config.get(MODIFY_COLUMNS_ON_SWITCH)
       );
-      await replaceUrlAppState(nextAppState);
-      $route.reload();
+      await setAppState(nextAppState);
     }
   };
 
