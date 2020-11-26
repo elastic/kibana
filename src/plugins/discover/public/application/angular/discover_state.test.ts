@@ -29,7 +29,7 @@ describe('Test discover state', () => {
     history = createBrowserHistory();
     history.push('/');
     state = getState({
-      defaultAppState: { index: 'test' },
+      getStateDefaults: () => ({ index: 'test' }),
       history,
     });
     await state.replaceUrlAppState({});
@@ -84,7 +84,7 @@ describe('Test discover state with legacy migration', () => {
       "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
     );
     state = getState({
-      defaultAppState: { index: 'test' },
+      getStateDefaults: () => ({ index: 'test' }),
       history,
     });
     expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`

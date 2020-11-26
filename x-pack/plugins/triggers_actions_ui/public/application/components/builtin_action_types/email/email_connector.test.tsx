@@ -7,8 +7,8 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { EmailActionConnector } from '../types';
 import EmailActionConnectorFields from './email_connector';
-import { DocLinksStart } from 'kibana/public';
 
+jest.mock('../../../../common/lib/kibana');
 describe('EmailActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
     const actionConnector = {
@@ -30,7 +30,6 @@ describe('EmailActionConnectorFields renders', () => {
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -61,7 +60,6 @@ describe('EmailActionConnectorFields renders', () => {
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -89,7 +87,6 @@ describe('EmailActionConnectorFields renders', () => {
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -114,7 +111,6 @@ describe('EmailActionConnectorFields renders', () => {
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );

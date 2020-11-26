@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { AgentLogsState } from './agent_logs';
+
 export const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
 export const AGENT_DATASET = 'elastic_agent';
 export const AGENT_DATASET_PATTERN = 'elastic_agent.*';
@@ -24,3 +26,21 @@ export const DEFAULT_DATE_RANGE = {
   start: 'now-1d',
   end: 'now',
 };
+export const DEFAULT_LOGS_STATE: AgentLogsState = {
+  start: DEFAULT_DATE_RANGE.start,
+  end: DEFAULT_DATE_RANGE.end,
+  logLevels: [],
+  datasets: [AGENT_DATASET],
+  query: '',
+};
+
+export const AGENT_LOG_LEVELS = {
+  ERROR: 'error',
+  WARNING: 'warning',
+  INFO: 'info',
+  DEBUG: 'debug',
+};
+
+export const ORDERED_FILTER_LOG_LEVELS = ['error', 'warning', 'warn', 'notice', 'info', 'debug'];
+
+export const DEFAULT_LOG_LEVEL = AGENT_LOG_LEVELS.INFO;
