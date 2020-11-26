@@ -45,6 +45,7 @@ import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
+import { TimelineTabs } from '../../store/timeline/model';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
@@ -237,6 +238,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -336,6 +338,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -435,6 +438,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -532,6 +536,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -629,6 +634,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
         columns: [
           {
@@ -795,6 +801,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
         columns: [
           {
@@ -932,6 +939,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -1031,6 +1039,7 @@ describe('helpers', () => {
 
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
+        activeTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',

@@ -17,17 +17,17 @@ export const TITLE = i18n.translate('xpack.securitySolution.timeline.properties.
   defaultMessage: 'Title',
 });
 
-export const FAVORITE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.favoriteTooltip',
+export const ADD_TO_FAVORITES = i18n.translate(
+  'xpack.securitySolution.timeline.properties.addToFavoriteButtonLabel',
   {
-    defaultMessage: 'Favorite',
+    defaultMessage: 'Add to favorites',
   }
 );
 
-export const NOT_A_FAVORITE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.notAFavoriteTooltip',
+export const REMOVE_FROM_FAVORITES = i18n.translate(
+  'xpack.securitySolution.timeline.properties.removeFromFavoritesButtonLabel',
   {
-    defaultMessage: 'Not a Favorite',
+    defaultMessage: 'Remove from favorites',
   }
 );
 

@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -97,37 +97,42 @@ export const FieldsPane = React.memo<Props>(
       [columnHeaders, dispatch, timelineId]
     );
 
+    const filteredBrowserFieldsExists = useMemo(
+      () => Object.keys(filteredBrowserFields).length > 0,
+      [filteredBrowserFields]
+    );
+
+    if (filteredBrowserFieldsExists) {
+      return (
+        <Category
+          categoryId={selectedCategoryId}
+          data-test-subj="category"
+          filteredBrowserFields={filteredBrowserFields}
+          fieldItems={getFieldItems({
+            browserFields: filteredBrowserFields,
+            category: filteredBrowserFields[selectedCategoryId],
+            categoryId: selectedCategoryId,
+            columnHeaders,
+            highlight: searchInput,
+            onUpdateColumns,
+            timelineId,
+            toggleColumn,
+          })}
+          width={width}
+          onCategorySelected={onCategorySelected}
+          timelineId={timelineId}
+        />
+      );
+    }
+
     return (
-      <>
-        {Object.keys(filteredBrowserFields).length > 0 ? (
-          <Category
-            categoryId={selectedCategoryId}
-            data-test-subj="category"
-            filteredBrowserFields={filteredBrowserFields}
-            fieldItems={getFieldItems({
-              browserFields: filteredBrowserFields,
-              category: filteredBrowserFields[selectedCategoryId],
-              categoryId: selectedCategoryId,
-              columnHeaders,
-              highlight: searchInput,
-              onUpdateColumns,
-              timelineId,
-              toggleColumn,
-            })}
-            width={width}
-            onCategorySelected={onCategorySelected}
-            timelineId={timelineId}
-          />
-        ) : (
-          <NoFieldsPanel>
-            <NoFieldsFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <h3 data-test-subj="no-fields-match">{i18n.NO_FIELDS_MATCH_INPUT(searchInput)}</h3>
-              </EuiFlexItem>
-            </NoFieldsFlexGroup>
-          </NoFieldsPanel>
-        )}
-      </>
+      <NoFieldsPanel>
+        <NoFieldsFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <h3 data-test-subj="no-fields-match">{i18n.NO_FIELDS_MATCH_INPUT(searchInput)}</h3>
+          </EuiFlexItem>
+        </NoFieldsFlexGroup>
+      </NoFieldsPanel>
     );
   }
 );

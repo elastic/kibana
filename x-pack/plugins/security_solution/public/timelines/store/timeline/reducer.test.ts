@@ -40,7 +40,7 @@ import {
   updateTimelineTitle,
   upsertTimelineColumn,
 } from './helpers';
-import { ColumnHeaderOptions, TimelineModel } from './model';
+import { ColumnHeaderOptions, TimelineModel, TimelineTabs } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
@@ -68,6 +68,7 @@ const basicDataProvider: DataProvider = {
   kqlQuery: '',
 };
 const basicTimeline: TimelineModel = {
+  activeTab: TimelineTabs.query,
   columns: [],
   dataProviders: [{ ...basicDataProvider }],
   dateRange: {

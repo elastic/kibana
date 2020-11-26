@@ -13,7 +13,6 @@ import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { StatefulEventDetails } from '../../../../common/components/event_details/stateful_event_details';
-import { LazyAccordion } from '../../lazy_accordion';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { getColumnHeaders } from '../body/column_headers/helpers';
@@ -66,20 +65,6 @@ export const ExpandableEvent = React.memo<Props>(
       [dispatch, timelineId]
     );
 
-    const handleRenderExpandedContent = useCallback(
-      () => (
-        <StatefulEventDetails
-          browserFields={browserFields}
-          columnHeaders={columnHeaders}
-          data={detailsData!}
-          id={event.eventId!}
-          onUpdateColumns={onUpdateColumns}
-          timelineId={timelineId}
-        />
-      ),
-      [browserFields, columnHeaders, detailsData, event.eventId, onUpdateColumns, timelineId]
-    );
-
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
     }
@@ -89,14 +74,14 @@ export const ExpandableEvent = React.memo<Props>(
     }
 
     return (
-      <ExpandableDetails>
-        <LazyAccordion
-          id={`timeline-${timelineId}-row-${event.eventId}`}
-          renderExpandedContent={handleRenderExpandedContent}
-          forceExpand={!!event.eventId && !loading}
-          paddingSize="none"
-        />
-      </ExpandableDetails>
+      <StatefulEventDetails
+        browserFields={browserFields}
+        columnHeaders={columnHeaders}
+        data={detailsData!}
+        id={event.eventId!}
+        onUpdateColumns={onUpdateColumns}
+        timelineId={timelineId}
+      />
     );
   }
 );

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -22,12 +22,6 @@ export enum EventsViewType {
   jsonView = 'json-view',
 }
 
-const CollapseLink = styled(EuiLink)`
-  margin: 20px 0;
-`;
-
-CollapseLink.displayName = 'CollapseLink';
-
 interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
@@ -39,70 +33,84 @@ interface Props {
   timelineId: string;
 }
 
-const Details = styled.div`
-  user-select: none;
+const StyledEuiTabbedContent = styled(EuiTabbedContent)`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+
+  > [role='tabpanel'] {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
 `;
 
-Details.displayName = 'Details';
-
-export const EventDetails = React.memo<Props>(
-  ({
-    browserFields,
-    columnHeaders,
-    data,
-    id,
-    view,
-    onUpdateColumns,
+const EventDetailsComponent: React.FC<Props> = ({
+  browserFields,
+  columnHeaders,
+  data,
+  id,
+  view,
+  onUpdateColumns,
+  onViewSelected,
+  timelineId,
+}) => {
+  const handleTabClick = useCallback((e) => onViewSelected(e.id as EventsViewType), [
     onViewSelected,
-    timelineId,
-  }) => {
-    const handleTabClick = useCallback((e) => onViewSelected(e.id as EventsViewType), [
-      onViewSelected,
-    ]);
+  ]);
 
-    const tabs: EuiTabbedContentTab[] = useMemo(
-      () => [
-        {
-          id: EventsViewType.tableView,
-          name: i18n.TABLE,
-          content: (
-            <>
-              <EuiSpacer />
-              <EventFieldsBrowser
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                data={data}
-                eventId={id}
-                onUpdateColumns={onUpdateColumns}
-                timelineId={timelineId}
-              />
-            </>
-          ),
-        },
-        {
-          id: EventsViewType.jsonView,
-          name: i18n.JSON_VIEW,
-          content: (
-            <>
-              <EuiSpacer />
-              <JsonView data={data} />
-            </>
-          ),
-        },
-      ],
-      [browserFields, columnHeaders, data, id, onUpdateColumns, timelineId]
-    );
+  const tabs: EuiTabbedContentTab[] = useMemo(
+    () => [
+      {
+        id: EventsViewType.tableView,
+        name: i18n.TABLE,
+        content: (
+          <>
+            <EuiSpacer size="m" />
 
-    return (
-      <Details data-test-subj="eventDetails">
-        <EuiTabbedContent
-          tabs={tabs}
-          selectedTab={view === 'table-view' ? tabs[0] : tabs[1]}
-          onTabClick={handleTabClick}
-        />
-      </Details>
-    );
-  }
-);
+            <EuiSpacer size="m" />
+            <EventFieldsBrowser
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              data={data}
+              eventId={id}
+              onUpdateColumns={onUpdateColumns}
+              timelineId={timelineId}
+            />
+          </>
+        ),
+      },
+      {
+        id: EventsViewType.jsonView,
+        name: i18n.JSON_VIEW,
+        content: (
+          <>
+            <EuiSpacer size="m" />
+            <JsonView data={data} />
+          </>
+        ),
+      },
+    ],
+    [browserFields, columnHeaders, data, id, onUpdateColumns, timelineId]
+  );
 
-EventDetails.displayName = 'EventDetails';
+  const selectedTab = useMemo(() => (view === EventsViewType.tableView ? tabs[0] : tabs[1]), [
+    tabs,
+    view,
+  ]);
+
+  return (
+    <StyledEuiTabbedContent
+      data-test-subj="eventDetails"
+      tabs={tabs}
+      selectedTab={selectedTab}
+      onTabClick={handleTabClick}
+    />
+  );
+};
+
+EventDetailsComponent.displayName = 'EventDetailsComponent';
+
+export const EventDetails = React.memo(EventDetailsComponent);

@@ -59,7 +59,7 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   box-shadow: none;
   display: flex;
   flex-direction: column;
-  padding: 14px 10px 0 12px;
+  padding: 0;
 `;
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
@@ -72,7 +72,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   }
 
   .euiFlyoutBody__overflowContent {
-    padding: 0 10px 0 12px;
+    padding: 0;
     height: 100%;
     display: flex;
   }
@@ -80,16 +80,17 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 
 const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   background: none;
-  padding: 0 10px 5px 12px;
+  padding: 0;
 `;
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
+  margin: 0;
   width: 100%;
   overflow: hidden;
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
-  overflow: auto;
+  overflow: hidden;
 `;
 
 const DatePicker = styled(EuiFlexItem)`

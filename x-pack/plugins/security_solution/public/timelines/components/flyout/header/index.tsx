@@ -23,7 +23,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { Description, Name, AddToFavoritesButton } from '../../timeline/properties/helpers';
+import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 
 import { AddToCaseButton } from '../add_to_case_button';
 import { AddTimelineButton } from '../add_timeline_button';
@@ -117,7 +117,7 @@ const RowFlexItem = styled(EuiFlexItem)`
   align-items: center;
 `;
 
-const TimelineName = ({ timelineId }) => {
+const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { title, timelineType } = useDeepEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
@@ -142,7 +142,9 @@ const TimelineName = ({ timelineId }) => {
   );
 };
 
-const TimelineDescription = ({ timelineId }) => {
+const TimelineName = React.memo(TimelineNameComponent);
+
+const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const description = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
@@ -154,15 +156,15 @@ const TimelineDescription = ({ timelineId }) => {
 
   return (
     <>
-      <EuiText>
-        <h3>{content}</h3>
-      </EuiText>
+      <EuiText size="s">{content}</EuiText>
       <SaveTimelineButton timelineId={timelineId} />
     </>
   );
 };
 
-const TimelineStatusInfo = ({ timelineId }) => {
+const TimelineDescription = React.memo(TimelineDescriptionComponent);
+
+const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { status: timelineStatus, updated } = useDeepEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
@@ -171,52 +173,58 @@ const TimelineStatusInfo = ({ timelineId }) => {
   const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);
 
   if (isUnsaved) {
-    return <EuiTextColor color="warning">{'Unsaved'}</EuiTextColor>;
+    return (
+      <EuiText size="xs">
+        <EuiTextColor color="warning">{'Unsaved'}</EuiTextColor>
+      </EuiText>
+    );
   }
 
   return (
-    <EuiTextColor color="default">
-      <FormattedRelative
-        data-test-subj="last-updated-at-date"
-        key="timeline-status-autosaved"
-        value={new Date(updated)}
-      />
-    </EuiTextColor>
+    <EuiText size="xs">
+      <EuiTextColor color="default">
+        <FormattedRelative
+          data-test-subj="last-updated-at-date"
+          key="timeline-status-autosaved"
+          value={new Date(updated)}
+        />
+      </EuiTextColor>
+    </EuiText>
   );
 };
 
-const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  return (
-    <StyledTimelineHeader alignItems="center" gutterSize="m">
-      <EuiFlexItem>
-        <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="s">
-          <RowFlexItem>
-            <TimelineName timelineId={timelineId} />
-          </RowFlexItem>
-          <RowFlexItem>
-            <TimelineDescription timelineId={timelineId} />
-          </RowFlexItem>
-          <EuiFlexItem>
-            <TimelineStatusInfo timelineId={timelineId} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
-      <EuiFlexItem grow={1}>{/* KPIs PLACEHOLDER */}</EuiFlexItem>
+const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => (
+  <StyledTimelineHeader alignItems="center" gutterSize="xl">
+    <EuiFlexItem>
+      <EuiFlexGroup data-test-subj="properties-left" direction="column" gutterSize="none">
+        <RowFlexItem>
+          <TimelineName timelineId={timelineId} />
+        </RowFlexItem>
+        <RowFlexItem>
+          <TimelineDescription timelineId={timelineId} />
+        </RowFlexItem>
+        <EuiFlexItem>
+          <TimelineStatusInfo timelineId={timelineId} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <AddToFavoritesButton timelineId={timelineId} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddToCaseButton timelineId={timelineId} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </StyledTimelineHeader>
-  );
-};
+    <EuiFlexItem grow={1}>{/* KPIs PLACEHOLDER */}</EuiFlexItem>
+
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <AddToFavoritesButton timelineId={timelineId} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AddToCaseButton timelineId={timelineId} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  </StyledTimelineHeader>
+);
 
 FlyoutHeaderComponent.displayName = 'FlyoutHeaderComponent';
 

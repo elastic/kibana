@@ -22,6 +22,7 @@ import { Ecs } from '../../../../common/ecs';
 import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { TimelineTabs } from '../../../timelines/store/timeline/model';
 
 jest.mock('apollo-client');
 
@@ -101,6 +102,7 @@ describe('alert actions', () => {
           from: '2018-11-05T18:58:25.937Z',
           notes: null,
           timeline: {
+            activeTab: TimelineTabs.query,
             columns: [
               {
                 aggregatable: undefined,

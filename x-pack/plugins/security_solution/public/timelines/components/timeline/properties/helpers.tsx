@@ -83,7 +83,7 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}
       onClick={handleClick}
     >
-      {isFavorite ? i18n.NOT_A_FAVORITE : i18n.FAVORITE}
+      {isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES}
     </EuiButton>
   );
 };

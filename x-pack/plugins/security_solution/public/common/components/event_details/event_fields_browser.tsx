@@ -8,6 +8,8 @@ import { sortBy } from 'lodash';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { rgba } from 'polished';
+import styled from 'styled-components';
 
 import { timelineActions } from '../../../timelines/store/timeline';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
@@ -27,6 +29,45 @@ interface Props {
   timelineId: string;
 }
 
+const TableWrapper = styled.div`
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+
+    > .euiFlexGroup:first-of-type {
+      flex: 0;
+    }
+  }
+`;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
+  flex: 1;
+  overflow: auto;
+
+  &::-webkit-scrollbar {
+    height: ${({ theme }) => theme.eui.euiScrollBar};
+    width: ${({ theme }) => theme.eui.euiScrollBar};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
+    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
+  }
+
+  &::-webkit-scrollbar-corner,
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`;
+
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
   ({ browserFields, columnHeaders, data, eventId, onUpdateColumns, timelineId }) => {
@@ -41,6 +82,7 @@ export const EventFieldsBrowser = React.memo<Props>(
         })),
       [data, fieldsByName]
     );
+
     const toggleColumn = useCallback(
       (column: ColumnHeaderOptions) => {
         const exists = columnHeaders.findIndex((c) => c.id === column.id) !== -1;
@@ -81,16 +123,15 @@ export const EventFieldsBrowser = React.memo<Props>(
     );
 
     return (
-      <div className="euiTable--compressed">
-        <EuiInMemoryTable
-          // @ts-expect-error items going in match Partial<BrowserField>, column `render` callbacks expect complete BrowserField
+      <TableWrapper>
+        <StyledEuiInMemoryTable
           items={items}
           columns={columns}
           pagination={false}
           search={search}
           sorting={true}
         />
-      </div>
+      </TableWrapper>
     );
   }
 );

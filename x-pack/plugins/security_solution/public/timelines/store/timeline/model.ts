@@ -137,6 +137,7 @@ export interface TimelineModel {
 export type SubsetTimelineModel = Readonly<
   Pick<
     TimelineModel,
+    | 'activeTab'
     | 'columns'
     | 'dataProviders'
     | 'deletedEventIds'

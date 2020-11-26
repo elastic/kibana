@@ -33,13 +33,13 @@ const EventDetailsComponent: React.FC<EventDetailsProps> = ({
   timelineId,
 }) => {
   const expandedEvent = useDeepEqualSelector(
-    (state) => state.timeline.timelineById[timelineId]?.expandedEvent ?? {}
+    (state) => state.timeline.timelineById[timelineId]?.expandedEvent
   );
 
   return (
     <>
       <ExpandableEventTitle />
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <ExpandableEvent
         browserFields={browserFields}
         docValueFields={docValueFields}

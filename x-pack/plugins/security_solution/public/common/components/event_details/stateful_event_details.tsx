@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { find } from 'lodash/fp';
+import React, { useMemo, useState } from 'react';
 
 import { BrowserFields } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
@@ -27,17 +29,34 @@ export const StatefulEventDetails = React.memo<Props>(
     // TODO: Move to the store
     const [view, setView] = useState<View>(EventsViewType.tableView);
 
+    const message = useMemo(() => {
+      if (data) {
+        const messageField = find({ category: 'base', field: 'message' }, data) as
+          | TimelineEventsDetailsItem
+          | undefined;
+
+        if (messageField?.originalValue) {
+          return messageField?.originalValue;
+        }
+      }
+      return null;
+    }, [data]);
+
     return (
-      <EventDetails
-        browserFields={browserFields}
-        columnHeaders={columnHeaders}
-        data={data}
-        id={id}
-        onUpdateColumns={onUpdateColumns}
-        onViewSelected={setView}
-        timelineId={timelineId}
-        view={view}
-      />
+      <>
+        <EuiText>{message}</EuiText>
+        <EuiSpacer size="m" />
+        <EventDetails
+          browserFields={browserFields}
+          columnHeaders={columnHeaders}
+          data={data}
+          id={id}
+          onUpdateColumns={onUpdateColumns}
+          onViewSelected={setView}
+          timelineId={timelineId}
+          view={view}
+        />
+      </>
     );
   }
 );

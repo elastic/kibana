@@ -5,7 +5,7 @@
  */
 
 import { EuiProgress } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
