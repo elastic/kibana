@@ -65,6 +65,10 @@ jest.mock('../../../common/lib/kibana', () => {
     useGetUserSavedObjectPermissions: jest.fn(),
   };
 });
+jest.mock('./event_details', () => {
+  return { EventDetails: jest.fn(() => <div />) };
+});
+
 describe('Timeline', () => {
   let props = {} as TimelineComponentProps;
   const sort: Sort = {
