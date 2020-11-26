@@ -619,7 +619,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       if (indexOfSource !== -1 && columns.splice(indexOfSource, 1).length > 0) {
         return columns.splice(indexOfSource, 1).length > 0;
       }
-      return ['fields'];
+      return columns;
     } else if (columns.length > 0) {
       return columns;
     }
@@ -928,7 +928,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
     $scope.hits = resp.hits.total;
     $scope.rows = resp.hits.hits.map((hit) => {
-      if ($scope.useNewFieldsApi) {
+      if ($scope.useNewFieldsApi && $scope.state.columns.length === 0) {
         const fields = {};
         Object.keys(hit.fields)
           .splice(0, FIRST_N_COLUMNS_FROM_FIELDS_RESPONSE)
@@ -1027,8 +1027,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       .setField('query', data.query.queryString.getQuery() || null)
       .setField('filter', filterManager.getFilters());
     if (useNewFieldsApi) {
-      searchSource.setField('fields', ['*']);
-      searchSource.setField('source', false);
+      const { columns } = $scope.state;
+      if (columns.length === 0 || columns.includes('fields')) {
+        searchSource.setField('fields', ['*']);
+        searchSource.setField('source', false);
+      }
     }
     return Promise.resolve();
   };

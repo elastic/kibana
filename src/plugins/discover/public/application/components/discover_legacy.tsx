@@ -158,6 +158,23 @@ export function DiscoverLegacy({
     'col-md-12': isSidebarClosed,
   });
 
+  const getDisplayColumns = () => {
+    const { columns } = state;
+    if (useNewFieldsApi && columns) {
+      const indexOfSource = columns.indexOf('_source');
+      if (indexOfSource !== -1 && columns.splice(indexOfSource, 1).length > 0) {
+        return columns.splice(indexOfSource, 1);
+      } else if (
+        columns.length === 0 ||
+        (indexOfSource !== -1 && columns.splice(indexOfSource, 1).length === 0)
+      ) {
+        return ['fields'];
+      }
+      return columns;
+    }
+    return columns;
+  };
+
   return (
     <I18nProvider>
       <div className="dscAppContainer" data-fetch-counter={fetchCounter}>
@@ -187,7 +204,7 @@ export function DiscoverLegacy({
               {!isSidebarClosed && (
                 <div className="dscFieldChooser">
                   <DiscoverSidebar
-                    columns={state.columns || []}
+                    columns={getDisplayColumns() || []}
                     fieldCounts={fieldCounts}
                     hits={rows}
                     indexPatternList={indexPatternList}
@@ -277,7 +294,7 @@ export function DiscoverLegacy({
                       {rows && rows.length && (
                         <div className="dscDiscover">
                           <DocTableLegacy
-                            columns={state.columns || []}
+                            columns={getDisplayColumns() || []}
                             indexPattern={indexPattern}
                             minimumVisibleRows={minimumVisibleRows}
                             rows={rows}
