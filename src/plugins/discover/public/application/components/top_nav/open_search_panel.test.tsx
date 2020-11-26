@@ -18,29 +18,20 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { shallow } from 'enzyme';
+
+jest.mock('../../../kibana_services', () => {
+  return {
+    getServices: () => ({
+      core: { uiSettings: {}, savedObjects: {} },
+      addBasePath: (path: string) => path,
+    }),
+  };
+});
+
 import { OpenSearchPanel } from './open_search_panel';
 
-let isOpen = false;
-
-export function showOpenSearchPanel({ makeUrl, I18nContext }) {
-  if (isOpen) {
-    return;
-  }
-
-  isOpen = true;
-  const container = document.createElement('div');
-  const onClose = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    isOpen = false;
-  };
-
-  document.body.appendChild(container);
-  const element = (
-    <I18nContext>
-      <OpenSearchPanel onClose={onClose} makeUrl={makeUrl} />
-    </I18nContext>
-  );
-  ReactDOM.render(element, container);
-}
+test('render', () => {
+  const component = shallow(<OpenSearchPanel onClose={jest.fn()} makeUrl={jest.fn()} />);
+  expect(component).toMatchSnapshot();
+});
