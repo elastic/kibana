@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -12,10 +12,15 @@ import {
   EuiImage,
   EuiLink,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { useIntersection } from 'react-use';
 import moment from 'moment';
 import styled from 'styled-components';
 import { Ping } from '../../../../../common/runtime_types/ping';
+import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
+import { useFetcher } from '../../../../../../observability/public';
+import { getJourneyScreenshot } from '../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../contexts';
 
 const StepImage = styled(EuiImage)`
@@ -61,72 +66,86 @@ interface Props {
 export const PingTimestamp = ({ timestamp, ping }: Props) => {
   const [stepNo, setStepNo] = useState(1);
 
-  const [maxStep, setMaxStep] = useState<number | null>(null);
+  const [stepImages, setStepImages] = useState<string[]>([]);
+
+  const intersectionRef = React.useRef(null);
 
   const { basePath } = useContext(UptimeSettingsContext);
 
-  const timeStamp = moment(timestamp);
+  const imgPath = basePath + `/api/uptime/journey/screenshot/${ping.monitor.check_group}/${stepNo}`;
 
-  let checkedTime = '';
+  const intersection = useIntersection(intersectionRef, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 1,
+  });
 
-  if (moment().diff(timeStamp, 'd') > 1) {
-    checkedTime = timeStamp.format('ll LTS');
-  } else {
-    checkedTime = timeStamp.format('LTS');
-  }
+  const { data } = useFetcher(() => {
+    if (intersection && intersection.intersectionRatio === 1 && !stepImages[stepNo - 1])
+      return getJourneyScreenshot(imgPath);
+  }, [intersection?.intersectionRatio, stepNo]);
 
-  const imgSrc = basePath + `/api/uptime/journey/screenshot/${ping.monitor.check_group}/${stepNo}`;
+  useEffect(() => {
+    if (data) {
+      setStepImages((prevState) => [...prevState, data?.src]);
+    }
+  }, [data]);
+
+  const imgSrc = stepImages[stepNo] || data?.src;
 
   return (
-    <StepDiv>
-      <StepImage
-        allowFullScreen={true}
-        size="s"
-        hasShadow
-        caption={
-          <>
-            <EuiFlexGroup
-              className="stepArrowsFullScreen"
-              gutterSize="s"
-              alignItems="center"
-              style={{ position: 'absolute', bottom: 32, left: 'calc(50% - 32px)' }}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  disabled={stepNo === 1}
-                  color="subdued"
-                  size="m"
-                  onClick={() => {
-                    setStepNo(stepNo - 1);
-                  }}
-                  iconType="arrowLeft"
-                  aria-label="Next"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  disabled={stepNo === maxStep}
-                  color="subdued"
-                  size="m"
-                  onClick={() => {
-                    setStepNo(stepNo + 1);
-                  }}
-                  iconType="arrowRight"
-                  aria-label="Next"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiLink href={'/step/details'}>{checkedTime}</EuiLink>
-            <EuiSpacer size="s" />
-          </>
-        }
-        alt="NO IMAGE AVAILABLE"
-        url={imgSrc}
-        onError={() => {
-          setMaxStep(stepNo - 1);
-          setStepNo(stepNo - 1);
-        }}
-      />
+    <StepDiv ref={intersectionRef}>
+      {imgSrc && (
+        <StepImage
+          allowFullScreen={true}
+          size="s"
+          hasShadow
+          caption={
+            <>
+              <div
+                className="stepArrowsFullScreen"
+                style={{ position: 'absolute', bottom: 32, width: '100%' }}
+              >
+                <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      disabled={stepNo === 1}
+                      color="subdued"
+                      size="m"
+                      onClick={() => {
+                        setStepNo(stepNo - 1);
+                      }}
+                      iconType="arrowLeft"
+                      aria-label="Next"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText>
+                      Step:{stepNo} {data?.stepName}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      disabled={stepNo === data?.maxSteps}
+                      color="subdued"
+                      size="m"
+                      onClick={() => {
+                        setStepNo(stepNo + 1);
+                      }}
+                      iconType="arrowRight"
+                      aria-label="Next"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+              <EuiLink href={'/step/details'}>{getShortTimeStamp(moment(timestamp))}</EuiLink>
+              <EuiSpacer size="s" />
+            </>
+          }
+          alt="NO IMAGE AVAILABLE"
+          url={imgSrc}
+        />
+      )}
       <EuiFlexGroup
         className="stepArrows"
         gutterSize="s"
@@ -147,7 +166,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            disabled={stepNo === maxStep}
+            disabled={stepNo === data?.maxSteps}
             color="subdued"
             size="s"
             onClick={() => {

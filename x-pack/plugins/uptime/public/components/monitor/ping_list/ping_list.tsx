@@ -86,7 +86,6 @@ export const PingList = () => {
     {
       field: 'monitor.status',
       name: I18LABELS.STATUS_LABEL,
-      width: '15%',
       render: (pingStatus: string, item: Ping) => (
         <PingStatusColumn pingStatus={pingStatus} item={item} />
       ),
@@ -94,7 +93,6 @@ export const PingList = () => {
     {
       align: 'left',
       field: 'observer.geo.name',
-      width: '10%',
       name: LOCATION_LABEL,
       render: (location: string) => <LocationName location={location} />,
     },
@@ -103,7 +101,6 @@ export const PingList = () => {
           {
             align: 'left',
             field: 'timestamp',
-            width: '200px',
             name: TIMESTAMP_LABEL,
             render: (timestamp: string, item: Ping) => (
               <PingTimestamp timestamp={timestamp} ping={item} />
@@ -118,7 +115,6 @@ export const PingList = () => {
             align: 'right',
             dataType: 'number',
             field: 'monitor.ip',
-            width: '150px',
             name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
               defaultMessage: 'IP',
             }),
@@ -131,7 +127,6 @@ export const PingList = () => {
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      width: '8%',
       render: (duration: number) =>
         i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
           values: { millis: microsToMillis(duration) },
@@ -141,7 +136,7 @@ export const PingList = () => {
     {
       field: 'error.type',
       name: ERROR_LABEL,
-      width: '35%',
+      width: '30%',
       render: (errorType: string, item: Ping) => <PingErrorCol ping={item} errorType={errorType} />,
     },
     ...(monitorType === MONITOR_TYPES.BROWSER
@@ -149,7 +144,6 @@ export const PingList = () => {
           {
             field: 'monitor.status',
             align: 'left',
-            width: '10%',
             name: i18n.translate('xpack.uptime.pingList.columns.failedStep', {
               defaultMessage: 'Failed step',
             }),
@@ -210,6 +204,7 @@ export const PingList = () => {
           setPageSize(criteria.page!.size);
           setPageIndex(criteria.page!.index);
         }}
+        tableLayout={'auto'}
       />
     </EuiPanel>
   );
