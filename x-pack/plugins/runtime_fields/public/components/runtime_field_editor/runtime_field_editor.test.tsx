@@ -120,5 +120,31 @@ describe('Runtime field editor', () => {
       expect(lastOnChangeCall()[0].isValid).toBe(false);
       expect(form.getErrorsMessages()).toEqual(['There is already a field with this name.']);
     });
+
+    test('should not count the default value as a duplicate', async () => {
+      const existingRuntimeFieldNames = ['myRuntimeField'];
+
+      const defaultValue: RuntimeField = {
+        name: 'myRuntimeField',
+        type: 'boolean',
+        script: { source: 'emit("hello"' },
+      };
+
+      testBed = setup({
+        defaultValue,
+        onChange,
+        docLinks,
+        ctx: { namesNotAllowed: existingRuntimeFieldNames },
+      });
+
+      const { form, component } = testBed;
+
+      await act(async () => {
+        await lastOnChangeCall()[0].submit();
+      });
+
+      expect(lastOnChangeCall()[0].isValid).toBe(true);
+      expect(form.getErrorsMessages()).toEqual([]);
+    });
   });
 });

@@ -74,6 +74,37 @@ const createNameNotAllowedValidator = (
   }
 };
 
+/**
+ * Dynamically retrieve the config for the "name" field, adding
+ * a validator to avoid duplicated runtime fields to be created.
+ *
+ * @param namesNotAllowed Array of names not allowed for the field "name"
+ * @param defaultValue Initial value of the form
+ */
+const getNameFieldConfig = (
+  namesNotAllowed?: string[],
+  defaultValue?: Props['defaultValue']
+): FieldConfig<string, RuntimeField> => {
+  const nameFieldConfig = schema.name as FieldConfig<string, RuntimeField>;
+
+  if (!namesNotAllowed) {
+    return nameFieldConfig;
+  }
+
+  // Add validation to not allow duplicates
+  return {
+    ...nameFieldConfig!,
+    validations: [
+      ...(nameFieldConfig.validations ?? []),
+      {
+        validator: createNameNotAllowedValidator(
+          namesNotAllowed.filter((name) => name !== defaultValue?.name)
+        ),
+      },
+    ],
+  };
+};
+
 const RuntimeFieldFormComp = ({
   defaultValue,
   onChange,
@@ -84,20 +115,7 @@ const RuntimeFieldFormComp = ({
   const { submit, isValid: isFormValid, isSubmitted } = form;
   const [{ name }] = useFormData<RuntimeField>({ form, watch: 'name' });
 
-  let nameFieldConfig = schema.name as FieldConfig<string, RuntimeField>;
-
-  if (namesNotAllowed) {
-    // Add validation to not allow duplicates
-    nameFieldConfig = {
-      ...nameFieldConfig!,
-      validations: [
-        ...(nameFieldConfig.validations ?? []),
-        {
-          validator: createNameNotAllowedValidator(namesNotAllowed),
-        },
-      ],
-    };
-  }
+  const nameFieldConfig = getNameFieldConfig(namesNotAllowed, defaultValue);
 
   useEffect(() => {
     if (onChange) {
