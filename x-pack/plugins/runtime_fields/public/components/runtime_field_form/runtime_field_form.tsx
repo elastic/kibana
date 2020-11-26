@@ -65,7 +65,7 @@ const createNameNotAllowedValidator = (
   if (namesNotAllowed.includes(value)) {
     return {
       message: i18n.translate(
-        'xpack.idxMgmt.mappingsEditor.existRuntimeFieldNamesValidationErrorMessage',
+        'xpack.runtimeFields.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
         {
           defaultMessage: 'There is already a field with this name.',
         }
