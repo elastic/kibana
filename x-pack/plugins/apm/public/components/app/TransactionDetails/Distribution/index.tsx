@@ -196,7 +196,7 @@ export function TransactionDistribution({
           <Settings
             xDomain={{ min: xMin, max: xMax }}
             tooltip={tooltipProps}
-            onElementClick={onBarClick}
+            onProjectionClick={onBarClick}
           />
           {selectedBucket && (
             <RectAnnotation
