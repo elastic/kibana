@@ -17,27 +17,27 @@
  * under the License.
  */
 
-export interface Emitter {
-  on: (...args: any[]) => void;
-  off: (...args: any[]) => void;
-  addListener: Emitter['on'];
-  removeListener: Emitter['off'];
-}
+import getopts from 'getopts';
+// @ts-expect-error no types available, very simple module https://github.com/evanlucas/argsplit
+import argsplit from 'argsplit';
 
-export class BinderBase {
-  private disposal: Array<() => void> = [];
+const execOpts = getopts(process.execArgv);
+const envOpts = getopts(process.env.NODE_OPTIONS ? argsplit(process.env.NODE_OPTIONS) : []);
 
-  public on(emitter: Emitter, ...args: any[]) {
-    const on = emitter.on || emitter.addListener;
-    const off = emitter.off || emitter.removeListener;
-
-    on.apply(emitter, args);
-    this.disposal.push(() => off.apply(emitter, args));
+export function getActiveInspectFlag() {
+  if (execOpts.inspect) {
+    return '--inspect';
   }
 
-  public destroy() {
-    const destroyers = this.disposal;
-    this.disposal = [];
-    destroyers.forEach((fn) => fn());
+  if (execOpts['inspect-brk']) {
+    return '--inspect-brk';
+  }
+
+  if (envOpts.inspect) {
+    return '--inspect';
+  }
+
+  if (envOpts['inspect-brk']) {
+    return '--inspect-brk';
   }
 }

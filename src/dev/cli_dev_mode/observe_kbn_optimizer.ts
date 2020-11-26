@@ -19,6 +19,7 @@
 
 import Chalk from 'chalk';
 import moment from 'moment';
+import { map } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
 import {
   ToolingLog,
@@ -26,23 +27,31 @@ import {
   ToolingLogTextWriter,
   parseLogLevel,
 } from '@kbn/dev-utils';
-import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
+import { runOptimizer, OptimizerConfig, logOptimizerState, OptimizerUpdate } from '@kbn/optimizer';
 
-import { CliArgs } from '../../core/server/config';
-import { LegacyConfig } from '../../core/server/legacy';
+export interface Options {
+  quiet?: boolean;
+  silent?: boolean;
+  watch?: boolean;
+  cache?: boolean;
+  dist?: boolean;
+  oss?: boolean;
+  runExamples?: boolean;
+  pluginPaths?: string[];
+}
 
-type SomeCliArgs = Pick<CliArgs, 'watch' | 'cache' | 'dist' | 'oss' | 'runExamples'>;
+export type KbnOptimizerState = OptimizerUpdate;
 
-export function runKbnOptimizer(opts: SomeCliArgs, config: LegacyConfig) {
+export function observeKbnOptimizer(options: Options) {
   const optimizerConfig = OptimizerConfig.create({
     repoRoot: REPO_ROOT,
-    watch: !!opts.watch,
+    watch: !!options.watch,
     includeCoreBundle: true,
-    cache: !!opts.cache,
-    dist: !!opts.dist,
-    oss: !!opts.oss,
-    examples: !!opts.runExamples,
-    pluginPaths: config.get('plugins.paths'),
+    cache: !!options.cache,
+    dist: !!options.dist,
+    oss: !!options.oss,
+    examples: !!options.runExamples,
+    pluginPaths: options.pluginPaths,
   });
 
   const dim = Chalk.dim('np bld');
@@ -56,15 +65,24 @@ export function runKbnOptimizer(opts: SomeCliArgs, config: LegacyConfig) {
         return Chalk.cyan(msgType);
       case 'debug':
         return Chalk.gray(msgType);
+      case 'warning':
+        return Chalk.yellowBright(msgType);
       default:
         return msgType;
     }
   };
-  const { flags: levelFlags } = parseLogLevel(pickLevelFromFlags(opts));
-  const toolingLog = new ToolingLog();
+
+  const { flags: levelFlags } = parseLogLevel(
+    pickLevelFromFlags({
+      quiet: options.quiet,
+      silent: options.silent,
+    })
+  );
+
+  const log = new ToolingLog();
   const has = <T extends object>(obj: T, x: any): x is keyof T => obj.hasOwnProperty(x);
 
-  toolingLog.setWriters([
+  log.setWriters([
     {
       write(msg) {
         if (has(levelFlags, msg.type) && !levelFlags[msg.type]) {
@@ -81,5 +99,8 @@ export function runKbnOptimizer(opts: SomeCliArgs, config: LegacyConfig) {
     },
   ]);
 
-  return runOptimizer(optimizerConfig).pipe(logOptimizerState(toolingLog, optimizerConfig));
+  return runOptimizer(optimizerConfig).pipe(
+    logOptimizerState(log, optimizerConfig),
+    map(({ state }) => state.phase === 'success' || state.phase === 'issue')
+  );
 }

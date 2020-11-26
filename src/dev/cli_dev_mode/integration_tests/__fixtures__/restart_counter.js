@@ -17,14 +17,21 @@
  * under the License.
  */
 
-import { BinderBase, Emitter } from './binder';
+const Fs = require('fs');
+const Path = require('path');
 
-export class BinderFor extends BinderBase {
-  constructor(private readonly emitter: Emitter) {
-    super();
-  }
+const COUNTER_PATH = Path.resolve(__dirname, '../__tmp__/counter');
 
-  public on(...args: any[]) {
-    super.on(this.emitter, ...args);
-  }
+if (Fs.existsSync(COUNTER_PATH)) {
+  const prev = parseInt(Fs.readFileSync(COUNTER_PATH), 10);
+  const next = Number.isNaN(prev) ? 1 : prev + 1;
+  Fs.writeFileSync(COUNTER_PATH, `${next}`);
+  process.send([`COUNTER_${next}`]);
+} else {
+  Fs.writeFileSync(COUNTER_PATH, `1`);
+  process.send([`COUNTER_1`]);
 }
+
+setTimeout(() => {
+  // keep the proces open
+}, 10000000);

@@ -17,6 +17,21 @@
  * under the License.
  */
 
-import { MockCluster } from './cluster.mock';
-export const mockCluster = new MockCluster();
-jest.mock('cluster', () => mockCluster);
+import * as Rx from 'rxjs';
+import { tap, first, materialize, mapTo } from 'rxjs/operators';
+
+/**
+ * Subscribe to a source observable and emit undefined when it completes
+ */
+export function observeCompletion(source: Rx.Observable<any>) {
+  return source.pipe(
+    materialize(),
+    tap((n) => {
+      if (n.kind === 'E') {
+        throw n.error;
+      }
+    }),
+    first((n) => n.kind === 'C'),
+    mapTo(undefined)
+  );
+}

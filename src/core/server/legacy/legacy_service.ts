@@ -145,7 +145,7 @@ export class LegacyService implements CoreService {
 
     // Receive initial config and create kbnServer/ClusterManager.
     if (this.coreContext.env.isDevCliParent) {
-      await this.createClusterManager(this.legacyRawConfig!);
+      await this.setupCliDevMode(this.legacyRawConfig!);
     } else {
       this.kbnServer = await this.createKbnServer(
         this.settings!,
@@ -170,7 +170,7 @@ export class LegacyService implements CoreService {
     }
   }
 
-  private async createClusterManager(config: LegacyConfig) {
+  private async setupCliDevMode(config: LegacyConfig) {
     const basePathProxy$ = this.coreContext.env.cliArgs.basePath
       ? combineLatest([this.devConfig$, this.httpConfig$]).pipe(
           first(),
@@ -182,8 +182,8 @@ export class LegacyService implements CoreService {
       : EMPTY;
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { ClusterManager } = require('./cluster_manager');
-    return new ClusterManager(
+    const { CliDevMode } = require('./cli_dev_mode');
+    CliDevMode.fromCoreServices(
       this.coreContext.env.cliArgs,
       config,
       await basePathProxy$.toPromise()
