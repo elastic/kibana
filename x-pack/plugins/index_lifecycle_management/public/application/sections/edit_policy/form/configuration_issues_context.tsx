@@ -9,6 +9,7 @@ import React, { FunctionComponent, createContext, useContext } from 'react';
 import { useFormData } from '../../../../shared_imports';
 
 export interface ConfigurationIssues {
+  isUsingForceMergeInHotPhase: boolean;
   /**
    * If this value is true, phases after hot cannot set shrink, forcemerge, freeze, or
    * searchable_snapshot actions.
@@ -23,13 +24,18 @@ const ConfigurationIssuesContext = createContext<ConfigurationIssues>(null as an
 const pathToHotPhaseSearchableSnapshot =
   'phases.hot.actions.searchable_snapshot.snapshot_repository';
 
+const pathToHotForceMerge = 'phases.hot.actions.forcemerge.max_num_segments';
+
 export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => {
-  const [formData] = useFormData({ watch: pathToHotPhaseSearchableSnapshot });
+  const [formData] = useFormData({
+    watch: [pathToHotPhaseSearchableSnapshot, pathToHotForceMerge],
+  });
   return (
     <ConfigurationIssuesContext.Provider
       value={{
         isUsingSearchableSnapshotInHotPhase:
           get(formData, pathToHotPhaseSearchableSnapshot) != null,
+        isUsingForceMergeInHotPhase: get(formData, pathToHotForceMerge) != null,
       }}
     >
       {children}

@@ -8,7 +8,7 @@ import React, { FunctionComponent, useState } from 'react';
 import { EuiSpacer, EuiSwitch, EuiSwitchProps } from '@elastic/eui';
 
 export interface Props extends Omit<EuiSwitchProps, 'checked' | 'onChange'> {
-  children: (() => JSX.Element) | JSX.Element | JSX.Element[];
+  children: (() => JSX.Element) | JSX.Element | JSX.Element[] | undefined;
   initialValue: boolean;
   onChange?: (nextValue: boolean) => void;
 }

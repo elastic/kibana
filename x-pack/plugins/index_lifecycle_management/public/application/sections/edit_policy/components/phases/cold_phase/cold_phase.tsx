@@ -100,7 +100,7 @@ export const ColdPhase: FunctionComponent = () => {
         </EuiDescribedFormGroup>
         {enabled && (
           <>
-            {!isUsingSearchableSnapshotInHotPhase && <SearchableSnapshotField phase="cold" />}
+            <SearchableSnapshotField phase="cold" />
             {/* Data tier allocation section */}
             <DataTierAllocationField
               description={i18nTexts.dataTierAllocation.description}

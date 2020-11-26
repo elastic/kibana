@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiDescribedFormGroup,
   EuiCallOut,
+  EuiAccordion,
 } from '@elastic/eui';
 
 import { Phases } from '../../../../../../../common/types';
@@ -29,6 +30,8 @@ import {
 import { i18nTexts } from '../../../i18n_texts';
 
 import { ROLLOVER_EMPTY_VALIDATION } from '../../../form';
+
+import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { ROLLOVER_FORM_PATHS } from '../../../constants';
 
@@ -46,11 +49,11 @@ import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 const hotProperty: keyof Phases = 'hot';
 
 export const HotPhase: FunctionComponent = () => {
+  const { license } = useEditPolicyContext();
   const [formData] = useFormData({
     watch: useRolloverPath,
   });
   const isRolloverEnabled = get(formData, useRolloverPath);
-
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
 
   return (
@@ -225,9 +228,20 @@ export const HotPhase: FunctionComponent = () => {
           </>
         )}
       </EuiDescribedFormGroup>
+
       {isRolloverEnabled && <ForcemergeField phase="hot" />}
-      {isRolloverEnabled && <SearchableSnapshotField phase="hot" />}
+
       <SetPriorityInputField phase={hotProperty} />
+
+      {license.canUseSearchableSnapshot() && (
+        <EuiAccordion
+          id="ilmHotPhaseAdvancedSettings"
+          buttonContent="Advanced settings"
+          paddingSize="m"
+        >
+          <SearchableSnapshotField phase="hot" />
+        </EuiAccordion>
+      )}
     </>
   );
 };

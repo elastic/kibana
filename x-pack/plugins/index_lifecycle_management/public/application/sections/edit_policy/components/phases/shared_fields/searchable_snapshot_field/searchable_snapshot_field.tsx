@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLink,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import {
@@ -50,10 +51,18 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     services: { cloud },
   } = useKibana();
   const { getUrlForApp, policy, license } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const {
+    isUsingSearchableSnapshotInHotPhase,
+    isUsingForceMergeInHotPhase,
+  } = useConfigurationIssues();
   const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
 
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
+  const isDisabledInColdDueToHotPhase = phase === 'cold' && isUsingSearchableSnapshotInHotPhase;
+  const isDisabledInHotDueToForceMerge = phase === 'hot' && isUsingForceMergeInHotPhase;
+
+  const isDisabled =
+    isDisabledDueToLicense || isDisabledInColdDueToHotPhase || isDisabledInHotDueToForceMerge;
 
   const renderField = () => (
     <SearchableSnapshotDataProvider>
@@ -190,28 +199,10 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     </SearchableSnapshotDataProvider>
   );
 
-  const renderInfoCallout = (): React.ReactNode => {
-    let infoCallout: React.ReactNode;
+  const renderInfoCallout = (): JSX.Element | undefined => {
+    let infoCallout: JSX.Element | undefined;
 
-    if (isDisabledDueToLicense) {
-      infoCallout = (
-        <EuiCallOut
-          data-test-subj="searchableSnapshotDisabledDueToLicense"
-          title={i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle',
-            { defaultMessage: 'Enterprise license required' }
-          )}
-          iconType="questionInCircle"
-        >
-          {i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutBody',
-            {
-              defaultMessage: 'To create a searchable snapshot an enterprise license is required.',
-            }
-          )}
-        </EuiCallOut>
-      );
-    } else if (phase === 'hot' && isUsingSearchableSnapshotInHotPhase) {
+    if (phase === 'hot' && isUsingSearchableSnapshotInHotPhase) {
       infoCallout = (
         <EuiCallOut
           data-test-subj="searchableSnapshotFieldsDisabledCallout"
@@ -242,21 +233,87 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
     return;
   };
 
+  const renderDisabledCallout = (): JSX.Element | undefined => {
+    let disabledCallout: JSX.Element | undefined;
+
+    if (isDisabledDueToLicense) {
+      disabledCallout = (
+        <EuiCallOut
+          data-test-subj="searchableSnapshotDisabledDueToLicense"
+          title={i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle',
+            { defaultMessage: 'Enterprise license required' }
+          )}
+          iconType="questionInCircle"
+        >
+          {i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutBody',
+            {
+              defaultMessage: 'To create a searchable snapshot an enterprise license is required.',
+            }
+          )}
+        </EuiCallOut>
+      );
+    } else if (isDisabledInColdDueToHotPhase) {
+      disabledCallout = (
+        <EuiCallOut
+          data-test-subj="searchableSnapshotFieldsEnabledInHotCallout"
+          title={i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutTitle',
+            { defaultMessage: 'Searchable snapshot disabled' }
+          )}
+          iconType="questionInCircle"
+        >
+          {i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutBody',
+            {
+              defaultMessage:
+                'Cannot perform searchable snapshot in cold when it is configured in hot phase.',
+            }
+          )}
+        </EuiCallOut>
+      );
+    } else if (isDisabledInHotDueToForceMerge) {
+      disabledCallout = (
+        <EuiCallOut
+          data-test-subj="searchableSnapshotFieldsDisabledDueToForceMerge"
+          title={i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutTitle',
+            { defaultMessage: 'Searchable snapshot disabled' }
+          )}
+          iconType="questionInCircle"
+        >
+          {i18n.translate(
+            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledForcemergeCalloutBody',
+            {
+              defaultMessage:
+                'To configure searchable snapshot in the hot phase disable force merge.',
+            }
+          )}
+        </EuiCallOut>
+      );
+    }
+
+    return disabledCallout;
+  };
+
   return (
     <DescribedFormField
       data-test-subj={`searchableSnapshotField-${phase}`}
-      switchProps={{
-        disabled: isDisabledDueToLicense,
-        'data-test-subj': 'searchableSnapshotToggle',
-        label: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
-          { defaultMessage: 'Create searchable snapshot' }
-        ),
-        initialValue:
-          isDisabledDueToLicense === true
-            ? false
-            : Boolean(policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository),
-      }}
+      switchProps={
+        isDisabled
+          ? undefined
+          : {
+              'data-test-subj': 'searchableSnapshotToggle',
+              label: i18n.translate(
+                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
+                { defaultMessage: 'Create searchable snapshot' }
+              ),
+              initialValue: Boolean(
+                policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
+              ),
+            }
+      }
       title={
         <h3>
           {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
@@ -280,7 +337,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
       }
       fullWidth
     >
-      {renderField}
+      {isDisabled ? <EuiFormRow>{renderDisabledCallout() ?? <div />}</EuiFormRow> : renderField}
     </DescribedFormField>
   );
 };
