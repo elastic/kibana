@@ -82,6 +82,7 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
+  cy.scrollTo('top');
   cy.get(EXCEPTIONS_TAB).should('be.visible');
   cy.get(EXCEPTIONS_TAB).click();
 };

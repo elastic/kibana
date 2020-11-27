@@ -112,7 +112,6 @@ describe('Exceptions', () => {
 
       addsException(exception);
       esArchiverLoad('auditbeat_for_exceptions2');
-      activatesRule();
       waitForTheRuleToBeExecuted();
       goToClosedAlerts();
       refreshPage();
