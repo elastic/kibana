@@ -14,7 +14,7 @@ import { InventoryItemType } from '../../../../../../common/inventory_models/typ
 import { MetricsTab } from './tabs/metrics/metrics';
 import { LogsTab } from './tabs/logs';
 import { ProcessesTab } from './tabs/processes';
-import { PropertiesTab } from './tabs/properties';
+import { PropertiesTab } from './tabs/properties/index';
 import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN, OVERLAY_HEADER_SIZE } from './tabs/shared';
 
 interface Props {
