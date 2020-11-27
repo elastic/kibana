@@ -160,11 +160,16 @@ export class IndexPatternsService {
    * @param title {string}
    * @returns {Promise<SavedObject|undefined>}
    */
-  findByTitle = async (title: string) => {
-    const savedObject = await findByTitle(this.savedObjectsClient, title);
+  findByTitle = async (title: string, refresh: boolean = false) => {
+    if (!this.savedObjectsCache || refresh) {
+      await this.refreshSavedObjectsCache();
+    }
+    if (this.savedObjectsCache) {
+      const so = this.savedObjectsCache.find((obj) => obj.attributes.title === title);
 
-    if (savedObject?.id) {
-      return this.get(savedObject?.id);
+      if (so?.id) {
+        return this.get(so.id);
+      }
     }
   };
 

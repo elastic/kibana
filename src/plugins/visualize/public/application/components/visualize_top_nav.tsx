@@ -20,7 +20,6 @@
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import { AppMountParameters, OverlayRef } from 'kibana/public';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../kibana_react/public';
 import {
@@ -31,6 +30,7 @@ import {
 } from '../types';
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
+import type { IndexPattern } from '../../../../data/common/index_patterns';
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -165,14 +165,23 @@ const TopNav = ({
   ]);
 
   useEffect(() => {
+    const asyncSetIndexPattern = async () => {
+      let index: IndexPattern | null = null;
+
+      if (vis.type.getUsedIndexPattern) {
+        [index] = await vis.type.getUsedIndexPattern(vis.params);
+      }
+      if (!index) {
+        index = await services.data.indexPatterns.getDefault();
+      }
+      if (index) {
+        setIndexPattern(index);
+      }
+    };
     if (!vis.data.indexPattern) {
-      services.data.indexPatterns.getDefault().then((index) => {
-        if (index) {
-          setIndexPattern(index);
-        }
-      });
+      asyncSetIndexPattern();
     }
-  }, [services.data.indexPatterns, vis.data.indexPattern]);
+  }, [vis.params, vis.type, services.data.indexPatterns, vis.data.indexPattern]);
 
   return isChromeVisible ? (
     /**

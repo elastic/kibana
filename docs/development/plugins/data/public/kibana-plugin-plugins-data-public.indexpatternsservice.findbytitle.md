@@ -9,5 +9,5 @@ Returns an object matching a given title
 <b>Signature:</b>
 
 ```typescript
-findByTitle: (title: string) => Promise<IndexPattern | undefined>;
+findByTitle: (title: string, refresh?: boolean) => Promise<IndexPattern | undefined>;
 ```

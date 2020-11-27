@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { find } from 'lodash';
-import { SavedObjectsClientCommon, SavedObject } from '..';
+import type { IndexPatternSavedObjectAttrs } from './index_patterns';
+import type { SavedObjectsClientCommon } from '../types';
 
 /**
  * Returns an object matching a given title
@@ -29,7 +29,7 @@ import { SavedObjectsClientCommon, SavedObject } from '..';
  */
 export async function findByTitle(client: SavedObjectsClientCommon, title: string) {
   if (title) {
-    const savedObjects = await client.find({
+    const savedObjects = await client.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
       perPage: 10,
       search: `"${title}"`,
@@ -37,9 +37,6 @@ export async function findByTitle(client: SavedObjectsClientCommon, title: strin
       fields: ['title'],
     });
 
-    return find(
-      savedObjects,
-      (obj: SavedObject<any>) => obj.attributes.title.toLowerCase() === title.toLowerCase()
-    );
+    return savedObjects.find((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
   }
 }
