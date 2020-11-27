@@ -39,7 +39,7 @@ describe('Export timelines', () => {
       exportTimeline(timelineId);
 
       cy.wait('@export').then(({ response: exportResponse }) => {
-        cy.wrap(JSON.parse(exportResponse.body as string).templateTimelineId).should(
+        cy.wrap(JSON.parse(exportResponse!.body as string).templateTimelineId).should(
           'eql',
           templateTimelineId
         );
