@@ -25,7 +25,6 @@ import {
   activatesRule,
   addsException,
   addsExceptionFromRuleSettings,
-  deactivatesRule,
   goToAlertsTab,
   goToExceptionsTab,
   removeException,
@@ -53,6 +52,8 @@ describe('Exceptions', () => {
     waitForAlertsToPopulate();
     refreshPage();
 
+    cy.screenshot('after-activating-rule');
+
     cy.scrollTo('bottom');
     cy.get(SERVER_SIDE_EVENT_COUNT)
       .invoke('text')
@@ -62,7 +63,6 @@ describe('Exceptions', () => {
           NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
         );
       });
-    deactivatesRule();
   });
 
   afterEach(() => {
@@ -76,12 +76,14 @@ describe('Exceptions', () => {
       goToExceptionsTab();
       addsExceptionFromRuleSettings(exception);
       esArchiverLoad('auditbeat_for_exceptions2');
-      activatesRule();
       waitForTheRuleToBeExecuted();
       goToAlertsTab();
       refreshPage();
+      cy.screenshot('after-adding-exceptions-alert-tab');
 
       cy.scrollTo('bottom');
+      cy.screenshot('after-adding-exceptions-alert-tab-after-scrolling');
+
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfAlertsAfterCreatingExceptionText) => {
@@ -90,8 +92,10 @@ describe('Exceptions', () => {
 
       goToClosedAlerts();
       refreshPage();
+      cy.screenshot('closed-alerts');
 
       cy.scrollTo('bottom');
+      cy.screenshot('closed-alerts-after-scroll');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
@@ -139,7 +143,6 @@ describe('Exceptions', () => {
       esArchiverLoad('auditbeat_for_exceptions2');
 
       cy.scrollTo('bottom');
-      activatesRule();
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfAlertsAfterCreatingExceptionText) => {
