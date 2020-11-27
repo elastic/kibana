@@ -54,6 +54,7 @@ export const addsException = (exception: Exception) => {
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
+  cy.get(ADD_EXCEPTIONS_BTN).should('be.visible');
   cy.get(ADD_EXCEPTIONS_BTN).click();
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
@@ -66,7 +67,6 @@ export const addsExceptionFromRuleSettings = (exception: Exception) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);
   });
   cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
-  cy.screenshot('exceptions-modal-filled');
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
   cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
@@ -77,6 +77,7 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
+  cy.get(EXCEPTIONS_TAB).should('be.visible');
   cy.get(EXCEPTIONS_TAB).click();
 };
 

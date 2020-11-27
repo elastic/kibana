@@ -8,6 +8,7 @@ import { CustomRule } from '../objects/rule';
 
 export const createCustomRule = (rule: CustomRule) => {
   cy.request({
+    failOnStatusCode: false,
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
@@ -30,6 +31,7 @@ export const createCustomRule = (rule: CustomRule) => {
 
 export const deleteCustomRule = () => {
   cy.request({
+    failOnStatusCode: false,
     method: 'DELETE',
     url: 'api/detection_engine/rules?rule_id=rule_testing',
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -38,6 +40,7 @@ export const deleteCustomRule = () => {
 
 export const removeSignalsIndex = () => {
   cy.request({
+    failOnStatusCode: false,
     method: 'DELETE',
     url: `api/detection_engine/index`,
     headers: { 'kbn-xsrf': 'delete-signals' },

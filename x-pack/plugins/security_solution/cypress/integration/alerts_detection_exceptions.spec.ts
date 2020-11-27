@@ -41,6 +41,7 @@ describe('Exceptions', () => {
   beforeEach(() => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsIndexToBeCreated();
+    cy.reload(true);
     createCustomRule(newRule);
     goToManageAlertsDetectionRules();
     goToRuleDetails();
@@ -52,8 +53,6 @@ describe('Exceptions', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
     refreshPage();
-
-    cy.screenshot('after-activating-rule');
 
     cy.scrollTo('bottom');
     cy.get(SERVER_SIDE_EVENT_COUNT)
@@ -73,126 +72,58 @@ describe('Exceptions', () => {
     removeSignalsIndex();
     deleteCustomRule();
   });
+
   context('From rule', () => {
     it('Creates an exception and deletes it', () => {
       goToExceptionsTab();
       addsExceptionFromRuleSettings(exception);
       esArchiverLoad('auditbeat_for_exceptions2');
-      activatesRule();
       refreshPage();
+      activatesRule();
       waitForTheRuleToBeExecuted();
       goToAlertsTab();
       refreshPage();
-      cy.screenshot('after-adding-exceptions-alert-tab');
-
-      cy.scrollTo('bottom');
-      cy.screenshot('after-adding-exceptions-alert-tab-after-scrolling');
-      /* cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((numberOfAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
-        });*/
 
       goToClosedAlerts();
       refreshPage();
-      cy.screenshot('closed-alerts');
-
-      cy.scrollTo('bottom');
-      cy.screenshot('closed-alerts-after-scroll');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfClosedAlertsAfterCreatingExceptionText, 10)).should(
-            'eql',
-            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-          );
-        });
 
       goToOpenedAlerts();
       waitForTheRuleToBeExecuted();
       refreshPage();
-
-      cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((numberOfOpenedAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfOpenedAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
-        });
 
       goToExceptionsTab();
       removeException();
       refreshPage();
       goToAlertsTab();
       waitForTheRuleToBeExecuted();
-      waitForAlertsToPopulate();
       refreshPage();
-
-      cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((numberOfAlertsAfterRemovingExceptionsText) => {
-          cy.wrap(parseInt(numberOfAlertsAfterRemovingExceptionsText, 10)).should(
-            'eql',
-            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-          );
-        });
+      waitForAlertsToPopulate();
     });
   });
 
   context('From alert', () => {
     it('Creates an exception and deletes it', () => {
       addExceptionFromFirstAlert();
+      refreshPage();
       addsException(exception);
       esArchiverLoad('auditbeat_for_exceptions2');
-
-      cy.scrollTo('bottom');
+      refreshPage();
       activatesRule();
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((numberOfAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
-        });
-
+      waitForTheRuleToBeExecuted();
       goToClosedAlerts();
       refreshPage();
-
-      cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfClosedAlertsAfterCreatingExceptionText, 10)).should(
-            'eql',
-            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-          );
-        });
 
       goToOpenedAlerts();
       waitForTheRuleToBeExecuted();
       refreshPage();
 
-      cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((numberOfOpenedAlertsAfterCreatingExceptionText) => {
-          cy.wrap(parseInt(numberOfOpenedAlertsAfterCreatingExceptionText, 10)).should('eql', 0);
-        });
-
       goToExceptionsTab();
       removeException();
+      refreshPage();
       goToAlertsTab();
       waitForTheRuleToBeExecuted();
-      waitForAlertsToPopulate();
       refreshPage();
-
-      cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((numberOfAlertsAfterRemovingExceptionsText) => {
-          cy.wrap(parseInt(numberOfAlertsAfterRemovingExceptionsText, 10)).should(
-            'eql',
-            NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
-          );
-        });
+      waitForAlertsToPopulate();
     });
   });
 });

@@ -29,7 +29,9 @@ import { REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 
 export const addExceptionFromFirstAlert = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.visible');
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+  cy.get(ADD_EXCEPTION_BTN).should('be.visible');
   cy.get(ADD_EXCEPTION_BTN).click();
 };
 
