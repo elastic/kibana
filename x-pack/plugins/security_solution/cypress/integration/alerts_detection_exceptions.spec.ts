@@ -26,7 +26,6 @@ import {
   activatesRule,
   addsException,
   addsExceptionFromRuleSettings,
-  deactivatesRule,
   goToAlertsTab,
   goToExceptionsTab,
   removeException,
@@ -63,7 +62,6 @@ describe('Exceptions', () => {
           NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS
         );
       });
-    deactivatesRule();
   });
 
   afterEach(() => {
@@ -78,7 +76,6 @@ describe('Exceptions', () => {
       goToExceptionsTab();
       addsExceptionFromRuleSettings(exception);
       esArchiverLoad('auditbeat_for_exceptions2');
-      activatesRule();
       waitForTheRuleToBeExecuted();
       goToAlertsTab();
       refreshPage();
