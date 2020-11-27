@@ -112,7 +112,7 @@ const LoadingSpinner = euiStyled(EuiLoadingSpinner).attrs({ size: 'm' })`
 
 export const PropertiesTab = {
   id: 'properties',
-  name: i18n.translate('xpack.infra.nodeDetails.tabs.metadata', {
+  name: i18n.translate('xpack.infra.nodeDetails.tabs.metadata.title', {
     defaultMessage: 'Metadata',
   }),
   content: TabComponent,
