@@ -129,7 +129,7 @@ export class AnnotationsEditor extends Component {
                   helpText={
                     defaultIndexPattern &&
                     !model.index_pattern &&
-                    i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {
+                    i18n.translate('visTypeTimeseries.annotationsEditor.searchByDefaultIndex', {
                       defaultMessage: 'Default index pattern is used. To query all indexes use *',
                     })
                   }
