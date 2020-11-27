@@ -27,8 +27,10 @@ import uuid from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 
-jest.mock('../../../../src/core/server/saved_objects/serialization/serializer', () => ({
-  generateSavedObjectId: () => 'GENERATED_ID',
+jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+  SavedObjectsUtils: {
+    generateId: () => 'mock-saved-object-id',
+  },
 }));
 
 const defaultKibanaIndex = '.kibana';
@@ -182,7 +184,7 @@ describe('create()', () => {
             action: 'connector_create',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: 'GENERATED_ID', type: 'action' } },
+          kibana: { saved_object: { id: 'mock-saved-object-id', type: 'action' } },
         })
       );
     });
@@ -225,7 +227,7 @@ describe('create()', () => {
           }),
           kibana: {
             saved_object: {
-              id: 'GENERATED_ID',
+              id: 'mock-saved-object-id',
               type: 'action',
             },
           },
@@ -282,7 +284,7 @@ describe('create()', () => {
           "secrets": Object {},
         },
         Object {
-          "id": "GENERATED_ID",
+          "id": "mock-saved-object-id",
         },
       ]
     `);
@@ -389,7 +391,7 @@ describe('create()', () => {
           "secrets": Object {},
         },
         Object {
-          "id": "GENERATED_ID",
+          "id": "mock-saved-object-id",
         },
       ]
     `);

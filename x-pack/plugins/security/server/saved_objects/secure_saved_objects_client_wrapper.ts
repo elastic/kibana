@@ -18,7 +18,6 @@ import {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUtils,
-  generateSavedObjectId,
 } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import {
@@ -97,7 +96,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
   ) {
-    const optionsWithId = { ...options, id: options.id ?? generateSavedObjectId() };
+    const optionsWithId = { ...options, id: options.id ?? SavedObjectsUtils.generateId() };
     const namespaces = [optionsWithId.namespace, ...(optionsWithId.initialNamespaces || [])];
     try {
       const args = { type, attributes, options: optionsWithId };
@@ -143,7 +142,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsBaseOptions = {}
   ) {
-    const objectsWithId = objects.map((obj) => ({ ...obj, id: obj.id ?? generateSavedObjectId() }));
+    const objectsWithId = objects.map((obj) => ({
+      ...obj,
+      id: obj.id ?? SavedObjectsUtils.generateId(),
+    }));
     const namespaces = objectsWithId.reduce(
       (acc, { initialNamespaces = [] }) => acc.concat(initialNamespaces),
       [options.namespace]

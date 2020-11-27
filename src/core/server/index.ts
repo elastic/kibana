@@ -311,7 +311,6 @@ export {
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
-  generateSavedObjectId,
 } from './saved_objects';
 
 export {

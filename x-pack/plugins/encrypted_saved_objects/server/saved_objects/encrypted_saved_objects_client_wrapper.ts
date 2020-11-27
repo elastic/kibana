@@ -24,7 +24,7 @@ import {
   SavedObjectsRemoveReferencesToOptions,
   ISavedObjectTypeRegistry,
   SavedObjectsRemoveReferencesToResponse,
-  generateSavedObjectId,
+  SavedObjectsUtils,
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsService } from '../crypto';
@@ -66,14 +66,15 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // only allow a specified ID if we're overwriting an existing ESO with a Version
     // this helps us ensure that the document really was previously created using ESO
     // and not being used to get around the specified ID limitation
-    const canSpecifyID = options.overwrite && options.version;
+    const canSpecifyID =
+      (options.overwrite && options.version) || SavedObjectsUtils.isRandomId(options.id);
     if (options.id && !canSpecifyID) {
       throw new Error(
-        'Predefined IDs are not allowed for saved objects with encrypted attributes.'
+        'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
       );
     }
 
-    const id = options.id ?? generateSavedObjectId();
+    const id = options.id ?? SavedObjectsUtils.generateId();
     const namespace = getDescriptorNamespace(
       this.options.baseTypeRegistry,
       type,
@@ -110,14 +111,15 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         // Saved objects with encrypted attributes should have IDs that are hard to guess especially
         // since IDs are part of the AAD used during encryption, that's why we control them within this
         // wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
-        const canSpecifyID = options?.overwrite && object.version;
+        const canSpecifyID =
+          (options?.overwrite && object.version) || SavedObjectsUtils.isRandomId(object.id);
         if (object.id && !canSpecifyID) {
           throw new Error(
-            'Predefined IDs are not allowed for saved objects with encrypted attributes.'
+            'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `.generateId`.'
           );
         }
 
-        const id = object.id ?? generateSavedObjectId();
+        const id = object.id ?? SavedObjectsUtils.generateId();
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           object.type,

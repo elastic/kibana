@@ -65,7 +65,6 @@ export function setupSavedObjects(
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
     attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
-    allowPredefinedID: true,
   });
 
   // Encrypted attributes

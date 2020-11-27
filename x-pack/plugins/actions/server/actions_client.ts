@@ -13,7 +13,7 @@ import {
   SavedObjectAttributes,
   SavedObject,
   KibanaRequest,
-  generateSavedObjectId,
+  SavedObjectsUtils,
 } from '../../../../src/core/server';
 import { AuditLogger, EventOutcome } from '../../security/server';
 import { ActionType } from '../common';
@@ -118,7 +118,7 @@ export class ActionsClient {
   public async create({
     action: { actionTypeId, name, config, secrets },
   }: CreateOptions): Promise<ActionResult> {
-    const id = generateSavedObjectId();
+    const id = SavedObjectsUtils.generateId();
 
     try {
       await this.authorization.ensureAuthorized('create', actionTypeId);

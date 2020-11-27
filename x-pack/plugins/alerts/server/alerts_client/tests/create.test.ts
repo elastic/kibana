@@ -18,8 +18,10 @@ import { auditServiceMock } from '../../../../security/server/audit/index.mock';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
-jest.mock('../../../../../../src/core/server/saved_objects/serialization/serializer', () => ({
-  generateSavedObjectId: () => 'GENERATED_ID',
+jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+  SavedObjectsUtils: {
+    generateId: () => 'mock-saved-object-id',
+  },
 }));
 
 const taskManager = taskManagerMock.createStart();
@@ -212,7 +214,7 @@ describe('create()', () => {
             action: 'alert_rule_create',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: 'GENERATED_ID', type: 'alert' } },
+          kibana: { saved_object: { id: 'mock-saved-object-id', type: 'alert' } },
         })
       );
     });
@@ -236,7 +238,7 @@ describe('create()', () => {
           }),
           kibana: {
             saved_object: {
-              id: 'GENERATED_ID',
+              id: 'mock-saved-object-id',
               type: 'alert',
             },
           },
@@ -402,7 +404,7 @@ describe('create()', () => {
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
-        "id": "GENERATED_ID",
+        "id": "mock-saved-object-id",
         "references": Array [
           Object {
             "id": "1",
@@ -1055,7 +1057,7 @@ describe('create()', () => {
         },
       },
       {
-        id: 'GENERATED_ID',
+        id: 'mock-saved-object-id',
         references: [
           {
             id: '1',
@@ -1178,7 +1180,7 @@ describe('create()', () => {
         },
       },
       {
-        id: 'GENERATED_ID',
+        id: 'mock-saved-object-id',
         references: [
           {
             id: '1',

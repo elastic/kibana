@@ -13,7 +13,7 @@ import {
   SavedObjectReference,
   SavedObject,
   PluginInitializerContext,
-  generateSavedObjectId,
+  SavedObjectsUtils,
 } from '../../../../../src/core/server';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
@@ -217,7 +217,7 @@ export class AlertsClient {
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
-    const id = generateSavedObjectId();
+    const id = SavedObjectsUtils.generateId();
 
     try {
       await this.authorization.ensureAuthorized(
