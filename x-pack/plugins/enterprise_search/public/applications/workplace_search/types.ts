@@ -181,3 +181,26 @@ export interface CustomSource {
   name: string;
   id: string;
 }
+
+export interface Result {
+  [key: string]: string;
+}
+
+export interface OptionValue {
+  value: string;
+  text: string;
+}
+
+export interface DetailField {
+  fieldName: string;
+  label: string;
+}
+
+export interface SearchResultConfig {
+  titleField: string | null;
+  subtitleField: string | null;
+  descriptionField: string | null;
+  urlField: string | null;
+  color: string;
+  detailFields: DetailField[];
+}

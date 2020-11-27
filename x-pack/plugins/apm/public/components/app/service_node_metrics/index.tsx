@@ -22,7 +22,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event_context';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
@@ -59,7 +59,11 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
   const { urlParams, uiFilters } = useUrlParams();
   const { serviceName, serviceNodeName } = match.params;
   const { agentName } = useAgentName();
-  const { data } = useServiceMetricCharts(urlParams, agentName);
+  const { data } = useServiceMetricCharts(
+    urlParams,
+    agentName,
+    serviceNodeName
+  );
   const { start, end } = urlParams;
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
@@ -177,29 +181,10 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
           </EuiFlexItem>
         </MetadataFlexGroup>
       )}
-      {agentName && (
-        <ChartsSyncContextProvider>
-          <EuiFlexGrid columns={2} gutterSize="s">
-            {data.charts.map((chart) => (
-              <EuiFlexItem key={chart.key}>
-                <EuiPanel>
-                  <MetricsChart
-                    start={start}
-                    end={end}
-                    chart={chart}
-                    fetchStatus={status}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-          <EuiSpacer size="xxl" />
-        </ChartsSyncContextProvider>
-      )}
       <SearchBar />
       <EuiPage>
         {agentName && (
-          <ChartsSyncContextProvider>
+          <ChartPointerEventContextProvider>
             <EuiFlexGrid columns={2} gutterSize="s">
               {data.charts.map((chart) => (
                 <EuiFlexItem key={chart.key}>
@@ -215,7 +200,7 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
               ))}
             </EuiFlexGrid>
             <EuiSpacer size="xxl" />
-          </ChartsSyncContextProvider>
+          </ChartPointerEventContextProvider>
         )}
       </EuiPage>
     </>
