@@ -110,7 +110,6 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
                       disabled={stepNo === 1}
-                      color="subdued"
                       size="m"
                       onClick={() => {
                         setStepNo(stepNo - 1);
@@ -127,7 +126,6 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
                       disabled={stepNo === data?.maxSteps}
-                      color="subdued"
                       size="m"
                       onClick={() => {
                         setStepNo(stepNo + 1);
