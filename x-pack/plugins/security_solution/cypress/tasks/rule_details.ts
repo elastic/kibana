@@ -66,6 +66,7 @@ export const addsExceptionFromRuleSettings = (exception: Exception) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);
   });
   cy.get(CLOSE_ALERTS_CHECKBOX).click({ force: true });
+  cy.screenshot('exceptions-modal-filled');
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
   cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
