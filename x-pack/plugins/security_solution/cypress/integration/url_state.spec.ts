@@ -220,7 +220,7 @@ describe('url state', () => {
     cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
   });
 
-  it.only('sets and reads the url state for timeline by id', () => {
+  it.skip('sets and reads the url state for timeline by id', () => {
     loginAndWaitForPage(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
