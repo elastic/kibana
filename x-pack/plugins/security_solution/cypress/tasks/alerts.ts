@@ -112,13 +112,13 @@ export const waitForAlerts = () => {
 };
 
 export const waitForAlertsIndexToBeCreated = () => {
-  cy.request({ url: '/api/detection_engine/index', retryOnStatusCodeFailure: true }).then(
-    (response) => {
-      if (response.status !== 200) {
-        cy.wait(7500);
-      }
+  cy.server();
+  cy.route('GET', '/api/detection_engine/index').as('signals_index');
+  cy.wait('@signals_index').then((response) => {
+    if (response.status !== 200) {
+      cy.reload(true);
     }
-  );
+  });
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {

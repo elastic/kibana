@@ -8,6 +8,7 @@ import { Exception } from '../objects/exception';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN,
+  MODAL_CLOSE_BUTTON,
   CLOSE_ALERTS_CHECKBOX,
   CONFIRM_BTN,
   FIELD_INPUT,
@@ -39,7 +40,6 @@ export const deactivatesRule = () => {
 };
 
 export const addsException = (exception: Exception) => {
-  cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
   cy.get(FIELD_INPUT).should('exist');
   cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
@@ -54,12 +54,17 @@ export const addsException = (exception: Exception) => {
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
+  cy.server();
+  cy.route('PATCH', 'api/detection_engine/rules').as('rules_patch');
   cy.get(ADD_EXCEPTIONS_BTN).should('be.visible');
   cy.get(ADD_EXCEPTIONS_BTN).click();
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
+
+  cy.wait('@rules_patch').then((response) => {
+    if (response.status !== 200) {
+      cy.get(MODAL_CLOSE_BUTTON).click();
+      cy.get(ADD_EXCEPTIONS_BTN).click();
+    }
+  });
   cy.get(FIELD_INPUT).should('be.visible');
   cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);

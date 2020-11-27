@@ -8,6 +8,7 @@ import { newRule } from '../objects/rule';
 
 import { RULE_STATUS } from '../screens/create_new_rule';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+import { MODAL_CLOSE_BUTTON } from '../screens/exceptions';
 
 import {
   addExceptionFromFirstAlert,
@@ -41,7 +42,6 @@ describe('Exceptions', () => {
   beforeEach(() => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsIndexToBeCreated();
-    cy.reload(true);
     createCustomRule(newRule);
     goToManageAlertsDetectionRules();
     goToRuleDetails();
@@ -78,7 +78,6 @@ describe('Exceptions', () => {
       goToExceptionsTab();
       addsExceptionFromRuleSettings(exception);
       esArchiverLoad('auditbeat_for_exceptions2');
-      refreshPage();
       activatesRule();
       waitForTheRuleToBeExecuted();
       goToAlertsTab();
@@ -103,11 +102,19 @@ describe('Exceptions', () => {
 
   context('From alert', () => {
     it('Creates an exception and deletes it', () => {
+      cy.server();
+      cy.route('PATCH', 'api/detection_engine/rules').as('rules_patch');
       addExceptionFromFirstAlert();
-      refreshPage();
+
+      cy.wait('@rules_patch').then((response) => {
+        if (response.status !== 200) {
+          cy.get(MODAL_CLOSE_BUTTON).click();
+          addExceptionFromFirstAlert();
+        }
+      });
+
       addsException(exception);
       esArchiverLoad('auditbeat_for_exceptions2');
-      refreshPage();
       activatesRule();
       waitForTheRuleToBeExecuted();
       goToClosedAlerts();
