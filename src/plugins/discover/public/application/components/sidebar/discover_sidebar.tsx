@@ -21,7 +21,7 @@ import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { isEqual, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { UiStatsMetricType } from '@kbn/analytics';
 import {
   EuiAccordion,
