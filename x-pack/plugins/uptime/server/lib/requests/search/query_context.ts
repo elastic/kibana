@@ -12,7 +12,6 @@ import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 
 export class QueryContext {
   callES: ElasticsearchClient;
-  heartbeatIndices: string;
   dateRangeStart: string;
   dateRangeEnd: string;
   pagination: CursorPagination;
@@ -24,7 +23,6 @@ export class QueryContext {
 
   constructor(
     database: any,
-    heartbeatIndices: string,
     dateRangeStart: string,
     dateRangeEnd: string,
     pagination: CursorPagination,
@@ -34,7 +32,6 @@ export class QueryContext {
     query?: string
   ) {
     this.callES = database;
-    this.heartbeatIndices = heartbeatIndices;
     this.dateRangeStart = dateRangeStart;
     this.dateRangeEnd = dateRangeEnd;
     this.pagination = pagination;
@@ -45,12 +42,10 @@ export class QueryContext {
   }
 
   async search(params: any): Promise<any> {
-    params.index = this.heartbeatIndices;
-    return this.callES.search(params);
+    return this.callES.search({ body: params.body });
   }
 
   async count(params: any): Promise<any> {
-    params.index = this.heartbeatIndices;
     return this.callES.count(params);
   }
 
@@ -141,7 +136,6 @@ export class QueryContext {
   clone(): QueryContext {
     return new QueryContext(
       this.callES,
-      this.heartbeatIndices,
       this.dateRangeStart,
       this.dateRangeEnd,
       this.pagination,

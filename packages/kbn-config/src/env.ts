@@ -26,7 +26,7 @@ import { PackageInfo, EnvironmentMode } from './types';
 export interface EnvOptions {
   configs: string[];
   cliArgs: CliArgs;
-  isDevClusterMaster: boolean;
+  isDevCliParent: boolean;
 }
 
 /** @internal */
@@ -38,7 +38,6 @@ export interface CliArgs {
   watch: boolean;
   repl: boolean;
   basePath: boolean;
-  open: boolean;
   oss: boolean;
   /** @deprecated use disableOptimizer to know if the @kbn/optimizer is disabled in development */
   optimize?: boolean;
@@ -102,10 +101,10 @@ export class Env {
   public readonly configs: readonly string[];
 
   /**
-   * Indicates that this Kibana instance is run as development Node Cluster master.
+   * Indicates that this Kibana instance is running in the parent process of the dev cli.
    * @internal
    */
-  public readonly isDevClusterMaster: boolean;
+  public readonly isDevCliParent: boolean;
 
   /**
    * @internal
@@ -123,7 +122,7 @@ export class Env {
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);
-    this.isDevClusterMaster = options.isDevClusterMaster;
+    this.isDevCliParent = options.isDevCliParent;
 
     const isDevMode = this.cliArgs.dev || this.cliArgs.envName === 'development';
     this.mode = Object.freeze<EnvironmentMode>({

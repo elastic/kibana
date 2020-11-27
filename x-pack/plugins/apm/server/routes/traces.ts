@@ -17,6 +17,7 @@ export const tracesRoute = createRoute({
   params: t.type({
     query: t.intersection([rangeRt, uiFiltersRt]),
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
@@ -37,6 +38,7 @@ export const tracesByIdRoute = createRoute({
     }),
     query: rangeRt,
   }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return getTrace(context.params.path.traceId, setup);

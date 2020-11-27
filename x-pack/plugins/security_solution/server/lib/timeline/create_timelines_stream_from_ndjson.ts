@@ -9,11 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { failure } from 'io-ts/lib/PathReporter';
 import { identity } from 'fp-ts/lib/function';
-import {
-  createConcatStream,
-  createSplitStream,
-  createMapStream,
-} from '../../../../../../src/core/server/utils';
+import { createConcatStream, createSplitStream, createMapStream } from '@kbn/utils';
 import {
   parseNdjsonStrings,
   filterExportedCounts,

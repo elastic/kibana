@@ -48,9 +48,10 @@ export async function getPolicyResponseByAgentId(
   dataClient: ILegacyScopedClusterClient
 ): Promise<GetHostPolicyResponse | undefined> {
   const query = getESQueryPolicyResponseByAgentID(agentID, index);
-  const response = (await dataClient.callAsCurrentUser('search', query)) as SearchResponse<
-    HostPolicyResponse
-  >;
+  const response = (await dataClient.callAsCurrentUser(
+    'search',
+    query
+  )) as SearchResponse<HostPolicyResponse>;
 
   if (response.hits.hits.length === 0) {
     return undefined;

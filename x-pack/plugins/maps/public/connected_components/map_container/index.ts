@@ -14,6 +14,7 @@ import {
   areLayersLoaded,
   getRefreshConfig,
   getMapInitError,
+  getMapSettings,
   getQueryableUniqueIndexPatternIds,
   isToolbarOverlayHidden,
 } from '../../selectors/map_selectors';
@@ -29,6 +30,7 @@ function mapStateToProps(state: MapStoreState) {
     mapInitError: getMapInitError(state),
     indexPatternIds: getQueryableUniqueIndexPatternIds(state),
     hideToolbarOverlay: isToolbarOverlayHidden(state),
+    backgroundColor: getMapSettings(state).backgroundColor,
   };
 }
 

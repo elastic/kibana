@@ -26,6 +26,8 @@ If {stack-security-features} are enabled, users must have the necessary
 privileges to use {ml-features}. Refer to 
 {ml-docs}/setup.html#setup-privileges[Set up {ml-features}].
 
+NOTE: There are limitations in {ml-features} that affect {kib}. For more information, refer to {ml-docs}/ml-limitations.html[Machine learning].
+
 --
 
 [[xpack-ml-anomalies]]

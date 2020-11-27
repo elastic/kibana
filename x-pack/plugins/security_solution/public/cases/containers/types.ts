@@ -19,7 +19,7 @@ export interface Comment {
   createdAt: string;
   createdBy: ElasticUser;
   comment: string;
-  type: CommentType;
+  type: CommentType.user;
   pushedAt: string | null;
   pushedBy: string | null;
   updatedAt: string | null;

@@ -23,7 +23,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   describe('import_rules', () => {
     describe('importing rules without an index', () => {
@@ -39,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
             .send();
           return body.status_code === 404;
-        });
+        }, `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`);
 
         // Try to fetch the rule which should still be a 404 (not found)
         const { body } = await supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`).send();
@@ -86,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
       });
 
       it('should set the response content types to be expected', async () => {
@@ -129,7 +128,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1'], true), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect(200);
 
         const { body } = await supertest
@@ -138,7 +137,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput('rule-1'));
+        expect(bodyToCompare).to.eql(getSimpleRuleOutput('rule-1', false));
       });
 
       it('should fail validation when importing a rule with malformed "from" params on the rules', async () => {
@@ -330,7 +329,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1'], true), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
           .expect(200);
 
         const simpleRule = getSimpleRule('rule-1');
@@ -422,17 +421,13 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2'], true), 'rules.ndjson')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
           .expect(200);
 
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
-          .attach(
-            'file',
-            getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3'], true),
-            'rules.ndjson'
-          )
+          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3']), 'rules.ndjson')
           .expect(200);
 
         const { body: bodyOfRule1 } = await supertest

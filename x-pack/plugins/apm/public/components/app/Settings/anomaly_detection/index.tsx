@@ -17,9 +17,7 @@ import { LicensePrompt } from '../../../shared/LicensePrompt';
 import { useLicense } from '../../../../hooks/useLicense';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-export type AnomalyDetectionApiResponse = APIReturnType<
-  'GET /api/apm/settings/anomaly-detection'
->;
+export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/anomaly-detection'>;
 
 const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   jobs: [],

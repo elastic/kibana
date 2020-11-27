@@ -60,9 +60,9 @@ describe('NumberRow', () => {
 
   test('should call onChange', () => {
     const comp = shallow(<NumberRow {...defaultProps} />);
-    comp.find('EuiFieldNumber').prop('onChange')!({ target: { value: '5' } } as React.ChangeEvent<
-      HTMLInputElement
-    >);
+    comp.find('EuiFieldNumber').prop('onChange')!({
+      target: { value: '5' },
+    } as React.ChangeEvent<HTMLInputElement>);
 
     expect(defaultProps.onChange).lastCalledWith({ id: defaultProps.model.id, value: '5' });
   });

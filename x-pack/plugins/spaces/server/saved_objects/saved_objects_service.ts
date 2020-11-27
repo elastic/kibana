@@ -8,15 +8,15 @@ import { CoreSetup } from 'src/core/server';
 import { SpacesSavedObjectMappings } from './mappings';
 import { migrateToKibana660 } from './migrations';
 import { spacesSavedObjectsClientWrapperFactory } from './saved_objects_client_wrapper_factory';
-import { SpacesServiceSetup } from '../spaces_service';
+import { SpacesServiceStart } from '../spaces_service';
 
 interface SetupDeps {
   core: Pick<CoreSetup, 'savedObjects' | 'getStartServices'>;
-  spacesService: SpacesServiceSetup;
+  getSpacesService: () => SpacesServiceStart;
 }
 
 export class SpacesSavedObjectsService {
-  public setup({ core, spacesService }: SetupDeps) {
+  public setup({ core, getSpacesService }: SetupDeps) {
     core.savedObjects.registerType({
       name: 'space',
       hidden: true,
@@ -30,7 +30,7 @@ export class SpacesSavedObjectsService {
     core.savedObjects.addClientWrapper(
       Number.MIN_SAFE_INTEGER,
       'spaces',
-      spacesSavedObjectsClientWrapperFactory(spacesService)
+      spacesSavedObjectsClientWrapperFactory(getSpacesService)
     );
   }
 }

@@ -36,9 +36,10 @@ import {
 } from './types';
 import { createGetterSetter } from '../../kibana_utils/public';
 
-const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] = createGetterSetter<
-  ManagementSectionsStartPrivate
->('SectionsServiceStartPrivate');
+const [
+  getSectionsServiceStartPrivate,
+  setSectionsServiceStartPrivate,
+] = createGetterSetter<ManagementSectionsStartPrivate>('SectionsServiceStartPrivate');
 
 export { getSectionsServiceStartPrivate };
 

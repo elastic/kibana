@@ -140,33 +140,6 @@ export const getProviderActionsRoute = (
   );
 };
 
-export const getLoggerRoute = (
-  router: IRouter,
-  eventLogService: IEventLogService,
-  logger: Logger
-) => {
-  router.get(
-    {
-      path: `/api/log_event_fixture/getEventLogger/{event}`,
-      validate: {
-        params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
-      },
-    },
-    async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      const { event } = req.params as { event: string };
-      logger.info(`test get event logger for event: ${event}`);
-
-      return res.ok({
-        body: { eventLogger: eventLogService.getLogger({ event: { provider: event } }) },
-      });
-    }
-  );
-};
-
 export const isIndexingEntriesRoute = (
   router: IRouter,
   eventLogService: IEventLogService,
