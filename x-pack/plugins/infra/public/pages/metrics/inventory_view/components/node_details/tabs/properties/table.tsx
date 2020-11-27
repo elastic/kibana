@@ -44,16 +44,19 @@ export const Table = (props: Props) => {
         render: (_name: string, item: Row) => (
           <span>
             <EuiToolTip
-              content={i18n.translate('xpack.infra.logFlyout.setFilterTooltip', {
+              content={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.setFilterTooltip', {
                 defaultMessage: 'View event with filter',
               })}
             >
               <EuiButtonIcon
                 color="text"
                 iconType="filter"
-                aria-label={i18n.translate('xpack.infra.logFlyout.filterAriaLabel', {
-                  defaultMessage: 'Filter',
-                })}
+                aria-label={i18n.translate(
+                  'xpack.infra.nodeDetails.tabs.metadata.filterAriaLabel',
+                  {
+                    defaultMessage: 'Filter',
+                  }
+                )}
                 onClick={() => onClick(item)}
               />
             </EuiToolTip>
