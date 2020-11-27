@@ -31,8 +31,6 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
   errors,
   messageVariables,
   actionConnector,
-  http,
-  toastNotifications,
 }) => {
   const {
     caseId = null,

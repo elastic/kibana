@@ -76,7 +76,11 @@ export const CreateCaseForm: React.FC<Props> = React.memo(({ withSteps = true })
     <>
       {isSubmitting && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}
       {withSteps ? (
-        <EuiSteps headingElement="h2" steps={allSteps} />
+        <EuiSteps
+          headingElement="h2"
+          steps={allSteps}
+          data-test-subj={'case-creation-form-steps'}
+        />
       ) : (
         <>
           {firstStep.children}

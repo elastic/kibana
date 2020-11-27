@@ -38,12 +38,14 @@ const SettingFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChan
             </EuiFlexGroup>
           }
         >
-          <FieldsComponent
-            isEdit={isEdit}
-            fields={fields}
-            connector={connector}
-            onChange={onChange}
-          />
+          <div data-test-subj={'connector-settings'}>
+            <FieldsComponent
+              isEdit={isEdit}
+              fields={fields}
+              connector={connector}
+              onChange={onChange}
+            />
+          </div>
         </Suspense>
       ) : null}
     </>

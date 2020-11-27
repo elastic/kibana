@@ -16,7 +16,7 @@ interface ConnectorSelectorProps {
   connectors: ActionConnector[];
   dataTestSubj: string;
   disabled: boolean;
-  field: FieldHook;
+  field: FieldHook<string>;
   idAria: string;
   isEdit: boolean;
   isLoading: boolean;
@@ -47,7 +47,7 @@ export const ConnectorSelector = ({
         disabled={disabled}
         isLoading={isLoading}
         onChange={field.setValue}
-        selectedConnector={isEmpty(field.value) ? 'none' : (field.value as string)}
+        selectedConnector={isEmpty(field.value) ? 'none' : field.value}
       />
     </EuiFormRow>
   ) : null;

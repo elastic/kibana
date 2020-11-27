@@ -21,7 +21,7 @@ interface Props {
 
 interface SettingsFieldProps {
   connectors: ActionConnector[];
-  field: FieldHook;
+  field: FieldHook<ConnectorTypeFields['fields']>;
   isEdit: boolean;
 }
 
@@ -39,7 +39,7 @@ const SettingsField = ({ connectors, isEdit, field }: SettingsFieldProps) => {
   return (
     <SettingFieldsForm
       connector={connector}
-      fields={field.value as ConnectorTypeFields['fields']}
+      fields={field.value}
       isEdit={isEdit}
       onChange={setValue}
     />

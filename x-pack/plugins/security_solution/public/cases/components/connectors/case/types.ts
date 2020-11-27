@@ -9,7 +9,8 @@ export interface CaseActionParams {
   subActionParams: {
     caseId: string;
     comment: {
-      comment: string;
+      alertId: string;
+      index: string;
       type: 'alert';
     };
   };

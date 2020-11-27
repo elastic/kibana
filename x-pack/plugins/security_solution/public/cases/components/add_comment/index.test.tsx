@@ -6,34 +6,21 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { waitFor, act } from '@testing-library/react';
 
 import { AddComment, AddCommentRefObject } from '.';
 import { TestProviders } from '../../../common/mock';
-import { getFormMock } from '../__mock__/form';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
 import { CommentRequest, CommentType } from '../../../../../case/common/api';
+import { useInsertTimeline } from '../use_insert_timeline/use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
-import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { useFormData } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
-
-import { waitFor } from '@testing-library/react';
-
-jest.mock(
-  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
-);
-
-jest.mock(
-  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data'
-);
 
 jest.mock('../../containers/use_post_comment');
-
-const useFormMock = useForm as jest.Mock;
-const useFormDataMock = useFormData as jest.Mock;
+jest.mock('../use_insert_timeline/use_insert_timeline');
 
 const usePostCommentMock = usePostComment as jest.Mock;
-
+const useInsertTimelineMock = useInsertTimeline as jest.Mock;
 const onCommentSaving = jest.fn();
 const onCommentPosted = jest.fn();
 const postComment = jest.fn();
@@ -59,13 +46,9 @@ const sampleData: CommentRequest = {
 };
 
 describe('AddComment ', () => {
-  const formHookMock = getFormMock(sampleData);
-
   beforeEach(() => {
     jest.resetAllMocks();
     usePostCommentMock.mockImplementation(() => defaultPostCommment);
-    useFormMock.mockImplementation(() => ({ form: formHookMock }));
-    useFormDataMock.mockImplementation(() => [{ comment: sampleData.comment }]);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 
@@ -77,14 +60,25 @@ describe('AddComment ', () => {
         </Router>
       </TestProviders>
     );
+
+    await act(async () => {
+      wrapper
+        .find(`[data-test-subj="add-comment"] textarea`)
+        .first()
+        .simulate('change', { target: { value: sampleData.comment } });
+    });
+
     expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeFalsy();
 
-    wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
+    await act(async () => {
+      wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
+    });
+
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
       expect(postComment).toBeCalledWith(sampleData, onCommentPosted);
-      expect(formHookMock.reset).toBeCalled();
+      expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');
     });
   });
 
@@ -97,6 +91,7 @@ describe('AddComment ', () => {
         </Router>
       </TestProviders>
     );
+
     expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeTruthy();
     expect(
       wrapper.find(`[data-test-subj="submit-comment"]`).first().prop('isDisabled')
@@ -112,15 +107,16 @@ describe('AddComment ', () => {
         </Router>
       </TestProviders>
     );
+
     expect(
       wrapper.find(`[data-test-subj="submit-comment"]`).first().prop('isDisabled')
     ).toBeTruthy();
   });
 
-  it('should insert a quote', () => {
+  it('should insert a quote', async () => {
     const sampleQuote = 'what a cool quote';
     const ref = React.createRef<AddCommentRefObject>();
-    mount(
+    const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
           <AddComment {...{ ...addCommentProps }} ref={ref} />
@@ -128,10 +124,37 @@ describe('AddComment ', () => {
       </TestProviders>
     );
 
-    ref.current!.addQuote(sampleQuote);
-    expect(formHookMock.setFieldValue).toBeCalledWith(
-      'comment',
+    await act(async () => {
+      wrapper
+        .find(`[data-test-subj="add-comment"] textarea`)
+        .first()
+        .simulate('change', { target: { value: sampleData.comment } });
+    });
+
+    await act(async () => {
+      ref.current!.addQuote(sampleQuote);
+    });
+
+    expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(
       `${sampleData.comment}\n\n${sampleQuote}`
     );
+  });
+
+  it('it should insert a timeline', async () => {
+    useInsertTimelineMock.mockImplementation((comment, onTimelineAttached) => {
+      onTimelineAttached(`[title](url)`);
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <AddComment {...{ ...addCommentProps }} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('[title](url)');
+    });
   });
 });
