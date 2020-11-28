@@ -28,16 +28,8 @@ export async function fetchIndexPatterns(
   }
 
   const searchString = indexPatternStrings.map((string) => `"${string}"`).join(' | ');
-  // todo use find
-  const indexPatternsFromSavedObjects = [await indexPatternsService.get(searchString)];
-  /*
-  const indexPatternsFromSavedObjects = await savedObjectsClient.find<IndexPatternAttributes>({
-    type: 'index-pattern',
-    fields: ['title', 'fields'],
-    search: searchString,
-    searchFields: ['title'],
-  });
-  */
+
+  const indexPatternsFromSavedObjects = await indexPatternsService.find(searchString);
 
   const exactMatches = indexPatternsFromSavedObjects.filter((ip) => {
     return indexPatternStrings.includes(ip.title);
