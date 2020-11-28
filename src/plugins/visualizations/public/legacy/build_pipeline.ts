@@ -304,6 +304,7 @@ export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
       visConfig.title = title;
       pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visConfig)}
+    ${prepareJson('uiState', uiState)}
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.params.showPartialRows || false} `;
       if (indexPattern) {
