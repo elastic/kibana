@@ -21,7 +21,9 @@ import { VisSavedObject } from '../types';
 import type { IndexPattern } from '../../../../plugins/data/public';
 import { getIndexPatterns } from '../services';
 
-export async function getIndexPattern(savedVis: VisSavedObject): Promise<IndexPattern | undefined> {
+export async function getIndexPattern(
+  savedVis: VisSavedObject
+): Promise<IndexPattern | undefined | null> {
   if (savedVis.visState.type !== 'metrics') {
     return savedVis.searchSource!.getField('index');
   }
@@ -29,6 +31,6 @@ export async function getIndexPattern(savedVis: VisSavedObject): Promise<IndexPa
   const indexPatternsClient = getIndexPatterns();
 
   return savedVis.visState.params.index_pattern
-    ? indexPatternsClient.find(`"${savedVis.visState.params.index_pattern}"`)
-    : indexPatternsClient.getDefault();
+    ? (await indexPatternsClient.find(`"${savedVis.visState.params.index_pattern}"`))[0]
+    : await indexPatternsClient.getDefault();
 }
