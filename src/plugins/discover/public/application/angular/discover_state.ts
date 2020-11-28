@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _, { isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { History } from 'history';
-import { IUiSettingsClient, NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from 'kibana/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
@@ -27,13 +27,9 @@ import {
   IKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
-import { esFilters, Filter, IndexPattern, Query } from '../../../../data/public';
+import { esFilters, Filter, Query } from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
-import { getSortArray } from './doc_table';
-import { DEFAULT_COLUMNS_SETTING } from '../../../common';
-import { SavedSearch } from '../../saved_searches';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
-import { SortPairArr } from './doc_table/lib/get_sort';
 
 export interface AppState {
   /**
@@ -63,7 +59,7 @@ export interface AppState {
   /**
    * Array of the used sorting [[field,direction],...]
    */
-  sort?: SortPairArr[];
+  sort?: string[][];
   /**
    * id of the used saved query
    */
@@ -74,7 +70,7 @@ interface GetStateParams {
   /**
    * Default state used for merging with with URL state to get the initial state
    */
-  defaultAppState?: AppState;
+  getStateDefaults?: () => AppState;
   /**
    * Determins the use of long vs. short/hashed urls
    */
@@ -132,7 +128,11 @@ export interface GetStateReturn {
   /**
    * Returns whether the current app state is different to the initial state
    */
-  isAppStateDirty: () => void;
+  isAppStateDirty: () => boolean;
+  /**
+   * Reset AppState to default, discarding all changes
+   */
+  resetAppState: () => void;
 }
 const APP_STATE_URL_KEY = '_a';
 
@@ -141,11 +141,12 @@ const APP_STATE_URL_KEY = '_a';
  * Used to sync URL with UI state
  */
 export function getState({
-  defaultAppState = {},
+  getStateDefaults,
   storeInSessionStorage = false,
   history,
   toasts,
 }: GetStateParams): GetStateReturn {
+  const defaultAppState = getStateDefaults ? getStateDefaults() : {};
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
@@ -194,37 +195,14 @@ export function getState({
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
+    resetAppState: () => {
+      const defaultState = getStateDefaults ? getStateDefaults() : {};
+      setState(appStateContainerModified, defaultState);
+    },
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
   };
-}
-
-export function getStateDefaults(
-  savedSearch: SavedSearch,
-  indexPattern: IndexPattern,
-  config: IUiSettingsClient,
-  defaultQuery: {
-    query: string;
-    language: string;
-  }
-): AppState {
-  const { searchSource } = savedSearch;
-  const defaultState: AppState = {
-    query: searchSource.getField('query') || defaultQuery,
-    sort: getSortArray(savedSearch.sort, indexPattern),
-    columns:
-      savedSearch.columns.length > 0
-        ? savedSearch.columns
-        : config.get(DEFAULT_COLUMNS_SETTING).slice(),
-    index: indexPattern.id,
-    interval: 'auto',
-    filters: _.cloneDeep(searchSource.getOwnField('filter')) as Filter[],
-  };
-  if (savedSearch.grid && savedSearch.grid) {
-    defaultState.grid = savedSearch.grid;
-  }
-  return defaultState;
 }
 
 /**

@@ -36,7 +36,7 @@ describe('Configuration Statistics Aggregator', () => {
       pollIntervalConfiguration$: new Subject<number>(),
     };
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       createConfigurationAggregator(configuration, managedConfig)
         .pipe(take(3), bufferCount(3))
         .subscribe(([initial, updatedWorkers, updatedInterval]) => {

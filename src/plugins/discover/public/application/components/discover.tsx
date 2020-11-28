@@ -19,8 +19,6 @@
 import React, { useState } from 'react';
 import rison from 'rison-node';
 import classNames from 'classnames';
-
-// import { EuiResizableContainer } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiHideFor, EuiButtonIcon } from '@elastic/eui';
 import { HitsCounter } from './hits_counter';
@@ -34,6 +32,7 @@ import { esFilters, search } from '../../../../data/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverNoResults } from './no_results';
 import { DiscoverProps } from './discover_legacy';
+import { SortPairArr } from '../angular/doc_table/lib/get_sort';
 
 export function Discover({
   addColumn,
@@ -231,7 +230,7 @@ export function Discover({
                             columns={state.columns || []}
                             indexPattern={indexPattern}
                             rows={rows}
-                            sort={state.sort || []}
+                            sort={(state.sort as SortPairArr[]) || []}
                             sampleSize={opts.sampleSize}
                             searchDescription={opts.savedSearch.description}
                             searchTitle={opts.savedSearch.lastSavedTitle}

@@ -29,7 +29,7 @@ import {
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
-type AnyCollector = Collector<any, any>;
+type AnyCollector = Collector<any, any, any>;
 type AnyUsageCollector = UsageCollector<any, any>;
 
 interface CollectorSetConfig {

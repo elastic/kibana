@@ -78,6 +78,7 @@ interface ISourcesServerResponse {
 }
 
 export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>({
+  path: ['enterprise_search', 'workplace_search', 'sources_logic'],
   actions: {
     setServerSourceStatuses: (statuses: ContentSourceStatus[]) => statuses,
     onInitializeSources: (serverResponse: ISourcesServerResponse) => serverResponse,
