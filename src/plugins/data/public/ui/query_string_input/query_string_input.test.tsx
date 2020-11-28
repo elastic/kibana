@@ -41,6 +41,7 @@ import { stubIndexPatternWithFields } from '../../stubs';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
 const startMock = coreMock.createStart();
+const dataMock = dataPluginMock.createStartContract();
 
 const noop = () => {
   return;
@@ -289,10 +290,6 @@ describe('QueryStringInput', () => {
       })
     );
 
-    expect(mockFetchIndexPatterns).toHaveBeenCalledWith(
-      startMock.savedObjects.client,
-      ['logstash-*'],
-      startMock.uiSettings
-    );
+    expect(mockFetchIndexPatterns).toHaveBeenLastCalledWith(dataMock.indexPatterns, ['logstash-*']);
   });
 });

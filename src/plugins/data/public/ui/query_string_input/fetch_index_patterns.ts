@@ -29,11 +29,9 @@ export async function fetchIndexPatterns(
 
   const searchString = indexPatternStrings.map((string) => `"${string}"`).join(' | ');
 
-  const indexPatternsFromSavedObjects = await indexPatternsService.find(searchString);
-
-  const exactMatches = indexPatternsFromSavedObjects.filter((ip) => {
-    return indexPatternStrings.includes(ip.title);
-  });
+  const exactMatches = (await indexPatternsService.find(searchString)).filter((ip) =>
+    indexPatternStrings.includes(ip.title)
+  );
 
   const allMatches =
     exactMatches.length === indexPatternStrings.length
