@@ -48,9 +48,9 @@ export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
 export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]';
 
-export const NOTES = '[data-test-subj="markdown-root"]';
+export const NOTES = '[data-test-subj="note-card-body"]';
 
-export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"]';
+export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
 export const NOTES_BUTTON = '[data-test-subj="timeline-notes-button-large"]';
 

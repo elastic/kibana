@@ -91,7 +91,7 @@ describe('Timeline Templates', () => {
       // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
       cy.get(NOTES_COUNT).should('have.text', '1');
       cy.get(NOTES_BUTTON).click();
-      cy.get(NOTES_TEXT_AREA).should('have.attr', 'placeholder', 'Add a Note');
+      cy.get(NOTES_TEXT_AREA).should('exist');
       cy.get(NOTES).should('have.text', timeline.notes);
     });
   });

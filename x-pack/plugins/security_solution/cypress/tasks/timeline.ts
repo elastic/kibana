@@ -103,7 +103,7 @@ export const checkIdToggleField = () => {
 };
 
 export const closeNotes = () => {
-  cy.get(CLOSE_NOTES_BTN).click();
+  cy.get(CLOSE_NOTES_BTN).first().click();
 };
 
 export const closeTimeline = () => {

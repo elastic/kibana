@@ -91,7 +91,7 @@ describe('Timelines', () => {
       cy.get(NOTES_COUNT).should('have.text', '1');
       cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
       cy.get(NOTES_BUTTON).click();
-      cy.get(NOTES_TEXT_AREA).should('have.attr', 'placeholder', 'Add a Note');
+      cy.get(NOTES_TEXT_AREA).should('exist');
       cy.get(NOTES).should('have.text', timeline.notes);
     });
   });
