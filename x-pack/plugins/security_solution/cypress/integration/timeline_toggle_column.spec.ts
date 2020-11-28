@@ -11,6 +11,7 @@ import {
   TIMESTAMP_TOGGLE_FIELD,
 } from '../screens/timeline';
 
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
 import {
@@ -26,7 +27,12 @@ import { HOSTS_URL } from '../urls/navigation';
 
 describe('toggle column in timeline', () => {
   before(() => {
+    esArchiverLoad('timeline');
     loginAndWaitForPage(HOSTS_URL);
+  });
+
+  after(() => {
+    esArchiverUnload('timeline');
   });
 
   beforeEach(() => {
@@ -44,6 +50,7 @@ describe('toggle column in timeline', () => {
   });
 
   it('displays an Unchecked Toggle field checkbox for `_id`, because it is NOT a default timeline column', () => {
+    expandFirstTimelineEventDetails();
     cy.get(ID_TOGGLE_FIELD).should('not.be.checked');
   });
 
