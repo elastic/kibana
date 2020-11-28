@@ -12,6 +12,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { ActionConnector } from '../../../../types';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
@@ -90,7 +91,7 @@ describe('JiraParamsFields renders', () => {
         errors={{ title: [] }}
         editAction={() => {}}
         index={0}
-        messageVariables={[{ name: 'alertId', description: '' }]}
+        messageVariables={[{ name: AlertProvidedActionVariables.alertId, description: '' }]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         toastNotifications={mocks.notifications.toasts}
         http={mocks.http}

@@ -27,6 +27,7 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import { extractActionVariable } from '../extract_action_variable';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
   actionParams,
@@ -43,7 +44,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     actionParams.subActionParams || {};
 
   const isActionBeingConfiguredByAnAlert = messageVariables
-    ? isSome(extractActionVariable(messageVariables, 'alertId'))
+    ? isSome(extractActionVariable(messageVariables, AlertProvidedActionVariables.alertId))
     : false;
 
   const [incidentTypesComboBoxOptions, setIncidentTypesComboBoxOptions] = useState<
@@ -107,7 +108,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
       editAction('subAction', 'pushToService', index);
     }
     if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
-      editSubActionProperty('savedObjectId', '{{alertId}}');
+      editSubActionProperty('savedObjectId', `${AlertProvidedActionVariables.alertId}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector, savedObjectId]);

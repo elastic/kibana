@@ -36,7 +36,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await security.testUser.setRoles(
-        ['global_dashboard_all', 'global_discover_all', 'test_logstash_reader'],
+        [
+          'global_dashboard_all',
+          'global_discover_all',
+          'test_logstash_reader',
+          'global_visualize_all',
+        ],
         false
       );
     });
@@ -116,6 +121,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
       expect(hasGeoDestFilter).to.be(true);
+      await filterBar.addFilter('geo.src', 'is', 'US');
+      await filterBar.toggleFilterPinned('geo.src');
+    });
+
+    it('should not carry over filters if creating a new lens visualization from within dashboard', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await filterBar.addFilter('geo.src', 'is', 'US');
+      await filterBar.toggleFilterPinned('geo.src');
+      await filterBar.addFilter('geo.dest', 'is', 'LS');
+
+      await dashboardAddPanel.clickCreateNewLink();
+      await dashboardAddPanel.clickVisType('lens');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
+      expect(hasGeoDestFilter).to.be(false);
+      const hasGeoSrcFilter = await filterBar.hasFilter('geo.src', 'US', true, true);
+      expect(hasGeoSrcFilter).to.be(true);
     });
   });
 }

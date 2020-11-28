@@ -51,18 +51,27 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
   };
 }
 
-function getUniqueProviderSchema(
+function getUniqueProviderSchema<TProperties extends Record<string, Type<any>>>(
   providerType: string,
-  overrides?: Partial<ProvidersCommonConfigType>
+  overrides?: Partial<ProvidersCommonConfigType>,
+  properties?: TProperties
 ) {
   return schema.maybe(
-    schema.recordOf(schema.string(), schema.object(getCommonProviderSchemaProperties(overrides)), {
-      validate(config) {
-        if (Object.values(config).filter((provider) => provider.enabled).length > 1) {
-          return `Only one "${providerType}" provider can be configured.`;
-        }
-      },
-    })
+    schema.recordOf(
+      schema.string(),
+      schema.object(
+        properties
+          ? { ...getCommonProviderSchemaProperties(overrides), ...properties }
+          : getCommonProviderSchemaProperties(overrides)
+      ),
+      {
+        validate(config) {
+          if (Object.values(config).filter((provider) => provider.enabled).length > 1) {
+            return `Only one "${providerType}" provider can be configured.`;
+          }
+        },
+      }
+    )
   );
 }
 
@@ -119,6 +128,40 @@ const providersConfigSchema = schema.object(
         schema.string(),
         schema.object({ ...getCommonProviderSchemaProperties(), realm: schema.string() })
       )
+    ),
+    anonymous: getUniqueProviderSchema(
+      'anonymous',
+      {
+        description: schema.string({
+          defaultValue: i18n.translate('xpack.security.loginAsGuestLabel', {
+            defaultMessage: 'Continue as Guest',
+          }),
+        }),
+        hint: schema.string({
+          defaultValue: i18n.translate('xpack.security.loginAsGuestHintLabel', {
+            defaultMessage: 'For anonymous users',
+          }),
+        }),
+        icon: schema.string({ defaultValue: 'globe' }),
+        session: schema.object({
+          idleTimeout: schema.nullable(schema.duration()),
+          lifespan: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+        }),
+      },
+      {
+        credentials: schema.oneOf([
+          schema.object({
+            username: schema.string(),
+            password: schema.string(),
+          }),
+          schema.object({
+            apiKey: schema.oneOf([
+              schema.object({ id: schema.string(), key: schema.string() }),
+              schema.string(),
+            ]),
+          }),
+        ]),
+      }
     ),
   },
   {
@@ -201,6 +244,7 @@ export const ConfigSchema = schema.object({
         oidc: undefined,
         pki: undefined,
         kerberos: undefined,
+        anonymous: undefined,
       },
     }),
     oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
@@ -340,6 +384,7 @@ export function createConfig(
 }
 
 function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
+  const defaultAnonymousSessionLifespan = schema.duration().validate('30d');
   return {
     cleanupInterval: session.cleanupInterval,
     getExpirationTimeouts({ type, name }: AuthenticationProvider) {
@@ -348,9 +393,20 @@ function getSessionConfig(session: RawConfigType['session'], providers: Provider
       // provider doesn't override session config and we should fall back to the global one instead.
       const providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
 
+      // We treat anonymous sessions differently since users can create them without realizing it. This may lead to a
+      // non controllable amount of sessions stored in the session index. To reduce the impact we set a 30 days lifespan
+      // for the anonymous sessions in case neither global nor provider specific lifespan is configured explicitly.
+      // We can remove this code once https://github.com/elastic/kibana/issues/68885 is resolved.
+      const providerLifespan =
+        type === 'anonymous' &&
+        providerSessionConfig?.lifespan === undefined &&
+        session.lifespan === undefined
+          ? defaultAnonymousSessionLifespan
+          : providerSessionConfig?.lifespan;
+
       const [idleTimeout, lifespan] = [
         [session.idleTimeout, providerSessionConfig?.idleTimeout],
-        [session.lifespan, providerSessionConfig?.lifespan],
+        [session.lifespan, providerLifespan],
       ].map(([globalTimeout, providerTimeout]) => {
         const timeout = providerTimeout === undefined ? globalTimeout ?? null : providerTimeout;
         return timeout && timeout.asMilliseconds() > 0 ? timeout : null;

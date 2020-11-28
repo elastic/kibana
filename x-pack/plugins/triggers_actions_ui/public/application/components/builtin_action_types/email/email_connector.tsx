@@ -23,9 +23,9 @@ import { EuiLink } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 
-export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  EmailActionConnector
->> = ({ action, editActionConfig, editActionSecrets, errors, readOnly, docLinks }) => {
+export const EmailActionConnectorFields: React.FunctionComponent<
+  ActionConnectorFieldsProps<EmailActionConnector>
+> = ({ action, editActionConfig, editActionSecrets, errors, readOnly, docLinks }) => {
   const { from, host, port, secure, hasAuth } = action.config;
   const { user, password } = action.secrets;
   useEffect(() => {

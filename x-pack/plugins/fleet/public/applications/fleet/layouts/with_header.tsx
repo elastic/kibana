@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import styled from 'styled-components';
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { Header, HeaderProps } from '../components';
-
-const Page = styled(EuiPage)`
-  background: ${(props) => props.theme.eui.euiColorEmptyShade};
-`;
+import { Page, ContentWrapper } from './without_header';
 
 export interface WithHeaderLayoutProps extends HeaderProps {
   restrictWidth?: number;
@@ -37,8 +33,10 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
       data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
     >
       <EuiPageBody>
-        <EuiSpacer size="m" />
-        {children}
+        <ContentWrapper>
+          <EuiSpacer size="m" />
+          {children}
+        </ContentWrapper>
       </EuiPageBody>
     </Page>
   </Fragment>

@@ -122,30 +122,31 @@ export function registerUpgradeAssistantUsageCollector({
   usageCollection,
   savedObjects,
 }: Dependencies) {
-  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector<
-    UpgradeAssistantTelemetry
-  >({
-    type: 'upgrade-assistant-telemetry',
-    isReady: () => true,
-    schema: {
-      features: {
-        deprecation_logging: {
-          enabled: { type: 'boolean' },
+  const upgradeAssistantUsageCollector = usageCollection.makeUsageCollector<UpgradeAssistantTelemetry>(
+    {
+      type: 'upgrade-assistant-telemetry',
+      isReady: () => true,
+      schema: {
+        features: {
+          deprecation_logging: {
+            enabled: { type: 'boolean' },
+          },
+        },
+        ui_open: {
+          cluster: { type: 'long' },
+          indices: { type: 'long' },
+          overview: { type: 'long' },
+        },
+        ui_reindex: {
+          close: { type: 'long' },
+          open: { type: 'long' },
+          start: { type: 'long' },
+          stop: { type: 'long' },
         },
       },
-      ui_open: {
-        cluster: { type: 'long' },
-        indices: { type: 'long' },
-        overview: { type: 'long' },
-      },
-      ui_reindex: {
-        close: { type: 'long' },
-        open: { type: 'long' },
-        start: { type: 'long' },
-        stop: { type: 'long' },
-      },
-    },
-    fetch: async () => fetchUpgradeAssistantMetrics(elasticsearch, savedObjects),
-  });
+      fetch: async () => fetchUpgradeAssistantMetrics(elasticsearch, savedObjects),
+    }
+  );
+
   usageCollection.registerCollector(upgradeAssistantUsageCollector);
 }

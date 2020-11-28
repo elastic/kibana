@@ -40,6 +40,10 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
       'critical'
     );
+    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').first().prop('value')).toStrictEqual(
+      'test'
+    );
     expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="timestampInput"]').length > 0).toBeTruthy();

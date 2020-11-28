@@ -59,7 +59,7 @@ https://momentjs.com/docs/#/displaying/format/[pretty formatted dates].
 [[dateformat-dow]]`dateFormat:dow`::
 The day that a week should start on.
 
-[[dateformat-scaled]]``dateFormat:scaled`::
+[[dateformat-scaled]]`dateFormat:scaled`::
 The values that define the format to use to render ordered time-based data.
 Formatted timestamps must adapt to the interval between measurements. Keys are
 http://en.wikipedia.org/wiki/ISO_8601#Time_intervals[ISO8601 intervals].
@@ -455,7 +455,8 @@ of buckets to try to represent.
 
 [horizontal]
 [[visualization-colormapping]]`visualization:colorMapping`::
-Maps values to specified colors in visualizations.
+**This setting is deprecated and will not be supported as of 8.0.**
+Maps values to specific colors in *Visualize* charts and *TSVB*. This setting does not apply to *Lens*.
 
 [[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
 The opacity of the chart items that are dimmed when highlighting another element

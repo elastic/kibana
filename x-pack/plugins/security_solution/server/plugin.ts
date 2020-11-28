@@ -290,7 +290,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    const libs = compose(core, plugins, this.context.env.mode.prod, endpointContext);
+    const libs = compose(core, plugins, endpointContext);
     initServer(libs);
 
     core.getStartServices().then(([_, depsStart]) => {
@@ -347,6 +347,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.endpointAppContextService.start({
       agentService: plugins.fleet?.agentService,
       packageService: plugins.fleet?.packageService,
+      packagePolicyService: plugins.fleet?.packagePolicyService,
+      agentPolicyService: plugins.fleet?.agentPolicyService,
       appClientFactory: this.appClientFactory,
       security: this.setupPlugins!.security!,
       alerts: plugins.alerts,

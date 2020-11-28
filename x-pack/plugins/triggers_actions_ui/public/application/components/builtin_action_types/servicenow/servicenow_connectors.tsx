@@ -27,9 +27,9 @@ import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { connectorConfiguration } from './config';
 
-const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
-  ServiceNowActionConnector
->> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, docLinks }) => {
+const ServiceNowConnectorFields: React.FC<
+  ActionConnectorFieldsProps<ServiceNowActionConnector>
+> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, docLinks }) => {
   // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
   const { apiUrl, incidentConfiguration, isCaseOwned } = action.config;
   const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];

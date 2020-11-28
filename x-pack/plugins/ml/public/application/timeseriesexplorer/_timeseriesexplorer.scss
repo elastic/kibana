@@ -166,7 +166,6 @@
     }
 
     .forecast {
-
       .metric-value,
       .metric-value:hover {
         stroke: #cca300;
@@ -201,7 +200,6 @@
         a:focus {
           text-decoration: underline;
         }
-
       }
     }
 
@@ -246,7 +244,6 @@
           stroke-width: 0;
         }
       }
-
     }
 
     .swimlane .axis text {
@@ -290,10 +287,8 @@
       text-align: center;
       cursor: ew-resize;
       margin-top: 9px;
-
-      i.fa {
-        margin-top: 30px;
-      }
+      font-size: $euiFontSizeS;
+      fill: $euiColorDarkShade;
     }
 
     div.brush-handle-inner-left {
