@@ -17,39 +17,36 @@
  * under the License.
  */
 import { isEmpty } from 'lodash';
-import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
-import { indexPatterns, IndexPatternAttributes } from '../..';
+import { IndexPatternsContract } from '../..';
 
 export async function fetchIndexPatterns(
-  savedObjectsClient: SavedObjectsClientContract,
-  indexPatternStrings: string[],
-  uiSettings: IUiSettingsClient
+  indexPatternsService: IndexPatternsContract,
+  indexPatternStrings: string[]
 ) {
   if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
     return [];
   }
 
   const searchString = indexPatternStrings.map((string) => `"${string}"`).join(' | ');
+  // todo use find
+  const indexPatternsFromSavedObjects = [await indexPatternsService.get(searchString)];
+  /*
   const indexPatternsFromSavedObjects = await savedObjectsClient.find<IndexPatternAttributes>({
     type: 'index-pattern',
     fields: ['title', 'fields'],
     search: searchString,
     searchFields: ['title'],
   });
+  */
 
-  const exactMatches = indexPatternsFromSavedObjects.savedObjects.filter((savedObject) => {
-    return indexPatternStrings.includes(savedObject.attributes.title);
+  const exactMatches = indexPatternsFromSavedObjects.filter((ip) => {
+    return indexPatternStrings.includes(ip.title);
   });
-
-  const defaultIndex = uiSettings.get('defaultIndex');
 
   const allMatches =
     exactMatches.length === indexPatternStrings.length
       ? exactMatches
-      : [
-          ...exactMatches,
-          await savedObjectsClient.get<IndexPatternAttributes>('index-pattern', defaultIndex),
-        ];
+      : [...exactMatches, await indexPatternsService.getDefault()];
 
-  return allMatches.map(indexPatterns.getFromSavedObject);
+  return allMatches;
 }
