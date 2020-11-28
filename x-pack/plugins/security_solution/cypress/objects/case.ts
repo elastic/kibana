@@ -21,6 +21,23 @@ export interface Connector {
   password: string;
 }
 
+export interface JiraConnectorOptions {
+  issueType: string;
+  priority: string;
+}
+
+export interface ServiceNowconnectorOptions {
+  urgency: string;
+  severity: string;
+  impact: string;
+}
+
+export interface IbmResilientConnectorOptions {
+  title: string;
+  severity: string;
+  incidentTypes: string[];
+}
+
 export const caseTimeline: TimelineWithId = {
   title: 'SIEM test',
   description: 'description',
@@ -41,6 +58,23 @@ export const serviceNowConnector: Connector = {
   URL: 'https://www.test.service-now.com',
   username: 'Username Name',
   password: 'password',
+};
+
+export const jiraConnectorOptions: JiraConnectorOptions = {
+  issueType: '10006',
+  priority: 'High',
+};
+
+export const serviceNowConnectorOpions: ServiceNowconnectorOptions = {
+  urgency: '2',
+  severity: '1',
+  impact: '3',
+};
+
+export const ibmResilientConnectorOptions: IbmResilientConnectorOptions = {
+  title: 'Resilient',
+  severity: 'Medium',
+  incidentTypes: ['Communication error (fax; email)', 'Denial of Service'],
 };
 
 export const TIMELINE_CASE_ID = '68248e00-f689-11ea-9ab2-59238b522856';

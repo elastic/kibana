@@ -5,11 +5,26 @@
  */
 
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
-import { case1, connectorIds, mockConnectorsResponse, executeResponses } from '../objects/case';
-import { createNewCaseWithConnector } from '../tasks/create_new_case';
-import { CONNECTOR_TITLE } from '../screens/edit_connector';
+import {
+  case1,
+  connectorIds,
+  mockConnectorsResponse,
+  executeResponses,
+  ibmResilientConnectorOptions,
+  jiraConnectorOptions,
+  serviceNowConnectorOpions,
+} from '../objects/case';
+import {
+  createCase,
+  fillCasesMandatoryfields,
+  fillIbmResilientConnectorOptions,
+  fillJiraConnectorOptions,
+  fillServiceNowConnectorOptions,
+} from '../tasks/create_new_case';
 import { goToCreateNewCase } from '../tasks/all_cases';
+import { deleteCase } from '../tasks/case_details';
 import { CASES_URL } from '../urls/navigation';
+import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../screens/case_details';
 
 describe('Cases connector incident fields', () => {
   before(() => {
@@ -30,10 +45,28 @@ describe('Cases connector incident fields', () => {
       req.reply(JSON.stringify(response));
     });
   });
+
+  after(() => {
+    deleteCase();
+  });
+
   it('Correct incident fields show when connector is changed', () => {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
-    createNewCaseWithConnector(case1);
-    cy.get(CONNECTOR_TITLE).should('have.text', 'Resilient');
+    fillCasesMandatoryfields(case1);
+    fillJiraConnectorOptions(jiraConnectorOptions);
+    fillServiceNowConnectorOptions(serviceNowConnectorOpions);
+    fillIbmResilientConnectorOptions(ibmResilientConnectorOptions);
+    createCase();
+
+    cy.get(CONNECTOR_TITLE).should('have.text', ibmResilientConnectorOptions.title);
+    cy.get(CONNECTOR_CARD_DETAILS).should(
+      'have.text',
+      `${
+        ibmResilientConnectorOptions.title
+      }Incident Types: ${ibmResilientConnectorOptions.incidentTypes.join(', ')}Severity: ${
+        ibmResilientConnectorOptions.severity
+      }`
+    );
   });
 });
