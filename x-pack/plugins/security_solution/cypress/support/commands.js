@@ -49,10 +49,8 @@ Cypress.Commands.add(
   'stubSearchStrategyApi',
   function (stubObject, factoryQueryType, searchStrategyName = 'securitySolutionSearchStrategy') {
     cy.intercept('POST', '/internal/bsearch', (req) => {
-      const bodyObj = JSON.parse(req.body);
       const findRequestConfig = getFindRequestConfig(searchStrategyName, factoryQueryType);
-
-      const requestIndex = findIndex(findRequestConfig, bodyObj.batch);
+      const requestIndex = findIndex(findRequestConfig, req.body.batch);
 
       if (requestIndex > -1) {
         return req.reply((res) => {
