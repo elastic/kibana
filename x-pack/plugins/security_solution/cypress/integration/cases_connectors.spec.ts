@@ -30,14 +30,11 @@ describe('Cases connectors', () => {
     addServiceNowConnector(serviceNowConnector);
 
     cy.wait('@createConnector').then(({ response }) => {
-      // @ts-expect-error statusCode isn't typed properly
-      cy.wrap(response.statusCode).should('eql', 200);
+      cy.wrap(response!.statusCode).should('eql', 200);
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
       cy.get(TOASTER).should('not.exist');
 
-      const bodyJSON = JSON.parse(response!.body as string);
-
-      selectLastConnectorCreated(bodyJSON.id);
+      selectLastConnectorCreated(response!.body.id);
 
       cy.wait('@saveConnector', { timeout: 10000 }).its('response.statusCode').should('eql', 200);
       cy.get(TOASTER).should('have.text', 'Saved external connection settings');

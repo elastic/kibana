@@ -50,7 +50,7 @@ describe('Timelines', () => {
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
-  it('Creates a timeline', async () => {
+  it('Creates a timeline', () => {
     loginAndWaitForPage(OVERVIEW_URL);
     openTimelineUsingToggle();
     populateTimeline();
@@ -62,37 +62,37 @@ describe('Timelines', () => {
 
     addNameToTimeline(timeline.title);
 
-    const { response } = await cy.wait('@timeline').promisify();
-    const timelineId = JSON.parse(response!.body as string).data.persistTimeline.timeline
-      .savedObjectId;
+    cy.wait('@timeline').then(({ response }) => {
+      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
 
-    addDescriptionToTimeline(timeline.description);
-    addNotesToTimeline(timeline.notes);
-    closeNotes();
-    markAsFavorite();
-    waitForTimelineChanges();
-    createNewTimeline();
-    closeTimeline();
-    openTimelineFromSettings();
+      addDescriptionToTimeline(timeline.description);
+      addNotesToTimeline(timeline.notes);
+      closeNotes();
+      markAsFavorite();
+      waitForTimelineChanges();
+      createNewTimeline();
+      closeTimeline();
+      openTimelineFromSettings();
 
-    cy.contains(timeline.title).should('exist');
-    cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
-    cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
-    cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
-    cy.get(TIMELINES_FAVORITE).first().should('exist');
+      cy.contains(timeline.title).should('exist');
+      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
+      cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
+      cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
+      cy.get(TIMELINES_FAVORITE).first().should('exist');
 
-    openTimeline(timelineId);
+      openTimeline(timelineId);
 
-    cy.get(FAVORITE_TIMELINE).should('exist');
-    cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
-    cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', timeline.description);
-    cy.get(TIMELINE_QUERY).should('have.text', timeline.query);
-    // Comments this assertion until we agreed what to do with the filters.
-    // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
-    cy.get(NOTES_COUNT).should('have.text', '1');
-    cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
-    cy.get(NOTES_BUTTON).click();
-    cy.get(NOTES_TEXT_AREA).should('have.attr', 'placeholder', 'Add a Note');
-    cy.get(NOTES).should('have.text', timeline.notes);
+      cy.get(FAVORITE_TIMELINE).should('exist');
+      cy.get(TIMELINE_TITLE).should('have.attr', 'value', timeline.title);
+      cy.get(TIMELINE_DESCRIPTION).should('have.attr', 'value', timeline.description);
+      cy.get(TIMELINE_QUERY).should('have.text', timeline.query);
+      // Comments this assertion until we agreed what to do with the filters.
+      // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
+      cy.get(NOTES_COUNT).should('have.text', '1');
+      cy.get(PIN_EVENT).should('have.attr', 'aria-label', 'Pinned event');
+      cy.get(NOTES_BUTTON).click();
+      cy.get(NOTES_TEXT_AREA).should('have.attr', 'placeholder', 'Add a Note');
+      cy.get(NOTES).should('have.text', timeline.notes);
+    });
   });
 });
