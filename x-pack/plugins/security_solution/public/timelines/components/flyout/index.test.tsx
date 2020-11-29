@@ -21,7 +21,6 @@ import { createStore, State } from '../../../common/store';
 import * as timelineActions from '../../store/timeline/actions';
 
 import { Flyout } from '.';
-import { FlyoutBottomBar } from './button';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

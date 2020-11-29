@@ -138,7 +138,7 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
   (prevProps, nextProps) =>
     prevProps.children === nextProps.children &&
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-    prevProps.activeTimelineDataProviders === nextProps.activeTimelineDataProviders
+    deepEqual(prevProps.activeTimelineDataProviders, nextProps.activeTimelineDataProviders)
 );
 
 DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';

@@ -19,6 +19,7 @@
 
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import deepEqual from 'fast-deep-equal';
 
 import classNames from 'classnames';
 import {
@@ -571,9 +572,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
   handleListUpdate = () => {
     if (this.componentIsUnmounting) return;
 
-    return this.setState({
-      queryBarRect: this.queryBarInputDivRefInstance.current?.getBoundingClientRect(),
-    });
+    const newQueryBarRect = this.queryBarInputDivRefInstance.current?.getBoundingClientRect();
+
+    if (!deepEqual(this.state.queryBarRect, newQueryBarRect)) {
+      this.setState({ queryBarRect: newQueryBarRect });
+    }
   };
 
   handleAutoHeight = () => {

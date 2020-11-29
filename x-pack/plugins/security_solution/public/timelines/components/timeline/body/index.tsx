@@ -184,15 +184,15 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.data, nextProps.data) &&
     deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
-    prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
+    deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
+    deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
+    deepEqual(prevProps.selectedEventIds, nextProps.selectedEventIds) &&
+    deepEqual(prevProps.loadingEventIds, nextProps.loadingEventIds) &&
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-    prevProps.loadingEventIds === nextProps.loadingEventIds &&
-    prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
-    prevProps.selectedEventIds === nextProps.selectedEventIds &&
-    prevProps.showCheckboxes === nextProps.showCheckboxes &&
-    prevProps.sort === nextProps.sort
+    prevProps.showCheckboxes === nextProps.showCheckboxes
 );
 
 BodyComponent.displayName = 'BodyComponent';

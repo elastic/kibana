@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import deepEqual from 'fast-deep-equal';
 import { useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import { ManageScope, SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
-import { State } from '../../store';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../hooks/use_selector';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -30,8 +28,8 @@ export const useInitSourcerer = (
   const ConfigIndexPatterns = useDeepEqualSelector(getConfigIndexPatternsSelector);
 
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const activeTimelineSavedObjectId = useShallowEqualSelector(
-    (state) => getTimelineSelector(state, TimelineId.active)?.savedObjectId
+  const activeTimeline = useDeepEqualSelector((state) =>
+    getTimelineSelector(state, TimelineId.active)
   );
 
   useIndexFields(scopeId);
@@ -45,7 +43,11 @@ export const useInitSourcerer = (
 
   // Related to timeline
   useEffect(() => {
-    if (!loadingSignalIndex && signalIndexName != null && activeTimelineSavedObjectId == null) {
+    if (
+      !loadingSignalIndex &&
+      signalIndexName != null &&
+      (activeTimeline == null || (activeTimeline != null && activeTimeline.savedObjectId == null))
+    ) {
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
@@ -53,13 +55,7 @@ export const useInitSourcerer = (
         })
       );
     }
-  }, [
-    activeTimelineSavedObjectId,
-    ConfigIndexPatterns,
-    dispatch,
-    loadingSignalIndex,
-    signalIndexName,
-  ]);
+  }, [activeTimeline, ConfigIndexPatterns, dispatch, loadingSignalIndex, signalIndexName]);
 
   // Related to the detection page
   useEffect(() => {
@@ -80,9 +76,6 @@ export const useInitSourcerer = (
 
 export const useSourcererScope = (scope: SourcererScopeName = SourcererScopeName.default) => {
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const SourcererScope = useSelector<State, ManageScope>(
-    (state) => sourcererScopeSelector(state, scope),
-    deepEqual
-  );
+  const SourcererScope = useDeepEqualSelector((state) => sourcererScopeSelector(state, scope));
   return SourcererScope;
 };

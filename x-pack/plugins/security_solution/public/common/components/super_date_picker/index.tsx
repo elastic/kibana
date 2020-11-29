@@ -79,7 +79,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     fromStr,
     id,
     isLoading,
-    kind,
     kqlQuery,
     policy,
     queries,

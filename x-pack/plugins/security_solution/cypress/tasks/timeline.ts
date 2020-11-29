@@ -116,14 +116,14 @@ export const closeTimeline = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
   cy.get(CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(CREATE_NEW_TIMELINE).click();
-  cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
+  cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click({ force: true });
 };
 
 export const createNewTimelineTemplate = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).click({ force: true });
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
   cy.get(CREATE_NEW_TIMELINE_TEMPLATE).click();
 };
 
@@ -157,10 +157,6 @@ export const openTimelineTemplateFromSettings = (id: string) => {
   openTimelineFromSettings();
   cy.get(OPEN_TIMELINE_TEMPLATE_ICON).click({ force: true });
   cy.get(TIMELINE_TITLE_BY_ID(id)).click({ force: true });
-};
-
-export const openTimelineSettings = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).trigger('click', { force: true });
 };
 
 export const pinFirstEvent = () => {
