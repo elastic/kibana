@@ -86,7 +86,7 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
               Kibana Query Language
             </EuiLink>{' '}
             (KQL) offers a simplified query syntax and support for scripted fields. KQL also
-            provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana
+            provides autocomplete if you have a Basic license or above. If you turn off KQL, Uptime
             uses simple wildcard search against <strong>Monitor Name, ID, Url</strong> fields.
           </EuiText>
           <EuiSpacer />
