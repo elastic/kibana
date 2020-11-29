@@ -280,16 +280,16 @@ describe('QueryStringInput', () => {
   });
 
   it('Should accept index pattern strings and fetch the full object', () => {
+    const patternStrings = ['logstash-*'];
     mockFetchIndexPatterns.mockClear();
     mount(
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: ['logstash-*'],
+        indexPatterns: patternStrings,
         disableAutoFocus: true,
       })
     );
-
-    expect(mockFetchIndexPatterns).toHaveBeenLastCalledWith(dataMock.indexPatterns, ['logstash-*']);
+    expect(mockFetchIndexPatterns.mock.calls[0][1]).toStrictEqual(patternStrings);
   });
 });
