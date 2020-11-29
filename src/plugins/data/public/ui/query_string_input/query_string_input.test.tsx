@@ -41,7 +41,6 @@ import { stubIndexPatternWithFields } from '../../stubs';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
 const startMock = coreMock.createStart();
-const dataMock = dataPluginMock.createStartContract();
 
 const noop = () => {
   return;
