@@ -11,7 +11,7 @@ import { useCreateTimelineButton } from './use_create_timeline';
 import * as i18n from './translations';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { TimelineType } from '../../../../../common/types/timeline';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 jest.mock('../../../../common/hooks/use_selector');
 
@@ -143,7 +143,7 @@ describe('Name', () => {
   };
 
   beforeAll(() => {
-    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+    (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
   test('should render tooltip', () => {
@@ -169,7 +169,7 @@ describe('Name', () => {
   });
 
   test('should render placeholder by timelineType - timeline template', () => {
-    (useShallowEqualSelector as jest.Mock).mockReturnValue({
+    (useDeepEqualSelector as jest.Mock).mockReturnValue({
       ...mockTimelineModel,
       timelineType: TimelineType.template,
     });

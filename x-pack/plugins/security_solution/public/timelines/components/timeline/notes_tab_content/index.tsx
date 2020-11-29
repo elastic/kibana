@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -46,8 +47,8 @@ interface NotesTabContentProps {
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { status: timelineStatus, noteIds } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  const { status: timelineStatus, noteIds } = useDeepEqualSelector((state) =>
+    pick(['noteIds', 'status'], getTimeline(state, timelineId) ?? timelineDefaults)
   );
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);

@@ -10,7 +10,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -63,8 +63,8 @@ export const useNetworkTopCountries = ({
   startDate,
   type,
 }: UseNetworkTopCountries): [boolean, NetworkTopCountriesArgs] => {
-  const getTopCountriesSelector = networkSelectors.topCountriesSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+  const getTopCountriesSelector = useMemo(() => networkSelectors.topCountriesSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopCountriesSelector(state, type, flowTarget)
   );
   const { data, notifications } = useKibana().services;

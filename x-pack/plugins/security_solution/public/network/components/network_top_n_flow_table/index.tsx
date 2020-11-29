@@ -15,7 +15,7 @@ import {
   NetworkTopNFlowEdges,
   NetworkTopTablesFields,
 } from '../../../../common/search_strategy';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import { getNFlowColumnsCurated } from './columns';
@@ -60,8 +60,8 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  const getTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+  const getTopNFlowSelector = useMemo(() => networkSelectors.topNFlowSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopNFlowSelector(state, type, flowTargeted)
   );
 

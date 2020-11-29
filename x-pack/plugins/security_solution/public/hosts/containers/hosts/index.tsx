@@ -6,12 +6,12 @@
 
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import {
@@ -65,8 +65,8 @@ export const useAllHost = ({
   startDate,
   type,
 }: UseAllHost): [boolean, HostsArgs] => {
-  const getHostsSelector = hostsSelectors.hostsSelector();
-  const { activePage, direction, limit, sortField } = useShallowEqualSelector((state: State) =>
+  const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
+  const { activePage, direction, limit, sortField } = useDeepEqualSelector((state: State) =>
     getHostsSelector(state, type)
   );
   const { data, notifications } = useKibana().services;

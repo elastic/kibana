@@ -12,21 +12,19 @@ import {
   EuiHorizontalRule,
   EuiToolTip,
 } from '@elastic/eui';
-import { noop } from 'lodash/fp';
+import { noop, pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
 import { DEFAULT_INDEX_KEY, FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import { useFullScreen } from '../../../common/containers/use_full_screen';
-import { State } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { TimelineModel } from '../../store/timeline/model';
 import { isFullScreen } from '../timeline/body/column_headers';
 import { NewCase, ExistingCase } from '../timeline/properties/helpers';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
@@ -56,26 +54,26 @@ const FullScreenButtonIcon = styled(EuiButtonIcon)`
 `;
 
 interface OwnProps {
-  graphEventId?: string;
   isEventViewer: boolean;
   timelineId: string;
-  timelineType: TimelineType;
 }
 
-const Navigation = ({
-  fullScreen,
-  globalFullScreen,
-  onCloseOverlay,
-  timelineId,
-  timelineFullScreen,
-  toggleFullScreen,
-}: {
+interface NavigationProps {
   fullScreen: boolean;
   globalFullScreen: boolean;
   onCloseOverlay: () => void;
   timelineId: string;
   timelineFullScreen: boolean;
   toggleFullScreen: () => void;
+}
+
+const NavigationComponent: React.FC<NavigationProps> = ({
+  fullScreen,
+  globalFullScreen,
+  onCloseOverlay,
+  timelineId,
+  timelineFullScreen,
+  toggleFullScreen,
 }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow={false}>
@@ -102,21 +100,21 @@ const Navigation = ({
   </EuiFlexGroup>
 );
 
-const GraphOverlayComponent = ({
-  graphEventId,
-  isEventViewer,
-  status,
-  timelineId,
-  title,
-  timelineType,
-}: OwnProps & PropsFromRedux) => {
+NavigationComponent.displayName = 'NavigationComponent';
+
+const Navigation = React.memo(NavigationComponent);
+
+const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }) => {
   const dispatch = useDispatch();
   const onCloseOverlay = useCallback(() => {
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
   }, [dispatch, timelineId]);
-
-  const currentTimeline = useShallowEqualSelector((state) =>
-    timelineSelectors.selectTimeline(state, timelineId)
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const { graphEventId, timelineType, status, title } = useDeepEqualSelector((state) =>
+    pick(
+      ['graphEventId', 'timelineType', 'status', 'title'],
+      getTimeline(state, timelineId) ?? timelineDefaults
+    )
   );
 
   const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
@@ -127,10 +125,12 @@ const GraphOverlayComponent = ({
     globalFullScreen,
     setGlobalFullScreen,
   } = useFullScreen();
+
   const fullScreen = useMemo(
     () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
     [globalFullScreen, timelineId, timelineFullScreen]
   );
+
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {
       setTimelineFullScreen(!timelineFullScreen);
@@ -202,7 +202,7 @@ const GraphOverlayComponent = ({
       {graphEventId !== undefined && indices !== null && (
         <StyledResolver
           databaseDocumentID={graphEventId}
-          resolverComponentInstanceID={currentTimeline.id}
+          resolverComponentInstanceID={timelineId}
           indices={indices}
         />
       )}
@@ -211,22 +211,4 @@ const GraphOverlayComponent = ({
   );
 };
 
-const makeMapStateToProps = () => {
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
-    const { status, title = '' } = timeline;
-
-    return {
-      status,
-      title,
-    };
-  };
-  return mapStateToProps;
-};
-
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const GraphOverlay = connector(GraphOverlayComponent);
+export const GraphOverlay = React.memo(GraphOverlayComponent);

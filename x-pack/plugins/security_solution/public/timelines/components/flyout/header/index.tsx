@@ -14,7 +14,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { isEmpty, get } from 'lodash/fp';
+import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { FormattedRelative } from '@kbn/i18n/react';
@@ -49,8 +49,11 @@ interface FlyoutHeaderPanelProps {
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { dataProviders, kqlQuery, title, timelineType, show } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  const { dataProviders, kqlQuery, title, timelineType, show } = useDeepEqualSelector((state) =>
+    pick(
+      ['dataProviders', 'kqlQuery', 'title', 'timelineType', 'show'],
+      getTimeline(state, timelineId) ?? timelineDefaults
+    )
   );
   const isDataInTimeline = useMemo(
     () => !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
@@ -119,8 +122,8 @@ const RowFlexItem = styled(EuiFlexItem)`
 
 const TimelineNameComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { title, timelineType } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  const { title, timelineType } = useDeepEqualSelector((state) =>
+    pick(['title', 'timelineType'], getTimeline(state, timelineId) ?? timelineDefaults)
   );
   const placeholder = useMemo(
     () =>
@@ -169,8 +172,8 @@ const TimelineDescription = React.memo(TimelineDescriptionComponent);
 const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   // @ts-expect-error
-  const { status: timelineStatus, updated } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
+    pick(['status', 'updated'], getTimeline(state, timelineId) ?? timelineDefaults)
   );
 
   const isUnsaved = useMemo(() => timelineStatus === TimelineStatus.draft, [timelineStatus]);

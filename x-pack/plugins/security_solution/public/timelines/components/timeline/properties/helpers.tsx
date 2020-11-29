@@ -18,6 +18,7 @@ import {
   EuiToolTip,
   EuiTextArea,
 } from '@elastic/eui';
+import { pick } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -34,7 +35,10 @@ import { SecurityPageName } from '../../../../app/types';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { getCreateCaseUrl } from '../../../../common/components/link_to';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import {
+  useDeepEqualSelector,
+  useShallowEqualSelector,
+} from '../../../../common/hooks/use_selector';
 
 import { Notes } from '../../notes';
 import { AssociateNote } from '../../notes/helpers';
@@ -188,8 +192,8 @@ export const Name = React.memo<NameProps>(
     const timelineNameRef = useRef<HTMLInputElement>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-    const { title, timelineType } = useShallowEqualSelector(
-      (state) => getTimeline(state, timelineId) ?? timelineDefaults
+    const { title, timelineType } = useDeepEqualSelector((state) =>
+      pick(['title', 'timelineType'], getTimeline(state, timelineId) ?? timelineDefaults)
     );
 
     const handleChange = useCallback(

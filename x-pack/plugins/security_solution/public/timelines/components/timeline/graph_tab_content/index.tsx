@@ -7,9 +7,8 @@
 import React, { useMemo } from 'react';
 
 import { timelineSelectors } from '../../../store/timeline';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { GraphOverlay } from '../../graph_overlay';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 
 interface GraphTabContentProps {
   timelineId: string;
@@ -17,22 +16,15 @@ interface GraphTabContentProps {
 
 const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { timelineType, graphEventId } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  const graphEventId = useShallowEqualSelector(
+    (state) => getTimeline(state, timelineId)?.graphEventId
   );
 
   if (!graphEventId) {
     return null;
   }
 
-  return (
-    <GraphOverlay
-      graphEventId={graphEventId}
-      isEventViewer={false}
-      timelineId={timelineId}
-      timelineType={timelineType}
-    />
-  );
+  return <GraphOverlay isEventViewer={false} timelineId={timelineId} />;
 };
 
 GraphTabContentComponent.displayName = 'GraphTabContentComponent';

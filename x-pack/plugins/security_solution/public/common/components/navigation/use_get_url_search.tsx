@@ -13,7 +13,7 @@ import { SearchNavTab } from './types';
 
 export const useGetUrlSearch = (tab: SearchNavTab) => {
   const mapState = makeMapStateToProps();
-  const { urlState } = useDeepEqualSelector(mapState);
+  const urlState = useDeepEqualSelector((state) => mapState(state).urlState);
   const urlSearch = useMemo(() => getSearch(tab, urlState), [tab, urlState]);
   return urlSearch;
 };

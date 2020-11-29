@@ -5,12 +5,12 @@
  */
 
 import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { PageInfoPaginated, FlowTargetSourceDest } from '../../../graphql/types';
@@ -63,8 +63,8 @@ export const useNetworkTls = ({
   startDate,
   type,
 }: UseNetworkTls): [boolean, NetworkTlsArgs] => {
-  const getTlsSelector = networkSelectors.tlsSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+  const getTlsSelector = useMemo(() => networkSelectors.tlsSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTlsSelector(state, type, flowTarget)
   );
   const { data, notifications } = useKibana().services;

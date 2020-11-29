@@ -5,12 +5,12 @@
  */
 
 import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -64,10 +64,8 @@ export const useNetworkHttp = ({
   startDate,
   type,
 }: UseNetworkHttp): [boolean, NetworkHttpArgs] => {
-  const getHttpSelector = networkSelectors.httpSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
-    getHttpSelector(state, type)
-  );
+  const getHttpSelector = useMemo(() => networkSelectors.httpSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) => getHttpSelector(state, type));
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());

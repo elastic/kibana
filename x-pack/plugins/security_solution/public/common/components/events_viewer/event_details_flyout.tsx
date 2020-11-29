@@ -28,6 +28,8 @@ interface EventDetailsFlyoutProps {
   timelineId: string;
 }
 
+const emptyExpandedEvent = {};
+
 const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   browserFields,
   docValueFields,
@@ -35,14 +37,14 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
 }) => {
   const dispatch = useDispatch();
   const expandedEvent = useDeepEqualSelector(
-    (state) => state.timeline.timelineById[timelineId]?.expandedEvent ?? {}
+    (state) => state.timeline.timelineById[timelineId]?.expandedEvent ?? emptyExpandedEvent
   );
 
   const handleClearSelection = useCallback(() => {
     dispatch(
       timelineActions.toggleExpandedEvent({
         timelineId,
-        event: {},
+        event: emptyExpandedEvent,
       })
     );
   }, [dispatch, timelineId]);

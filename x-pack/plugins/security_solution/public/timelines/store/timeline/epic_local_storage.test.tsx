@@ -87,7 +87,6 @@ describe('epicLocalStorage', () => {
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
-      show: true,
       showCallOutUnauthorizedMsg: false,
       showEventDetails: false,
       start: startDate,

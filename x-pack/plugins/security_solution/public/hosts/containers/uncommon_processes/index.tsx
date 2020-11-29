@@ -6,8 +6,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
@@ -31,6 +30,7 @@ import * as i18n from './translations';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 const ID = 'hostsUncommonProcessesQuery';
 
@@ -64,8 +64,11 @@ export const useUncommonProcesses = ({
   startDate,
   type,
 }: UseUncommonProcesses): [boolean, UncommonProcessesArgs] => {
-  const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  const { activePage, limit } = useSelector((state: State) =>
+  const getUncommonProcessesSelector = useMemo(
+    () => hostsSelectors.uncommonProcessesSelector(),
+    []
+  );
+  const { activePage, limit } = useDeepEqualSelector((state: State) =>
     getUncommonProcessesSelector(state, type)
   );
   const { data, notifications } = useKibana().services;

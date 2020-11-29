@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
@@ -28,8 +29,6 @@ import { AddEventNoteAction } from '../actions/add_note_icon_item';
 import { PinEventAction } from '../actions/pin_event_action';
 import { inputsModel } from '../../../../../common/store';
 import { TimelineId } from '../../../../../../common/types/timeline';
-
-import { TimelineModel } from '../../../../store/timeline/model';
 
 interface Props {
   id: string;
@@ -85,8 +84,8 @@ export const EventColumnView = React.memo<Props>(
     timelineId,
     toggleShowNotes,
   }) => {
-    const { timelineType, status } = useShallowEqualSelector<TimelineModel>(
-      (state) => state.timeline.timelineById[timelineId]
+    const { timelineType, status } = useDeepEqualSelector((state) =>
+      pick(['timelineType', 'status'], state.timeline.timelineById[timelineId])
     );
 
     const handlePinClicked = useCallback(

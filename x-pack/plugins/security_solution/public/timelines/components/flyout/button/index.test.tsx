@@ -23,20 +23,10 @@ describe.skip('FlyoutBottomBar', () => {
     });
   });
 
-  test('it renders the button when show is true', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FlyoutBottomBar show={true} timelineId="test" />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toBe(true);
-  });
-
   test('it renders the expected button text', () => {
     const wrapper = mount(
       <TestProviders>
-        <FlyoutBottomBar show={true} timelineId="test" />
+        <FlyoutBottomBar timelineId="test" />
       </TestProviders>
     );
 
@@ -48,20 +38,10 @@ describe.skip('FlyoutBottomBar', () => {
   test('it renders the data providers drop target area', () => {
     const wrapper = mount(
       <TestProviders>
-        <FlyoutBottomBar show={true} timelineId="test" />
+        <FlyoutBottomBar timelineId="test" />
       </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toBe(true);
-  });
-
-  test('it does NOT render the button when show is false', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <FlyoutBottomBar show={false} timelineId="test" />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toBe(false);
   });
 });

@@ -9,14 +9,15 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import * as i18n from './translations';
 
 const TimelineDatePickerLockComponent = () => {
   const dispatch = useDispatch();
-  const getGlobalInput = inputsSelectors.globalSelector();
-  const { linkTo } = useDeepEqualSelector(getGlobalInput);
-  const isDatePickerLocked = useMemo(() => linkTo.includes('timeline'), [linkTo]);
+  const getGlobalInput = useMemo(() => inputsSelectors.globalSelector(), []);
+  const isDatePickerLocked = useShallowEqualSelector((state) =>
+    getGlobalInput(state).linkTo.includes('timeline')
+  );
 
   const onToggleLock = useCallback(
     () => dispatch(inputsActions.toggleTimelineLinkTo({ linkToId: 'timeline' })),

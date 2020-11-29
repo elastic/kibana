@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash/fp';
 import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -34,7 +35,12 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     status: timelineStatus,
     title: timelineTitle,
     timelineType,
-  } = useDeepEqualSelector((state) => getTimeline(state, timelineId) ?? timelineDefaults);
+  } = useDeepEqualSelector((state) =>
+    pick(
+      ['graphEventId', 'savedObjectId', 'status', 'title', 'timelineType'],
+      getTimeline(state, timelineId) ?? timelineDefaults
+    )
+  );
   const [isPopoverOpen, setPopover] = useState(false);
   const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
 

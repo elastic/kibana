@@ -149,7 +149,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
-  show,
   showCallOutUnauthorizedMsg,
   showEventDetails,
   start,
@@ -290,7 +289,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 indexPattern={indexPattern}
                 filterManager={filterManager}
-                show={show}
                 showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                 timelineId={timelineId}
                 status={status}
@@ -370,7 +368,6 @@ const makeMapStateToProps = () => {
       isSaving,
       kqlMode,
       noteIds,
-      show,
       sort,
       status,
       timelineType,
@@ -399,7 +396,6 @@ const makeMapStateToProps = () => {
       kqlMode,
       kqlQueryExpression,
       noteIds,
-      show,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       showEventDetails: !!expandedEvent.eventId,
       sort,
@@ -440,7 +436,6 @@ const QueryTabContent = connector(
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
-      prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.showEventDetails === nextProps.showEventDetails &&
       prevProps.status === nextProps.status &&

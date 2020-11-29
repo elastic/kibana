@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash/fp';
 import { EuiProgress } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -43,8 +44,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
-  const { graphEventId, isSaving, savedObjectId, timelineType } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  const { graphEventId, isSaving, savedObjectId, timelineType } = useDeepEqualSelector((state) =>
+    pick(
+      ['graphEventId', 'isSaving', 'savedObjectId', 'timelineType'],
+      getTimeline(state, timelineId) ?? timelineDefaults
+    )
   );
 
   useEffect(() => {

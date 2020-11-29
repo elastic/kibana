@@ -61,23 +61,16 @@ const DataProvidersPanel = styled(EuiPanel)`
 `;
 
 interface FlyoutBottomBarProps {
-  show: boolean;
   timelineId: string;
 }
 
-export const FlyoutBottomBar = React.memo<FlyoutBottomBarProps>(({ show, timelineId }) => {
-  if (!show) {
-    return null;
-  }
-
-  return (
-    <Container data-test-subj="flyoutBottomBar">
-      <FlyoutHeaderPanel timelineId={timelineId} />
-      <DataProvidersPanel paddingSize="none">
-        <DataProviders timelineId={timelineId} />
-      </DataProvidersPanel>
-    </Container>
-  );
-});
+export const FlyoutBottomBar = React.memo<FlyoutBottomBarProps>(({ timelineId }) => (
+  <Container data-test-subj="flyoutBottomBar">
+    <FlyoutHeaderPanel timelineId={timelineId} />
+    <DataProvidersPanel paddingSize="none">
+      <DataProviders timelineId={timelineId} />
+    </DataProvidersPanel>
+  </Container>
+));
 
 FlyoutBottomBar.displayName = 'FlyoutBottomBar';

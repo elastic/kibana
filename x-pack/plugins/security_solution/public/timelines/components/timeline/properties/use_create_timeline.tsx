@@ -15,7 +15,7 @@ import {
   TimelineType,
   TimelineTypeLiteral,
 } from '../../../../../common/types/timeline';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -34,9 +34,9 @@ export const useCreateTimeline = ({
     () => sourcererSelectors.getAllExistingIndexNamesSelector(),
     []
   );
-  const existingIndexNames = useShallowEqualSelector<string[]>(existingIndexNamesSelector);
+  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
   const { timelineFullScreen, setTimelineFullScreen } = useFullScreen();
-  const globalTimeRange = useShallowEqualSelector(inputsSelectors.globalTimeRangeSelector);
+  const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
     ({ id, show }) => {
       if (id === TimelineId.active && timelineFullScreen) {

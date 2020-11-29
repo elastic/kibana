@@ -35,7 +35,7 @@ import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useFullScreen } from '../../containers/use_full_screen';
-import { TimelineId, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
@@ -286,14 +286,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                 refetch={refetch}
               />
 
-              {graphEventId && (
-                <GraphOverlay
-                  graphEventId={graphEventId}
-                  isEventViewer={true}
-                  timelineId={id}
-                  timelineType={TimelineType.default}
-                />
-              )}
+              {graphEventId && <GraphOverlay isEventViewer={true} timelineId={id} />}
               <FullWidthFlexGroup $visible={!graphEventId}>
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody

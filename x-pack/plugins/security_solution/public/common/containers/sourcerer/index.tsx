@@ -5,9 +5,6 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEqual from 'lodash/isEqual';
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -18,7 +15,7 @@ import { State } from '../../store';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../hooks/use_selector';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -30,12 +27,11 @@ export const useInitSourcerer = (
     () => sourcererSelectors.configIndexPatternsSelector(),
     []
   );
-  const ConfigIndexPatterns = useSelector(getConfigIndexPatternsSelector, isEqual);
+  const ConfigIndexPatterns = useDeepEqualSelector(getConfigIndexPatternsSelector);
 
   const getTimelineSelector = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const activeTimeline = useSelector<State, TimelineModel>(
-    (state) => getTimelineSelector(state, TimelineId.active),
-    isEqual
+  const activeTimelineSavedObjectId = useShallowEqualSelector(
+    (state) => getTimelineSelector(state, TimelineId.active)?.savedObjectId
   );
 
   useIndexFields(scopeId);
@@ -49,11 +45,7 @@ export const useInitSourcerer = (
 
   // Related to timeline
   useEffect(() => {
-    if (
-      !loadingSignalIndex &&
-      signalIndexName != null &&
-      (activeTimeline == null || (activeTimeline != null && activeTimeline.savedObjectId == null))
-    ) {
+    if (!loadingSignalIndex && signalIndexName != null && activeTimelineSavedObjectId == null) {
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
@@ -61,7 +53,13 @@ export const useInitSourcerer = (
         })
       );
     }
-  }, [activeTimeline, ConfigIndexPatterns, dispatch, loadingSignalIndex, signalIndexName]);
+  }, [
+    activeTimelineSavedObjectId,
+    ConfigIndexPatterns,
+    dispatch,
+    loadingSignalIndex,
+    signalIndexName,
+  ]);
 
   // Related to the detection page
   useEffect(() => {

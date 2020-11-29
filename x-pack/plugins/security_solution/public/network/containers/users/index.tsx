@@ -5,10 +5,10 @@
  */
 
 import { noop } from 'lodash/fp';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel } from '../../../common/store';
@@ -62,8 +62,8 @@ export const useNetworkUsers = ({
   skip,
   startDate,
 }: UseNetworkUsers): [boolean, NetworkUsersArgs] => {
-  const getNetworkUsersSelector = networkSelectors.usersSelector();
-  const { activePage, sort, limit } = useShallowEqualSelector(getNetworkUsersSelector);
+  const getNetworkUsersSelector = useMemo(() => networkSelectors.usersSelector(), []);
+  const { activePage, sort, limit } = useDeepEqualSelector(getNetworkUsersSelector);
   const { data, notifications, uiSettings } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
