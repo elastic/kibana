@@ -104,26 +104,6 @@ export const OverviewPageFooter: FC<Props> = ({
         <EuiFlexItem grow={false}>
           <div>{isAdvancedSettingsEnabled ? defaultRoutebutton : null}</div>
         </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <div>
-            <RedirectAppLinks application={application}>
-              <EuiButtonEmpty
-                className="kbnOverviewPageFooter__button"
-                data-test-subj="allPlugins"
-                flush="both"
-                href={addBasePath('/app/home#/feature_directory')}
-                iconType="apps"
-                size="xs"
-              >
-                <FormattedMessage
-                  id="kibana-react.pageFooter.appDirectoryButtonLabel"
-                  defaultMessage="View app directory"
-                />
-              </EuiButtonEmpty>
-            </RedirectAppLinks>
-          </div>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </footer>
   );
