@@ -7,6 +7,7 @@
 import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import uuid from 'uuid';
 
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
@@ -61,7 +62,8 @@ const DropTargetDataProviders = styled.div`
 
 DropTargetDataProviders.displayName = 'DropTargetDataProviders';
 
-const getDroppableId = (id: string): string => `${droppableTimelineProvidersPrefix}${id}`;
+const getDroppableId = (id: string): string =>
+  `${droppableTimelineProvidersPrefix}${id}${uuid.v4()}`;
 
 /**
  * Renders the data providers section of the timeline.
@@ -91,6 +93,7 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const dataProviders = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).dataProviders
   );
+  const droppableId = useMemo(() => getDroppableId(timelineId), [timelineId]);
 
   return (
     <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
@@ -105,7 +108,7 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
             dataProviders={dataProviders}
           />
         ) : (
-          <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(timelineId)}>
+          <DroppableWrapper isDropDisabled={isLoading} droppableId={droppableId}>
             <Empty browserFields={browserFields} timelineId={timelineId} />
           </DroppableWrapper>
         )}

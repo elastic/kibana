@@ -112,7 +112,7 @@ export const closeNotes = () => {
 };
 
 export const closeTimeline = () => {
-  cy.get(CLOSE_TIMELINE_BTN).click({ force: true });
+  cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click({ force: true });
 };
 
 export const createNewTimeline = () => {

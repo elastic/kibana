@@ -68,7 +68,7 @@ export const FlyoutBottomBar = React.memo<FlyoutBottomBarProps>(({ timelineId })
   <Container data-test-subj="flyoutBottomBar">
     <FlyoutHeaderPanel timelineId={timelineId} />
     <DataProvidersPanel paddingSize="none">
-      <DataProviders timelineId={timelineId} />
+      <DataProviders timelineId={timelineId} data-test-subj="dataProviders-bottomBar" />
     </DataProvidersPanel>
   </Container>
 ));

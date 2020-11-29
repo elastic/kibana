@@ -15,7 +15,7 @@ export const openTimelineUsingToggle = () => {
 };
 
 export const closeTimelineUsingToggle = () => {
-  cy.get(TIMELINE_TOGGLE_BUTTON).click();
+  cy.get(TIMELINE_TOGGLE_BUTTON).filter(':visible').click();
 };
 
 export const openTimelineIfClosed = () =>

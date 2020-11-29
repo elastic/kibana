@@ -10,7 +10,6 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { timeline as timelineTemplate } from '../objects/timeline';
 
 import { TIMELINE_TEMPLATES_URL } from '../urls/navigation';
-import { openTimelineUsingToggle } from '../tasks/security_main';
 import { addNameToTimeline, closeTimeline, createNewTimelineTemplate } from '../tasks/timeline';
 
 describe('Export timelines', () => {
@@ -23,7 +22,6 @@ describe('Export timelines', () => {
 
   it('Exports a custom timeline template', async () => {
     loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
-    openTimelineUsingToggle();
     createNewTimelineTemplate();
     addNameToTimeline(timelineTemplate.title);
     closeTimeline();
