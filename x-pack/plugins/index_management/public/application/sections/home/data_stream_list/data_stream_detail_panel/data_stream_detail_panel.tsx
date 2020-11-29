@@ -290,7 +290,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
 
-            {!isLoading && !error ? (
+            {!isLoading && !error && dataStream?.privileges.delete_index ? (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="danger"
