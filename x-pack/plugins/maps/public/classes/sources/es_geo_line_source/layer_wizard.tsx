@@ -22,6 +22,7 @@ import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_de
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import { getIsGoldPlus } from '../../../licensed_features';
+import { TracksLayerIcon } from '../../layers/icons/tracks_layer_icon';
 
 export const geoLineLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
@@ -32,7 +33,7 @@ export const geoLineLayerWizardConfig: LayerWizard = {
     defaultMessage: '{title} requires a Gold license.',
     values: { title: geoLineTitle },
   }),
-  icon: 'logoElasticsearch',
+  icon: TracksLayerIcon,
   getIsDisabled: () => {
     return !getIsGoldPlus();
   },
