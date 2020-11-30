@@ -4,7 +4,7 @@
 
 ## SavedObjectsIncrementCounterOptions.initialize property
 
-Sets all the counter fields to 0 if they don't already exist
+(default=false) If true, sets all the counter fields to 0 if they don't already exist. Existing fields will be left as-is and won't be incremented.
 
 <b>Signature:</b>
 

@@ -16,20 +16,22 @@ incrementCounter(type: string, id: string, counterFieldNames: string[], options?
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
-|  counterFieldNames | <code>string[]</code> |  |
-|  options | <code>SavedObjectsIncrementCounterOptions</code> |  |
+|  type | <code>string</code> | The type of saved object whose fields should be incremented |
+|  id | <code>string</code> | The id of the document whose fields should be incremented |
+|  counterFieldNames | <code>string[]</code> | An array of field names to increment |
+|  options | <code>SavedObjectsIncrementCounterOptions</code> | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
 
 <b>Returns:</b>
 
 `Promise<SavedObject>`
 
-{<!-- -->promise<!-- -->}
+The saved object after the specified fields were incremented
 
 ## Remarks
 
-\* When supplying a field name like `stats.api.counter` the field name will be used as-is to create a document like: `{attributes: {'stats.api.counter': 1}}` It will not create a nested structure like: `{attributes: {stats: {api: {counter: 1}}}}` When using incrementCounter for collecting usage data, you need to ensure that usage collection happens on a best-effort basis and doesn't negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage\_collection/README.md\#tracking-interactions-with-incrementcounter)
+When supplying a field name like `stats.api.counter` the field name will be used as-is to create a document like: `{attributes: {'stats.api.counter': 1}}` It will not create a nested structure like: `{attributes: {stats: {api: {counter: 1}}}}`
+
+When using incrementCounter for collecting usage data, you need to ensure that usage collection happens on a best-effort basis and doesn't negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage\_collection/README.md\#tracking-interactions-with-incrementcounter)
 
 ## Example
 
@@ -37,10 +39,17 @@ incrementCounter(type: string, id: string, counterFieldNames: string[], options?
 ```ts
 const repository = coreStart.savedObjects.createInternalRepository();
 
+// Initialize all fields to 0
 repository
   .incrementCounter('dashboard_counter_type', 'counter_id', [
     'stats.apiCalls',
     'stats.sampleDataInstalled',
+  ], {initialize: true});
+
+// Increment the apiCalls field counter
+repository
+  .incrementCounter('dashboard_counter_type', 'counter_id', [
+    'stats.apiCalls',
   ])
 
 ```

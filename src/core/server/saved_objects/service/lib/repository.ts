@@ -101,10 +101,17 @@ export interface SavedObjectsRepositoryOptions {
  * @public
  */
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
-  /** Sets all the counter fields to 0 if they don't already exist */
+  /**
+   * (default=false) If true, sets all the counter fields to 0 if they don't
+   * already exist. Existing fields will be left as-is and won't be incremented.
+   */
   initialize?: boolean;
+  /** {@link SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
-  /** The Elasticsearch Refresh setting for this operation */
+  /**
+   * (default='wait_for') The Elasticsearch refresh setting for this
+   * operation. See {@link MutatingOperationRefreshSetting}
+   */
   refresh?: MutatingOperationRefreshSetting;
 }
 
@@ -1521,11 +1528,12 @@ export class SavedObjectsRepository {
    * if one doesn't exist for the given id.
    *
    * @remarks
-   * * When supplying a field name like `stats.api.counter` the field name will
+   * When supplying a field name like `stats.api.counter` the field name will
    * be used as-is to create a document like:
    *   `{attributes: {'stats.api.counter': 1}}`
    * It will not create a nested structure like:
    *   `{attributes: {stats: {api: {counter: 1}}}}`
+   *
    * When using incrementCounter for collecting usage data, you need to ensure
    * that usage collection happens on a best-effort basis and doesn't
    * negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.md#tracking-interactions-with-incrementcounter)
@@ -1534,19 +1542,25 @@ export class SavedObjectsRepository {
    * ```ts
    * const repository = coreStart.savedObjects.createInternalRepository();
    *
+   * // Initialize all fields to 0
    * repository
    *   .incrementCounter('dashboard_counter_type', 'counter_id', [
    *     'stats.apiCalls',
    *     'stats.sampleDataInstalled',
+   *   ], {initialize: true});
+   *
+   * // Increment the apiCalls field counter
+   * repository
+   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
+   *     'stats.apiCalls',
    *   ])
    * ```
    *
-   * @param {string} type
-   * @param {string} id
-   * @param {string} counterFieldNames
-   * @param {object} [options={}]
-   * @property {object} [options.migrationVersion=undefined]
-   * @returns {promise}
+   * @param type - The type of saved object whose fields should be incremented
+   * @param id - The id of the document whose fields should be incremented
+   * @param counterFieldNames - An array of field names to increment
+   * @param options - {@link SavedObjectsIncrementCounterOptions}
+   * @returns The saved object after the specified fields were incremented
    */
   async incrementCounter(
     type: string,
