@@ -629,7 +629,7 @@ const ColorPicker = ({
     <EuiColorPicker
       data-test-subj="indexPattern-dimension-colorPicker"
       compressed
-      isClearable={color !== ''}
+      isClearable={Boolean(overwriteColor)}
       onChange={handleColor}
       color={disabled ? '' : color || currentColor}
       disabled={disabled}
