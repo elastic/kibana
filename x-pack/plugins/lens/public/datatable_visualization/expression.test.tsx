@@ -67,6 +67,8 @@ function sampleArgs() {
     title: 'My fanci metric chart',
     columns: {
       columnIds: ['a', 'b', 'c'],
+      sortBy: '',
+      sortDirection: 'none',
       type: 'lens_datatable_columns',
     },
   };
@@ -76,8 +78,11 @@ function sampleArgs() {
 
 describe('datatable_expression', () => {
   let onClickValue: jest.Mock;
+  let onEditAction: jest.Mock;
+
   beforeEach(() => {
     onClickValue = jest.fn();
+    onEditAction = jest.fn();
   });
 
   describe('datatable renders', () => {
@@ -214,7 +219,12 @@ describe('datatable_expression', () => {
 
       const args: DatatableProps['args'] = {
         title: '',
-        columns: { columnIds: ['a', 'b'], type: 'lens_datatable_columns' },
+        columns: {
+          columnIds: ['a', 'b'],
+          sortBy: '',
+          sortDirection: 'none',
+          type: 'lens_datatable_columns',
+        },
       };
 
       const wrapper = mountWithIntl(
@@ -273,6 +283,38 @@ describe('datatable_expression', () => {
         />
       );
       expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
+    });
+
+    test('it renders the the table with the given sorting', () => {
+      const { data, args } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <DatatableComponent
+          data={data}
+          args={{
+            ...args,
+            columns: {
+              ...args.columns,
+              sortBy: 'b',
+              sortDirection: 'desc',
+            },
+          }}
+          formatFactory={(x) => x as IFieldFormat}
+          onClickValue={onClickValue}
+          onEditAction={onEditAction}
+          getType={jest.fn()}
+        />
+      );
+
+      expect(wrapper.exists('[data-test-subj="tableHeaderSortButton"]')).toBe(true);
+      // check that the sorting is passing the right next state
+      wrapper.find('[data-test-subj="tableHeaderSortButton"]').first().simulate('click');
+
+      expect(onEditAction).toHaveBeenCalledWith({
+        action: 'sort',
+        columnId: undefined,
+        direction: 'none',
+      });
     });
   });
 });

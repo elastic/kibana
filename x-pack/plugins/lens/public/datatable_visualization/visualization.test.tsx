@@ -371,6 +371,8 @@ describe('Datatable Visualization', () => {
       expect(tableArgs).toHaveLength(1);
       expect(tableArgs[0].arguments).toEqual({
         columnIds: ['c', 'b'],
+        sortBy: [''],
+        sortDirection: ['none'],
       });
     });
 
