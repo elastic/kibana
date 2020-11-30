@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { Filter, IAggConfig, TabbedTable } from '../../../common';
+import { Filter } from '../../../es_query';
+import { IAggConfig } from '../../aggs';
+import { TabbedTable } from '../../tabify';
 
 const getOtherBucketFilterTerms = (table: TabbedTable, columnIndex: number, rowIndex: number) => {
   if (rowIndex === -1) {

@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import {
-  AggConfigs,
-  IAggConfig,
-  TabbedTable,
-  isRangeFilter,
-  BytesFormat,
-  FieldFormatsGetConfigFn,
-} from '../../../common';
-import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
+import { isRangeFilter } from '../../../es_query/filters';
+import { BytesFormat, FieldFormatsGetConfigFn } from '../../../field_formats';
+import { AggConfigs, IAggConfig } from '../../aggs';
+import { mockAggTypesRegistry } from '../../aggs/test_helpers';
+import { TabbedTable } from '../../tabify';
 
 import { createFilter } from './create_filter';
 

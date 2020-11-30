@@ -23,9 +23,10 @@ import {
   TabularData,
   TabularDataValue,
 } from '../../../../../../plugins/inspector/common';
-import { Filter, TabbedTable } from '../../../../common';
-import { FormatFactory } from '../../../../common/field_formats/utils';
-import { createFilter } from '../create_filter';
+import { Filter } from '../../../es_query';
+import { FormatFactory } from '../../../field_formats/utils';
+import { TabbedTable } from '../../tabify';
+import { createFilter } from './create_filter';
 
 /**
  * Type borrowed from the client-side FilterManager['addFilters'].

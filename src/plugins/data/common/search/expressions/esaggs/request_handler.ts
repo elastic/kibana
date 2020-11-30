@@ -40,7 +40,8 @@ import { FormatFactory } from '../../../../common/field_formats/utils';
 
 import { AddFilters, buildTabularInspectorData } from './build_tabular_inspector_data';
 
-interface RequestHandlerParams {
+/** @internal */
+export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
   addFilters?: AddFilters;
   aggs: IAggConfigs;
