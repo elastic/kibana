@@ -60,11 +60,11 @@ Index patterns provide Rest-like HTTP CRUD+ API with the following endpoints:
 - Fields API
   - Update field &mdash; `POST /api/index_patterns/index_pattern/{id}/fields`
 - Scripted Fields API
-  - Create a field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field`
-  - Upsert a field &mdash; `PUT /api/index_patterns/index_pattern/{id}/scripted_field`
-  - Fetch a field &mdash; `GET /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
-  - Remove a field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
-  - Update a an existing field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+  - Create a scripted field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field`
+  - Upsert a scripted field &mdash; `PUT /api/index_patterns/index_pattern/{id}/scripted_field`
+  - Fetch a scripted field &mdash; `GET /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+  - Remove a scripted field &mdash; `DELETE /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
+  - Update a scripted field &mdash; `POST /api/index_patterns/index_pattern/{id}/scripted_field/{name}`
 
 
 ### Index Patterns API
