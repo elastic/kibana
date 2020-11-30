@@ -56,6 +56,7 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
    * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * Kibana internal user.
    * See {@link LegacyAPICaller}.
+   * @deprecated Use {@link IScopedClusterClient.asInternalUser}.
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
@@ -73,6 +74,7 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
    * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * user initiated request to the Kibana server (via HTTP request headers).
    * See {@link LegacyAPICaller}.
+   * @deprecated Use {@link IScopedClusterClient.asCurrentUser}.
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.

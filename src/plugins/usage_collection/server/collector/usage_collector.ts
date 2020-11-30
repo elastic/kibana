@@ -18,43 +18,24 @@
  */
 
 import { Logger } from 'src/core/server';
-import { KIBANA_STATS_TYPE } from '../../common/constants';
 import { Collector, CollectorOptions } from './collector';
 
 // Enforce the `schema` property for UsageCollectors
 export type UsageCollectorOptions<
   TFetchReturn = unknown,
-  UFormatBulkUploadPayload = { usage: { [key: string]: TFetchReturn } },
   WithKibanaRequest extends boolean = false,
   ExtraOptions extends object = {}
-> = CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, WithKibanaRequest, ExtraOptions> &
-  Required<Pick<CollectorOptions<TFetchReturn, UFormatBulkUploadPayload, boolean>, 'schema'>>;
+> = CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions> &
+  Required<Pick<CollectorOptions<TFetchReturn, boolean>, 'schema'>>;
 
-export class UsageCollector<
+export class UsageCollector<TFetchReturn, ExtraOptions extends object = {}> extends Collector<
   TFetchReturn,
-  UFormatBulkUploadPayload = { usage: { [key: string]: TFetchReturn } },
-  ExtraOptions extends object = {}
-> extends Collector<TFetchReturn, UFormatBulkUploadPayload, ExtraOptions> {
+  ExtraOptions
+> {
   constructor(
-    public readonly log: Logger,
-    collectorOptions: UsageCollectorOptions<
-      TFetchReturn,
-      UFormatBulkUploadPayload,
-      any,
-      ExtraOptions
-    >
+    log: Logger,
+    collectorOptions: UsageCollectorOptions<TFetchReturn, any, ExtraOptions>
   ) {
     super(log, collectorOptions);
-  }
-
-  protected defaultFormatterForBulkUpload(result: TFetchReturn) {
-    return {
-      type: KIBANA_STATS_TYPE,
-      payload: ({
-        usage: {
-          [this.type]: result,
-        },
-      } as unknown) as UFormatBulkUploadPayload,
-    };
   }
 }
