@@ -2,7 +2,6 @@
 [[alerting-getting-started]]
 = Alerting and Actions
 
-beta[]
 
 --
 
