@@ -163,7 +163,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           newHtmls.push(
             cellTemplate({
               timefield: false,
-              sourcefield: column === '_source',
+              sourcefield: column === '_source' || column === 'fields',
               formatted: _displayField(row, column, true),
               filterable: isFilterable,
               column,

@@ -62,7 +62,7 @@ export class SourceFormat extends FieldFormat {
   htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
     const { field, hit, indexPattern } = options;
 
-    if (!field) {
+    if (!field && !hit?.fields) {
       const converter = this.getConverterFor('text') as Function;
 
       return escape(converter(value));

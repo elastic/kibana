@@ -935,7 +935,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
           .forEach((key) => {
             fields[key] = hit.fields[key];
           });
-        return { ...hit, ...fields };
+        return { ...hit };
       }
       return hit;
     });

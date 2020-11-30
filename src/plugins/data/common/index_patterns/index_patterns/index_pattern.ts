@@ -20,12 +20,12 @@
 import _, { each, reject } from 'lodash';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
-import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
+import { ES_FIELD_TYPES, IFieldType, IIndexPattern, KBN_FIELD_TYPES } from '../../../common';
+import { fieldList, IIndexPatternFieldList, IndexPatternField } from '../fields';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
-import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
+import { FieldFormat, FieldFormatsStartCommon } from '../../field_formats';
+import { IndexPatternFieldMap, IndexPatternSpec, SourceFilter, TypeMeta } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 
 interface IndexPatternDeps {
@@ -95,6 +95,9 @@ export class IndexPattern implements IIndexPattern {
     // set values
     this.id = spec.id;
     this.fieldFormatMap = spec.fieldFormats || {};
+    this.fieldFormatMap.fields = this.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES._SOURCE, [
+      ES_FIELD_TYPES._SOURCE,
+    ]);
 
     this.version = spec.version;
 
@@ -311,5 +314,6 @@ export class IndexPattern implements IIndexPattern {
     if (formatSpec?.id) {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
+    return formatSpec;
   }
 }

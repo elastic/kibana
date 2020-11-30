@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { IndexPattern } from './index_pattern';
-import { FieldFormatsContentType } from '../../../common';
+import { ES_FIELD_TYPES, FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
 
 const formattedCache = new WeakMap();
 const partialFormattedCache = new WeakMap();
@@ -34,7 +34,12 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     type: FieldFormatsContentType = 'html'
   ) {
     const field = indexPattern.fields.getByName(fieldName);
-    const format = field ? indexPattern.getFormatterForField(field) : defaultFormat;
+    let format = defaultFormat;
+    if (field) {
+      format = indexPattern.getFormatterForField(field);
+    } else if (fieldName === 'fields') {
+      format = indexPattern.getFormatterForFieldNoDefault(fieldName);
+    }
 
     return format.convert(val, type, { field, hit, indexPattern });
   }
