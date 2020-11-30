@@ -215,9 +215,9 @@ const UnstyledProcessEventDot = React.memo(
     } = React.createRef();
     const colorMap = useColors();
 
+    // TODO: handle the error state so the button can be clicked to reload the node's data
     const isNodeLoading = useSelector(selectors.isNodeDataLoading)(nodeID);
     const cubeClassName = isNodeLoading ? 'cube loading' : 'cube';
-    // if we can't find it in the nodeData map then assume it is still running
     const nodeState = useSelector(selectors.getNodeState)(nodeID);
     const {
       backingFill,

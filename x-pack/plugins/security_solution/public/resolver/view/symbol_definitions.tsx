@@ -20,11 +20,22 @@ const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
   const paintServerIDs = usePaintServerIDs();
   return (
     <>
-      <linearGradient
+      {/* <linearGradient
         id={paintServerIDs.loadingCube}
         x1="10.5204"
         y1="9.49068"
         x2="46.8139"
+        y2="45.7844"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#6D6D6D" />
+        <stop offset="1" stopColor="#B9B9B9" />
+      </linearGradient>*/}
+      <linearGradient
+        id={paintServerIDs.errorCube}
+        x1="10.2372"
+        y1="9.49068"
+        x2="46.5307"
         y2="45.7844"
         gradientUnits="userSpaceOnUse"
       >
@@ -137,17 +148,27 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
       </symbol>
       <symbol id={symbolIDs.loadingCube} viewBox="0 0 88 100">
         <title>{'Loading Process'}</title>
+
+        <path
+          d="M87.52127,25.129a3.79536,3.79536,0,0,0-1.43184-1.47165L45.91025.57471a3.83652,3.83652,0,0,0-3.8205,0L1.91039,23.65739A3.86308,3.86308,0,0,0,0,26.95V73.11541a3.79835,3.79835,0,0,0,1.9104,3.2925L42.08975,99.49067a3.83691,3.83691,0,0,0,3.8205,0L86.08943,76.40791A3.79852,3.79852,0,0,0,88,73.11541V26.95A3.77641,3.77641,0,0,0,87.52127,25.129Z"
+          fill="white"
+          stroke="#98A2B3"
+          strokeWidth="2"
+        />
+      </symbol>
+      <symbol id={symbolIDs.errorCube} viewBox="0 0 88 100">
+        <title>{'Error Process'}</title>
         <path
           d="M87.52127,25.129a3.79536,3.79536,0,0,0-1.43184-1.47165L45.91025.57471a3.83652,3.83652,0,0,0-3.8205,0L1.91039,23.65739A3.86308,3.86308,0,0,0,0,26.95V73.11541a3.79835,3.79835,0,0,0,1.9104,3.2925L42.08975,99.49067a3.83691,3.83691,0,0,0,3.8205,0L86.08943,76.40791A3.79852,3.79852,0,0,0,88,73.11541V26.95A3.77641,3.77641,0,0,0,87.52127,25.129Z"
           transform="translate(0.00001 0)"
-          fill={`url(#${paintServerIDs.loadingCube})`}
+          fill={`url(#${paintServerIDs.errorCube})`}
         />
         <g opacity="0.6">
           <path
             opacity={0.6}
             d="M87.52113,24.73352a3.7956,3.7956,0,0,0-1.43182-1.47166L45.91012.17918a3.8365,3.8365,0,0,0-3.82049,0L1.91029,23.26186A3.86312,3.86312,0,0,0-.00009,26.55445V72.7199a3.79834,3.79834,0,0,0,1.91041,3.29249L42.08963,99.09514a3.83689,3.83689,0,0,0,3.82049,0L86.08931,76.01239a3.79852,3.79852,0,0,0,1.91056-3.29249V26.55445A3.77643,3.77643,0,0,0,87.52113,24.73352Z"
             transform="translate(0.00013 0.39551)"
-            fill={`url(#${paintServerIDs.loadingCube})`}
+            fill={`url(#${paintServerIDs.errorCube})`}
           />
           <path
             opacity={0.4}

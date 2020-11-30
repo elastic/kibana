@@ -19,6 +19,7 @@ import {
   IsometricTaxiLayout,
   IDToNodeInfo,
   NodeData,
+  NodeDataStatus,
 } from '../../types';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import * as nodeModel from '../../../../common/endpoint/models/node';
@@ -117,17 +118,16 @@ export const nodeDataForID: (
 /**
  * Returns a function that can be called to retrieve the state of the node, running, loading, or terminated.
  */
-export const getNodeState: (
-  state: DataState
-) => (id: string) => 'running' | 'loading' | 'terminated' = createSelector(
+export const getNodeState: (state: DataState) => (id: string) => NodeDataStatus = createSelector(
   nodeDataForID,
   (nodeInfo) => {
     return (id: string) => {
       const info = nodeInfo(id);
-      if (!info || info.status === 'requested') {
+      if (!info) {
         return 'loading';
       }
-      return info.terminated ? 'terminated' : 'running';
+
+      return info.status;
     };
   }
 );
@@ -136,11 +136,11 @@ export const getNodeState: (
  * Returns a function that can be called to retrieve whether the node is in the loading state.
  */
 export const isNodeDataLoading: (state: DataState) => (id: string) => boolean = createSelector(
-  nodeDataForID,
-  (nodeInfo) => {
+  getNodeState,
+  (nodeState) => {
     return (id: string) => {
-      const info = nodeInfo(id);
-      return !info || info.status === 'requested';
+      const state = nodeState(id);
+      return state === 'loading';
     };
   }
 );

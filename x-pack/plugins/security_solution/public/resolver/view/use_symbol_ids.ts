@@ -26,6 +26,7 @@ export function useSymbolIDs() {
       terminatedTriggerCube: `${prefix}-terminatedTriggerCube`,
       processCubeActiveBacking: `${prefix}-activeBacking`,
       loadingCube: `${prefix}-loadingCube`,
+      errorCube: `${prefix}-errorCube`,
     };
   }, [resolverComponentInstanceID]);
 }

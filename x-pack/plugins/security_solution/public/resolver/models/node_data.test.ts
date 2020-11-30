@@ -40,26 +40,26 @@ describe('node data model', () => {
 
   it('overwrites the existing entries and creates new ones when calling setRequestedNodes', () => {
     const state: IDToNodeInfo = new Map([
-      ['1', { events: [generator.generateEvent()], status: 'received', terminated: false }],
+      ['1', { events: [generator.generateEvent()], status: 'running' }],
     ]);
 
     expect(setRequestedNodes(state, new Set(['1', '2']))).toEqual(
       new Map([
-        ['1', { events: [], status: 'requested', terminated: false }],
-        ['2', { events: [], status: 'requested', terminated: false }],
+        ['1', { events: [], status: 'loading' }],
+        ['2', { events: [], status: 'loading' }],
       ])
     );
   });
 
   it('overwrites the existing entries and creates new ones when calling setErrorNodes', () => {
     const state: IDToNodeInfo = new Map([
-      ['1', { events: [generator.generateEvent()], status: 'received', terminated: false }],
+      ['1', { events: [generator.generateEvent()], status: 'running' }],
     ]);
 
     expect(setErrorNodes(state, new Set(['1', '2']))).toEqual(
       new Map([
-        ['1', { events: [], status: 'error', terminated: false }],
-        ['2', { events: [], status: 'error', terminated: false }],
+        ['1', { events: [], status: 'error' }],
+        ['2', { events: [], status: 'error' }],
       ])
     );
   });
@@ -71,7 +71,7 @@ describe('node data model', () => {
 
     it('only includes ids that are not in the base state', () => {
       const state: IDToNodeInfo = new Map([
-        ['1', { events: [generator.generateEvent()], status: 'error', terminated: false }],
+        ['1', { events: [generator.generateEvent()], status: 'error' }],
       ]);
       expect(idsNotInBase(state, new Set(['1', '2', '3']))).toEqual(new Set(['2', '3']));
     });
@@ -81,8 +81,8 @@ describe('node data model', () => {
     const node1Events = [generator.generateEvent({ entityID: '1' })];
     const node2Events = [generator.generateEvent({ entityID: '2' })];
     const state: IDToNodeInfo = new Map([
-      ['1', { events: node1Events, status: 'error', terminated: false }],
-      ['2', { events: node2Events, status: 'error', terminated: false }],
+      ['1', { events: node1Events, status: 'error' }],
+      ['2', { events: node2Events, status: 'error' }],
     ]);
     describe('reachedLimit is false', () => {
       it('overwrites entries with the received data', () => {
@@ -99,8 +99,8 @@ describe('node data model', () => {
           })
         ).toEqual(
           new Map([
-            ['1', { events: [genNodeEvent], status: 'received', terminated: false }],
-            ['2', { events: node2Events, status: 'error', terminated: false }],
+            ['1', { events: [genNodeEvent], status: 'running' }],
+            ['2', { events: node2Events, status: 'error' }],
           ])
         );
       });
@@ -115,8 +115,8 @@ describe('node data model', () => {
           })
         ).toEqual(
           new Map([
-            ['1', { events: [], status: 'received', terminated: false }],
-            ['2', { events: [], status: 'received', terminated: false }],
+            ['1', { events: [], status: 'running' }],
+            ['2', { events: [], status: 'running' }],
           ])
         );
       });
@@ -131,7 +131,7 @@ describe('node data model', () => {
             requestedNodes: new Set(['1']),
             reachedLimit: true,
           })
-        ).toEqual(new Map([['2', { events: node2Events, status: 'error', terminated: false }]]));
+        ).toEqual(new Map([['2', { events: node2Events, status: 'error' }]]));
       });
 
       it('attempts to remove entries from the map even if they do not exist', () => {
@@ -144,8 +144,8 @@ describe('node data model', () => {
           })
         ).toEqual(
           new Map([
-            ['1', { events: node1Events, status: 'error', terminated: false }],
-            ['2', { events: node2Events, status: 'error', terminated: false }],
+            ['1', { events: node1Events, status: 'error' }],
+            ['2', { events: node2Events, status: 'error' }],
           ])
         );
       });
@@ -164,8 +164,8 @@ describe('node data model', () => {
           })
         ).toEqual(
           new Map([
-            ['1', { events: [genNodeEvent], status: 'received', terminated: false }],
-            ['2', { events: node2Events, status: 'error', terminated: false }],
+            ['1', { events: [genNodeEvent], status: 'running' }],
+            ['2', { events: node2Events, status: 'error' }],
           ])
         );
       });
