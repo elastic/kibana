@@ -31,10 +31,12 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { sourceConfiguration, sourceId } = useLogSourceContext();
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
-    setFlyoutVisibility,
-    setFlyoutId,
     surroundingLogsId,
     setSurroundingLogsId,
+    closeFlyout: closeLogEntryFlyout,
+    openFlyout: openLogEntryFlyout,
+    isFlyoutOpen,
+    logEntryId: flyoutLogEntryId,
   } = useLogEntryFlyoutContext();
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const { applyLogFilterQuery } = useContext(LogFilterState.Context);
@@ -72,7 +74,14 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
       <PageViewLogInContext />
-      <LogEntryFlyout setFilter={setFilter} />
+      {isFlyoutOpen ? (
+        <LogEntryFlyout
+          logEntryId={flyoutLogEntryId}
+          onCloseFlyout={closeLogEntryFlyout}
+          onSetFieldFilter={setFilter}
+          sourceId={sourceId}
+        />
+      ) : null}
       <PageContent key={`${sourceId}-${sourceConfiguration?.version}`}>
         <WithStreamItems>
           {({
@@ -104,8 +113,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               scale={textScale}
               target={targetPosition}
               wrap={textWrap}
-              setFlyoutItem={setFlyoutId}
-              setFlyoutVisibility={setFlyoutVisibility}
+              onOpenLogEntryFlyout={openLogEntryFlyout}
               setContextEntry={setContextEntry}
               highlightedItem={surroundingLogsId ? surroundingLogsId : null}
               currentHighlightKey={currentHighlightKey}

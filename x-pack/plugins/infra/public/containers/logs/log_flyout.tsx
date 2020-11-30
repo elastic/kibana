@@ -6,7 +6,7 @@
 
 import createContainer from 'constate';
 import { isString } from 'lodash';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { UrlStateContainer } from '../../utils/url_state';
 
 export enum FlyoutVisibility {
@@ -21,16 +21,24 @@ export interface FlyoutOptionsUrlState {
 }
 
 export const useLogFlyout = () => {
-  const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
   const [logEntryId, setLogEntryId] = useState<string | null>(null);
   const [surroundingLogsId, setSurroundingLogsId] = useState<string | null>(null);
 
+  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+  const openFlyout = useCallback((newLogEntryId?: string) => {
+    if (newLogEntryId) {
+      setLogEntryId(newLogEntryId);
+    }
+    setIsFlyoutOpen(true);
+  }, []);
+
   return {
-    isVisible: flyoutVisible,
-    flyoutVisible,
-    setFlyoutVisibility,
-    flyoutId: logEntryId,
-    setFlyoutId: setLogEntryId,
+    isFlyoutOpen,
+    closeFlyout,
+    openFlyout,
+    logEntryId,
+    setLogEntryId,
     surroundingLogsId,
     setSurroundingLogsId,
   };
@@ -41,10 +49,11 @@ export const [LogEntryFlyoutProvider, useLogEntryFlyoutContext] = LogFlyout;
 
 export const WithFlyoutOptionsUrlState = () => {
   const {
-    flyoutVisible,
-    setFlyoutVisibility,
-    flyoutId,
-    setFlyoutId,
+    isFlyoutOpen,
+    openFlyout,
+    closeFlyout,
+    logEntryId,
+    setLogEntryId,
     surroundingLogsId,
     setSurroundingLogsId,
   } = useLogEntryFlyoutContext();
@@ -52,38 +61,38 @@ export const WithFlyoutOptionsUrlState = () => {
   return (
     <UrlStateContainer
       urlState={{
-        flyoutVisibility: flyoutVisible ? FlyoutVisibility.visible : FlyoutVisibility.hidden,
-        flyoutId,
+        flyoutVisibility: isFlyoutOpen ? FlyoutVisibility.visible : FlyoutVisibility.hidden,
+        flyoutId: logEntryId,
         surroundingLogsId,
       }}
       urlStateKey="flyoutOptions"
       mapToUrlState={mapToUrlState}
       onChange={(newUrlState) => {
         if (newUrlState && newUrlState.flyoutId) {
-          setFlyoutId(newUrlState.flyoutId);
+          setLogEntryId(newUrlState.flyoutId);
         }
         if (newUrlState && newUrlState.surroundingLogsId) {
           setSurroundingLogsId(newUrlState.surroundingLogsId);
         }
         if (newUrlState && newUrlState.flyoutVisibility === FlyoutVisibility.visible) {
-          setFlyoutVisibility(true);
+          openFlyout();
         }
         if (newUrlState && newUrlState.flyoutVisibility === FlyoutVisibility.hidden) {
-          setFlyoutVisibility(false);
+          closeFlyout();
         }
       }}
       onInitialize={(initialUrlState) => {
         if (initialUrlState && initialUrlState.flyoutId) {
-          setFlyoutId(initialUrlState.flyoutId);
+          setLogEntryId(initialUrlState.flyoutId);
         }
         if (initialUrlState && initialUrlState.surroundingLogsId) {
           setSurroundingLogsId(initialUrlState.surroundingLogsId);
         }
         if (initialUrlState && initialUrlState.flyoutVisibility === FlyoutVisibility.visible) {
-          setFlyoutVisibility(true);
+          openFlyout();
         }
         if (initialUrlState && initialUrlState.flyoutVisibility === FlyoutVisibility.hidden) {
-          setFlyoutVisibility(false);
+          closeFlyout();
         }
       }}
     />

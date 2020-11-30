@@ -16,55 +16,40 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { euiStyled } from '../../../../../observability/public';
-import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
-import { useLogEntryFlyoutContext } from '../../../containers/logs/log_flyout';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { InfraLoadingPanel } from '../../loading';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
 import { LogEntryFieldsTable } from './log_entry_fields_table';
 
 export interface LogEntryFlyoutProps {
-  flyoutError?: string | null | undefined;
-  flyoutItem?: LogEntry | null | undefined;
-  setFlyoutVisibility?: (visible: boolean) => void;
-  setFilter: (filter: string, flyoutItemId: string, timeKey?: TimeKey) => void;
-  loading?: boolean;
+  logEntryId: string | null | undefined;
+  onCloseFlyout?: () => void;
+  onSetFieldFilter?: (filter: string, logEntryId: string, timeKey?: TimeKey) => void;
+  sourceId: string | null | undefined;
 }
 
 export const LogEntryFlyout = ({
-  // flyoutError,
-  // flyoutItem,
-  // loading,
-  // setFlyoutVisibility,
-  setFilter,
+  logEntryId,
+  onCloseFlyout,
+  onSetFieldFilter,
+  sourceId,
 }: LogEntryFlyoutProps) => {
-  const { sourceId } = useLogSourceContext();
-
-  const { setFlyoutVisibility, flyoutId: logEntryId, isVisible } = useLogEntryFlyoutContext();
-
-  const { fetchLogEntry, isRunning, logEntry, errors: logEntryErrors } = useLogEntry({
+  const { fetchLogEntry, isRequestRunning, logEntry, errors: logEntryErrors } = useLogEntry({
     sourceId,
-    logEntryId: isVisible ? logEntryId : null,
+    logEntryId,
   });
 
   useEffect(() => {
-    if (logEntryId) {
+    if (sourceId && logEntryId) {
       fetchLogEntry();
     }
-  }, [fetchLogEntry, logEntryId]);
-
-  const closeFlyout = useCallback(() => setFlyoutVisibility(false), [setFlyoutVisibility]);
-
-  if (!isVisible) {
-    return null;
-  }
+  }, [fetchLogEntry, sourceId, logEntryId]);
 
   return (
-    <EuiFlyout onClose={closeFlyout} size="m">
+    <EuiFlyout onClose={onCloseFlyout ?? noop} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -100,7 +85,7 @@ export const LogEntryFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {isRunning ? (
+        {isRequestRunning ? (
           <InfraFlyoutLoadingPanel>
             <InfraLoadingPanel
               height="100%"
@@ -111,7 +96,7 @@ export const LogEntryFlyout = ({
             />
           </InfraFlyoutLoadingPanel>
         ) : logEntry ? (
-          <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={setFilter} />
+          <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
         ) : (
           <div>{`${logEntryErrors}`}</div>
         )}
@@ -127,3 +112,5 @@ export const InfraFlyoutLoadingPanel = euiStyled.div`
   bottom: 0;
   left: 0;
 `;
+
+const noop = () => {};

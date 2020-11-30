@@ -6,7 +6,7 @@
 
 import { EuiBasicTableColumn, EuiButtonIcon, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   LogEntry,
   LogEntryField,
@@ -16,12 +16,15 @@ import { FieldValue } from '../log_text_stream/field_value';
 
 export const LogEntryFieldsTable: React.FC<{
   logEntry: LogEntry;
-  onSetFieldFilter: (filter: string, logEntryId: string, timeKey?: TimeKey) => void;
+  onSetFieldFilter?: (filter: string, logEntryId: string, timeKey?: TimeKey) => void;
 }> = ({ logEntry, onSetFieldFilter }) => {
-  const createSetFilterHandler = useCallback(
-    (field: LogEntryField) => () => {
-      onSetFieldFilter(`${field.field}:"${field.value}"`, logEntry.id, logEntry.key);
-    },
+  const createSetFilterHandler = useMemo(
+    () =>
+      onSetFieldFilter
+        ? (field: LogEntryField) => () => {
+            onSetFieldFilter?.(`${field.field}:"${field.value}"`, logEntry.id, logEntry.key);
+          }
+        : undefined,
     [logEntry, onSetFieldFilter]
   );
 
@@ -52,7 +55,8 @@ export const LogEntryFieldsTable: React.FC<{
                 aria-label={i18n.translate('xpack.infra.logFlyout.filterAriaLabel', {
                   defaultMessage: 'Filter',
                 })}
-                onClick={createSetFilterHandler(item)}
+                onClick={createSetFilterHandler?.(item)}
+                disabled={!!createSetFilterHandler}
               />
             </EuiToolTip>
             <FieldValue

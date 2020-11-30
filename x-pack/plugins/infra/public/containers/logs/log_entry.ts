@@ -20,8 +20,8 @@ export const useLogEntry = ({
   sourceId,
   logEntryId,
 }: {
-  sourceId: string | null;
-  logEntryId: string | null;
+  sourceId: string | null | undefined;
+  logEntryId: string | null | undefined;
 }) => {
   const { search: fetchLogEntry, requests$: logEntrySearchRequests$ } = useDataSearch({
     getRequest: useCallback(() => {
@@ -37,10 +37,11 @@ export const useLogEntry = ({
   });
 
   const {
+    cancelRequest,
+    isRequestRunning,
+    isResponsePartial,
     latestResponseData,
     latestResponseErrors,
-    isPartial,
-    isRunning,
     loaded,
     total,
   } = useLatestPartialDataSearchRequest(
@@ -50,12 +51,13 @@ export const useLogEntry = ({
   );
 
   return {
-    fetchLogEntry,
-    logEntry: latestResponseData ?? null,
+    cancelRequest,
     errors: latestResponseErrors,
-    isRunning,
-    isPartial,
+    fetchLogEntry,
+    isRequestRunning,
+    isResponsePartial,
     loaded,
+    logEntry: latestResponseData ?? null,
     total,
   };
 };

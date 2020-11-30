@@ -170,7 +170,7 @@ export const useLatestPartialDataSearchRequest = <
                       errors: [
                         {
                           type: 'generic' as const,
-                          message: `${error}`,
+                          message: `${error.message ?? error}`,
                         },
                       ],
                       isPartial: true,
@@ -190,17 +190,17 @@ export const useLatestPartialDataSearchRequest = <
 
   const { latestValue } = useObservableState(latestResponse$, undefined);
 
-  const cancel = useCallback(() => {
+  const cancelRequest = useCallback(() => {
     latestValue?.abortController.abort();
   }, [latestValue]);
 
   return {
+    cancelRequest,
+    isRequestRunning: latestValue?.response.isRunning ?? false,
+    isResponsePartial: latestValue?.response.isPartial ?? false,
     latestResponseData: latestValue?.response.data,
     latestResponseErrors: latestValue?.response.errors,
-    isRunning: latestValue?.response.isRunning ?? false,
-    isPartial: latestValue?.response.isPartial ?? false,
-    total: latestValue?.response.total,
     loaded: latestValue?.response.loaded,
-    cancel,
+    total: latestValue?.response.total,
   };
 };
