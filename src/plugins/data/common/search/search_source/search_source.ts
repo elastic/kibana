@@ -482,7 +482,10 @@ export class SearchSource {
     // set defaults
     let fieldsFromSource = searchRequest.fieldsFromSource || [];
     body.fields = body.fields || [];
-    body.script_fields = Object.assign(body.script_fields || {}, scriptFields);
+    body.script_fields = {
+      ...body.script_fields,
+      ...scriptFields,
+    };
     body.stored_fields = storedFields;
 
     // apply source filters from index pattern if specified by the user
@@ -510,10 +513,9 @@ export class SearchSource {
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
-      const bodyFieldNames = body.fields.length
-        ? body.fields.map((field: string | Record<string, any>) => getFieldName(field))
-        : [];
-
+      const bodyFieldNames = body.fields.map((field: string | Record<string, any>) =>
+        getFieldName(field)
+      );
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
       // filter down script_fields to only include items specified
