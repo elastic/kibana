@@ -9,7 +9,7 @@ import { create } from './cases/create';
 import { update } from './cases/update';
 import { addComment } from './comments/add';
 import { getFields } from './configure/fields';
-import { getMappings } from './configure/mappings';
+import { getMappings } from './configure/get_mappings';
 
 export { CaseClient } from './types';
 

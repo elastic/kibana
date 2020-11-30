@@ -8,15 +8,15 @@ import {
   ServiceConnectorCommentParams,
   ConnectorMappingsAttributes,
 } from '../../../../../common/api/connectors';
-
+export const updateUser = {
+  updatedAt: '2020-03-13T08:34:53.450Z',
+  updatedBy: { fullName: 'Another User', username: 'another' },
+};
 const entity = {
   createdAt: '2020-03-13T08:34:53.450Z',
   createdBy: { fullName: 'Elastic User', username: 'elastic' },
-  updatedAt: '2020-03-15T08:34:53.450Z',
-  updatedBy: {
-    fullName: 'Another User',
-    username: 'anotherUser',
-  },
+  updatedAt: null,
+  updatedBy: null,
 };
 export const comment: ServiceConnectorCommentParams = {
   comment: 'first comment',

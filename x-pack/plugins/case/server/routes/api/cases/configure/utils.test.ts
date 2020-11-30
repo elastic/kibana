@@ -11,13 +11,13 @@ import {
   transformers,
 } from './utils';
 
-import { comment, defaultPipes, mappings, params } from './mock';
+import { comment as commentObj, defaultPipes, mappings, params, updateUser } from './mock';
 import {
   ServiceConnectorCaseParams,
   ExternalServiceParams,
   Incident,
 } from '../../../../../common/api/connectors';
-
+const formatComment = { commentId: commentObj.commentId, comment: commentObj.comment };
 describe('api/cases/configure/utils', () => {
   describe('prepareFieldsForTransformation', () => {
     test('prepare fields with defaults', () => {
@@ -175,76 +175,51 @@ describe('api/cases/configure/utils', () => {
   });
   describe('transformComments', () => {
     test('transform creation comments', () => {
-      const comments = [
-        {
-          ...comment,
-          updatedAt: null,
-          updatedBy: null,
-        },
-      ];
+      const comments = [commentObj];
       const res = transformComments(comments, ['informationCreated']);
       expect(res).toEqual([
         {
-          ...comment,
-          updatedAt: null,
-          updatedBy: null,
+          ...formatComment,
+          comment: `${formatComment.comment} (created at ${comments[0].createdAt} by ${comments[0].createdBy.fullName})`,
         },
       ]);
     });
 
     test('transform update comments', () => {
-      const comments = [comment];
+      const comments = [
+        {
+          ...commentObj,
+          ...updateUser,
+        },
+      ];
       const res = transformComments(comments, ['informationUpdated']);
       expect(res).toEqual([
         {
-          commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-          comment: 'first comment (updated at 2020-03-15T08:34:53.450Z by Another User)',
-          createdAt: '2020-03-13T08:34:53.450Z',
-          createdBy: { fullName: 'Elastic User', username: 'elastic' },
-          updatedAt: '2020-03-15T08:34:53.450Z',
-          updatedBy: {
-            fullName: 'Another User',
-            username: 'anotherUser',
-          },
+          ...formatComment,
+          comment: `${formatComment.comment} (updated at ${updateUser.updatedAt} by ${updateUser.updatedBy.fullName})`,
         },
       ]);
     });
 
     test('transform added comments', () => {
-      const comments = [
-        {
-          ...comment,
-          updatedAt: null,
-          updatedBy: null,
-        },
-      ];
+      const comments = [commentObj];
       const res = transformComments(comments, ['informationAdded']);
       expect(res).toEqual([
         {
-          commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-          comment: 'first comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
-          createdAt: '2020-03-13T08:34:53.450Z',
-          createdBy: { fullName: 'Elastic User', username: 'elastic' },
-          updatedAt: null,
-          updatedBy: null,
+          ...formatComment,
+          comment: `${formatComment.comment} (added at ${comments[0].createdAt} by ${comments[0].createdBy.fullName})`,
         },
       ]);
     });
 
     test('transform comments without fullname', () => {
-      const comments = [
-        {
-          ...comment,
-          updatedAt: null,
-          updatedBy: null,
-        },
-      ];
+      const comments = [{ ...commentObj, createdBy: { username: commentObj.createdBy.username } }];
+      // @ts-ignore testing no fullName
       const res = transformComments(comments, ['informationAdded']);
       expect(res).toEqual([
         {
-          ...comment,
-          updatedAt: null,
-          updatedBy: null,
+          ...formatComment,
+          comment: `${formatComment.comment} (added at ${comments[0].createdAt} by ${comments[0].createdBy.username})`,
         },
       ]);
     });
@@ -252,7 +227,7 @@ describe('api/cases/configure/utils', () => {
     test('adds update user correctly', () => {
       const comments = [
         {
-          ...comment,
+          ...commentObj,
           updatedAt: '2020-04-13T08:34:53.450Z',
           updatedBy: { fullName: 'Elastic2', username: 'elastic' },
         },
@@ -260,12 +235,8 @@ describe('api/cases/configure/utils', () => {
       const res = transformComments(comments, ['informationAdded']);
       expect(res).toEqual([
         {
-          commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-          comment: 'first comment (added at 2020-04-13T08:34:53.450Z by Elastic2)',
-          createdAt: '2020-03-13T08:34:53.450Z',
-          createdBy: { fullName: 'Elastic', username: 'elastic' },
-          updatedAt: '2020-04-13T08:34:53.450Z',
-          updatedBy: { fullName: 'Elastic2', username: 'elastic' },
+          ...formatComment,
+          comment: `${formatComment.comment} (added at ${comments[0].updatedAt} by ${comments[0].updatedBy.fullName})`,
         },
       ]);
     });
@@ -273,7 +244,7 @@ describe('api/cases/configure/utils', () => {
     test('adds update user with empty fullname correctly', () => {
       const comments = [
         {
-          ...comment,
+          ...commentObj,
           updatedAt: '2020-04-13T08:34:53.450Z',
           updatedBy: { fullName: '', username: 'elastic2' },
         },
@@ -281,12 +252,8 @@ describe('api/cases/configure/utils', () => {
       const res = transformComments(comments, ['informationAdded']);
       expect(res).toEqual([
         {
-          commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-          comment: 'first comment (added at 2020-04-13T08:34:53.450Z by elastic2)',
-          createdAt: '2020-03-13T08:34:53.450Z',
-          createdBy: { fullName: 'Elastic', username: 'elastic' },
-          updatedAt: '2020-04-13T08:34:53.450Z',
-          updatedBy: { fullName: '', username: 'elastic2' },
+          ...formatComment,
+          comment: `${formatComment.comment} (added at ${comments[0].updatedAt} by ${comments[0].updatedBy.username})`,
         },
       ]);
     });
