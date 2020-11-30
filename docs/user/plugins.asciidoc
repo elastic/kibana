@@ -14,7 +14,7 @@ Plugin developers must release a new version of their plugin for each new {kib} 
 ==============================================
 
 [float]
-[[known-plugins]]
+[[known-kibana-plugins]]
 == Known plugins
 
 The known plugins were tested for {kib} *5.x*, so we are unable to guarantee compatibility with your version of {kib}. The {kib} installer rejects any plugins that haven't been published for your specific version of {kib}. 
