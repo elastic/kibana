@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { get } from 'lodash';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 import { TaskManagerPlugin } from './plugin';
-import { configSchema } from './config';
+import { configSchema, TaskManagerConfig } from './config';
 
 export const plugin = (initContext: PluginInitializerContext) => new TaskManagerPlugin(initContext);
 
@@ -26,6 +27,17 @@ export {
   TaskManagerStartContract,
 } from './plugin';
 
-export const config = {
+export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
+  deprecations: () => [
+    (settings, fromPath, log) => {
+      const taskManager = get(settings, fromPath);
+      if (taskManager?.index) {
+        log(
+          `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`
+        );
+      }
+      return settings;
+    },
+  ],
 };
