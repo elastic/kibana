@@ -100,7 +100,6 @@ export function useLayerList() {
     visible: true,
     style: { type: 'TILE' },
     type: 'VECTOR_TILE',
-    areLabelsOnTop: true,
   };
 
   ES_TERM_SOURCE_COUNTRY.whereQuery = getWhereQuery(serviceName!);
