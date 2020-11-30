@@ -40,7 +40,7 @@ describe('telemetry_application_usage', () => {
 
   const logger = loggingSystemMock.createLogger();
 
-  let collector: Collector<unknown, unknown>;
+  let collector: Collector<unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
