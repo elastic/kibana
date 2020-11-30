@@ -115,7 +115,6 @@ export function getSettingsCollector(
 ) {
   return usageCollection.makeStatsCollector<
     EmailSettingData | undefined,
-    unknown,
     false,
     KibanaSettingsCollectorExtraOptions
   >({
