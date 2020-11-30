@@ -19,8 +19,8 @@ before_script:
 script:
   - yarn tsc
   - yarn eslint './**/*.{ts,js}'
-  - 'if [ "$accessToken" != "false" ]; then yarn jest --config ./jest.config.all.js --coverage; fi'
-  - 'if [ "$accessToken" = "false" ]; then yarn jest --config ./jest.config.js; fi'
+  - 'if [ -n "$accessToken" ]; then yarn jest --config ./jest.config.all.js --coverage; fi'
+  - 'if [ -z "$accessToken" ]; then yarn jest --config ./jest.config.js; fi'
 after_success:
   - npm install -g coveralls
   - cat coverage/lcov.info | coveralls

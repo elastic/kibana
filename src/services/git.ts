@@ -45,7 +45,7 @@ export function cloneRepo(
   options: ValidConfigOptions,
   callback: (progress: string) => void
 ) {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const cb = (error: any) => {
       if (error) {
         reject(error);
