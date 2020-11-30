@@ -306,6 +306,7 @@ export function DiscoverLegacy({
                         className="dscTable eui-yScroll"
                         aria-labelledby="documentsAriaLabel"
                         ref={scrollableDesktop}
+                        tabIndex={-1}
                       >
                         <h2 className="euiScreenReaderOnly" id="documentsAriaLabel">
                           <FormattedMessage
@@ -346,15 +347,14 @@ export function DiscoverLegacy({
 
                                 <EuiButtonEmpty
                                   onClick={() => {
-                                    const skipToBottomBtn = document.getElementById(
-                                      'dscSkipButton'
-                                    );
-                                    if (skipToBottomBtn) {
-                                      skipToBottomBtn.focus();
+                                    if (scrollableDesktop && scrollableDesktop.current) {
+                                      scrollableDesktop.current.focus();
                                     }
                                     // Only the desktop one needs to target a specific container
                                     if (!isMobile() && scrollableDesktop.current) {
                                       scrollableDesktop.current.scrollTo(0, 0);
+                                    } else if (window) {
+                                      window.scrollTo(0, 0);
                                     }
                                   }}
                                 >
