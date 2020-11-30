@@ -1,5 +1,14 @@
 {
-  "config": {"view": {"continuousWidth": 400, "continuousHeight": 300}},
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+  "padding": 10,
+  "config": {
+    "axis": {
+      "domainColor": "#ccc",
+      "tickColor": "#ccc",
+      "labelColor": "#aaa",
+      "titleColor": "#999"
+    }
+  },
   "repeat": {
     "column": [],
     "row": []
@@ -10,39 +19,39 @@
     "encoding": {
       "color": {
         "condition": {
-          "value": "red",
-          "test": "(datum['ml.outlier_score'] >= SelectorName.cutoff)"
+          "value": "#bd271e",
+          "test": "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)"
         },
         "value": "gray"
       },
       "opacity": {
         "condition": {
           "value": 0.75,
-          "test": "(datum['ml.outlier_score'] >= SelectorName.cutoff)"
+          "test": "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)"
         },
         "value": 0.25
       },
       "size": {
         "condition": {
           "value": 28,
-          "test": "(datum['ml.outlier_score'] >= SelectorName.cutoff)"
+          "test": "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)"
         },
         "value": 2
       },
-      "tooltip": [{"type": "quantitative", "field": "ml.outlier_score"}],
-      "x": {"type": "quantitative", "field": {"repeat": "column"}},
-      "y": {"type": "quantitative", "field": {"repeat": "row"}}
+      "tooltip": {"type": "quantitative", "field": "outlier_score"},
+      "x": {"type": "quantitative", "field": {"repeat": "column" } },
+      "y": {"type": "quantitative", "field": {"repeat": "row" } }
     },
     "height": 100,
     "selection": {
-      "SelectorName": {
+      "mlOutlierScoreThreshold": {
         "type": "single",
         "fields": ["cutoff"],
         "bind": {
           "input": "range",
           "max": 1,
           "min": 0,
-          "name": "Outlier score Threshold:",
+          "name": "Outlier score threshold:",
           "step": 0.01
         },
         "init": {"cutoff": 0.8}
@@ -50,6 +59,5 @@
     },
     "transform": [],
     "width": 100
-  },
-  "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json"
+  }
 }

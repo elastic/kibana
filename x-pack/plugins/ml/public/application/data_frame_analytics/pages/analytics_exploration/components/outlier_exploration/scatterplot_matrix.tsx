@@ -6,43 +6,32 @@
 
 import React, { useEffect, FC } from 'react';
 
+// @ts-ignore
 import * as vegaLite from 'vega-lite/build-es5/vega-lite';
+// @ts-ignore
 import * as vega from 'vega/build-es5/vega';
 
 import { htmlIdGenerator } from '@elastic/eui';
 
-import { UseIndexDataReturnType } from '../../../../../components/data_grid';
-
 import scatterplotMatrixVegaLiteSpec from './scatterplot_matrix_vega_lite_spec.json';
+import './scatterplot_matrix.scss';
 
-export const ScatterplotMatrix: FC<UseIndexDataReturnType> = (props) => {
+interface ScatterplotMatrix {
+  items: Array<Record<string, any>>;
+  columns: string[];
+}
+
+export const ScatterplotMatrix: FC<ScatterplotMatrix> = ({ items, columns: rawColumns }) => {
   const htmlId = htmlIdGenerator()();
 
   useEffect(() => {
-    const columns = props.visibleColumns
-      .filter((column) => {
-        const columnInfo = props.columnsWithCharts.find(
-          (columnWithChart) => columnWithChart.id === column
-        );
-        return column !== 'ml.outlier_score' && columnInfo?.schema === 'numeric';
-      })
-      .sort()
-      .map((column) => column.split('-').join('_'));
+    // Vega doesn't support dashes in attribute names
+    const columns = rawColumns.map((column) => `${column.split('-').join('_')}`);
+    columns.length = 3;
 
     // TODO we want more results than just what's visible in data grid
     scatterplotMatrixVegaLiteSpec.spec.data = {
-      values: props.tableItems.map((item) => {
-        return Object.entries(item).reduce((p, [key, value]) => {
-          const columnName = key.split('-').join('_');
-          if (columns.includes(columnName)) {
-            p[columnName] = value;
-          }
-          if (columnName === 'ml') {
-            p.ml = { outlier_score: item.ml.outlier_score };
-          }
-          return p;
-        }, {} as Record<string, any>);
-      }),
+      values: items,
     };
 
     scatterplotMatrixVegaLiteSpec.repeat = {
@@ -51,9 +40,13 @@ export const ScatterplotMatrix: FC<UseIndexDataReturnType> = (props) => {
     };
 
     scatterplotMatrixVegaLiteSpec.transform = columns.map((column) => ({
-      calculate: `datum.${column}`,
+      calculate: `datum['${column}']`,
       as: column,
     }));
+    scatterplotMatrixVegaLiteSpec.transform.push({
+      calculate: `datum['ml.outlier_score']`,
+      as: 'outlier_score',
+    });
 
     const vgSpec = vegaLite.compile(scatterplotMatrixVegaLiteSpec).spec;
 
@@ -64,7 +57,7 @@ export const ScatterplotMatrix: FC<UseIndexDataReturnType> = (props) => {
       .hover(); // enable hover event processing, *only call once*!
 
     view.runAsync(); // evaluate and render the view
-  }, [props.tableItems, props.visibleColumns]);
+  }, [items, rawColumns]);
 
-  return <div id={htmlId} />;
+  return <div id={htmlId} className="mlScatterplotMatrix" />;
 };
