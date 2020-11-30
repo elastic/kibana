@@ -9,16 +9,6 @@ import { CoreStart } from 'kibana/public';
 import { PackagePolicyEditExtensionComponent } from '../../../../../../../fleet/public';
 import { StartPlugins } from '../../../../../types';
 
-export const LazyEndpointPolicyEditExtension = lazy<PackagePolicyEditExtensionComponent>(
-  async () => {
-    const { EndpointPolicyEditExtension } = await import('./endpoint_policy_edit_extension');
-    return {
-      // FIXME: remove casting once old UI component registration is removed
-      default: (EndpointPolicyEditExtension as unknown) as PackagePolicyEditExtensionComponent,
-    };
-  }
-);
-
 export const getLazyEndpointPolicyEditExtension = (
   coreStart: CoreStart,
   depsStart: Pick<StartPlugins, 'data' | 'fleet'>
