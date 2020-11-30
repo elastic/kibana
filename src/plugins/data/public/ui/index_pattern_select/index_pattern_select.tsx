@@ -114,7 +114,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
     const { fieldTypes, onNoIndexPatterns, indexPatternService } = this.props;
-    const indexPatterns = await indexPatternService.find(searchValue, 100);
+    const indexPatterns = await indexPatternService.find(`${searchValue}*`, 100);
 
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.

@@ -139,7 +139,7 @@ export class IndexPatternsService {
     const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
       fields: ['title'],
-      search: `${search}*`,
+      search,
       searchFields: ['title'],
       perPage: size,
     });
