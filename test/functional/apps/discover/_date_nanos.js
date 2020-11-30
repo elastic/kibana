@@ -27,8 +27,6 @@ export default function ({ getService, getPageObjects }) {
   const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
   const toTime = 'Sep 23, 2019 @ 03:31:44.000';
 
-  // Failing: See https://github.com/elastic/kibana/issues/82035
-
   describe('date_nanos', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('date_nanos');

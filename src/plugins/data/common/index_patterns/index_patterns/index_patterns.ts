@@ -203,13 +203,12 @@ export class IndexPatternsService {
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const result = this.apiClient.getFieldsForWildcard({
+    return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
     });
-    return result;
   };
 
   /**
@@ -268,22 +267,21 @@ export class IndexPatternsService {
     options: GetFieldsOptions,
     fieldAttrs: FieldAttrs = {}
   ) => {
-    // eslint-disable-next-line no-console
-    console.log('refreshFieldSpecMap start');
     const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
       const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
       return this.fieldArrayToMap([...newFields, ...scriptdFields], fieldAttrs);
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log('refreshFieldSpecMap ERROR');
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
         return {};
       }
-      const msg = i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-        defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-        values: { id, title },
+
+      this.onError(err, {
+        title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
+          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+          values: { id, title },
+        }),
       });
       throw err;
     }
@@ -383,8 +381,6 @@ export class IndexPatternsService {
           iconType: 'alert',
         });
       } else {
-        // eslint-disable-next-line no-console
-        console.error('fields fetching not possible');
         this.onError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
@@ -512,8 +508,6 @@ export class IndexPatternsService {
       .then((resp) => {
         indexPattern.id = resp.id;
         indexPattern.version = resp.version;
-        // eslint-disable-next-line no-console
-        console.error('index pattern saved successfully');
       })
       .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
