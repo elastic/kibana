@@ -243,7 +243,7 @@ export const mockGlobalState: State = {
         status: TimelineStatus.active,
       },
     },
-    attachTimeline: null,
+    insertTimeline: null,
   },
   sourcerer: {
     ...initialSourcererState,

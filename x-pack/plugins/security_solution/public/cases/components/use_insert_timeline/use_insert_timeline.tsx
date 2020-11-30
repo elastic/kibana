@@ -12,10 +12,10 @@ import { getTimelineUrl, useFormatUrl } from '../../../common/components/link_to
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { SecurityPageName } from '../../../app/types';
-import { setAttachTimeline } from '../../../timelines/store/timeline/actions';
+import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
 
 interface UseInsertTimelineReturn {
-  handleOnTimelineAttached: (title: string, id: string | null, graphEventId?: string) => void;
+  handleOnTimelineChange: (title: string, id: string | null, graphEventId?: string) => void;
 }
 
 export const useInsertTimeline = (
@@ -25,9 +25,9 @@ export const useInsertTimeline = (
   const dispatch = useDispatch();
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
 
-  const attachTimeline = useShallowEqualSelector(timelineSelectors.selectAttachTimeline);
+  const insertTimeline = useShallowEqualSelector(timelineSelectors.selectInsertTimeline);
 
-  const handleOnTimelineAttached = useCallback(
+  const handleOnTimelineChange = useCallback(
     (title: string, id: string | null, graphEventId?: string) => {
       const url = formatUrl(getTimelineUrl(id ?? '', graphEventId), {
         absolute: true,
@@ -46,18 +46,18 @@ export const useInsertTimeline = (
   );
 
   useEffect(() => {
-    if (attachTimeline != null && value != null) {
-      dispatch(timelineActions.showTimeline({ id: attachTimeline.timelineId, show: false }));
-      handleOnTimelineAttached(
-        attachTimeline.timelineTitle,
-        attachTimeline.timelineSavedObjectId,
-        attachTimeline.graphEventId
+    if (insertTimeline != null && value != null) {
+      dispatch(timelineActions.showTimeline({ id: insertTimeline.timelineId, show: false }));
+      handleOnTimelineChange(
+        insertTimeline.timelineTitle,
+        insertTimeline.timelineSavedObjectId,
+        insertTimeline.graphEventId
       );
-      dispatch(setAttachTimeline(null));
+      dispatch(setInsertTimeline(null));
     }
-  }, [attachTimeline, dispatch, handleOnTimelineAttached, value]);
+  }, [insertTimeline, dispatch, handleOnTimelineChange, value]);
 
   return {
-    handleOnTimelineAttached,
+    handleOnTimelineChange,
   };
 };
