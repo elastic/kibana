@@ -6,7 +6,6 @@
 
 import {
   ResolverRelatedEvents,
-  ResolverTree,
   ResolverEntityIndex,
   SafeResolverEvent,
   ResolverNode,
@@ -107,10 +106,16 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
       },
 
       async event({
+        nodeID,
+        eventCategory,
+        eventTimestamp,
         eventID,
         timerange,
         indexPatterns,
       }: {
+        nodeID: string;
+        eventCategory: string[];
+        eventTimestamp: string;
         eventID: string;
         timerange: Timerange;
         indexPatterns: string[];

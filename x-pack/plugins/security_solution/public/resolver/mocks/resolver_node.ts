@@ -26,17 +26,14 @@ export function mockResolverNode({
     id,
     name,
     stats,
+    parent: parentID,
     data: {
       '@timestamp': timestamp,
       'process.entity_id': id,
       'process.name': name,
+      'process.parent.entity_id': parentID,
     },
   };
-
-  if (parentID) {
-    resolverNode.parent = parentID;
-    resolverNode.data['process.parent.entity_id'] = parentID;
-  }
 
   return resolverNode;
 }

@@ -31,6 +31,7 @@ export function CurrentRelatedEventFetcher(
     const state = api.getState();
 
     const newParams = selectors.panelViewAndParameters(state);
+    const dbParams = selectors.treeParametersToFetch(state);
 
     const oldParams = last;
     last = newParams;
@@ -38,6 +39,9 @@ export function CurrentRelatedEventFetcher(
     // If the panel view params have changed and the current panel view is the `eventDetail`, then fetch the event details for that eventID.
     if (!isEqual(newParams, oldParams) && newParams.panelView === 'eventDetail') {
       const currentEventID = newParams.panelParameters.eventID;
+      const currentNodeID = newParams.panelParameters.nodeID;
+      const currentEventCategory = newParams.panelParameters.eventCategory;
+      const currentEventTimestamp = newParams.panelParameters.eventTimestamp;
 
       api.dispatch({
         type: 'appRequestedCurrentRelatedEventData',
@@ -56,9 +60,11 @@ export function CurrentRelatedEventFetcher(
       let result: SafeResolverEvent | null = null;
       try {
         result = await dataAccessLayer.event({
+          nodeID: currentNodeID,
+          eventCategory: [currentEventCategory],
+          eventTimestamp: currentEventTimestamp,
           eventID: currentEventID,
-          indexPatterns: ['logs-*'],
-          // TODO: fix these
+          indexPatterns: dbParams?.indices ?? [],
           timerange,
         });
       } catch (error) {

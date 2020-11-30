@@ -7,9 +7,7 @@
 import {
   ResolverRelatedEvents,
   SafeResolverEvent,
-  ResolverTree,
   ResolverEntityIndex,
-  NewResolverTree,
   ResolverNode,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
@@ -97,10 +95,16 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
       },
 
       async event({
+        nodeID,
+        eventCategory,
+        eventTimestamp,
         eventID,
         timerange,
         indexPatterns,
       }: {
+        nodeID: string;
+        eventCategory: string[];
+        eventTimestamp: string;
         eventID: string;
         timerange: Timerange;
         indexPatterns: string[];

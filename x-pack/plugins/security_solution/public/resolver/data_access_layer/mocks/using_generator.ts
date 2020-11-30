@@ -182,10 +182,16 @@ export function usingGenerator(
        * Any of the origin's related events by event.id
        */
       async event({
+        nodeID,
+        eventCategory,
+        eventTimestamp,
         eventID,
         timerange,
         indexPatterns,
       }: {
+        nodeID: string;
+        eventCategory: string[];
+        eventTimestamp: string;
         eventID: string;
         timerange: Timerange;
         indexPatterns: string[];

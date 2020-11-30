@@ -24,7 +24,6 @@ describe('resolver visible entities', () => {
   let nodeG: ResolverNode;
   let store: Store<ResolverState, ResolverAction>;
 
-  // TODO: Update ResolverNode so ID can be number or string
   beforeEach(() => {
     /*
      *          A

@@ -97,21 +97,3 @@ export function mock({
     nodes,
   };
 }
-
-/**
- * `true` if there are more children to fetch.
- * TODO: Going to need to use levelOrder or similar to identify ancestor count and child count and then compare against limit
- */
-export function hasMoreChildren(resolverTree: NewResolverTree): boolean {
-  return false;
-  // return resolverTree.children.nextChild !== null;
-}
-
-/**
- * `true` if there are more ancestors to fetch.
- * TODO: Going to need to use levelOrder or similar to identify ancestor count and child count and then compare against limit
- */
-export function hasMoreAncestors(resolverTree: NewResolverTree): boolean {
-  return false;
-  // return resolverTree.ancestry.nextAncestor !== null;
-}

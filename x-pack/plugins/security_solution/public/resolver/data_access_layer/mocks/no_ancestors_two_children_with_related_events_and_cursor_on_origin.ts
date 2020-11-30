@@ -144,10 +144,16 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
        * Any of the origin's related events by event.id
        */
       async event({
+        nodeID,
+        eventCategory,
+        eventTimestamp,
         eventID,
         timerange,
         indexPatterns,
       }: {
+        nodeID: string;
+        eventCategory: string[];
+        eventTimestamp: string;
         eventID: string;
         timerange: Timerange;
         indexPatterns: string[];
@@ -155,10 +161,6 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOriginWithOneAfterCurso
         return relatedEvents.events.find((event) => eventModel.eventID(event) === eventID) ?? null;
       },
 
-      /**
-       *
-       * TODO:
-       */
       async nodeData({
         ids,
         timerange,

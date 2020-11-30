@@ -6,11 +6,7 @@
 
 import { ResolverNode, SafeResolverEvent } from './../../../../common/endpoint/types/index';
 
-import {
-  ResolverRelatedEvents,
-  ResolverTree,
-  ResolverEntityIndex,
-} from '../../../../common/endpoint/types';
+import { ResolverRelatedEvents, ResolverEntityIndex } from '../../../../common/endpoint/types';
 import { DataAccessLayer } from '../../types';
 
 type PausableRequests =

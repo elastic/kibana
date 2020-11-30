@@ -646,7 +646,7 @@ export interface IsometricTaxiLayout {
  */
 export interface TreeIdSchema {
   id: string;
-  parent: string; // TODO: Maybe change this to neighbors or adjacents as a more general purpose graph.
+  parent: string;
   name: string;
 }
 
@@ -716,10 +716,16 @@ export interface DataAccessLayer {
    * Return up to one event that has an `event.id` that includes `eventID`.
    */
   event: ({
+    nodeID,
+    eventCategory,
+    eventTimestamp,
     eventID,
     timerange,
     indexPatterns,
   }: {
+    nodeID: string;
+    eventCategory: string[];
+    eventTimestamp: string;
     eventID: string;
     timerange: Timerange;
     indexPatterns: string[];
@@ -916,6 +922,8 @@ export type PanelViewAndParameters =
       panelParameters: {
         /**
          * The nodeID (e.g. `process.entity_id`) for the node related to the event being shown.
+         * @warning - All these have to be strings since they are used for the url parameters. So you can get the string 'undefined'
+         * rather than just a regular undefined value
          */
         nodeID: string;
         /**
@@ -931,5 +939,10 @@ export type PanelViewAndParameters =
          * `event.id` that uniquely identifies the event to show.
          */
         eventID: string;
+
+        /**
+         * `event['@timestamp']` that identifies the given timestamp for an event
+         */
+        eventTimestamp: string;
       };
     };

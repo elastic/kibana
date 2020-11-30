@@ -26,6 +26,8 @@ export function RelatedEventsFetcher(
 
     const newParams = selectors.panelViewAndParameters(state);
     const isLoadingMoreEvents = selectors.isLoadingMoreNodeEventsInCategory(state);
+    const dbParams = selectors.treeParametersToFetch(state);
+
     const oldParams = last;
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     last = newParams;
@@ -56,14 +58,14 @@ export function RelatedEventsFetcher(
             entityID: nodeID,
             category: eventCategory,
             after: cursor,
-            indexPatterns: ['logs-*'],
+            indexPatterns: dbParams?.indices ?? [],
             timerange,
           });
         } else {
           result = await dataAccessLayer.eventsWithEntityIDAndCategory({
             entityID: nodeID,
             category: eventCategory,
-            indexPatterns: ['logs-*'],
+            indexPatterns: dbParams?.indices ?? [],
             timerange,
           });
         }

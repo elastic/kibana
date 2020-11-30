@@ -69,7 +69,7 @@ export function ResolverTreeFetcher(
         payload: databaseParameters,
       });
       try {
-        // TODO: Update the entities call for the front end to explicitly send what fields to return based on data source
+        // TODO: Update to use the schema that's passed back!
         const matchingEntities: ResolverEntityIndex = await dataAccessLayer.entities({
           _id: databaseParameters.databaseDocumentID,
           indices: databaseParameters.indices ?? [],
@@ -83,7 +83,6 @@ export function ResolverTreeFetcher(
           });
           return;
         }
-        // TODO: Enttities call should return the fields as [{ process: { entity_id: 'blargh' }}] to allow use of the schema.id field
         entityIDToFetch = matchingEntities[0].entity_id;
 
         result = await dataAccessLayer.resolverTree({

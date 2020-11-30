@@ -112,6 +112,7 @@ const NodeEventsListItem = memo(function ({
   eventCategory: string;
 }) {
   const timestamp = eventModel.eventTimestamp(event);
+  const eventID = eventModel.eventID(event);
   const date =
     useFormattedDate(timestamp) ||
     i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved', {
@@ -122,7 +123,8 @@ const NodeEventsListItem = memo(function ({
     panelParameters: {
       nodeID,
       eventCategory,
-      eventID: String(eventModel.eventID(event)),
+      eventID: eventID ? String(eventID) : '',
+      eventTimestamp: String(timestamp),
     },
   });
   return (

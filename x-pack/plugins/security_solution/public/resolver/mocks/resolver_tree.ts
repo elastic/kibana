@@ -16,7 +16,6 @@ import * as eventModel from '../../../common/endpoint/models/event';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { mockResolverNode } from './resolver_node';
 
-// TODO: Rename to describe return more accurately..
 export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
   originID,
 }: {
@@ -213,8 +212,6 @@ export function mockTreeWithNoAncestorsAnd2Children({
   relatedEvents: ResolverRelatedEvents;
   nodeDataResponse: SafeResolverEvent[];
 } {
-  // TODO: Confirm we're no longer using this
-
   const originProcessEvent: SafeResolverEvent = mockEndpointEvent({
     pid: 0,
     entityID: originID,
@@ -340,7 +337,6 @@ export function mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents
     timestamp: 1600863932318,
   });
 
-  // TODO: Worth testing, but this should never happen
   const treeResponse = [
     ancestor,
     ancestorClone,

@@ -3,13 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { ResolverNode, SafeResolverEvent } from './../../../../common/endpoint/types/index';
-
 import {
   ResolverRelatedEvents,
-  ResolverTree,
+  ResolverNode,
   ResolverEntityIndex,
+  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoProcessEvents } from '../../mocks/resolver_tree';
 import { DataAccessLayer } from '../../types';

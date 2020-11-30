@@ -140,7 +140,10 @@ export function dataAccessLayerFactory(
      * Return up to one event that has an `event.id` that includes `eventID`.
      */
     async event({
+      nodeID,
       eventID,
+      eventCategory,
+      eventTimestamp,
       timerange,
       indexPatterns,
     }: {
@@ -148,6 +151,23 @@ export function dataAccessLayerFactory(
       timerange: Timerange;
       indexPatterns: string[];
     }): Promise<SafeResolverEvent | null> {
+      /** @description - eventID isn't provided by winlog. This can be removed once runtime fields are available */
+      const filter =
+        eventID === ''
+          ? {
+              bool: {
+                filter: [
+                  { terms: { 'event.category': eventCategory } },
+                  { term: { 'process.entity_id': nodeID } },
+                  { term: { '@timestamp': eventTimestamp } },
+                ],
+              },
+            }
+          : {
+              bool: {
+                filter: [{ term: { 'event.id': eventID } }],
+              },
+            };
       const response: ResolverPaginatedEvents = await context.services.http.post(
         '/api/endpoint/resolver/events',
         {
@@ -158,11 +178,7 @@ export function dataAccessLayerFactory(
               from: timerange.from.toISOString(),
               to: timerange.to.toISOString(),
             },
-            filter: JSON.stringify({
-              bool: {
-                filter: [{ term: { 'event.id': eventID } }],
-              },
-            }),
+            filter: JSON.stringify(filter),
           }),
         }
       );

@@ -230,7 +230,6 @@ const UnstyledProcessEventDot = React.memo(
       nodeState,
       /**
        * There is no definition for 'trigger process' yet. return false.
-       * TODO: Define what the standard library of cubes will be and allow users to define what data is what color
        */ false
     );
 

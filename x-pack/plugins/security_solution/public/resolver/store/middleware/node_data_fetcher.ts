@@ -39,6 +39,7 @@ export function NodeDataFetcher(
      */
     const visibleNodes: Set<string> = selectors.visibleNodes(state)(Number.POSITIVE_INFINITY);
     const nodeData = selectors.nodeData(state);
+    const dbParams = selectors.treeParametersToFetch(state);
 
     // Get the visible nodes that we haven't already requested or received data for
     const newIDsToRequest = nodeDataModel.idsNotInBase(nodeData, visibleNodes);
@@ -76,7 +77,7 @@ export function NodeDataFetcher(
       results = await dataAccessLayer.nodeData({
         ids: Array.from(newIDsToRequest),
         timerange,
-        indexPatterns: ['logs-*'],
+        indexPatterns: dbParams?.indices ?? [],
         limit: nodeDataLimit,
       });
     } catch (error) {
