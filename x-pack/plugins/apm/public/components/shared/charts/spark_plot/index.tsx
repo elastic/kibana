@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { ScaleType, Chart, Settings, AreaSeries } from '@elastic/charts';
+import {
+  ScaleType,
+  Chart,
+  Settings,
+  AreaSeries,
+  CurveType,
+} from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -40,17 +46,7 @@ export function SparkPlot(props: Props) {
 
   return (
     <Chart size={{ height: px(24), width }}>
-      <Settings
-        theme={{
-          ...chartTheme,
-          background: {
-            ...chartTheme.background,
-            color: 'transparent',
-          },
-        }}
-        showLegend={false}
-        tooltip="none"
-      />
+      <Settings theme={chartTheme} showLegend={false} tooltip="none" />
       <AreaSeries
         id="area"
         xScaleType={ScaleType.Time}
@@ -59,6 +55,7 @@ export function SparkPlot(props: Props) {
         yAccessors={['y']}
         data={series}
         color={color}
+        curve={CurveType.CURVE_MONOTONE_X}
       />
     </Chart>
   );

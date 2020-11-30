@@ -19,9 +19,7 @@ export interface UIExtensionsStorage {
  * UI Component Extension is used on the pages displaying the ability to edit an
  * Integration Policy
  */
-export type PackagePolicyEditExtensionComponent = ComponentType<
-  PackagePolicyEditExtensionComponentProps
->;
+export type PackagePolicyEditExtensionComponent = ComponentType<PackagePolicyEditExtensionComponentProps>;
 
 export interface PackagePolicyEditExtensionComponentProps {
   /** The current integration policy being edited */
@@ -51,9 +49,7 @@ export interface PackagePolicyEditExtension {
  * UI Component Extension is used on the pages displaying the ability to Create an
  * Integration Policy
  */
-export type PackagePolicyCreateExtensionComponent = ComponentType<
-  PackagePolicyCreateExtensionComponentProps
->;
+export type PackagePolicyCreateExtensionComponent = ComponentType<PackagePolicyCreateExtensionComponentProps>;
 
 export interface PackagePolicyCreateExtensionComponentProps {
   /** The integration policy being created */

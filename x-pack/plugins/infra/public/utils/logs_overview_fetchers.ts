@@ -6,12 +6,7 @@
 
 import { encode } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
-import {
-  FetchData,
-  FetchDataParams,
-  HasData,
-  LogsFetchDataResponse,
-} from '../../../observability/public';
+import { FetchData, FetchDataParams, LogsFetchDataResponse } from '../../../observability/public';
 import { DEFAULT_SOURCE_ID } from '../../common/constants';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
@@ -38,9 +33,7 @@ interface LogParams {
 
 type StatsAndSeries = Pick<LogsFetchDataResponse, 'stats' | 'series'>;
 
-export function getLogsHasDataFetcher(
-  getStartServices: InfraClientCoreSetup['getStartServices']
-): HasData {
+export function getLogsHasDataFetcher(getStartServices: InfraClientCoreSetup['getStartServices']) {
   return async () => {
     const [core] = await getStartServices();
     const sourceStatus = await callFetchLogSourceStatusAPI(DEFAULT_SOURCE_ID, core.http.fetch);

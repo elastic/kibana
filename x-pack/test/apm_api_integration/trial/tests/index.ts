@@ -37,6 +37,7 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
       loadTestFile(require.resolve('./csm/page_views.ts'));
       loadTestFile(require.resolve('./csm/js_errors.ts'));
       loadTestFile(require.resolve('./csm/has_rum_data.ts'));
+      loadTestFile(require.resolve('./csm/page_load_dist.ts'));
     });
   });
 }

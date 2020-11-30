@@ -17,6 +17,8 @@ import { MockUrlParamsContextProvider } from '../../../context/UrlParamsContext/
 import * as useDynamicIndexPatternHooks from '../../../hooks/useDynamicIndexPattern';
 import * as callApmApi from '../../../services/rest/createCallApmApi';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import * as useAnnotationsHooks from '../../../hooks/use_annotations';
+import * as useTransactionBreakdownHooks from '../../../hooks/use_transaction_breakdown';
 import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
 import { waitFor } from '@testing-library/dom';
@@ -55,6 +57,9 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('ServiceOverview', () => {
   it('renders', async () => {
     jest
+      .spyOn(useAnnotationsHooks, 'useAnnotations')
+      .mockReturnValue({ annotations: [] });
+    jest
       .spyOn(useDynamicIndexPatternHooks, 'useDynamicIndexPattern')
       .mockReturnValue({
         indexPattern: undefined,
@@ -85,6 +90,13 @@ describe('ServiceOverview', () => {
         ? Promise.resolve(response)
         : Promise.reject(`Response for ${endpoint} is not defined`);
     });
+    jest
+      .spyOn(useTransactionBreakdownHooks, 'useTransactionBreakdown')
+      .mockReturnValue({
+        data: { timeseries: [] },
+        error: undefined,
+        status: FETCH_STATUS.SUCCESS,
+      });
 
     const { findAllByText } = renderWithTheme(
       <ServiceOverview serviceName="test service name" />,

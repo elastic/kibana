@@ -33,7 +33,9 @@ const expectedResults = (...ids: string[]) => ids.map((id) => expect.objectConta
 describe('POST /internal/global_search/find', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
-  let globalSearchHandlerContext: ReturnType<typeof globalSearchPluginMock.createRouteHandlerContext>;
+  let globalSearchHandlerContext: ReturnType<
+    typeof globalSearchPluginMock.createRouteHandlerContext
+  >;
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(pluginId));
@@ -60,7 +62,9 @@ describe('POST /internal/global_search/find', () => {
     await supertest(httpSetup.server.listener)
       .post('/internal/global_search/find')
       .send({
-        term: 'search',
+        params: {
+          term: 'search',
+        },
         options: {
           preference: 'custom-pref',
         },
@@ -68,10 +72,13 @@ describe('POST /internal/global_search/find', () => {
       .expect(200);
 
     expect(globalSearchHandlerContext.find).toHaveBeenCalledTimes(1);
-    expect(globalSearchHandlerContext.find).toHaveBeenCalledWith('search', {
-      preference: 'custom-pref',
-      aborted$: expect.any(Object),
-    });
+    expect(globalSearchHandlerContext.find).toHaveBeenCalledWith(
+      { term: 'search' },
+      {
+        preference: 'custom-pref',
+        aborted$: expect.any(Object),
+      }
+    );
   });
 
   it('returns all the results returned from the service', async () => {
@@ -82,7 +89,9 @@ describe('POST /internal/global_search/find', () => {
     const response = await supertest(httpSetup.server.listener)
       .post('/internal/global_search/find')
       .send({
-        term: 'search',
+        params: {
+          term: 'search',
+        },
       })
       .expect(200);
 
@@ -99,7 +108,9 @@ describe('POST /internal/global_search/find', () => {
     const response = await supertest(httpSetup.server.listener)
       .post('/internal/global_search/find')
       .send({
-        term: 'search',
+        params: {
+          term: 'search',
+        },
       })
       .expect(403);
 
@@ -117,7 +128,9 @@ describe('POST /internal/global_search/find', () => {
     const response = await supertest(httpSetup.server.listener)
       .post('/internal/global_search/find')
       .send({
-        term: 'search',
+        params: {
+          term: 'search',
+        },
       })
       .expect(500);
 

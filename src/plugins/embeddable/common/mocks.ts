@@ -19,9 +19,7 @@
 
 import { EmbeddablePersistableStateService } from './types';
 
-export const createEmbeddablePersistableStateServiceMock = (): jest.Mocked<
-  EmbeddablePersistableStateService
-> => {
+export const createEmbeddablePersistableStateServiceMock = (): jest.Mocked<EmbeddablePersistableStateService> => {
   return {
     inject: jest.fn((state, references) => state),
     extract: jest.fn((state) => ({ state, references: [] })),
