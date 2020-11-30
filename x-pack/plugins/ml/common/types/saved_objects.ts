@@ -11,7 +11,7 @@ export interface SavedObjectResult {
   [jobId: string]: { success: boolean; error?: any };
 }
 
-export interface RepairSavedObjectResponse {
+export interface SyncSavedObjectResponse {
   savedObjectsCreated: SavedObjectResult;
   savedObjectsDeleted: SavedObjectResult;
   datafeedsAdded: SavedObjectResult;

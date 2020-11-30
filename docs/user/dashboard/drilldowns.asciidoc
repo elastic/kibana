@@ -21,7 +21,7 @@ refer https://www.elastic.co/subscriptions[the subscription page].
 ==============================================
 
 [float]
-[[dashboard-drilldown]]
+[[dashboard-drilldowns]]
 ==== Dashboard drilldowns
 
 Dashboard drilldowns enable you to open a dashboard from another dashboard,
@@ -33,7 +33,7 @@ you can create a drilldown that navigates from the overall status dashboard to a
 that shows a single data center or server.
 
 [float]
-[[url-drilldown]]
+[[url-drilldowns]]
 ==== URL drilldowns
 
 beta[] URL drilldowns enable you to navigate from a dashboard to internal or external URLs.
@@ -41,8 +41,8 @@ Destination URLs can be dynamic, depending on the dashboard context or user inte
 For example, if you have a dashboard that shows data from a Github repository, you can create a URL drilldown
 that opens Github from the dashboard.
 
-Some panels support multiple interactions, also known as triggers.
-The <<variables,variables>> you use to create a <<url_templating, URL template>> depends on the trigger you choose. URL drilldowns support these types of triggers:
+Some panels support multiple interactions, also known as triggers. 
+The <<url-template-variables,variables>> you use to create a <<url_templating-language, URL template>> depends on the trigger you choose. URL drilldowns support these types of triggers:
 
 * *Single click* &mdash; A single data point in the visualization.
 
