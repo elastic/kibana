@@ -19,7 +19,6 @@
 
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import deepEqual from 'fast-deep-equal';
 
 import classNames from 'classnames';
 import {
@@ -574,9 +573,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
     const newQueryBarRect = this.queryBarInputDivRefInstance.current?.getBoundingClientRect();
 
-    if (!deepEqual(this.state.queryBarRect, newQueryBarRect)) {
-      this.setState({ queryBarRect: newQueryBarRect });
-    }
+    return this.setState({	    const newQueryBarRect = this.queryBarInputDivRefInstance.current?.getBoundingClientRect();
+      queryBarRect: this.queryBarInputDivRefInstance.current?.getBoundingClientRect(),
+    });
   };
 
   handleAutoHeight = () => {
