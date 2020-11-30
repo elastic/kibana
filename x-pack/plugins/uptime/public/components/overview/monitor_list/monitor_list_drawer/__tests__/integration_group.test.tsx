@@ -17,7 +17,7 @@ describe('IntegrationGroup', () => {
       monitor_id: '12345',
       state: {
         summary: {},
-        monitor: {},
+        monitor: { type: 'http' },
         summaryPings: [],
         timestamp: '123',
         url: {},
@@ -48,7 +48,7 @@ describe('IntegrationGroup', () => {
         state: {
           timestamp: 'foo',
           summaryPings: [],
-          monitor: {},
+          monitor: { type: 'http' },
           summary: {
             up: 0,
             down: 0,
