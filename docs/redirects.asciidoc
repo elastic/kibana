@@ -169,12 +169,10 @@ This content has moved. See {ref}/index-mgmt.html[Index management].
 
 This content has moved. See <<discover, **Discover**>>.
 
-
 [role="exclude",id="document-context"]
 == View a document in context
 
 This content has moved. See <<discover, **Discover**>>.
-
 
 [role="exclude",id="document-data"]
 == View document data
