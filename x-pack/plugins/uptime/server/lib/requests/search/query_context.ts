@@ -48,7 +48,8 @@ export class QueryContext {
 
   async count(params: any): Promise<any> {
     const { body: result } = await this.callES.count(params);
-    return result;  }
+    return result;
+  }
 
   async dateAndCustomFilters(): Promise<any[]> {
     const clauses = [await this.dateRangeFilter()];
