@@ -40,9 +40,7 @@ export function useDashboardStateManager(
   history: History,
   savedDashboard?: DashboardSavedObject
 ) {
-  const [dashboardStateManager, setDashboardStateManager] = useState<
-    DashboardStateManager | undefined
-  >();
+  const [dashboardStateManager, setDashboardStateManager] = useState<DashboardStateManager>();
 
   useEffect(() => {
     if (!savedDashboard) {
