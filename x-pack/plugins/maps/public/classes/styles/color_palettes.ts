@@ -7,6 +7,8 @@
 import tinycolor from 'tinycolor2';
 import {
   // @ts-ignore
+  colorPalette as colorPaletteGenerator,
+  // @ts-ignore
   euiPaletteForStatus,
   // @ts-ignore
   euiPaletteForTemperature,
@@ -35,6 +37,13 @@ export const DEFAULT_LINE_COLORS: string[] = [
   '#000',
   '#FFF',
 ];
+
+const ROYAL_BLUE = 'rgb(65, 105, 225)';
+const CYAN = 'rgb(0, 256, 256)';
+const LIME = 'rgb(0, 256, 0)';
+const YELLOW = 'rgb(256, 256, 0)';
+const RED = 'rgb(256, 0, 0)';
+const HEATMAP_PALETTE = [ROYAL_BLUE, CYAN, LIME, YELLOW, RED];
 
 type COLOR_PALETTE = EuiColorPalettePickerPaletteProps & {
   getPalette?: (steps: number) => string[];
@@ -99,13 +108,10 @@ const COLOR_PALETTES: COLOR_PALETTE[] = [
   },
   {
     value: DEFAULT_HEATMAP_COLOR_RAMP_NAME,
-    palette: [
-      'rgb(65, 105, 225)', // royalblue
-      'rgb(0, 256, 256)', // cyan
-      'rgb(0, 256, 0)', // lime
-      'rgb(256, 256, 0)', // yellow
-      'rgb(256, 0, 0)', // red
-    ],
+    getPalette: (steps: number) => {
+      return colorPaletteGenerator(HEATMAP_PALETTE, steps, true, true);
+    },
+    palette: HEATMAP_PALETTE,
     type: 'gradient',
   },
   {
