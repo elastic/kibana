@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
-import { useAgentName } from '../../../hooks/useAgentName';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useErrorOverviewHref } from '../../shared/Links/apm/ErrorOverviewLink';
 import { useMetricOverviewHref } from '../../shared/Links/apm/MetricOverviewLink';
@@ -24,6 +23,7 @@ import { ServiceMetrics } from '../service_metrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../transaction_overview';
+import { useApmService } from '../../../hooks/use_apm_service';
 
 interface Tab {
   key: string;
@@ -44,7 +44,7 @@ interface Props {
 }
 
 export function ServiceDetailTabs({ serviceName, tab }: Props) {
-  const { agentName } = useAgentName();
+  const { agentName } = useApmService();
   const { uiSettings } = useApmPluginContext().core;
 
   const overviewTab = {

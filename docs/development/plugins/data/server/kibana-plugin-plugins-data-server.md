@@ -34,6 +34,7 @@
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
+|  [searchUsageObserver(logger, usage)](./kibana-plugin-plugins-data-server.searchusageobserver.md) | Rxjs observer for easily doing <code>tap(searchUsageObserver(logger, usage))</code> in an rxjs chain. |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
 |  [usageProvider(core)](./kibana-plugin-plugins-data-server.usageprovider.md) |  |
 
@@ -45,7 +46,6 @@
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
-|  [IEsRawSearchResponse](./kibana-plugin-plugins-data-server.iesrawsearchresponse.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |

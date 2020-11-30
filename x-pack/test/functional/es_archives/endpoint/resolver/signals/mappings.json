@@ -2582,6 +2582,16 @@
             },
             "threshold_count": {
               "type": "float"
+            },
+            "threshold_result": {
+              "properties": {
+                "count": {
+                  "type": "long"
+                },
+                "value": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
