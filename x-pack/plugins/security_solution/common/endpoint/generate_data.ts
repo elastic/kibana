@@ -44,6 +44,9 @@ export type Event = AlertEvent | SafeEndpointEvent;
  */
 export const ANCESTRY_LIMIT: number = 2;
 
+/**
+ * The configuration options for generating an event.
+ */
 export interface EventOptions {
   timestamp?: number;
   entityID?: string;
