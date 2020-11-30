@@ -36,6 +36,7 @@ export const InfraMetadataHostRT = rt.partial({
   name: rt.string,
   hostname: rt.string,
   id: rt.string,
+  ip: rt.array(rt.string),
   mac: rt.array(rt.string),
   os: InfraMetadataOSRT,
   architecture: rt.string,

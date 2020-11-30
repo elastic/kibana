@@ -23,8 +23,12 @@ export const getFields = (metadata: InfraMetadata, group: 'cloud' | 'host' | 'ag
           value: metadata.info?.host?.id,
         },
         {
+          name: 'host.ip',
+          value: metadata.info?.host?.ip,
+        },
+        {
           name: 'host.mac',
-          value: metadata.info?.host?.mac ? metadata.info?.host?.mac.join(',') : '',
+          value: metadata.info?.host?.mac,
         },
         {
           name: 'host.name',
@@ -49,6 +53,10 @@ export const getFields = (metadata: InfraMetadata, group: 'cloud' | 'host' | 'ag
         {
           name: 'host.os.platform',
           value: metadata.info?.host?.os?.platform,
+        },
+        {
+          name: 'host.os.version',
+          value: metadata.info?.host?.os?.version,
         },
       ];
     case 'cloud':
