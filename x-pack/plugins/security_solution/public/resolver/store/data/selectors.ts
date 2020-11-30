@@ -119,15 +119,23 @@ export const nodeDataForID: (
  */
 export const getNodeState: (
   state: DataState
-) => (id: string) => 'running' | 'loading' | 'terminated' = createSelector(
+) => (id: string) => 'running' | 'loading' | 'terminated' | 'error' = createSelector(
   nodeDataForID,
   (nodeInfo) => {
     return (id: string) => {
       const info = nodeInfo(id);
-      if (!info || info.status === 'requested') {
+      if (!info) {
         return 'loading';
       }
-      return info.terminated ? 'terminated' : 'running';
+
+      // TODO: maybe move terminated and running to the status
+      if (info.status === 'requested') {
+        return 'loading';
+      } else if (info.status === 'error') {
+        return 'error';
+      } else {
+        return info.terminated ? 'terminated' : 'running';
+      }
     };
   }
 );

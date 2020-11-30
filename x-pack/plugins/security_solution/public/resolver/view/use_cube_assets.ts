@@ -48,6 +48,17 @@ export function useCubeAssets(cubeType: CubeState, isProcessTrigger: boolean): N
         labelButtonFill: 'primary',
         strokeColor: theme.euiColorPrimary,
       },
+      errorCube: {
+        backingFill: colorMap.processBackingFill,
+        cubeSymbol: `#${SymbolIds.loadingCube}`,
+        descriptionFill: colorMap.descriptionText,
+        descriptionText: i18n.translate('xpack.securitySolution.endpoint.resolver.errorProcess', {
+          defaultMessage: 'Error Process',
+        }),
+        isLabelFilled: false,
+        labelButtonFill: 'primary',
+        strokeColor: theme.euiColorPrimary,
+      },
       runningTriggerCube: {
         backingFill: colorMap.triggerBackingFill,
         cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
@@ -103,6 +114,8 @@ export function useCubeAssets(cubeType: CubeState, isProcessTrigger: boolean): N
     } else {
       return nodeAssets[processTypeToCube.processRan];
     }
+  } else if (cubeType === 'error') {
+    return nodeAssets[processTypeToCube.processError];
   } else {
     return nodeAssets[processTypeToCube.processLoading];
   }
@@ -115,6 +128,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
   unknownProcessEvent: 'runningProcessCube',
   processCausedAlert: 'runningTriggerCube',
   processLoading: 'loadingCube',
+  processError: 'errorCube',
   unknownEvent: 'runningProcessCube',
 };
 interface NodeStyleMap {
@@ -123,6 +137,7 @@ interface NodeStyleMap {
   terminatedProcessCube: NodeStyleConfig;
   terminatedTriggerCube: NodeStyleConfig;
   loadingCube: NodeStyleConfig;
+  errorCube: NodeStyleConfig;
 }
 interface NodeStyleConfig {
   backingFill: string;

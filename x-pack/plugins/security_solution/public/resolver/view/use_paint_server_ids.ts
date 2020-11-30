@@ -24,6 +24,7 @@ export function usePaintServerIDs() {
       terminatedProcessCube: `${prefix}-psTerminatedProcessCube`,
       terminatedTriggerCube: `${prefix}-psTerminatedTriggerCube`,
       loadingCube: `${prefix}-psLoadingCube`,
+      errorCube: `${prefix}-psErrorCube`,
     };
   }, [resolverComponentInstanceID]);
 }

@@ -9,7 +9,7 @@ import { dataReducer } from './reducer';
 import * as selectors from './selectors';
 import { DataState } from '../../types';
 import { DataAction } from './action';
-import { usingGenerator, Metadata } from '../../data_access_layer/mocks/using_generator';
+import { generateTreeWithDAL, Metadata } from '../../data_access_layer/mocks/using_generator';
 import { NewResolverTree } from '../../../../common/endpoint/types';
 
 /**
@@ -49,16 +49,12 @@ describe('Resolver Data Middleware', () => {
 
   describe("when data the server's ancestry and descendants limits were reached", () => {
     beforeEach(() => {
-      const { metadata } = usingGenerator({
+      const { metadata } = generateTreeWithDAL({
         ancestors: 5,
         generations: 1,
         children: 5,
       });
-      dispatchTree(
-        metadata.structuredTree,
-        metadata.tree.ancestry.size,
-        metadata.tree.children.size
-      );
+      dispatchTree(metadata.tree, metadata.genTree.ancestry.size, metadata.genTree.children.size);
     });
     it('should indicate there are additional ancestor', () => {
       expect(selectors.hasMoreAncestors(store.getState())).toBe(true);
@@ -70,17 +66,17 @@ describe('Resolver Data Middleware', () => {
 
   describe("when data the server's ancestry and descendants limits were not reached", () => {
     beforeEach(() => {
-      const { metadata } = usingGenerator({
+      const { metadata } = generateTreeWithDAL({
         ancestors: 5,
         generations: 1,
         children: 5,
       });
 
       dispatchTree(
-        metadata.structuredTree,
+        metadata.tree,
         // +100 means we requested more than the number of ancestors and descendants that were returned
-        metadata.tree.ancestry.size + 100,
-        metadata.tree.children.size + 100
+        metadata.genTree.ancestry.size + 100,
+        metadata.genTree.children.size + 100
       );
     });
     it('should indicate there are additional ancestor', () => {
@@ -94,7 +90,7 @@ describe('Resolver Data Middleware', () => {
   describe('when data was received for a resolver tree', () => {
     let metadata: Metadata;
     beforeEach(() => {
-      ({ metadata } = usingGenerator({
+      ({ metadata } = generateTreeWithDAL({
         generations: 1,
         children: 1,
         percentWithRelated: 100,
@@ -105,17 +101,17 @@ describe('Resolver Data Middleware', () => {
           },
         ],
       }));
-      dispatchTree(metadata.structuredTree, 0, 0);
+      dispatchTree(metadata.tree, 0, 0);
     });
     it('should have the correct total related events for a child node', () => {
       // get the first level of children, and there should only be a single child
-      const childNode = Array.from(metadata.tree.childrenLevels[0].values())[0];
+      const childNode = Array.from(metadata.genTree.childrenLevels[0].values())[0];
       const total = selectors.relatedEventTotalCount(store.getState())(childNode.id);
       expect(total).toEqual(5);
     });
     it('should have the correct related events stats for a child node', () => {
       // get the first level of children, and there should only be a single child
-      const childNode = Array.from(metadata.tree.childrenLevels[0].values())[0];
+      const childNode = Array.from(metadata.genTree.childrenLevels[0].values())[0];
       const stats = selectors.nodeStats(store.getState())(childNode.id);
       expect(stats).toEqual({
         total: 5,

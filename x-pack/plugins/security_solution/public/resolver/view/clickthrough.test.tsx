@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createMemoryHistory, History } from 'history';
 import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { Simulator } from '../test_utilities/simulator';
@@ -12,9 +13,8 @@ import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
 import { Vector2, AABB } from '../types';
-import { usingGenerator } from '../data_access_layer/mocks/using_generator';
+import { generateTreeWithDAL } from '../data_access_layer/mocks/using_generator';
 import { ReactWrapper } from 'enzyme';
-import { nudgeAnimationDuration } from '../store/camera/scaling_constants';
 
 let simulator: Simulator;
 let databaseDocumentID: string;
@@ -212,30 +212,87 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
 });
 
 describe('Resolver, when using a generated tree with 20 generations, 4 children per child, and 10 ancestors', () => {
+  let memoryHistory: History<never>;
   beforeEach(async () => {
-    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = usingGenerator({
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = generateTreeWithDAL({
       ancestors: 3,
       children: 3,
       generations: 4,
     });
+    memoryHistory = createMemoryHistory();
     // save a reference to the `_id` supported by the mock data layer
     databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
     simulator = new Simulator({
       databaseDocumentID,
       dataAccessLayer,
+      history: memoryHistory,
       resolverComponentInstanceID,
       indices: [],
     });
   });
 
-  describe('when clicking on a node in the panel whose node data has not yet been loaded', () => {
-    let getLoadingNodeInList;
-
+  describe('when navigating to a node that is not loaded and then back to the process node list', () => {
     beforeEach(async () => {
       // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
       // loading that is outside of the initial loaded view
-      getLoadingNodeInList = async () => {
+      const getLoadingNodeInList = async () => {
+        return (
+          await simulator.resolveWrapper(() =>
+            simulator.testSubject('resolver:node-list:node-link')
+          )
+        )
+          ?.findWhere((wrapper) => wrapper.prop('data-test-node-state') === 'loading')
+          ?.first();
+      };
+
+      const loadingNode = await getLoadingNodeInList();
+
+      if (!loadingNode) {
+        throw new Error("Unable to find a node without it's node data");
+      }
+      loadingNode.simulate('click', { button: 0 });
+      // the time here is equivalent to the animation duration in the camera reducer
+      simulator.runAnimationFramesTimeFromNow(1000);
+
+      await simulator.resolveWrapper(() => simulator.selectedProcessNode('2kt059pl3i'));
+    });
+
+    it('should mark the node as terminated in the node list', async () => {
+      const getNodeInPanelList = async () => {
+        return (
+          await simulator.resolveWrapper(() =>
+            simulator.testSubject('resolver:node-list:node-link')
+          )
+        )
+          ?.findWhere((wrapper) => wrapper.prop('data-test-node-id') === '2kt059pl3i')
+          ?.first();
+      };
+
+      const breadcrumbs = await simulator.resolve(
+        'resolver:node-detail:breadcrumbs:node-list-link'
+      );
+
+      // navigate back to the node list in the panel
+      if (breadcrumbs) {
+        breadcrumbs.simulate('click', { button: 0 });
+      }
+
+      await expect(
+        simulator.map(async () => ({
+          nodeState: (await getNodeInPanelList())?.prop('data-test-node-state'),
+        }))
+      ).toYieldEqualTo({
+        nodeState: 'terminated',
+      });
+    });
+  });
+
+  describe('when clicking on a node in the panel whose node data has not yet been loaded', () => {
+    beforeEach(async () => {
+      // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
+      // loading that is outside of the initial loaded view
+      const getLoadingNodeInList = async () => {
         return (
           await simulator.resolveWrapper(() =>
             simulator.testSubject('resolver:node-list:node-link')
