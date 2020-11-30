@@ -225,7 +225,7 @@ export interface App<HistoryLocationState = unknown> {
    * ```ts
    * core.application.register({
    *   id: 'my_app',
-   *   title: 'My App'
+   *   title: 'My App',
    *   exactRoute: true,
    *   mount: () => { ... },
    * })
@@ -239,8 +239,33 @@ export interface App<HistoryLocationState = unknown> {
   /**
    * Array of links that represent secondary in-app locations for the app.
    *
+   * @remarks
    * Used to populate navigational search results (where available).
    * Can be updated using the {@link App.updater$} observable. See {@link AppSubLink} for more details.
+   *
+   * @example
+   * The `path` property on deep links should not include the application's `appRoute`:
+   * ```ts
+   * core.application.register({
+   *   id: 'my_app',
+   *   title: 'My App',
+   *   searchDeepLinks: [
+   *     { id: 'sub1', title: 'Sub1', path: '/sub1' },
+   *     {
+   *       id: 'sub2',
+   *       title: 'Sub2',
+   *       searchDeepLinks: [
+   *         { id: 'subsub', title: 'SubSub', path: '/sub2/sub' }
+   *       ]
+   *     }
+   *   ],
+   *   mount: () => { ... },
+   * })
+   * ```
+   *
+   * Will produce deep links on these paths:
+   * - `/app/my_app/sub1`
+   * - `/app/my_app/sub2/sub`
    */
   searchDeepLinks?: AppSearchDeepLink[];
 }
