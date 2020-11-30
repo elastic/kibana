@@ -22,8 +22,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     }, t);
   };
 
-  describe('GlobalSearch', function () {
-    beforeEach(async () => {
+  describe('GlobalSearch providers', function () {
+    before(async () => {
       await pageObjects.common.navigateToApp('globalSearchTestApp');
     });
 
@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('can search for index patterns', async () => {
-        const results = await findResultsWithApi('logstash');
+        const results = await findResultsWithApi('type:index-pattern logstash');
         expect(results.length).to.be(1);
         expect(results[0].type).to.be('index-pattern');
         expect(results[0].title).to.be('logstash-*');
@@ -45,35 +45,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('can search for visualizations', async () => {
-        const results = await findResultsWithApi('pie');
+        const results = await findResultsWithApi('type:visualization pie');
         expect(results.length).to.be(1);
         expect(results[0].type).to.be('visualization');
         expect(results[0].title).to.be('A Pie');
       });
 
       it('can search for maps', async () => {
-        const results = await findResultsWithApi('just');
+        const results = await findResultsWithApi('type:map just');
         expect(results.length).to.be(1);
         expect(results[0].type).to.be('map');
         expect(results[0].title).to.be('just a map');
       });
 
       it('can search for dashboards', async () => {
-        const results = await findResultsWithApi('Amazing');
+        const results = await findResultsWithApi('type:dashboard Amazing');
         expect(results.length).to.be(1);
         expect(results[0].type).to.be('dashboard');
         expect(results[0].title).to.be('Amazing Dashboard');
       });
 
       it('returns all objects matching the search', async () => {
-        const results = await findResultsWithApi('dashboard');
-        expect(results.length).to.be.greaterThan(2);
+        const results = await findResultsWithApi('type:dashboard dashboard');
+        expect(results.length).to.be(2);
         expect(results.map((r) => r.title)).to.contain('dashboard with map');
         expect(results.map((r) => r.title)).to.contain('Amazing Dashboard');
       });
 
       it('can search by prefix', async () => {
-        const results = await findResultsWithApi('Amaz');
+        const results = await findResultsWithApi('type:dashboard Amaz');
         expect(results.length).to.be(1);
         expect(results[0].type).to.be('dashboard');
         expect(results[0].title).to.be('Amazing Dashboard');
@@ -87,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(results[0].title).to.be('Discover');
       });
 
-      it('can search for application sublinks', async () => {
+      it('can search for application deep links', async () => {
         const results = await findResultsWithApi('saved objects');
         expect(results.length).to.be(1);
         expect(results[0].title).to.be('Kibana / Saved Objects');
