@@ -11,7 +11,6 @@ import {
   OverrideRule,
   ThresholdRule,
 } from '../objects/rule';
-import { NUMBER_OF_ALERTS } from '../screens/alerts';
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_TAB,
@@ -65,6 +64,7 @@ import {
   EQL_QUERY_PREVIEW_HISTOGRAM,
   EQL_QUERY_VALIDATION_SPINNER,
 } from '../screens/create_new_rule';
+import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { NOTIFICATION_TOASTS, TOAST_ERROR_CLASS } from '../screens/shared';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
@@ -273,6 +273,22 @@ export const selectThresholdRuleType = () => {
   cy.get(THRESHOLD_TYPE).click({ force: true });
 };
 
+export const waitForAlertsToPopulate = async () => {
+  cy.waitUntil(
+    () => {
+      refreshPage();
+      return cy
+        .get(SERVER_SIDE_EVENT_COUNT)
+        .invoke('text')
+        .then((countText) => {
+          const alertCount = parseInt(countText, 10) || 0;
+          return alertCount > 0;
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
+};
+
 export const waitForTheRuleToBeExecuted = () => {
   cy.waitUntil(() => {
     cy.get(REFRESH_BUTTON).click();
@@ -280,19 +296,6 @@ export const waitForTheRuleToBeExecuted = () => {
       .get(RULE_STATUS)
       .invoke('text')
       .then((ruleStatus) => ruleStatus === 'succeeded');
-  });
-};
-
-export const waitForAlertsToPopulate = async () => {
-  cy.waitUntil(() => {
-    refreshPage();
-    return cy
-      .get(NUMBER_OF_ALERTS)
-      .invoke('text')
-      .then((countText) => {
-        const alertCount = parseInt(countText, 10) || 0;
-        return alertCount > 0;
-      });
   });
 };
 
